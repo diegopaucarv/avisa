@@ -1,0 +1,415 @@
+/*
+ * Overrides de modo noche cargados DESPUÉS de theme-dark.generated.css.
+ *
+ * Motivo: los estilos inline de componentes (`styles:`) no se oscurecen nunca,
+ * y el generador sólo traduce reglas de global.css. Esta hoja es el último
+ * recurso explícito para texto, paneles, menús, formularios y hovers. Se usa
+ * `!important` sólo donde la encapsulación de Angular gana la especificidad.
+ */
+
+/* ── Texto: títulos grandes y textos pequeños en blanco ─────────────────── */
+html[data-theme='dark'] .view-head h1,
+html[data-theme='dark'] .drawer-head h2,
+html[data-theme='dark'] .drawer-head h3,
+html[data-theme='dark'] .surface-heading h2,
+html[data-theme='dark'] .surface-heading h3,
+html[data-theme='dark'] .workspace-greeting h1,
+html[data-theme='dark'] .case-resumen {
+  color: #fff;
+}
+
+html[data-theme='dark'] .view-subtitle,
+html[data-theme='dark'] .section-eyebrow,
+html[data-theme='dark'] .workspace-kicker,
+html[data-theme='dark'] .tabla-nota,
+html[data-theme='dark'] .panel-nota,
+html[data-theme='dark'] .result-count,
+html[data-theme='dark'] .barra-cuenta,
+html[data-theme='dark'] .stat-copy > span,
+html[data-theme='dark'] .stat-copy > small,
+html[data-theme='dark'] .data-table th,
+html[data-theme='dark'] .data-table td,
+html[data-theme='dark'] .data-table td:first-child:not(.col-seleccion) strong,
+html[data-theme='dark'] .data-table td:first-child:not(.col-seleccion) small,
+html[data-theme='dark'] .celda-tipo small,
+html[data-theme='dark'] .celda-caso small,
+html[data-theme='dark'] .celda-caso strong,
+html[data-theme='dark'] .celda-vencimiento small,
+html[data-theme='dark'] .sin-dato,
+html[data-theme='dark'] .compositor-aviso,
+html[data-theme='dark'] .profile-menu-detail {
+  color: #fff;
+}
+
+/* ── Paneles y menús (registrar / ámbito / perfil / exportar) ───────────── */
+html[data-theme='dark'] .registrar-panel,
+html[data-theme='dark'] .profile-menu,
+html[data-theme='dark'] .menu,
+html[data-theme='dark'] .menu-acciones {
+  background: #191e25;
+  border-color: #2a3038;
+  box-shadow: 0 16px 34px rgb(0 0 0 / 40%);
+}
+
+html[data-theme='dark'] .registrar-titulo,
+html[data-theme='dark'] .menu-titulo {
+  color: #fff;
+}
+
+html[data-theme='dark'] .registrar-opcion,
+html[data-theme='dark'] .menu button {
+  color: #e3e9f0;
+}
+
+html[data-theme='dark'] .registrar-opcion:hover:not(:disabled),
+html[data-theme='dark'] .registrar-opcion:focus-visible:not(:disabled),
+html[data-theme='dark'] .menu button:hover,
+html[data-theme='dark'] .menu button:focus-visible {
+  background: #232a33;
+  color: #fff;
+}
+
+html[data-theme='dark'] .registrar-opcion:disabled {
+  color: #6b7885;
+}
+
+html[data-theme='dark'] .registrar-separador,
+html[data-theme='dark'] .menu-separador {
+  background: #262c33;
+}
+
+html[data-theme='dark'] .ambito-opcion[aria-checked='true'] {
+  background: #1d2a3d;
+  color: #a9c6ee;
+}
+
+html[data-theme='dark'] .profile-menu button:hover,
+html[data-theme='dark'] .profile-menu-link:hover {
+  background: #232a33;
+  color: #fff;
+}
+
+/* ── Hovers de filas que hoy quedan blancos (estilos inline) ─────────────── */
+html[data-theme='dark'] .fila-documento:hover td,
+html[data-theme='dark'] .fila-documento:focus-within td,
+html[data-theme='dark'] .fila-compromiso:hover,
+html[data-theme='dark'] .fila-compromiso:focus-within,
+html[data-theme='dark'] .arbol-hoja:hover,
+html[data-theme='dark'] .arbol-hoja:focus-visible,
+html[data-theme='dark'] a.search-result:hover,
+html[data-theme='dark'] a.search-result:focus-visible {
+  background: #1e242c !important;
+}
+
+html[data-theme='dark'] .data-table tr.sin-leer td {
+  background: #1a2230 !important;
+}
+
+html[data-theme='dark'] .data-table tr.sin-leer .notificacion-texto strong {
+  color: #fff !important;
+}
+
+html[data-theme='dark'] .data-table tr.row-aviso-ok td {
+  background: #16241c !important;
+}
+
+html[data-theme='dark'] .data-table tr.row-aviso-error td {
+  background: #2a1917 !important;
+}
+
+html[data-theme='dark'] .data-table tr.row-selected td {
+  background: #1a1f25 !important;
+}
+
+/* ── Botones/menús con fondo fijo claro dentro de modales ────────────────── */
+html[data-theme='dark'] .acciones-boton,
+html[data-theme='dark'] .lista-quitar,
+html[data-theme='dark'] .previa-acceso,
+html[data-theme='dark'] .caso-opcion,
+html[data-theme='dark'] .panel-caso-opcion,
+html[data-theme='dark'] .caso-regiones-lista,
+html[data-theme='dark'] .search-results,
+html[data-theme='dark'] .lista-temporal-panel,
+html[data-theme='dark'] .directorio-card,
+html[data-theme='dark'] .casos-drawer,
+html[data-theme='dark'] .casos-drawer-caso,
+html[data-theme='dark'] .aviso-inactividad {
+  background: #191e25;
+  border-color: #2a3038;
+}
+
+html[data-theme='dark'] .menu-acciones .menu-anular:hover,
+html[data-theme='dark'] .menu-acciones .menu-anular:focus-visible {
+  background: #2a1917;
+}
+
+/* ── Formularios ─────────────────────────────────────────────────────────── */
+html[data-theme='dark'] .campo input,
+html[data-theme='dark'] .campo textarea,
+html[data-theme='dark'] .actor-editor input:not([type='checkbox']),
+html[data-theme='dark'] .actor-editor select,
+html[data-theme='dark'] .actor-editor textarea,
+html[data-theme='dark'] .padron-form input {
+  background: #191e25;
+  border-color: #2d3034;
+  color: #e3e9f0;
+}
+
+html[data-theme='dark'] .campo {
+  color: #fff;
+}
+
+/* ── Ordenación de tablas ────────────────────────────────────────────────── */
+html[data-theme='dark'] .data-table th.th-orden-asc,
+html[data-theme='dark'] .data-table th.th-orden-desc {
+  color: #fff;
+}
+
+/* ── Refuerzo de auditoría ────────────────────────────────────────────────
+ * Las reglas siguientes cubren literales claros que viven en los `styles:`
+ * encapsulados de cada componente: el generador sólo traduce global.css y la
+ * encapsulación puede ganar la especificidad. Sólo aplican en modo noche y
+ * usan `!important` para no depender del orden de inyección.
+ */
+
+/* Títulos y textos pequeños en blanco. */
+html[data-theme='dark'] h1,
+html[data-theme='dark'] h2,
+html[data-theme='dark'] h3,
+html[data-theme='dark'] h4,
+html[data-theme='dark'] h5,
+html[data-theme='dark'] h6,
+html[data-theme='dark'] small {
+  color: #fff !important;
+}
+
+html[data-theme='dark'] .panel-datos dd,
+html[data-theme='dark'] .panel-datos dt,
+html[data-theme='dark'] .panel-texto,
+html[data-theme='dark'] .panel-vacio,
+html[data-theme='dark'] .panel-nota,
+html[data-theme='dark'] .panel-linea,
+html[data-theme='dark'] .panel-check,
+html[data-theme='dark'] .panel-fuentes strong,
+html[data-theme='dark'] .panel-fuentes small,
+html[data-theme='dark'] .alerta-texto,
+html[data-theme='dark'] .alerta-nota,
+html[data-theme='dark'] .alerta-vacio,
+html[data-theme='dark'] .alerta-etapa,
+html[data-theme='dark'] .caso-panel-sub,
+html[data-theme='dark'] .caso-region-opcion,
+html[data-theme='dark'] .casos-drawer-sub,
+html[data-theme='dark'] .casos-drawer-meta,
+html[data-theme='dark'] .casos-drawer-vacio,
+html[data-theme='dark'] .dim-sub,
+html[data-theme='dark'] .metric-top b,
+html[data-theme='dark'] .metric-detalle,
+html[data-theme='dark'] .metric-val.sin-dato,
+html[data-theme='dark'] .franja-dato,
+html[data-theme='dark'] .franja-dato strong,
+html[data-theme='dark'] .cola-contador,
+html[data-theme='dark'] .cola-contador strong,
+html[data-theme='dark'] .cola-totales strong,
+html[data-theme='dark'] .cola-fecha,
+html[data-theme='dark'] .cola-registro strong,
+html[data-theme='dark'] .cola-registro small,
+html[data-theme='dark'] .cola-nota-fuente,
+html[data-theme='dark'] .cola-pendiente,
+html[data-theme='dark'] .calendario-resumen,
+html[data-theme='dark'] .calendario-numero,
+html[data-theme='dark'] .calendario-rejilla th,
+html[data-theme='dark'] .lista-temporal-cabecera p,
+html[data-theme='dark'] .lista-temporal-vacia,
+html[data-theme='dark'] .lista-temporal-items strong,
+html[data-theme='dark'] .lista-temporal-items span,
+html[data-theme='dark'] .actor-actualizando,
+html[data-theme='dark'] .padron-form p,
+html[data-theme='dark'] .padron-form label,
+html[data-theme='dark'] .celda-motivo,
+html[data-theme='dark'] .caso-opcion-codigo,
+html[data-theme='dark'] .caso-opcion-titulo,
+html[data-theme='dark'] .micro-label {
+  color: #fff !important;
+}
+
+/* Menú de acciones de fila (hover que quedaba blanco). */
+html[data-theme='dark'] .acciones-boton {
+  border-color: #2a3038 !important;
+  background: #191e25 !important;
+  color: #c7d2dd !important;
+}
+html[data-theme='dark'] .acciones-boton:hover,
+html[data-theme='dark'] .menu-acciones button:hover,
+html[data-theme='dark'] .menu-acciones button:focus-visible {
+  background: #232a33 !important;
+  color: #fff !important;
+}
+html[data-theme='dark'] .acciones-boton[aria-expanded='true'] {
+  border-color: #2e4361 !important;
+  background: #1d2a3d !important;
+  color: #a9c6ee !important;
+}
+html[data-theme='dark'] .menu-acciones button {
+  color: #e3e9f0 !important;
+}
+html[data-theme='dark'] .menu-acciones .menu-anular {
+  color: #e59189 !important;
+}
+html[data-theme='dark'] .menu-acciones .menu-anular:hover,
+html[data-theme='dark'] .menu-acciones .menu-anular:focus-visible {
+  background: #2a1917 !important;
+}
+html[data-theme='dark'] .menu-acciones .menu-titulo,
+html[data-theme='dark'] .menu-titulo {
+  color: #9aa5ae !important;
+}
+
+/* Pastillas y chips con fondo fijo claro. */
+html[data-theme='dark'] .alerta-prioridad--critica,
+html[data-theme='dark'] .alerta-grave,
+html[data-theme='dark'] .panel-anulado {
+  background: #3a1f1d !important;
+  color: #f0a9a2 !important;
+}
+html[data-theme='dark'] .alerta-prioridad--urgente,
+html[data-theme='dark'] .tipo-compromiso {
+  background: #3a2c18 !important;
+  color: #e8c07a !important;
+}
+html[data-theme='dark'] .alerta-prioridad--temprana,
+html[data-theme='dark'] .alerta-nivel,
+html[data-theme='dark'] .alerta-etapa-estado,
+html[data-theme='dark'] .tipo-alerta,
+html[data-theme='dark'] .lista-contador {
+  background: #1d2a3d !important;
+  color: #a9c6ee !important;
+}
+html[data-theme='dark'] .alerta-prioridad--seguimiento,
+html[data-theme='dark'] .alerta-plazo,
+html[data-theme='dark'] .panel-entidad,
+html[data-theme='dark'] .tipo-demanda {
+  background: #262c33 !important;
+  color: #c7d2dd !important;
+}
+html[data-theme='dark'] .alerta-prioridad--sin-prioridad,
+html[data-theme='dark'] .alerta-plazo--sin {
+  background: #22272d !important;
+  color: #9aa5ae !important;
+}
+
+/* Cajas de aviso, error y confirmación. */
+html[data-theme='dark'] .alerta-confirmacion {
+  background: #2e2716 !important;
+  border-color: #4a3d1f !important;
+}
+html[data-theme='dark'] .alerta-confirmacion-titulo {
+  color: #e8c07a !important;
+}
+html[data-theme='dark'] .alerta-error,
+html[data-theme='dark'] .panel-error {
+  background: #2a1917 !important;
+  border-color: #4a2a26 !important;
+  color: #f0a9a2 !important;
+}
+html[data-theme='dark'] .panel-aviso {
+  background: #1e242c !important;
+  border-color: #2a3038 !important;
+  color: #e3e9f0 !important;
+}
+html[data-theme='dark'] .panel-aviso-warn,
+html[data-theme='dark'] .panel-confirmacion,
+html[data-theme='dark'] .cola-aviso,
+html[data-theme='dark'] .calendario-aviso {
+  background: #2e2716 !important;
+  border-color: #4a3d1f !important;
+  color: #e8c07a !important;
+}
+
+/* Selectores de caso incrustados en paneles. */
+html[data-theme='dark'] .caso-opcion:hover:not(:disabled),
+html[data-theme='dark'] .panel-caso-opcion:hover,
+html[data-theme='dark'] .panel-caso-opcion:focus-visible {
+  background: #20262e !important;
+  border-color: #2e4361 !important;
+}
+html[data-theme='dark'] .panel-caso-elegido {
+  background: #1e242c !important;
+  border-color: #2a3038 !important;
+}
+html[data-theme='dark'] .caso-regiones-lista {
+  background: #191e25 !important;
+  border-color: #2a3038 !important;
+}
+html[data-theme='dark'] .criterios {
+  background: #1e242c !important;
+  border-color: #2a3038 !important;
+}
+
+/* Pie de cajón del mapa y miniaturas. */
+html[data-theme='dark'] .casos-drawer-pie {
+  background: #1e242c !important;
+  border-color: #2a3038 !important;
+}
+html[data-theme='dark'] .dim-num {
+  background: #262c33 !important;
+  color: #fff !important;
+}
+html[data-theme='dark'] .tabla-foto {
+  background: #232a33 !important;
+}
+
+/* Diálogo de padrón (el UA pinta los <dialog> en blanco). */
+html[data-theme='dark'] .padron-dialogo {
+  background: #191e25 !important;
+  border-color: #2a3038 !important;
+  color: #fff !important;
+}
+
+/* Controles comunes: las reglas encapsuladas no siempre entran al generador. */
+html[data-theme='dark'] .button-primary {
+  border-color: var(--blue) !important;
+  background: var(--blue) !important;
+  color: #fff !important;
+}
+html[data-theme='dark'] .button-primary:hover:not(:disabled) {
+  border-color: var(--blue-dark) !important;
+  background: var(--blue-dark) !important;
+}
+html[data-theme='dark'] .button-secondary {
+  border-color: #343c46 !important;
+  background: #191e25 !important;
+  color: #c7d2dd !important;
+}
+html[data-theme='dark'] .button-secondary:hover:not(:disabled) {
+  background: #232a33 !important;
+  color: #fff !important;
+}
+html[data-theme='dark'] .button-secondary:disabled,
+html[data-theme='dark'] .button-primary:disabled {
+  opacity: 0.55;
+}
+
+html[data-theme='dark'] .segmented {
+  border-color: #2a3038 !important;
+  background: #12171d !important;
+}
+html[data-theme='dark'] .segmented > button {
+  background: transparent !important;
+  color: #aebbc8 !important;
+}
+html[data-theme='dark'] .segmented > button:hover {
+  background: #232a33 !important;
+  color: #edf2f7 !important;
+}
+html[data-theme='dark'] .segmented > button[aria-pressed='true'],
+html[data-theme='dark'] .segmented > button[aria-selected='true'] {
+  background: #263243 !important;
+  color: #c5d9f2 !important;
+}
+
+html[data-theme='dark'] .empty-state {
+  color: #aebbc8 !important;
+}
+html[data-theme='dark'] .empty-state p {
+  color: #aebbc8 !important;
+}

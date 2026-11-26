@@ -1,0 +1,111 @@
+<div
+  class="tabla-scroll"
+  [class.tabla-cebra]="cebra()"
+  [class.tabla-compacta]="densidad() === 'compacta'"
+  [class.tabla-imprimible]="imprimible()"
+  [class.tabla-cargando]="cargando()"
+  [style.max-height]="altoMaximo()"
+>
+  <table class="tabla">
+    @if (resumen()) {
+      <caption class="tabla-resumen">
+        {{ resumen() }}
+      </caption>
+    }
+
+    <thead>
+      <tr>
+        @if (seleccionable()) {
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              [checked]="todasVisibles()"
+              [indeterminate]="algunasVisibles()"
+              [disabled]="filasVisibles().length === 0"
+              aria-label="Seleccionar las filas de esta página"
+              (change)="alternarPagina($event)"
+            />
+          </th>
+        }
+
+        @for (col of columnas(); track col.clave) {
+          <th
+            scope="col"
+            [style.width]="col.ancho ?? null"
+            [style.text-align]="alineacion(col)"
+            [attr.aria-sort]="ariaSort(col)"
+            [class.th-ordenable]="col.ordenable"
+            [class.th-orden-asc]="indicador(col.clave) === 'asc'"
+            [class.th-orden-desc]="indicador(col.clave) === 'desc'"
+          >
+            @if (col.ordenable) {
+              <button
+                type="button"
+                class="th-boton"
+                (click)="alternarOrden(col.clave)"
+              >
+                <span>{{ col.titulo }}</span>
+                <span class="th-flecha" aria-hidden="true"></span>
+              </button>
+            } @else {
+              <span>{{ col.titulo }}</span>
+            }
+          </th>
+        }
+      </tr>
+    </thead>
+
+    <tbody>
+      @if (cargando() && filasVisibles().length === 0) {
+        <tr>
+          <td [attr.colspan]="columnasVisibles()">
+            <div class="tabla-estado" role="status">Cargando…</div>
+          </td>
+        </tr>
+      } @else if (filasVisibles().length === 0) {
+        <tr>
+          <td [attr.colspan]="columnasVisibles()">
+            <div class="tabla-estado" role="status">{{ vacio() }}</div>
+          </td>
+        </tr>
+      } @else {
+        @for (fila of filasVisibles(); track idDe(fila, $index); let i = $index) {
+          <tr
+            [class.fila-clicable]="clicable()"
+            [class.fila-seleccionada]="seleccionable() && estaSeleccionada(fila, i)"
+            [attr.tabindex]="clicable() ? 0 : null"
+            (click)="alClicFila(fila, i)"
+            (keydown.enter)="alClicFila(fila, i)"
+          >
+            @if (seleccionable()) {
+              <td class="col-seleccion" (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
+                  [checked]="estaSeleccionada(fila, i)"
+                  [attr.aria-label]="'Seleccionar la fila ' + (i + 1)"
+                  (change)="alternarFila(fila, i, $event)"
+                />
+              </td>
+            }
+
+            @for (col of columnas(); track col.clave; let c = $index) {
+              <td
+                [style.text-align]="alineacion(col)"
+                [class.celda-principal]="esPrincipal(c)"
+              >
+                @if (plantilla(col.clave); as plantillaCelda) {
+                  <ng-container
+                    [ngTemplateOutlet]="plantillaCelda"
+                    [ngTemplateOutletContext]="contexto(fila, col, i)"
+                  />
+                } @else {
+                  {{ mostrar(fila, col) }}
+                }
+              </td>
+            }
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>

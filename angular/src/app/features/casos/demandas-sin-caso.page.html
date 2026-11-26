@@ -2,10 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-demandas">Demandas sin caso</h1>
-      <p class="view-subtitle">
-        Demandas registradas que todavía no se vinculan a un caso. Se sistematizan con las 3P de la
-        Guía §8.1.2.1: problema, propuesta y pedido.
-      </p>
     </div>
     <div class="view-actions">
       <app-exportar-menu
@@ -13,11 +9,20 @@
         [consulta]="filtrosExportacion()"
         (fallo)="alFallarExportacion($event)"
       />
-      @if (total() > 0) {
-      <p class="result-count" aria-live="polite">{{ sinCasoTotal() }} demandas sin caso</p>
-      }
     </div>
   </header>
+
+  <div class="view-toolbar">
+    <app-barra-seleccion
+      entidad="demandas"
+      anulable="demandas"
+      [consulta]="filtrosExportacion()"
+      [cantidad]="seleccion.cantidad()"
+      [idsSeleccionados]="seleccion.lista()"
+      (anulado)="alAnularLote($event)"
+      (fallo)="alFallarExportacion($event)"
+    />
+  </div>
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
@@ -30,7 +35,7 @@
       <app-icono nombre="buscar" [tamano]="14" />
       <input
         type="search"
-        placeholder="Buscar por descripción, problema o pedido"
+        placeholder="Buscar por descripción"
         [value]="filtros().q"
         aria-label="Buscar demandas sin caso"
         (input)="buscar($event)"
@@ -71,36 +76,40 @@
   } } @else {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ total() }} demandas sin caso con los filtros aplicados. La fecha es la del hecho
-        reportado en la alerta; cuando la demanda no tiene alerta se muestra la de registro, marcada
-        como tal. La vinculación exige permiso de edición.
-      </caption>
       <thead>
         <tr>
-          <th scope="col">Descripción</th>
-          <th scope="col">Problema · Propuesta · Pedido</th>
-          <th scope="col">Estado</th>
-          <th scope="col">Fecha del hecho</th>
-          <th scope="col">Temática</th>
-          <th scope="col">Afecta a mujeres</th>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
+          <th scope="col" [appThOrden]="'descripcion'" [orden]="orden">Descripción</th>
+          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
+          <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha del hecho</th>
+          <th scope="col" [appThOrden]="'mujeres'" [orden]="orden">Afecta a mujeres</th>
           @if (puedeVincular()) {
           <th scope="col">Acción</th>
           }
         </tr>
       </thead>
       <tbody>
-        @for (demanda of demandas(); track demanda.id) {
+        @for (demanda of filasVisibles(); track demanda.id) {
         <tr>
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(demanda.id)"
+              [attr.aria-label]="'Seleccionar la demanda ' + (demanda.descripcion || demanda.id)"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(demanda.id)"
+            />
+          </td>
           <td class="celda-descripcion">
             {{ demanda.descripcion || 'Sin descripción registrada' }}
-          </td>
-          <td class="celda-3p">
-            @for (parte of partes(demanda); track parte.etiqueta) {
-            <span class="p3-linea"> <strong>{{ parte.etiqueta }}</strong>{{ parte.valor }} </span>
-            } @empty {
-            <span class="sin-dato">—</span>
-            }
           </td>
           <td>
             <span [class]="'status-badge ' + claseEstado(demanda.estado)">
@@ -124,7 +133,6 @@
             <span class="sin-dato">—</span>
             }
           </td>
-          <td>{{ demanda.tematica || '—' }}</td>
           <td>
             @if (demanda.afectaMujeres) {
             <span class="status-badge state-pending">Sí</span>

@@ -10,6 +10,8 @@ export type OpcionesExportacion = {
   formato: FormatoExportacion;
   /** Exporta sólo el registro con ese uuid. */
   id?: string | null;
+  /** Exporta sólo estos registros (uuid, código de caso o código de reporte). */
+  ids?: readonly string[] | null;
   /**
    * Filtros, búsqueda y orden vigentes en la vista. Se anexan a la URL para que
    * la exportación coincida con lo que la pantalla está mostrando.
@@ -67,6 +69,7 @@ export async function descargarExportacion(opciones: OpcionesExportacion): Promi
     entidad: opciones.entidad,
   });
   if (opciones.id) parametros.set('id', opciones.id);
+  if (opciones.ids?.length) parametros.set('ids', opciones.ids.join(','));
   for (const [clave, valor] of Object.entries(opciones.consulta ?? {})) {
     if (!valor) continue;
     parametros.set(clave, valor);

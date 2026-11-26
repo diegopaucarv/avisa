@@ -3,184 +3,421 @@
     <div>
       <h1 id="titulo-bandeja">Bandeja de trabajo</h1>
       <p class="view-subtitle">
-        Lo que requiere atención hoy, reunido en una sola vista. Cada bloque enlaza a su pantalla
-        completa para trabajar con todos los registros.
+        Tablero por columnas: <b>Backlog</b>, <b>En curso</b>, <b>En espera</b> y <b>Hecho</b>. Cada
+        tarjeta guarda responsable, asignación, fecha límite y posposición; mover o editar deja
+        constancia en el historial. Lo que no está declarado se muestra «sin asignar» o «sin fecha»:
+        no se estima.
       </p>
     </div>
     <div class="view-actions">
       <app-exportar-menu entidad="casos" (fallo)="alFallarExportacion($event)" />
-      <button type="button" class="button-secondary" (click)="recargar()">Recargar</button>
+      <button type="button" class="button-secondary" (click)="recargar()">
+        <app-icono nombre="actividad" [tamano]="14" />
+        Recargar
+      </button>
     </div>
   </header>
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (aviso(); as mensaje) {
+  <p class="accion-aviso" role="status">{{ mensaje }}</p>
+  } @if (errorAccion(); as mensaje) {
+  <p class="accion-error" role="alert">{{ mensaje }}</p>
   }
 
-  <section class="surface bloque" aria-labelledby="titulo-alertas-pendientes">
-    <div class="surface-heading">
-      <div>
-        <p class="section-eyebrow">ALERTA TEMPRANA</p>
-        <h3 class="bloque-titulo" id="titulo-alertas-pendientes">
-          <app-icono nombre="alertas" [tamano]="15" />
-          Alertas pendientes
-        </h3>
-        <p>Reportes de RED-RADAR en espera de revisión.</p>
-      </div>
-      <a class="link-button" routerLink="/alertas">
-        Ver todo
-        <app-icono nombre="chevron-derecha" [tamano]="13" />
-      </a>
+  <div class="executive-kpis">
+    <div class="stat-card">
+      <span class="stat-icon"><app-icono nombre="bandeja" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Tarjetas en el tablero</span>
+        <strong>{{ tablero()?.total ?? '—' }}</strong>
+        <small>Backlog, En curso, En espera y Hecho</small>
+      </span>
     </div>
+    <div class="stat-card">
+      <span class="stat-icon amber"><app-icono nombre="reloj" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Pospuestas</span>
+        <strong>{{ tablero()?.pospuestas ?? '—' }}</strong>
+        <small>Con fecha y motivo declarados</small>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon red"><app-icono nombre="alerta" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Vencidas</span>
+        <strong>{{ tablero()?.vencidas ?? '—' }}</strong>
+        <small>Fecha límite anterior a hoy</small>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon amber"><app-icono nombre="actores" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Sin responsable</span>
+        <strong>{{ tablero()?.sinResponsable ?? '—' }}</strong>
+        <small>Tarjetas sin persona asignada</small>
+      </span>
+    </div>
+  </div>
 
-    @if (estadoAlertas() === 'error') {
-    <p class="bloque-nota" role="alert">{{ errorAlertas()?.message }}</p>
-    } @else if (estadoAlertas() === 'cargando' || estadoAlertas() === 'inactivo') {
-    <p class="bloque-vacio" role="status">Cargando alertas…</p>
-    } @else if (alertas().length === 0) {
-    <p class="bloque-vacio">No hay alertas pendientes de revisión.</p>
-    } @else {
-    <ul class="tarea-lista">
-      @for (alerta of alertas(); track alerta.id) {
-      <li class="tarea">
-        <span class="tarea-principal">
-          <span class="tarea-titulo">{{ alerta.titulo || 'Sin título' }}</span>
-          <span class="tarea-meta">
-            <span>{{ alerta.codigo }}</span>
-            @if (alerta.prioridad) {
-            <span class="priority-label">{{ alerta.prioridad }}</span>
-            }
-            <span>{{ plazo(alerta.plazoHoras) }}</span>
-            <span>{{ fecha(alerta.fechaReporte) }}</span>
-          </span>
-        </span>
-        @if (alerta.casoCodigo) {
-        <span class="tarea-codigo">{{ alerta.casoCodigo }}</span>
+  <div class="filter-bar">
+    <div class="segmented" role="group" aria-label="Filtrar el tablero por tipo de registro">
+      @for (opcion of opcionesTipo; track opcion.valor) {
+      <button
+        type="button"
+        [attr.aria-pressed]="filtroTipo() === opcion.valor"
+        (click)="cambiarTipo(opcion.valor)"
+      >
+        {{ opcion.etiqueta }} @if (contadorTipo(opcion.valor); as cantidad) {
+        <b>{{ cantidad }}</b>
         }
-      </li>
+      </button>
       }
-    </ul>
-    @if (totalAlertas() > alertas().length) {
-    <p class="bloque-pie">{{ totalAlertas() }} alertas pendientes en total.</p>
-    } }
-  </section>
+    </div>
+  </div>
 
-  <section class="surface bloque" aria-labelledby="titulo-compromisos-atencion">
+  @if (!tablero() && error(); as mensaje) {
+  <p class="tablero-aviso" role="alert">
+    {{ mensaje }}
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </p>
+  } @else if (!tablero()) {
+  <div class="empty-state" role="status">Cargando el tablero…</div>
+  } @else { @if (sinTarjetas()) {
+  <p class="tablero-aviso" role="note">
+    <strong>El tablero está vacío.</strong>
+    Aún no hay tarjetas{{ filtroTipo() === 'todas' ? '' : ' de este tipo' }}. Cada registro aparece
+    en su columna en cuanto se mueve o se le asigna responsable desde aquí; los registros que
+    todavía no tienen tarjeta se listan más abajo y se incorporan con el primer movimiento.
+  </p>
+  }
+
+  <div class="tablero">
+    @for (col of columnas(); track col.clave) {
+    <section class="tablero-col" [attr.aria-label]="col.etiqueta">
+      <div class="tablero-col-head">
+        <h2>{{ col.etiqueta }}</h2>
+        <span class="tablero-col-count">{{ col.total }}</span>
+      </div>
+
+      @if (completitudDe(col.clave); as completa) {
+      <p class="tablero-col-meta">
+        {{ completa.conResponsable }} con responsable · {{ completa.sinAsignacion }} sin asignación
+        · {{ completa.incompletas }} incompletas
+      </p>
+      } @else {
+      <p class="tablero-col-meta">Completitud no disponible.</p>
+      } @for (tarjeta of col.tarjetas; track tarjeta.id) {
+      <article class="tarjeta">
+        <div class="tarjeta-top">
+          <span [class]="'tag ' + claseTipoDe(tarjeta)"
+            >{{ etiquetasTipo[tarjeta.entidadTipo] }}</span
+          >
+          @if (tarjeta.riesgo) {
+          <span [class]="'tag ' + claseRiesgoDe(tarjeta)">{{ tarjeta.riesgo }}</span>
+          } @if (tarjeta.estado) {
+          <span class="tag">{{ tarjeta.estado }}</span>
+          }
+        </div>
+
+        <h3 class="tarjeta-titulo">{{ tarjeta.titulo ?? 'Sin título' }}</h3>
+
+        <p class="tarjeta-code">
+          <code>{{ tarjeta.codigo ?? 'Sin código' }}</code>
+          @if (tarjeta.casoCodigo) {
+          <span> · caso {{ tarjeta.casoCodigo }}</span>
+          }
+        </p>
+
+        <dl class="tarjeta-datos">
+          <div>
+            <dt>Responsable</dt>
+            <dd [class.sin-dato]="sinResponsable(tarjeta)">{{ responsable(tarjeta) }}</dd>
+          </div>
+          <div>
+            <dt>Asignación</dt>
+            <dd [class.sin-dato]="!tarjeta.asignacionTexto">
+              {{ tarjeta.asignacionTexto ?? 'Sin asignación' }}
+            </dd>
+          </div>
+          <div>
+            <dt>Fecha límite</dt>
+            <dd>
+              @if (tarjeta.columna === 'hecho') {
+              <span [class.sin-dato]="!tarjeta.fechaLimite">{{ fecha(tarjeta.fechaLimite) }}</span>
+              } @else {
+              <span [class]="'due-state ' + claseFecha(tarjeta)">{{ etiquetaFecha(tarjeta) }}</span>
+              <span [class.sin-dato]="!tarjeta.fechaLimite">{{ fecha(tarjeta.fechaLimite) }}</span>
+              }
+            </dd>
+          </div>
+        </dl>
+
+        @if (tarjeta.pospuestoHasta) {
+        <p class="tarjeta-pospuesta">
+          <app-icono nombre="reloj" [tamano]="12" />
+          <span>
+            Pospuesta hasta {{ fecha(tarjeta.pospuestoHasta) }} · {{ tarjeta.motivoPosposicion ??
+            'motivo no declarado' }}
+          </span>
+        </p>
+        }
+
+        <div class="tarjeta-acciones">
+          @for (destino of destinos; track destino.clave) {
+          <button
+            type="button"
+            [attr.aria-pressed]="tarjeta.columna === destino.clave"
+            [disabled]="!puedeEditar() || guardando() || tarjeta.columna === destino.clave"
+            (click)="mover(tarjeta, destino.clave)"
+          >
+            {{ destino.etiqueta }}
+          </button>
+          }
+          <button
+            type="button"
+            class="editar"
+            [disabled]="!puedeEditar() || guardando()"
+            (click)="editar(tarjeta)"
+          >
+            Editar
+          </button>
+        </div>
+
+        @if (enEdicion(tarjeta)) {
+        <form class="tarjeta-form" (submit)="guardar($event, tarjeta)">
+          <label>
+            Responsable
+            <input
+              type="text"
+              [value]="formulario().responsableTexto"
+              (input)="campo('responsableTexto', $event)"
+              placeholder="Nombre del responsable"
+              autocomplete="off"
+              maxlength="160"
+            />
+          </label>
+          <label>
+            Asignación
+            <input
+              type="text"
+              [value]="formulario().asignacionTexto"
+              (input)="campo('asignacionTexto', $event)"
+              placeholder="Unidad o encargo"
+              autocomplete="off"
+              maxlength="160"
+            />
+          </label>
+          <label>
+            Fecha límite
+            <input
+              type="date"
+              [value]="formulario().fechaLimite"
+              (input)="campo('fechaLimite', $event)"
+            />
+          </label>
+          <label>
+            Posponer hasta
+            <input
+              type="date"
+              [value]="formulario().pospuestoHasta"
+              (input)="campo('pospuestoHasta', $event)"
+            />
+          </label>
+          <label>
+            Motivo de posposición
+            <input
+              type="text"
+              [value]="formulario().motivoPosposicion"
+              (input)="campo('motivoPosposicion', $event)"
+              placeholder="Obligatorio al posponer"
+              autocomplete="off"
+              maxlength="1000"
+            />
+          </label>
+          <div class="tarjeta-form-acciones">
+            <button type="submit" class="button-primary" [disabled]="guardando()">Guardar</button>
+            <button type="button" class="button-secondary" (click)="cancelar()">Cancelar</button>
+          </div>
+        </form>
+        } @if (rutaDe(tarjeta); as ruta) {
+        <a class="link-button" [routerLink]="ruta">
+          Abrir registro
+          <app-icono nombre="chevron-derecha" [tamano]="12" />
+        </a>
+        }
+      </article>
+      } @empty {
+      <p class="tablero-col-vacio">Sin tarjetas en esta columna.</p>
+      }
+    </section>
+    }
+  </div>
+
+  <section class="surface" aria-labelledby="titulo-candidatos">
     <div class="surface-heading">
       <div>
-        <p class="section-eyebrow">COMPROMISOS</p>
-        <h3 class="bloque-titulo" id="titulo-compromisos-atencion">
-          <app-icono nombre="compromisos" [tamano]="15" />
-          Vencidos o por vencer
+        <h3 id="titulo-candidatos">
+          <app-icono nombre="bandeja" [tamano]="15" />
+          Registros sin tarjeta
         </h3>
         <p>
-          Compromisos vencidos y los que vencen entre hoy y los próximos {{ horizonteDias }} días.
+          Alertas pendientes, compromisos no terminales y demandas sin caso que todavía no están en
+          el tablero. Al moverlos se crea la tarjeta. @if (filtroTipo() === 'todas' &&
+          candidatos().length < (tablero()?.candidatosTotal ?? 0)) { Se muestran {{
+          candidatos().length }} de {{ tablero()?.candidatosTotal }} registros. }
         </p>
       </div>
-      <a class="link-button" routerLink="/compromisos">
-        Ver todo
-        <app-icono nombre="chevron-derecha" [tamano]="13" />
-      </a>
+      <span class="badge">{{ candidatos().length }} sin tarjeta</span>
     </div>
 
-    <div class="contadores-compromisos">
-      <div class="contador">
-        <span class="contador-etiqueta">Vencidos</span>
-        <strong class="contador-valor" [class.contador-sin-dato]="estadoVencidos() === 'error'">
-          {{ textoVencidos() }}
-        </strong>
-      </div>
-      <div class="contador">
-        <span class="contador-etiqueta">Por vencer</span>
-        <strong class="contador-valor" [class.contador-sin-dato]="estadoPorVencer() === 'error'">
-          {{ textoPorVencer() }}
-        </strong>
-      </div>
+    @if (sinCandidatos()) {
+    <div class="empty-state" role="note">
+      No hay registros sin tarjeta{{ filtroTipo() === 'todas' ? '' : ' de este tipo' }}: todo lo
+      pendiente ya está en el tablero.
     </div>
-
-    @if (estadoCompromisos() === 'error') {
-    <p class="bloque-nota" role="alert">{{ errorCompromisos()?.message }}</p>
-    } @else if (estadoCompromisos() === 'cargando' || estadoCompromisos() === 'inactivo') {
-    <p class="bloque-vacio" role="status">Cargando compromisos…</p>
-    } @else { @if (compromisos().length === 0) {
-    <p class="bloque-vacio">
-      No hay compromisos vencidos ni por vencer en los próximos {{ horizonteDias }} días.
-    </p>
     } @else {
-    <ul class="tarea-lista">
-      @for (compromiso of compromisos(); track compromiso.id) {
-      <li class="tarea">
-        <span class="tarea-principal">
-          <span class="tarea-titulo">{{ compromiso.accion }}</span>
-          <span class="tarea-meta">
-            <span>{{ compromiso.codigo }}</span>
-            <span>{{ compromiso.casoCodigo || 'Sin caso' }}</span>
-            <span>{{ fecha(vencimiento(compromiso).fecha) }}</span>
-          </span>
-        </span>
-        <span [class]="'due-state ' + situacion(compromiso).clase">
-          {{ situacion(compromiso).etiqueta }}
-        </span>
-      </li>
-      }
-    </ul>
-    } @if (totalCompromisos() > 0) {
-    <p class="bloque-pie">
-      {{ totalCompromisos() }} compromisos vencidos o que vencen en los próximos {{ horizonteDias }}
-      días.
-    </p>
-    } }
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Tipo</th>
+            <th scope="col">Registro</th>
+            <th scope="col">Caso</th>
+            <th scope="col">Riesgo</th>
+            <th scope="col">Estado</th>
+            <th scope="col">Fecha de referencia</th>
+            <th scope="col">Incorporar a</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (candidato of candidatos(); track candidato.entidadTipo + ':' + candidato.entidadId)
+          {
+          <tr>
+            <td>
+              <span [class]="'tag ' + claseTipoDe(candidato)">
+                {{ etiquetasTipo[candidato.entidadTipo] }}
+              </span>
+            </td>
+            <td>
+              <strong>{{ candidato.titulo ?? 'Sin título' }}</strong>
+              <small>{{ candidato.codigo ?? 'Sin código' }}</small>
+            </td>
+            <td>{{ candidato.casoCodigo ?? 'Sin caso' }}</td>
+            <td>
+              @if (candidato.riesgo) {
+              <span [class]="'tag ' + claseRiesgoDe(candidato)">{{ candidato.riesgo }}</span>
+              } @else {
+              <span class="sin-dato">—</span>
+              }
+            </td>
+            <td>{{ candidato.estado ?? '—' }}</td>
+            <td>{{ fecha(candidato.fechaReferencia) }}</td>
+            <td>
+              <div class="candidato-mover">
+                @for (destino of destinos; track destino.clave) {
+                <button
+                  type="button"
+                  [disabled]="!puedeEditar() || guardando()"
+                  (click)="moverCandidato(candidato, destino.clave)"
+                >
+                  {{ destino.etiqueta }}
+                </button>
+                } @if (rutaCandidato(candidato); as ruta) {
+                <a class="link-button" [routerLink]="ruta">Abrir</a>
+                }
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
   </section>
 
-  <section class="surface bloque" aria-labelledby="titulo-demandas-sin-caso">
+  <section class="surface" aria-labelledby="titulo-completitud">
     <div class="surface-heading">
       <div>
-        <p class="section-eyebrow">DEMANDAS</p>
-        <h3 class="bloque-titulo" id="titulo-demandas-sin-caso">
-          <app-icono nombre="bandeja" [tamano]="15" />
-          Demandas sin caso
+        <h3 id="titulo-completitud">
+          <app-icono nombre="analisis" [tamano]="15" />
+          Completitud del tablero
         </h3>
-        <p>Demandas registradas que todavía no se vinculan a un caso.</p>
+        <p>
+          Calculada en el servidor. Una tarjeta es completa cuando declara responsable, fecha límite
+          y asignación.
+        </p>
       </div>
-      <a class="link-button" routerLink="/casos/sin-caso">
-        Ver todo
-        <app-icono nombre="chevron-derecha" [tamano]="13" />
-      </a>
+      @if (completitud(); as datos) {
+      <span class="badge">{{ datos.total.incompletas }} incompletas</span>
+      }
     </div>
 
-    @if (estadoDemandas() === 'error') {
-    <p class="bloque-nota" role="alert">{{ errorDemandas()?.message }}</p>
-    } @else if (estadoDemandas() === 'cargando' || estadoDemandas() === 'inactivo') {
-    <p class="bloque-vacio" role="status">Cargando demandas…</p>
-    } @else if (demandas().length === 0) {
-    <p class="bloque-vacio">No hay demandas sin caso.</p>
+    @if (completitud(); as datos) {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Columna</th>
+            <th scope="col" class="num">Total</th>
+            <th scope="col" class="num">Con responsable</th>
+            <th scope="col" class="num">Sin responsable</th>
+            <th scope="col" class="num">Con fecha límite</th>
+            <th scope="col" class="num">Sin fecha límite</th>
+            <th scope="col" class="num">Con asignación</th>
+            <th scope="col" class="num">Sin asignación</th>
+            <th scope="col" class="num">Incompletas</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (columna of datos.columnas; track columna.clave) {
+          <tr>
+            <td><strong>{{ columna.etiqueta }}</strong></td>
+            <td class="num">{{ columna.total }}</td>
+            <td class="num">{{ columna.conResponsable }}</td>
+            <td class="num">{{ columna.sinResponsable }}</td>
+            <td class="num">{{ columna.conFechaLimite }}</td>
+            <td class="num">{{ columna.sinFechaLimite }}</td>
+            <td class="num">{{ columna.conAsignacion }}</td>
+            <td class="num">{{ columna.sinAsignacion }}</td>
+            <td class="num">{{ columna.incompletas }}</td>
+          </tr>
+          }
+          <tr>
+            <td><strong>Total</strong></td>
+            <td class="num">{{ datos.total.total }}</td>
+            <td class="num">{{ datos.total.conResponsable }}</td>
+            <td class="num">{{ datos.total.sinResponsable }}</td>
+            <td class="num">{{ datos.total.conFechaLimite }}</td>
+            <td class="num">{{ datos.total.sinFechaLimite }}</td>
+            <td class="num">{{ datos.total.conAsignacion }}</td>
+            <td class="num">{{ datos.total.sinAsignacion }}</td>
+            <td class="num">{{ datos.total.incompletas }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    } @else if (error()) {
+    <div class="empty-state" role="alert">No se pudo cargar la completitud del tablero.</div>
     } @else {
-    <ul class="tarea-lista">
-      @for (demanda of demandas(); track demanda.id) {
-      <li class="tarea">
-        <span class="tarea-principal">
-          <span class="tarea-titulo">
-            {{ demanda.descripcion || demanda.pedido || demanda.problema || 'Sin descripción' }}
-          </span>
-          <span class="tarea-meta">
-            <span [class]="'status-badge ' + claseDemanda(demanda.estado)">
-              <span class="status-dot"></span>
-              {{ demanda.estado }}
-            </span>
-            <span>{{ fechaDemanda(demanda.fechaRegistro) }}</span>
-            @if (demanda.tematica) {
-            <span>{{ demanda.tematica }}</span>
-            }
-          </span>
-        </span>
-        @if (demanda.afectaMujeres) {
-        <span class="status-badge state-pending">Afecta a mujeres</span>
-        }
-      </li>
-      }
-    </ul>
-    @if (totalDemandas() > demandas().length) {
-    <p class="bloque-pie">{{ totalDemandas() }} demandas sin caso en total.</p>
-    } }
+    <div class="empty-state" role="status">Cargando la completitud…</div>
+    }
   </section>
+
+  <nav class="view-toolbar" aria-label="Pantallas completas">
+    <a class="link-button" routerLink="/alertas">
+      Alertas
+      <app-icono nombre="chevron-derecha" [tamano]="13" />
+    </a>
+    <a class="link-button" routerLink="/compromisos">
+      Compromisos
+      <app-icono nombre="chevron-derecha" [tamano]="13" />
+    </a>
+    <a class="link-button" routerLink="/casos/sin-caso">
+      Demandas sin caso
+      <app-icono nombre="chevron-derecha" [tamano]="13" />
+    </a>
+  </nav>
+  }
 </section>

@@ -151,7 +151,7 @@ export function criteriosExpediente(completitud: CompletitudCaso): CriterioExped
     .expediente-cabecera h2 {
       margin: 0;
       color: var(--ink);
-      font: 700 11px var(--font-display);
+      font: 700 13px var(--font-display);
     }
 
     .exp-completo {
@@ -187,7 +187,7 @@ export function criteriosExpediente(completitud: CompletitudCaso): CriterioExped
       flex: none;
       width: 12px;
       color: var(--muted);
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 700;
       text-align: center;
     }
@@ -204,13 +204,13 @@ export function criteriosExpediente(completitud: CompletitudCaso): CriterioExped
 
     .expediente-texto strong {
       color: var(--ink-2);
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 600;
     }
 
     .expediente-texto small {
       color: var(--muted);
-      font-size: 9px;
+      font-size: 12px;
       line-height: 1.4;
     }
 
@@ -222,7 +222,7 @@ export function criteriosExpediente(completitud: CompletitudCaso): CriterioExped
     .expediente-falta-titulo {
       display: block;
       color: var(--muted);
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -238,7 +238,7 @@ export function criteriosExpediente(completitud: CompletitudCaso): CriterioExped
     .expediente-falta a,
     .expediente-falta span {
       color: var(--ink-2);
-      font-size: 10px;
+      font-size: 12.5px;
       text-decoration: none;
     }
 
@@ -253,13 +253,13 @@ export function criteriosExpediente(completitud: CompletitudCaso): CriterioExped
     .expediente-ok {
       margin: 0;
       color: var(--green);
-      font-size: 10px;
+      font-size: 12.5px;
     }
 
     .expediente-nota {
       margin: 0;
       color: var(--muted);
-      font-size: 8.5px;
+      font-size: 12px;
       line-height: 1.45;
     }
   `,

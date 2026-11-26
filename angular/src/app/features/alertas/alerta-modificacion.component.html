@@ -1,0 +1,88 @@
+<div class="modal-scrim">
+  <section
+    #dialogo
+    class="modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modificacion-titulo"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="modal-head">
+      <div>
+        <p class="modal-codigo">{{ codigo() || 'Alerta sin código' }}</p>
+        <h2 id="modificacion-titulo">{{ titulo() || 'Alerta sin título' }}</h2>
+        @if (sitio()) {
+          <span class="modal-sitio">{{ sitio() }}</span>
+        }
+      </div>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la ventana de solicitud de modificación"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="modal-body">
+      <p class="modal-titulo">Solicitar modificación de la alerta</p>
+      <p class="modal-texto">
+        Al enviar la solicitud, la alerta retorna a <strong>En modificación</strong> para que el
+        sectorista asignado subsane lo indicado antes de volver al circuito de revisión.
+      </p>
+
+      <dl class="modal-actores">
+        <div>
+          <dt>Solicita</dt>
+          <dd>{{ solicitante() }}</dd>
+        </div>
+        <div>
+          <dt>Recibe y subsana</dt>
+          <dd>{{ destinatario() }}</dd>
+        </div>
+      </dl>
+
+      <div class="form-field">
+        <label class="form-label" for="modificacion-motivo">Indique qué debe modificarse</label>
+        <textarea
+          id="modificacion-motivo"
+          class="form-textarea"
+          rows="5"
+          [attr.maxlength]="maximo"
+          [value]="motivo()"
+          (input)="campo($event)"
+        ></textarea>
+        <span class="contador">{{ motivo().length }} / {{ maximo }} caracteres</span>
+      </div>
+
+      <p class="modal-aviso">
+        Se notificará al sectorista responsable y quedará constancia en el historial de la alerta.
+      </p>
+
+      @if (errorEnvio(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+    </div>
+
+    <footer class="modal-foot">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="enviando()"
+        (click)="cerrar.emit()"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="button-primary"
+        [disabled]="enviando() || !valido()"
+        (click)="confirmar()"
+      >
+        {{ enviando() ? 'Enviando…' : 'Enviar solicitud al sectorista' }}
+      </button>
+    </footer>
+  </section>
+</div>

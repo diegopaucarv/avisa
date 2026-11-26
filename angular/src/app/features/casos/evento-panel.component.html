@@ -1,4 +1,4 @@
-<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+<div class="drawer-scrim" (keydown)="alTecla($event)">
   <aside
     #panel
     class="drawer"
@@ -15,13 +15,6 @@
         <h2 id="evento-panel-titulo">
           {{ evento() ? 'Editar hecho' : 'Registrar hecho' }}
         </h2>
-        <p class="evento-panel-sub">
-          @if (evento()) {
-            Sólo se envían los campos que cambian.
-          } @else {
-            Complete al menos la descripción; sin fecha se registra la del día.
-          }
-        </p>
       </div>
 
       <button

@@ -1,0 +1,2337 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Matriz del caso · Mockup AVISA</title>
+        <style>
+            /* Tokens del brief. Sin webfonts, sin JS, sin CDN: se abre por doble clic. */
+            :root {
+                --ink: #17283a;
+                --ink-2: #33475b;
+                --muted: #778797;
+                --line: #e6ebef;
+                --paper: #fff;
+                --canvas: #f5f7f8;
+                --blue: #2455a2;
+                --blue-dark: #1d427f;
+                --blue-pale: #eaf1fb;
+                --teal: #397c79;
+                --amber: #aa6a11;
+                --amber-pale: #fff4e2;
+                --red: #ad4d46;
+                --red-pale: #fbeceb;
+                --green: #34785b;
+                --green-pale: #e9f5ef;
+                --font-sans:
+                    "DM Sans", system-ui, -apple-system, "Segoe UI", Arial,
+                    sans-serif;
+                --font-display:
+                    "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
+                    sans-serif;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                background: var(--canvas);
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                font-family: var(--font-sans);
+                font-size: 13px;
+                line-height: 1.5;
+                -webkit-font-smoothing: antialiased;
+            }
+            button,
+            select,
+            summary {
+                font: inherit;
+                color: inherit;
+            }
+            :focus-visible {
+                outline: 2px solid var(--blue);
+                outline-offset: 2px;
+                border-radius: 6px;
+            }
+            .sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0 0 0 0);
+                white-space: nowrap;
+                border: 0;
+            }
+            .page {
+                width: 100%;
+                max-width: 1440px;
+                margin: 0 auto;
+                padding: 26px 36px 64px;
+            }
+            /* ---- Cabecera documental de cinco bloques ---- */
+            .doc {
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                padding: 20px 22px 22px;
+                box-shadow: 0 1px 2px rgba(23, 40, 58, 0.05);
+            }
+            .doc-top {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 14px 20px;
+            }
+            .doc-top h1 {
+                margin: 4px 0 2px;
+                font: 800 24px/1.15 var(--font-display);
+                letter-spacing: -0.7px;
+            }
+            .kicker {
+                margin: 0;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--blue-dark);
+            }
+            .doc-file {
+                margin: 0;
+                color: var(--ink-2);
+                font-size: 12px;
+            }
+            .doc-file code,
+            .doc-body code,
+            .app code,
+            .tray code {
+                font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+                font-size: 0.92em;
+                background: #f2f5f7;
+                border: 1px solid var(--line);
+                border-radius: 5px;
+                padding: 0 4px;
+                color: var(--ink-2);
+            }
+            .badge-route {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 7px 12px;
+                border-radius: 999px;
+                background: var(--amber-pale);
+                border: 1px solid #f0dcc0;
+                color: var(--ink);
+                font-size: 11.5px;
+                font-weight: 700;
+            }
+            .badge-route .dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--amber);
+            }
+            .doc-lede {
+                margin: 12px 0 0;
+                max-width: 1080px;
+                color: var(--ink-2);
+            }
+            .doc-lede strong {
+                color: var(--ink);
+            }
+            .doc-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+                margin-top: 16px;
+            }
+            .doc-sec {
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                padding: 13px 14px 14px;
+                background: #fcfdfd;
+            }
+            .doc-sec.span-2 {
+                grid-column: 1 / -1;
+            }
+            .doc-sec h2 {
+                margin: 0 0 8px;
+                font: 700 11px/1.3 var(--font-sans);
+                letter-spacing: 0.09em;
+                text-transform: uppercase;
+                color: var(--blue-dark);
+            }
+            .doc-sec h2 span {
+                color: var(--ink-2);
+            }
+            .doc-sec p {
+                margin: 0 0 8px;
+            }
+            .doc-sec p:last-child {
+                margin-bottom: 0;
+            }
+            .doc-sec ul {
+                margin: 0;
+                padding-left: 18px;
+            }
+            .doc-sec li {
+                margin: 0 0 5px;
+            }
+            .doc-sec li:last-child {
+                margin-bottom: 0;
+            }
+            .src {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 12px;
+            }
+            .src th {
+                text-align: left;
+                font: 700 10.5px/1.3 var(--font-sans);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+                color: var(--ink-2);
+                padding: 0 10px 6px 0;
+                border-bottom: 1px solid var(--line);
+            }
+            .src td {
+                padding: 7px 10px 7px 0;
+                border-bottom: 1px solid var(--line);
+                vertical-align: top;
+            }
+            .src tr:last-child td {
+                border-bottom: 0;
+            }
+            .src td:last-child {
+                width: 138px;
+                padding-right: 0;
+            }
+            .flag {
+                display: inline-block;
+                padding: 1px 7px;
+                border-radius: 999px;
+                font-size: 10.5px;
+                font-weight: 700;
+                white-space: nowrap;
+                border: 1px solid var(--line);
+                background: #f3f6f8;
+                color: var(--ink-2);
+            }
+            .flag.ok {
+                background: var(--green-pale);
+                border-color: #cfe8db;
+                color: var(--green);
+            }
+            .flag.gap {
+                background: var(--red-pale);
+                border-color: #f2d3d0;
+                color: var(--red);
+            }
+            .flag.warn {
+                background: var(--amber-pale);
+                border-color: #f0dcc0;
+                color: var(--ink);
+            }
+            .roles {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 10px;
+            }
+            .role {
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                padding: 10px 11px;
+                background: var(--paper);
+            }
+            .role b {
+                display: block;
+                font: 700 12.5px/1.35 var(--font-display);
+                margin-bottom: 3px;
+            }
+            .role span {
+                color: var(--ink-2);
+                font-size: 12px;
+            }
+            /* ---- Artboard ---- */
+            .artboard-label {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 6px 16px;
+                margin: 22px 2px 8px;
+                color: var(--ink-2);
+                font-size: 11px;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                font-weight: 700;
+            }
+            .app {
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-radius: 14px;
+                box-shadow: 0 1px 2px rgba(23, 40, 58, 0.05);
+                overflow: hidden;
+            }
+            .case-bar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px 24px;
+                padding: 18px 20px 16px;
+                border-bottom: 1px solid var(--line);
+                background: linear-gradient(180deg, #fff 0%, #fcfdfd 100%);
+            }
+            .case-main {
+                min-width: 0;
+                flex: 1 1 560px;
+            }
+            .case-code {
+                display: inline-block;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.09em;
+                color: var(--blue-dark);
+                background: var(--blue-pale);
+                border: 1px solid #d5e3f7;
+                border-radius: 6px;
+                padding: 2px 8px;
+            }
+            .case-title {
+                margin: 7px 0 0;
+                font: 700 18px/1.32 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .case-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px 8px;
+                margin-top: 9px;
+            }
+            .pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 3px 9px;
+                border-radius: 999px;
+                border: 1px solid var(--line);
+                background: #f7f9fa;
+                color: var(--ink-2);
+                font-size: 11.5px;
+                font-weight: 600;
+            }
+            .pill .dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: var(--muted);
+            }
+            .pill.manifest {
+                background: var(--red-pale);
+                border-color: #f2d3d0;
+                color: var(--ink);
+            }
+            .pill.manifest .dot {
+                background: var(--red);
+            }
+            .pill.urgent {
+                background: var(--amber-pale);
+                border-color: #f0dcc0;
+                color: var(--ink);
+            }
+            .pill.urgent .dot {
+                background: var(--amber);
+            }
+            .pill.open {
+                background: var(--green-pale);
+                border-color: #cfe8db;
+                color: var(--ink);
+            }
+            .pill.open .dot {
+                background: var(--green);
+            }
+            .case-actions {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+            }
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                padding: 8px 13px;
+                border-radius: 8px;
+                border: 1px solid #cfd8e0;
+                background: var(--paper);
+                color: var(--ink);
+                font-size: 12.5px;
+                font-weight: 700;
+                line-height: 1.2;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .btn:hover {
+                background: #f4f7f9;
+                border-color: #b9c6d2;
+            }
+            .btn.primary {
+                background: var(--blue);
+                border-color: var(--blue);
+                color: #fff;
+            }
+            .btn.primary:hover {
+                background: var(--blue-dark);
+                border-color: var(--blue-dark);
+            }
+            .btn.tiny {
+                padding: 5px 9px;
+                font-size: 11.5px;
+            }
+            .menu {
+                position: relative;
+            }
+            .menu > summary {
+                list-style: none;
+            }
+            .menu > summary::-webkit-details-marker {
+                display: none;
+            }
+            .menu-pop {
+                display: none;
+                position: absolute;
+                right: 0;
+                top: calc(100% + 6px);
+                min-width: 168px;
+                padding: 5px;
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-radius: 9px;
+                box-shadow: 0 8px 22px rgba(23, 40, 58, 0.12);
+                z-index: 5;
+            }
+            .menu[open] .menu-pop {
+                display: block;
+            }
+            .menu-pop button {
+                display: block;
+                width: 100%;
+                text-align: left;
+                padding: 7px 9px;
+                border: 0;
+                border-radius: 6px;
+                background: transparent;
+                color: var(--ink);
+                font-size: 12.5px;
+                cursor: pointer;
+            }
+            .menu-pop button:hover {
+                background: var(--blue-pale);
+            }
+            .caret {
+                font-size: 10px;
+                color: var(--ink-2);
+            }
+            .reality {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                border-bottom: 1px solid var(--line);
+                background: #fbfcfd;
+            }
+            .reality div {
+                padding: 11px 16px;
+                border-right: 1px solid var(--line);
+            }
+            .reality div:last-child {
+                border-right: 0;
+            }
+            .reality b {
+                display: block;
+                font: 700 16px/1.2 var(--font-display);
+                margin-bottom: 2px;
+            }
+            .reality span {
+                color: var(--ink-2);
+                font-size: 11.5px;
+            }
+            .case-grid {
+                display: grid;
+                grid-template-columns: 292px minmax(0, 1fr);
+                gap: 16px;
+                align-items: start;
+                padding: 18px 20px 20px;
+            }
+            .panel {
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                background: var(--paper);
+                overflow: hidden;
+            }
+            .panel-head {
+                display: flex;
+                align-items: baseline;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 11px 14px;
+                background: #f9fbfc;
+                border-bottom: 1px solid var(--line);
+            }
+            .panel-head h3 {
+                margin: 0;
+                font: 700 13px/1.3 var(--font-display);
+            }
+            .panel-head span {
+                color: var(--ink-2);
+                font-size: 11.5px;
+                font-weight: 600;
+            }
+            .demandas {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+            .demandas li {
+                display: grid;
+                grid-template-columns: 24px minmax(0, 1fr);
+                gap: 9px;
+                padding: 11px 14px;
+                border-bottom: 1px solid var(--line);
+            }
+            .demandas li:last-child {
+                border-bottom: 0;
+            }
+            .d-num {
+                font: 700 11px/1.7 var(--font-display);
+                color: var(--blue-dark);
+                background: var(--blue-pale);
+                border-radius: 5px;
+                text-align: center;
+                align-self: start;
+            }
+            .d-text {
+                margin: 0;
+                font-size: 12.5px;
+                line-height: 1.45;
+            }
+            .chip {
+                display: inline-block;
+                margin-top: 6px;
+                padding: 1px 7px;
+                border-radius: 999px;
+                font-size: 10.5px;
+                font-weight: 700;
+                background: var(--blue-pale);
+                border: 1px solid #d5e3f7;
+                color: var(--blue-dark);
+            }
+            .panel-note {
+                margin: 0;
+                padding: 10px 14px;
+                border-top: 1px solid var(--line);
+                background: #fbfcfd;
+                color: var(--ink-2);
+                font-size: 11.5px;
+                line-height: 1.45;
+            }
+            .action {
+                border: 1px solid var(--line);
+                border-radius: 12px;
+                background: var(--paper);
+                overflow: hidden;
+            }
+            .action + .action {
+                margin-top: 13px;
+            }
+            .action-top {
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 11px 14px;
+                background: #f9fbfc;
+                border-bottom: 1px solid var(--line);
+            }
+            .action-num {
+                flex: none;
+                width: 25px;
+                height: 25px;
+                border-radius: 7px;
+                background: var(--blue);
+                color: #fff;
+                font: 700 11.5px/25px var(--font-display);
+                text-align: center;
+            }
+            .action-title {
+                margin: 0;
+                font: 600 13.5px/1.45 var(--font-sans);
+            }
+            .action-meta {
+                display: grid;
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+                gap: 8px 16px;
+                margin: 0;
+                padding: 10px 14px;
+                border-bottom: 1px solid var(--line);
+            }
+            .action-meta dt {
+                font: 700 10px/1.3 var(--font-sans);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+                color: var(--ink-2);
+                margin-bottom: 2px;
+            }
+            .action-meta dd {
+                margin: 0;
+                font-size: 12px;
+                line-height: 1.4;
+            }
+            .marker {
+                display: inline-block;
+                padding: 1px 6px;
+                border-radius: 5px;
+                background: var(--amber-pale);
+                border: 1px solid #f0dcc0;
+                color: var(--ink);
+                font-size: 11px;
+                font-weight: 600;
+            }
+            .linkbtn {
+                padding: 0;
+                border: 0;
+                background: transparent;
+                color: var(--blue-dark);
+                font-size: 12px;
+                font-weight: 700;
+                text-decoration: underline;
+                text-underline-offset: 2px;
+                cursor: pointer;
+            }
+            .table-wrap {
+                overflow-x: auto;
+            }
+            .hitos {
+                width: 100%;
+                min-width: 700px;
+                border-collapse: collapse;
+            }
+            .hitos th {
+                text-align: left;
+                padding: 8px 12px;
+                background: #fbfcfd;
+                border-bottom: 1px solid var(--line);
+                font: 700 10px/1.3 var(--font-sans);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+                color: var(--ink-2);
+                white-space: nowrap;
+            }
+            .hitos td {
+                padding: 9px 12px;
+                border-bottom: 1px solid var(--line);
+                vertical-align: middle;
+                font-size: 12px;
+            }
+            .hitos tr:last-child td {
+                border-bottom: 0;
+            }
+            .hitos .c-hito {
+                width: 76px;
+                white-space: nowrap;
+            }
+            .hitos .c-resp {
+                width: 152px;
+            }
+            .hitos .c-date {
+                width: 108px;
+                white-space: nowrap;
+            }
+            .hitos .c-est {
+                width: 132px;
+            }
+            .hito-code {
+                display: inline-block;
+                padding: 1px 6px;
+                border-radius: 5px;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+                font-size: 10.5px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+            .hito-desc {
+                color: var(--ink);
+            }
+            .est {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 2px 8px;
+                border-radius: 999px;
+                font-size: 11px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+            .est .dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+            }
+            .est.ok {
+                background: var(--green-pale);
+                color: var(--green);
+            }
+            .est.ok .dot {
+                background: var(--green);
+            }
+            .est.no {
+                background: var(--red-pale);
+                color: var(--red);
+            }
+            .est.no .dot {
+                background: var(--red);
+            }
+            .fn {
+                margin-left: 3px;
+                font-size: 10px;
+                font-weight: 700;
+                color: var(--ink-2);
+            }
+            .muted {
+                color: var(--ink-2);
+                font-size: 11.5px;
+            }
+            .notes {
+                margin: 12px 0 0;
+                padding: 0;
+                list-style: none;
+                color: var(--ink-2);
+                font-size: 11.5px;
+                line-height: 1.5;
+            }
+            .notes li {
+                margin-bottom: 3px;
+            }
+            .notes .sym {
+                color: var(--ink);
+                font-weight: 700;
+            }
+            .tray {
+                border-top: 1px solid var(--line);
+                padding: 18px 20px 20px;
+                background: #fbfcfd;
+            }
+            .sec-head {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: baseline;
+                justify-content: space-between;
+                gap: 6px 16px;
+                margin-bottom: 4px;
+            }
+            .sec-head h2 {
+                margin: 0;
+                font: 800 16px/1.25 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .sec-head p {
+                margin: 0;
+                color: var(--ink-2);
+                font-size: 12px;
+            }
+            .tray-note {
+                margin: 6px 0 0;
+                max-width: 940px;
+                color: var(--ink-2);
+                font-size: 12px;
+            }
+            .tray-note strong {
+                color: var(--ink);
+            }
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 12px;
+                margin: 12px 0;
+            }
+            .stat {
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-left: 4px solid var(--muted);
+                border-radius: 11px;
+                padding: 12px 14px;
+            }
+            .stat.good {
+                border-left-color: var(--green);
+            }
+            .stat.warn {
+                border-left-color: var(--amber);
+            }
+            .stat.bad {
+                border-left-color: var(--red);
+            }
+            .stat b {
+                display: block;
+                font: 800 26px/1 var(--font-display);
+            }
+            .stat span {
+                display: block;
+                color: var(--ink-2);
+                font-size: 12px;
+                font-weight: 600;
+            }
+            .stat .ex {
+                margin-top: 3px;
+                color: var(--ink-2);
+                font-size: 11px;
+                font-weight: 400;
+            }
+            .diag {
+                width: 100%;
+                min-width: 860px;
+                border-collapse: collapse;
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-radius: 11px;
+                font-size: 12px;
+            }
+            .diag th {
+                text-align: left;
+                padding: 9px 12px;
+                background: #f4f7f9;
+                border-bottom: 1px solid var(--line);
+                font: 700 10px/1.3 var(--font-sans);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+                color: var(--ink-2);
+            }
+            .diag td {
+                padding: 10px 12px;
+                border-bottom: 1px solid var(--line);
+                vertical-align: top;
+                line-height: 1.45;
+            }
+            .diag tr:last-child td {
+                border-bottom: 0;
+            }
+            .diag .val {
+                display: inline-block;
+                margin: 1px 0;
+                font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+                font-size: 10.5px;
+                background: #f2f5f7;
+                border: 1px solid var(--line);
+                border-radius: 5px;
+                padding: 0 5px;
+                color: var(--ink);
+                overflow-wrap: anywhere;
+            }
+            .decide {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 6px;
+            }
+            .diag select {
+                max-width: 215px;
+                padding: 5px 7px;
+                border: 1px solid #cfd8e0;
+                border-radius: 6px;
+                background: var(--paper);
+                font-size: 11.5px;
+            }
+            .rules {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+                margin-top: 12px;
+            }
+            .rule {
+                background: var(--paper);
+                border: 1px solid var(--line);
+                border-radius: 11px;
+                padding: 12px 14px;
+            }
+            .rule .rn {
+                display: inline-block;
+                font: 800 10px/1.6 var(--font-display);
+                letter-spacing: 0.06em;
+                color: var(--blue-dark);
+                background: var(--blue-pale);
+                border-radius: 5px;
+                padding: 0 6px;
+                margin-bottom: 5px;
+            }
+            .rule h3 {
+                margin: 0 0 4px;
+                font: 700 12.5px/1.35 var(--font-display);
+            }
+            .rule p {
+                margin: 0;
+                color: var(--ink-2);
+                font-size: 12px;
+                line-height: 1.45;
+            }
+            @media (max-width: 1120px) {
+                .action-meta {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+                .roles {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+            }
+            @media (max-width: 960px) {
+                .page {
+                    padding: 20px 20px 48px;
+                }
+                .doc-grid {
+                    grid-template-columns: 1fr;
+                }
+                .case-grid {
+                    grid-template-columns: 1fr;
+                }
+                .reality {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
+                .reality div:nth-child(2) {
+                    border-right: 0;
+                }
+                .stats {
+                    grid-template-columns: 1fr;
+                }
+                .rules {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <main class="page">
+            <header class="doc">
+                <div class="doc-top">
+                    <div>
+                        <p class="kicker">Mockup AVISA · pieza de forma</p>
+                        <h1>Matriz de conflictividad del caso</h1>
+                        <p class="doc-file">
+                            archivo:
+                            <code
+                                >docs/07_frontend/mockups/matriz-conflictividad-caso.html</code
+                            >
+                        </p>
+                    </div>
+                    <span class="badge-route"
+                        ><span class="dot" aria-hidden="true"></span>sin ruta ·
+                        no está en el menú</span
+                    >
+                </div>
+                <p class="doc-lede">
+                    La <strong>matriz del equipo</strong>: por cada caso, las
+                    filas de demandas, acciones/compromisos/acuerdos e hitos que
+                    hoy viven en un Excel burocrático. Se propone como pestaña
+                    <strong>«Matriz»</strong> dentro de la ficha del caso
+                    (<code>/casos/:codigo</code>), con un
+                    <strong>modo global de importación</strong>. No confundir
+                    con el <strong>Anexo 15 institucional</strong>: ése es otro
+                    archivo (<code>anexo-15-matriz-conflictividad.html</code>,
+                    vista 15 imprimible).
+                </p>
+                <div class="doc-grid">
+                    <section class="doc-sec span-2">
+                        <h2>1 · <span>Cubre</span></h2>
+                        <p>
+                            Pieza de trabajo sobre la matriz que alimenta el
+                            <strong>Anexo 15</strong> (vista 15) y el
+                            <strong>Anexo 14</strong> de seguimiento (item 25).
+                            No es ninguno de los dos documentos: el Anexo 15 es
+                            la vista imprimible institucional; esto es la vista
+                            operativa del equipo, con importación y exportación.
+                        </p>
+                        <p>
+                            Ruta:
+                            <strong>sin ruta · no está en el menú</strong>.
+                            Propuesta: pestaña <strong>«Matriz»</strong> en la
+                            ficha del caso (<code>/casos/:codigo</code>), más un
+                            <strong>modo global de importación</strong> para el
+                            Administrador.
+                        </p>
+                    </section>
+                    <section class="doc-sec span-2">
+                        <h2>2 · <span>Dato por bloque</span></h2>
+                        <table class="src">
+                            <caption class="sr-only">
+                                Qué campo alimenta cada bloque y qué huecos se
+                                declaran
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Bloque</th>
+                                    <th scope="col">Campo o fuente</th>
+                                    <th scope="col">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Barra del caso</td>
+                                    <td>
+                                        <code>core.casos</code>:
+                                        <code>codigo</code>,
+                                        <code>nombre</code>,
+                                        <code>nivel_conflicto_id</code>,
+                                        <code>estado</code>
+                                    </td>
+                                    <td><span class="flag ok">OK</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Demandas</td>
+                                    <td><code>core.demandas</code> (texto)</td>
+                                    <td><span class="flag ok">OK</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Temática</td>
+                                    <td>
+                                        Texto del Excel
+                                        (<code>Gobernanza</code>,
+                                        <code
+                                            >Ordenamiento y acceso
+                                            territorial</code
+                                        >, <code>Normatividad</code>);
+                                        <code>cat_tematicas</code> es el
+                                        catálogo candidato
+                                    </td>
+                                    <td>
+                                        <span class="flag warn"
+                                            >por mapear</span
+                                        >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Acciones / compromisos / acuerdos</td>
+                                    <td>
+                                        <code>core.compromisos</code> (texto); 8
+                                        filas hoy
+                                    </td>
+                                    <td><span class="flag ok">OK</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Área responsable de monitoreo</td>
+                                    <td>
+                                        Valor compuesto del Excel:
+                                        <code>DIPFORPA / DGPA</code>,
+                                        <code>DGPA / DIREPRO PIURA</code>,
+                                        <code>DGSFS-PA</code>,
+                                        <code>DGPARP</code>
+                                    </td>
+                                    <td><span class="flag">texto</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Punto focal de monitoreo</td>
+                                    <td>
+                                        Persona, en el Excel; en base, por
+                                        confirmar
+                                    </td>
+                                    <td>
+                                        <span class="flag warn"
+                                            >por confirmar</span
+                                        >
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Medio de verificación</td>
+                                    <td>
+                                        <code
+                                            >core.compromisos.evidencia_cumplimiento_uri</code
+                                        >
+                                        existe, pero el Excel sólo dice
+                                        <code>Acción n: Adjuntar</code>:
+                                        marcador de adjunto, no URL
+                                    </td>
+                                    <td>
+                                        <span class="flag warn">marcador</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Documentos</td>
+                                    <td>
+                                        <code>core.documentos</code> (adjuntos)
+                                    </td>
+                                    <td><span class="flag ok">OK</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Hitos</td>
+                                    <td>
+                                        <code>core.hitos_compromiso</code>:
+                                        <code>codigo_hito</code>, descripción,
+                                        fechas, <code>estado_id</code>; 12 filas
+                                        hoy
+                                    </td>
+                                    <td><span class="flag ok">OK</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Responsable del hito</td>
+                                    <td>
+                                        <strong>No existe columna</strong> en la
+                                        base viva;
+                                        <code
+                                            >hitos_compromiso.responsable_usuario_id</code
+                                        >
+                                        / <code>responsable_texto</code> llega
+                                        con la migración 41 (propuesta).
+                                    </td>
+                                    <td><span class="flag gap">41</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Análisis del caso (Canva)</td>
+                                    <td>
+                                        <strong>No hay columna</strong> en la
+                                        base viva;
+                                        <code>casos.link_analisis_caso</code>
+                                        llega con la migración 41, separado de
+                                        <code>link_reporte_pdf</code>
+                                        (documentos).
+                                    </td>
+                                    <td><span class="flag gap">41</span></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Seguimiento semanal / nudos críticos
+                                    </td>
+                                    <td>
+                                        <strong
+                                            >No existe tabla en la base
+                                            viva</strong
+                                        >; <code>core.caso_nudo_critico</code>
+                                        llega con la migración 43
+                                    </td>
+                                    <td><span class="flag gap">43</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Desglose 3P</td>
+                                    <td>
+                                        <code>core.demandas.problema_3p</code>,
+                                        <code>propuesta_3p</code>,
+                                        <code>pedido_3p</code> existen en la
+                                        base, <strong>no</strong> en el Excel
+                                    </td>
+                                    <td><span class="flag">sólo base</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Importación y estados</td>
+                                    <td>
+                                        Plantilla XLSX; hoja
+                                        <code>METADATOS CASOS</code>; catálogo
+                                        <code>cat_estados_hito</code>
+                                    </td>
+                                    <td>
+                                        <span class="flag gap"
+                                            >sin endpoint</span
+                                        >
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </section>
+                    <section class="doc-sec">
+                        <h2>3 · <span>Sólo forma</span></h2>
+                        <p>
+                            Son decisiones de diseño, no de dato: la jerarquía y
+                            el anidado acción → hitos, la columna de demandas a
+                            la izquierda, la fila cabecera de cada acción con
+                            sus cuatro metadatos, la bandeja de importación y el
+                            bloque de reglas. El color sólo refuerza; el estado
+                            siempre lleva texto.
+                        </p>
+                        <p>
+                            El Excel no declara qué demanda origina qué acción:
+                            las tres listas se muestran 1:N sobre el mismo eje
+                            de filas, sin inventar correspondencias.
+                        </p>
+                    </section>
+                    <section class="doc-sec">
+                        <h2>4 · <span>Bloqueado</span></h2>
+                        <ul>
+                            <li>
+                                <strong>Importación real:</strong> no hay
+                                endpoint; la bandeja y sus contadores son
+                                estáticos (≈).
+                            </li>
+                            <li>
+                                <strong
+                                    >Nudos críticos y seguimiento
+                                    semanal:</strong
+                                >
+                                no existe tabla en la base viva; la migración 43
+                                crea <code>core.caso_nudo_critico</code>.
+                            </li>
+                            <li>
+                                <strong>Responsable del hito:</strong> no hay
+                                columna en la base viva; la migración 41 añade
+                                <code>responsable_usuario_id</code> /
+                                <code>responsable_texto</code>.
+                            </li>
+                            <li>
+                                <strong>Análisis del caso (Canva):</strong> no
+                                hay columna en la base viva; la migración 41
+                                crea <code>casos.link_analisis_caso</code>,
+                                separado de <code>link_reporte_pdf</code>.
+                            </li>
+                            <li>
+                                <strong
+                                    >Medio de verificación como archivo:</strong
+                                >
+                                existe <code>evidencia_cumplimiento_uri</code>,
+                                pero el Excel no trae URI.
+                            </li>
+                        </ul>
+                    </section>
+                    <section class="doc-sec span-2">
+                        <h2>5 · <span>Roles</span></h2>
+                        <div class="roles">
+                            <div class="role">
+                                <b>Especialista OAIPCS</b>
+                                <span>Edita demandas, acciones e hitos.</span>
+                            </div>
+                            <div class="role">
+                                <b>Sectorista</b>
+                                <span>Lee y exporta (XLSX · CSV · PDF).</span>
+                            </div>
+                            <div class="role">
+                                <b>Dirección</b>
+                                <span>Lee.</span>
+                            </div>
+                            <div class="role">
+                                <b>Administrador</b>
+                                <span
+                                    >Importa: bandeja, decisiones e
+                                    informe.</span
+                                >
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </header>
+
+            <div class="artboard-label">
+                <span>Artboard · lienzo 1440 px · se sostiene a 1024 px</span>
+                <span>Ficha del caso · pestaña «Matriz»</span>
+            </div>
+
+            <div class="app">
+                <div class="case-bar">
+                    <div class="case-main">
+                        <span class="case-code">CS-PA-OAT-2024-02</span>
+                        <h2 class="case-title">
+                            Pescadores de Cabo Blanco — rechazo al uso de redes
+                            de cortina de fondo
+                        </h2>
+                        <div class="case-meta">
+                            <span class="pill manifest"
+                                ><span class="dot" aria-hidden="true"></span
+                                >Nivel de conflictividad: Manifiesto · Conflicto
+                                social</span
+                            >
+                            <span class="pill open"
+                                ><span class="dot" aria-hidden="true"></span
+                                >Estado: Abierto</span
+                            >
+                            <span class="pill urgent"
+                                ><span class="dot" aria-hidden="true"></span
+                                >Prioridad: Urgente</span
+                            >
+                            <span class="pill">Piura</span>
+                            <span class="pill"
+                                >Sectorista: Ivan Ascurra Santillán</span
+                            >
+                            <span class="pill">Bloque 1 de 34</span>
+                        </div>
+                    </div>
+                    <div class="case-actions">
+                        <button class="btn primary" type="button">
+                            Importar XLSX
+                        </button>
+                        <button class="btn" type="button">
+                            Descargar plantilla
+                        </button>
+                        <details class="menu">
+                            <summary class="btn">
+                                Exportar
+                                <span class="caret" aria-hidden="true">▾</span>
+                            </summary>
+                            <div class="menu-pop">
+                                <button type="button">XLSX</button>
+                                <button type="button">CSV</button>
+                                <button type="button">PDF</button>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+                <div class="reality">
+                    <div>
+                        <b>34 bloques</b>
+                        <span>33 números únicos · el «15» está duplicado</span>
+                    </div>
+                    <div>
+                        <b>23 · 56 · 111</b>
+                        <span>demandas · acciones · hitos en el Excel</span>
+                    </div>
+                    <div>
+                        <b>8 · 12</b>
+                        <span>compromisos · hitos en la base AVISA hoy</span>
+                    </div>
+                    <div>
+                        <b>Desfase declarado</b>
+                        <span>faltan 48 acciones y 99 hitos por cargar</span>
+                    </div>
+                </div>
+
+                <div class="case-grid">
+                    <section class="panel" aria-labelledby="demandas-title">
+                        <div class="panel-head">
+                            <h3 id="demandas-title">Demandas del caso</h3>
+                            <span>7</span>
+                        </div>
+                        <ol class="demandas">
+                            <li>
+                                <span class="d-num">01</span>
+                                <div>
+                                    <p class="d-text">
+                                        «Realización de un estudio técnico a
+                                        cargo de una consultoría asesorada…»
+                                    </p>
+                                    <span class="chip">Gobernanza</span>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="d-num">02</span>
+                                <div>
+                                    <p class="d-text">
+                                        «Rechazo categórico al uso de redes de
+                                        cortina de fondo en sus zonas de pesca»
+                                    </p>
+                                    <span class="chip"
+                                        >Ordenamiento y acceso territorial</span
+                                    >
+                                </div>
+                            </li>
+                            <li>
+                                <span class="d-num">03</span>
+                                <div>
+                                    <p class="d-text">
+                                        «Participación de las organizaciones en
+                                        la actualización del plan de manejo»
+                                    </p>
+                                    <span class="chip">Gobernanza</span>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="d-num">04</span>
+                                <div>
+                                    <p class="d-text">
+                                        «Mayor presencia de la autoridad en los
+                                        puntos de desembarque»
+                                    </p>
+                                    <span class="chip">Normatividad</span>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="d-num">05</span>
+                                <div>
+                                    <p class="d-text">
+                                        «Acceso oportuno a la información de
+                                        permisos y vedas»
+                                    </p>
+                                    <span class="chip">Normatividad</span>
+                                </div>
+                            </li>
+                            <li>
+                                <span class="d-num">06</span>
+                                <div>
+                                    <p class="d-text">
+                                        «Reconocimiento de los puntos de
+                                        desembarque históricos»
+                                    </p>
+                                    <span class="chip"
+                                        >Ordenamiento y acceso territorial</span
+                                    >
+                                </div>
+                            </li>
+                            <li>
+                                <span class="d-num">07</span>
+                                <div>
+                                    <p class="d-text">
+                                        «Canal permanente de diálogo entre el
+                                        sector y las organizaciones»
+                                    </p>
+                                    <span class="chip">Gobernanza</span>
+                                </div>
+                            </li>
+                        </ol>
+                        <p class="panel-note">
+                            Demandas y acciones son listas 1:N sobre el mismo
+                            eje de filas. El Excel no declara qué demanda
+                            origina qué acción: aquí no se inventa el vínculo.
+                        </p>
+                    </section>
+                    <div>
+                        <article class="action">
+                            <div class="action-top">
+                                <span class="action-num" aria-hidden="true"
+                                    >1</span
+                                >
+                                <h3 class="action-title">
+                                    Desarrollar estudio denominado Evaluación y
+                                    monitoreo de los efectos…
+                                </h3>
+                            </div>
+                            <dl class="action-meta">
+                                <div>
+                                    <dt>Área responsable</dt>
+                                    <dd>DIPFORPA / DGPA</dd>
+                                </div>
+                                <div>
+                                    <dt>Punto focal</dt>
+                                    <dd>
+                                        Rosa Medina Quispe
+                                        <span class="muted">≈</span>
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>
+                                        Medio de verificación
+                                        <span class="fn">‡</span>
+                                    </dt>
+                                    <dd>
+                                        <span class="marker"
+                                            >Acción 1: Adjuntar</span
+                                        >
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>Documentos</dt>
+                                    <dd>
+                                        <button
+                                            class="linkbtn"
+                                            type="button"
+                                            aria-label="Adjuntar documento de la acción 1"
+                                        >
+                                            Adjuntar
+                                        </button>
+                                    </dd>
+                                </div>
+                            </dl>
+                            <div class="table-wrap">
+                                <table class="hitos">
+                                    <caption class="sr-only">
+                                        Acción 1: hitos
+                                    </caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Hito</th>
+                                            <th scope="col">Descripción</th>
+                                            <th scope="col">
+                                                Responsable del hito
+                                                <span class="fn">†</span>
+                                            </th>
+                                            <th scope="col">
+                                                Fecha planificada
+                                            </th>
+                                            <th scope="col">Fecha real</th>
+                                            <th scope="col">
+                                                Estado <span class="fn">§</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 1</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Presentar los términos de
+                                                referencia de la consultoría
+                                            </td>
+                                            <td class="c-resp">
+                                                Rosa Medina Quispe
+                                            </td>
+                                            <td class="c-date">15 mar 2025</td>
+                                            <td class="c-date">12 mar 2025</td>
+                                            <td class="c-est">
+                                                <span class="est ok"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 2</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Adjudicar la consultoría
+                                            </td>
+                                            <td class="c-resp">
+                                                Rosa Medina Quispe
+                                            </td>
+                                            <td class="c-date">30 abr 2025</td>
+                                            <td class="c-date">08 may 2025</td>
+                                            <td class="c-est">
+                                                <span class="est ok"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 3</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Entregar el informe final del
+                                                estudio
+                                            </td>
+                                            <td class="c-resp">
+                                                Rosa Medina Quispe
+                                            </td>
+                                            <td class="c-date">31 dic 2025</td>
+                                            <td class="c-date">
+                                                <span class="muted"
+                                                    >sin dato</span
+                                                >
+                                            </td>
+                                            <td class="c-est">
+                                                <span class="est no"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >No Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                        <article class="action">
+                            <div class="action-top">
+                                <span class="action-num" aria-hidden="true"
+                                    >2</span
+                                >
+                                <h3 class="action-title">
+                                    Conformar mesa técnica de seguimiento con
+                                    las organizaciones de pescadores
+                                </h3>
+                            </div>
+                            <dl class="action-meta">
+                                <div>
+                                    <dt>Área responsable</dt>
+                                    <dd>DGPA / DIREPRO PIURA</dd>
+                                </div>
+                                <div>
+                                    <dt>Punto focal</dt>
+                                    <dd>
+                                        Luis Távara Chunga
+                                        <span class="muted">≈</span>
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>
+                                        Medio de verificación
+                                        <span class="fn">‡</span>
+                                    </dt>
+                                    <dd>
+                                        <span class="marker"
+                                            >Acción 2: Adjuntar</span
+                                        >
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>Documentos</dt>
+                                    <dd>
+                                        <button
+                                            class="linkbtn"
+                                            type="button"
+                                            aria-label="Adjuntar documento de la acción 2"
+                                        >
+                                            Adjuntar
+                                        </button>
+                                    </dd>
+                                </div>
+                            </dl>
+                            <div class="table-wrap">
+                                <table class="hitos">
+                                    <caption class="sr-only">
+                                        Acción 2: hitos
+                                    </caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Hito</th>
+                                            <th scope="col">Descripción</th>
+                                            <th scope="col">
+                                                Responsable del hito
+                                                <span class="fn">†</span>
+                                            </th>
+                                            <th scope="col">
+                                                Fecha planificada
+                                            </th>
+                                            <th scope="col">Fecha real</th>
+                                            <th scope="col">
+                                                Estado <span class="fn">§</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 1</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Convocar a las organizaciones de
+                                                pescadores
+                                            </td>
+                                            <td class="c-resp">
+                                                Luis Távara Chunga
+                                            </td>
+                                            <td class="c-date">20 ene 2025</td>
+                                            <td class="c-date">18 ene 2025</td>
+                                            <td class="c-est">
+                                                <span class="est ok"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 2</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Instalar la mesa técnica
+                                            </td>
+                                            <td class="c-resp">
+                                                Luis Távara Chunga
+                                            </td>
+                                            <td class="c-date">28 feb 2025</td>
+                                            <td class="c-date">05 mar 2025</td>
+                                            <td class="c-est">
+                                                <span class="est ok"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 3</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Aprobar el plan de trabajo de la
+                                                mesa
+                                            </td>
+                                            <td class="c-resp">
+                                                Luis Távara Chunga
+                                            </td>
+                                            <td class="c-date">31 mar 2025</td>
+                                            <td class="c-date">
+                                                <span class="muted"
+                                                    >sin dato</span
+                                                >
+                                            </td>
+                                            <td class="c-est">
+                                                <span class="est no"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >No Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                        <article class="action">
+                            <div class="action-top">
+                                <span class="action-num" aria-hidden="true"
+                                    >3</span
+                                >
+                                <h3 class="action-title">
+                                    Actualizar el padrón de puntos de
+                                    desembarque del ámbito
+                                </h3>
+                            </div>
+                            <dl class="action-meta">
+                                <div>
+                                    <dt>Área responsable</dt>
+                                    <dd>DGPA / DIREPRO PIURA</dd>
+                                </div>
+                                <div>
+                                    <dt>Punto focal</dt>
+                                    <dd>
+                                        Ana Panta Seminario
+                                        <span class="muted">≈</span>
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>
+                                        Medio de verificación
+                                        <span class="fn">‡</span>
+                                    </dt>
+                                    <dd>
+                                        <span class="marker"
+                                            >Acción 3: Adjuntar</span
+                                        >
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>Documentos</dt>
+                                    <dd>
+                                        <button
+                                            class="linkbtn"
+                                            type="button"
+                                            aria-label="Adjuntar documento de la acción 3"
+                                        >
+                                            Adjuntar
+                                        </button>
+                                    </dd>
+                                </div>
+                            </dl>
+                            <div class="table-wrap">
+                                <table class="hitos">
+                                    <caption class="sr-only">
+                                        Acción 3: hitos
+                                    </caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Hito</th>
+                                            <th scope="col">Descripción</th>
+                                            <th scope="col">
+                                                Responsable del hito
+                                                <span class="fn">†</span>
+                                            </th>
+                                            <th scope="col">
+                                                Fecha planificada
+                                            </th>
+                                            <th scope="col">Fecha real</th>
+                                            <th scope="col">
+                                                Estado <span class="fn">§</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 1</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Levantar el padrón de puntos de
+                                                desembarque
+                                            </td>
+                                            <td class="c-resp">
+                                                Ana Panta Seminario
+                                            </td>
+                                            <td class="c-date">30 jun 2025</td>
+                                            <td class="c-date">27 jun 2025</td>
+                                            <td class="c-est">
+                                                <span class="est ok"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 2</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Validar el padrón con DIREPRO
+                                                Piura
+                                            </td>
+                                            <td class="c-resp">
+                                                Ana Panta Seminario
+                                            </td>
+                                            <td class="c-date">31 jul 2025</td>
+                                            <td class="c-date">
+                                                <span class="muted"
+                                                    >sin dato</span
+                                                >
+                                            </td>
+                                            <td class="c-est">
+                                                <span class="est no"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >No Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 3</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Publicar el padrón actualizado
+                                            </td>
+                                            <td class="c-resp">
+                                                Ana Panta Seminario
+                                            </td>
+                                            <td class="c-date">31 ago 2025</td>
+                                            <td class="c-date">
+                                                <span class="muted"
+                                                    >sin dato</span
+                                                >
+                                            </td>
+                                            <td class="c-est">
+                                                <span class="est no"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >No Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                        <article class="action">
+                            <div class="action-top">
+                                <span class="action-num" aria-hidden="true"
+                                    >4</span
+                                >
+                                <h3 class="action-title">
+                                    Difundir el calendario de vedas y permisos
+                                    vigentes
+                                </h3>
+                            </div>
+                            <dl class="action-meta">
+                                <div>
+                                    <dt>Área responsable</dt>
+                                    <dd>DGSFS-PA</dd>
+                                </div>
+                                <div>
+                                    <dt>Punto focal</dt>
+                                    <dd>
+                                        Jorge Redhead Villalobos
+                                        <span class="muted">≈</span>
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>
+                                        Medio de verificación
+                                        <span class="fn">‡</span>
+                                    </dt>
+                                    <dd>
+                                        <span class="marker"
+                                            >Acción 4: Adjuntar</span
+                                        >
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>Documentos</dt>
+                                    <dd>
+                                        <button
+                                            class="linkbtn"
+                                            type="button"
+                                            aria-label="Adjuntar documento de la acción 4"
+                                        >
+                                            Adjuntar
+                                        </button>
+                                    </dd>
+                                </div>
+                            </dl>
+                            <div class="table-wrap">
+                                <table class="hitos">
+                                    <caption class="sr-only">
+                                        Acción 4: hitos
+                                    </caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Hito</th>
+                                            <th scope="col">Descripción</th>
+                                            <th scope="col">
+                                                Responsable del hito
+                                                <span class="fn">†</span>
+                                            </th>
+                                            <th scope="col">
+                                                Fecha planificada
+                                            </th>
+                                            <th scope="col">Fecha real</th>
+                                            <th scope="col">
+                                                Estado <span class="fn">§</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 1</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Elaborar la pieza de difusión
+                                            </td>
+                                            <td class="c-resp">
+                                                Jorge Redhead Villalobos
+                                            </td>
+                                            <td class="c-date">15 sep 2025</td>
+                                            <td class="c-date">14 sep 2025</td>
+                                            <td class="c-est">
+                                                <span class="est ok"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 2</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Difundir en los puntos de
+                                                desembarque
+                                            </td>
+                                            <td class="c-resp">
+                                                Jorge Redhead Villalobos
+                                            </td>
+                                            <td class="c-date">31 oct 2025</td>
+                                            <td class="c-date">
+                                                <span class="muted"
+                                                    >sin dato</span
+                                                >
+                                            </td>
+                                            <td class="c-est">
+                                                <span class="est no"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >No Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                        <article class="action">
+                            <div class="action-top">
+                                <span class="action-num" aria-hidden="true"
+                                    >5</span
+                                >
+                                <h3 class="action-title">
+                                    Instalar un canal de diálogo mensual con el
+                                    sector
+                                </h3>
+                            </div>
+                            <dl class="action-meta">
+                                <div>
+                                    <dt>Área responsable</dt>
+                                    <dd>DGPARP</dd>
+                                </div>
+                                <div>
+                                    <dt>Punto focal</dt>
+                                    <dd>
+                                        María Eche Querevalú
+                                        <span class="muted">≈</span>
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>
+                                        Medio de verificación
+                                        <span class="fn">‡</span>
+                                    </dt>
+                                    <dd>
+                                        <span class="marker"
+                                            >Acción 5: Adjuntar</span
+                                        >
+                                    </dd>
+                                </div>
+                                <div>
+                                    <dt>Documentos</dt>
+                                    <dd>
+                                        <button
+                                            class="linkbtn"
+                                            type="button"
+                                            aria-label="Adjuntar documento de la acción 5"
+                                        >
+                                            Adjuntar
+                                        </button>
+                                    </dd>
+                                </div>
+                            </dl>
+                            <div class="table-wrap">
+                                <table class="hitos">
+                                    <caption class="sr-only">
+                                        Acción 5: hitos
+                                    </caption>
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Hito</th>
+                                            <th scope="col">Descripción</th>
+                                            <th scope="col">
+                                                Responsable del hito
+                                                <span class="fn">†</span>
+                                            </th>
+                                            <th scope="col">
+                                                Fecha planificada
+                                            </th>
+                                            <th scope="col">Fecha real</th>
+                                            <th scope="col">
+                                                Estado <span class="fn">§</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 1</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Realizar la primera reunión de
+                                                diálogo
+                                            </td>
+                                            <td class="c-resp">
+                                                María Eche Querevalú
+                                            </td>
+                                            <td class="c-date">10 oct 2025</td>
+                                            <td class="c-date">09 oct 2025</td>
+                                            <td class="c-est">
+                                                <span class="est ok"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="c-hito">
+                                                <span class="hito-code"
+                                                    >Hito 2</span
+                                                >
+                                            </td>
+                                            <td class="hito-desc">
+                                                Acordar la periodicidad mensual
+                                            </td>
+                                            <td class="c-resp">
+                                                María Eche Querevalú
+                                            </td>
+                                            <td class="c-date">30 nov 2025</td>
+                                            <td class="c-date">
+                                                <span class="muted"
+                                                    >sin dato</span
+                                                >
+                                            </td>
+                                            <td class="c-est">
+                                                <span class="est no"
+                                                    ><span
+                                                        class="dot"
+                                                        aria-hidden="true"
+                                                    ></span
+                                                    >No Cumplido</span
+                                                >
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+
+                        <ul class="notes">
+                            <li>
+                                <span class="sym">≈</span> Valores de ejemplo
+                                del bloque 1: textos recortados del Excel y
+                                nombres ilustrativos.
+                            </li>
+                            <li>
+                                <span class="sym">†</span> Responsable del hito:
+                                <code>core.hitos_compromiso</code> no tiene
+                                columna de responsable. Se pinta y se declara.
+                            </li>
+                            <li>
+                                <span class="sym">‡</span>
+                                <code>Acción n: Adjuntar</code> es el literal
+                                del Excel: marcador de adjunto, no una URL. En
+                                base existe
+                                <code
+                                    >core.compromisos.evidencia_cumplimiento_uri</code
+                                >.
+                            </li>
+                            <li>
+                                <span class="sym">§</span>
+                                <code>No Cumplido</code> no existe en
+                                <code>cat_estados_hito</code> (Registrado · En
+                                ejecución · Paralizado · Cumplido ·
+                                Desestimado): se muestra el literal del Excel y
+                                se resuelve en la bandeja.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <section class="tray" aria-labelledby="tray-title">
+                    <div class="sec-head">
+                        <h2 id="tray-title">Bandeja de importación</h2>
+                        <p>Plantilla XLSX · lote de ejemplo</p>
+                    </div>
+                    <p class="tray-note">
+                        <strong>El sistema no adivina:</strong> cada fila dudosa
+                        queda en pausa hasta que el Administrador decide. No se
+                        escribe ninguna fila del lote hasta resolver.
+                    </p>
+                    <div class="stats">
+                        <div class="stat good">
+                            <b>48</b>
+                            <span>Aceptadas</span>
+                            <span class="ex"
+                                >≈ ejemplo · listas para confirmar</span
+                            >
+                        </div>
+                        <div class="stat warn">
+                            <b>6</b>
+                            <span>Advertencias</span>
+                            <span class="ex"
+                                >≈ ejemplo · requieren decisión</span
+                            >
+                        </div>
+                        <div class="stat bad">
+                            <b>2</b>
+                            <span>Rechazadas</span>
+                            <span class="ex"
+                                >≈ ejemplo · no entran al lote</span
+                            >
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="diag">
+                            <caption class="sr-only">
+                                Diagnóstico de importación con tres decisiones
+                                pendientes
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Origen</th>
+                                    <th scope="col">Caso</th>
+                                    <th scope="col">Campo</th>
+                                    <th scope="col">Valor en el archivo</th>
+                                    <th scope="col">Problema</th>
+                                    <th scope="col">Decisión requerida</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>HITOS · fila 214</td>
+                                    <td>
+                                        <span class="val"
+                                            >CS-PA-OAT-2023-99</span
+                                        >
+                                    </td>
+                                    <td>Código de Caso</td>
+                                    <td>
+                                        <span class="val"
+                                            >CS-PA-OAT-2023-99</span
+                                        >
+                                    </td>
+                                    <td>
+                                        El código no existe en
+                                        <code>core.casos</code>. No hay caso al
+                                        que conciliar.
+                                    </td>
+                                    <td>
+                                        <div class="decide">
+                                            <select
+                                                aria-label="Decisión para el código de caso inexistente"
+                                            >
+                                                <option>
+                                                    Vincular a un caso existente
+                                                </option>
+                                                <option>
+                                                    Crear caso nuevo
+                                                </option>
+                                                <option>Rechazar fila</option>
+                                            </select>
+                                            <button
+                                                class="btn tiny"
+                                                type="button"
+                                            >
+                                                Aplicar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>HITOS · fila 88</td>
+                                    <td>
+                                        <span class="val"
+                                            >CS-PA-OAT-2024-02</span
+                                        >
+                                    </td>
+                                    <td>Fecha planificada</td>
+                                    <td>
+                                        <span class="val"
+                                            >31.12.2025, 02, 03 y
+                                            05.01.2026</span
+                                        ><br />
+                                        <span class="val">2020.0</span>
+                                    </td>
+                                    <td>
+                                        Formato no ISO; varias fechas
+                                        concatenadas en una celda;
+                                        <code>2020.0</code> no es una fecha.
+                                    </td>
+                                    <td>
+                                        <div class="decide">
+                                            <select
+                                                aria-label="Decisión para las fechas inválidas"
+                                            >
+                                                <option>
+                                                    Convertir a AAAA-MM-DD
+                                                </option>
+                                                <option>Dejar sin fecha</option>
+                                                <option>Rechazar fila</option>
+                                            </select>
+                                            <button
+                                                class="btn tiny"
+                                                type="button"
+                                            >
+                                                Aplicar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>HITOS · fila 91</td>
+                                    <td>
+                                        <span class="val"
+                                            >CS-PA-OAT-2024-02</span
+                                        >
+                                    </td>
+                                    <td>Estado</td>
+                                    <td>
+                                        <span class="val">No Cumplido</span>
+                                    </td>
+                                    <td>
+                                        <code>No Cumplido</code> no existe en
+                                        <code>cat_estados_hito</code>:
+                                        Registrado · En ejecución · Paralizado ·
+                                        Cumplido · Desestimado.
+                                    </td>
+                                    <td>
+                                        <div class="decide">
+                                            <select
+                                                aria-label="Decisión para el estado no mapeable"
+                                            >
+                                                <option>
+                                                    Mapear a Desestimado
+                                                </option>
+                                                <option>
+                                                    Crear estado nuevo
+                                                </option>
+                                                <option>Rechazar fila</option>
+                                            </select>
+                                            <button
+                                                class="btn tiny"
+                                                type="button"
+                                            >
+                                                Aplicar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="sec-head" style="margin-top: 16px">
+                        <h2>Reglas de importación</h2>
+                        <p>Cuatro reglas no negociables del lote</p>
+                    </div>
+                    <div class="rules">
+                        <div class="rule">
+                            <span class="rn">01</span>
+                            <h3>Clave de conciliación</h3>
+                            <p>
+                                <code>Código de Caso</code> de la hoja
+                                <code>METADATOS CASOS</code>. No el
+                                <code>N°</code>: dos bloques comparten el 15 y
+                                la serie salta el 32: 1…31, 33 y 34. Son 34
+                                bloques con 33 números únicos.
+                            </p>
+                        </div>
+                        <div class="rule">
+                            <span class="rn">02</span>
+                            <h3>Deduplicación de hitos</h3>
+                            <p>
+                                Por <code>codigo_hito</code> + texto. Un hito
+                                repetido no se duplica ni se reescribe.
+                            </p>
+                        </div>
+                        <div class="rule">
+                            <span class="rn">03</span>
+                            <h3>Transacción todo-o-nada por lote</h3>
+                            <p>
+                                Si una fila no se resuelve, no entra ninguna del
+                                lote. Sin escrituras parciales.
+                            </p>
+                        </div>
+                        <div class="rule">
+                            <span class="rn">04</span>
+                            <h3>Informe descargable</h3>
+                            <p>
+                                XLSX o CSV con aceptadas, advertencias y
+                                rechazadas, y el motivo de cada decisión.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </body>
+</html>

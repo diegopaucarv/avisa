@@ -1,0 +1,622 @@
+<section class="view-body" aria-labelledby="titulo-gobierno-sugerencias">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-gobierno-sugerencias">Archivo de sugerencias</h1>
+      <p class="view-subtitle">
+        Matriz de <b>sugerencias y recomendaciones de intervención</b> por caso o territorio: qué se
+        sugiere, a quién, con qué prioridad, en qué estado va, quién la atiende y con qué sustento.
+        Se usa para conducir la mesa de trabajo y para alimentar los anexos.
+      </p>
+      <div class="view-badges">
+        <span class="badge">Administración</span>
+        @if (puedeEditar()) {
+        <span class="badge">Con escritura</span>
+        } @else {
+        <span class="badge">Sólo lectura</span>
+        }
+      </div>
+    </div>
+
+    <div class="view-actions">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="exportando() !== null"
+        (click)="exportar('csv')"
+      >
+        <app-icono nombre="archivo" [tamano]="14" />
+        {{ exportando() === 'csv' ? 'Generando…' : 'Exportar CSV' }}
+      </button>
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="exportando() !== null"
+        (click)="exportar('pdf')"
+      >
+        <app-icono nombre="archivo" [tamano]="14" />
+        {{ exportando() === 'pdf' ? 'Generando…' : 'Exportar PDF' }}
+      </button>
+      @if (puedeEditar()) {
+      <button type="button" class="button-primary" (click)="abrirAlta()">
+        Registrar sugerencia
+      </button>
+      }
+    </div>
+  </header>
+
+  @if (exportarError(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (aviso(); as texto) {
+  <p class="form-hint aviso-ok" role="status">{{ texto }}</p>
+  }
+
+  <!-- Regla de oro: ninguna sugerencia tiene efecto sin decisión humana. -->
+  <div class="golden" role="note">
+    <span class="golden-key">Regla de oro</span>
+    <p>
+      <b>El sistema nunca aplica una sugerencia sin decisión humana.</b><br />
+      Toda fila con efecto registra persona y fecha de la decisión. Las filas pendientes o expiradas
+      quedan inertes: no tocan el caso ni la alerta.
+    </p>
+    <div class="golden-stats">
+      <div>
+        <b>{{ resumen().autoAplicadas }} de {{ resumen().total }}</b>
+        <span>filas aplicadas en automático</span>
+      </div>
+      <div>
+        <b>{{ resumen().decididas }}</b>
+        <span>filas decididas por una persona</span>
+      </div>
+      <div>
+        <b>{{ resumen().sinDecision }}</b>
+        <span>filas sin decisión, sin efecto</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Indicadores del período -->
+  <div class="panel-kpis">
+    <div class="kpi">
+      <div class="kpi-top">
+        <span class="label">Sugerencias del período</span>
+      </div>
+      <div class="val">{{ resumen().total }}</div>
+      <div class="hint">Con los filtros vigentes</div>
+      <div class="foot">Cuenta las filas de la matriz que devuelve la consulta.</div>
+    </div>
+
+    <div class="kpi">
+      <div class="kpi-top">
+        <span class="label">Tasa de aceptación</span>
+      </div>
+      <div class="val" [class.suave]="resumen().tasaAceptacion === null">
+        {{ porcentajeTexto(resumen().tasaAceptacion) }}
+      </div>
+      <div class="hint">(aceptadas + con cambios) ÷ decididas</div>
+      <div class="foot">
+        Sin decisiones registradas no hay tasa: se declara «sin dato» en lugar de un cero.
+      </div>
+    </div>
+
+    <div class="kpi">
+      <div class="kpi-top">
+        <span class="label">Tiempo medio hasta la decisión</span>
+      </div>
+      <div class="val" [class.suave]="resumen().tiempoMedioHoras === null">
+        {{ duracionTexto(resumen().tiempoMedioHoras) }}
+      </div>
+      <div class="hint">De la propuesta a la decisión humana</div>
+      <div class="foot">Se calcula con las marcas de tiempo registradas en la base.</div>
+    </div>
+
+    <div class="kpi">
+      <div class="kpi-top">
+        <span class="label">Ahorro estimado de trabajo</span>
+      </div>
+      <div class="val suave">sin dato</div>
+      <div class="hint">No hay medición de tiempo ahorrado</div>
+      <div class="foot">
+        Es una estimación declarada, no una medición: se declara «sin dato» en lugar de inventar una
+        cifra.
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filter-bar">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por código, título o sustento"
+        [value]="filtros().q"
+        aria-label="Buscar sugerencias"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Caso
+      <input
+        class="filtro-texto"
+        type="search"
+        placeholder="Código"
+        [value]="filtros().caso"
+        aria-label="Filtrar por caso"
+        (input)="buscarCaso($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Territorio
+      <input
+        class="filtro-texto"
+        type="search"
+        placeholder="Región, provincia o distrito"
+        [value]="filtros().territorio"
+        aria-label="Filtrar por territorio"
+        (input)="buscarTerritorio($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Estado
+      <select aria-label="Filtrar por estado" (change)="filtrarEstado($event)">
+        <option value="" [selected]="!filtros().estado">Todos</option>
+        @for (estado of estadosFiltro(); track estado.codigo) {
+        <option [value]="estado.codigo" [selected]="estado.codigo === filtros().estado">
+          {{ estado.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Prioridad
+      <select aria-label="Filtrar por prioridad" (change)="filtrarPrioridad($event)">
+        <option value="" [selected]="!filtros().prioridad">Todas</option>
+        @for (prioridad of prioridadesFiltro(); track prioridad.codigo) {
+        <option [value]="prioridad.codigo" [selected]="prioridad.codigo === filtros().prioridad">
+          {{ prioridadTexto(prioridad.codigo) }}
+        </option>
+        }
+      </select>
+    </label>
+    <app-glosario termino="prioridad-atencion" alineacion="fin" />
+
+    <label class="select-filter">
+      Tipo
+      <select aria-label="Filtrar por tipo de sugerencia" (change)="filtrarTipo($event)">
+        <option value="" [selected]="!filtros().tipo">Todos</option>
+        @for (tipo of tiposFiltro(); track tipo.codigo) {
+        <option [value]="tipo.codigo" [selected]="tipo.codigo === filtros().tipo">
+          {{ tipo.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  <!-- Bandeja + detalle -->
+  <div class="workspace" [class.con-detalle]="seleccionado() !== null">
+    <section class="panel" aria-labelledby="bandeja-titulo">
+      <div class="panel-head">
+        <div class="panel-title">
+          <h2 id="bandeja-titulo">Bandeja de sugerencias</h2>
+          <span class="count">{{ resumenTabla() }} · {{ resumen().sinDecision }} sin decisión</span>
+        </div>
+        <span class="panel-note">Seleccione una fila para abrir el detalle</span>
+      </div>
+
+      @if (estadoLista() === 'inactivo' || estadoLista() === 'cargando') {
+      <div class="empty-state" role="status">Cargando la matriz de sugerencias…</div>
+      } @else if (estadoLista() === 'error') {
+      <div class="empty-state" role="alert">
+        <p>{{ errorLista()?.message }}</p>
+        <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+      </div>
+      } @else if (sugerencias().length === 0) {
+      <div class="empty-state">
+        <strong>Sin sugerencias</strong>
+        <p>No hay sugerencias para los filtros seleccionados.</p>
+      </div>
+      } @else {
+      <div class="table-wrap">
+        <table class="tabla-sugerencias">
+          <caption class="sr-solo">
+            Matriz de sugerencias de intervención. Cada estado se lee por color, símbolo y texto.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha</th>
+              <th scope="col" [appThOrden]="'tipo'" [orden]="orden">Tipo</th>
+              <th scope="col" [appThOrden]="'entidad'" [orden]="orden">Entidad afectada</th>
+              <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Qué se sugiere</th>
+              <th scope="col" [appThOrden]="'destinatario'" [orden]="orden">A quién</th>
+              <th scope="col" [appThOrden]="'prioridad'" [orden]="orden">Prioridad</th>
+              <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
+              <th scope="col" [appThOrden]="'atiende'" [orden]="orden">Atiende</th>
+              <th scope="col" [appThOrden]="'sustento'" [orden]="orden">Sustento</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (sugerencia of filasVisibles(); track sugerencia.id) {
+            <tr
+              [class.fila-abierta]="seleccionado()?.id === sugerencia.id"
+              (click)="abrir(sugerencia)"
+            >
+              <td class="celda-fecha">{{ fechaTexto(sugerencia.fecha) }}</td>
+
+              <td>{{ sugerencia.tipo }}</td>
+
+              <td>
+                <span class="entidad-codigo">{{ sugerencia.entidad }}</span>
+                <span class="entidad-detalle">{{ entidadSecundaria(sugerencia) }}</span>
+              </td>
+
+              <td class="celda-titulo">
+                <button
+                  type="button"
+                  class="table-link titulo-sugerencia"
+                  [attr.aria-label]="
+                        'Abrir la sugerencia ' + sugerencia.codigo + ': ' + sugerencia.titulo
+                      "
+                  (click)="abrir(sugerencia); $event.stopPropagation()"
+                >
+                  {{ sugerencia.titulo }}
+                </button>
+                <span class="codigo-sugerencia">{{ sugerencia.codigo }}</span>
+              </td>
+
+              <td class="celda-destinatario">
+                @if (sugerencia.destinatario) {
+                <span class="texto-dos-lineas" [attr.title]="sugerencia.destinatario">
+                  {{ sugerencia.destinatario }}
+                </span>
+                } @else {
+                <span class="sin-dato-texto">sin dato</span>
+                }
+              </td>
+
+              <td>
+                @if (sugerencia.prioridad) {
+                <span class="prioridad-pastilla">{{ prioridadTexto(sugerencia.prioridad) }}</span>
+                } @else {
+                <span class="sin-dato-texto">—</span>
+                }
+              </td>
+
+              <td>
+                <span [class]="claseChip(sugerencia.estadoCodigo)">
+                  <span class="sug-chip-simbolo" aria-hidden="true"
+                    >{{ simbolo(sugerencia.estadoCodigo) }}</span
+                  >
+                  {{ sugerencia.estado }}
+                </span>
+              </td>
+
+              <td>
+                @if (sugerencia.responsable) {
+                <span [attr.title]="sugerencia.responsable">{{ sugerencia.responsable }}</span>
+                } @else {
+                <span class="sin-dato-texto">sin asignar</span>
+                }
+              </td>
+
+              <td class="celda-sustento">
+                @if (sugerencia.sustento) {
+                <span class="texto-truncado" [attr.title]="sugerencia.sustento">
+                  {{ sugerencia.sustento }}
+                </span>
+                } @else {
+                <span class="sin-dato-texto">sin dato</span>
+                }
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="tabla-nota">
+        El estado nunca se lee sólo por color: cada chip lleva color, símbolo y texto. Ninguna
+        sugerencia modifica el caso ni la alerta sin una decisión humana registrada.
+      </p>
+
+      <div class="leyenda" role="group" aria-label="Leyenda de estados">
+        <span class="sug-chip pendiente">
+          <span class="sug-chip-simbolo" aria-hidden="true">○</span>Pendiente = espera decisión
+        </span>
+        <span class="sug-chip aceptada">
+          <span class="sug-chip-simbolo" aria-hidden="true">✓</span>Aceptada = aplicada como se
+          propuso
+        </span>
+        <span class="sug-chip cambios">
+          <span class="sug-chip-simbolo" aria-hidden="true">✎</span>Aceptada con cambios = aplicada
+          con texto revisado
+        </span>
+        <span class="sug-chip rechazada">
+          <span class="sug-chip-simbolo" aria-hidden="true">✕</span>Rechazada = no se aplica; motivo
+          obligatorio
+        </span>
+        <span class="sug-chip expirada">
+          <span class="sug-chip-simbolo" aria-hidden="true">◷</span>Expirada = venció sin decisión
+        </span>
+      </div>
+      } @if (total() > 0) {
+      <app-paginacion
+        [pagina]="filtros().pagina"
+        [tamano]="filtros().tamano"
+        [total]="total()"
+        (paginaCambia)="cambiarPagina($event)"
+        (tamanoCambia)="cambiarTamano($event)"
+      />
+      }
+    </section>
+
+    @if (seleccionado(); as s) {
+    <aside class="panel detalle" aria-labelledby="detalle-titulo">
+      <div class="panel-head detalle-head">
+        <div>
+          <span class="eyebrow">Detalle de la sugerencia</span>
+          <h2 id="detalle-titulo">{{ s.titulo }}</h2>
+          <span class="detalle-sub">{{ s.codigo }} · {{ s.entidad }}</span>
+          <span class="detalle-sub">
+            <span [class]="claseChip(s.estadoCodigo)">
+              <span class="sug-chip-simbolo" aria-hidden="true">{{ simbolo(s.estadoCodigo) }}</span>
+              {{ s.estado }}
+            </span>
+          </span>
+        </div>
+        <div class="detalle-acciones">
+          @if (puedeEditar()) {
+          <button type="button" class="button-secondary" (click)="abrirEdicion(s)">Editar</button>
+          }
+          <button
+            type="button"
+            class="button-secondary"
+            aria-label="Cerrar el detalle de la sugerencia"
+            (click)="cerrarDetalle()"
+          >
+            <app-icono nombre="cerrar" [tamano]="14" />
+          </button>
+        </div>
+      </div>
+
+      <div class="detalle-body">
+        @if (avisoDetalle(); as texto) {
+        <p class="form-hint aviso-ok" role="status">{{ texto }}</p>
+        } @if (s.anuladoEn) {
+        <p class="form-error" role="alert">
+          Sugerencia anulada el {{ fechaHoraTexto(s.anuladoEn) }}.{{ s.motivoAnulacion ? ' ' +
+          s.motivoAnulacion : '' }}
+        </p>
+        }
+
+        <dl class="meta">
+          <div>
+            <dt>Origen</dt>
+            <dd>{{ origenTexto(s.origen) }}</dd>
+          </div>
+          <div>
+            <dt>Confianza</dt>
+            <dd>
+              @if (s.confianza !== null) {
+              <span class="conf">
+                <span
+                  class="bar"
+                  role="img"
+                  [attr.aria-label]="'Confianza ' + confianzaTexto(s.confianza)"
+                >
+                  <span class="fill" [style.width]="barraConfianza(s.confianza)"></span>
+                </span>
+                <b>{{ confianzaTexto(s.confianza) }}</b>
+              </span>
+              } @else {
+              <span class="sin-dato-texto">sin dato</span>
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Propuesta</dt>
+            <dd>{{ s.creadaEn ? fechaHoraTexto(s.creadaEn) : 'sin dato' }}</dd>
+          </div>
+          <div>
+            <dt>Decidida</dt>
+            <dd>{{ s.decididoEn ? fechaHoraTexto(s.decididoEn) : 'sin decisión' }}</dd>
+          </div>
+          <div>
+            <dt>Código</dt>
+            <dd>{{ s.codigo }}</dd>
+          </div>
+          <div>
+            <dt>Entidad</dt>
+            <dd>{{ s.entidad }}</dd>
+          </div>
+          <div>
+            <dt>Tipo</dt>
+            <dd>{{ s.tipo }}</dd>
+          </div>
+          <div>
+            <dt>Vence</dt>
+            <dd>{{ s.venceEn ? fechaTexto(s.venceEn) : 'sin vencimiento' }}</dd>
+          </div>
+        </dl>
+
+        <section class="dsec" aria-labelledby="detalle-propuesta">
+          <h3 id="detalle-propuesta">Qué se sugiere</h3>
+          <p>{{ textoOSinDato(s.detalle) }}</p>
+        </section>
+
+        <section class="dsec" aria-labelledby="detalle-destino">
+          <h3 id="detalle-destino">A quién y quién atiende</h3>
+          <p>
+            <b>A quién:</b> {{ textoOSinDato(s.destinatario) }}<br />
+            <b>Unidad:</b> {{ textoOSinDato(s.unidad) }}<br />
+            <b>Atiende:</b> {{ textoOSinDato(s.responsable) }}
+          </p>
+        </section>
+
+        <section class="dsec" aria-labelledby="detalle-decision">
+          <h3 id="detalle-decision">Qué decidió la persona</h3>
+          <div class="decision-box">
+            @if (s.decididoEn) {
+            <p>
+              <b>{{ s.decididoPorNombre ?? 'Persona sin identificar' }}</b> · {{
+              fechaHoraTexto(s.decididoEn) }}
+            </p>
+            <p>{{ textoOSinDato(s.decisionNota) }}</p>
+            } @else {
+            <p>
+              <b>Sin decisión registrada.</b> La sugerencia está inerte: no modifica el caso ni la
+              alerta.
+            </p>
+            @if (s.decisionNota) {
+            <p>{{ s.decisionNota }}</p>
+            } }
+          </div>
+        </section>
+
+        @if (s.motivoRechazo) {
+        <section class="dsec" aria-labelledby="detalle-rechazo">
+          <h3 id="detalle-rechazo">Motivo del rechazo</h3>
+          <p>{{ s.motivoRechazo }}</p>
+        </section>
+        }
+
+        <section class="dsec" aria-labelledby="detalle-sustento">
+          <h3 id="detalle-sustento">Sustento</h3>
+          <p>{{ textoOSinDato(s.sustento) }}</p>
+          @if (s.sustentoUri; as uri) {
+          <p class="src-line">
+            <a class="link-button" [href]="uri" target="_blank" rel="noopener noreferrer">
+              Abrir el sustento
+            </a>
+          </p>
+          }
+        </section>
+
+        @if (puedeEditar() && !s.anuladoEn) {
+        <section class="dsec" aria-labelledby="detalle-cambiar-estado">
+          <h3 id="detalle-cambiar-estado">Cambiar estado</h3>
+          <form class="sug-form" (submit)="$event.preventDefault(); cambiarEstado()">
+            <select
+              class="form-select"
+              aria-label="Nuevo estado"
+              (change)="alCambiarEstado($event)"
+            >
+              @for (estado of estadosFiltro(); track estado.codigo) {
+              <option [value]="estado.codigo" [selected]="estado.codigo === estadoNuevo()">
+                {{ estado.etiqueta }}
+              </option>
+              }
+            </select>
+
+            @if (estadoNuevo() === 'rechazada') {
+            <textarea
+              class="form-textarea"
+              rows="2"
+              placeholder="Motivo del rechazo (obligatorio)"
+              [value]="motivoRechazoEstado()"
+              (input)="alMotivoEstado($event)"
+            ></textarea>
+            }
+
+            <textarea
+              class="form-textarea"
+              rows="2"
+              placeholder="Nota de la decisión (opcional)"
+              [value]="notaDecision()"
+              (input)="alNotaDecision($event)"
+            ></textarea>
+
+            @if (errorEstado(); as mensaje) {
+            <p class="form-error" role="alert">{{ mensaje }}</p>
+            }
+
+            <button type="submit" class="button-primary" [disabled]="guardandoEstado()">
+              {{ guardandoEstado() ? 'Guardando…' : 'Registrar decisión' }}
+            </button>
+          </form>
+        </section>
+
+        <section class="dsec" aria-labelledby="detalle-asignacion">
+          <h3 id="detalle-asignacion">Asignación</h3>
+          <form class="sug-form" (submit)="$event.preventDefault(); asignar()">
+            <select
+              class="form-select"
+              aria-label="Unidad responsable"
+              (change)="alUnidadAsignada($event)"
+            >
+              <option value="" [selected]="!unidadAsignada()">Sin unidad</option>
+              @for (unidad of unidadesAsignacion(); track unidad.siglas) {
+              <option [value]="unidad.siglas" [selected]="unidad.siglas === unidadAsignada()">
+                {{ unidad.siglas }}{{ unidad.nombre ? ' · ' + unidad.nombre : '' }}
+              </option>
+              }
+            </select>
+
+            <select
+              class="form-select"
+              aria-label="Responsable del sistema"
+              (change)="alResponsableAsignado($event)"
+            >
+              <option value="" [selected]="!responsableAsignado()">Sin asignar</option>
+              @for (responsable of responsablesAsignacion(); track responsable.id) {
+              <option
+                [value]="responsable.id"
+                [selected]="responsable.id === responsableAsignado()"
+              >
+                {{ responsable.nombre }}{{ responsable.cargo ? ' · ' + responsable.cargo : '' }}
+              </option>
+              }
+            </select>
+
+            <input
+              class="form-input"
+              type="text"
+              placeholder="O declare un nombre o cargo"
+              [value]="responsableTextoAsignado()"
+              aria-label="Responsable declarado sin usuario del sistema"
+              (input)="alResponsableTexto($event)"
+            />
+
+            @if (errorAsignacion(); as mensaje) {
+            <p class="form-error" role="alert">{{ mensaje }}</p>
+            }
+
+            <button type="submit" class="button-primary" [disabled]="guardandoAsignacion()">
+              {{ guardandoAsignacion() ? 'Guardando…' : 'Guardar asignación' }}
+            </button>
+          </form>
+        </section>
+        }
+
+        <section class="dsec" aria-labelledby="detalle-traza">
+          <h3 id="detalle-traza">Traza</h3>
+          <p>
+            Registrada el {{ s.creadaEn ? fechaHoraTexto(s.creadaEn) : 'sin dato' }} · Origen {{
+            origenTexto(s.origen) }}.
+          </p>
+          <p class="src-line">
+            Ninguna sugerencia se aplica sola: el estado decidido y la persona que decide quedan
+            registrados aquí y en la auditoría de la base.
+          </p>
+        </section>
+      </div>
+    </aside>
+    }
+  </div>
+</section>
+
+@if (formAbierto()) {
+<app-sugerencia-form
+  [sugerencia]="formSugerencia()"
+  [opciones]="opciones()"
+  [regiones]="regiones()"
+  (cerrado)="cerrarForm()"
+  (guardado)="alGuardar()"
+/>
+}

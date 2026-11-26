@@ -1,0 +1,60 @@
+<div class="modal-scrim">
+  <section
+    #dialogo
+    class="modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="whatsapp-titulo"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="modal-head">
+      <div>
+        <h2 id="whatsapp-titulo">Enviar alerta por mensajería instantánea</h2>
+        <p class="modal-codigo">{{ codigo() || 'Alerta sin código' }}</p>
+        <p class="modal-contexto">
+          <span>{{ titulo() }}</span>
+          <span>{{ sitio() }}</span>
+          <span>Riesgo {{ etiquetaRiesgo() }}</span>
+        </p>
+      </div>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la ventana de mensajería instantánea"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="modal-body">
+      <div class="modal-cabecera-cuerpo">
+        <p class="modal-titulo">Cuerpo del mensaje (sintaxis de WhatsApp)</p>
+        <span class="contador">{{ caracteres() }} caracteres</span>
+      </div>
+
+      <textarea
+        class="mensaje"
+        rows="16"
+        spellcheck="false"
+        readonly
+        [value]="texto()"
+        aria-label="Mensaje de la alerta para mensajería instantánea"
+      ></textarea>
+    </div>
+
+    <footer class="modal-foot">
+      <button
+        type="button"
+        class="button-primary"
+        [title]="errorCopia() ?? 'Copiar el mensaje al portapapeles'"
+        (click)="copiar()"
+      >
+        <app-icono nombre="copiar" [tamano]="14" />
+        {{ copiado() ? 'Copiado ✓' : 'Copiar mensaje' }}
+      </button>
+      <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+    </footer>
+  </section>
+</div>

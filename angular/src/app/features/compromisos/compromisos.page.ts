@@ -1,8 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import {   ChangeDetectionStrategy,
+import {
+  ChangeDetectionStrategy,
   Component,
   computed,
-  effect, inject, signal } from '@angular/core';
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
@@ -17,7 +21,7 @@ import {
   urlConParametros,
   type Coleccion,
 } from '../../core/http/coleccion';
-import { consulta } from '../../core/http/consulta';
+import { consulta, type Consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import {
@@ -25,13 +29,21 @@ import {
   type ModoAnulacion,
   type ResultadoAnulacion,
 } from '../../shared/ui/anular-panel.component';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
-import { GlosarioComponent } from '../../shared/ui/glosario.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ClicFila,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import {
   ESTADOS_COMPROMISO,
-  NIVELES_GOBIERNO,
   TIPOS_COMPROMISO,
   aCompromiso,
   etiquetaNivelGobierno,
@@ -40,11 +52,14 @@ import {
   resolverVencimiento,
   situacionDe,
   type Compromiso,
+  type EstadoHito,
+  type Hito,
   type OrigenVencimiento,
   type ResolucionVencimiento,
   type Situacion,
 } from './compromiso.mapeo';
 import { CompromisoPanelComponent } from './compromiso-panel.component';
+import { MatrizEquipoComponent } from './matriz-equipo.component';
 
 type FiltrosCompromisos = {
   q: string;
@@ -54,16 +69,15 @@ type FiltrosCompromisos = {
   tipo: string;
   nivelGobierno: string;
   atiendeGenero: string;
+  /** `?vencidos=1`: sólo compromisos con vencimiento efectivo anterior a hoy. */
+  vencidos: boolean;
   ver: VerRegistros;
 };
 
-const GENERO = [
-  { valor: '', etiqueta: 'Todos' },
-  { valor: 'true', etiqueta: 'Sí atiende brecha de género' },
-  { valor: 'false', etiqueta: 'No atiende brecha de género' },
-] as const;
+/** Cifra de la franja de indicadores; cada una filtra la tabla. */
+type IndicadorCompromisos = 'todos' | 'cumplido' | 'enProceso' | 'vencidos';
 
-type ModoVista = 'tabla' | 'calendario' | 'resumen';
+type ModoVista = 'tabla' | 'calendario' | 'resumen' | 'matriz' | 'anexo14';
 
 /** Una fila del desglose: la etiqueta agrupada y cuántos compromisos suma. */
 type FilaDesglose = { etiqueta: string; total: number };
@@ -179,6 +193,16 @@ function isoHoy(): string {
   return `${anio}-${mes}-${dia}`;
 }
 
+/** Fecha local de ayer en `YYYY-MM-DD`, sin cruzar de día por UTC. */
+function isoAyer(): string {
+  const ayer = new Date();
+  ayer.setDate(ayer.getDate() - 1);
+  const anio = ayer.getFullYear();
+  const mes = String(ayer.getMonth() + 1).padStart(2, '0');
+  const dia = String(ayer.getDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
+
 /** `total` del sobre paginado sin construir las filas (consultas de indicadores). */
 function totalDe(bruto: unknown): number {
   return normalizarColeccion<unknown>(bruto).total;
@@ -188,11 +212,13 @@ function totalDe(bruto: unknown): number {
   selector: 'app-compromisos',
   imports: [
     IconoComponent,
-    GlosarioComponent,
     PaginacionComponent,
     CompromisoPanelComponent,
     AnularPanelComponent,
-    ExportarMenuComponent,
+    BarraSeleccionComponent,
+    MatrizEquipoComponent,
+    TablaComponent,
+    CeldaTablaDirectiva,
   ],
   templateUrl: './compromisos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -200,39 +226,157 @@ function totalDe(bruto: unknown): number {
     .filter-bar {
       flex-wrap: wrap;
     }
-    .aviso-ok {
-      margin: 0;
-      color: #2f6f52;
-      font-size: 11.5px;
+    /*
+     * Franja de cifras: una sola línea de indicadores pulsables, con el idioma
+     * visual de la franja de realidad del caso (celdas separadas por la línea
+     * del tema). Cada botón filtra la tabla y se marca con aria-pressed.
+     */
+    .reality-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1px;
+      margin: 0 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--line);
+      overflow: hidden;
     }
-    .fila-compromiso {
+    .reality-strip button {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
+      min-width: 0;
+      padding: 10px 12px;
+      border: 0;
+      background: var(--paper);
+      color: var(--muted);
+      font: inherit;
+      font-size: 12.5px;
+      text-align: left;
       cursor: pointer;
     }
-    .fila-compromiso:hover,
-    .fila-compromiso:focus-within {
-      background: #fafbfc;
+    .reality-strip button:hover {
+      background: var(--blue-pale);
     }
-    .data-table td:first-child {
-      min-width: 132px;
+    .reality-strip button:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: -2px;
     }
+    .reality-strip button[aria-pressed='true'] {
+      background: var(--blue-pale);
+      box-shadow: inset 0 -2px 0 var(--blue);
+    }
+    .reality-strip b {
+      color: var(--ink);
+      font-size: 18px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+    }
+    .reality-strip span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .aviso-ok {
+      margin: 0;
+      color: var(--green);
+      font-size: 13.5px;
+    }
+
+    /*
+     * app-tabla gobierna el hover y la fila abierta; aquí sólo quedan los
+     * bloques de celda, que ahora viven dentro del ng-template (el td es
+     * nowrap, así que el salto de línea se declara en el bloque interno).
+     */
     .celda-compromiso {
+      display: block;
       max-width: 320px;
       white-space: normal;
     }
+    .celda-compromiso .compromiso-codigo {
+      display: block;
+      margin: 0 0 2px;
+      font-size: 12px;
+    }
+    .compromiso-accion {
+      display: block;
+    }
+    /*
+     * Franja de hitos de una fila: un punto por hito, en orden de fecha. El
+     * color sale de las variables de tema y el tamaño del punto lo aporta la
+     * clase global status-dot; el anillo rojo marca el hito vencido y el
+     * tachado el desestimado.
+     */
+    .hitos-franja {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 3px;
+      margin-top: 4px;
+      cursor: help;
+    }
+    .hito-punto {
+      position: relative;
+      flex: none;
+    }
+    .hito-registrado {
+      color: var(--muted);
+    }
+    .hito-ejecucion {
+      color: var(--blue);
+    }
+    .hito-paralizado {
+      color: var(--amber);
+    }
+    .hito-cumplido {
+      color: var(--green);
+    }
+    .hito-desestimado {
+      color: var(--muted);
+    }
+    .hito-desestimado::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -1px;
+      right: -1px;
+      height: 1px;
+      background: currentColor;
+      transform: translateY(-50%);
+    }
+    .hito-vencido {
+      box-shadow: 0 0 0 1px var(--red);
+    }
     .celda-vencimiento {
+      display: block;
       white-space: normal;
     }
     .celda-vencimiento small {
       display: block;
       margin-top: 2px;
-      color: #8d99a6;
-      font-size: 8px;
+      color: var(--muted);
+      font-size: 12px;
     }
     .celda-vencimiento .due-state {
       margin-left: 4px;
     }
     .aviso-fecha {
-      color: #a27435 !important;
+      color: var(--amber);
+    }
+    .anexo-observaciones {
+      display: block;
+      min-width: 220px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      white-space: normal;
+    }
+
+    /* La papelera la nombra el código, no una acción: conserva su ancho menor. */
+    :host ::ng-deep .tabla-papelera app-tabla .tabla tbody td.celda-principal {
+      min-width: 132px;
+      white-space: nowrap;
     }
     .calendario-barra {
       display: flex;
@@ -247,13 +391,8 @@ function totalDe(bruto: unknown): number {
     }
     .calendario-titulo {
       margin: 0;
-      font-size: 15px;
+      font-size: 16px;
       color: #1c2a38;
-    }
-    .calendario-resumen {
-      margin: 0 0 0 auto;
-      color: #647487;
-      font-size: 10px;
     }
     .calendario-aviso {
       margin: 0 0 10px;
@@ -262,7 +401,7 @@ function totalDe(bruto: unknown): number {
       border-radius: 6px;
       background: #fff8ec;
       color: #8a5a1f;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.45;
     }
     /* Si la rejilla no cabe se desplaza en horizontal antes que apilar días. */
@@ -280,7 +419,7 @@ function totalDe(bruto: unknown): number {
       padding: 7px 6px;
       border-bottom: 1px solid #e6ecf1;
       color: #647487;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       text-align: center;
       text-transform: uppercase;
@@ -309,7 +448,7 @@ function totalDe(bruto: unknown): number {
       display: block;
       margin-bottom: 4px;
       color: #52677a;
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 600;
     }
     .calendario-pastillas {
@@ -327,7 +466,7 @@ function totalDe(bruto: unknown): number {
       border: 0;
       border-left: 3px solid transparent;
       border-radius: 4px;
-      font-size: 8.5px;
+      font-size: 12px;
       line-height: 1.3;
       text-align: left;
       cursor: pointer;
@@ -356,7 +495,7 @@ function totalDe(bruto: unknown): number {
     }
     .calendario-pastilla-plazo {
       flex: none;
-      font-size: 8px;
+      font-size: 12px;
       font-weight: 700;
     }
     .calendario-mas {
@@ -364,7 +503,7 @@ function totalDe(bruto: unknown): number {
       border: 0;
       background: transparent;
       color: #1d4b86;
-      font-size: 8px;
+      font-size: 12px;
       font-weight: 600;
       text-align: left;
       cursor: pointer;
@@ -390,7 +529,7 @@ function totalDe(bruto: unknown): number {
     .desglose-card h3 {
       margin: 0 0 9px;
       color: var(--muted);
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -408,7 +547,7 @@ function totalDe(bruto: unknown): number {
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
       gap: 3px 10px;
-      font-size: 10px;
+      font-size: 12.5px;
     }
     .desglose-etiqueta {
       overflow: hidden;
@@ -436,13 +575,13 @@ function totalDe(bruto: unknown): number {
     .desglose-cuenta small {
       margin-left: 3px;
       color: var(--muted);
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 600;
     }
     .desglose-nota {
       margin: 0;
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.5;
     }
   `,
@@ -462,8 +601,6 @@ export class CompromisosPage {
 
   readonly estados = ESTADOS_COMPROMISO as readonly string[];
   readonly tipos = TIPOS_COMPROMISO as readonly string[];
-  readonly niveles = NIVELES_GOBIERNO as readonly string[];
-  readonly generos = GENERO;
 
   readonly seleccionado = signal<Compromiso | null>(null);
 
@@ -475,6 +612,97 @@ export class CompromisosPage {
 
   /** El alta se ofrece a quien tiene permiso de escritura. */
   readonly puedeRegistrar = this.capacidades.puedeEditar;
+
+  /** Selección de la tabla (página visible) para exportar o anular en lote. */
+  readonly seleccion = new SeleccionTabla();
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<Compromiso>();
+
+  private readonly accesoresCompromiso: Record<string, (compromiso: Compromiso) => unknown> = {
+    codigo: (compromiso) => compromiso.codigo,
+    compromiso: (compromiso) => compromiso.accion,
+    caso: (compromiso) => compromiso.casoCodigo,
+    unidad: (compromiso) => compromiso.unidad,
+    estado: (compromiso) => compromiso.estado,
+    vencimiento: (compromiso) => compromiso.fechaVencimiento,
+    anulado: (compromiso) => compromiso.anuladoEn,
+  };
+
+  readonly filasVisibles = computed(() =>
+    this.orden.ordenar(this.compromisos(), this.accesoresCompromiso),
+  );
+
+  /** Ids marcados, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() => this.seleccion.lista());
+
+  /** Columnas de la matriz del Anexo 14, en el orden del mockup. */
+  readonly columnasAnexo14: readonly ColumnaTabla[] = [
+    { clave: 'compromiso', titulo: 'Compromiso', ordenable: true },
+    { clave: 'unidad', titulo: 'Responsable', ordenable: true },
+    {
+      clave: 'fechaInicio',
+      titulo: 'Fecha de inicio',
+      formato: (valor) => this.fechaTexto(valor as string | null),
+    },
+    { clave: 'estado', titulo: 'Estado', ordenable: true },
+    {
+      clave: 'avance',
+      titulo: 'Avance',
+      acceso: (fila) => this.avanceTexto(fila as Compromiso),
+    },
+    { clave: 'observaciones', titulo: 'Observaciones' },
+  ];
+
+  /** Columnas de la papelera: mismo orden que el listado de anulados. */
+  readonly columnasPapelera: readonly ColumnaTabla[] = [
+    { clave: 'codigo', titulo: 'Código', ordenable: true },
+    { clave: 'compromiso', titulo: 'Compromiso', ordenable: true },
+    { clave: 'caso', titulo: 'Caso', ordenable: true },
+    {
+      clave: 'anulado',
+      titulo: 'Fecha de anulación',
+      ordenable: true,
+      acceso: (fila) => (fila as Compromiso).anuladoEn,
+      formato: (valor) => this.fechaHoraTexto(valor as string | null),
+    },
+    { clave: 'accion', titulo: 'Acción' },
+  ];
+
+  /** Columnas del listado activo. */
+  readonly columnasListado: readonly ColumnaTabla[] = [
+    { clave: 'compromiso', titulo: 'Compromiso', ordenable: true },
+    { clave: 'caso', titulo: 'Caso', ordenable: true },
+    { clave: 'unidad', titulo: 'Unidad responsable', ordenable: true },
+    { clave: 'estado', titulo: 'Estado', ordenable: true },
+    { clave: 'vencimiento', titulo: 'Vencimiento', ordenable: true },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página sigue ordenando con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  alCambiarSeleccion(ids: readonly string[]): void {
+    const marcadas = new Set(ids);
+    for (const id of this.seleccion.lista()) {
+      if (!marcadas.has(id)) this.seleccion.alternar(id);
+    }
+    for (const id of ids) {
+      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+    }
+  }
+
+  alClicFila(evento: ClicFila): void {
+    this.abrir(evento.fila as Compromiso);
+  }
 
   /** Compromiso que se está anulando en el panel compartido. */
   readonly compromisoAnulacion = signal<Compromiso | null>(null);
@@ -510,6 +738,7 @@ export class CompromisosPage {
         tipo: params.get('tipo') ?? '',
         nivelGobierno: params.get('nivelGobierno') ?? '',
         atiendeGenero: params.get('atiendeGenero') ?? '',
+        vencidos: params.get('vencidos') === '1',
         ver: params.get('ver') === 'anulados' ? 'anulados' : 'activos',
       })),
     ),
@@ -522,6 +751,7 @@ export class CompromisosPage {
         tipo: '',
         nivelGobierno: '',
         atiendeGenero: '',
+        vencidos: false,
         ver: 'activos',
       } satisfies FiltrosCompromisos,
     },
@@ -563,6 +793,12 @@ export class CompromisosPage {
   /** El desglose tampoco: la papelera se lista como tabla de restauración. */
   readonly vistaResumen = computed(() => !this.verPapelera() && this.modo() === 'resumen');
 
+  /** La matriz del equipo (Anexo 15 × Anexo 14, formato A..W) tampoco lista la papelera. */
+  readonly vistaMatriz = computed(() => !this.verPapelera() && this.modo() === 'matriz');
+
+  /** La matriz del Anexo 14 lista los compromisos con sus columnas de seguimiento. */
+  readonly vistaAnexo14 = computed(() => !this.verPapelera() && this.modo() === 'anexo14');
+
   /**
    * Rejilla del mes visible, de lunes a domingo. Incluye los días de los meses
    * vecinos que completan la primera y la última semana, para que el rango
@@ -588,6 +824,9 @@ export class CompromisosPage {
         tipo: filtros.tipo,
         nivelGobierno: filtros.nivelGobierno,
         atiendeGenero: filtros.atiendeGenero,
+        // «Vencidos» es el mismo corte que usa el semáforo de la fila:
+        // vencimiento efectivo anterior a hoy (la API compara <= hasta).
+        vencimiento_hasta: filtros.vencidos ? isoAyer() : '',
       });
     },
     esquema: (bruto) => {
@@ -621,10 +860,10 @@ export class CompromisosPage {
 
   /**
    * Indicadores de la pantalla (item 112): totales del servidor, no de la página
-   * visible. Cada tarjeta repite el recorte de filtros con un `estado` adicional
-   * y lee `total` con `pageSize=1`. Se ocultan en la papelera.
+   * visible. Cada cifra repite el recorte de filtros con un `estado` adicional (o
+   * el corte de vencidos) y lee `total` con `pageSize=1`. Se ocultan en la papelera.
    */
-  private contar(extra: Record<string, string>) {
+  private contar(extra: Record<string, string | undefined>) {
     return consulta<number>({
       fuente: () => {
         const filtros = this.parametros();
@@ -636,6 +875,7 @@ export class CompromisosPage {
           tipo: filtros.tipo,
           nivelGobierno: filtros.nivelGobierno,
           atiendeGenero: filtros.atiendeGenero,
+          vencimiento_hasta: filtros.vencidos ? isoAyer() : '',
           ...extra,
         });
       },
@@ -643,13 +883,59 @@ export class CompromisosPage {
     });
   }
 
-  private readonly cumplidosRec = this.contar({ estado: 'Cumplido' });
-  private readonly enProcesoRec = this.contar({ estado: 'En proceso' });
-  private readonly porIniciarRec = this.contar({ estado: 'Por iniciar' });
+  /*
+   * Cuatro cifras, cada una independiente de la dimensión que representa:
+   * «compromisos» ignora estado y vencidos; «cumplidos» y «en proceso» fijan su
+   * estado; «vencidos» aplica el mismo corte de vencimiento efectivo que el
+   * semáforo de la tabla. «Sin hitos» y «sin validar» no se muestran porque la
+   * API no ofrece ni filtro ni agregado para ellos.
+   */
+  private readonly todosRec = this.contar({ estado: undefined, vencimiento_hasta: undefined });
+  private readonly cumplidosRec = this.contar({
+    estado: 'Cumplido',
+    vencimiento_hasta: undefined,
+  });
+  private readonly enProcesoRec = this.contar({
+    estado: 'En proceso',
+    vencimiento_hasta: undefined,
+  });
+  private readonly vencidosRec = this.contar({ estado: undefined, vencimiento_hasta: isoAyer() });
 
-  readonly cumplidos = computed(() => this.cumplidosRec.valor() ?? null);
-  readonly enProceso = computed(() => this.enProcesoRec.valor() ?? null);
-  readonly porIniciar = computed(() => this.porIniciarRec.valor() ?? null);
+  /**
+   * Texto de una cifra: «…» mientras la consulta no resuelve y «—» sólo si
+   * falló. Antes cualquier valor ausente (incluida la carga) se pintaba «—»,
+   * que se leía como un cero desconocido.
+   */
+  private textoCifra(recurso: Consulta<number>): string {
+    if (recurso.estado() === 'error') return '—';
+    const valor = recurso.valor();
+    return valor === undefined ? '…' : String(valor);
+  }
+
+  readonly cifraCompromisos = computed(() => this.textoCifra(this.todosRec));
+  readonly cifraCumplidos = computed(() => this.textoCifra(this.cumplidosRec));
+  readonly cifraEnProceso = computed(() => this.textoCifra(this.enProcesoRec));
+  readonly cifraVencidos = computed(() => this.textoCifra(this.vencidosRec));
+
+  /** Cifra que corresponde al filtro vigente; se marca con `aria-pressed`. */
+  readonly indicadorActivo = computed<IndicadorCompromisos>(() => {
+    const { estado, vencidos } = this.parametros();
+    if (vencidos) return 'vencidos';
+    if (estado === 'Cumplido') return 'cumplido';
+    if (estado === 'En proceso') return 'enProceso';
+    return 'todos';
+  });
+
+  /** Cada cifra filtra la tabla: fija su dimensión y reinicia la paginación. */
+  filtrarIndicador(indicador: IndicadorCompromisos): void {
+    const cambios: Partial<FiltrosCompromisos> = { pagina: 1, estado: '', vencidos: false };
+    if (indicador === 'cumplido') cambios.estado = 'Cumplido';
+    if (indicador === 'enProceso') cambios.estado = 'En proceso';
+    if (indicador === 'vencidos') cambios.vencidos = true;
+    // Las cifras describen la tabla; si se pulsa desde otra vista, se vuelve a ella.
+    this.modo.set('tabla');
+    void this.actualizar(cambios);
+  }
 
   /**
    * El calendario no pagina de 25 en 25: pide el rango completo de la rejilla
@@ -836,19 +1122,12 @@ export class CompromisosPage {
   }
 
   filtrarEstado(evento: Event): void {
-    void this.actualizar({ estado: this.valorDe(evento), pagina: 1 });
+    // Elegir un estado a mano descarta el corte de «vencidos» de la franja.
+    void this.actualizar({ estado: this.valorDe(evento), vencidos: false, pagina: 1 });
   }
 
   filtrarTipo(evento: Event): void {
     void this.actualizar({ tipo: this.valorDe(evento), pagina: 1 });
-  }
-
-  filtrarNivel(evento: Event): void {
-    void this.actualizar({ nivelGobierno: this.valorDe(evento), pagina: 1 });
-  }
-
-  filtrarGenero(evento: Event): void {
-    void this.actualizar({ atiendeGenero: this.valorDe(evento), pagina: 1 });
   }
 
   cambiarPagina(pagina: number): void {
@@ -861,6 +1140,10 @@ export class CompromisosPage {
 
   cambiarModo(modo: ModoVista): void {
     this.modo.set(modo);
+    // «Vencidos» sólo filtra el listado; en calendario, resumen o matriz no aplica.
+    if (modo !== 'tabla' && modo !== 'anexo14' && this.parametros().vencidos) {
+      void this.actualizar({ vencidos: false });
+    }
   }
 
   /** Cambia entre activos y papelera; reinicia a la primera página. */
@@ -868,7 +1151,8 @@ export class CompromisosPage {
     this.cerrarPanel();
     this.cerrarAlta();
     this.cerrarAnulacion();
-    void this.actualizar({ ver, pagina: 1 });
+    // La papelera oculta la franja: no puede quedar un filtro de vencidos invisible.
+    void this.actualizar({ ver, vencidos: false, pagina: 1 });
   }
 
   mesAnterior(): void {
@@ -919,6 +1203,14 @@ export class CompromisosPage {
 
   recargar(): void {
     this.recurso.recargar();
+  }
+
+  alAnularLote(cantidad: number): void {
+    this.seleccion.limpiar();
+    this.avisoAnulacion.set(
+      cantidad === 1 ? '1 registro anulado.' : `${cantidad} registros anulados.`,
+    );
+    this.alActualizar();
   }
 
   alFallarExportacion(mensaje: string): void {
@@ -1079,23 +1371,89 @@ export class CompromisosPage {
     return resolverVencimiento(compromiso);
   }
 
+  /** Semáforo de la fila: vencido, por vencer, en plazo o sin fecha. */
+  situacion(compromiso: Compromiso): Situacion {
+    return situacionDe(compromiso);
+  }
+
+  /**
+   * Hitos de la franja, en orden de fecha. Los que no tienen fecha tipada (por
+   * ejemplo «Julio 2026») van al final, ordenados por código.
+   */
+  hitosOrdenados(compromiso: Compromiso): Hito[] {
+    return [...compromiso.hitos].sort((izquierda, derecha) => {
+      const fechaIzquierda = izquierda.fecha ?? '';
+      const fechaDerecha = derecha.fecha ?? '';
+      if (fechaIzquierda && fechaDerecha && fechaIzquierda !== fechaDerecha) {
+        return fechaIzquierda < fechaDerecha ? -1 : 1;
+      }
+      if (fechaIzquierda && !fechaDerecha) return -1;
+      if (!fechaIzquierda && fechaDerecha) return 1;
+      return (izquierda.codigo ?? '').localeCompare(derecha.codigo ?? '', 'es');
+    });
+  }
+
+  /** Vencido es fecha planificada pasada en un hito que todavía no es terminal. */
+  hitoVencido(hito: Hito): boolean {
+    if (!hito.fecha || hito.terminal) return false;
+    return hito.fecha.slice(0, 10) < isoHoy();
+  }
+
+  /** Clases del punto: base de `status-dot`, color por estado y anillo si venció. */
+  clasesHito(hito: Hito): string {
+    const clases = ['hito-punto', 'status-dot', this.claseEstadoHito(hito.estado)];
+    if (this.hitoVencido(hito)) clases.push('hito-vencido');
+    return clases.join(' ');
+  }
+
+  /** Texto accesible de la franja: estado y fecha de cada hito, en orden. */
+  resumenHitos(compromiso: Compromiso): string {
+    const hitos = this.hitosOrdenados(compromiso);
+    const partes = hitos.map((hito) => {
+      const fecha = hito.fecha ? this.fechaTexto(hito.fecha) : hito.fechaTexto || 'sin fecha';
+      return `${hito.estado} (${fecha})${this.hitoVencido(hito) ? ', vencido' : ''}`;
+    });
+    return `Hitos: ${partes.join('; ')}`;
+  }
+
+  private claseEstadoHito(estado: EstadoHito): string {
+    if (estado === 'En ejecución') return 'hito-ejecucion';
+    if (estado === 'Paralizado') return 'hito-paralizado';
+    if (estado === 'Cumplido') return 'hito-cumplido';
+    if (estado === 'Desestimado') return 'hito-desestimado';
+    return 'hito-registrado';
+  }
+
+  /**
+   * Avance del Anexo 14: hitos cumplidos sobre hitos registrados del
+   * compromiso. Sin hitos no se estima nada: se declara «Sin hitos».
+   */
+  avanceTexto(compromiso: Compromiso): string {
+    const total = compromiso.hitos.length;
+    if (total === 0) return 'Sin hitos';
+    const cumplidos = compromiso.hitos.filter((hito) => hito.estado === 'Cumplido').length;
+    return `${cumplidos}/${total} hitos cumplidos`;
+  }
+
+  /**
+   * La matriz del Anexo 14 no tiene columna de observaciones y AVISA no guarda
+   * texto libre por compromiso: se muestra sólo lo declarado, sin inventar.
+   */
+  observacionesTexto(compromiso: Compromiso): string {
+    const partes = [`Vencimiento: ${situacionDe(compromiso).etiqueta}`];
+    if (compromiso.tematica) partes.push(`Temática: ${compromiso.tematica}`);
+    if (compromiso.alcance) partes.push(`Alcance: ${compromiso.alcance}`);
+    return partes.join(' · ');
+  }
+
   origenTexto(origen: OrigenVencimiento): string {
     if (origen === 'manual') return 'Fecha manual';
     if (origen === 'hito') return 'Derivada del próximo hito';
     return 'Sin fecha';
   }
 
-  situacion(compromiso: Compromiso): Situacion {
-    return situacionDe(compromiso);
-  }
-
   fechaTexto(valor: string | null | undefined): string {
     return formatearFecha(valor);
-  }
-
-  /** «Regional» se muestra como GORE; a la API sigue viajando el valor del catálogo. */
-  nivelTexto(valor: string | null | undefined): string {
-    return etiquetaNivelGobierno(valor ?? null);
   }
 
   fechaHoraTexto(valor: string | null | undefined): string {
@@ -1119,6 +1477,7 @@ export class CompromisosPage {
         tipo: siguiente.tipo || null,
         nivelGobierno: siguiente.nivelGobierno || null,
         atiendeGenero: siguiente.atiendeGenero || null,
+        vencidos: siguiente.vencidos ? '1' : null,
         ver: siguiente.ver === 'anulados' ? 'anulados' : null,
       },
       queryParamsHandling: 'merge',

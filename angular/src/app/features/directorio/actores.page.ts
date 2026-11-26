@@ -5,10 +5,11 @@ import {
   ElementRef,
   computed,
   inject,
+  input,
   signal,
   viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 
@@ -21,23 +22,39 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
-import { IconoComponent } from '../../shared/ui/icono.component';
-import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { aErrorApi } from '../../core/http/errores';
+import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import {
-  TerritorioBuscadorComponent,
-  type OpcionTerritorio,
-} from '../../shared/ui/territorio-buscador.component';
+  aFoto,
+  esFotoPintable,
+  fotoPrincipal,
+  fotosPorEntidad,
+  type Foto,
+} from '../../dominio/medios';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
+import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
+import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import {
+  AnularPanelComponent,
+  type ResultadoAnulacion,
+} from '../../shared/ui/anular-panel.component';
 import { ActorPanelComponent } from './actor-panel.component';
-import { alternarActorLista, quitarActorLista } from './lista-temporal';
+import { ActorPanelAltaComponent, type NaturalezaAlta } from './actor-panel-alta.component';
+import { ActorPanelFusionComponent } from './actor-panel-fusion.component';
+import { alternarActorLista, quitarActorListaPorIndice } from './lista-temporal';
 import { crearCsvPadronAsistencia } from './padron-asistencia';
 import {
-  NATURALEZAS,
   aActorDirectorio,
   aCatalogosDirectorio,
+  SIN_DATO,
   type ActorDirectorio,
   type CatalogosDirectorio,
 } from './directorio.mapeo';
+import { HttpClient } from '@angular/common/http';
 
 type FiltrosActores = {
   q: string;
@@ -64,10 +81,11 @@ const FILTROS_INICIALES: FiltrosActores = {
  * el repositorio: `q`, `naturaleza`, `tipo` y `region`. Los filtros viven en la
  * URL con `replaceUrl` para que el historial no se llene de estados intermedios.
  *
- * La región se elige con el buscador territorial, no escribiendo el nombre: la
- * API compara `core.regiones.nombre` de forma exacta y `core.actores` tiene
- * región (355 de 1 160) pero no distrito (0 de 1 160), así que el grano honesto
- * del filtro es la región del distrito elegido.
+ * El listado de organizaciones vive en su propia entrada de la barra lateral
+ * («Organizaciones», `organizaciones.page`): esta pantalla no alterna vistas ni
+ * muestra pestañas. El parámetro `naturaleza` de la URL se mantiene por los
+ * enlaces profundos y, sin él, se usa el valor por defecto de la ruta
+ * (`/directorio/personas`) o «persona».
  *
  * Al pulsar una fila no se navega: se abre `ActorPanelComponent` con la ficha.
  * Los datos personales NO forman parte de la carga del listado; sólo el panel
@@ -79,8 +97,11 @@ const FILTROS_INICIALES: FiltrosActores = {
     IconoComponent,
     PaginacionComponent,
     ActorPanelComponent,
-    ExportarMenuComponent,
-    TerritorioBuscadorComponent,
+    ActorPanelAltaComponent,
+    ActorPanelFusionComponent,
+    AnularPanelComponent,
+    BarraSeleccionComponent,
+    ThOrdenDirective,
   ],
   templateUrl: './actores.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -103,34 +124,76 @@ const FILTROS_INICIALES: FiltrosActores = {
     .view-head {
       display: flex;
       flex-wrap: wrap;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
+    .view-actions {
+      flex-wrap: wrap;
     }
 
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
+    /* Menú «Nuevo»: alta no disponible en este entorno. */
+    .menu-nuevo {
+      position: relative;
     }
 
-    /* El buscador territorial entra en la barra como un filtro más. */
-    .territorio-filtro {
-      width: 240px;
-      min-width: 0;
+    .menu-nuevo summary {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* «Nuevo» es un <summary>: se iguala al alto del resto de botones. */
+    .menu-nuevo-toggle {
+      padding: 0 11px;
+      line-height: 1;
+      font-size: 12.5px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .menu-nuevo summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .menu-nuevo-lista {
+      position: absolute;
+      right: 0;
+      z-index: 30;
+      display: grid;
+      gap: 2px;
+      min-width: 190px;
+      margin-top: 4px;
+      padding: 6px;
+      border: 1px solid #dce5ef;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 12px 32px rgb(25 45 68 / 14%);
+    }
+
+    .menu-nuevo-lista button {
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #465a6c;
+      font: inherit;
+      text-align: left;
+    }
+
+    .menu-nuevo-lista button:disabled {
+      color: #aab4bd;
+      cursor: not-allowed;
+    }
+
+    .menu-nuevo-lista button:not(:disabled):hover {
+      background: #f5f7f8;
     }
 
     .actor-nombre {
-      display: block;
+      display: -webkit-box;
       width: 100%;
       padding: 0;
       border: 0;
@@ -138,36 +201,156 @@ const FILTROS_INICIALES: FiltrosActores = {
       color: inherit;
       font-family: inherit;
       text-align: left;
+      white-space: normal;
+      overflow: hidden;
       cursor: pointer;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+    }
+
+    /* «Apellidos y nombres» ocupa la mitad del ancho que antes: tres líneas. */
+    .col-nombre {
+      width: 210px;
+      min-width: 150px;
+      max-width: 210px;
+      white-space: normal;
     }
 
     .actor-organizacion {
-      max-width: 240px;
+      max-width: 230px;
       white-space: normal;
+    }
+
+    .actor-organizacion small {
+      display: block;
+      color: inherit;
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .col-foto {
+      width: 46px;
+    }
+
+    .tabla-foto {
+      display: block;
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #f6f8fa;
+    }
+
+    /* global.css fija white-space: nowrap en td; el contacto necesita dos líneas. */
+    .actor-contacto {
+      white-space: normal;
+    }
+
+    .contacto-linea {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .contacto-linea > span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .boton-copiar-icono {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: #526577;
+      cursor: pointer;
+    }
+
+    .boton-copiar-icono:hover {
+      color: #1f5597;
+    }
+
+    .col-acciones {
+      width: 1%;
+    }
+
+    .acciones-fila {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 4px;
+      white-space: nowrap;
+    }
+
+    .accion {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 1px solid #dce3e8;
+      border-radius: 6px;
+      background: #fff;
+      color: #526577;
+      cursor: pointer;
+    }
+
+    .accion:hover:not(:disabled) {
+      background: #f5f7f8;
+    }
+
+    .accion:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .accion.activa {
+      border-color: #1f5597;
+      color: #1f5597;
+      background: #eef3fa;
+    }
+
+    /* «sin dato» es información, no un error: tono apagado y sin icono de fallo. */
+    .sin-dato {
+      color: #97a1aa;
+      font-size: 12.5px;
+      font-style: italic;
+    }
+
+    .fila-inactiva .actor-nombre strong {
+      color: #8a98a5;
+    }
+
+    .fila-inactiva {
+      background: #fafbfc;
+    }
+
+    .actor-inactivo {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 6px;
+      border: 1px solid #e2e7ec;
+      border-radius: 999px;
+      background: #f3f5f7;
+      color: #7b8896;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      vertical-align: middle;
     }
 
     .actor-actualizando {
       margin: 0;
       color: #8d99a6;
-      font-size: 9.5px;
-    }
-
-    .lista-contador {
-      display: inline-grid;
-      min-width: 18px;
-      height: 18px;
-      margin-left: 4px;
-      place-items: center;
-      border-radius: 999px;
-      background: #eaf1fb;
-      color: #2455a2;
-      font-size: 10px;
-      font-weight: 700;
-    }
-
-    .button-lista {
-      min-height: 27px;
-      padding: 0 8px;
+      font-size: 12px;
     }
 
     .lista-temporal-panel {
@@ -190,14 +373,14 @@ const FILTROS_INICIALES: FiltrosActores = {
     .lista-temporal-cabecera h2 {
       margin: 0;
       color: #1a2b3e;
-      font: 700 14px/1.4 var(--font-display);
+      font: 700 15px/1.4 var(--font-display);
     }
 
     .lista-temporal-cabecera p,
     .lista-temporal-vacia {
       margin: 4px 0 0;
       color: #7b8896;
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -223,12 +406,12 @@ const FILTROS_INICIALES: FiltrosActores = {
 
     .lista-temporal-items strong {
       color: #465a6c;
-      font-size: 11px;
+      font-size: 13px;
     }
 
     .lista-temporal-items span {
       color: #8a98a5;
-      font-size: 10px;
+      font-size: 12.5px;
     }
 
     .lista-quitar {
@@ -238,11 +421,17 @@ const FILTROS_INICIALES: FiltrosActores = {
       border-radius: 5px;
       background: #fff;
       color: #526577;
-      font-size: 10px;
+      font-size: 12.5px;
     }
 
+    /* El diálogo nativo se centra en la ventana: margen automático y alto guiado. */
     .padron-dialogo {
+      position: fixed;
+      inset: 0;
       width: min(520px, calc(100vw - 32px));
+      height: fit-content;
+      max-height: calc(100vh - 40px);
+      margin: auto;
       padding: 0;
       border: 1px solid #dce5ef;
       border-radius: 12px;
@@ -267,12 +456,12 @@ const FILTROS_INICIALES: FiltrosActores = {
     }
 
     .padron-form h2 {
-      font: 700 17px/1.35 var(--font-display);
+      font: 700 17.5px/1.35 var(--font-display);
     }
 
     .padron-form p {
       color: #68798a;
-      font-size: 12px;
+      font-size: 14px;
       line-height: 1.5;
     }
 
@@ -280,7 +469,7 @@ const FILTROS_INICIALES: FiltrosActores = {
       display: grid;
       gap: 5px;
       color: #465a6c;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
     }
 
@@ -318,14 +507,25 @@ export class ActoresPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destruccion = inject(DestroyRef);
+  private readonly http = inject(HttpClient);
 
-  readonly naturalezas = NATURALEZAS;
+  /** Permisos de la sesión: escribir, anular y nivel de clasificación máximo. */
+  readonly capacidades = inject(CapacidadesService);
+
+  /** Texto único para un dato ausente; nunca se presenta como error. */
+  readonly sinDato = SIN_DATO;
+
+  /**
+   * Naturaleza del listado. Las pestañas se retiraron: cada listado tiene su
+   * entrada en la barra lateral y `organizaciones.page` cubre las
+   * organizaciones, así que esta pantalla es siempre el directorio de personas.
+   */
+  readonly naturalezaFija = input('persona');
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
       map((params) => ({
         q: params.get('q') ?? '',
-        naturaleza: params.get('naturaleza') ?? '',
         tipo: params.get('tipo') ?? '',
         region: params.get('region') ?? '',
         pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
@@ -338,17 +538,22 @@ export class ActoresPage {
     { initialValue: FILTROS_INICIALES },
   );
 
-  readonly filtros = computed(() => this.parametros());
+  /** `persona` siempre: la naturaleza ya no se elige ni viaja por la URL. */
+  private readonly naturalezaActiva = computed(() => this.naturalezaFija().trim() || 'persona');
 
-  /** Región activa como etiqueta del buscador territorial restaurado. */
-  readonly regionFiltroInicial = computed(() => {
-    const region = this.filtros().region;
-    return region ? { id: 0, nombre: region } : null;
-  });
+  readonly filtros = computed<FiltrosActores>(() => ({
+    ...this.parametros(),
+    naturaleza: this.naturalezaActiva(),
+  }));
+
+  readonly titulo = computed(() => 'Actores');
+  readonly sustantivo = computed(() =>
+    this.naturalezaActiva() === 'organizacion' ? 'organizaciones' : 'personas',
+  );
 
   private readonly listado = consulta<Coleccion<ActorDirectorio>>({
     fuente: () => {
-      const filtros = this.parametros();
+      const filtros = this.filtros();
       return urlConParametros(urlApi('/v1/actors'), {
         ...paramsDePagina({ pagina: filtros.pagina, tamano: filtros.tamano }),
         q: filtros.q,
@@ -365,6 +570,53 @@ export class ActoresPage {
 
   readonly actores = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
+
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<ActorDirectorio>();
+
+  private readonly accesores: Record<string, (actor: ActorDirectorio) => unknown> = {
+    nombre: (actor) => actor.nombre,
+    region: (actor) => actor.region,
+    organizacion: (actor) => actor.organizacionAncla ?? actor.cargo,
+  };
+
+  readonly filasVisibles = computed(() => this.orden.ordenar(this.actores(), this.accesores));
+
+  idsVisibles(): string[] {
+    return this.actores()
+      .map((actor) => actor.id)
+      .filter((id): id is string => !!id);
+  }
+
+  /**
+   * Fotos de la página visible en una sola petición (`entidadIds`). Si la
+   * consulta falla, la columna queda en «—» y el listado sigue funcionando.
+   */
+  private readonly fotosPagina = consulta<Map<string, Foto[]>>({
+    fuente: () => {
+      const ids = this.idsVisibles();
+      if (ids.length === 0) return null;
+      return urlConParametros(urlApi('/v1/media'), {
+        entidadTipo: 'actor',
+        entidadIds: ids.join(','),
+        pageSize: '200',
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return fotosPorEntidad(coleccion.elementos.map(aFoto).filter(esFotoPintable));
+    },
+  });
+
+  readonly fotosPorActor = computed(() => this.fotosPagina.valor() ?? new Map<string, Foto[]>());
+
+  /** Foto principal del actor para la columna de la tabla; `null` = sin foto. */
+  fotoDe(actorId: string): Foto | null {
+    return fotoPrincipal(this.fotosPorActor().get(actorId) ?? []);
+  }
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
 
@@ -381,6 +633,20 @@ export class ActoresPage {
 
   /** Actor cuya ficha está abierta en el panel lateral. */
   readonly seleccionado = signal<ActorDirectorio | null>(null);
+  /** `true` cuando la ficha debe abrirse directamente en modo edición. */
+  readonly editarAlAbrir = signal(false);
+
+  /** `null` = cerrado; la naturaleza fija el bloque inicial del alta. */
+  readonly altaNaturaleza = signal<NaturalezaAlta | null>(null);
+  /** Actor abierto que se propone fusionar con otro. */
+  readonly fusionOrigen = signal<ActorDirectorio | null>(null);
+  /** Confirmación de baja o restauración pendiente. */
+  readonly bajaAbierta = signal<{
+    actor: ActorDirectorio;
+    modo: 'anular' | 'restaurar';
+  } | null>(null);
+  readonly enviandoBaja = signal(false);
+  readonly errorBaja = signal<string | null>(null);
 
   /** Selección de trabajo en memoria, conservada al cambiar página o filtros. */
   readonly listaTemporal = signal<ActorDirectorio[]>([]);
@@ -390,6 +656,10 @@ export class ActoresPage {
   readonly padronFecha = signal(new Date().toLocaleDateString('en-CA'));
   private readonly dialogoPadron = viewChild<ElementRef<HTMLDialogElement>>('dialogoPadron');
 
+  /** Valor copiado recientemente, para confirmar la acción en la fila. */
+  readonly copiado = signal<string | null>(null);
+  private temporizadorCopiado?: ReturnType<typeof setTimeout>;
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
@@ -398,10 +668,18 @@ export class ActoresPage {
   constructor() {
     this.destruccion.onDestroy(() => {
       clearTimeout(this.temporizadorBusqueda);
+      clearTimeout(this.temporizadorCopiado);
     });
   }
 
   abrir(actor: ActorDirectorio): void {
+    this.editarAlAbrir.set(false);
+    this.seleccionado.set(actor);
+  }
+
+  abrirEdicion(actor: ActorDirectorio, evento?: Event): void {
+    evento?.stopPropagation();
+    this.editarAlAbrir.set(true);
     this.seleccionado.set(actor);
   }
 
@@ -414,12 +692,23 @@ export class ActoresPage {
     this.listaTemporal.update((actual) => alternarActorLista(actual, actor));
   }
 
-  quitarDeLista(id: string): void {
-    this.listaTemporal.update((actual) => quitarActorLista(actual, id));
+  quitarDeListaPorIndice(indice: number): void {
+    this.listaTemporal.update((actual) => quitarActorListaPorIndice(actual, indice));
   }
 
   vaciarLista(): void {
     this.listaTemporal.set([]);
+  }
+
+  /** Copia al portapapeles y confirma el valor copiado durante un instante. */
+  copiar(valor: string | null | undefined, evento?: Event): void {
+    evento?.stopPropagation();
+    if (!valor) return;
+
+    void navigator.clipboard?.writeText(valor);
+    this.copiado.set(valor);
+    clearTimeout(this.temporizadorCopiado);
+    this.temporizadorCopiado = setTimeout(() => this.copiado.set(null), 1600);
   }
 
   abrirPadron(): void {
@@ -447,7 +736,7 @@ export class ActoresPage {
     const url = URL.createObjectURL(archivo);
     const enlace = document.createElement('a');
     enlace.href = url;
-    enlace.download = 'padron-asistencia.csv';
+    enlace.download = 'lista-de-asistencia.csv';
     enlace.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     this.dialogoPadron()?.nativeElement.close();
@@ -455,6 +744,7 @@ export class ActoresPage {
 
   cerrarPanel(): void {
     this.seleccionado.set(null);
+    this.editarAlAbrir.set(false);
   }
 
   alActualizarActor(actor: ActorDirectorio): void {
@@ -465,6 +755,86 @@ export class ActoresPage {
     this.listado.recargar();
   }
 
+  /** Abre el alta con la naturaleza elegida en el menú «Nuevo». */
+  abrirAlta(naturaleza: NaturalezaAlta): void {
+    this.altaNaturaleza.set(naturaleza);
+  }
+
+  cerrarAlta(): void {
+    this.altaNaturaleza.set(null);
+  }
+
+  alCrearActor(actor: ActorDirectorio): void {
+    this.altaNaturaleza.set(null);
+    this.listado.recargar();
+    this.abrir(actor);
+  }
+
+  /** La fusión necesita un actor de origen: el que está abierto en el panel. */
+  abrirFusion(): void {
+    const origen = this.seleccionado();
+    if (!origen) return;
+    this.fusionOrigen.set(origen);
+  }
+
+  cerrarFusion(): void {
+    this.fusionOrigen.set(null);
+  }
+
+  alFusionar(): void {
+    this.fusionOrigen.set(null);
+    // El origen queda inactivo: se cierra su ficha y se refresca el listado.
+    this.cerrarPanel();
+    this.listado.recargar();
+  }
+
+  /** Abre la baja lógica —o la restauración— del actor seleccionado. */
+  abrirBajaSeleccionado(): void {
+    const actor = this.seleccionado();
+    if (actor) this.abrirBaja(actor, actor.activo ? 'anular' : 'restaurar');
+  }
+
+  abrirBaja(actor: ActorDirectorio, modo: 'anular' | 'restaurar'): void {
+    this.errorBaja.set(null);
+    this.bajaAbierta.set({ actor, modo });
+  }
+
+  cerrarBaja(): void {
+    this.bajaAbierta.set(null);
+    this.errorBaja.set(null);
+  }
+
+  /** Ejecuta `POST …/baja` o `POST …/restaurar` según lo confirmado en el panel. */
+  alConfirmarBaja(resultado: ResultadoAnulacion): void {
+    const abierta = this.bajaAbierta();
+    if (!abierta || this.enviandoBaja()) return;
+
+    const { actor } = abierta;
+    const esAnular = resultado.modo === 'anular';
+    const url = urlApi(
+      `/v1/actors/${encodeURIComponent(actor.id)}/${esAnular ? 'baja' : 'restaurar'}`,
+    );
+
+    this.enviandoBaja.set(true);
+    this.errorBaja.set(null);
+
+    const peticion = esAnular
+      ? this.http.post<unknown>(url, { motivo: resultado.motivo })
+      : this.http.post<unknown>(url, {});
+
+    peticion.pipe(takeUntilDestroyed(this.destruccion)).subscribe({
+      next: (bruto) => {
+        this.enviandoBaja.set(false);
+        this.bajaAbierta.set(null);
+        this.alActualizarActor(aActorDirectorio(bruto));
+      },
+      error: (fallo: unknown) => {
+        this.enviandoBaja.set(false);
+        this.errorBaja.set(aErrorApi(fallo).message);
+      },
+    });
+  }
+
   buscar(evento: Event): void {
     const valor = (evento.target as HTMLInputElement).value;
     clearTimeout(this.temporizadorBusqueda);
@@ -473,23 +843,9 @@ export class ActoresPage {
     }, 300);
   }
 
-  cambiarNaturaleza(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value;
-    void this.actualizar({ naturaleza: valor, pagina: 1 });
-  }
-
   cambiarTipo(evento: Event): void {
     const valor = (evento.target as HTMLSelectElement).value;
     void this.actualizar({ tipo: valor, pagina: 1 });
-  }
-
-  /**
-   * El buscador entrega un distrito (o lugar) y aquí se usa su **región**: es el
-   * único grano territorial que `core.actores` guarda hoy. Un distrito del
-   * Callao o de Lima sigue funcionando porque la región viene resuelta.
-   */
-  alElegirTerritorio(opcion: OpcionTerritorio | null): void {
-    void this.actualizar({ region: opcion?.region ?? '', pagina: 1 });
   }
 
   cambiarPagina(pagina: number): void {
@@ -528,7 +884,6 @@ export class ActoresPage {
       relativeTo: this.ruta,
       queryParams: {
         q: siguiente.q || null,
-        naturaleza: siguiente.naturaleza || null,
         tipo: siguiente.tipo || null,
         region: siguiente.region || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,

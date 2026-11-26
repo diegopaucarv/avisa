@@ -1,0 +1,162 @@
+<div class="drawer-scrim">
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="vincular-actor-titulo">
+    <header class="drawer-head">
+      <div>
+        <p class="evento-panel-codigo">{{ codigoCaso() }}</p>
+        <h2 id="vincular-actor-titulo">Vincular actor</h2>
+      </div>
+
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar el panel de vinculación"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      <form (submit)="enviar($event)">
+        @if (mensajeError(); as fallo) {
+          <p class="form-error" role="alert">{{ fallo }}</p>
+        }
+
+        @if (seleccionado(); as actor) {
+          <div class="actor-elegido">
+            <span>
+              <strong>{{ actor.nombre }}</strong>
+              @if (actor.tipo) {
+                <span class="actor-opcion-meta"> · {{ actor.tipo }}</span>
+              }
+            </span>
+            <button type="button" class="button-secondary" (click)="quitarSeleccion()">
+              Cambiar
+            </button>
+          </div>
+        } @else {
+          <label class="form-campo">
+            <span>Buscar en el Directorio</span>
+            <input
+              class="form-input"
+              type="search"
+              autocomplete="off"
+              placeholder="Nombre, abreviatura o cargo"
+              [value]="busqueda()"
+              (input)="alBuscar($event)"
+            />
+          </label>
+
+          @if (buscando()) {
+            <p class="form-hint" role="status">Buscando…</p>
+          } @else if (buscandoAlgo() && resultados().length === 0) {
+            <p class="form-hint">Sin coincidencias en el Directorio.</p>
+          }
+
+          @if (resultados().length > 0) {
+            <ul class="actor-resultados">
+              @for (opcion of resultados(); track opcion.id) {
+                <li>
+                  <button type="button" class="actor-opcion" (click)="elegir(opcion)">
+                    <span class="actor-opcion-nombre">{{ opcion.nombre }}</span>
+                    <span class="actor-opcion-meta">
+                      {{ opcion.tipo || 'Sin tipo declarado' }}
+                      @if (opcion.institucion) {
+                        · {{ opcion.institucion }}
+                      }
+                    </span>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        }
+
+        @if (seleccionado()) {
+          <label class="form-campo">
+            <span>
+              Posicionamiento
+              @if (requierePosicion()) {
+                <span aria-hidden="true">*</span>
+              }
+            </span>
+            <select class="form-input" (change)="alCambiarPosicion($event)">
+              <option value="">Sin declarar</option>
+              @for (opcion of posiciones; track opcion) {
+                <option [value]="opcion">{{ opcion }}</option>
+              }
+            </select>
+            <span class="form-hint">
+              Apoyo, Oposición, Neutral o No dialogante. No se asume un valor.
+            </span>
+          </label>
+
+          <label class="form-campo">
+            <span>
+              Nivel de influencia (1–100)
+              @if (requiereNivel()) {
+                <span aria-hidden="true">*</span>
+              }
+            </span>
+            <input
+              class="form-input"
+              type="number"
+              min="1"
+              max="100"
+              [value]="nivelInfluencia()"
+              (input)="alCambiarNivel($event)"
+            />
+          </label>
+
+          @if (vinculo()?.rolEnCaso) {
+            <label class="form-campo">
+              <span>Rol en el caso</span>
+              <input
+                class="form-input"
+                type="text"
+                maxlength="120"
+                [value]="rolEnCaso()"
+                (input)="alCambiarRol($event)"
+              />
+            </label>
+          }
+
+          @if (vinculo()?.vigencia) {
+            <label class="form-campo">
+              <span>Vigente desde</span>
+              <input
+                class="form-input"
+                type="date"
+                [value]="vigenteDesde()"
+                (input)="alCambiarVigencia($event)"
+              />
+            </label>
+          } @else {
+            <p class="form-hint">
+              El rol en el caso y la vigencia requieren la migración 50 de
+              <code>core.casos_actores</code>; hoy no se capturan.
+            </p>
+          }
+
+          <div class="evento-formulario-acciones">
+            <button type="submit" class="button-primary" [disabled]="!puedeGuardar()">
+              {{ guardando() ? 'Vinculando…' : 'Vincular actor' }}
+            </button>
+            <button
+              type="button"
+              class="button-secondary"
+              [disabled]="guardando()"
+              (click)="cerrar.emit()"
+            >
+              Cancelar
+            </button>
+          </div>
+        } @else {
+          <div class="evento-formulario-acciones">
+            <button type="button" class="button-secondary" (click)="cerrar.emit()">Cancelar</button>
+          </div>
+        }
+      </form>
+    </div>
+  </aside>
+</div>

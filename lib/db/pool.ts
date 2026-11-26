@@ -22,7 +22,7 @@ export function getPool(): Pool {
   if (!globalPool.__avisaPool) {
     globalPool.__avisaPool = new Pool({
       connectionString: resolveConnectionString(),
-      max: Number(process.env.APP_DB_POOL_MAX ?? 3),
+      max: Number(process.env.APP_DB_POOL_MAX ?? 8),
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,
       application_name: "avisa-next",

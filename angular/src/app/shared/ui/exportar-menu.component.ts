@@ -51,6 +51,10 @@ import { IconoComponent } from './icono.component';
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      min-height: 36px;
+      padding: 0 12px;
+      border-radius: 8px;
+      font-weight: 600;
     }
 
     .menu {
@@ -60,9 +64,9 @@ import { IconoComponent } from './icono.component';
       right: 0;
       min-width: 210px;
       padding: 4px;
-      border: 1px solid #dce3e8;
+      border: 1px solid var(--line);
       border-radius: 10px;
-      background: #fff;
+      background: var(--paper, #fff);
       box-shadow: 0 10px 30px rgb(26 43 62 / 14%);
     }
 
@@ -76,29 +80,29 @@ import { IconoComponent } from './icono.component';
       border: 0;
       border-radius: 7px;
       background: transparent;
-      color: #1a2b3e;
-      font: 600 11px/1.3 var(--font-body, inherit);
+      color: var(--ink);
+      font: 600 14.5px/1.3 var(--font-body, inherit);
       text-align: left;
       cursor: pointer;
     }
 
     .menu button:hover,
     .menu button:focus-visible {
-      background: #f5f7f8;
+      background: var(--canvas);
       outline: none;
     }
 
     .menu small {
-      color: #7b8896;
-      font-size: 9px;
+      color: var(--muted);
+      font-size: 14px;
       font-weight: 400;
     }
 
     .menu-titulo {
       margin: 2px 0 3px;
       padding: 0 10px;
-      color: #8b97a1;
-      font-size: 8px;
+      color: var(--muted);
+      font-size: 14px;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -107,13 +111,15 @@ import { IconoComponent } from './icono.component';
     .menu-separador {
       height: 1px;
       margin: 5px 6px;
-      background: #e8edf1;
+      background: var(--line);
     }
   `,
 })
 export class ExportarMenuComponent {
   readonly entidad = input.required<string>();
   readonly id = input<string | null>(null);
+  /** Exporta sólo estos registros; tiene prioridad sobre la vista completa. */
+  readonly ids = input<readonly string[] | null>(null);
   readonly etiqueta = input('Exportar');
   /** Filtros vigentes de la vista; se omiten al exportar la base completa. */
   readonly consulta = input<Record<string, string> | null>(null);
@@ -131,6 +137,9 @@ export class ExportarMenuComponent {
   private readonly permitidos = computed(
     () => this.formatos() ?? this.capacidades.formatosExportacion(),
   );
+
+  /** «vista» o «selección», para el encabezado y las etiquetas del menú. */
+  readonly alcance = computed(() => (this.ids()?.length ? 'selección' : 'vista'));
 
   permite(formato: FormatoExportacion): boolean {
     return this.permitidos().includes(formato);
@@ -170,9 +179,10 @@ export class ExportarMenuComponent {
       await descargarExportacion({
         entidad,
         formato,
-        // El `id` y los filtros sólo aplican a una entidad suelta, nunca al
-        // respaldo completo.
+        // El `id`, los `ids` y los filtros sólo aplican a una entidad suelta,
+        // nunca al respaldo completo.
         id: entidad === 'base' ? null : this.id(),
+        ids: entidad === 'base' ? null : this.ids(),
         consulta: entidad === 'base' ? null : this.consulta(),
       });
     } catch (error) {

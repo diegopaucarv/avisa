@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -7,6 +14,7 @@ import { urlApi } from '../../core/config/entorno';
 import { paramsDePagina, urlConParametros, type Coleccion } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { BusquedaFichaComponent } from './busqueda-ficha.component';
 import {
   GRUPOS,
   MINIMO_TERMINO,
@@ -48,14 +56,19 @@ const FILTROS_INICIALES = { q: '' };
  * verificados en `app/api/v1/`— para tener el total de cada grupo y poder
  * topear filas sin sepultar a los grupos pequeños. Aparte se pide
  * `GET /api/v1/search`, que es la única respuesta con la región heredada del
- * caso: se usa como índice para completar región y el código de las demandas.
+ * caso: se usa como índice para completar región, territorio (provincia,
+ * distrito, ubigeo) y el código de las demandas.
+ *
+ * Cambio 30: cada fila abre `<app-busqueda-ficha>`, un drawer con el territorio
+ * y el destino del registro (su ficha o su listado filtrado), sin navegar en el
+ * acto.
  *
  * El atajo `/` del shell enfoca el primer `input[type="search"]` visible
  * (`core/atajos`): este campo lo es, así que no hace falta duplicar nada.
  */
 @Component({
   selector: 'app-busqueda',
-  imports: [RouterLink, IconoComponent],
+  imports: [RouterLink, IconoComponent, BusquedaFichaComponent],
   templateUrl: './busqueda.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -80,21 +93,6 @@ const FILTROS_INICIALES = { q: '' };
       align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
-    }
-
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
     }
 
     .search-groups {
@@ -125,7 +123,7 @@ const FILTROS_INICIALES = { q: '' };
     .search-group-head h2 {
       margin: 0;
       color: #5f7690;
-      font: 700 10px/1.3 var(--font-display);
+      font: 700 12.5px/1.3 var(--font-display);
       letter-spacing: 0.6px;
       text-transform: uppercase;
     }
@@ -134,7 +132,7 @@ const FILTROS_INICIALES = { q: '' };
       margin: 0;
       padding: 0 2px;
       color: #8b97a2;
-      font-size: 9px;
+      font-size: 12px;
     }
 
     .search-group-omitidos a {
@@ -166,13 +164,19 @@ const FILTROS_INICIALES = { q: '' };
       display: flex;
       align-items: flex-start;
       gap: 11px;
+      width: 100%;
       padding: 12px 14px;
+      border: 0;
+      background: transparent;
       color: inherit;
+      font: inherit;
+      text-align: left;
       text-decoration: none;
+      cursor: pointer;
     }
 
-    a.search-result:hover,
-    a.search-result:focus-visible {
+    .search-result:hover,
+    .search-result:focus-visible {
       background: #fbfcfd;
     }
 
@@ -197,14 +201,14 @@ const FILTROS_INICIALES = { q: '' };
 
     .search-result-titulo {
       color: #33465a;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
       line-height: 1.4;
     }
 
     .search-result-subtitulo {
       color: #748391;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.45;
     }
 
@@ -214,7 +218,7 @@ const FILTROS_INICIALES = { q: '' };
       align-items: center;
       gap: 8px;
       color: #8b97a2;
-      font-size: 9px;
+      font-size: 12px;
     }
 
     .search-result-tipo {
@@ -222,7 +226,7 @@ const FILTROS_INICIALES = { q: '' };
       border-radius: 12px;
       background: #f1f3f5;
       color: #687783;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 600;
       white-space: nowrap;
     }
@@ -242,7 +246,7 @@ const FILTROS_INICIALES = { q: '' };
 
     .search-result-dato-etiqueta {
       color: #a3aeb8;
-      font-size: 8px;
+      font-size: 12px;
       letter-spacing: 0.4px;
       text-transform: uppercase;
     }
@@ -257,7 +261,7 @@ const FILTROS_INICIALES = { q: '' };
       flex: none;
       margin-top: 6px;
       color: #9aa5ae;
-      font-size: 9px;
+      font-size: 12px;
       white-space: nowrap;
     }
 
@@ -278,7 +282,7 @@ const FILTROS_INICIALES = { q: '' };
       border-radius: 8px;
       background: #fdf8f1;
       color: #8a5a1f;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.5;
     }
 
@@ -295,6 +299,9 @@ export class BusquedaPage {
   private readonly destruccion = inject(DestroyRef);
 
   readonly topePorGrupo = TOPE_POR_GRUPO;
+
+  /** Resultado cuya ficha está abierta; `null` cuando el drawer está cerrado. */
+  readonly ficha = signal<ResultadoEnlazado | null>(null);
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
@@ -413,11 +420,21 @@ export class BusquedaPage {
 
   limpiar(): void {
     clearTimeout(this.temporizador);
+    this.ficha.set(null);
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {},
       replaceUrl: true,
     });
+  }
+
+  /** Abre la ficha del resultado (cambio 30). */
+  abrir(resultado: ResultadoEnlazado): void {
+    this.ficha.set(resultado);
+  }
+
+  cerrarFicha(): void {
+    this.ficha.set(null);
   }
 
   recargar(): void {

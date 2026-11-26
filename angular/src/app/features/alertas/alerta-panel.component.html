@@ -1,655 +1,593 @@
-<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+<div class="drawer-scrim" (keydown)="alTecla($event)">
   <aside
     #panel
     class="drawer"
     tabindex="-1"
     role="dialog"
     aria-modal="true"
-    aria-labelledby="alerta-panel-titulo"
+    aria-label="Ficha de la alerta temprana"
+    (click)="$event.stopPropagation()"
   >
-    @if (esAlta()) {
-      <header class="drawer-head">
-        <div class="alerta-panel-cabecera">
-          <p class="alerta-panel-codigo">Alerta temprana</p>
-          <h2 id="alerta-panel-titulo">Registrar alerta</h2>
-          <p class="alerta-alta-ayuda" id="alerta-alta-ayuda">
-            El título y la prioridad son obligatorios; el resto puede completarse después.
-          </p>
+    <header class="drawer-head">
+      @if (esAlta()) {
+        <div class="alerta-cabecera">
+          <p class="alerta-codigo">Nueva alerta</p>
+          <h2 class="alerta-titulo">Registrar alerta temprana</h2>
         </div>
-
-        <button
-          type="button"
-          class="icon-button"
-          aria-label="Cerrar el panel de alta de alerta"
-          (click)="cerrar.emit()"
-        >
-          <app-icono nombre="cerrar" [tamano]="18" />
-        </button>
-      </header>
-
-      <div class="drawer-body alerta-panel-cuerpo">
-        @if (errorGuardado()) {
-          <p class="form-error" role="alert">{{ errorGuardado() }}</p>
+      } @else {
+        @if (alerta(); as a) {
+          <div class="alerta-cabecera">
+            <p class="alerta-codigo">
+              <span>{{ a.codigo || 'Sin código' }}</span>
+              <span class="alerta-modificacion"
+                >🕒 Última modificación: {{ fecha(a.ultimaModificacion) }}</span
+              >
+            </p>
+            <h2 class="alerta-titulo">{{ tituloVisible(a) }}</h2>
+            <div class="alerta-insignias">
+              <span class="alerta-geografia">{{ geografia(a) }}</span>
+              <span aria-hidden="true">·</span>
+              <span [class]="claseRiesgoTexto(a.riesgo)"
+                >Riesgo {{ etiquetaRiesgo(a.riesgo) }}</span
+              >
+              <span aria-hidden="true">·</span>
+              <span class="alerta-fecha">{{ fecha(a.fechaReporte) }}</span>
+            </div>
+          </div>
         }
-        @if (mensajeLocal()) {
-          <p class="form-error" role="alert">{{ mensajeLocal() }}</p>
-        }
-        @if (errorPrioridades(); as fallo) {
-          <p class="alerta-alta-catalogo" role="alert">
-            No se pudo leer el catálogo de prioridades ({{ fallo.message }}). Se muestran las
-            prioridades del vocabulario congelado.
-          </p>
-        }
+      }
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la ficha de la alerta"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
 
-        <form
-          class="alerta-formulario alerta-alta-formulario"
-          aria-describedby="alerta-alta-ayuda"
-          (submit)="alEnviarAlta($event)"
-        >
+    <div class="drawer-body">
+      @if (cargando()) {
+        <p class="form-hint" role="status">Cargando la alerta…</p>
+      }
+
+      @if (errorCarga(); as error) {
+        <div class="empty-state" role="alert">
+          <strong>No se pudo cargar la alerta</strong>
+          <p>{{ error.message }}</p>
+          <button type="button" class="button-secondary" (click)="reintentar.emit()">
+            Reintentar
+          </button>
+        </div>
+      }
+
+      @if (errorGuardado(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+
+      @if (aviso(); as mensaje) {
+        <p class="form-hint aviso-ok" role="status">{{ mensaje }}</p>
+      }
+
+      @if (mensajeLocal(); as local) {
+        <p class="form-hint" role="status">{{ local }}</p>
+      }
+
+      @if (esFormulario()) {
+        <form class="alerta-form" (submit)="alEnviarAlta($event)">
+          <h3>{{ esAlta() ? 'Datos de la alerta' : 'Modificar alerta' }}</h3>
+
           <div class="form-field">
-            <label class="form-label" for="alerta-alta-titulo">Título</label>
+            <label class="form-label" for="alta-titulo">🔔 Título</label>
             <input
-              id="alerta-alta-titulo"
-              class="form-input"
+              id="alta-titulo"
               type="text"
-              required
-              autocomplete="off"
-              placeholder="Resumen del riesgo detectado"
               [value]="borradorAlta().titulo"
               (input)="campoAlta('titulo', $event)"
             />
           </div>
 
-          <div class="form-field">
-            <label class="form-label" for="alerta-alta-prioridad">Prioridad</label>
-            <select
-              id="alerta-alta-prioridad"
-              class="form-select"
-              required
-              [value]="borradorAlta().prioridad"
-              [disabled]="cargandoPrioridades()"
-              (change)="campoAlta('prioridad', $event)"
-            >
-              <option value="">Seleccione una prioridad</option>
-              @for (opcion of opcionesPrioridad(); track opcion.valor) {
-                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-              }
-            </select>
-            @if (cargandoPrioridades()) {
-              <span class="form-hint">Cargando el catálogo de prioridades…</span>
-            } @else if (prioridadElegida(); as prioridad) {
-              <span class="alerta-alta-plazo">
-                Plazo de atención: <strong>{{ formatearPlazo(prioridad.slaHoras) }}</strong>
-                @if (prioridad.grave) {
-                  <span class="alerta-alta-grave">Grave</span>
+          <div class="rejilla-dos">
+            <div class="form-field">
+              <label class="form-label" for="alta-riesgo">⚠️ Nivel de riesgo *</label>
+              <select
+                id="alta-riesgo"
+                [value]="borradorAlta().riesgo"
+                (change)="cambiarRiesgoAlta($event)"
+              >
+                <option value="">Seleccione</option>
+                @for (riesgo of riesgos; track riesgo) {
+                  <option [value]="riesgo">{{ riesgo }}</option>
                 }
-              </span>
-            }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="alta-alcance">Alcance geográfico *</label>
+              <select
+                id="alta-alcance"
+                [value]="borradorAlta().alcance"
+                (change)="cambiarAlcanceAlta($event)"
+              >
+                <option value="">Seleccione</option>
+                @for (alcance of alcances; track alcance) {
+                  <option [value]="alcance">{{ alcance }}</option>
+                }
+              </select>
+            </div>
           </div>
 
-          <div class="form-field">
-            <label class="form-label" for="alerta-alta-caso">Caso vinculado</label>
-            <input
-              id="alerta-alta-caso"
-              class="form-input"
-              type="text"
-              autocomplete="off"
-              placeholder="Código de un caso existente"
-              [value]="borradorAlta().casoCode"
-              (input)="campoAlta('casoCode', $event)"
-            />
-            <span class="form-hint">
-              Opcional. Si la pantalla viene filtrada por caso, se preselecciona.
-            </span>
-          </div>
+          @if (borradorAlta().alcance === 'Región') {
+            <div class="form-field">
+              <label class="form-label" for="alta-region">Región</label>
+              <select
+                id="alta-region"
+                [value]="borradorAlta().region"
+                (change)="campoAlta('region', $event)"
+              >
+                <option value="">Seleccione una región</option>
+                @for (region of regiones; track region) {
+                  <option [value]="region">{{ region }}</option>
+                }
+              </select>
+            </div>
+          }
 
-          <app-territorio-buscador
-            etiqueta="Distrito (opcional)"
-            marcador="Distrito: Islay, Piura, Contralmirante Villar…"
-            [soloDistritos]="true"
-            (elegido)="alElegirDistrito($event)"
-          />
-
-          @if (borradorAlta().casoCode.trim() && !distritoAlta()) {
-            <p class="form-hint">
-              Sin distrito se usará el del caso vinculado al guardar, si lo tiene.
-            </p>
+          @if (borradorAlta().alcance === 'Distrito') {
+            <div class="form-field">
+              <span class="form-label">Distrito</span>
+              <app-territorio-buscador
+                etiqueta="Distrito"
+                marcador="Distrito: Islay, Piura…"
+                [soloDistritos]="true"
+                [compacto]="true"
+                [inicial]="inicialDistritoAlta()"
+                (elegido)="alElegirDistritoAlta($event)"
+              />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="alta-provincia">Provincia</label>
+              <input
+                id="alta-provincia"
+                type="text"
+                [value]="borradorAlta().provincia"
+                (input)="campoAlta('provincia', $event)"
+              />
+            </div>
           }
 
           <div class="form-field">
-            <label class="form-label" for="alerta-alta-riesgo">Descripción del riesgo</label>
-            <textarea
-              id="alerta-alta-riesgo"
-              class="form-textarea"
-              rows="3"
-              [value]="borradorAlta().descripcionRiesgo"
-              (input)="campoAlta('descripcionRiesgo', $event)"
-            ></textarea>
+            <span class="form-label">Caso vinculado</span>
+            <app-caso-combobox
+              [opciones]="casos()"
+              [valor]="borradorAlta().casoCode"
+              (cambio)="cambiarCasoAlta($event)"
+            />
           </div>
 
-          <div class="form-field">
-            <label class="form-label" for="alerta-alta-hechos">
-              Hechos recientes y acciones en curso
-            </label>
-            <textarea
-              id="alerta-alta-hechos"
-              class="form-textarea"
-              rows="3"
-              [value]="borradorAlta().hechosRecientes"
-              (input)="campoAlta('hechosRecientes', $event)"
-            ></textarea>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="alerta-alta-situacion">Situación actual</label>
-            <textarea
-              id="alerta-alta-situacion"
-              class="form-textarea"
-              rows="3"
-              [value]="borradorAlta().situacionActual"
-              (input)="campoAlta('situacionActual', $event)"
-            ></textarea>
-          </div>
-
-          <div class="form-field">
-            <label class="form-label" for="alerta-alta-oaipcs">Acciones de la OAIPCS</label>
-            <textarea
-              id="alerta-alta-oaipcs"
-              class="form-textarea"
-              rows="3"
-              [value]="borradorAlta().accionesOaipcs"
-              (input)="campoAlta('accionesOaipcs', $event)"
-            ></textarea>
-          </div>
-
-          <div class="alerta-formulario-acciones">
-            <button
-              type="submit"
-              class="button-primary"
-              [disabled]="guardando() || !puedeModificar()"
-            >
-              {{ guardando() ? 'Registrando…' : 'Registrar alerta' }}
+          <div class="bloque-lista">
+            <span class="form-label">🔍 Situación actual</span>
+            @for (linea of borradorAlta().situacionActual; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Situación actual"
+                  [value]="linea.texto"
+                  (input)="editarLinea('situacionActual', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar línea de situación actual"
+                  (click)="quitarLinea('situacionActual', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
+            <button type="button" class="alerta-agregar" (click)="agregarLinea('situacionActual')">
+              ＋ Agregar
             </button>
+          </div>
+
+          <div class="bloque-lista">
+            <span class="form-label">🏗️ Hechos recientes y acciones en curso</span>
+            @for (linea of borradorAlta().hechosRecientes; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Hecho reciente"
+                  [value]="linea.texto"
+                  (input)="editarLinea('hechosRecientes', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar hecho"
+                  (click)="quitarLinea('hechosRecientes', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
+            <button type="button" class="alerta-agregar" (click)="agregarLinea('hechosRecientes')">
+              ＋ Agregar hecho
+            </button>
+          </div>
+
+          <div class="bloque-lista">
+            <span class="form-label">👥 Actores clave</span>
+            @for (linea of borradorAlta().actoresClave; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Actor clave"
+                  [value]="linea.texto"
+                  (input)="editarLinea('actoresClave', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar actor"
+                  (click)="quitarLinea('actoresClave', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
+            <p class="form-hint">Nombre — Cargo / Organización (texto libre).</p>
+            <span class="form-label">＋ Agregar actor</span>
+            <div class="actor-acciones">
+              <button type="button" class="button-secondary" (click)="alternarBuscadorActor()">
+                Elegir del directorio
+              </button>
+              <button type="button" class="button-secondary" (click)="escribirActorNuevo()">
+                Escribir actor nuevo
+              </button>
+            </div>
+
+            @if (buscandoActor()) {
+              <div class="actor-buscador">
+                <div class="actor-buscador-input">
+                  <app-icono nombre="buscar" [tamano]="15" />
+                  <input
+                    type="text"
+                    placeholder="Buscar actor por nombre…"
+                    aria-label="Buscar actor en el Directorio"
+                    [value]="consultaActor()"
+                    (input)="alBuscarActor($event)"
+                  />
+                </div>
+                @if (buscandoDirectorio()) {
+                  <p class="form-hint" role="status">Buscando en el Directorio…</p>
+                }
+                @if (errorActor(); as falloActor) {
+                  <p class="form-error" role="alert">{{ falloActor }}</p>
+                }
+                @if (resultadosActor().length) {
+                  <ul class="actor-resultados">
+                    @for (actor of resultadosActor(); track actor.id) {
+                      <li>
+                        <button
+                          type="button"
+                          class="actor-opcion"
+                          (click)="elegirActorDirectorio(actor)"
+                        >
+                          <span class="actor-nombre">{{ actor.nombre }}</span>
+                          <span class="actor-meta">
+                            @if (actor.tipo) {
+                              {{ actor.tipo }}
+                            }
+                            @if (actor.tipo && actor.institucion) {
+                              ·
+                            }
+                            {{ actor.institucion }}
+                          </span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+                <button type="button" class="button-secondary" (click)="cerrarBuscadorActor()">
+                  Cerrar buscador
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="bloque-lista">
+            <span class="form-label">📌 Demandas inmediatas</span>
+            @for (linea of borradorAlta().demandasInmediatas; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Demanda inmediata"
+                  [value]="linea.texto"
+                  (input)="editarLinea('demandasInmediatas', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar demanda"
+                  (click)="quitarLinea('demandasInmediatas', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
             <button
               type="button"
-              class="button-secondary"
-              [disabled]="guardando()"
-              (click)="cerrar.emit()"
+              class="alerta-agregar"
+              (click)="agregarLinea('demandasInmediatas')"
             >
-              Cancelar
+              ＋ Agregar
+            </button>
+          </div>
+
+          <div class="bloque-lista">
+            <span class="form-label">⚠️ Descripción del riesgo</span>
+            @for (linea of borradorAlta().descripcionRiesgo; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Descripción del riesgo"
+                  [value]="linea.texto"
+                  (input)="editarLinea('descripcionRiesgo', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar línea de descripción del riesgo"
+                  (click)="quitarLinea('descripcionRiesgo', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
+            <button
+              type="button"
+              class="alerta-agregar"
+              (click)="agregarLinea('descripcionRiesgo')"
+            >
+              ＋ Agregar
+            </button>
+          </div>
+
+          <div class="bloque-lista">
+            <span class="form-label">🧭 Acciones sugeridas</span>
+            @for (linea of borradorAlta().accionesSugeridas; track linea.id) {
+              <div class="linea-fila">
+                <textarea
+                  rows="2"
+                  aria-label="Acción sugerida"
+                  [value]="linea.texto"
+                  (input)="editarLinea('accionesSugeridas', linea.id, $event)"
+                ></textarea>
+                <button
+                  type="button"
+                  class="icon-button"
+                  aria-label="Quitar acción sugerida"
+                  (click)="quitarLinea('accionesSugeridas', linea.id)"
+                >
+                  <app-icono nombre="cerrar" [tamano]="14" />
+                </button>
+              </div>
+            }
+            <button
+              type="button"
+              class="alerta-agregar"
+              (click)="agregarLinea('accionesSugeridas')"
+            >
+              ＋ Agregar
             </button>
           </div>
         </form>
-      </div>
-    } @else if (alerta(); as a) {
-      <header class="drawer-head">
-        <div class="alerta-panel-cabecera">
-          <p class="alerta-panel-codigo">{{ a.codigo }}</p>
-          <h2 id="alerta-panel-titulo">{{ a.titulo || 'Alerta sin título' }}</h2>
-          <div class="alerta-panel-badges">
-            <span
-              [class]="
-                'status-badge alerta-prioridad alerta-prioridad--' + clavePrioridad(a.prioridad)
-              "
-            >
-              <span class="status-dot"></span>
-              {{ a.prioridad || 'Sin prioridad' }}
-            </span>
-            <span
-              class="status-badge alerta-plazo"
-              [class.alerta-plazo--sin]="a.plazoHoras === null"
-            >
-              <app-icono nombre="reloj" [tamano]="12" />
-              {{ formatearPlazo(a.plazoHoras) }}
-            </span>
-            @if (a.nivel) {
-              <span class="status-badge alerta-nivel">{{ a.nivel }}</span>
-            }
-            <span [class]="'status-badge ' + claseEstado(a.estado)">
-              <span class="status-dot"></span>
-              {{ a.estado || 'Sin estado' }}
-            </span>
-            @if (a.grave) {
-              <span class="status-badge alerta-grave">
-                <app-icono nombre="alerta" [tamano]="11" />
-                Grave
-              </span>
-            }
-          </div>
-        </div>
+      } @else {
+        @if (alerta(); as a) {
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">🔍 1. Situación actual</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.situacionActual) {
+                <p>{{ a.situacionActual }}</p>
+              } @else {
+                <p class="alerta-vacio">Sin contenido.</p>
+              }
+            </div>
+          </section>
 
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">🏗️ 2. Hechos recientes y acciones en curso</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.hechosRecientes) {
+                <p>{{ a.hechosRecientes }}</p>
+              } @else {
+                <p class="alerta-vacio">Sin contenido.</p>
+              }
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">👥 3. Actores clave</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.actoresClave.length) {
+                <ul>
+                  @for (actor of a.actoresClave; track $index) {
+                    <li>{{ actor }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="alerta-vacio">Sin actores registrados.</p>
+              }
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">📌 4. Demandas inmediatas</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.demandasInmediatas.length) {
+                <ul>
+                  @for (demanda of a.demandasInmediatas; track $index) {
+                    <li>{{ demanda }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="alerta-vacio">Sin demandas registradas.</p>
+              }
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">⚠️ 5. Descripción del riesgo</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.descripcionRiesgo) {
+                <p>{{ a.descripcionRiesgo }}</p>
+              }
+              @if (a.riesgos.length) {
+                <ul>
+                  @for (riesgo of a.riesgos; track $index) {
+                    <li>{{ riesgo }}</li>
+                  }
+                </ul>
+              }
+              @if (!a.descripcionRiesgo && !a.riesgos.length) {
+                <p class="alerta-vacio">Sin contenido.</p>
+              }
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">🧭 6. Acciones sugeridas</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.accionesSugeridas.length) {
+                <ul>
+                  @for (accion of a.accionesSugeridas; track $index) {
+                    <li>{{ accion }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="alerta-vacio">Sin acciones sugeridas.</p>
+              }
+            </div>
+          </section>
+
+          @if (puedeModificar()) {
+            <div class="acciones-form">
+              <button type="button" class="button-secondary" (click)="iniciarEdicion()">
+                Modificar contenido
+              </button>
+            </div>
+          }
+
+          <section class="alerta-seccion">
+            <div class="alerta-seccion-cuerpo">
+              <p>
+                Caso vinculado: <b>{{ a.casoCodigo || 'SIN CASO' }}</b>
+                @if (a.casoTitulo) {
+                  · {{ a.casoTitulo }}
+                }
+              </p>
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">Fuente</h3>
+            <div class="alerta-seccion-cuerpo">
+              @if (a.fuenteTipo || a.fuenteDescripcion) {
+                <p>
+                  <b>{{ a.fuenteTipo || 'Fuente' }}</b>
+                  @if (a.fuenteDescripcion) {
+                    · {{ a.fuenteDescripcion }}
+                  }
+                </p>
+              } @else {
+                <p class="alerta-vacio">Sin fuente registrada.</p>
+              }
+              @if (a.fuenteUrl) {
+                <p>
+                  <a [href]="a.fuenteUrl" target="_blank" rel="noopener">Abrir la fuente</a>
+                </p>
+              }
+            </div>
+          </section>
+
+          <section class="alerta-seccion">
+            <app-adjuntos-panel
+              entidadTipo="alerta"
+              titulo="Adjuntos de la alerta"
+              [entidadId]="a.id"
+              [editable]="puedeModificar()"
+            />
+          </section>
+
+          <div class="alerta-traza">
+            <span
+              >Estado: <b>{{ estadoVisible(a) }}</b></span
+            >
+            <span aria-hidden="true">·</span>
+            <span
+              >Modificó: <b>{{ a.modificadoPor || '—' }}</b></span
+            >
+            <span aria-hidden="true">·</span>
+            <span
+              >Último revisor: <b>{{ a.ultimoRevisor || '—' }}</b></span
+            >
+            <button type="button" class="alerta-traza-boton" (click)="alternarHistorial()">
+              {{ verHistorial() ? 'Ocultar historial' : 'Ver historial' }}
+            </button>
+          </div>
+
+          @if (verHistorial()) {
+            <section class="alerta-seccion">
+              <h3 class="alerta-seccion-titulo">Historial de revisiones</h3>
+              <div class="alerta-seccion-cuerpo">
+                @if (a.historial.length) {
+                  <ul class="historial">
+                    @for (revision of a.historial; track $index) {
+                      <li>
+                        <span class="historial-autor">{{ revision.autor }}</span>
+                        <span class="historial-meta">
+                          {{ fecha(revision.fecha) }}
+                          @if (revision.accion) {
+                            · {{ revision.accion }}
+                          }
+                        </span>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="alerta-vacio">Sin revisiones registradas.</p>
+                }
+              </div>
+            </section>
+          }
+        }
+      }
+    </div>
+
+    <footer class="drawer-foot">
+      @if (esAlta()) {
+        <button type="button" class="button-secondary" (click)="cerrar.emit()">Cancelar</button>
         <button
           type="button"
-          class="icon-button"
-          aria-label="Cerrar el panel de la alerta"
-          (click)="cerrar.emit()"
+          class="button-primary"
+          [disabled]="guardando()"
+          (click)="guardarAlta()"
         >
-          <app-icono nombre="cerrar" [tamano]="18" />
+          {{ guardando() ? 'Registrando…' : 'Registrar alerta' }}
         </button>
-      </header>
-
-      <div class="drawer-body alerta-panel-cuerpo">
-        @if (aviso()) {
-          <p class="alerta-aviso" role="status">{{ aviso() }}</p>
-        }
-        @if (errorGuardado()) {
-          <p class="form-error" role="alert">{{ errorGuardado() }}</p>
-        }
-        @if (mensajeLocal()) {
-          <p class="form-error" role="alert">{{ mensajeLocal() }}</p>
-        }
-        @if (cargando()) {
-          <p class="alerta-nota" role="status">Cargando el detalle de la alerta…</p>
-        }
-        @if (errorCarga(); as fallo) {
-          <div class="alerta-error" role="alert">
-            <p>{{ fallo.message }}</p>
-            <button type="button" class="button-secondary" (click)="reintentar.emit()">
-              Reintentar
-            </button>
-          </div>
-        }
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-flujo">
-          <h3 id="alerta-panel-flujo">Recorrido de la alerta</h3>
-          @if (etapa(); as paso) {
-            <p class="alerta-etapa">
-              Paso {{ paso.paso }} de 5 · {{ paso.nombre }}
-              <span class="alerta-etapa-estado">{{ paso.estado }}</span>
-            </p>
-            <p class="alerta-nota">
-              Registra el paso: {{ paso.responsable }}. La gravedad no cambia el recorrido; cambia a
-              quién se avisa y con qué plazo.
-            </p>
-          } @else {
-            <p class="alerta-nota">
-              El paso registrado ({{ a.pasoActual }}) no está en el flujo de cinco pasos del
-              catálogo.
-            </p>
-          }
-
-          @if (acciones().length === 0) {
-            <p class="alerta-nota">
-              No hay transiciones disponibles desde este paso. Reabrir exige una alerta nueva o una
-              suplencia autorizada.
-            </p>
-          } @else {
-            <div class="alerta-acciones">
-              @for (transicion of acciones(); track transicion.paso) {
-                <button
-                  type="button"
-                  class="button-secondary alerta-accion"
-                  [disabled]="!puedeModificar() || guardando()"
-                  (click)="accion.emit(transicion.paso)"
-                >
-                  <span>{{ transicion.etiqueta }}</span>
-                  <small> {{ transicion.detalle }} Registra: {{ transicion.responsable }}. </small>
-                </button>
-              }
-            </div>
-          }
-
-          @if (!puedeModificar()) {
-            <p class="alerta-nota">Su rol no permite modificar esta alerta.</p>
-          }
-        </section>
-
-        @if (!formulario()) {
-          <div class="alerta-formulario-acciones">
-            <button
-              type="button"
-              class="button-secondary"
-              [disabled]="!puedeModificar() || guardando()"
-              (click)="iniciarEdicion()"
-            >
-              <app-icono nombre="documentos" [tamano]="14" />
-              Modificar
-            </button>
-          </div>
-        } @else {
-          @if (formulario(); as b) {
-            <form class="alerta-formulario" (submit)="alEnviarFormulario($event)">
-              <p class="alerta-nota">
-                Sólo se envían los campos que cambian. El plazo se deriva de la prioridad en el
-                catálogo y no se edita aquí.
-              </p>
-
-              <div class="form-field">
-                <label class="form-label" for="alerta-campo-titulo">Título</label>
-                <input
-                  id="alerta-campo-titulo"
-                  class="form-input"
-                  type="text"
-                  [value]="b.titulo"
-                  (input)="campo('titulo', $event)"
-                />
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="alerta-campo-prioridad">Prioridad</label>
-                <select
-                  id="alerta-campo-prioridad"
-                  class="form-select"
-                  [value]="b.prioridad"
-                  (change)="campo('prioridad', $event)"
-                >
-                  <option value="">Sin prioridad</option>
-                  @for (prioridad of prioridades; track prioridad) {
-                    <option [value]="prioridad">{{ prioridad }}</option>
-                  }
-                </select>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="alerta-campo-nivel">Nivel</label>
-                <select
-                  id="alerta-campo-nivel"
-                  class="form-select"
-                  [value]="b.nivel"
-                  (change)="campo('nivel', $event)"
-                >
-                  <option value="">Sin nivel</option>
-                  @for (nivel of niveles; track nivel) {
-                    <option [value]="nivel">{{ nivel }}</option>
-                  }
-                </select>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="alerta-campo-situacion">Situación actual</label>
-                <textarea
-                  id="alerta-campo-situacion"
-                  class="form-textarea"
-                  rows="3"
-                  [value]="b.situacionActual"
-                  (input)="campo('situacionActual', $event)"
-                ></textarea>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="alerta-campo-hechos">
-                  Hechos recientes y acciones en curso
-                </label>
-                <textarea
-                  id="alerta-campo-hechos"
-                  class="form-textarea"
-                  rows="3"
-                  [value]="b.hechosRecientes"
-                  (input)="campo('hechosRecientes', $event)"
-                ></textarea>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="alerta-campo-riesgo"> Descripción del riesgo </label>
-                <textarea
-                  id="alerta-campo-riesgo"
-                  class="form-textarea"
-                  rows="3"
-                  [value]="b.descripcionRiesgo"
-                  (input)="campo('descripcionRiesgo', $event)"
-                ></textarea>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="alerta-campo-oaipcs">Acciones de la OAIPCS</label>
-                <textarea
-                  id="alerta-campo-oaipcs"
-                  class="form-textarea"
-                  rows="3"
-                  [value]="b.accionesOaipcs"
-                  (input)="campo('accionesOaipcs', $event)"
-                ></textarea>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="alerta-campo-sugeridas"> Acciones sugeridas </label>
-                <textarea
-                  id="alerta-campo-sugeridas"
-                  class="form-textarea"
-                  rows="3"
-                  [value]="b.accionesSugeridas"
-                  (input)="campo('accionesSugeridas', $event)"
-                ></textarea>
-                <span class="form-hint">Una acción por línea. Se guarda como lista.</span>
-              </div>
-
-              <div class="form-field">
-                <label class="form-label" for="alerta-campo-caso">Caso vinculado</label>
-                <input
-                  id="alerta-campo-caso"
-                  class="form-input"
-                  type="text"
-                  [value]="b.casoCode"
-                  (input)="campo('casoCode', $event)"
-                />
-                <span class="form-hint">
-                  Código de un caso existente. Vacío desvincula la alerta.
-                </span>
-              </div>
-
-              <app-territorio-buscador
-                etiqueta="Distrito de la alerta"
-                marcador="Distrito: Islay, Piura, Contralmirante Villar…"
-                [soloDistritos]="true"
-                [inicial]="inicialDistritoEdicion()"
-                (elegido)="alElegirDistritoEdicion($event)"
-              />
-
-              @if (distritoDivergente()) {
-                <div class="alerta-error">
-                  <p>
-                    La alerta ocurre en <strong>{{ distritoEdicion()?.nombre }}</strong
-                    >; el caso vinculado está en <strong>{{ alerta()?.casoDistrito }}</strong
-                    >.
-                  </p>
-                  <div class="alerta-formulario-acciones">
-                    <button type="button" class="button-secondary" (click)="usarDistritoDelCaso()">
-                      Usar el del caso
-                    </button>
-                    <button
-                      type="button"
-                      class="button-secondary"
-                      (click)="mantenerDistritoDeLaAlerta()"
-                    >
-                      Mantener el de la alerta
-                    </button>
-                  </div>
-                </div>
-              } @else if (distritoDelCaso()) {
-                <button type="button" class="button-secondary" (click)="usarDistritoDelCaso()">
-                  Usar el distrito del caso ({{ distritoDelCaso()?.nombre }})
-                </button>
-              }
-
-              <div class="alerta-formulario-acciones">
-                <button type="submit" class="button-primary" [disabled]="guardando()">
-                  {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
-                </button>
-                <button
-                  type="button"
-                  class="button-secondary"
-                  [disabled]="guardando()"
-                  (click)="cancelarEdicion()"
-                >
-                  Cancelar
-                </button>
-              </div>
-            </form>
-          }
-        }
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-situacion">
-          <h3 id="alerta-panel-situacion">1. Situación actual</h3>
-          @if (a.situacionActual) {
-            <p class="alerta-texto">{{ a.situacionActual }}</p>
-          } @else {
-            <p class="alerta-vacio">Sin registro.</p>
-          }
-        </section>
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-hechos">
-          <h3 id="alerta-panel-hechos">2. Hechos recientes y acciones en curso</h3>
-          @if (a.hechosRecientes) {
-            <p class="alerta-texto">{{ a.hechosRecientes }}</p>
-          } @else {
-            <p class="alerta-vacio">Sin registro.</p>
-          }
-        </section>
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-riesgo">
-          <h3 id="alerta-panel-riesgo">Descripción del riesgo</h3>
-          @if (a.descripcionRiesgo) {
-            <p class="alerta-texto">{{ a.descripcionRiesgo }}</p>
-          } @else {
-            <p class="alerta-vacio">Sin registro.</p>
-          }
-        </section>
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-oaipcs">
-          <h3 id="alerta-panel-oaipcs">Acciones de la OAIPCS</h3>
-          @if (a.accionesOaipcs) {
-            <p class="alerta-texto">{{ a.accionesOaipcs }}</p>
-          } @else {
-            <p class="alerta-vacio">Sin registro.</p>
-          }
-        </section>
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-sugeridas">
-          <h3 id="alerta-panel-sugeridas">Acciones sugeridas</h3>
-          @if (a.accionesSugeridas.length === 0) {
-            <p class="alerta-vacio">Sin registro.</p>
-          } @else {
-            <ul class="alerta-lista">
-              @for (sugerida of a.accionesSugeridas; track $index) {
-                <li>{{ sugerida }}</li>
-              }
-            </ul>
-          }
-        </section>
-
-        @if (a.riesgos.length > 0) {
-          <section class="alerta-seccion" aria-labelledby="alerta-panel-riesgos">
-            <h3 id="alerta-panel-riesgos">Riesgos identificados</h3>
-            <ul class="alerta-lista">
-              @for (riesgo of a.riesgos; track $index) {
-                <li>{{ riesgo }}</li>
-              }
-            </ul>
-          </section>
-        }
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-datos">
-          <h3 id="alerta-panel-datos">Caso y datos de la alerta</h3>
-          <dl class="alerta-datos">
-            <div>
-              <dt>Caso</dt>
-              <dd>
-                @if (a.casoCodigo) {
-                  {{ a.casoCodigo }} · {{ a.casoTitulo || 'Sin título del caso' }}
-                } @else {
-                  Sin caso
-                }
-              </dd>
-            </div>
-            <div>
-              <dt>Distrito de la alerta</dt>
-              <dd>{{ a.distritoRuta || a.distrito || '—' }}</dd>
-            </div>
-            @if (a.casoDistrito) {
-              <div>
-                <dt>Distrito del caso</dt>
-                <dd>
-                  {{ a.casoDistritoRuta || a.casoDistrito }}
-                  @if (a.distritoCoincideConCaso === false) {
-                    · distinto del de la alerta
-                  }
-                </dd>
-              </div>
-            }
-            <div>
-              <dt>Subsector</dt>
-              <dd>{{ a.subsector || '—' }}</dd>
-            </div>
-            <div>
-              <dt>Visibilidad</dt>
-              <dd>{{ a.visibilidad || '—' }}</dd>
-            </div>
-            <div>
-              <dt>Origen</dt>
-              <dd>{{ a.origen || '—' }}</dd>
-            </div>
-            <div>
-              <dt>Confianza</dt>
-              <dd>{{ porcentaje(a.confianza) }}</dd>
-            </div>
-            <div>
-              <dt>Validado por humano</dt>
-              <dd>{{ a.validado ? 'Sí' : 'No' }}</dd>
-            </div>
-            <div>
-              <dt>Clasificación</dt>
-              <dd>Nivel {{ a.clasificacion }}</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-fuente">
-          <h3 id="alerta-panel-fuente">Fuente</h3>
-          @if (a.fuenteDescripcion) {
-            <p class="alerta-texto">{{ a.fuenteDescripcion }}</p>
-          } @else {
-            <p class="alerta-vacio">Sin descripción de la fuente.</p>
-          }
-          @if (a.fuenteTipo) {
-            <p class="alerta-nota">Tipo: {{ a.fuenteTipo }}</p>
-          }
-          @if (a.fuenteUrl) {
-            <a class="table-link" [href]="a.fuenteUrl" target="_blank" rel="noopener noreferrer">
-              Abrir la fuente
-            </a>
-          }
-        </section>
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-fechas">
-          <h3 id="alerta-panel-fechas">Fechas del recorrido</h3>
-          <dl class="alerta-datos">
-            <div>
-              <dt>Reporte</dt>
-              <dd>{{ a.fechaReporte || '—' }}</dd>
-            </div>
-            <div>
-              <dt>Validación previa</dt>
-              <dd>{{ a.fechaValidacion || '—' }}</dd>
-            </div>
-            <div>
-              <dt>Aprobación definitiva</dt>
-              <dd>{{ a.fechaAprobacion || '—' }}</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section class="alerta-seccion" aria-labelledby="alerta-panel-demandas">
-          <h3 id="alerta-panel-demandas">Demandas vinculadas ({{ demandas().length }})</h3>
-          @if (demandas().length === 0) {
-            <p class="alerta-vacio">Sin demandas vinculadas a la alerta.</p>
-          } @else {
-            <ol class="alerta-demandas">
-              @for (demanda of demandas(); track demanda.id) {
-                <li>
-                  <strong>{{ demanda.problema || demanda.descripcion || 'Demanda' }}</strong>
-                  <p>{{ demanda.pedido || demanda.propuesta || 'Sin pedido registrado.' }}</p>
-                  <small>
-                    {{ demanda.estado || 'Sin estado' }}
-                    @if (demanda.fechaRegistro) {
-                      · {{ demanda.fechaRegistro }}
-                    }
-                  </small>
-                </li>
-              }
-            </ol>
-          }
-        </section>
-      </div>
-    }
+      } @else if (editando()) {
+        <button type="button" class="button-secondary" (click)="cancelarEdicion()">Cancelar</button>
+        <button
+          type="button"
+          class="button-primary"
+          [disabled]="guardando()"
+          (click)="guardarAlta()"
+        >
+          {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+      } @else {
+        <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+      }
+    </footer>
   </aside>
 </div>

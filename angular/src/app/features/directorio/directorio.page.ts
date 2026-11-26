@@ -6,7 +6,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 /**
  * Directorio · portada visual (item 108).
  *
- * Cuatro accesos con ícono y botón. Cada uno lleva a su matriz, que sigue en su
+ * Tres accesos con ícono y botón. Cada uno lleva a su matriz, que sigue en su
  * propia ruta: la portada reordena la entrada, no reescribe el CRUD. Los enlaces
  * directos a las matrices —incluido `/directorio/actores?q=…` de la ficha del
  * caso— siguen funcionando sin pasar por aquí.
@@ -30,21 +30,6 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       margin: 0 auto;
       padding: 27px 34px 50px;
       box-sizing: border-box;
-    }
-
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
     }
 
     .directorio-grid {
@@ -96,12 +81,12 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 
     .directorio-copy strong {
       color: #1c2a38;
-      font: 700 15px/1.25 var(--font-display);
+      font: 700 16px/1.25 var(--font-display);
     }
 
     .directorio-copy span {
       color: #7b8896;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -111,7 +96,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
       align-items: center;
       gap: 4px;
       color: var(--blue-dark);
-      font-size: 10.5px;
+      font-size: 13px;
       font-weight: 700;
     }
 
@@ -126,21 +111,16 @@ export class DirectorioPage {
   readonly accesos = [
     {
       etiqueta: 'Actores',
-      ruta: '/directorio/actores',
+      ruta: '/directorio/personas',
       icono: 'actores',
-      descripcion: 'Personas y colectivos vinculados a los casos, con su perfil de diálogo.',
+      descripcion:
+        'Actores vinculados a los casos, con su perfil de diálogo y galería fotográfica.',
     },
     {
       etiqueta: 'Organizaciones',
       ruta: '/directorio/organizaciones',
       icono: 'organizaciones',
-      descripcion: 'Organizaciones sociales y gremiales del territorio.',
-    },
-    {
-      etiqueta: 'Instituciones',
-      ruta: '/directorio/instituciones',
-      icono: 'instituciones',
-      descripcion: 'Entidades públicas y privadas que intervienen en el diálogo.',
+      descripcion: 'Organizaciones sociales, gremiales y entidades públicas del territorio.',
     },
     {
       etiqueta: 'Auditorios',

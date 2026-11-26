@@ -2,10 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-resumen">Resumen operativo</h1>
-      <p class="view-subtitle">
-        Indicadores calculados con los totales reales de los listados y las tareas que requieren
-        atención inmediata.
-      </p>
     </div>
     <div class="view-actions">
       <app-exportar-menu entidad="casos" (fallo)="alFallarExportacion($event)" />
@@ -14,25 +10,71 @@
   </header>
 
   @if (exportarError(); as mensaje) {
-  <p class="form-error" role="alert">{{ mensaje }}</p>
+    <p class="form-error" role="alert">{{ mensaje }}</p>
   }
 
-  <div class="executive-kpis">
-    @for (kpi of indicadores(); track kpi.clave) {
-    <a
-      class="stat-card"
-      [routerLink]="kpi.ruta"
-      [attr.aria-label]="kpi.etiqueta + ': ' + kpi.texto"
-    >
-      <span [class]="'stat-icon ' + kpi.color">
-        <app-icono [nombre]="kpi.icono" [tamano]="16" />
-      </span>
-      <span class="stat-copy">
-        <span>{{ kpi.etiqueta }}</span>
-        <strong [class.kpi-sin-dato]="!kpi.disponible">{{ kpi.texto }}</strong>
-        <small>{{ kpi.detalle }}</small>
-      </span>
-    </a>
+  <section class="surface panel sync" aria-labelledby="titulo-sync">
+    <h2 id="titulo-sync">Última sincronización</h2>
+    <ul class="sync-lista">
+      @for (fuente of sincronizacion(); track fuente.clave) {
+        <li class="sync-item">
+          <span class="sync-fuente">{{ fuente.etiqueta }}</span>
+          <strong
+            class="sync-marca"
+            [class.sync-sin-dato]="fuente.tono !== 'normal'"
+            [attr.role]="rolDe(fuente.tono)"
+            [attr.title]="
+              fuente.tono === 'ausente'
+                ? 'La API no expone marca de alta o actualización para esta fuente.'
+                : null
+            "
+            >{{ fuente.texto }}</strong
+          >
+        </li>
+      }
+    </ul>
+    <p class="sync-nota">
+      Marca de alta o actualización más reciente que expone cada fuente; «sin dato» cuando la API no
+      la publica.
+    </p>
+  </section>
+
+  <div class="dims">
+    @for (etapa of etapas(); track etapa.clave) {
+      <section class="surface panel dim" [attr.aria-labelledby]="'titulo-' + etapa.id">
+        <div class="dim-head">
+          <h2 [id]="'titulo-' + etapa.id">{{ etapa.titulo }}</h2>
+          <span class="dim-num" aria-hidden="true">{{ etapa.numero }}</span>
+        </div>
+        <p class="dim-sub">{{ etapa.resumen }}</p>
+
+        @for (metrica of etapa.metricas; track metrica.clave) {
+          <div class="metric" [class.metric-ausente]="metrica.tono === 'ausente'">
+            <div class="metric-top">
+              <b>{{ metrica.etiqueta }}</b>
+              <span
+                class="metric-val"
+                [class.compacta]="metrica.compacta"
+                [class.sin-dato]="metrica.tono !== 'normal'"
+                [attr.role]="rolDe(metrica.tono)"
+                >{{ metrica.valor }}</span
+              >
+            </div>
+            @if (metrica.detalle) {
+              <p class="metric-detalle">{{ metrica.detalle }}</p>
+            }
+            @if (metrica.nota) {
+              <p class="metric-nota">{{ metrica.nota }}</p>
+            }
+          </div>
+        }
+
+        <div class="dim-acciones">
+          @for (accion of etapa.acciones; track accion.ruta) {
+            <a class="button-secondary" [routerLink]="accion.ruta">{{ accion.texto }}</a>
+          }
+        </div>
+      </section>
     }
   </div>
 
@@ -40,9 +82,8 @@
     <section class="surface panel" aria-labelledby="titulo-ultimas-alertas">
       <div class="surface-heading">
         <div>
-          <p class="section-eyebrow">ALERTA TEMPRANA</p>
-          <h3 id="titulo-ultimas-alertas">Últimas alertas</h3>
-          <p>Los cinco reportes más recientes de RED-RADAR.</p>
+          <span class="section-eyebrow">Prevención</span>
+          <h3 id="titulo-ultimas-alertas">Alertas tempranas por atender</h3>
         </div>
         <a class="link-button" routerLink="/alertas">
           Ver todas
@@ -51,43 +92,40 @@
       </div>
 
       @if (estadoAlertas() === 'error') {
-      <p class="panel-nota" role="alert">{{ errorAlertas()?.message }}</p>
+        <p class="panel-nota" role="alert">{{ errorAlertas()?.message }}</p>
       } @else if (estadoAlertas() === 'cargando' || estadoAlertas() === 'inactivo') {
-      <p class="panel-vacio" role="status">Cargando alertas…</p>
+        <p class="panel-vacio" role="status">Cargando alertas…</p>
       } @else if (alertas().length === 0) {
-      <p class="panel-vacio">No hay alertas registradas.</p>
+        <p class="panel-vacio">No hay alertas registradas.</p>
       } @else {
-      <ul class="tarea-lista">
-        @for (alerta of alertas(); track alerta.id) {
-        <li class="tarea">
-          <span class="tarea-principal">
-            <span class="tarea-titulo">{{ alerta.titulo || 'Sin título' }}</span>
-            <span class="tarea-meta">
-              <span>{{ alerta.codigo }}</span>
-              @if (alerta.prioridad) {
-              <span class="priority-label">{{ alerta.prioridad }}</span>
+        <ul class="tarea-lista">
+          @for (alerta of alertas(); track alerta.id) {
+            <li class="tarea">
+              <span class="tarea-principal">
+                <span class="tarea-titulo">{{ alerta.titulo || 'Sin título' }}</span>
+                <span class="tarea-meta">
+                  <span>{{ alerta.codigo }}</span>
+                  @if (alerta.prioridad) {
+                    <span class="priority-label">{{ alerta.prioridad }}</span>
+                  }
+                  <span>{{ plazo(alerta.plazoHoras) }}</span>
+                  <span>{{ fecha(alerta.fechaReporte) }}</span>
+                </span>
+              </span>
+              @if (alerta.casoCodigo) {
+                <span class="tarea-codigo">{{ alerta.casoCodigo }}</span>
               }
-              <span>{{ plazo(alerta.plazoHoras) }}</span>
-              <span>{{ fecha(alerta.fechaReporte) }}</span>
-            </span>
-          </span>
-          @if (alerta.casoCodigo) {
-          <span class="tarea-codigo">{{ alerta.casoCodigo }}</span>
+            </li>
           }
-        </li>
-        }
-      </ul>
+        </ul>
       }
     </section>
 
     <section class="surface panel" aria-labelledby="titulo-compromisos-vencer">
       <div class="surface-heading">
         <div>
-          <p class="section-eyebrow">COMPROMISOS</p>
-          <h3 id="titulo-compromisos-vencer">Vencidos o por vencer</h3>
-          <p>
-            Compromisos vencidos y los que vencen entre hoy y los próximos {{ horizonteDias }} días.
-          </p>
+          <span class="section-eyebrow">Seguimiento</span>
+          <h3 id="titulo-compromisos-vencer">Compromisos vencidos y por vencer</h3>
         </div>
         <a class="link-button" routerLink="/compromisos">
           Ver todos
@@ -111,37 +149,40 @@
       </div>
 
       @if (estadoCompromisos() === 'error') {
-      <p class="panel-nota" role="alert">{{ errorCompromisos()?.message }}</p>
+        <p class="panel-nota" role="alert">{{ errorCompromisos()?.message }}</p>
       } @else if (estadoCompromisos() === 'cargando' || estadoCompromisos() === 'inactivo') {
-      <p class="panel-vacio" role="status">Cargando compromisos…</p>
-      } @else { @if (compromisos().length === 0) {
-      <p class="panel-vacio">
-        No hay compromisos vencidos ni por vencer en los próximos {{ horizonteDias }} días.
-      </p>
+        <p class="panel-vacio" role="status">Cargando compromisos…</p>
       } @else {
-      <ul class="tarea-lista">
-        @for (compromiso of compromisos(); track compromiso.id) {
-        <li class="tarea">
-          <span class="tarea-principal">
-            <span class="tarea-titulo">{{ compromiso.accion }}</span>
-            <span class="tarea-meta">
-              <span>{{ compromiso.codigo }}</span>
-              <span>{{ compromiso.casoCodigo || 'Sin caso' }}</span>
-              <span>{{ fecha(vencimiento(compromiso).fecha) }}</span>
-            </span>
-          </span>
-          <span [class]="'due-state ' + situacion(compromiso).clase">
-            {{ situacion(compromiso).etiqueta }}
-          </span>
-        </li>
+        @if (compromisos().length === 0) {
+          <p class="panel-vacio">
+            No hay compromisos vencidos ni por vencer en los próximos {{ horizonteDias }} días.
+          </p>
+        } @else {
+          <ul class="tarea-lista">
+            @for (compromiso of compromisos(); track compromiso.id) {
+              <li class="tarea">
+                <span class="tarea-principal">
+                  <span class="tarea-titulo">{{ compromiso.accion }}</span>
+                  <span class="tarea-meta">
+                    <span>{{ compromiso.codigo }}</span>
+                    <span>{{ compromiso.casoCodigo || 'Sin caso' }}</span>
+                    <span>{{ fecha(vencimiento(compromiso).fecha) }}</span>
+                  </span>
+                </span>
+                <span [class]="'due-state ' + situacion(compromiso).clase">
+                  {{ situacion(compromiso).etiqueta }}
+                </span>
+              </li>
+            }
+          </ul>
+          @if (totalCompromisos() > 0) {
+            <p class="panel-pie">
+              {{ totalCompromisos() }} compromisos vencidos o que vencen en los próximos
+              {{ horizonteDias }} días.
+            </p>
+          }
         }
-      </ul>
-      @if (totalCompromisos() > 0) {
-      <p class="panel-pie">
-        {{ totalCompromisos() }} compromisos vencidos o que vencen en los próximos {{ horizonteDias
-        }} días.
-      </p>
-      } } }
+      }
     </section>
   </div>
 </section>

@@ -1,185 +1,90 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
-import {
-  TAMANO_PAGINA,
-  normalizarColeccion,
-  paramsDePagina,
-  urlConParametros,
-  type Coleccion,
-} from '../../core/http/coleccion';
+import { TAMANO_PAGINA, paramsDePagina, urlConParametros } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
-import { esRegistro, texto, type Registro } from '../../dominio/mapeo';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { aErrorApi } from '../../core/http/errores';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-
-/**
- * `GET /api/v1/notifications` devuelve `{items, total, page, pageSize,
- * generatedAt, pagina, tamanoPagina}` y cada aviso tiene exactamente los
- * campos de `lib/db/repos/notifications.ts`: `id`, `tipo`, `entidadTipo`,
- * `entidadId`, `venceEn`, `estado` y `createdAt`. No hay título, detalle ni
- * booleano de lectura.
- *
- * `estado` es el ciclo de vida (`pendiente` | `enviada` | `leida` según el
- * CHECK de `core.notificaciones`): sólo `leida` significa leída. No existe
- * `PATCH` ni `POST` sobre `/api/v1/notifications`, así que la pantalla no
- * ofrece «marcar como leída».
- *
- * `entidadId` es un UUID interno y ninguna ruta de la SPA lo acepta (casos usa
- * `codigo`, no UUID; alertas, compromisos y documentos no tienen ficha). El
- * enlace abre la sección del recurso, nunca una ficha concreta.
- */
-export type Notificacion = {
-  id: string;
-  /** Código técnico del aviso (`regla_por_vencer`, …). */
-  tipo: string;
-  /** `tipo` legible, porque el modelo no trae título. */
-  titulo: string;
-  categoria: string;
-  icono: string;
-  entidadTipo: string | null;
-  entidadId: string | null;
-  venceEn: string | null;
-  estado: string | null;
-  leida: boolean;
-  creadaEn: string | null;
-  /** Sección relacionada; `null` cuando el recurso no tiene pantalla propia. */
-  seccion: { ruta: string; etiqueta: string } | null;
-};
-
-type Categoria = {
-  pista: string;
-  etiqueta: string;
-  icono: string;
-  seccion: { ruta: string; etiqueta: string };
-};
-
-const CATEGORIAS: readonly Categoria[] = [
-  {
-    pista: 'alerta',
-    etiqueta: 'Alerta',
-    icono: 'alertas',
-    seccion: { ruta: '/alertas', etiqueta: 'Alertas tempranas' },
-  },
-  {
-    pista: 'compromiso',
-    etiqueta: 'Compromiso',
-    icono: 'compromisos',
-    seccion: { ruta: '/compromisos', etiqueta: 'Compromisos' },
-  },
-  {
-    pista: 'documento',
-    etiqueta: 'Documento',
-    icono: 'documentos',
-    seccion: { ruta: '/documentos', etiqueta: 'Documentos' },
-  },
-  {
-    pista: 'caso',
-    etiqueta: 'Caso',
-    icono: 'casos',
-    seccion: { ruta: '/casos', etiqueta: 'Casos' },
-  },
-];
-
-/** `regla_por_vencer` → `Regla por vencer`; no hay título en el modelo. */
-function humanizar(valor: string): string {
-  const frase = valor.replace(/_/g, ' ').trim();
-  if (!frase) return 'Notificación';
-  return frase.charAt(0).toUpperCase() + frase.slice(1);
-}
-
-function estadoClave(valor: string | null): string {
-  return (valor ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
-    .toLowerCase();
-}
-
-function etiquetaEstado(valor: string | null): string {
-  switch (estadoClave(valor)) {
-    case 'leida':
-      return 'Leída';
-    case 'enviada':
-      return 'Enviada';
-    case 'pendiente':
-      return 'Pendiente';
-    default:
-      return valor?.trim() ? humanizar(valor) : 'Sin estado';
-  }
-}
-
-/** Estado de lectura visible: sólo `leida` cuenta como leída. */
-function etiquetaLectura(valor: string | null): string {
-  return estadoClave(valor) === 'leida' ? 'Leída' : 'No leída';
-}
-
-function claseLectura(valor: string | null): string {
-  return estadoClave(valor) === 'leida' ? 'state-approved' : 'state-pending';
-}
-
-/** Un elemento de `items[]`. */
-export function aNotificacion(bruto: unknown): Notificacion {
-  const registro: Registro = esRegistro(bruto) ? bruto : {};
-  const tipo = texto(registro, ['tipo']) ?? '';
-  const entidadTipo = texto(registro, ['entidadTipo', 'entidad_tipo']);
-  const pista = `${entidadTipo ?? ''} ${tipo}`.toLowerCase();
-  const categoria = CATEGORIAS.find((opcion) => pista.includes(opcion.pista)) ?? null;
-  const estado = texto(registro, ['estado']);
-
-  return {
-    id: texto(registro, ['id']) ?? '',
-    tipo,
-    titulo: humanizar(tipo),
-    categoria: categoria?.etiqueta ?? 'Sistema',
-    icono: categoria?.icono ?? 'campana',
-    entidadTipo,
-    entidadId: texto(registro, ['entidadId', 'entidad_id']),
-    venceEn: texto(registro, ['venceEn', 'vence_en']),
-    estado,
-    leida: estadoClave(estado) === 'leida',
-    creadaEn: texto(registro, ['createdAt', 'created_at']),
-    seccion: categoria ? categoria.seccion : null,
-  };
-}
-
-/** `YYYY-MM-DD` (o ISO completo) → `DD/MM/YYYY`, sin depender del locale. */
-export function formatearFecha(valor: string | null | undefined): string {
-  if (!valor) return '—';
-
-  const partes = valor.slice(0, 10).split('-');
-  if (partes.length !== 3) return valor;
-
-  const [anio, mes, dia] = partes;
-  if (!anio || !mes || !dia) return valor;
-
-  return `${dia}/${mes}/${anio}`;
-}
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ColumnaTabla,
+  type FilaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
+import {
+  ESTADOS_NOTIFICACION,
+  aColeccionNotificaciones,
+  agruparPorDia,
+  claseLectura,
+  enlaceNotificacion,
+  esEstadoFiltro,
+  estadoDeMarcado,
+  etiquetaEstado,
+  etiquetaEstadoFiltro,
+  etiquetaLectura,
+  etiquetaNoLeidas,
+  formatearFecha,
+  type EnlaceNotificacion,
+  type Notificacion,
+} from './notificacion.mapeo';
 
 type FiltrosNotificaciones = {
   pagina: number;
   tamano: number;
+  estado: string;
 };
 
 const FILTROS_INICIALES: FiltrosNotificaciones = {
   pagina: 1,
   tamano: TAMANO_PAGINA,
+  estado: '',
+};
+
+/** Reintento de la acción de lectura: una fila concreta o la bandeja entera. */
+type Reintento = { tipo: 'una'; id: string; leer: boolean } | { tipo: 'todas' };
+
+/** Mensaje en línea de una acción de lectura, con su reintento opcional. */
+type AvisoLectura = {
+  texto: string;
+  tipo: 'ok' | 'error';
+  reintento: Reintento | null;
 };
 
 /**
- * Bandeja de notificaciones.
+ * Centro de notificaciones.
  *
- * Listado paginado en servidor. La tabla `core.notificaciones` está vacía hoy:
- * el estado vacío es explícito y no se rellenan filas de ejemplo. Las no leídas
- * se marcan con el campo `estado`, sin ofrecer una acción que la API no tiene.
+ * Listado paginado en servidor con filtro por estado de lectura en la URL,
+ * agrupado por día en la tabla. El contador de no leídas sale del sobre
+ * (`noLeidas`), no de una segunda consulta ni de las filas visibles, así que
+ * vale para toda la bandeja y no sólo para la página.
+ *
+ * «Marcar como leída» usa `POST /v1/notifications/{id}/leer`; «Desmarcar» usa
+ * `PATCH /v1/notifications/{id}` con `estado=pendiente`; «Marcar todas» usa
+ * `POST /v1/notifications/leer-todas`. Tras cada acción se recarga lista y
+ * contador.
+ *
+ * El enlace abre la ficha del caso cuando la API entrega `entidadCodigo`; en
+ * cualquier otro caso abre la sección y la nota lo declara.
  */
 @Component({
   selector: 'app-notificaciones',
-  imports: [RouterLink, IconoComponent, PaginacionComponent, ExportarMenuComponent],
+  imports: [
+    RouterLink,
+    IconoComponent,
+    PaginacionComponent,
+    BarraSeleccionComponent,
+    TablaComponent,
+    CeldaTablaDirectiva,
+  ],
   templateUrl: './notificaciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -206,19 +111,21 @@ const FILTROS_INICIALES: FiltrosNotificaciones = {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
+    .contador {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #eef3f7;
+      color: #4f6480;
+      font: 700 12px/1.4 var(--font-display);
+      white-space: nowrap;
     }
 
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
+    .contador-vacio {
+      background: #f1f3f5;
+      color: #687783;
     }
 
     .notificacion {
@@ -234,8 +141,8 @@ const FILTROS_INICIALES: FiltrosNotificaciones = {
       height: 26px;
       flex: none;
       border-radius: 50%;
-      background: #eef3f7;
-      color: #5f7690;
+      background: var(--blue-pale);
+      color: var(--blue);
     }
 
     .notificacion-texto {
@@ -245,28 +152,61 @@ const FILTROS_INICIALES: FiltrosNotificaciones = {
       gap: 3px;
     }
 
-    .data-table tr.sin-leer td {
-      background: #fbfdff;
+    .notificacion-texto small {
+      color: var(--muted);
+      font-size: 12px;
     }
 
-    .data-table tr.sin-leer td:first-child {
-      box-shadow: inset 3px 0 0 #4f7fc4;
+    /* La fila no se puede teñir: el énfasis de «sin leer» queda en el título. */
+    .notificacion.sin-leer .notificacion-texto strong {
+      color: var(--ink-2);
     }
 
-    .data-table tr.sin-leer .notificacion-texto strong {
-      color: #1f3850;
+    /*
+     * La tabla compartida no tiene filas de grupo: el día viaja como rótulo en
+     * la primera fila de cada grupo, dentro de la celda que nombra el aviso.
+     */
+    .grupo-etiqueta {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 11px;
       font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .grupo-etiqueta small {
+      margin-left: 6px;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .aviso-ok {
+      color: #3f6b52;
+    }
+
+    .aviso-lectura {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .accion-leida {
+      white-space: nowrap;
     }
 
     .sin-dato {
-      color: #a0aab3;
+      color: var(--muted);
       font-style: italic;
     }
 
     .notificaciones-nota {
       margin: 0;
       color: #8b97a2;
-      font-size: 9px;
+      font-size: 12px;
       line-height: 1.55;
     }
 
@@ -280,47 +220,165 @@ const FILTROS_INICIALES: FiltrosNotificaciones = {
 export class NotificacionesPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
+
+  readonly estados = ESTADOS_NOTIFICACION;
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
-      map((params) => ({
-        pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
-        tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
-      })),
+      map((params) => {
+        const estado = params.get('estado') ?? '';
+        return {
+          pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
+          tamano: Math.max(
+            1,
+            Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA,
+          ),
+          estado: esEstadoFiltro(estado) ? estado : '',
+        };
+      }),
     ),
     { initialValue: FILTROS_INICIALES },
   );
 
   readonly filtros = computed(() => this.parametros());
 
-  private readonly listado = consulta<Coleccion<Notificacion>>({
+  private readonly listado = consulta({
     fuente: () => {
-      const { pagina, tamano } = this.parametros();
-      return urlConParametros(urlApi('/v1/notifications'), paramsDePagina({ pagina, tamano }));
+      const { pagina, tamano, estado } = this.parametros();
+      return urlConParametros(urlApi('/v1/notifications'), {
+        ...paramsDePagina({ pagina, tamano }),
+        estado,
+      });
     },
-    esquema: (bruto) => {
-      const coleccion = normalizarColeccion<unknown>(bruto);
-      return { ...coleccion, elementos: coleccion.elementos.map(aNotificacion) };
-    },
+    esquema: aColeccionNotificaciones,
   });
 
   readonly notificaciones = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
-  readonly sinLeerEnPagina = computed(
-    () => this.notificaciones().filter((notificacion) => !notificacion.leida).length,
-  );
+
+  /** Contador de no leídas del servidor; `null` mientras no llega la respuesta. */
+  readonly sinLeer = computed(() => this.listado.valor()?.noLeidas ?? null);
+
+  readonly textoContador = computed(() => etiquetaNoLeidas(this.sinLeer()));
+
+  /** El botón «Marcar todas» sólo se habilita si hay algo sin leer. */
+  readonly puedeMarcarTodas = computed(() => (this.sinLeer() ?? 0) > 0);
+
   readonly estadoListado = this.listado.estado;
   readonly errorListado = this.listado.error;
+
+  /** Fila cuya lectura se está guardando; bloquea las demás acciones. */
+  readonly enviandoId = signal<string | null>(null);
+
+  /** Acción «marcar todas» en curso. */
+  readonly marcandoTodas = signal(false);
+
+  /** Mensaje en línea del último intento de marcar o desmarcar. */
+  readonly aviso = signal<AvisoLectura | null>(null);
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  /** Ids marcados, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() => this.seleccion.lista());
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<Notificacion>();
+
+  /** Columnas del listado, en el orden de la bandeja. */
+  readonly columnas: readonly ColumnaTabla[] = [
+    { clave: 'notificacion', titulo: 'Notificación', ordenable: true },
+    { clave: 'categoria', titulo: 'Categoría', ordenable: true },
+    { clave: 'lectura', titulo: 'Lectura', ordenable: true },
+    {
+      clave: 'vence',
+      titulo: 'Vence',
+      ordenable: true,
+      acceso: (fila) => (fila as unknown as Notificacion).venceEn,
+      formato: (valor) => this.fecha(valor as string | null),
+    },
+    {
+      clave: 'registrada',
+      titulo: 'Registrada',
+      ordenable: true,
+      acceso: (fila) => (fila as unknown as Notificacion).creadaEn,
+      formato: (valor) => this.fecha(valor as string | null),
+    },
+    { clave: 'registro', titulo: 'Registro', ordenable: true },
+    { clave: 'acciones', titulo: 'Acciones', alineacion: 'centro' },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página ordena con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
+
+  private readonly accesores: Record<string, (notificacion: Notificacion) => unknown> = {
+    notificacion: (notificacion) => notificacion.titulo,
+    categoria: (notificacion) => notificacion.categoria,
+    lectura: (notificacion) => notificacion.leida,
+    vence: (notificacion) => notificacion.venceEn,
+    registrada: (notificacion) => notificacion.creadaEn,
+    registro: (notificacion) => notificacion.entidadCodigo ?? notificacion.seccion?.etiqueta ?? '',
+  };
+
+  readonly filasVisibles = computed(() =>
+    this.orden.ordenar(this.notificaciones(), this.accesores),
+  );
+
+  /** Filas visibles agrupadas por día de registro, conservando el orden. */
+  private readonly grupos = computed(() => agruparPorDia(this.filasVisibles()));
+
+  /**
+   * Filas aplanadas con la etiqueta del día en la primera de cada grupo: la
+   * tabla compartida no admite filas de grupo, así que el rótulo viaja en la
+   * celda que nombra el aviso.
+   */
+  readonly filasConGrupo = computed<readonly FilaTabla[]>(() =>
+    this.grupos().flatMap((grupo) =>
+      grupo.notificaciones.map((notificacion, indice) => ({
+        ...notificacion,
+        inicioGrupo: indice === 0,
+        etiquetaGrupo: grupo.etiqueta,
+        cuentaGrupo: grupo.notificaciones.length,
+      })),
+    ),
+  );
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  alCambiarSeleccion(ids: readonly string[]): void {
+    // Un aviso sin id real llega como `#índice`: no se puede exportar.
+    const marcadas = new Set(ids.filter((id) => !!id && !id.startsWith('#')));
+    for (const id of this.seleccion.lista()) {
+      if (!marcadas.has(id)) this.seleccion.alternar(id);
+    }
+    for (const id of marcadas) {
+      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+    }
+  }
+
+  readonly sinLeerEnPagina = computed(
+    () => this.notificaciones().filter((notificacion) => !notificacion.leida).length,
+  );
+
   /** Leyenda de la tabla; se arma aquí para no partir `@if` dentro de `<caption>`. */
   readonly resumenTabla = computed(() => {
     const partes = [`Total: ${this.total()}`];
+    const { estado } = this.filtros();
+    if (estado) partes.push(`filtro: ${etiquetaEstadoFiltro(estado)}`);
     const sinLeer = this.sinLeerEnPagina();
     if (sinLeer > 0) partes.push(`${sinLeer} sin leer en esta página`);
-    partes.push('orden del servidor, más recientes primero');
+    partes.push(`${this.textoContador()} en la bandeja`);
     return `${partes.join(' · ')}.`;
   });
 
@@ -332,12 +390,76 @@ export class NotificacionesPage {
     return etiquetaEstado(valor);
   }
 
-  lecturaEtiqueta(valor: string | null): string {
-    return etiquetaLectura(valor);
+  estadoFiltroEtiqueta(valor: string): string {
+    return etiquetaEstadoFiltro(valor);
   }
 
-  lecturaClase(valor: string | null): string {
-    return claseLectura(valor);
+  lecturaEtiqueta(notificacion: Notificacion): string {
+    return etiquetaLectura(notificacion.estado, notificacion.leidoEn);
+  }
+
+  lecturaClase(notificacion: Notificacion): string {
+    return claseLectura(notificacion.estado, notificacion.leidoEn);
+  }
+
+  enlace(notificacion: Notificacion): EnlaceNotificacion | null {
+    return enlaceNotificacion(notificacion);
+  }
+
+  pistaEnlace(notificacion: Notificacion): string {
+    const enlace = enlaceNotificacion(notificacion);
+    if (!enlace) return 'El aviso no tiene un registro asociado';
+    if (enlace.concreta) return `Abrir la ficha del ${enlace.etiqueta}`;
+    return `Abrir la sección ${enlace.etiqueta}; el aviso no trae el código del registro`;
+  }
+
+  etiquetaAccion(notificacion: Notificacion): string {
+    return notificacion.leida ? 'Desmarcar' : 'Marcar como leída';
+  }
+
+  ariaAccion(notificacion: Notificacion): string {
+    const accion = notificacion.leida ? 'Desmarcar' : 'Marcar como leída';
+    return `${accion} la notificación ${notificacion.titulo}`;
+  }
+
+  /** Marca o deshace la lectura de una fila. */
+  cambiarLectura(notificacion: Notificacion, leida: boolean): void {
+    if (!notificacion.id || this.enviandoId() || this.marcandoTodas()) return;
+    if (leida) {
+      this.enviarLeer(notificacion.id);
+    } else {
+      this.enviarDesmarcar(notificacion.id);
+    }
+  }
+
+  /** Marca como leídas todas las notificaciones sin leer de la bandeja. */
+  marcarTodas(): void {
+    if (this.enviandoId() || this.marcandoTodas() || !this.puedeMarcarTodas()) return;
+    this.enviarLeerTodas();
+  }
+
+  /** Reintenta la última acción de lectura que falló. */
+  reintentarLectura(): void {
+    const aviso = this.aviso();
+    if (!aviso?.reintento || this.enviandoId() || this.marcandoTodas()) return;
+
+    const reintento = aviso.reintento;
+    if (reintento.tipo === 'todas') {
+      this.enviarLeerTodas();
+    } else if (reintento.leer) {
+      this.enviarLeer(reintento.id);
+    } else {
+      this.enviarDesmarcar(reintento.id);
+    }
+  }
+
+  cambiarEstado(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    this.actualizar({ estado: esEstadoFiltro(valor) ? valor : '', pagina: 1 });
+  }
+
+  limpiar(): void {
+    this.actualizar({ estado: '', pagina: 1 });
   }
 
   cambiarPagina(pagina: number): void {
@@ -356,12 +478,120 @@ export class NotificacionesPage {
     this.exportarError.set(mensaje);
   }
 
+  private enviarLeer(id: string): void {
+    this.enviandoId.set(id);
+    this.aviso.set(null);
+
+    this.http
+      .post<unknown>(urlApi(`/v1/notifications/${encodeURIComponent(id)}/leer`), {})
+      .subscribe({
+        next: () => {
+          this.enviandoId.set(null);
+          this.aviso.set({
+            tipo: 'ok',
+            texto: 'Notificación marcada como leída.',
+            reintento: null,
+          });
+          this.recargar();
+        },
+        error: (fallo: unknown) => {
+          this.enviandoId.set(null);
+          this.aviso.set({
+            tipo: 'error',
+            texto: this.mensajeDeError(fallo),
+            reintento: { tipo: 'una', id, leer: true },
+          });
+        },
+      });
+  }
+
+  private enviarDesmarcar(id: string): void {
+    this.enviandoId.set(id);
+    this.aviso.set(null);
+
+    this.http
+      .patch<unknown>(urlApi(`/v1/notifications/${encodeURIComponent(id)}`), {
+        estado: estadoDeMarcado(false),
+      })
+      .subscribe({
+        next: () => {
+          this.enviandoId.set(null);
+          this.aviso.set({
+            tipo: 'ok',
+            texto: 'Notificación devuelta a «sin leer».',
+            reintento: null,
+          });
+          this.recargar();
+        },
+        error: (fallo: unknown) => {
+          this.enviandoId.set(null);
+          this.aviso.set({
+            tipo: 'error',
+            texto: this.mensajeDeError(fallo),
+            reintento: { tipo: 'una', id, leer: false },
+          });
+        },
+      });
+  }
+
+  private enviarLeerTodas(): void {
+    this.marcandoTodas.set(true);
+    this.aviso.set(null);
+
+    this.http.post<unknown>(urlApi('/v1/notifications/leer-todas'), {}).subscribe({
+      next: (bruto) => {
+        this.marcandoTodas.set(false);
+        const actualizadas = this.actualizadasDe(bruto);
+        this.aviso.set({
+          tipo: 'ok',
+          texto:
+            actualizadas === 0
+              ? 'No había notificaciones sin leer.'
+              : `Se marcaron ${actualizadas} ${
+                  actualizadas === 1 ? 'notificación' : 'notificaciones'
+                } como leídas.`,
+          reintento: null,
+        });
+        this.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.marcandoTodas.set(false);
+        this.aviso.set({
+          tipo: 'error',
+          texto: this.mensajeDeError(fallo),
+          reintento: { tipo: 'todas' },
+        });
+      },
+    });
+  }
+
+  private actualizadasDe(bruto: unknown): number {
+    if (typeof bruto === 'object' && bruto !== null && 'actualizadas' in bruto) {
+      const valor = (bruto as { actualizadas: unknown }).actualizadas;
+      if (typeof valor === 'number' && Number.isFinite(valor)) return valor;
+    }
+    return 0;
+  }
+
+  private mensajeDeError(fallo: unknown): string {
+    const error = aErrorApi(fallo);
+    if (error.estado === 404) {
+      return 'La notificación ya no existe o no le pertenece.';
+    }
+    if (error.esProhibido) {
+      return 'Su rol no permite cambiar el estado de esta notificación.';
+    }
+    return error.message;
+  }
+
   private actualizar(cambios: Partial<FiltrosNotificaciones>): void {
     const siguiente = { ...this.parametros(), ...cambios };
+    this.aviso.set(null);
 
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {
+        estado: siguiente.estado || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
       },

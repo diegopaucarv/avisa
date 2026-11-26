@@ -557,6 +557,17 @@
             .drawer-row .t {
                 color: var(--ink-2);
             }
+            .drawer-tags {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 3px;
+            }
+            .drawer-row .conf {
+                color: var(--muted);
+                font-size: 8px;
+                white-space: nowrap;
+            }
             .drawer-foot {
                 margin-top: auto;
                 padding: 8px 13px;
@@ -589,10 +600,10 @@
                         Pantalla de entrada de la SPA. Integra el resumen KPI,
                         las bandas por alcance, el selector de ámbito y la tabla
                         regional de la variante geográfica; conserva además los
-                        círculos por región sobre un lienzo referencial. El lienzo
-                        OSM <b>se conserva</b> (X2 resuelto) y se rotula «Mapa
-                        referencial · sin ubigeo distrital». Debajo del mapa,
-                        los casos priorizados por gravedad y antigüedad.
+                        círculos por región sobre un lienzo referencial. El
+                        lienzo OSM <b>se conserva</b> (X2 resuelto) y se rotula
+                        «Mapa referencial · sin ubigeo distrital». Debajo del
+                        mapa, los casos priorizados por gravedad y antigüedad.
                     </p>
                 </div>
                 <div>
@@ -610,11 +621,13 @@
                     textos de apoyo) · <b>90</b> (X2 resuelto: el lienzo se
                     conserva y el mapa no se retira) · <b>91</b> («Alcance
                     geográfico», notas fuera) · <b>92</b> (selector fijo y
-                    «Casos abiertos» ordenable) · <b>109</b> («Ver casos» en
-                    cajón) · <b>118</b> (casos priorizados bajo el mapa).
-                    <br /><b>Diseño por lote:</b>
+                    «Latentes / manifiestos» ordenable) · <b>109</b> («Ver
+                    casos» en cajón) · <b>118</b> (casos priorizados bajo el
+                    mapa). <br /><b>Diseño por lote:</b>
                     Lote B · Panorama, alertas y directorios (89, 90, 91, 92,
                     109, 118).
+                    <br /><b>X3 · 2026-11-23:</b> vocabulario latente /
+                    manifiesto implementado; no se añade un estado nuevo.
                 </div>
                 <div class="ann-card">
                     <h3>
@@ -732,7 +745,10 @@
                 <span class="fix">Textos de apoyo fuera</span>
                 <span class="fix">«Alcance geográfico»</span>
                 <span class="fix">Selector de ámbito fijo</span>
-                <span class="fix">«Casos abiertos» ordenable</span>
+                <span class="fix">«Latentes / manifiestos» ordenable</span>
+                <span class="fix"
+                    >X3 · latente/manifiesto implementado 2026-11-23</span
+                >
                 <span class="fix"
                     >«Ver casos» en cajón con fondo desenfocado</span
                 >
@@ -758,15 +774,13 @@
 
             <!-- Tarjetas: sin textos de apoyo -->
             <div class="kpis">
-                <div class="kpi"><b>34</b><span>Casos abiertos</span></div>
+                <div class="kpi"><b>20</b><span>Casos latentes</span></div>
+                <div class="kpi"><b>13</b><span>Casos manifiestos</span></div>
                 <div class="kpi">
                     <b>9</b><span>Regiones con al menos un caso</span>
                 </div>
                 <div class="kpi">
                     <b>1</b><span>Casos con riesgo alto</span>
-                </div>
-                <div class="kpi zero">
-                    <b>0</b><span>En Crisis social</span>
                 </div>
                 <div class="kpi"><b>12</b><span>Casos sin región</span></div>
             </div>
@@ -779,7 +793,8 @@
                             <h2 class="card-title">Mapa referencial</h2>
                             <p class="card-sub">
                                 Círculos por región sobre el lienzo OSM; el
-                                tamaño es el número de casos abiertos.
+                                tamaño refleja el total de casos (latentes y
+                                manifiestos).
                             </p>
                         </div>
                         <span class="tag ref">OSM · referencial</span>
@@ -841,7 +856,7 @@
                                 stroke-width="1"
                                 opacity="0.6"
                             />
-                            <!-- círculos por región (tamaño = casos abiertos) -->
+                            <!-- círculos por región (tamaño = total de casos) -->
                             <g
                                 fill="#2455a2"
                                 fill-opacity="0.72"
@@ -935,7 +950,8 @@
 
                     <div class="legend">
                         <span
-                            ><i class="big"></i>Casos abiertos por región</span
+                            ><i class="big"></i>Latentes y manifiestos por
+                            región</span
                         >
                         <span><i class="dot"></i>Activos PRODUCE · KML</span>
                         <span
@@ -1084,7 +1100,7 @@
                         <div class="card-head">
                             <div>
                                 <h2 class="card-title">
-                                    Casos abiertos por región
+                                    Latentes y manifiestos por región
                                 </h2>
                                 <p class="card-sub">
                                     Regiones con al menos un caso · orden
@@ -1098,7 +1114,7 @@
                                     <th>Región</th>
                                     <th>Ámbito</th>
                                     <th class="num sortable">
-                                        Casos abiertos
+                                        Latentes / manifiestos
                                         <span class="arrow">▼</span>
                                     </th>
                                     <th class="num">Riesgo alto</th>
@@ -1109,7 +1125,7 @@
                                 <tr>
                                     <td class="strong">Lima</td>
                                     <td>Centro</td>
-                                    <td class="num strong">5</td>
+                                    <td class="num strong">2 / 3</td>
                                     <td class="num">1</td>
                                     <td>
                                         <button class="link" type="button">
@@ -1120,7 +1136,7 @@
                                 <tr>
                                     <td class="strong">Piura</td>
                                     <td>Norte</td>
-                                    <td class="num strong">5</td>
+                                    <td class="num strong">2 / 3</td>
                                     <td class="num">0</td>
                                     <td>
                                         <button class="link" type="button">
@@ -1131,7 +1147,7 @@
                                 <tr>
                                     <td class="strong">Callao</td>
                                     <td>Centro</td>
-                                    <td class="num strong">3</td>
+                                    <td class="num strong">1 / 2</td>
                                     <td class="num">0</td>
                                     <td>
                                         <button class="link" type="button">
@@ -1142,7 +1158,7 @@
                                 <tr>
                                     <td class="strong">Ica</td>
                                     <td>Centro</td>
-                                    <td class="num strong">2</td>
+                                    <td class="num strong">1 / 1</td>
                                     <td class="num">0</td>
                                     <td>
                                         <button class="link" type="button">
@@ -1153,7 +1169,7 @@
                                 <tr>
                                     <td class="strong">Arequipa</td>
                                     <td>Sur</td>
-                                    <td class="num strong">2</td>
+                                    <td class="num strong">2 / 0</td>
                                     <td class="num">0</td>
                                     <td>
                                         <button class="link" type="button">
@@ -1164,7 +1180,7 @@
                                 <tr>
                                     <td class="strong">Loreto</td>
                                     <td>Oriente</td>
-                                    <td class="num strong">2</td>
+                                    <td class="num strong">2 / 0</td>
                                     <td class="num">0</td>
                                     <td>
                                         <button class="link" type="button">
@@ -1175,7 +1191,7 @@
                                 <tr>
                                     <td class="strong">Lambayeque</td>
                                     <td>Norte</td>
-                                    <td class="num strong">1</td>
+                                    <td class="num strong">1 / 0</td>
                                     <td class="num">0</td>
                                     <td>
                                         <button class="link" type="button">
@@ -1186,7 +1202,7 @@
                                 <tr>
                                     <td class="strong">Moquegua</td>
                                     <td>Sur</td>
-                                    <td class="num strong">1</td>
+                                    <td class="num strong">1 / 0</td>
                                     <td class="num">0</td>
                                     <td>
                                         <button class="link" type="button">
@@ -1197,7 +1213,7 @@
                                 <tr>
                                     <td class="strong">Tumbes</td>
                                     <td>Norte</td>
-                                    <td class="num strong">1</td>
+                                    <td class="num strong">1 / 0</td>
                                     <td class="num">0</td>
                                     <td>
                                         <button class="link" type="button">
@@ -1208,7 +1224,16 @@
                                 <tr style="background: #fbfcfd">
                                     <td class="strong">Sin región</td>
                                     <td>—</td>
-                                    <td class="num strong">12</td>
+                                    <td class="num strong">
+                                        7 / 4<br /><span
+                                            style="
+                                                color: #8b97a1;
+                                                font-size: 8px;
+                                                font-weight: 400;
+                                            "
+                                            >+1 sin nivel</span
+                                        >
+                                    </td>
                                     <td class="num">0</td>
                                     <td>
                                         <button class="link" type="button">
@@ -1223,9 +1248,7 @@
                     <div class="card">
                         <div class="card-head">
                             <div>
-                                <h2 class="card-title">
-                                    Casos abiertos por ámbito
-                                </h2>
+                                <h2 class="card-title">Casos por ámbito</h2>
                                 <p class="card-sub">
                                     Alcance calculado desde las regiones del
                                     caso (item 6).
@@ -1285,7 +1308,7 @@
                     >
                         <div class="drawer-head">
                             <div>
-                                <h4>Piura · 5 casos abiertos</h4>
+                                <h4>Piura · 2 latentes · 3 manifiestos</h4>
                                 <p>Ámbito Norte · sólo lectura</p>
                             </div>
                             <span class="tag">Cerrar</span>
@@ -1299,7 +1322,10 @@
                                         Los Órganos
                                     </div>
                                 </div>
-                                <span class="risk bajo">Bajo</span>
+                                <div class="drawer-tags">
+                                    <span class="conf">Controversia</span>
+                                    <span class="risk bajo">Bajo</span>
+                                </div>
                             </div>
                             <div class="drawer-row">
                                 <div>
@@ -1308,7 +1334,10 @@
                                         Ocupación informal del predio del PIP
                                     </div>
                                 </div>
-                                <span class="risk mod">Moderado</span>
+                                <div class="drawer-tags">
+                                    <span class="conf">Conflicto social</span>
+                                    <span class="risk mod">Moderado</span>
+                                </div>
                             </div>
                             <div class="drawer-row">
                                 <div>
@@ -1317,14 +1346,20 @@
                                         Áreas acuáticas y maricultura en Sechura
                                     </div>
                                 </div>
-                                <span class="risk mod">Moderado</span>
+                                <div class="drawer-tags">
+                                    <span class="conf">Controversia</span>
+                                    <span class="risk mod">Moderado</span>
+                                </div>
                             </div>
                             <div class="drawer-row">
                                 <div>
                                     <span class="c">CS-PA-INF-2024-01</span>
                                     <div class="t">Rehabilitación del DPA</div>
                                 </div>
-                                <span class="risk bajo">Bajo</span>
+                                <div class="drawer-tags">
+                                    <span class="conf">Conflicto social</span>
+                                    <span class="risk bajo">Bajo</span>
+                                </div>
                             </div>
                             <div class="drawer-row">
                                 <div>
@@ -1334,7 +1369,10 @@
                                         hidrocarburos
                                     </div>
                                 </div>
-                                <span class="risk mod">Moderado</span>
+                                <div class="drawer-tags">
+                                    <span class="conf">Conflicto social</span>
+                                    <span class="risk mod">Moderado</span>
+                                </div>
                             </div>
                         </div>
                         <div class="drawer-foot">
@@ -1349,12 +1387,17 @@
                     </div>
                 </div>
                 <p class="foot">
-                    Cifras del corte del 22.11.2026 sobre los 34 casos abiertos
-                    usados en el catálogo. En producción cada tarjeta y cada
-                    fila se leen de <code>GET /v1/cases?conteos=true</code> por
-                    región; el mockup no estima ninguna. El lienzo reproduce la
-                    decisión de producto: se conserva y se sustituye por la capa
-                    distrital cuando exista el ubigeo.
+                    Cifras del corte del 22.11.2026. Latentes y manifiestos se
+                    obtienen agrupando
+                    <code>core.cat_niveles_conflicto</code> (§7.5.1): latente =
+                    Diferencia + Controversia; manifiesto = Conflicto social +
+                    Crisis social. Los casos sin nivel declarado se declaran
+                    aparte y no se estiman: el único del corte aparece en «Sin
+                    región». El reparto por región es ilustrativo; en producción
+                    cada tarjeta y cada fila se leen de
+                    <code>GET /v1/cases?conteos=true</code> por región. El
+                    lienzo reproduce la decisión de producto: se conserva y se
+                    sustituye por la capa distrital cuando exista el ubigeo.
                 </p>
             </div>
         </main>

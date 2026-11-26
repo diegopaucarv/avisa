@@ -1,4 +1,4 @@
-<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+<div class="drawer-scrim" (keydown)="alTecla($event)">
   <aside
     #panel
     class="drawer"
@@ -9,12 +9,13 @@
   >
     <header class="drawer-head">
       <div>
-        <p class="previa-codigo">{{ caso().codigo }}</p>
+        <div class="previa-cabecera">
+          <p class="previa-codigo">📁 {{ caso().codigo }}</p>
+          <span class="previa-actualizacion"
+            >🕒 Última actualización: {{ fechaTexto(caso().actualizado) }}</span
+          >
+        </div>
         <h2 id="vista-previa-titulo">{{ caso().titulo }}</h2>
-        <p class="previa-sub">
-          Actualización: {{ fechaCorta(caso().actualizado) }} · Región:
-          {{ caso().region || 'sin región' }}
-        </p>
       </div>
 
       <button
@@ -29,50 +30,25 @@
 
     <div class="drawer-body">
       <div class="previa-badges">
-        <span class="status-badge">{{ caso().nivelConflicto }}</span>
-        <span class="status-badge" [class]="'status-badge risk-' + caso().riesgo.toLowerCase()">
+        <span class="status-badge"
+          >Nivel de conflictividad: {{ caso().nivelConflicto || 'Sin declarar' }}</span
+        >
+        <span [class]="claseRiesgo()">
           <span class="status-dot"></span>
-          Nivel de riesgo: {{ caso().riesgo }}
+          Nivel de riesgo: {{ riesgoVisible() }}
         </span>
-        <span class="status-badge">{{ caso().estado }}</span>
+        <span class="status-badge">📍 Región: {{ caso().region || 'Sin región' }}</span>
+        <span class="status-badge">Estado: {{ caso().estado }}</span>
       </div>
 
+      <h3 class="previa-resumen-titulo">☰ Resumen del caso</h3>
       <p class="previa-resumen">{{ caso().resumen || 'Sin resumen registrado.' }}</p>
-
-      <dl class="previa-meta">
-        <div>
-          <dt>Temática</dt>
-          <dd>{{ caso().tematica || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Naturaleza del caso</dt>
-          <dd>{{ caso().naturaleza || 'Sin declarar' }}</dd>
-        </div>
-        <div>
-          <dt>Componente del ciclo</dt>
-          <dd>{{ caso().etapa }}</dd>
-        </div>
-        <div>
-          <dt>Prioridad de atención</dt>
-          <dd>{{ caso().prioridad }}</dd>
-        </div>
-        <div>
-          <dt>Inicio</dt>
-          <dd>{{ fechaCorta(caso().inicio) }}</dd>
-        </div>
-      </dl>
 
       <ul class="previa-accesos">
         <li>
           <a class="previa-acceso" [routerLink]="['/casos', caso().codigo]" fragment="eventos-caso">
             <app-icono nombre="actividad" [tamano]="14" />
             Línea de tiempo
-          </a>
-        </li>
-        <li>
-          <a class="previa-acceso" [routerLink]="['/casos', caso().codigo]" fragment="actores-caso">
-            <app-icono nombre="actores" [tamano]="14" />
-            Mapa de actores
           </a>
         </li>
         <li>
@@ -86,20 +62,72 @@
           </a>
         </li>
         <li>
-          <span class="previa-acceso" aria-disabled="true">
+          <a
+            class="previa-acceso"
+            [routerLink]="['/casos', caso().codigo]"
+            fragment="demandas-caso"
+          >
+            <app-icono nombre="bandeja" [tamano]="14" />
+            Demandas
+          </a>
+        </li>
+        <li>
+          <a
+            class="previa-acceso"
+            [routerLink]="['/casos', caso().codigo]"
+            fragment="documentos-caso"
+          >
             <app-icono nombre="documentos" [tamano]="14" />
-            <span>
+            Documentos
+          </a>
+        </li>
+        <li>
+          <a class="previa-acceso" [routerLink]="['/casos', caso().codigo]" fragment="actores-caso">
+            <app-icono nombre="actores" [tamano]="14" />
+            Actores
+          </a>
+        </li>
+        <li class="previa-canva">
+          @if (caso().enlaceAnalisis; as enlace) {
+            <a class="previa-acceso" [href]="enlace" target="_blank" rel="noopener noreferrer">
+              <app-icono nombre="ojo" [tamano]="14" />
               Caso de análisis (Canva)
-              <small>Sin enlace: el caso no guarda un tablero asociado.</small>
-            </span>
-          </span>
+            </a>
+          } @else if (editandoCanva()) {
+            <form class="previa-canva-editor" (submit)="guardarCanva($event)">
+              <input
+                type="url"
+                [value]="borradorCanva()"
+                placeholder="https://www.canva.com/design/…"
+                aria-label="URL del tablero de Canva"
+                (input)="alEscribirCanva($event)"
+              />
+              <button type="submit" class="button-primary" [disabled]="!borradorCanva().trim()">
+                Guardar
+              </button>
+              <button type="button" class="button-secondary" (click)="cancelarCanva()">
+                Cancelar
+              </button>
+            </form>
+          } @else {
+            <button
+              type="button"
+              class="previa-acceso previa-canva-vacio"
+              [disabled]="!puedeEditar()"
+              (click)="abrirCanva()"
+            >
+              <app-icono nombre="documentos" [tamano]="14" />
+              <span>
+                Caso de análisis (Canva)
+                <small>Vacío</small>
+              </span>
+              @if (puedeEditar()) {
+                <span class="previa-canva-mas" aria-hidden="true">＋</span>
+              }
+            </button>
+          }
         </li>
       </ul>
-
-      <p class="previa-nota">
-        La línea de tiempo, el mapa de actores y los acuerdos abren la sección correspondiente del
-        expediente del caso.
-      </p>
     </div>
 
     <footer class="drawer-foot">

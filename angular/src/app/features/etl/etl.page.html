@@ -1,0 +1,802 @@
+<section class="view-body" aria-labelledby="titulo-etl">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-etl">Consola ETL</h1>
+      <p class="view-subtitle">
+        Extracción, transformación y carga. Esta pantalla muestra el estado real de la base y de las
+        migraciones aplicadas; el motor de extracción todavía no existe.
+      </p>
+    </div>
+    <div class="view-actions">
+      <button type="button" class="button-secondary" (click)="recargar()">
+        <app-icono nombre="reloj-mas" [tamano]="14" />
+        Recargar
+      </button>
+    </div>
+  </header>
+
+  @if (estadoResumen() === 'error') {
+  <p class="form-error" role="alert">{{ errorResumen()?.message }}</p>
+  }
+
+  <nav class="etl-tabs" role="tablist" aria-label="Vistas de la consola ETL">
+    <button
+      type="button"
+      role="tab"
+      id="tab-extraccion"
+      aria-controls="panel-extraccion"
+      data-tab="extraccion"
+      [attr.aria-selected]="pestana() === 'extraccion'"
+      [attr.tabindex]="pestana() === 'extraccion' ? 0 : -1"
+      (click)="seleccionarPestana('extraccion')"
+      (keydown)="alTeclaPestana($event)"
+    >
+      Extracción
+    </button>
+    <button
+      type="button"
+      role="tab"
+      id="tab-fuentes"
+      aria-controls="panel-fuentes"
+      data-tab="fuentes"
+      [attr.aria-selected]="pestana() === 'fuentes'"
+      [attr.tabindex]="pestana() === 'fuentes' ? 0 : -1"
+      (click)="seleccionarPestana('fuentes')"
+      (keydown)="alTeclaPestana($event)"
+    >
+      Fuentes <span class="etl-tab-num">{{ fuentesTotal() }}</span>
+    </button>
+    <button
+      type="button"
+      role="tab"
+      id="tab-historial"
+      aria-controls="panel-historial"
+      data-tab="historial"
+      [attr.aria-selected]="pestana() === 'historial'"
+      [attr.tabindex]="pestana() === 'historial' ? 0 : -1"
+      (click)="seleccionarPestana('historial')"
+      (keydown)="alTeclaPestana($event)"
+    >
+      Historial <span class="etl-tab-num">{{ migracionesTotal() }}</span>
+    </button>
+  </nav>
+
+  <!-- ═════════════════════════ 1 · EXTRACCIÓN ═════════════════════════ -->
+  @if (pestana() === 'extraccion') {
+  <section
+    class="etl-panel"
+    id="panel-extraccion"
+    role="tabpanel"
+    aria-labelledby="tab-extraccion"
+    tabindex="0"
+  >
+    <div class="etl-banner">
+      <span class="mk" aria-hidden="true">▲</span>
+      <div>
+        <b>No hay motor conectado.</b> El texto de la izquierda y las propuestas de la derecha
+        describen la forma de la revisión, pero no se ejecutan: no existe un endpoint que analice
+        material. El botón <b>Analizar</b> está deshabilitado por eso.
+      </div>
+    </div>
+
+    <div class="etl-split">
+      <!-- Entrada -->
+      <article class="surface etl-card" aria-labelledby="etl-entrada">
+        <div class="etl-card-head">
+          <div>
+            <h2 class="etl-card-title" id="etl-entrada">1 · Entrada</h2>
+            <p class="etl-card-sub">
+              El usuario entrega el material en el formato en que lo tiene. El sistema no obliga a
+              trocearlo a mano.
+            </p>
+          </div>
+          <span class="etl-tag off">Forma</span>
+        </div>
+
+        <div class="etl-fields">
+          <div class="etl-field">
+            <span class="etl-lab" id="etl-lab-origen">Origen del material</span>
+            <div class="segmented" role="group" aria-labelledby="etl-lab-origen">
+              @for (opcion of origenes; track opcion.clave) {
+              <button
+                type="button"
+                [attr.aria-pressed]="origen() === opcion.clave"
+                (click)="cambiarOrigen(opcion.clave)"
+              >
+                {{ opcion.etiqueta }}
+              </button>
+              }
+            </div>
+            @if (origen() !== 'texto') {
+            <span class="etl-hint">
+              La carga de archivos y planillas no está disponible: falta el endpoint de carga del
+              motor de ETL. El selector sólo cambia la forma de la pantalla.
+            </span>
+            }
+          </div>
+
+          <div class="etl-field">
+            <label class="etl-lab" for="etl-texto">Descripción larga</label>
+            <textarea
+              id="etl-texto"
+              spellcheck="false"
+              [value]="texto()"
+              placeholder="Pega aquí el texto del oficio, acta, reporte o matriz."
+              (input)="alEscribir($event)"
+            ></textarea>
+            <span class="etl-hint">
+              Lo escrito no se envía a ningún servidor. En la base, un texto así se repartiría entre
+              <code>core.caso_cronologia</code>, <code>core.demandas</code> y
+              <code>core.compromisos</code>.
+            </span>
+          </div>
+
+          <div class="etl-field">
+            <span class="etl-lab" id="etl-lab-destino">Destino principal</span>
+            <div class="segmented" role="group" aria-labelledby="etl-lab-destino">
+              @for (opcion of destinosPrincipales; track opcion.clave) {
+              <button
+                type="button"
+                [attr.aria-pressed]="destino() === opcion.clave"
+                (click)="cambiarDestino(opcion.clave)"
+              >
+                {{ opcion.etiqueta }}
+              </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="etl-row">
+          <button
+            type="button"
+            class="button-primary"
+            disabled
+            title="Falta el endpoint de análisis: no existe motor de extracción."
+          >
+            Analizar
+          </button>
+          <button
+            type="button"
+            class="button-secondary"
+            [disabled]="texto().length === 0"
+            (click)="limpiar()"
+          >
+            Limpiar
+          </button>
+          <span class="etl-tag off">Sin endpoint</span>
+        </div>
+      </article>
+
+      <!-- Propuesta -->
+      <article class="surface etl-card" aria-labelledby="etl-propuesta">
+        <div class="etl-card-head">
+          <div>
+            <h2 class="etl-card-title" id="etl-propuesta">2 · Propuesta del agente</h2>
+            <p class="etl-card-sub">
+              Agrupada por tabla destino. Cada registro se acepta, edita o descarta por separado:
+              nunca se aplica todo de golpe.
+            </p>
+          </div>
+          <div class="etl-tags">
+            <span class="etl-tag off">0 propuestas</span>
+            <span class="etl-tag off">Sin motor</span>
+          </div>
+        </div>
+
+        <p class="etl-empty">
+          No hay propuestas. El agente no está conectado: no existe un endpoint que analice texto y
+          devuelva registros candidatos. Este bloque queda vacío a propósito.
+        </p>
+
+        <div class="etl-destino-bloque">
+          <h3 class="etl-subtitle">Destino declarado: {{ etiquetaDestinoActual() }}</h3>
+          <dl class="etl-pairs">
+            @for (tabla of tablasDestino(); track tabla.clave) {
+            <dt><code class="etl-codigo">{{ tabla.clave }}</code></dt>
+            <dd>
+              @if (estadoResumen() !== 'listo') { — } @else if (tabla.filas === null) { sin dato: la
+              tabla no aparece en los conteos } @else if (tabla.filas === 0) { existe vacía · 0
+              filas } @else { {{ formatearNumero(tabla.filas) }} filas }
+            </dd>
+            }
+          </dl>
+          <span class="etl-hint">
+            Conteo real de las tablas donde caería este destino. El formulario no escribe nada.
+          </span>
+        </div>
+
+        <div class="etl-row">
+          <button
+            type="button"
+            class="button-secondary"
+            disabled
+            title="Falta el endpoint de propuestas: no existe forma de crearlas a mano."
+          >
+            Agregar propuesta a mano
+          </button>
+          <button
+            type="button"
+            class="button-secondary"
+            disabled
+            title="Falta el endpoint de aplicación por lote y la transacción que lo respalde."
+          >
+            Aplicar aceptadas (0)
+          </button>
+        </div>
+        <p class="etl-callout">
+          Aplicar exige endpoint y transacción por lote. Hoy no existe: la pantalla no lo simula.
+        </p>
+      </article>
+    </div>
+
+    <!-- Dónde aplica -->
+    <article class="surface etl-card" aria-labelledby="etl-destinos">
+      <div class="etl-card-head">
+        <div>
+          <h2 class="etl-card-title" id="etl-destinos">3 · Dónde aplica en AVISA</h2>
+          <p class="etl-card-sub">
+            Los puntos del aplicativo donde hoy entra un texto largo y debería salir una o varias
+            filas. La última columna se calcula con los conteos reales de la base.
+          </p>
+        </div>
+        <span class="etl-tag">Inventario</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table etl-tabla-destinos">
+          <thead>
+            <tr>
+              <th scope="col">Entrada que el usuario tiene</th>
+              <th scope="col">Qué produce</th>
+              <th scope="col">Tabla y campos destino</th>
+              <th scope="col">Estado del dato</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of filasDestino(); track item.fila.clave) {
+            <tr>
+              <td>{{ item.fila.entrada }}</td>
+              <td>{{ item.fila.produce }}</td>
+              <td class="etl-destino-celda">
+                @for (token of item.fila.destino; track $index) { @if (esCodigo(token)) {
+                <code>{{ token.valor }}</code>
+                } @else { {{ token.valor }} } }
+              </td>
+              <td>
+                @if (estadoResumen() === 'listo') {
+                <span [class]="tonoDe(item.estado)">{{ item.estado.etiqueta }}</span>
+                @if (item.estado.detalle) {
+                <span class="etl-nodato"> · {{ item.estado.detalle }}</span>
+                } } @else {
+                <span class="etl-st nodata">sin dato</span>
+                }
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <p class="etl-hint">
+        Donde la última columna dice «no existe», la interfaz no dibuja el bloque: lo declara. La
+        validación por fragmento y el OCR con página y offset dependen de
+        <code>core.documento_fragmento</code>, que hoy no existe.
+      </p>
+    </article>
+
+    <div class="surface etl-card">
+      <h2 class="etl-card-title">Lo que esta pestaña no puede hacer todavía</h2>
+      <ul class="etl-notas">
+        <li>
+          <b>Qué motor.</b> Modelo, prompt y proveedor quedan fuera: esta superficie consumiría
+          propuestas, no las genera.
+        </li>
+        <li>
+          <b>El orden de los pasos.</b> Si se revisa campo por campo o registro por registro se
+          decide cuando exista el contrato de datos.
+        </li>
+        <li>
+          <b>Qué es obligatorio.</b> Aquí todas las propuestas se podrían descartar; si alguna debe
+          exigir revisión, es una regla de negocio pendiente.
+        </li>
+        <li>
+          <b>La confianza.</b> No hay umbral definido ni fuente para ese número, así que no se
+          muestra ninguna barra.
+        </li>
+      </ul>
+    </div>
+  </section>
+  }
+
+  <!-- ══════════════════════════ 2 · FUENTES ═══════════════════════════ -->
+  @if (pestana() === 'fuentes') {
+  <section
+    class="etl-panel"
+    id="panel-fuentes"
+    role="tabpanel"
+    aria-labelledby="tab-fuentes"
+    tabindex="0"
+  >
+    <div class="etl-banner">
+      <span class="mk" aria-hidden="true">▲</span>
+      <div>
+        <b>No existe tabla de fuentes autorizadas para la extracción.</b> Lo que sigue son los
+        enlaces de integración declarados en <code>core.integraciones</code> y los catálogos reales
+        de formatos, tipos de documento y puntos de ingesta. Ningún enlace registra una
+        sincronización ejecutada.
+      </div>
+    </div>
+
+    <article class="surface etl-card" aria-labelledby="etl-origenes">
+      <div class="etl-card-head">
+        <div>
+          <h2 class="etl-card-title" id="etl-origenes">Orígenes de integración registrados</h2>
+          <p class="etl-card-sub">
+            Sistemas con los que existe un enlace declarado. «Enlaces» cuenta las filas de
+            <code>core.integraciones</code> por sistema; no son ejecuciones.
+          </p>
+        </div>
+        <span class="etl-tag">Real</span>
+      </div>
+
+      @if (estadoResumen() === 'error') {
+      <p class="etl-error" role="alert">{{ errorResumen()?.message }}</p>
+      } @else { @if (resumen(); as r) { @if (r.fuentesIntegracion.length === 0) {
+      <p class="etl-empty">No hay enlaces de integración registrados.</p>
+      } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Origen</th>
+              <th scope="col">Sentido</th>
+              <th scope="col">Protocolo</th>
+              <th scope="col">Última sincronización</th>
+              <th scope="col">Estado</th>
+              <th scope="col" class="etl-num">Enlaces</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (fuente of r.fuentesIntegracion; track fuente.sistema) {
+            <tr>
+              <td><code class="etl-codigo">{{ fuente.sistema }}</code></td>
+              <td>
+                @if (fuente.tipos.length === 0) {
+                <span class="etl-nodato">sin dato</span>
+                } @else { {{ unirSentidos(fuente) }} }
+              </td>
+              <td>
+                @if (fuente.protocolos.length === 0) {
+                <span class="etl-nodato">sin dato</span>
+                } @else { {{ unirProtocolos(fuente) }} }
+              </td>
+              <td>
+                @if (fuente.ultimaSincronizacion) { {{
+                formatearFechaHoraDdMmAaaa(fuente.ultimaSincronizacion) }} } @else {
+                <span
+                  class="etl-nodato"
+                  title="core.integraciones.ultima_sincronizacion está en NULL"
+                >
+                  — sin ejecución
+                </span>
+                }
+              </td>
+              <td>
+                @for (estado of fuente.estados; track estado) {
+                <span [class]="'etl-st ' + tonoEstadoIntegracion(estado)">
+                  {{ etiquetaEstadoIntegracion(estado) }}
+                </span>
+                } @empty {
+                <span class="etl-st nodata">sin dato</span>
+                }
+              </td>
+              <td class="etl-num">{{ formatearNumero(fuente.enlaces) }}</td>
+              <td>
+                <div class="etl-acciones">
+                  <button
+                    type="button"
+                    class="etl-mini"
+                    disabled
+                    title="Falta el endpoint de administración de fuentes."
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    class="etl-mini"
+                    disabled
+                    title="Falta el endpoint para suspender un enlace de integración."
+                  >
+                    Suspender
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      } } @else {
+      <p class="etl-empty" role="status">Cargando enlaces de integración…</p>
+      } }
+
+      <div class="etl-row">
+        <button
+          type="button"
+          class="button-secondary"
+          disabled
+          title="Falta la tabla de fuentes autorizadas y el endpoint para darlas de alta."
+        >
+          Agregar fuente
+        </button>
+        <span class="etl-tag off">Sin endpoint</span>
+      </div>
+
+      <p class="etl-hint">
+        El mockup pedía las columnas «Formatos» y «Autorizada por»; <code>core.integraciones</code>
+        no tiene esos campos. La tabla muestra las columnas que sí existen —sentido, protocolo,
+        estado y enlaces— para no inventar datos.
+      </p>
+    </article>
+
+    <div class="etl-catalogo">
+      <article class="surface etl-card" aria-labelledby="etl-formatos">
+        <div class="etl-card-head">
+          <div>
+            <h2 class="etl-card-title" id="etl-formatos">Formatos admitidos</h2>
+            <p class="etl-card-sub">
+              Lista blanca de archivos (<code>core.documento_lista_blanca</code>). La extensión es
+              el identificador que valida la carga.
+            </p>
+          </div>
+          <span class="etl-tag">Real</span>
+        </div>
+
+        @if (resumen(); as r) { @if (r.catalogos.formatos.length === 0) {
+        <p class="etl-empty">No hay formatos activos en la lista blanca.</p>
+        } @else {
+        <ul class="etl-chips">
+          @for (formato of r.catalogos.formatos; track formato.extension) {
+          <li [attr.title]="formato.nota || formato.mime">{{ formato.extension }}</li>
+          }
+        </ul>
+        } } @else {
+        <p class="etl-empty" role="status">Cargando formatos…</p>
+        }
+      </article>
+
+      <article class="surface etl-card" aria-labelledby="etl-tipos">
+        <div class="etl-card-head">
+          <div>
+            <h2 class="etl-card-title" id="etl-tipos">Tipos de documento del catálogo</h2>
+            <p class="etl-card-sub">
+              Clasificación real de la base (<code>core.cat_tipos_documento</code>). Es el
+              vocabulario al que la extracción tiene que mapear.
+            </p>
+          </div>
+          <span class="etl-tag">Real</span>
+        </div>
+
+        @if (resumen(); as r) { @if (r.catalogos.tiposDocumento.length === 0) {
+        <p class="etl-empty">No hay tipos de documento en el catálogo.</p>
+        } @else {
+        <ul class="etl-chips">
+          @for (tipo of r.catalogos.tiposDocumento; track tipo.codigo) {
+          <li [attr.title]="tipo.nombre">{{ tipo.codigo }}</li>
+          }
+        </ul>
+        } } @else {
+        <p class="etl-empty" role="status">Cargando tipos de documento…</p>
+        }
+      </article>
+    </div>
+
+    <article class="surface etl-card" aria-labelledby="etl-puntos">
+      <div class="etl-card-head">
+        <div>
+          <h2 class="etl-card-title" id="etl-puntos">Puntos de ingesta declarados</h2>
+          <p class="etl-card-sub">
+            <code>analisis.punto_ingesta</code>: por dónde entra el material y a qué esquema va.
+          </p>
+        </div>
+        <span class="etl-tag">Real</span>
+      </div>
+
+      @if (resumen(); as r) { @if (r.catalogos.puntosIngesta.length === 0) {
+      <p class="etl-empty">No hay puntos de ingesta declarados.</p>
+      } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Código</th>
+              <th scope="col">Descripción</th>
+              <th scope="col">Destino</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (punto of r.catalogos.puntosIngesta; track punto.codigo) {
+            <tr>
+              <td><code class="etl-codigo">{{ punto.codigo }}</code></td>
+              <td>{{ punto.descripcion || 'sin dato' }}</td>
+              <td>{{ etiquetaDestinoIngesta(punto.destino) }}</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      } } @else {
+      <p class="etl-empty" role="status">Cargando puntos de ingesta…</p>
+      }
+    </article>
+  </section>
+  }
+
+  <!-- ═════════════════════════ 3 · HISTORIAL ══════════════════════════ -->
+  @if (pestana() === 'historial') {
+  <section
+    class="etl-panel"
+    id="panel-historial"
+    role="tabpanel"
+    aria-labelledby="tab-historial"
+    tabindex="0"
+  >
+    <div class="etl-banner">
+      <span class="mk" aria-hidden="true">▲</span>
+      <div>
+        <b>No hay historial de corridas de extracción.</b> No existe tabla de corridas ni de
+        reintentos; <code>staging.lote</code> y <code>staging.registro</code> existen pero están
+        vacías. El historial que sí se puede mostrar es el de migraciones aplicadas
+        (<code>core.migracion_log</code>).
+      </div>
+    </div>
+
+    <article class="surface etl-card" aria-labelledby="etl-migraciones">
+      <div class="etl-card-head">
+        <div>
+          <h2 class="etl-card-title" id="etl-migraciones">Migraciones aplicadas</h2>
+          <p class="etl-card-sub">
+            Cada fila es una migración registrada en <code>core.migracion_log</code>. No hay autor,
+            duración ni resultado: la tabla sólo guarda clave y fecha.
+          </p>
+        </div>
+        <span class="etl-tag">Real</span>
+      </div>
+
+      @if (estadoEjecuciones() === 'error') {
+      <p class="etl-error" role="alert">{{ errorEjecuciones()?.message }}</p>
+      } @else { @if (ejecuciones(); as e) { @if (e.elementos.length === 0) {
+      <p class="etl-empty">No hay migraciones registradas.</p>
+      } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Clave</th>
+              <th scope="col" class="etl-num">Nº</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (migracion of e.elementos; track migracion.clave) {
+            <tr>
+              <td><code class="etl-codigo">{{ migracion.clave }}</code></td>
+              <td class="etl-num">{{ migracion.numero ?? '—' }}</td>
+              <td>{{ formatearFechaHoraDdMmAaaa(migracion.aplicadaEn) }}</td>
+              <td><span class="etl-st ok">aplicada</span></td>
+              <td>
+                <div class="etl-acciones">
+                  <button type="button" class="etl-mini" (click)="verMigracion(migracion.clave)">
+                    Ver
+                  </button>
+                  <button
+                    type="button"
+                    class="etl-mini"
+                    disabled
+                    title="No existe motor de ETL ni endpoint de reejecución."
+                  >
+                    Reejecutar
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (e.total > e.tamanoPagina) {
+      <app-paginacion
+        [pagina]="e.pagina"
+        [tamano]="e.tamanoPagina"
+        [total]="e.total"
+        (paginaCambia)="cambiarPagina($event)"
+        (tamanoCambia)="cambiarTamano($event)"
+      />
+      } } } @else {
+      <p class="etl-empty" role="status">Cargando migraciones…</p>
+      } }
+    </article>
+
+    <article class="surface etl-card" aria-labelledby="etl-detalle">
+      <div class="etl-card-head">
+        <div>
+          <h2 class="etl-card-title" id="etl-detalle">Detalle de la migración</h2>
+          <p class="etl-card-sub">
+            Lo único que la base conserva de cada migración. El cuerpo del SQL vive en
+            <code>migration/</code>, dentro del repositorio.
+          </p>
+        </div>
+        @if (migracionDetalle()) {
+        <span class="etl-st ok">aplicada</span>
+        }
+      </div>
+
+      @if (migracionDetalle(); as m) {
+      <dl class="etl-pairs">
+        <dt>Clave</dt>
+        <dd><code class="etl-codigo">{{ m.clave }}</code></dd>
+        <dt>Nº</dt>
+        <dd>{{ m.numero ?? '—' }}</dd>
+        <dt>Fecha de aplicación</dt>
+        <dd>{{ formatearFechaHoraDdMmAaaa(m.aplicadaEn) }}</dd>
+        <dt>Archivo</dt>
+        <dd><code class="etl-codigo">migration/{{ m.clave }}.sql</code></dd>
+      </dl>
+      <p class="etl-hint">
+        «Reejecutar» no está disponible: sin motor de ETL ni versionado por lote no hay nada que
+        volver a correr desde la interfaz. La migración se aplica con el script del repositorio.
+      </p>
+      } @else {
+      <p class="etl-empty">Selecciona una migración de la tabla para ver su registro.</p>
+      }
+    </article>
+
+    <article class="surface etl-card" aria-labelledby="etl-lotes">
+      <div class="etl-card-head">
+        <div>
+          <h2 class="etl-card-title" id="etl-lotes">Lotes y fragmentos</h2>
+          <p class="etl-card-sub">Estado del tramo de carga masiva y del troceado de documentos.</p>
+        </div>
+        <span class="etl-tag off">Motor no operativo</span>
+      </div>
+
+      <dl class="etl-pairs">
+        <dt><code class="etl-codigo">staging.lote</code></dt>
+        <dd>
+          @if (staging().lotes === null) { sin dato: el esquema no aparece en los conteos } @else {
+          {{ formatearNumero(staging().lotes) }} filas }
+        </dd>
+        <dt><code class="etl-codigo">staging.registro</code></dt>
+        <dd>
+          @if (staging().registros === null) { sin dato: el esquema no aparece en los conteos }
+          @else { {{ formatearNumero(staging().registros) }} filas }
+        </dd>
+        <dt><code class="etl-codigo">core.documento_fragmento</code></dt>
+        <dd>
+          @if (fragmentoCoreExiste()) { existe · {{ formatearNumero(fragmentoCore()?.filas ?? 0) }}
+          filas } @else {
+          <span class="etl-st bad">no existe</span>
+          }
+        </dd>
+        <dt><code class="etl-codigo">kag.documento_fragmento</code></dt>
+        <dd>
+          <span class="etl-st nodata">fuera del alcance de esta API</span>
+        </dd>
+      </dl>
+
+      <p class="etl-callout">
+        <b>Bloqueo de dato.</b> Sin <code>core.documento_fragmento</code> no hay página, offset ni
+        hash por fragmento. Por eso la pantalla no puede mostrar el fragmento exacto que originó
+        cada propuesta, y «deshacer una corrida» no es posible: la reejecución versionada queda sin
+        sustrato.
+      </p>
+    </article>
+
+    <article class="surface etl-card" aria-labelledby="etl-conteos">
+      <div class="etl-card-head">
+        <div>
+          <h2 class="etl-card-title" id="etl-conteos">Conteos por esquema</h2>
+          <p class="etl-card-sub">
+            Cardinalidades exactas de <code>core</code>, <code>legacy</code> y <code>staging</code>,
+            medidas al generar esta vista.
+          </p>
+        </div>
+        @if (resumen(); as r) {
+        <span class="etl-tag">{{ formatearNumero(r.esquemas.length) }} esquemas</span>
+        }
+      </div>
+
+      @if (estadoResumen() === 'error') {
+      <p class="etl-error" role="alert">{{ errorResumen()?.message }}</p>
+      } @else { @if (resumen(); as r) {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Esquema</th>
+              <th scope="col" class="etl-num">Tablas</th>
+              <th scope="col" class="etl-num">Filas</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (esquema of r.esquemas; track esquema.esquema) {
+            <tr>
+              <td><code class="etl-codigo">{{ esquema.esquema }}</code></td>
+              <td class="etl-num">{{ formatearNumero(esquema.totalTablas) }}</td>
+              <td class="etl-num">{{ formatearNumero(esquema.totalFilas) }}</td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="etl-esquemas">
+        @for (esquema of r.esquemas; track esquema.esquema) {
+        <details class="etl-esquema">
+          <summary>
+            <span><code class="etl-codigo">{{ esquema.esquema }}</code></span>
+            <span>{{ resumenEsquema(esquema) }}</span>
+          </summary>
+          <div class="etl-esquema-listas">
+            <table>
+              <tbody>
+                @for (tabla of esquema.tablas; track tabla.tabla) {
+                <tr [class.etl-vacia]="tabla.filas === 0">
+                  <td>{{ tabla.tabla }}</td>
+                  <td>{{ formatearNumero(tabla.filas) }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </details>
+        }
+      </div>
+
+      @if (tablasOmitidas() > 0) {
+      <p class="etl-hint">
+        Se omiten {{ formatearNumero(tablasOmitidas()) }} tablas de respaldo
+        <code>*_backup_*</code>: son copias de migración, no datos vivos.
+      </p>
+      } } @else {
+      <p class="etl-empty" role="status">Cargando conteos…</p>
+      } }
+    </article>
+
+    <div class="etl-metricas">
+      <div class="surface etl-metrica">
+        <span class="k">Migraciones aplicadas</span>
+        <p class="v">{{ formatearNumero(migracionesTotal()) }}</p>
+        <p class="s">Filas de <code>core.migracion_log</code>.</p>
+      </div>
+      <div class="surface etl-metrica">
+        <span class="k">Tablas con datos</span>
+        <p class="v">{{ formatearNumero(tablasConDatos()) }}</p>
+        <p class="s">Tablas de <code>core</code> con al menos una fila.</p>
+      </div>
+      <div class="surface etl-metrica">
+        <span class="k">Filas en core</span>
+        <p class="v">
+          @if (core(); as nucleo) { {{ formatearNumero(nucleo.totalFilas) }} } @else { — }
+        </p>
+        <p class="s">{{ formatearNumero(core()?.totalTablas) }} tablas medidas.</p>
+      </div>
+    </div>
+
+    <div class="etl-pie">
+      <span>
+        Generado el {{ generadoEn() ? formatearFechaHoraDdMmAaaa(generadoEn()) : '—' }}.
+      </span>
+      <span>
+        Regla del dato ausente: lo que la base no tiene se muestra como «—» o «sin dato», con el
+        motivo. No se completa con cifras de relleno.
+      </span>
+    </div>
+  </section>
+  }
+</section>

@@ -1,5 +1,10 @@
 # Inventario de paridad de la interfaz — AVISA (Next.js/React → Angular)
 
+> **Documento histórico.** Fotografía del **21-nov-2026**. No se reescribe: es el
+> inventario de la UI Next que sirvió de checklist de porting. El estado vigente
+> de la SPA está en `angular/ESTADO_MIGRACION_ANGULAR.md` y el estado pantalla por
+> pantalla, en `07_frontend/frontend.md`.
+
 > **Tipo de documento:** diagnóstico de solo lectura (no modifica código).
 > **Objetivo:** servir de checklist de porting para una reescritura en Angular.
 > **Base analizada:** `C:\Users\Julia\Downloads\avisa` — Next.js 16.4.3 (App Router), React 19,
@@ -483,7 +488,7 @@ servicio Angular + `localStorage`, con valor inicial seguro para SSR.
 - [ ] Documentos normativos — **M**
 - [ ] Ruta de intervención — **M**
 - [ ] Anulación lógica con restauración: decidida; sin endpoint `anular`/`restaurar`, la UI **no** ofrece el botón (E2) — **M**
-- [ ] Alta de demanda / hito / documento desde la ficha — **L**
+- [ ] Registrar demanda / hito / documento desde la ficha — **L**
 
 ## 6.6 Alertas tempranas
 
@@ -530,6 +535,11 @@ servicio Angular + `localStorage`, con valor inicial seguro para SSR.
 
 ## 6.10 Mapa territorial
 
+> **Superado (2026-11-24).** El aplazamiento se levantó: `/mapa` está implementada y dibuja la capa
+> distrital cargada (1 892 polígonos) **y** la nube de los 13 456 puntos del KML. La checklist queda
+> como referencia de lo que aún no se hace (agrupación de puntos por distrito, cronología espacial,
+> simbología propia de las redes de la Red Radar); no se documenta fórmula de calibración de riesgo.
+>
 > **Aplazado por decisión del usuario (2026-11-22)** hasta que exista el dataset de ubigeo/centroide.
 > La ruta `/mapa` sigue en marcador; no se documentan coordenadas ni una fórmula de calibración de
 > riesgo. La checklist queda como referencia para cuando se reabra.
@@ -543,7 +553,7 @@ servicio Angular + `localStorage`, con valor inicial seguro para SSR.
 - [ ] Cronología espacial — **M**
 - [ ] Overlay de vacío — **S**
 - [ ] Aviso «Mapa demostrativo» — **S**
-- [ ] **Observación:** el mapa queda aplazado hasta que exista el dataset de ubigeo/centroide; no se fija aquí ninguna coordenada — **S**
+- [ ] **Observación:** el mapa ya no está aplazado (2026-11-24); sigue sin fijarse aquí ninguna coordenada ni fórmula de riesgo — **S**
 
 ## 6.11 Resumen de Dirección
 

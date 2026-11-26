@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,65 +14,92 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { urlApi } from '../../core/config/entorno';
 import type { ErrorApi } from '../../core/http/errores';
+import { RIESGOS, formatearFechaCorta } from '../../dominio/mapeo';
+import type { Riesgo } from '../../dominio/modelos';
+import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
 } from '../../shared/ui/territorio-buscador.component';
+import { aOpciones } from '../casos/vincular-actor.component';
+import type { ActorOpcion } from '../casos/vincular-actor.component';
 import {
-  PRIORIDADES_ALERTA,
-  NIVELES_ALERTA,
-  OPCIONES_NIVEL,
-  type AccionFlujo,
-  type Alerta,
-  type AltaAlerta,
-  type DemandaAlerta,
-  type OpcionPrioridadAlerta,
-  type PatchAlerta,
-  accionesDeFlujo,
+  ALCANCES_ALERTA,
+  REGIONES_PERU,
   aJsonLineas,
-  clavePrioridad as clavePrioridadDe,
-  claseEstado as claseEstadoDe,
-  etapaDeFlujo,
-  formatearPlazo as formatearPlazoDe,
+  claveRiesgo,
+  etiquetaEstado,
+  geografiaAlerta,
+  tituloLimpio,
+  type Alerta,
+  type AlcanceAlerta,
+  type AltaAlerta,
+  type PatchAlerta,
 } from './alerta.mapeo';
+import { CasoComboboxComponent } from './caso-combobox.component';
 
-type BorradorAlerta = {
-  titulo: string;
-  prioridad: string;
-  nivel: string;
-  situacionActual: string;
-  hechosRecientes: string;
-  descripcionRiesgo: string;
-  accionesOaipcs: string;
-  accionesSugeridas: string;
-  casoCode: string;
-};
+/** Opción del combobox de caso: código, título y subsector del caso. */
+export type CasoOpcion = { codigo: string; titulo: string; subsector: string | null };
 
-type CampoBorrador = keyof BorradorAlerta;
+/** Modo con el que se abre el panel desde el listado. */
+export type ModoPanelAlerta = 'ver' | 'editar' | 'historial';
+
+/** Una fila editable de las listas del formulario. */
+type Linea = { id: number; texto: string };
+
+/** Campos del borrador que se editan como lista de filas con «＋». */
+type CampoLinea =
+  | 'situacionActual'
+  | 'hechosRecientes'
+  | 'descripcionRiesgo'
+  | 'actoresClave'
+  | 'demandasInmediatas'
+  | 'accionesSugeridas';
+
+/** Campos del borrador que siguen siendo texto o selección simple. */
+type CampoAlta = 'titulo' | 'region' | 'provincia';
 
 type BorradorAlta = {
   titulo: string;
-  prioridad: string;
+  riesgo: Riesgo | '';
+  alcance: AlcanceAlerta | '';
+  region: string;
+  provincia: string;
   casoCode: string;
-  descripcionRiesgo: string;
-  hechosRecientes: string;
-  situacionActual: string;
-  accionesOaipcs: string;
+  descripcionRiesgo: Linea[];
+  hechosRecientes: Linea[];
+  situacionActual: Linea[];
+  actoresClave: Linea[];
+  demandasInmediatas: Linea[];
+  accionesSugeridas: Linea[];
 };
 
-type CampoAlta = keyof BorradorAlta;
-
-const BORRADOR_ALTA_VACIO: BorradorAlta = {
-  titulo: '',
-  prioridad: '',
-  casoCode: '',
-  descripcionRiesgo: '',
-  hechosRecientes: '',
-  situacionActual: '',
-  accionesOaipcs: '',
-};
+/**
+ * Borrador vacío del alta.
+ *
+ * Es una fábrica y no una constante: las listas son mutables y compartir los
+ * mismos arrays entre aperturas arrastraría las líneas de una alerta a la
+ * siguiente.
+ */
+function borradorAltaVacio(): BorradorAlta {
+  return {
+    titulo: '',
+    riesgo: '',
+    alcance: '',
+    region: '',
+    provincia: '',
+    casoCode: '',
+    descripcionRiesgo: [],
+    hechosRecientes: [],
+    situacionActual: [],
+    actoresClave: [],
+    demandasInmediatas: [],
+    accionesSugeridas: [],
+  };
+}
 
 /** `undefined` = no cambió; `null` = se vació a propósito. */
 function diferenciaTexto(valor: string, original: string | null): string | null | undefined {
@@ -80,20 +108,32 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
   return limpio ? limpio : null;
 }
 
+/** `Distrito · Provincia · Región` → provincia y región. */
+function partesDeRuta(ruta: string | null | undefined): { provincia: string; region: string } {
+  const partes = (ruta ?? '')
+    .split('·')
+    .map((parte) => parte.trim())
+    .filter((parte) => parte.length > 0);
+  return { provincia: partes[1] ?? '', region: partes[2] ?? '' };
+}
+
 /**
  * Panel lateral derecho de una alerta.
  *
- * Reemplaza la navegación a otra vista: el listado queda detrás y el recorrido
- * de cinco pasos y la edición ocurren aquí. Es un diálogo modal (`role="dialog"`,
- * `aria-modal`), se cierra con Escape o con el fondo y encierra el foco con Tab.
+ * Concentra la ficha y el registro. La ficha es de sólo lectura salvo por
+ * «Modificar contenido», que abre el mismo formulario del alta ya prellenado.
  *
- * Sirve también de alta: `alerta === null` abre el formulario de registro en
- * lugar de la ficha. En ambos casos no conoce HTTP: emite el cuerpo ya armado
- * (alta) o el diff parcial y el paso de destino (edición).
+ * No conoce HTTP de escritura: emite el `PatchAlerta` ya calculado o el
+ * `AltaAlerta`. La única lectura es la búsqueda en el Directorio de actores.
  */
 @Component({
   selector: 'app-alerta-panel',
-  imports: [IconoComponent, TerritorioBuscadorComponent],
+  imports: [
+    IconoComponent,
+    TerritorioBuscadorComponent,
+    AdjuntosPanelComponent,
+    CasoComboboxComponent,
+  ],
   templateUrl: './alerta-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -101,356 +141,386 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       display: contents;
     }
 
-    /* El drawer global mide 600 px; la ficha necesita algo más de aire. */
     .drawer {
-      width: min(640px, 100%);
+      width: min(680px, 100%);
     }
 
-    .alerta-panel-cabecera {
+    .alerta-cabecera {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 6px;
       min-width: 0;
     }
 
-    .alerta-panel-codigo {
-      margin: 0;
-      color: #8a98a5;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.7px;
-      text-transform: uppercase;
-    }
-
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
-
-    .alerta-panel-badges {
+    .alerta-codigo {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 6px;
-      margin-top: 8px;
+      justify-content: space-between;
+      gap: 4px 10px;
+      margin: 0;
+      color: #8a98a5;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    .alerta-prioridad--critica {
-      background: #f9ecea;
-      color: #a84f49;
+    .alerta-modificacion {
+      color: #8a98a5;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: normal;
+      text-transform: none;
     }
-    .alerta-prioridad--urgente {
-      background: #fff3e5;
-      color: #a6732d;
+
+    .alerta-titulo {
+      margin: 0;
+      color: #17283a;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.2px;
     }
-    .alerta-prioridad--temprana {
-      background: #eef3fa;
+
+    .alerta-insignias {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px 6px;
+      color: #64748b;
+      font-size: 12.5px;
+    }
+
+    .alerta-geografia {
       color: #4a6b93;
+      font-weight: 600;
     }
-    .alerta-prioridad--seguimiento {
-      background: #f0f3f5;
-      color: #657684;
-    }
-    .alerta-prioridad--sin-prioridad {
-      background: #f6f7f8;
+
+    .alerta-fecha {
       color: #8b97a1;
     }
 
-    .alerta-plazo {
-      background: #f0f3f5;
-      color: #657684;
-    }
-    .alerta-plazo--sin {
-      background: #f6f7f8;
-      color: #8b97a1;
-    }
-
-    .alerta-nivel {
-      background: #eef3fa;
-      color: #4a6b93;
-    }
-
-    .alerta-grave {
-      background: #f9ecea;
-      color: #a84f49;
+    /* Sólo color: el encabezado no pinta la píldora de \`status-badge\`. */
+    .alerta-riesgo {
+      background: transparent;
       font-weight: 700;
     }
 
-    .alerta-panel-cuerpo {
-      gap: 16px;
+    /* Doble selector para vencer la píldora de \`global.css\`. */
+    .alerta-riesgo.risk-bajo {
+      background: transparent;
+      color: #1f5597;
     }
 
+    .alerta-riesgo.risk-medio {
+      background: transparent;
+      color: #b8860b;
+    }
+
+    .alerta-riesgo.risk-alto {
+      background: transparent;
+      color: #d9661f;
+    }
+
+    .alerta-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 14px 15px;
+      border: 1px solid #e8edf1;
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .alerta-form h3 {
+      margin: 0;
+      color: #1a2b3e;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* Seis secciones: el título va fuera de la caja. */
     .alerta-seccion {
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
 
-    .alerta-seccion h3 {
+    .alerta-seccion-titulo {
+      margin: 0;
+      color: #1a2b3e;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .alerta-seccion-cuerpo {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 14px 15px;
+      border: 1px solid #e8edf1;
+      border-radius: 11px;
+      background: #fff;
+    }
+
+    .alerta-seccion p {
       margin: 0;
       color: #33475b;
-      font: 700 11px var(--font-display);
+      font-size: 13.5px;
+      line-height: 1.6;
+      white-space: pre-wrap;
     }
 
-    .alerta-texto {
+    .alerta-seccion ul {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
       margin: 0;
-      color: #52677a;
-      font-size: 11px;
-      line-height: 1.65;
-      white-space: pre-line;
-    }
-
-    .alerta-nota {
-      margin: 0;
-      color: #8d99a6;
-      font-size: 10px;
-      line-height: 1.5;
+      padding-left: 18px;
+      color: #33475b;
+      font-size: 13.5px;
+      line-height: 1.55;
     }
 
     .alerta-vacio {
-      margin: 0;
-      color: #a0aab3;
-      font-size: 10.5px;
+      color: #99a3aa;
       font-style: italic;
     }
 
-    .alerta-aviso {
-      margin: 0;
-      padding: 8px 10px;
-      border-radius: 6px;
-      background: #edf6f0;
-      color: #52806a;
-      font-size: 10.5px;
+    /* Listas con «＋» del formulario. */
+    .bloque-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid #e6ecf1;
+      border-radius: 7px;
+      background: #fbfcfd;
     }
 
-    .alerta-error {
+    .bloque-lista > .form-label {
+      text-align: center;
+    }
+
+    .linea-fila {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .linea-fila textarea {
+      flex: 1;
+      min-width: 0;
+      min-height: 38px;
+      resize: vertical;
+    }
+
+    .alerta-agregar {
+      align-self: flex-start;
+      padding: 5px 10px;
+      border: 1px dashed #c8d6e4;
+      border-radius: 7px;
+      background: #fff;
+      color: #1f5597;
+      font: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .alerta-agregar:hover {
+      border-color: #1f5597;
+    }
+
+    .actor-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .actor-buscador {
       display: flex;
       flex-direction: column;
       gap: 8px;
       padding: 10px;
-      border: 1px solid #f0d9d5;
-      border-radius: 6px;
-      background: #fdf6f5;
-      color: #a3402f;
-      font-size: 10.5px;
-    }
-    .alerta-error p {
-      margin: 0;
+      border: 1px solid #e6ecf1;
+      border-radius: 8px;
+      background: #fff;
     }
 
-    .alerta-etapa {
+    .actor-buscador-input {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
-      margin: 0;
-      color: #465a6c;
-      font-size: 11px;
+      gap: 6px;
+      padding: 6px 8px;
+      border: 1px solid #dde5ec;
+      border-radius: 7px;
+      background: #f9fbfd;
+      color: #8b97a1;
     }
 
-    .alerta-etapa-estado {
-      padding: 2px 7px;
-      border-radius: 10px;
-      background: #eef3fa;
-      color: #4a6b93;
-      font-size: 9px;
-      font-weight: 600;
-    }
-
-    .alerta-acciones {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 2px;
-    }
-
-    .alerta-accion {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 2px;
-      height: auto;
-      padding: 8px 10px;
-      text-align: left;
-      white-space: normal;
-    }
-
-    .alerta-accion small {
-      color: #8d99a6;
-      font-size: 9.5px;
-      font-weight: 400;
-      line-height: 1.4;
-    }
-
-    .alerta-formulario {
-      display: flex;
-      flex-direction: column;
-      gap: 11px;
-      padding-top: 12px;
-      border-top: 1px solid #eef2f6;
-    }
-
-    .alerta-formulario .form-textarea {
-      min-height: 68px;
-    }
-
-    .alerta-formulario-acciones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .alerta-datos {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px 16px;
-      margin: 0;
-    }
-
-    .alerta-datos > div {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+    .actor-buscador-input input {
+      flex: 1;
       min-width: 0;
+      border: 0;
+      background: transparent;
+      color: #17283a;
+      font: inherit;
+      outline: none;
     }
 
-    .alerta-datos dt {
-      color: #97a1aa;
-      font-size: 8.5px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .alerta-datos dd {
-      margin: 0;
-      color: #465a6c;
-      font-size: 10.5px;
-      line-height: 1.4;
-      overflow-wrap: anywhere;
-    }
-
-    .alerta-lista {
+    .actor-resultados {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      margin: 0;
-      padding-left: 16px;
-      color: #52677a;
-      font-size: 10.5px;
-      line-height: 1.5;
-    }
-
-    .alerta-demandas {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      max-height: 200px;
+      overflow-y: auto;
       margin: 0;
       padding: 0;
       list-style: none;
     }
 
-    .alerta-demandas li {
+    .actor-opcion {
       display: flex;
       flex-direction: column;
-      gap: 3px;
-      padding-left: 10px;
-      border-left: 2px solid #dbe7f4;
+      gap: 2px;
+      width: 100%;
+      padding: 7px 9px;
+      border: 1px solid #e8edf1;
+      border-radius: 7px;
+      background: #fbfcfd;
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
     }
 
-    .alerta-demandas strong {
-      color: #465a6c;
-      font-size: 10.5px;
+    .actor-opcion:hover {
+      border-color: #1f5597;
     }
 
-    .alerta-demandas p {
-      margin: 0;
-      color: #52677a;
-      font-size: 10.5px;
-      line-height: 1.5;
+    .actor-nombre {
+      color: #17283a;
+      font-size: 13px;
+      font-weight: 600;
     }
 
-    .alerta-demandas small {
-      color: #97a1aa;
-      font-size: 9px;
+    .actor-meta {
+      color: #8b97a1;
+      font-size: 11.5px;
     }
 
-    .alerta-alta-ayuda {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 10.5px;
-      line-height: 1.5;
-    }
-
-    .alerta-alta-formulario {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .alerta-alta-plazo {
+    /* Trazabilidad: fila discreta al final del panel. */
+    .alerta-traza {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 6px;
-      margin: 0;
-      padding: 7px 10px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--canvas);
-      color: var(--muted);
-      font-size: 10.5px;
-      line-height: 1.4;
+      gap: 4px 8px;
+      padding: 8px 2px 0;
+      border-top: 1px solid #eef2f6;
+      color: #64748b;
+      font-size: 12px;
     }
 
-    .alerta-alta-plazo strong {
-      color: var(--ink);
+    .alerta-traza b {
+      color: #33475b;
       font-weight: 700;
     }
 
-    .alerta-alta-grave {
-      padding: 1px 7px;
-      border-radius: 10px;
-      background: var(--red-pale);
-      color: var(--red);
-      font-size: 9px;
+    .alerta-traza-boton {
+      margin-left: auto;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: #1f5597;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .alerta-traza-boton:hover {
+      text-decoration: underline;
+    }
+
+    .rejilla-dos {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .acciones-form {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .historial {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .historial li {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 8px 10px;
+      border: 1px solid #eef2f6;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .historial .historial-autor {
+      color: #17283a;
+      font-size: 13px;
       font-weight: 700;
     }
 
-    .alerta-alta-catalogo {
-      margin: 0;
-      color: var(--muted);
-      font-size: 10px;
-      line-height: 1.4;
+    .historial .historial-meta {
+      color: #8b97a1;
+      font-size: 12px;
+    }
+
+    @media (max-width: 620px) {
+      .rejilla-dos {
+        grid-template-columns: 1fr;
+      }
     }
   `,
 })
 export class AlertaPanelComponent {
   readonly alerta = input<Alerta | null>(null);
-  readonly demandas = input<readonly DemandaAlerta[]>([]);
   readonly cargando = input(false);
   readonly errorCarga = input<ErrorApi | null>(null);
+  /** Permiso para registrar y para modificar el contenido de una alerta. */
   readonly puedeModificar = input(false);
   readonly guardando = input(false);
   readonly errorGuardado = input<string | null>(null);
   readonly aviso = input<string | null>(null);
-  /** Código del caso con el que se presiembra el alta (pantalla filtrada por caso). */
+  readonly modoInicial = input<ModoPanelAlerta>('ver');
+  /** Código del caso con el que se presiembra el alta. */
   readonly casoInicial = input('');
-  /** Prioridades de `GET /api/v1/catalogs` → `catalogs.prioridadesAlerta`. */
-  readonly prioridadesCatalogo = input<readonly OpcionPrioridadAlerta[]>([]);
-  readonly cargandoPrioridades = input(false);
-  readonly errorPrioridades = input<ErrorApi | null>(null);
+  /** Casos disponibles para el combobox «Caso vinculado». */
+  readonly casos = input<readonly CasoOpcion[]>([]);
 
   readonly cerrar = output<void>();
   readonly reintentar = output<void>();
   readonly guardar = output<PatchAlerta>();
   readonly registrar = output<AltaAlerta>();
-  readonly accion = output<number>();
 
-  readonly prioridades = PRIORIDADES_ALERTA;
-  readonly niveles = NIVELES_ALERTA;
+  readonly riesgos = RIESGOS;
+  readonly alcances = ALCANCES_ALERTA;
+  readonly regiones = REGIONES_PERU;
 
+  private readonly http = inject(HttpClient);
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
   private readonly destruccion = inject(DestroyRef);
 
@@ -459,248 +529,362 @@ export class AlertaPanelComponent {
     typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null);
 
   readonly editando = signal(false);
-  readonly borrador = signal<BorradorAlerta | null>(null);
-  readonly borradorAlta = signal<BorradorAlta>(BORRADOR_ALTA_VACIO);
-  /**
-   * Distrito elegido en el alta. Se guarda aparte del borrador porque el
-   * buscador emite un objeto y `BorradorAlta` sólo guarda texto de campos
-   * nativos.
-   */
+  readonly verHistorial = signal(false);
+  readonly borradorAlta = signal<BorradorAlta>(borradorAltaVacio());
   readonly distritoAlta = signal<OpcionTerritorio | null>(null);
-  /**
-   * Distrito de la alerta en edición. Se siembra con el que ya está guardado para
-   * que el buscador no arranque vacío; cualquier edición de texto lo invalida
-   * (el componente emite `null`) para que lo guardado no contradiga lo visible.
-   */
-  readonly distritoEdicion = signal<OpcionTerritorio | null>(null);
-  /**
-   * El usuario ya confirmó guardar un distrito distinto del caso. Sin esto, el
-   * formulario pide la confirmación explícita en vez de pisar la diferencia.
-   */
-  readonly divergenciaAceptada = signal(false);
   readonly mensajeLocal = signal<string | null>(null);
 
-  readonly formulario = computed(() => (this.editando() ? this.borrador() : null));
+  /** Búsqueda en el Directorio de actores para «Elegir del directorio». */
+  readonly buscandoActor = signal(false);
+  readonly consultaActor = signal('');
+  readonly resultadosActor = signal<readonly ActorOpcion[]>([]);
+  readonly buscandoDirectorio = signal(false);
+  readonly errorActor = signal<string | null>(null);
 
   /** `alerta === null` significa alta. */
   readonly esAlta = computed(() => this.alerta() === null);
 
-  /** Semilla del buscador en edición: el distrito ya guardado. */
-  readonly inicialDistritoEdicion = computed(() => {
-    const distrito = this.distritoEdicion();
+  /** El formulario se muestra en el alta y también al modificar una alerta. */
+  readonly esFormulario = computed(() => this.esAlta() || this.editando());
+
+  readonly inicialDistritoAlta = computed(() => {
+    const distrito = this.distritoAlta();
     if (distrito?.tipo !== 'distrito') return null;
     return { id: distrito.id, nombre: distrito.nombre, ruta: distrito.ruta };
   });
 
-  /** Distrito que se enviaría al guardar; `null` si la caja no tiene uno válido. */
-  readonly distritoEdicionId = computed(() => {
-    const distrito = this.distritoEdicion();
-    return distrito?.tipo === 'distrito' ? distrito.id : null;
-  });
-
-  /**
-   * Hay diferencia cuando ambos lados declaran distrito y no es el mismo. Es
-   * información, no error: la alerta puede ocurrir en otro punto del territorio
-   * que el expediente (una movilización en Lima por un proyecto en Chilca).
-   */
-  readonly distritoDivergente = computed(() => {
-    const alerta = this.alerta();
-    const id = this.distritoEdicionId();
-    return Boolean(
-      alerta &&
-      this.editando() &&
-      id !== null &&
-      alerta.casoDistritoId !== null &&
-      id !== alerta.casoDistritoId,
-    );
-  });
-
-  /** Semilla del buscador en el alta: se ofrece el distrito del caso, si lo hay. */
-  readonly distritoDelCaso = computed(() => {
-    const alerta = this.alerta();
-    if (!alerta || alerta.casoDistritoId === null || !alerta.casoDistrito) return null;
-    return {
-      id: alerta.casoDistritoId,
-      nombre: alerta.casoDistrito,
-      ruta: alerta.casoDistritoRuta ?? alerta.casoDistrito,
-    };
-  });
-
-  /**
-   * Prioridades del alta: el catálogo manda; si aún no llegó (o falló) se cae al
-   * vocabulario congelado, que `createAlert` resuelve por `normalizar_ref`.
-   */
-  readonly opcionesPrioridad = computed<readonly OpcionPrioridadAlerta[]>(() => {
-    const catalogo = this.prioridadesCatalogo();
-    if (catalogo.length > 0) return catalogo;
-    return PRIORIDADES_ALERTA.map((prioridad) => ({
-      valor: prioridad,
-      etiqueta: prioridad,
-      slaHoras: null,
-      grave: false,
-    }));
-  });
-
-  readonly prioridadElegida = computed(() => {
-    const valor = this.borradorAlta().prioridad;
-    return this.opcionesPrioridad().find((opcion) => opcion.valor === valor) ?? null;
-  });
-
-  readonly etapa = computed(() => {
-    const alerta = this.alerta();
-    return alerta ? etapaDeFlujo(alerta.pasoActual) : null;
-  });
-
-  readonly acciones = computed<readonly AccionFlujo[]>(() => {
-    const alerta = this.alerta();
-    return alerta ? accionesDeFlujo(alerta.pasoActual) : [];
-  });
+  private secuenciaLinea = 0;
+  private timerActor: ReturnType<typeof setTimeout> | null = null;
+  private turnoActor = 0;
 
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
-    // Escape cierra el panel aunque el foco se haya ido a un bloque de texto.
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
     this.destruccion.onDestroy(() => {
-      document.removeEventListener('keydown', alEscape);
       this.focoPrevio?.focus?.();
+      if (this.timerActor) clearTimeout(this.timerActor);
     });
 
-    // Tras un guardado correcto el contenedor publica un aviso: el formulario se
-    // cierra para mostrar lo ya persistido en lugar del borrador.
+    // Tras un guardado correcto se cierra el formulario para mostrar lo ya persistido.
     effect(() => {
-      if (this.aviso()) {
-        this.editando.set(false);
-        this.borrador.set(null);
-      }
+      if (!this.aviso()) return;
+      this.editando.set(false);
+      this.cerrarBuscadorActor();
     });
 
-    // El alta se siembra limpia y con el caso del contexto, si lo hay.
+    // Siembra por alerta y modo. La firma evita reescribir lo que el usuario está
+    // editando mientras la misma alerta sigue abierta.
+    let firma: string | null = null;
+    effect(() => {
+      const alerta = this.alerta();
+      const modo = this.modoInicial();
+      const actual = alerta ? `${alerta.id}:${modo}` : null;
+      if (actual === firma) return;
+      firma = actual;
+      if (!alerta) {
+        this.editando.set(false);
+        this.verHistorial.set(false);
+        return;
+      }
+      this.sembrar(alerta);
+      // El modo «editar» sólo aplica si el perfil puede modificar el contenido.
+      this.editando.set(modo === 'editar' && this.puedeModificar());
+      this.verHistorial.set(modo === 'historial');
+    });
+
+    // El alta se siembra limpia y con el caso del contexto, si lo hay. Nunca
+    // pisa el formulario de una alerta existente que se está modificando.
     effect(() => {
       if (!this.esAlta()) return;
-      this.borradorAlta.set({ ...BORRADOR_ALTA_VACIO, casoCode: this.casoInicial().trim() });
+      this.borradorAlta.set({ ...borradorAltaVacio(), casoCode: this.casoInicial().trim() });
       this.distritoAlta.set(null);
       this.mensajeLocal.set(null);
     });
   }
 
-  formatearPlazo(horas: number | null): string {
-    return formatearPlazoDe(horas);
-  }
-
-  clavePrioridad(prioridad: Alerta['prioridad']): string {
-    return clavePrioridadDe(prioridad);
-  }
-
-  claseEstado(estado: string): string {
-    return claseEstadoDe(estado);
-  }
-
-  porcentaje(valor: number | null): string {
-    return valor === null ? '—' : `${Math.round(valor * 100)} %`;
-  }
-
-  iniciarEdicion(): void {
-    const alerta = this.alerta();
-    if (!alerta) return;
-
-    this.borrador.set({
+  /**
+   * Prellena el borrador del formulario con la alerta abierta. Sirve tanto para
+   * abrir en modo «editar» como para «Modificar contenido».
+   */
+  private sembrar(alerta: Alerta): void {
+    this.borradorAlta.set({
       titulo: alerta.titulo ?? '',
-      prioridad: alerta.prioridad ?? '',
-      nivel: alerta.nivel ?? '',
-      situacionActual: alerta.situacionActual ?? '',
-      hechosRecientes: alerta.hechosRecientes ?? '',
-      descripcionRiesgo: alerta.descripcionRiesgo ?? '',
-      accionesOaipcs: alerta.accionesOaipcs ?? '',
-      accionesSugeridas: alerta.accionesSugeridas.join('\n'),
+      riesgo: alerta.riesgo,
+      alcance: alerta.alcance,
+      region: alerta.region ?? '',
+      provincia: alerta.provincia ?? '',
       casoCode: alerta.casoCodigo ?? '',
+      situacionActual: this.lineasDesdeTexto(alerta.situacionActual),
+      hechosRecientes: this.lineasDesdeTexto(alerta.hechosRecientes),
+      descripcionRiesgo: this.lineasDesdeTexto(alerta.descripcionRiesgo),
+      actoresClave: this.lineasDesdeArray(alerta.actoresClave),
+      demandasInmediatas: this.lineasDesdeArray(alerta.demandasInmediatas),
+      accionesSugeridas: this.lineasDesdeArray(alerta.accionesSugeridas),
     });
-    this.distritoEdicion.set(
+    this.distritoAlta.set(
       alerta.distritoId !== null && alerta.distrito
         ? {
             tipo: 'distrito',
             id: alerta.distritoId,
             nombre: alerta.distrito,
-            region: '',
+            region: alerta.region ?? '',
             ruta: alerta.distritoRuta ?? alerta.distrito,
           }
         : null,
     );
-    this.divergenciaAceptada.set(false);
-    this.mensajeLocal.set(null);
-    this.editando.set(true);
-  }
-
-  cancelarEdicion(): void {
-    this.editando.set(false);
-    this.borrador.set(null);
-    this.distritoEdicion.set(null);
-    this.divergenciaAceptada.set(false);
+    this.cerrarBuscadorActor();
     this.mensajeLocal.set(null);
   }
 
-  campo(clave: CampoBorrador, evento: Event): void {
-    const objetivo = evento.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-    const valor = objetivo.value;
-    this.borrador.update((actual) => (actual ? { ...actual, [clave]: valor } : actual));
+  /* ---------------------------------------------------------------------- *
+   * Presentación
+   * ---------------------------------------------------------------------- */
+
+  tituloVisible(alerta: Alerta): string {
+    // `tituloLimpio` ya quita el 🔔 del prefijo «🔔 REPORTE DE ALERTA TEMPRANA |»;
+    // el `replace` cubre un 🔔 inicial suelto para que el emoji no se duplique.
+    const base =
+      tituloLimpio(alerta.titulo)
+        .replace(/^🔔\s*/u, '')
+        .trim() ||
+      alerta.codigo ||
+      'Alerta sin título';
+    return `🔔 ${base}`;
   }
 
-  campoAlta(clave: CampoAlta, evento: Event): void {
-    const objetivo = evento.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-    const valor = objetivo.value;
-    this.borradorAlta.update((actual) => ({ ...actual, [clave]: valor }));
+  geografia(alerta: Alerta): string {
+    return geografiaAlerta(alerta);
   }
 
-  alElegirDistrito(opcion: OpcionTerritorio | null): void {
-    this.distritoAlta.set(opcion);
+  estadoVisible(alerta: Alerta): string {
+    return etiquetaEstado(alerta.estado);
   }
 
-  alElegirDistritoEdicion(opcion: OpcionTerritorio | null): void {
-    this.distritoEdicion.set(opcion);
-    this.divergenciaAceptada.set(false);
-    this.mensajeLocal.set(null);
+  /** «Alto» → «alto»; se usa en el encabezado («Riesgo alto»). */
+  etiquetaRiesgo(riesgo: Riesgo): string {
+    switch (riesgo) {
+      case 'Alto':
+        return 'alto';
+      case 'Medio':
+        return 'moderado';
+      default:
+        return 'bajo';
+    }
   }
 
   /**
-   * Copia el distrito principal del caso al formulario. Es un botón y no una
-   * herencia silenciosa: en la base hay alertas que ocurren en otro territorio
-   * que el expediente y ese dato no se debe perder.
+   * Clases del texto de riesgo del encabezado. Sin `status-badge`: aquí no se
+   * pinta píldora, sólo color.
    */
-  usarDistritoDelCaso(): void {
-    const caso = this.distritoDelCaso();
-    if (!caso) return;
-    this.distritoEdicion.set({
-      tipo: 'distrito',
-      id: caso.id,
-      nombre: caso.nombre,
-      region: '',
-      ruta: caso.ruta,
-    });
-    this.divergenciaAceptada.set(false);
-    this.mensajeLocal.set('Distrito fijado al del caso. Guarde para aplicarlo.');
+  claseRiesgoTexto(riesgo: Riesgo): string {
+    return `alerta-riesgo risk-${claveRiesgo(riesgo)}`;
   }
 
-  /** Acepta la diferencia actual para que el guardado no vuelva a preguntar. */
-  mantenerDistritoDeLaAlerta(): void {
-    this.divergenciaAceptada.set(true);
-    this.mensajeLocal.set('Se conservará el distrito de la alerta, distinto del caso.');
+  fecha(valor: string | null): string {
+    return formatearFechaCorta(valor);
   }
+
+  /* ---------------------------------------------------------------------- *
+   * Formulario: campos simples
+   * ---------------------------------------------------------------------- */
+
+  campoAlta(clave: CampoAlta, evento: Event): void {
+    const objetivo = evento.target as HTMLInputElement | HTMLSelectElement;
+    const valor = objetivo.value;
+    this.borradorAlta.update((actual) => ({ ...actual, [clave]: valor }));
+    this.mensajeLocal.set(null);
+  }
+
+  cambiarRiesgoAlta(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value as Riesgo;
+    this.borradorAlta.update((actual) => ({ ...actual, riesgo: valor }));
+    this.mensajeLocal.set(null);
+  }
+
+  cambiarAlcanceAlta(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value as AlcanceAlerta;
+    this.borradorAlta.update((actual) => ({ ...actual, alcance: valor }));
+    if (valor !== 'Distrito') this.distritoAlta.set(null);
+    if (valor === 'Nacional') {
+      this.borradorAlta.update((actual) => ({ ...actual, region: '', provincia: '' }));
+    }
+    this.mensajeLocal.set(null);
+  }
+
+  alElegirDistritoAlta(opcion: OpcionTerritorio | null): void {
+    const distrito = opcion?.tipo === 'distrito' ? opcion : null;
+    this.distritoAlta.set(distrito);
+    if (distrito) {
+      const partes = partesDeRuta(distrito.ruta);
+      this.borradorAlta.update((actual) => ({
+        ...actual,
+        region: distrito.region || partes.region || actual.region,
+        provincia: partes.provincia || actual.provincia,
+      }));
+    }
+    this.mensajeLocal.set(null);
+  }
+
+  cambiarCasoAlta(codigo: string): void {
+    this.borradorAlta.update((actual) => ({ ...actual, casoCode: codigo }));
+    this.mensajeLocal.set(null);
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Formulario: listas con «＋»
+   * ---------------------------------------------------------------------- */
+
+  agregarLinea(campo: CampoLinea): void {
+    this.actualizarLineas(campo, (lineas) => [...lineas, this.nuevaLinea('')]);
+  }
+
+  quitarLinea(campo: CampoLinea, id: number): void {
+    this.actualizarLineas(campo, (lineas) => lineas.filter((linea) => linea.id !== id));
+  }
+
+  editarLinea(campo: CampoLinea, id: number, evento: Event): void {
+    const texto = (evento.target as HTMLTextAreaElement).value;
+    this.actualizarLineas(campo, (lineas) =>
+      lineas.map((linea) => (linea.id === id ? { ...linea, texto } : linea)),
+    );
+  }
+
+  private actualizarLineas(campo: CampoLinea, transformar: (lineas: Linea[]) => Linea[]): void {
+    const actual = this.borradorAlta();
+    const lineas = transformar(actual[campo]);
+    this.borradorAlta.set({
+      ...actual,
+      situacionActual: campo === 'situacionActual' ? lineas : actual.situacionActual,
+      hechosRecientes: campo === 'hechosRecientes' ? lineas : actual.hechosRecientes,
+      descripcionRiesgo: campo === 'descripcionRiesgo' ? lineas : actual.descripcionRiesgo,
+      actoresClave: campo === 'actoresClave' ? lineas : actual.actoresClave,
+      demandasInmediatas: campo === 'demandasInmediatas' ? lineas : actual.demandasInmediatas,
+      accionesSugeridas: campo === 'accionesSugeridas' ? lineas : actual.accionesSugeridas,
+    });
+    this.mensajeLocal.set(null);
+  }
+
+  private nuevaLinea(texto: string): Linea {
+    this.secuenciaLinea += 1;
+    return { id: this.secuenciaLinea, texto };
+  }
+
+  private lineasDesdeTexto(valor: string | null): Linea[] {
+    return (valor ?? '')
+      .split('\n')
+      .map((linea) => linea.trim())
+      .filter((linea) => linea.length > 0)
+      .map((linea) => this.nuevaLinea(linea));
+  }
+
+  private lineasDesdeArray(valores: readonly string[]): Linea[] {
+    return valores
+      .map((valor) => valor.trim())
+      .filter((valor) => valor.length > 0)
+      .map((valor) => this.nuevaLinea(valor));
+  }
+
+  private textoDesdeLineas(lineas: readonly Linea[]): string {
+    return lineas
+      .map((linea) => linea.texto.trim())
+      .filter((texto) => texto.length > 0)
+      .join('\n');
+  }
+
+  private jsonDesdeLineas(lineas: readonly Linea[]): string[] | null {
+    return aJsonLineas(lineas.map((linea) => linea.texto));
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Actores clave desde el Directorio
+   *
+   * AVISO: `core.alertas_tempranas.actores_clave` es `jsonb` de texto libre y
+   * la API no escribe `core.alertas_actores`, así que no hay FK. Convertirlo en
+   * vínculo real exigiría escribir `core.alertas_actores` (sólo roles
+   * `sectorista`/`administrador`) y los permisos `crear`/`pii` al dar de alta
+   * actores. Por eso aquí se sigue guardando texto libre.
+   * ---------------------------------------------------------------------- */
+
+  alternarBuscadorActor(): void {
+    if (this.buscandoActor()) {
+      this.cerrarBuscadorActor();
+      return;
+    }
+    this.buscandoActor.set(true);
+    this.errorActor.set(null);
+  }
+
+  cerrarBuscadorActor(): void {
+    if (this.timerActor) {
+      clearTimeout(this.timerActor);
+      this.timerActor = null;
+    }
+    this.buscandoActor.set(false);
+    this.consultaActor.set('');
+    this.resultadosActor.set([]);
+    this.buscandoDirectorio.set(false);
+    this.errorActor.set(null);
+  }
+
+  alBuscarActor(evento: Event): void {
+    const valor = (evento.target as HTMLInputElement).value;
+    this.consultaActor.set(valor);
+    this.errorActor.set(null);
+    if (this.timerActor) clearTimeout(this.timerActor);
+
+    const consulta = valor.trim();
+    if (consulta.length < 2) {
+      this.resultadosActor.set([]);
+      this.buscandoDirectorio.set(false);
+      return;
+    }
+
+    this.buscandoDirectorio.set(true);
+    this.timerActor = setTimeout(() => this.buscarActorEnDirectorio(consulta), 300);
+  }
+
+  private buscarActorEnDirectorio(consulta: string): void {
+    const turno = ++this.turnoActor;
+    const url = urlApi(`/v1/actors?q=${encodeURIComponent(consulta)}&pageSize=20`);
+
+    this.http.get<unknown>(url).subscribe({
+      next: (bruto) => {
+        if (turno !== this.turnoActor) return;
+        this.resultadosActor.set(aOpciones(bruto));
+        this.buscandoDirectorio.set(false);
+      },
+      error: () => {
+        if (turno !== this.turnoActor) return;
+        this.resultadosActor.set([]);
+        this.buscandoDirectorio.set(false);
+        this.errorActor.set('No se pudo consultar el Directorio de actores.');
+      },
+    });
+  }
+
+  /** Añade una línea «Nombre — Cargo / Organización» a partir del Directorio. */
+  elegirActorDirectorio(actor: ActorOpcion): void {
+    const detalle = actor.institucion ?? actor.tipo ?? '';
+    const texto = detalle ? `${actor.nombre} — ${detalle}` : actor.nombre;
+    this.actualizarLineas('actoresClave', (lineas) => [...lineas, this.nuevaLinea(texto)]);
+    this.cerrarBuscadorActor();
+  }
+
+  /** Añade una línea vacía editable, sin pasar por el Directorio. */
+  escribirActorNuevo(): void {
+    this.agregarLinea('actoresClave');
+    this.cerrarBuscadorActor();
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Guardado
+   * ---------------------------------------------------------------------- */
 
   alEnviarAlta(evento: Event): void {
     evento.preventDefault();
     this.guardarAlta();
   }
 
-  /**
-   * Alta: sólo se valida lo que `createAlert` exige (título y prioridad). Los
-   * opcionales vacíos se omiten para que el repositorio aplique sus valores por
-   * defecto (`visibilidad` interna, `pasoActual` 1).
-   */
   guardarAlta(): void {
     if (!this.puedeModificar() || this.guardando()) return;
 
@@ -711,119 +895,158 @@ export class AlertaPanelComponent {
       return;
     }
 
-    const prioridad = borrador.prioridad.trim();
-    if (!prioridad) {
-      this.mensajeLocal.set('La prioridad es obligatoria para registrar la alerta.');
+    if (!borrador.riesgo) {
+      this.mensajeLocal.set('El nivel de riesgo es obligatorio.');
       return;
     }
 
-    const cuerpo: AltaAlerta = { titulo, prioridad };
+    if (!borrador.alcance) {
+      this.mensajeLocal.set('El alcance geográfico es obligatorio.');
+      return;
+    }
 
-    // El buscador está restringido a distritos: `core.alertas_tempranas` no
-    // tiene lugares operativos y un lugar no se puede degradar a un distrito.
-    const distrito = this.distritoAlta();
-    if (distrito?.tipo === 'distrito') cuerpo.distritoId = distrito.id;
+    if (this.esAlta()) {
+      const cuerpo: AltaAlerta = {
+        titulo,
+        riesgo: borrador.riesgo,
+        alcance: borrador.alcance,
+      };
 
-    const casoCode = borrador.casoCode.trim();
-    if (casoCode) cuerpo.casoCode = casoCode;
+      const distrito = this.distritoAlta();
+      if (distrito?.tipo === 'distrito') cuerpo.distritoId = distrito.id;
 
-    const descripcion = borrador.descripcionRiesgo.trim();
-    if (descripcion) cuerpo.descripcionRiesgo = descripcion;
+      const caso = borrador.casoCode.trim();
+      if (caso) cuerpo.casoCode = caso;
 
-    const hechos = borrador.hechosRecientes.trim();
-    if (hechos) cuerpo.hechosRecientes = hechos;
+      const region = borrador.region.trim();
+      if (region) cuerpo.region = region;
 
-    const situacion = borrador.situacionActual.trim();
-    if (situacion) cuerpo.situacionActual = situacion;
+      const provincia = borrador.provincia.trim();
+      if (provincia) cuerpo.provincia = provincia;
 
-    const acciones = borrador.accionesOaipcs.trim();
-    if (acciones) cuerpo.accionesOaipcs = acciones;
+      const descripcion = this.textoDesdeLineas(borrador.descripcionRiesgo);
+      if (descripcion) cuerpo.descripcionRiesgo = descripcion;
 
-    this.mensajeLocal.set(null);
-    this.registrar.emit(cuerpo);
-  }
+      const hechos = this.textoDesdeLineas(borrador.hechosRecientes);
+      if (hechos) cuerpo.hechosRecientes = hechos;
 
-  alEnviarFormulario(evento: Event): void {
-    evento.preventDefault();
-    this.guardarCambios();
-  }
+      const situacion = this.textoDesdeLineas(borrador.situacionActual);
+      if (situacion) cuerpo.situacionActual = situacion;
 
-  guardarCambios(): void {
+      const actores = this.jsonDesdeLineas(borrador.actoresClave);
+      if (actores) cuerpo.actoresClave = actores;
+
+      const demandas = this.jsonDesdeLineas(borrador.demandasInmediatas);
+      if (demandas) cuerpo.demandasInmediatas = demandas;
+
+      const sugeridas = this.jsonDesdeLineas(borrador.accionesSugeridas);
+      if (sugeridas) cuerpo.accionesSugeridas = sugeridas;
+
+      this.mensajeLocal.set(null);
+      this.registrar.emit(cuerpo);
+      return;
+    }
+
     const alerta = this.alerta();
-    const borrador = this.borrador();
-    if (!alerta || !borrador) return;
+    if (!alerta) return;
 
-    const cambios: PatchAlerta = {};
-
-    const titulo = borrador.titulo.trim();
-    if (titulo && titulo !== (alerta.titulo ?? '')) cambios.titulo = titulo;
-
-    if (borrador.prioridad !== (alerta.prioridad ?? '')) {
-      cambios.prioridad = borrador.prioridad || null;
-    }
-
-    // El repositorio resuelve el nivel por `codigo_legado` o por `nombre`; se
-    // envía el código heredado porque no depende del rename de la migración 14.
-    const nivelActual =
-      alerta.nivelCodigo ??
-      OPCIONES_NIVEL.find((opcion) => opcion.etiqueta === alerta.nivel)?.valor ??
-      '';
-    const nivelElegido =
-      OPCIONES_NIVEL.find((opcion) => opcion.etiqueta === borrador.nivel)?.valor ?? '';
-    if (nivelElegido !== nivelActual) cambios.nivel = nivelElegido || null;
-
-    const situacion = diferenciaTexto(borrador.situacionActual, alerta.situacionActual);
-    if (situacion !== undefined) cambios.situacionActual = situacion;
-
-    const hechos = diferenciaTexto(borrador.hechosRecientes, alerta.hechosRecientes);
-    if (hechos !== undefined) cambios.hechosRecientes = hechos;
-
-    const descripcion = diferenciaTexto(borrador.descripcionRiesgo, alerta.descripcionRiesgo);
-    if (descripcion !== undefined) cambios.descripcionRiesgo = descripcion;
-
-    const acciones = diferenciaTexto(borrador.accionesOaipcs, alerta.accionesOaipcs);
-    if (acciones !== undefined) cambios.accionesOaipcs = acciones;
-
-    const sugeridas = aJsonLineas(borrador.accionesSugeridas.split('\n'));
-    const sugeridasPrevias = alerta.accionesSugeridas.length ? alerta.accionesSugeridas : null;
-    if ((sugeridas ?? []).join('\n') !== (sugeridasPrevias ?? []).join('\n')) {
-      cambios.accionesSugeridas = sugeridas;
-    }
-
-    const caso = borrador.casoCode.trim();
-    if (caso !== (alerta.casoCodigo ?? '')) cambios.casoCode = caso || null;
-
-    const distritoNuevo = this.distritoEdicionId();
-    if (distritoNuevo !== alerta.distritoId) {
-      // `null` limpia el distrito; un id lo fija. Ausente en el cuerpo = sin
-      // cambio, y así el repositorio puede heredar el del caso sin pisarlo.
-      if (
-        !this.divergenciaAceptada() &&
-        distritoNuevo !== null &&
-        alerta.casoDistritoId !== null &&
-        distritoNuevo !== alerta.casoDistritoId
-      ) {
-        const nombreNuevo = this.distritoEdicion()?.nombre ?? 'el elegido';
-        this.mensajeLocal.set(
-          `El distrito de la alerta (${nombreNuevo}) no coincide con el del caso (${alerta.casoDistrito}). Use «Usar el del caso» o confirme con «Mantener el de la alerta».`,
-        );
-        return;
-      }
-      cambios.distritoId = distritoNuevo;
-    }
-
-    if (Object.keys(cambios).length === 0) {
+    const patch = this.patchDesdeBorrador(alerta, borrador, titulo);
+    if (Object.keys(patch).length === 0) {
       this.mensajeLocal.set('No hay cambios que guardar.');
       return;
     }
 
     this.mensajeLocal.set(null);
-    this.guardar.emit(cambios);
+    this.guardar.emit(patch);
   }
 
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
+  /** `PatchAlerta` con sólo las claves cuyo valor difiere de la alerta abierta. */
+  private patchDesdeBorrador(alerta: Alerta, borrador: BorradorAlta, titulo: string): PatchAlerta {
+    const patch: PatchAlerta = {};
+
+    const tituloCambio = diferenciaTexto(titulo, alerta.titulo);
+    if (tituloCambio !== undefined) patch.titulo = tituloCambio;
+
+    if (borrador.riesgo && borrador.riesgo !== alerta.riesgo) patch.riesgo = borrador.riesgo;
+    if (borrador.alcance && borrador.alcance !== alerta.alcance) {
+      patch.alcance = borrador.alcance;
+    }
+
+    const region = diferenciaTexto(borrador.region, alerta.region);
+    if (region !== undefined) patch.region = region;
+
+    const provincia = diferenciaTexto(borrador.provincia, alerta.provincia);
+    if (provincia !== undefined) patch.provincia = provincia;
+
+    const caso = diferenciaTexto(borrador.casoCode, alerta.casoCodigo);
+    if (caso !== undefined) patch.casoCode = caso;
+
+    const distrito = this.distritoAlta();
+    const distritoId = distrito?.tipo === 'distrito' ? distrito.id : null;
+    if (distritoId !== alerta.distritoId) patch.distritoId = distritoId;
+
+    const situacion = diferenciaTexto(
+      this.textoDesdeLineas(borrador.situacionActual),
+      alerta.situacionActual,
+    );
+    if (situacion !== undefined) patch.situacionActual = situacion;
+
+    const hechos = diferenciaTexto(
+      this.textoDesdeLineas(borrador.hechosRecientes),
+      alerta.hechosRecientes,
+    );
+    if (hechos !== undefined) patch.hechosRecientes = hechos;
+
+    const descripcion = diferenciaTexto(
+      this.textoDesdeLineas(borrador.descripcionRiesgo),
+      alerta.descripcionRiesgo,
+    );
+    if (descripcion !== undefined) patch.descripcionRiesgo = descripcion;
+
+    const actores = this.jsonDesdeLineas(borrador.actoresClave);
+    if ((actores ?? []).join('\n') !== alerta.actoresClave.join('\n')) {
+      patch.actoresClave = actores;
+    }
+
+    const demandas = this.jsonDesdeLineas(borrador.demandasInmediatas);
+    if ((demandas ?? []).join('\n') !== alerta.demandasInmediatas.join('\n')) {
+      patch.demandasInmediatas = demandas;
+    }
+
+    const sugeridas = this.jsonDesdeLineas(borrador.accionesSugeridas);
+    if ((sugeridas ?? []).join('\n') !== alerta.accionesSugeridas.join('\n')) {
+      patch.accionesSugeridas = sugeridas;
+    }
+
+    return patch;
   }
+
+  /* ---------------------------------------------------------------------- *
+   * Contenido narrativo
+   * ---------------------------------------------------------------------- */
+
+  /** «Modificar contenido» reutiliza el formulario del alta ya prellenado. */
+  iniciarEdicion(): void {
+    const alerta = this.alerta();
+    if (!alerta || !this.puedeModificar()) return;
+
+    this.sembrar(alerta);
+    this.editando.set(true);
+  }
+
+  cancelarEdicion(): void {
+    this.editando.set(false);
+    this.cerrarBuscadorActor();
+    this.mensajeLocal.set(null);
+  }
+
+  alternarHistorial(): void {
+    this.verHistorial.update((valor) => !valor);
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Diálogo
+   * ---------------------------------------------------------------------- */
 
   alTecla(evento: KeyboardEvent): void {
     if (evento.key === 'Tab') this.atraparFoco(evento);

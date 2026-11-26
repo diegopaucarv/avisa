@@ -37,3 +37,4 @@ __pycache__/
 # correo y teléfono). Se conservan en local, fuera del control de versiones.
 backups/tdr/
 backups/*.dump
+nul

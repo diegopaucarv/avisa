@@ -1,0 +1,63 @@
+<div class="rango-fechas" role="group" [attr.aria-label]="etiquetaGrupo()">
+  <label class="campo" [attr.for]="idDesde()">
+    <span class="campo-etiqueta">{{ etiquetaDesde() }}</span>
+    <input
+      [id]="idDesde()"
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      spellcheck="false"
+      maxlength="10"
+      placeholder="dd/mm/aaaa"
+      [value]="textoDesde()"
+      [disabled]="deshabilitado()"
+      [attr.aria-invalid]="error() ? 'true' : null"
+      [attr.aria-describedby]="error() ? idError() : null"
+      (input)="cambiarDesde($event)"
+      (blur)="confirmarDesde()"
+      (keydown.enter)="confirmarDesde()"
+    />
+  </label>
+
+  <span class="guion" aria-hidden="true">–</span>
+
+  <label class="campo" [attr.for]="idHasta()">
+    <span class="campo-etiqueta">{{ etiquetaHasta() }}</span>
+    <input
+      [id]="idHasta()"
+      type="text"
+      inputmode="numeric"
+      autocomplete="off"
+      spellcheck="false"
+      maxlength="10"
+      placeholder="dd/mm/aaaa"
+      [value]="textoHasta()"
+      [disabled]="deshabilitado()"
+      [attr.aria-invalid]="error() ? 'true' : null"
+      [attr.aria-describedby]="error() ? idError() : null"
+      (input)="cambiarHasta($event)"
+      (blur)="confirmarHasta()"
+      (keydown.enter)="confirmarHasta()"
+    />
+  </label>
+
+  @if (atajos()) {
+    <div class="atajos" role="group" aria-label="Rangos rápidos">
+      @for (atajo of atajosDisponibles; track atajo.clave) {
+        <button
+          type="button"
+          class="atajo"
+          [attr.aria-pressed]="atajoActivo() === atajo.clave"
+          [disabled]="deshabilitado()"
+          (click)="aplicarAtajo(atajo.clave)"
+        >
+          {{ atajo.etiqueta }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (error()) {
+    <p class="rango-error" role="alert" [id]="idError()">{{ error() }}</p>
+  }
+</div>

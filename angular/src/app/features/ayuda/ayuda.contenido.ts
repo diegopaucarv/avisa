@@ -325,8 +325,8 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
         ],
       },
       {
-        id: 'riesgo-moderado',
-        termino: 'Moderado',
+        id: 'riesgo-medio',
+        termino: 'Medio',
         definicion:
           'Empiezan a presentarse factores que podrían favorecer el tránsito progresivo hacia situaciones de mayor conflictividad o dificultar su conducción institucional.',
         detalles: [
@@ -360,8 +360,8 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
           'Valor de prioridad de atención del caso. Se registra en la matriz de conflictividad (Anexo 15) y ordena el seguimiento operativo.',
       },
       {
-        id: 'atencion-moderado',
-        termino: 'Moderado',
+        id: 'atencion-medio',
+        termino: 'Medio',
         definicion:
           'Valor de prioridad de atención del caso. Se registra en la matriz de conflictividad (Anexo 15) y ordena el seguimiento operativo.',
       },
@@ -433,74 +433,10 @@ export const SECCIONES_AYUDA: readonly SeccionAyuda[] = [
     ],
   },
   {
-    id: 'tematicas',
-    titulo: 'Temáticas de conflictividad',
-    fuente: 'Guía §7.6 · Glosario §1.4',
-    introduccion:
-      'Los casos se clasifican según la naturaleza de la disputa y el rol del sector. Son seis temáticas.',
-    entradas: [
-      {
-        id: 'tematica-infraestructura',
-        termino: 'Infraestructura',
-        definicion:
-          'Conflictos derivados de las limitaciones o brechas en la provisión estatal de bienes públicos físicos, infraestructura productiva o asistencia técnica, sin los cuales se compromete el desarrollo de las actividades productivas y/o su adecuación a las normas vigentes.',
-        detalles: [
-          'Ejemplo de la Guía: el cierre temporal de un desembarcadero por deficiencias estructurales, sin comunicación previa ni plan de contingencia, puede derivar en hostilidad de las organizaciones de pescadores afectadas.',
-        ],
-      },
-      {
-        id: 'tematica-ordenamiento',
-        termino: 'Ordenamiento y acceso territorial',
-        definicion:
-          'Conflictos originados por la superposición de actividades o actores en zonas de pesca o territorios productivos vinculados al ordenamiento espacial del recurso. Incluyen disputas por delimitación de áreas, uso exclusivo de espacios, zonas reservadas o coexistencia con otras actividades productivas.',
-        detalles: [
-          'Ejemplo de la Guía: la restricción precautoria de un arte de pesca en zonas adyacentes a un área natural protegida puede intensificar la competencia entre organizaciones de distintas caletas.',
-        ],
-      },
-      {
-        id: 'tematica-normatividad',
-        termino: 'Normatividad',
-        definicion:
-          'Conflictos asociados a la emisión o implementación de medidas de normatividad, cuando generan impactos diferenciados en los actores o son percibidas como restrictivas, inequitativas o técnicamente cuestionables.',
-        detalles: [
-          'Ejemplo de la Guía: una norma de ordenamiento pesquero que reclasifica embarcaciones puede ser percibida como restricción de derechos adquiridos por unas organizaciones y como necesaria por otras.',
-        ],
-      },
-      {
-        id: 'tematica-distribucion',
-        termino: 'Distribución de beneficios',
-        definicion:
-          'Conflictos vinculados a la forma en que se distribuyen los beneficios económicos y sociales derivados de las actividades productivas o los programas del sector. Incluye acceso inequitativo a mercados, concentración de cuotas, participación en la cadena de valor o percepciones de favorecimiento competitivo.',
-        detalles: [
-          'Ejemplo de la Guía: la percepción de que un programa de compras públicas concentra sus beneficios en un grupo reducido de proveedores puede generar resentimiento y escalar hacia denuncias públicas.',
-        ],
-      },
-      {
-        id: 'tematica-gobernanza',
-        termino: 'Gobernanza',
-        definicion:
-          'Conflictos relacionados con los procesos de toma de decisiones, la legitimidad de las autoridades y las reglas institucionales que regulan la actividad y los espacios comunes. Incluyen disputas por participación, centralización de decisiones, legitimidad representativa y capacidad de incidencia.',
-        detalles: [
-          'Ejemplo de la Guía: cuando la administración de una infraestructura pública pesquera recae en una organización cuya legitimidad es cuestionada y la autoridad no actúa con oportunidad, el desacuerdo puede afectar la confianza en los mecanismos formales de gestión.',
-        ],
-      },
-      {
-        id: 'tematica-impactos-terceros',
-        termino: 'Impactos de terceros',
-        definicion:
-          'Conflictos vinculados con impactos negativos, amenazas o perturbaciones cuyo origen es externo a la cadena productiva: otras industrias, fenómenos naturales, criminalidad o actores que operan fuera del marco de regulación de PRODUCE.',
-        detalles: [
-          'Ejemplo de la Guía: la incorporación de especies en apéndices de una convención internacional de conservación puede restringir su extracción y comercialización y ser percibida como una imposición externa.',
-        ],
-      },
-    ],
-  },
-  {
     id: 'subsectores',
     titulo: 'Subsectores del Sector Producción',
     fuente: 'Guía §7.2 · Anexo 15',
-    introduccion:
-      'El subsector fija el bloque del código del caso y no es una temática ni un tipo de actor.',
+    introduccion: 'El subsector fija el bloque del código del caso y no es un tipo de actor.',
     entradas: [
       {
         id: 'subsector-pesca',

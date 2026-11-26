@@ -1,3 +1,4 @@
+import { formatearFechaCompacta, formatearFechaCorta, partesFecha } from '../shared/formato-fecha';
 import type {
   Alcance,
   Caso,
@@ -63,53 +64,24 @@ function unoDe<T extends string>(valor: string | null, permitidos: readonly T[],
  *
  * No construye un `Date`: de una fecha ISO con hora se toma el día literal, sin
  * desplazarlo a la jornada anterior al interpretarlo en una zona al oeste de
- * UTC (`2026-10-31T00:00:00.000Z` sigue siendo 31/10). Acepta `YYYY-MM-DD`,
+ * UTC (`2026-10-31T00:00:00.000Z` sigue siendo 31OCT2026). Acepta `YYYY-MM-DD`,
  * ISO con hora y el formato legado `DD/MM/YYYY`. Un valor no reconocible se
  * declara como hueco (`null`) en vez de propagarse como texto arbitrario.
  */
 export function fechaIso(valor: string | null | undefined): string | null {
-  if (!valor) return null;
-  const texto = valor.trim();
+  const partes = partesFecha(valor);
+  if (!partes) return null;
 
-  const barras = /^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(texto);
-  if (barras) {
-    return `${barras[3]}-${barras[2].padStart(2, '0')}-${barras[1].padStart(2, '0')}`;
-  }
-
-  const iso = /^(\d{4})-(\d{2})-(\d{2})(?:$|[T\s])/.exec(texto);
-  return iso ? `${iso[1]}-${iso[2]}-${iso[3]}` : null;
+  const [anio, mes, dia] = partes;
+  return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
 }
 
-/** `2026-10-31` o `2026-10-31T00:00:00.000Z` → `31/10/2026`; sin fecha → `—`. */
+/** Compatibilidad: el formato de caso es el compacto común (`31OCT2026`). */
 export function formatearFechaCaso(valor: string | null | undefined): string {
-  const iso = fechaIso(valor);
-  if (!iso) return '—';
-  const [anio, mes, dia] = iso.split('-');
-  return `${dia}/${mes}/${anio}`;
+  return formatearFechaCorta(valor);
 }
 
-/**
- * Formato corto de las tarjetas: `2026-11-18` → `18 nov 2026`.
- *
- * Se construye a medianoche UTC para que el día no se desplace en zonas al
- * oeste de UTC (no se parsea la cadena `YYYY-MM-DD`, que `Date` leería como UTC
- * y luego mostraría en hora local). `es-PE` abrevia el mes con punto («nov.»);
- * el punto se retira porque la etiqueta de la tarjeta no lo lleva.
- */
-const FECHA_CORTA = new Intl.DateTimeFormat('es-PE', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
-
-/** `2026-11-18` → `18 nov 2026`; sin fecha → `—`. */
-export function formatearFechaCorta(valor: string | null | undefined): string {
-  const iso = fechaIso(valor);
-  if (!iso) return '—';
-  const [anio, mes, dia] = iso.split('-').map(Number);
-  return FECHA_CORTA.format(new Date(Date.UTC(anio, mes - 1, dia))).replace(/\./g, '');
-}
+export { formatearFechaCompacta, formatearFechaCorta };
 
 export const NIVELES_CONFLICTO = [
   'Diferencia',
@@ -118,11 +90,11 @@ export const NIVELES_CONFLICTO = [
   'Crisis social',
 ] as const satisfies readonly NivelConflicto[];
 
-export const RIESGOS = ['Bajo', 'Moderado', 'Alto'] as const satisfies readonly Riesgo[];
+export const RIESGOS = ['Bajo', 'Medio', 'Alto'] as const satisfies readonly Riesgo[];
 
 export const PRIORIDADES = [
   'Urgente',
-  'Moderado',
+  'Medio',
   'Bajo',
 ] as const satisfies readonly PrioridadAtencion[];
 
@@ -289,6 +261,8 @@ export type CompromisoCaso = {
   /** Fecha manual si llega; si no, la del próximo hito no terminal. */
   vencimiento: string | null;
   origenVencimiento: 'manual' | 'hito' | null;
+  /** Hitos del compromiso, tal como los devuelve `GET /v1/cases/{codigo}`. */
+  hitos: HitoCompromisoCaso[];
 };
 
 export type DocumentoCaso = {
@@ -424,13 +398,13 @@ function esEstadoHitoTerminal(estado: string | null): boolean {
 function aCompromisoCaso(bruto: unknown): CompromisoCaso {
   const registro = esRegistro(bruto) ? bruto : {};
   const manual = texto(registro, ['fechaVencimiento', 'fecha_vencimiento']);
+  const hitos = lista(registro, ['hitos']).map(aHitoCompromisoCaso);
 
   // Misma regla que `lib/db/repos/commitments.ts`: la fecha manual prevalece y,
   // si falta, se usa la del próximo hito no terminal. Hoy el detalle no envía la
   // fecha manual, así que el vencimiento suele salir del hito.
   const delHito =
-    lista(registro, ['hitos'])
-      .map(aHitoCompromisoCaso)
+    hitos
       .filter((hito) => hito.fecha && !esEstadoHitoTerminal(hito.estado))
       .map((hito) => hito.fecha as string)
       .sort()[0] ?? null;
@@ -444,6 +418,7 @@ function aCompromisoCaso(bruto: unknown): CompromisoCaso {
     unidad: texto(registro, ['unidad']),
     vencimiento: manual ?? delHito,
     origenVencimiento: manual ? 'manual' : delHito ? 'hito' : null,
+    hitos,
   };
 }
 
@@ -547,10 +522,22 @@ export function aDetalleCaso(bruto: unknown): DetalleCaso {
   };
 }
 
-/** «Medio» es legado y no debe reaparecer en la UI. */
+/** «Moderado» es legado y no debe reaparecer en la UI. */
 function riesgoDe(valor: string | null): Riesgo {
-  if (valor && valor.trim().toLowerCase() === 'medio') return 'Moderado';
+  if (valor && valor.trim().toLowerCase() === 'moderado') return 'Medio';
   return unoDe(valor, RIESGOS, 'Bajo');
+}
+
+/**
+ * Nivel de conflictividad declarado. Como la naturaleza, no tiene respaldo: un
+ * valor ausente o desconocido es «sin declarar» (`null`) y no `Diferencia`.
+ * La etiqueta latente/manifiesto se deriva de este valor, así que inventarlo
+ * cambiaría la situación del caso.
+ */
+function nivelDe(valor: string | null): NivelConflicto | null {
+  if (!valor) return null;
+  const limpio = valor.trim().toLowerCase();
+  return NIVELES_CONFLICTO.find((opcion) => opcion.toLowerCase() === limpio) ?? null;
 }
 
 /**
@@ -574,6 +561,9 @@ function naturalezaDe(valor: string | null): NaturalezaCaso | null {
  */
 export function aCaso(bruto: unknown): Caso {
   const registro = esRegistro(bruto) ? bruto : {};
+  // El bloque `geografia` trae el distrito principal: nombre para mostrar y
+  // ubigeo como llave. La API lo incluye en el listado y en la ficha.
+  const geografia = esRegistro(registro['geografia']) ? registro['geografia'] : {};
 
   return {
     id: texto(registro, ['id', 'uid']) ?? '',
@@ -590,15 +580,14 @@ export function aCaso(bruto: unknown): Caso {
       texto(registro, ['actualizadoEn', 'updatedAt']),
     inicio: fechaIso(texto(registro, ['fechaInicio', 'fecha_inicio', 'inicio'])),
     region: texto(registro, ['region']),
+    enlaceAnalisis: texto(registro, ['enlaceAnalisis', 'enlace_analisis']),
+    distrito: texto(geografia, ['distrito']),
+    distritoUbigeo: texto(geografia, ['distritoUbigeo', 'distrito_ubigeo']),
     estado: estadoDeCaso(texto(registro, ['estado'])),
     riesgo: riesgoDe(texto(registro, ['riesgo', 'risk'])),
-    prioridad: unoDe(texto(registro, ['prioridad']), PRIORIDADES, 'Moderado'),
+    prioridad: unoDe(texto(registro, ['prioridad']), PRIORIDADES, 'Medio'),
     alcance: unoDe(texto(registro, ['alcance']), ALCANCES, 'Centro'),
-    nivelConflicto: unoDe(
-      texto(registro, ['nivelConflicto', 'nivel_conflicto']),
-      NIVELES_CONFLICTO,
-      'Diferencia',
-    ),
+    nivelConflicto: nivelDe(texto(registro, ['nivelConflicto', 'nivel_conflicto'])),
     naturaleza: naturalezaDe(texto(registro, ['naturaleza'])),
     etapa: etapaDe(texto(registro, ['etapa', 'stage'])),
     tematica: texto(registro, ['tematica']),

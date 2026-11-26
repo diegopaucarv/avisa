@@ -23,9 +23,32 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import {
+  aFoto,
+  esFotoPintable,
+  fotoPrincipal,
+  fotosPorEntidad,
+  type Foto,
+} from '../../dominio/medios';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+import {
+  formatearFechaCompacta,
+  formatearFechaHora,
+  partesFecha,
+} from '../../shared/formato-fecha';
+
+import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import {
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ClicFila,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
 import {
   TIPOS_ORGANIZACION,
   aOrganizacionDirectorio,
@@ -63,7 +86,14 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
  */
 @Component({
   selector: 'app-organizaciones',
-  imports: [IconoComponent, PaginacionComponent, ExportarMenuComponent],
+  imports: [
+    IconoComponent,
+    PaginacionComponent,
+    BarraSeleccionComponent,
+    GaleriaFotosComponent,
+    TablaComponent,
+    CeldaTablaDirectiva,
+  ],
   templateUrl: './organizaciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -90,23 +120,10 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
     .org-nombre {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
       width: 100%;
       padding: 0;
       border: 0;
@@ -117,15 +134,35 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
       cursor: pointer;
     }
 
+    .org-nombre small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     .org-razon {
+      display: block;
       max-width: 260px;
       white-space: normal;
+    }
+
+    .tabla-foto {
+      display: block;
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #f6f8fa;
     }
 
     .org-actualizando {
       margin: 0;
       color: #8d99a6;
-      font-size: 9.5px;
+      font-size: 12px;
+    }
+
+    .sin-dato {
+      color: var(--muted);
+      font-style: italic;
     }
 
     .drawer {
@@ -142,17 +179,10 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
     .ficha-etiqueta {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
-    }
-
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-      overflow-wrap: anywhere;
     }
 
     .ficha-badges {
@@ -186,8 +216,10 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
 
     .ficha-seccion h3 {
       margin: 0;
-      color: #33475b;
-      font: 700 11px var(--font-display);
+      color: #7b8896;
+      font: 700 11.5px var(--font-display);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .ficha-datos {
@@ -204,9 +236,14 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
       min-width: 0;
     }
 
+    /* La fotografía ocupa las columnas de la cuadrícula, no una sola. */
+    .ficha-datos > div.ficha-ancho {
+      grid-column: 1 / -1;
+    }
+
     .ficha-datos dt {
       color: #97a1aa;
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -215,7 +252,7 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
     .ficha-datos dd {
       margin: 0;
       color: #465a6c;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.45;
       overflow-wrap: anywhere;
     }
@@ -223,7 +260,7 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
     .ficha-perfil {
       margin: 0;
       color: #52677a;
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.65;
       white-space: pre-line;
     }
@@ -231,7 +268,7 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
     .ficha-vacio {
       margin: 0;
       color: #a0aab3;
-      font-size: 10.5px;
+      font-size: 13px;
       font-style: italic;
     }
 
@@ -288,6 +325,115 @@ export class OrganizacionesPage {
 
   readonly organizaciones = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
+
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  /** Ids marcados, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() => this.seleccion.lista());
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<OrganizacionDirectorio>();
+
+  /**
+   * Columnas del listado. El nombre va primero porque `app-tabla` reserva
+   * 200 px a la celda que nombra la fila; con la foto delante, la miniatura de
+   * 32 px estiraría toda la columna.
+   */
+  readonly columnas: readonly ColumnaTabla[] = [
+    { clave: 'nombre', titulo: 'Nombre', ordenable: true },
+    { clave: 'foto', titulo: 'Foto', ancho: '46px' },
+    { clave: 'tipo', titulo: 'Tipo', ordenable: true },
+    { clave: 'ruc', titulo: 'RUC / razón social', ordenable: true },
+    {
+      clave: 'integrantes',
+      titulo: 'Integrantes',
+      ordenable: true,
+      acceso: (fila) => (fila as unknown as OrganizacionDirectorio).numeroIntegrantes,
+    },
+    {
+      clave: 'vigencia',
+      titulo: 'Vigencia',
+      ordenable: true,
+      acceso: (fila) =>
+        (fila as unknown as OrganizacionDirectorio).vigenciaDesde ??
+        (fila as unknown as OrganizacionDirectorio).vigenciaHasta,
+      formato: (_valor, fila) => this.periodoVigencia(fila as unknown as OrganizacionDirectorio),
+    },
+    { clave: 'estadoOspa', titulo: 'Estado OSPA', ordenable: true },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página ordena con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
+
+  private readonly accesores: Record<string, (fila: OrganizacionDirectorio) => unknown> = {
+    nombre: (fila) => fila.nombre,
+    tipo: (fila) => fila.tipo,
+    ruc: (fila) => fila.ruc ?? fila.razonSocial,
+    integrantes: (fila) => fila.numeroIntegrantes,
+    vigencia: (fila) => fila.vigenciaDesde ?? fila.vigenciaHasta,
+    estadoOspa: (fila) => fila.estadoOspa,
+  };
+
+  readonly filasVisibles = computed(() =>
+    this.orden.ordenar(this.organizaciones(), this.accesores),
+  );
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  alCambiarSeleccion(ids: readonly string[]): void {
+    // Una organización sin id real llega como `#índice`: no se puede exportar.
+    const marcadas = new Set(ids.filter((id) => !!id && !id.startsWith('#')));
+    for (const id of this.seleccion.lista()) {
+      if (!marcadas.has(id)) this.seleccion.alternar(id);
+    }
+    for (const id of marcadas) {
+      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+    }
+  }
+
+  alClicFila(evento: ClicFila): void {
+    this.abrir(evento.fila as unknown as OrganizacionDirectorio);
+  }
+
+  idsVisibles(): string[] {
+    return this.organizaciones()
+      .map((organizacion) => organizacion.id)
+      .filter((id): id is string => !!id);
+  }
+
+  /** Fotos de la página visible en una sola petición (`entidadIds`). */
+  private readonly fotosPagina = consulta<Map<string, Foto[]>>({
+    fuente: () => {
+      const ids = this.idsVisibles();
+      if (ids.length === 0) return null;
+      return urlConParametros(urlApi('/v1/media'), {
+        entidadTipo: 'organizacion',
+        entidadIds: ids.join(','),
+        pageSize: '200',
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return fotosPorEntidad(coleccion.elementos.map(aFoto).filter(esFotoPintable));
+    },
+  });
+
+  readonly fotosPorOrganizacion = computed(
+    () => this.fotosPagina.valor() ?? new Map<string, Foto[]>(),
+  );
+
+  /** Foto principal de la organización; `null` = sin foto registrada. */
+  fotoDe(organizacionId: string): Foto | null {
+    return fotoPrincipal(this.fotosPorOrganizacion().get(organizacionId) ?? []);
+  }
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
 
@@ -387,25 +533,21 @@ export class OrganizacionesPage {
     this.exportarError.set(mensaje);
   }
 
-  /** `YYYY-MM-DD` → `DD/MM/AAAA`; cualquier otro valor se deja tal cual. */
+  /** `YYYY-MM-DD` → `02NOV2025`; cualquier otro valor se deja tal cual. */
   fecha(valor: string | null): string {
     if (!valor) return '—';
-    const iso = valor.slice(0, 10);
-    const [anio, mes, dia] = iso.split('-');
-    if (!anio || !mes || !dia) return valor;
-    return `${dia}/${mes}/${anio}`;
+    return partesFecha(valor) ? formatearFechaCompacta(valor) : valor;
   }
 
-  /** Marca de tiempo ISO → fecha y hora en horario de Lima. */
+  /** Marca de tiempo ISO → fecha compacta y hora: `02NOV2025 16:00`. */
   fechaHora(valor: string | null): string {
-    if (!valor) return '—';
-    const instante = new Date(valor);
-    if (Number.isNaN(instante.getTime())) return this.fecha(valor);
-    return new Intl.DateTimeFormat('es-PE', {
-      dateStyle: 'short',
-      timeStyle: 'short',
-      timeZone: 'America/Lima',
-    }).format(instante);
+    return formatearFechaHora(valor);
+  }
+
+  /** RUC y razón social en una celda; «—» cuando no hay ninguno. */
+  rucRazon(organizacion: OrganizacionDirectorio): string {
+    const ruc = organizacion.ruc || '—';
+    return organizacion.razonSocial ? `${ruc} · ${organizacion.razonSocial}` : ruc;
   }
 
   /** Vigencia con el dato disponible; nunca completa lo que la base no tiene. */

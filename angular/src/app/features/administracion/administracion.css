@@ -1,0 +1,255 @@
+/* Administración — estilos locales de la página y de sus cinco paneles.
+   Sólo se usan variables de tema (claro/oscuro); nunca colores fijos.
+   Las clases compartidas (`surface`, `data-table`, `segmented`, `badge`,
+   `form-*`, `button-*`, `inline-notice`, `empty-state`, `table-wrap`,
+   `filter-bar`, `search-field`, `select-filter`) vienen de global.css. */
+
+:host {
+  display: block;
+}
+
+/* ── Tarjetas de resumen ─────────────────────────────────────────────────── */
+
+.admin-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 11px;
+}
+
+@media (max-width: 1080px) {
+  .admin-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.admin-kpi {
+  min-height: 86px;
+  padding: 13px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+}
+
+.admin-kpi-label {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.admin-kpi-value {
+  color: var(--ink);
+  font: 700 20px/1.15 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-kpi-value.sin-dato {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.admin-kpi-note {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* ── Estructura de cada panel ─────────────────────────────────────────────── */
+
+.admin-section {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-panel-head h2 {
+  margin: 0;
+  color: var(--ink);
+  font: 700 15px/1.3 var(--font-display);
+}
+
+.admin-panel-head p {
+  max-width: 780px;
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-nota {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.admin-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.admin-sub {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-empty-cell {
+  color: var(--muted);
+}
+
+/* ── Formularios en línea ─────────────────────────────────────────────────── */
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--canvas);
+}
+
+.admin-form-title {
+  margin: 0;
+  color: var(--ink);
+  font: 700 13.5px/1.3 var(--font-display);
+}
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.admin-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.admin-check input {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Chips y celdas de acciones ───────────────────────────────────────────── */
+
+.admin-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.admin-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 9px;
+  background: var(--blue-pale);
+  color: var(--ink-2);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.admin-cell-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-confirm > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-valor {
+  display: block;
+  max-width: 380px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.admin-disabled-motivo {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+/* Celdas que sí pueden envolver: roles, notas y descripciones. */
+.admin-cell-wrap {
+  min-width: 180px;
+  white-space: normal;
+}
+
+/* El badge de «rol requerido» necesita separar el icono del texto. */
+.admin-rol-badge {
+  gap: 5px;
+}
+
+/* Selector de catálogo: el límite global de 150 px no alcanza los nombres. */
+.select-filter .admin-select-ancho {
+  max-width: 240px;
+  color: var(--ink-2);
+}
+
+/* Editor de rol en línea dentro de la tabla de usuarios. */
+.admin-edit-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-edit-inline .form-select {
+  width: auto;
+  max-width: 200px;
+}
+
+.admin-nota code,
+.admin-panel-head code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+}

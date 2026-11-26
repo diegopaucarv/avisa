@@ -1,0 +1,57 @@
+<section class="surface admin-section" aria-labelledby="titulo-admin-migraciones">
+  <div class="admin-panel-head">
+    <div>
+      <h2 id="titulo-admin-migraciones">Migraciones</h2>
+      <p>
+        Bitácora de <code>core.migracion_log</code>: qué migración se aplicó y cuándo. Es de sólo
+        lectura; la escribe el aplicador de migraciones.
+      </p>
+    </div>
+    <div class="admin-actions">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="cargando()"
+        (click)="cargar()"
+      >
+        <app-icono nombre="reloj" [tamano]="14" />
+        {{ cargando() ? 'Actualizando…' : 'Recargar' }}
+      </button>
+    </div>
+  </div>
+
+  @if (error(); as texto) {
+  <p class="form-error" role="alert">{{ texto }}</p>
+  } @if (cargando() && items().length === 0) {
+  <div class="empty-state" role="status">Cargando migraciones…</div>
+  } @else if (items().length === 0) {
+  <div class="empty-state">
+    <strong>Sin migraciones registradas</strong>
+    <p>La bitácora está vacía o la consulta no devolvió filas.</p>
+  </div>
+  } @else {
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Clave</th>
+          <th scope="col">Aplicada</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items(); track item.clave) {
+        <tr>
+          <td><span class="admin-mono">{{ item.clave }}</span></td>
+          <td>{{ fechaHora(item.aplicadaEn) }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+
+  <p class="admin-nota">
+    {{ items().length }} {{ items().length === 1 ? 'migración registrada' : 'migraciones
+    registradas' }}. La más reciente aparece primero.
+  </p>
+</section>

@@ -1,16 +1,13 @@
 <section class="view-body" aria-labelledby="titulo-organizaciones">
   <header class="view-head">
-    <div>
-      <h1 id="titulo-organizaciones">Organizaciones</h1>
-      <p class="view-subtitle">
-        Organizaciones sociales, gremios y cooperativas registradas en el directorio, con su tipo,
-        registro OSPA y vigencia (Guía §7.4). Los locales donde se reúnen se consultan en el
-        directorio de locales.
-      </p>
-    </div>
+    <h1 id="titulo-organizaciones">Organizaciones</h1>
     <div class="view-actions">
-      <app-exportar-menu entidad="organizaciones" (fallo)="alFallarExportacion($event)" />
-      <p class="result-count" aria-live="polite">{{ total() }} organizaciones</p>
+      <app-barra-seleccion
+        entidad="organizaciones"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (fallo)="alFallarExportacion($event)"
+      />
     </div>
   </header>
 
@@ -82,56 +79,52 @@
   <p class="org-actualizando" role="status">Actualizando el listado…</p>
   }
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <caption class="table-caption">
-        Pulse una fila para abrir la ficha en el panel lateral. Los datos provienen de
-        <code>core.organizaciones</code>
-        y del actor colectivo; las celdas sin dato muestran «—».
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col">Nombre</th>
-          <th scope="col">Tipo</th>
-          <th scope="col">RUC / razón social</th>
-          <th scope="col">Integrantes</th>
-          <th scope="col">Vigencia</th>
-          <th scope="col">Estado OSPA</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (organizacion of organizaciones(); track organizacion.id) {
-        <tr
-          class="case-row-clickable"
-          [class.row-selected]="seleccionado()?.id === organizacion.id"
-          (click)="abrir(organizacion)"
-        >
-          <td>
-            <button
-              type="button"
-              class="table-link org-nombre"
-              [attr.aria-label]="'Abrir la ficha de ' + organizacion.nombre"
-              (click)="abrir(organizacion); $event.stopPropagation()"
-            >
-              <strong>{{ organizacion.nombre }}</strong>
-              @if (organizacion.abreviatura) {
-              <small>{{ organizacion.abreviatura }}</small>
-              }
-            </button>
-          </td>
-          <td>{{ organizacion.tipo || "—" }}</td>
-          <td class="org-razon">
-            {{ organizacion.ruc || "—" }} @if (organizacion.razonSocial) { · {{
-            organizacion.razonSocial }} }
-          </td>
-          <td>{{ organizacion.numeroIntegrantes ?? "—" }}</td>
-          <td>{{ periodoVigencia(organizacion) }}</td>
-          <td>{{ organizacion.estadoOspa || "—" }}</td>
-        </tr>
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [seleccionable]="true"
+    [seleccion]="idsSeleccionados()"
+    [cargando]="estado() === 'cargando'"
+    [clicable]="true"
+    (ordenCambio)="alCambiarOrden($event)"
+    (seleccionCambio)="alCambiarSeleccion($event)"
+    (filaClic)="alClicFila($event)"
+  >
+    <ng-template appCeldaTabla="nombre" let-fila>
+      <button
+        type="button"
+        class="table-link org-nombre"
+        [attr.aria-label]="'Abrir la ficha de ' + fila.nombre"
+        (click)="abrir(fila); $event.stopPropagation()"
+      >
+        <strong>{{ fila.nombre }}</strong>
+        @if (fila.abreviatura) {
+        <small>{{ fila.abreviatura }}</small>
         }
-      </tbody>
-    </table>
-  </div>
+      </button>
+    </ng-template>
+
+    <ng-template appCeldaTabla="foto" let-fila>
+      @if (fotoDe(fila.id); as foto) {
+      <img
+        class="tabla-foto"
+        [src]="foto.url"
+        [alt]="foto.alt || foto.titulo || fila.nombre"
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer"
+      />
+      } @else {
+      <span class="sin-dato">—</span>
+      }
+    </ng-template>
+
+    <ng-template appCeldaTabla="ruc" let-fila>
+      <span class="org-razon">{{ rucRazon(fila) }}</span>
+    </ng-template>
+  </app-tabla>
   } @if (total() > 0 && estado() !== "error") {
   <app-paginacion
     [pagina]="filtros().pagina"
@@ -281,12 +274,10 @@
                 } @else { — }
               </dd>
             </div>
-            <div>
-              <dt>Fotografía</dt>
+            <div class="ficha-ancho">
+              <dt>Galería fotográfica</dt>
               <dd>
-                @if (org.fotoUrl; as enlace) {
-                <a [href]="enlace" target="_blank" rel="noopener">{{ enlace }}</a>
-                } @else { — }
+                <app-galeria-fotos entidadTipo="organizacion" [entidadId]="org.id" />
               </dd>
             </div>
           </dl>

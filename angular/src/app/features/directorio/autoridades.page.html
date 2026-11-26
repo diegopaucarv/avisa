@@ -1,0 +1,446 @@
+<section class="view-body" aria-labelledby="titulo-autoridades">
+  <header class="view-head">
+    <div class="view-title">
+      <h1 id="titulo-autoridades">Autoridades y agentes</h1>
+      <p class="view-sub">
+        Funcionarios, directores y servidores del sector, en una vista separada del directorio
+        general de actores.
+      </p>
+    </div>
+    <div class="view-actions">
+      <span class="view-total"> {{ totalUniverso() }} registros </span>
+    </div>
+  </header>
+
+  <!-- Criterio aplicado: la base no tiene una columna «autoridad». -->
+  <p class="criterio-nota">
+    <app-icono nombre="info" [tamano]="14" />
+    <span><strong>Criterio:</strong> {{ notaCriterio() }}</span>
+  </p>
+
+  <nav class="tab-bar" aria-label="Filtrar por tipo">
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="filtros().tipo === ''"
+      [attr.aria-pressed]="filtros().tipo === ''"
+      (click)="cambiarTipo('')"
+    >
+      Todos
+      <span class="tab-count">{{ totalUniverso() }}</span>
+    </button>
+    @for (tipo of tipos(); track tipo.valor) {
+    <button
+      type="button"
+      class="tab-button"
+      [class.active]="filtros().tipo === tipo.valor"
+      [attr.aria-pressed]="filtros().tipo === tipo.valor"
+      (click)="cambiarTipo(tipo.valor)"
+    >
+      {{ tipo.etiqueta }}
+      <span class="tab-count">{{ tipo.conteo }}</span>
+    </button>
+    }
+  </nav>
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por nombre, cargo o correo"
+        aria-label="Buscar autoridades y agentes"
+        [value]="filtros().q"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <!--
+      Las facetas llegan después del primer render, así que la selección se
+      marca por opción (`[selected]`) y no con `[value]` en el `select`: así un
+      enlace profundo con `institucion=PRODUCE` se pinta al cargar las opciones.
+    -->
+    <label class="select-filter">
+      Institución
+      <select aria-label="Filtrar por institución" (change)="cambiarInstitucion($event)">
+        <option value="" [selected]="filtros().institucion === ''">Todas</option>
+        @for (institucion of instituciones(); track institucion.valor) {
+        <option
+          [value]="institucion.valor"
+          [selected]="filtros().institucion === institucion.valor"
+        >
+          {{ institucion.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Territorio
+      <select aria-label="Filtrar por territorio" (change)="cambiarRegion($event)">
+        <option value="" [selected]="filtros().region === ''">Todos</option>
+        @for (region of regiones(); track region.valor) {
+        <option [value]="region.valor" [selected]="filtros().region === region.valor">
+          {{ region.etiqueta }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  @if (estado() === "error") {
+  <div class="empty-state" role="alert">
+    <strong>No se pudieron cargar las autoridades</strong>
+    <p>{{ error()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  } @else if (filas().length === 0) { @if (estado() === "cargando" || estado() === "inactivo") {
+  <div class="empty-state" role="status">Cargando autoridades y agentes…</div>
+  } @else {
+  <div class="empty-state">
+    <strong>Sin resultados para estos filtros</strong>
+    <p>No hay autoridades ni agentes que coincidan con la búsqueda.</p>
+  </div>
+  } } @else { @if (estado() === "cargando") {
+  <p class="actualizando" role="status">Actualizando el listado…</p>
+  }
+
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col" class="col-foto">Foto</th>
+          <th scope="col" class="col-nombre">Apellidos y Nombres</th>
+          <th scope="col">Contacto</th>
+          <th scope="col">Institución / Cargo</th>
+          <th scope="col">Territorio</th>
+          <th scope="col">Tipo</th>
+          <th scope="col" class="col-acciones">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (fila of filas(); track fila.id) {
+        <tr
+          class="case-row-clickable"
+          [class.row-selected]="seleccionada()?.id === fila.id"
+          [class.fila-inactiva]="!fila.activo"
+          (click)="abrir(fila)"
+        >
+          <td class="col-foto">
+            @if (fila.abreviatura) {
+            <span class="tabla-foto-texto">{{ fila.abreviatura }}</span>
+            } @else {
+            <span class="tabla-iniciales" aria-hidden="true">{{ inicialesDe(fila.nombre) }}</span>
+            }
+          </td>
+          <td class="col-nombre">
+            <button
+              type="button"
+              class="table-link actor-nombre"
+              [attr.aria-label]="'Abrir la ficha de ' + fila.nombre"
+              (click)="abrir(fila); $event.stopPropagation()"
+            >
+              <strong>{{ fila.nombre }}</strong>
+              @if (!fila.activo) {
+              <small class="actor-inactivo">Inactivo</small>
+              }
+            </button>
+          </td>
+          <td class="actor-contacto">
+            @if (fila.email) {
+            <span class="contacto-linea">
+              <span>{{ fila.email }}</span>
+              <button
+                type="button"
+                class="boton-copiar-icono"
+                [attr.aria-label]="'Copiar el correo de ' + fila.nombre"
+                [attr.title]="copiado() === fila.email ? 'Copiado' : 'Copiar correo'"
+                (click)="copiar(fila.email, $event)"
+              >
+                <app-icono [nombre]="copiado() === fila.email ? 'check' : 'copiar'" [tamano]="13" />
+              </button>
+            </span>
+            } @else {
+            <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+            }
+          </td>
+          <td class="actor-organizacion">
+            @if (fila.institucion) {
+            <strong>{{ fila.institucion }}</strong>
+            } @if (fila.cargo) { <small>{{ fila.cargo }}</small> } @if (!fila.institucion &&
+            !fila.cargo) {
+            <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+            }
+          </td>
+          <td>
+            @if (fila.region) { {{ fila.region }} } @else {
+            <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+            }
+          </td>
+          <td>
+            <span
+              class="badge"
+              [class.badge-autoridad]="fila.tipo === 'autoridad'"
+              [class.badge-agente]="fila.tipo === 'agente'"
+            >
+              {{ etiquetaTipo(fila.tipo) }}
+            </span>
+          </td>
+          <td class="col-acciones" (click)="$event.stopPropagation()">
+            <div class="acciones-fila">
+              <button
+                type="button"
+                class="accion"
+                [attr.aria-label]="'Ver la ficha de ' + fila.nombre"
+                [attr.title]="'Ver la ficha de ' + fila.nombre"
+                (click)="abrir(fila)"
+              >
+                <app-icono nombre="ojo" [tamano]="15" />
+              </button>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  } @if (total() > 0 && estado() !== "error") {
+  <app-paginacion
+    [pagina]="filtros().pagina"
+    [tamano]="filtros().tamano"
+    [total]="total()"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  }
+</section>
+
+@if (seleccionada(); as ficha) {
+<div class="drawer-scrim" (document:keydown.escape)="cerrarFicha()">
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="ficha-titulo">
+    <header class="drawer-head">
+      <div class="ficha-cabecera">
+        <span class="ficha-avatar" aria-hidden="true">{{ inicialesDe(ficha.nombre) }}</span>
+        <div class="ficha-identidad">
+          <h2 id="ficha-titulo" [attr.title]="ficha.nombre">{{ ficha.nombre }}</h2>
+          @if (ficha.cargo) {
+          <p [attr.title]="ficha.cargo">{{ ficha.cargo }}</p>
+          } @else {
+          <p class="sin-dato">Cargo {{ sinDato }}</p>
+          }
+          <span
+            class="badge"
+            [class.badge-autoridad]="ficha.tipo === 'autoridad'"
+            [class.badge-agente]="ficha.tipo === 'agente'"
+          >
+            {{ etiquetaTipo(ficha.tipo) }}
+          </span>
+          @if (!ficha.activo) {
+          <span class="badge badge-inactivo">Inactivo</span>
+          }
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la ficha"
+        (click)="cerrarFicha()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      <dl class="ficha-grid">
+        <div class="ficha-campo">
+          <dt>Institución</dt>
+          <dd>
+            @if (ficha.institucionNombre) { {{ ficha.institucionNombre }} } @else if
+            (ficha.institucion) { {{ ficha.institucion }} } @else {
+            <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+            }
+          </dd>
+          @if (ficha.institucion) {
+          <p class="pista">{{ ficha.institucion }}</p>
+          }
+          <p class="pista">Derivada del dominio del correo de contacto.</p>
+        </div>
+
+        <div class="ficha-campo">
+          <dt>Cargo</dt>
+          <dd>
+            @if (ficha.cargo) { {{ ficha.cargo }} } @else {
+            <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+            }
+          </dd>
+        </div>
+
+        <div class="ficha-campo">
+          <dt>Correo de contacto</dt>
+          <dd>
+            @if (ficha.email) {
+            <span class="valor-copiable">
+              <span>{{ ficha.email }}</span>
+              <button type="button" class="boton-copiar" (click)="copiar(ficha.email, $event)">
+                {{ copiado() === ficha.email ? 'Copiado' : 'Copiar' }}
+              </button>
+            </span>
+            } @else {
+            <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+            }
+          </dd>
+        </div>
+
+        <div class="ficha-campo">
+          <dt>Territorio</dt>
+          <dd>
+            @if (ficha.region) { {{ ficha.region }} } @else if (ficha.distrito) { {{ ficha.distrito
+            }} } @else {
+            <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+            }
+          </dd>
+          @if (ficha.distrito && ficha.region) {
+          <p class="pista">{{ ficha.distrito }}</p>
+          }
+          <p class="pista">La base no lo registra para este universo.</p>
+        </div>
+
+        <div class="ficha-campo">
+          <dt>Nivel de gobierno</dt>
+          <dd>
+            @if (ficha.nivelGobierno) { {{ ficha.nivelGobierno }} } @else {
+            <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+            }
+          </dd>
+        </div>
+
+        <div class="ficha-campo">
+          <dt>Clasificación de la información</dt>
+          <dd>Nivel {{ ficha.clasificacion }}</dd>
+        </div>
+      </dl>
+
+      <section class="ficha-seccion" aria-labelledby="ficha-pii">
+        <h3 id="ficha-pii">Datos personales</h3>
+
+        @if (sinAccesoPii()) {
+        <dl class="ficha-grid">
+          <div class="ficha-campo">
+            <dt>DNI</dt>
+            <dd class="sin-acceso">{{ sinDato }} · sin acceso</dd>
+          </div>
+          <div class="ficha-campo">
+            <dt>Teléfono</dt>
+            <dd class="sin-acceso">{{ sinDato }} · sin acceso</dd>
+          </div>
+        </dl>
+        <p class="pista">Su rol no permite descifrar datos personales.</p>
+        } @else {
+        <dl class="ficha-grid">
+          <div class="ficha-campo">
+            <dt>DNI</dt>
+            <dd>
+              @if (piiVisible()) { @if (datosPii()?.dni; as dni) {
+              <span class="valor-copiable">
+                <span>{{ dni }}</span>
+                <button type="button" class="boton-copiar" (click)="copiar(dni, $event)">
+                  {{ copiado() === dni ? 'Copiado' : 'Copiar' }}
+                </button>
+              </span>
+              } @else {
+              <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+              } } @else if (estadoPii() === 'sin_ficha') {
+              <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+              } @else {
+              <span class="enmascarado" title="Se descifra sólo bajo demanda">•••• ••••</span>
+              }
+            </dd>
+          </div>
+          <div class="ficha-campo">
+            <dt>Teléfono</dt>
+            <dd>
+              @if (piiVisible()) { @if (datosPii()?.telefono; as telefono) {
+              <span class="valor-copiable">
+                <span>{{ telefono }}</span>
+                <button type="button" class="boton-copiar" (click)="copiar(telefono, $event)">
+                  {{ copiado() === telefono ? 'Copiado' : 'Copiar' }}
+                </button>
+              </span>
+              } @else {
+              <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+              } } @else if (estadoPii() === 'sin_ficha') {
+              <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
+              } @else {
+              <span class="enmascarado" title="Se descifra sólo bajo demanda">••• ••• •••</span>
+              }
+            </dd>
+          </div>
+        </dl>
+
+        <div class="ficha-acciones">
+          @if (piiVisible() || estadoPii() === 'sin_ficha') {
+          <button type="button" class="button-secondary" (click)="ocultarPii()">Ocultar</button>
+          } @else {
+          <button
+            type="button"
+            class="button-secondary"
+            [disabled]="piiCargando()"
+            (click)="solicitarPii()"
+          >
+            <app-icono nombre="candado" [tamano]="14" />
+            {{ piiCargando() ? 'Consultando…' : 'Ver datos personales' }}
+          </button>
+          }
+        </div>
+
+        @if (errorPii(); as mensaje) {
+        <p class="form-error" role="alert">{{ mensaje }}</p>
+        }
+        <p class="pista">
+          Cada consulta queda registrada en la auditoría de acceso a datos personales (Ley 29733).
+        </p>
+        }
+      </section>
+
+      <section class="ficha-seccion" aria-labelledby="ficha-perfil">
+        <h3 id="ficha-perfil">Descripción del perfil</h3>
+        @if (ficha.perfil) {
+        <p class="ficha-perfil">{{ ficha.perfil }}</p>
+        } @else {
+        <p class="sin-dato">Sin descripción de perfil registrada.</p>
+        }
+      </section>
+
+      <section class="ficha-seccion" aria-labelledby="ficha-casos">
+        <h3 id="ficha-casos">Casos vinculados</h3>
+        @if (cargandoCasos()) {
+        <p class="pista" role="status">Cargando casos…</p>
+        } @else if (errorCasos(); as mensaje) {
+        <p class="form-error" role="alert">{{ mensaje }}</p>
+        } @else if (casos().length === 0) {
+        <p class="sin-dato">Sin casos vinculados.</p>
+        } @else {
+        <ul class="ficha-casos">
+          @for (caso of casos(); track caso.codigo) {
+          <li>
+            <strong>{{ caso.codigo }}</strong>
+            <span>{{ caso.nombre }}</span>
+            <span class="pista">
+              {{ caso.estado || 'Estado sin dato' }} @if (caso.posicion) { · {{ caso.posicion }} }
+            </span>
+          </li>
+          }
+        </ul>
+        }
+      </section>
+    </div>
+
+    <footer class="drawer-foot">
+      <button type="button" class="button-secondary" (click)="cerrarFicha()">Cerrar</button>
+    </footer>
+  </aside>
+</div>
+}

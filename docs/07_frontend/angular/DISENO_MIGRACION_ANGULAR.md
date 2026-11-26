@@ -492,11 +492,19 @@ presentar esos valores como si fueran manuales.
 | 14    | `executive`                    | `/direccion`                 | `loadComponent`              | `sesionGuard`                              | `?region&ventana`                                                        |
 | —     | (fallback)                     | `**` → `/resumen`            | —                            | —                                          | —                                                                        |
 
-**Estado de implementación (2026-11-22).** Cableadas: `casos`, `casos/:codigo`, `alertas`,
-`compromisos`, `documentos`, `directorio/actores` y `directorio/instituciones`. Siguen en marcador
-`EnMigracionComponent`: `resumen`, `bandeja`, `directorio/organizaciones`, `directorio/locales`,
-`direccion`, `ayuda`, `preferencias` y `mapa`; `mapa` está aplazado. `casos/sin-caso`, `busqueda` y
-`notificaciones` **no tienen ruta todavía**.
+> **Superado (2026-11-24).** Esta tabla es el **plan** de rutas, no el estado. Hoy hay **33
+> pantallas con componente** (32 hijas del shell y `/acceso`): `casos/sin-caso`, `busqueda` y
+> `notificaciones` tienen ruta, `mapa` dejó de estar aplazado y ninguna pantalla queda en
+> `EnMigracionComponent`. Dos rutas de esta tabla redirigen en vez de pintar: `/directorio/instituciones`
+> → `/directorio/organizaciones` y `/papelera` → `/archivo`. Ocho rutas que el plan no preveía existen
+> ya: `/dashboard`, `/red-radar`, `/matriz-conflictividad`, `/gobierno-sugerencias`,
+> `/exportaciones`, `/administracion`, `/administracion/etl` y `/directorio/autoridades`. El estado
+> vigente está en `ESTADO_MIGRACION_ANGULAR.md` §6–§7 y en `../frontend.md`.
+>
+> **Estado de implementación (2026-11-22, histórico).** Cableadas: `casos`, `casos/:codigo`,
+> `alertas`, `compromisos`, `documentos`, `directorio/actores` y `directorio/instituciones`. Siguen
+> en marcador `EnMigracionComponent`: `resumen`, `bandeja`, `directorio/organizaciones`,
+> `directorio/locales`, `direccion`, `ayuda`, `preferencias` y `mapa`; `mapa` está aplazado.
 
 ### 4.2 Paneles, drawers y modales → ruta (para que sean enlazables)
 
@@ -517,7 +525,7 @@ panel lateral.
 | Edición de alerta                     | `/alertas/:id/editar`                                   | Panel lateral                          |
 | Alta de compromiso                    | `/compromisos/nuevo`                                    | —                                      |
 | Edición de compromiso                 | `/compromisos/:id/editar`                               | —                                      |
-| Alta de demanda                       | `/casos/:codigo/demandas/nueva`                         | Dentro de la pestaña                   |
+| Registrar demanda                     | `/casos/:codigo/demandas/nueva`                         | Dentro de la pestaña                   |
 | Alta de hito                          | `/casos/:codigo/cronologia/nuevo`                       | Panel lateral sobre la línea de tiempo |
 | Carga de documento                    | `/documentos/nuevo` y `/casos/:codigo/documentos/nuevo` | —                                      |
 | Preferencias (`PreferencesDrawer`)    | `/preferencias`                                         | Drawer global                          |
@@ -1256,6 +1264,10 @@ importan **uno por uno** (son _tree-shakeables_), nunca el módulo completo.
 
 ## 8. Mapas
 
+> **Superado (2026-11-24).** El aplazamiento se levantó: `/mapa` es la ventana principal y ya dibuja
+> la capa distrital de `territorio.distrito` (1 892 distritos con geometría y centroide). Lo que sigue
+> abierto es la nube de puntos del KML, las redes RADAR y la agrupación de puntos.
+>
 > **Aplazado por decisión del usuario (2026-11-22)** hasta que exista el dataset de ubigeo/centroide.
 > No se construye la pantalla `mapa` ni se documenta una fórmula de calibración de riesgo. Lo que sigue
 > queda como referencia para cuando se reabra.
@@ -1317,9 +1329,10 @@ Reglas no negociables:
    `next.config.mjs:5-7`). Mantener la atribución; si el uso crece, revisar el proveedor (fuera de
    alcance).
 
-**Aplazado.** Ubigeo y centroides no se diseñan aquí: el mapa no se construye hasta que exista el
-dataset. Tampoco se documenta una fórmula de calibración de riesgo. Cuando se reabra, si falta la
-ubicación, la UI debe decirlo (`No ubicado`), no omitir la fila.
+**Superado (2026-11-24).** El ubigeo, los centroides y los límites distritales ya están cargados en
+`territorio.distrito`, así que el mapa se construyó; sigue sin documentarse una fórmula de
+calibración de riesgo, por decisión de producto. Si falta la ubicación, la UI lo dice
+(`No ubicado`), no omite la fila.
 
 ---
 
@@ -1538,12 +1551,12 @@ antes de que su equivalente Angular esté tras G-correspondiente.
 
 ### P3 — Módulos pesados
 
-|                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Entregables**              | Bandeja derivada (ranking 1–4 + paneles asignar/posponer/completar); Alertas (SLA + aprobar/descartar con motivo/editar cita/atender/reabrir/deshacer/derivar); Compromisos (3 vistas, calendario, hitos, evidencia, Anexo 14 en PDF/Excel/JSON — decidido, pendiente E5; vencimiento manual > próximo hito > aviso); Documentos (maestro-detalle, fragmentos, versiones); Directorio real (4 vistas **con datos**, no los 6 sintéticos); Mapa: aplazado hasta que exista el dataset de ubigeo/centroide; Dirección (`window.print`); Búsqueda global; Notificaciones; Preferencias; Glosario |
-| **Criterios de salida (G4)** | Toda la checklist §6 cubierta salvo el mapa, que está aplazado; cuando se construya, fuera del bundle inicial                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| **Riesgos**                  | calendario, mapa y derivaciones son lo más caro; riesgo alto de _scope creep_ (D-14)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **Días-persona**             | **28–42**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Entregables**              | Bandeja derivada (ranking 1–4 + paneles asignar/posponer/completar); Alertas (SLA + aprobar/descartar con motivo/editar cita/atender/reabrir/deshacer/derivar); Compromisos (3 vistas, calendario, hitos, evidencia, Anexo 14 en PDF/Excel/JSON — decidido, pendiente E5; vencimiento manual > próximo hito > aviso); Documentos (maestro-detalle, fragmentos, versiones); Directorio real (4 vistas **con datos**, no los 6 sintéticos); Mapa: implementado con capa distrital coroplética (2026-11-24; faltan los puntos del KML y las redes RADAR); Dirección (`window.print`); Búsqueda global; Notificaciones; Preferencias; Glosario |
+| **Criterios de salida (G4)** | Toda la checklist §6 cubierta salvo el mapa, que está aplazado; cuando se construya, fuera del bundle inicial                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Riesgos**                  | calendario, mapa y derivaciones son lo más caro; riesgo alto de _scope creep_ (D-14)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Días-persona**             | **28–42**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ### P4 — Cutover
 

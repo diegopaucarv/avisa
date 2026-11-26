@@ -1,4 +1,4 @@
-<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+<div class="drawer-scrim" (keydown)="alTecla($event)">
   <aside
     #panel
     class="drawer"
@@ -11,9 +11,6 @@
       <div class="caso-panel-cabecera">
         <p class="caso-panel-codigo">Nuevo caso</p>
         <h2 id="caso-panel-titulo">Alta de caso</h2>
-        <p class="caso-panel-sub">
-          El código del expediente lo asigna el servidor al registrar el caso.
-        </p>
       </div>
 
       <button
@@ -33,10 +30,68 @@
       @if (mensajeLocal(); as mensaje) {
         <p class="form-error" role="alert">{{ mensaje }}</p>
       }
+      @if (errorDuplicados(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+
+      @if (verificando()) {
+        <p class="form-hint" role="status">Buscando posibles duplicados…</p>
+      }
+
+      @if (duplicados().length > 0) {
+        <section class="duplicados-aviso" aria-labelledby="duplicados-titulo">
+          <h3 id="duplicados-titulo">Posibles duplicados</h3>
+          <p class="form-hint">
+            Antes de registrar, revise estos casos. Si no es un duplicado, descártelo con «No es
+            duplicado» o registre igualmente: no se borra ni se fusiona nada.
+          </p>
+          <ul class="duplicados-lista">
+            @for (candidato of duplicados(); track candidato.id) {
+              <li class="duplicado-item" [class.descartado]="estaDescartado(candidato)">
+                <div class="duplicado-cabecera">
+                  <a
+                    class="table-link"
+                    [routerLink]="['/casos', candidato.codigo]"
+                    target="_blank"
+                    rel="noopener"
+                    >{{ candidato.codigo }}</a
+                  >
+                  <strong class="duplicado-titulo">{{ candidato.titulo }}</strong>
+                </div>
+                <p class="duplicado-meta">
+                  {{ candidato.estado || 'Sin estado' }} ·
+                  {{ candidato.distrito || 'Sin distrito' }}
+                </p>
+                @if (candidato.coincidencias.length > 0) {
+                  <p class="duplicado-criterios">
+                    @for (criterio of candidato.coincidencias; track criterio) {
+                      <span class="duplicado-chip">{{ etiquetaCriterio(criterio) }}</span>
+                    }
+                  </p>
+                }
+                @if (estaDescartado(candidato)) {
+                  <span class="detail-hint">
+                    Descartado: se registrará como «no es duplicado».
+                  </span>
+                } @else {
+                  <button
+                    type="button"
+                    class="button-secondary"
+                    [disabled]="guardando()"
+                    (click)="descartar.emit(candidato.codigo)"
+                  >
+                    No es duplicado
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        </section>
+      }
 
       <form class="caso-formulario" (submit)="alEnviarFormulario($event)">
-        <div class="form-field">
-          <label class="form-label" for="caso-campo-titulo">Título</label>
+        <label class="form-campo">
+          <span>Título</span>
           <input
             id="caso-campo-titulo"
             class="form-input"
@@ -45,7 +100,7 @@
             [value]="borrador().titulo"
             (input)="campo('titulo', $event)"
           />
-        </div>
+        </label>
 
         <fieldset class="form-field caso-regiones">
           <legend class="form-label">Regiones</legend>
@@ -85,18 +140,20 @@
         </div>
 
         <div class="form-field">
-          <label class="form-label" for="caso-campo-tematica">Temática</label>
-          <select
-            id="caso-campo-tematica"
-            class="form-select"
-            [value]="borrador().tematica"
-            (change)="campo('tematica', $event)"
-          >
-            <option value="">Sin especificar</option>
-            @for (opcion of tematicas(); track opcion.valor) {
-              <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-            }
-          </select>
+          <label class="form-campo">
+            <span>Temática</span>
+            <select
+              id="caso-campo-tematica"
+              class="form-select"
+              [value]="borrador().tematica"
+              (change)="campo('tematica', $event)"
+            >
+              <option value="">Sin especificar</option>
+              @for (opcion of tematicas(); track opcion.valor) {
+                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+              }
+            </select>
+          </label>
           <p class="form-hint">
             Opcional. Si queda «Sin especificar», el código del caso usa el sufijo GEN y la temática
             podrá completarse después.
@@ -104,18 +161,20 @@
         </div>
 
         <div class="form-field">
-          <label class="form-label" for="caso-campo-naturaleza">Naturaleza del caso</label>
-          <select
-            id="caso-campo-naturaleza"
-            class="form-select"
-            [value]="borrador().naturaleza"
-            (change)="campo('naturaleza', $event)"
-          >
-            <option value="">Sin declarar</option>
-            @for (opcion of naturalezas(); track opcion.valor) {
-              <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-            }
-          </select>
+          <label class="form-campo">
+            <span>Naturaleza del caso</span>
+            <select
+              id="caso-campo-naturaleza"
+              class="form-select"
+              [value]="borrador().naturaleza"
+              (change)="campo('naturaleza', $event)"
+            >
+              <option value="">Sin declarar</option>
+              @for (opcion of naturalezas(); track opcion.valor) {
+                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+              }
+            </select>
+          </label>
           <p class="form-hint">
             Eje declarado, distinto del alcance. «Territorial» si la causa nace en un territorio;
             «Nacional o sectorial» si es una norma, cuota, temporada u otra medida sectorial.
@@ -123,8 +182,8 @@
           </p>
         </div>
 
-        <div class="form-field">
-          <label class="form-label" for="caso-campo-subsector">Subsector</label>
+        <label class="form-campo">
+          <span>Subsector</span>
           <select
             id="caso-campo-subsector"
             class="form-select"
@@ -136,25 +195,38 @@
               <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
             }
           </select>
+        </label>
+
+        <div class="fila-riesgo">
+          <label class="form-campo">
+            <span>Descripción del riesgo actual</span>
+            <textarea
+              id="caso-campo-descripcion-riesgo"
+              class="form-textarea"
+              rows="3"
+              [value]="borrador().descripcionRiesgo"
+              (input)="campo('descripcionRiesgo', $event)"
+            ></textarea>
+          </label>
+
+          <label class="form-campo">
+            <span>Nivel de riesgo</span>
+            <select
+              id="caso-campo-riesgo"
+              class="form-select"
+              [value]="borrador().riesgo"
+              (change)="campo('riesgo', $event)"
+            >
+              <option value="">Bajo (por defecto)</option>
+              @for (opcion of riesgos(); track opcion.valor) {
+                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+              }
+            </select>
+          </label>
         </div>
 
-        <div class="form-field">
-          <label class="form-label" for="caso-campo-riesgo">Riesgo</label>
-          <select
-            id="caso-campo-riesgo"
-            class="form-select"
-            [value]="borrador().riesgo"
-            (change)="campo('riesgo', $event)"
-          >
-            <option value="">Bajo (por defecto)</option>
-            @for (opcion of riesgos(); track opcion.valor) {
-              <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="form-field">
-          <label class="form-label" for="caso-campo-unidad">Unidad responsable</label>
+        <label class="form-campo">
+          <span>Unidad responsable</span>
           <select
             id="caso-campo-unidad"
             class="form-select"
@@ -168,10 +240,10 @@
               </option>
             }
           </select>
-        </div>
+        </label>
 
-        <div class="form-field">
-          <label class="form-label" for="caso-campo-resumen">Resumen ejecutivo</label>
+        <label class="form-campo">
+          <span>Resumen ejecutivo</span>
           <textarea
             id="caso-campo-resumen"
             class="form-textarea"
@@ -179,10 +251,10 @@
             [value]="borrador().resumen"
             (input)="campo('resumen', $event)"
           ></textarea>
-        </div>
+        </label>
 
-        <div class="form-field">
-          <label class="form-label" for="caso-campo-inicio">Inicio</label>
+        <label class="form-campo">
+          <span>Inicio</span>
           <input
             id="caso-campo-inicio"
             class="form-input"
@@ -190,11 +262,11 @@
             [value]="borrador().fechaInicio"
             (input)="campo('fechaInicio', $event)"
           />
-        </div>
+        </label>
 
         <div class="caso-formulario-acciones">
-          <button type="submit" class="button-primary" [disabled]="guardando()">
-            {{ guardando() ? 'Registrando…' : 'Registrar caso' }}
+          <button type="submit" class="button-primary" [disabled]="guardando() || verificando()">
+            {{ textoEnviar() }}
           </button>
           <button
             type="button"

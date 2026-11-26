@@ -1,0 +1,781 @@
+{
+  "meta": {
+    "modo": "dry-run",
+    "fuente": "MATRIZ_OAIPCS_2026",
+    "mapa_origen": "semilla_41",
+    "mapa_bloques": 34,
+    "casos_json": 37,
+    "operables": 32,
+    "estados": {
+      "operable": 32,
+      "sin_destino": 3,
+      "anulado": 1,
+      "duplicado": 1
+    },
+    "insumos": {
+      "casos": "C:\\Users\\Julia\\Downloads\\avisa\\scripts\\matriz\\salida\\casos.json",
+      "auxiliares": "C:\\Users\\Julia\\Downloads\\avisa\\scripts\\matriz\\salida\\hojas_auxiliares.json"
+    },
+    "config": {
+      "actualizar_riesgo": false,
+      "incluir_anulados": false,
+      "mapa_reuniones": null,
+      "solo": null
+    },
+    "conteos_insumos": {
+      "casos": "C:\\Users\\Julia\\Downloads\\avisa\\scripts\\matriz\\salida\\casos.json",
+      "auxiliares": "C:\\Users\\Julia\\Downloads\\avisa\\scripts\\matriz\\salida\\hojas_auxiliares.json"
+    }
+  },
+  "secciones": {
+    "casos": {
+      "cifras": {
+        "insertados": 0,
+        "actualizados": 28,
+        "omitidos": 9,
+        "rechazados": 0,
+        "total": 37
+      },
+      "motivos": {
+        "omitidos": {
+          "sin_destino": 3,
+          "caso_anulado": 1,
+          "sin_cambios": 4,
+          "duplicado_bloque_128": 1
+        },
+        "rechazados": {}
+      },
+      "rechazos": [],
+      "advertencias": [
+        {
+          "codigo": "resumen_ejecutivo_error_excel",
+          "detalle": "resumen_ejecutivo con error de Excel; no se carga.",
+          "ocurrencias": 27,
+          "filas": [
+            3,
+            16,
+            21,
+            22,
+            25,
+            27,
+            31,
+            37,
+            38,
+            39,
+            42,
+            47,
+            48,
+            50,
+            54,
+            60,
+            74,
+            79,
+            85,
+            88,
+            93,
+            95,
+            100,
+            106,
+            110
+          ]
+        },
+        {
+          "codigo": "estado_actualizacion_vacio",
+          "detalle": "casos.estado_actualizacion: timestamp vacío, no se toca.",
+          "ocurrencias": 4,
+          "filas": [
+            118,
+            122,
+            127,
+            132
+          ]
+        }
+      ]
+    },
+    "demandas": {
+      "cifras": {
+        "insertados": 16,
+        "actualizados": 0,
+        "omitidos": 3,
+        "rechazados": 0,
+        "total": 19
+      },
+      "motivos": {
+        "omitidos": {
+          "ya_existe": 3
+        },
+        "rechazados": {}
+      },
+      "rechazos": [],
+      "advertencias": [
+        {
+          "codigo": "demanda_tematica_sin_equivalencia",
+          "detalle": "Temática de demanda sin coincidencia exacta en cat_tematicas: se deja NULL (texto: 'Ordenanamiento y acceso territorial').",
+          "ocurrencias": 5,
+          "filas": [
+            31,
+            32,
+            33,
+            34,
+            35
+          ]
+        }
+      ]
+    },
+    "compromisos": {
+      "cifras": {
+        "insertados": 41,
+        "actualizados": 0,
+        "omitidos": 4,
+        "rechazados": 4,
+        "total": 49
+      },
+      "motivos": {
+        "omitidos": {
+          "ya_existe": 4
+        },
+        "rechazados": {
+          "sin_fecha_inicio": 4
+        }
+      },
+      "rechazos": [
+        {
+          "clave": "CS-PA-ITE-2026-04|Instalación de Mesas Técnicas en el marco de las RM 343 y 34",
+          "fila": 25,
+          "motivo": "sin_fecha_inicio",
+          "detalle": "Sin fecha_inicio en el caso ni fecha_planificada ISO en sus hitos."
+        },
+        {
+          "clave": "CS-PA-ITE-2026-04|Permanencia de operativos de fiscalización por parte de PROD",
+          "fila": 26,
+          "motivo": "sin_fecha_inicio",
+          "detalle": "Sin fecha_inicio en el caso ni fecha_planificada ISO en sus hitos."
+        },
+        {
+          "clave": "CS-PA-GOB-2026-01|Permanencia de operativos de fiscalización por parte de PROD",
+          "fila": 38,
+          "motivo": "sin_fecha_inicio",
+          "detalle": "Sin fecha_inicio en el caso ni fecha_planificada ISO en sus hitos."
+        },
+        {
+          "clave": "CS-PA-GOB-2026-02|1. Culminación del proceso de formalización de las cooperati",
+          "fila": 42,
+          "motivo": "sin_fecha_inicio",
+          "detalle": "Sin fecha_inicio en el caso ni fecha_planificada ISO en sus hitos."
+        }
+      ],
+      "advertencias": [
+        {
+          "codigo": "unidad_no_resuelta",
+          "detalle": "Unidad no resuelta: se usó la del caso.",
+          "ocurrencias": 2,
+          "filas": [
+            15,
+            114
+          ]
+        },
+        {
+          "codigo": "compromiso_sin_fecha_inicio",
+          "detalle": "Compromisos rechazados por no tener fecha de inicio demostrable.",
+          "ocurrencias": 4,
+          "filas": [
+            25,
+            26,
+            38,
+            42
+          ]
+        }
+      ]
+    },
+    "hitos": {
+      "cifras": {
+        "insertados": 87,
+        "actualizados": 0,
+        "omitidos": 7,
+        "rechazados": 1,
+        "total": 95
+      },
+      "motivos": {
+        "omitidos": {
+          "ya_existe": 3,
+          "compromiso_rechazado": 4
+        },
+        "rechazados": {
+          "sin_descripcion": 1
+        }
+      },
+      "rechazos": [
+        {
+          "clave": "hito_fila_47",
+          "fila": 47,
+          "motivo": "sin_descripcion",
+          "detalle": "caso_id: 492b5f31-233f-410d-9b52-3e8365144fd0; compromiso: CS-PA-OAT-2024-01_COMP001"
+        }
+      ],
+      "advertencias": [
+        {
+          "codigo": "usuario_no_resuelto",
+          "detalle": "Nombres de usuario sin coincidencia en core.usuarios: se guarda el texto.",
+          "ocurrencias": 84,
+          "filas": [
+            4,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            21,
+            22,
+            23,
+            24,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33
+          ]
+        },
+        {
+          "codigo": "hito_estado_vacio",
+          "detalle": "Hitos sin estado: se registran como 1 (Registrado).",
+          "ocurrencias": 5,
+          "filas": [
+            10,
+            11,
+            110,
+            111,
+            112
+          ]
+        },
+        {
+          "codigo": "fecha_planificada_no_tipada",
+          "detalle": "Fechas planificadas no ISO: se guarda el texto y queda NULL la fecha.",
+          "ocurrencias": 15,
+          "filas": [
+            14,
+            21,
+            41,
+            51,
+            83,
+            95,
+            101,
+            102,
+            103,
+            104,
+            105,
+            107,
+            111,
+            112,
+            126
+          ]
+        },
+        {
+          "codigo": "fecha_real_no_tipada",
+          "detalle": "Fechas reales no ISO: se guarda el texto y queda NULL la fecha.",
+          "ocurrencias": 9,
+          "filas": [
+            14,
+            21,
+            41,
+            51,
+            95,
+            98,
+            99,
+            111,
+            112
+          ]
+        },
+        {
+          "codigo": "hito_compromiso_rechazado",
+          "detalle": "Hitos cuya acción padre fue rechazada.",
+          "ocurrencias": 4,
+          "filas": [
+            25,
+            26,
+            38,
+            42
+          ]
+        }
+      ]
+    },
+    "nudos": {
+      "cifras": {
+        "insertados": 146,
+        "actualizados": 0,
+        "omitidos": 36,
+        "rechazados": 2,
+        "total": 184
+      },
+      "motivos": {
+        "omitidos": {
+          "repetido_identico": 24,
+          "caso_sin_destino": 4,
+          "compromiso_rechazado": 4,
+          "caso_anulado": 4
+        },
+        "rechazados": {
+          "sin_numero_excel": 2
+        }
+      },
+      "rechazos": [
+        {
+          "clave": "nudo_fila_105",
+          "fila": 105,
+          "motivo": "sin_numero_excel",
+          "detalle": "Sin numero_excel no se puede resolver el caso."
+        },
+        {
+          "clave": "nudo_fila_106",
+          "fila": 106,
+          "motivo": "sin_numero_excel",
+          "detalle": "Sin numero_excel no se puede resolver el caso."
+        }
+      ],
+      "advertencias": [
+        {
+          "codigo": "nudo_vinculo_posicional",
+          "detalle": "Nudos vinculados por posición en el bloque del reporte (la fila del nudo no coincide con la del hito).",
+          "ocurrencias": 134,
+          "filas": [
+            2,
+            14,
+            15,
+            18,
+            19,
+            20,
+            20,
+            20,
+            20,
+            21,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            28,
+            28,
+            29,
+            29,
+            30,
+            30,
+            34,
+            34,
+            35
+          ]
+        },
+        {
+          "codigo": "nudo_repetido_identico",
+          "detalle": "Celdas con contenido idéntico (caso, compromiso, semana, nudo y seguimiento): se cargan una sola vez.",
+          "ocurrencias": 24,
+          "filas": [
+            4,
+            4,
+            4,
+            4,
+            5,
+            7,
+            10,
+            15,
+            21,
+            21,
+            29,
+            29,
+            30,
+            31,
+            32,
+            33,
+            48,
+            73,
+            81,
+            93,
+            93,
+            93,
+            98,
+            99
+          ]
+        },
+        {
+          "codigo": "nudo_caso_sin_destino",
+          "detalle": "Nudos de casos sin destino: se omiten.",
+          "ocurrencias": 4,
+          "filas": [
+            17,
+            38,
+            38,
+            39
+          ]
+        },
+        {
+          "codigo": "nudo_compromiso_rechazado",
+          "detalle": "Nudos cuya acción de origen fue rechazada.",
+          "ocurrencias": 4,
+          "filas": [
+            22,
+            23,
+            35,
+            37
+          ]
+        },
+        {
+          "codigo": "nudo_caso_no_operable",
+          "detalle": "Nudos de casos anulados, duplicados o sin mapeo: se omiten.",
+          "ocurrencias": 4,
+          "filas": [
+            59,
+            60,
+            61,
+            62
+          ]
+        },
+        {
+          "codigo": "nudo_sin_compromiso",
+          "detalle": "Nudos sin vínculo a una acción: se guardan con compromiso_id NULL.",
+          "ocurrencias": 3,
+          "filas": [
+            89,
+            89,
+            89
+          ]
+        },
+        {
+          "codigo": "nudo_sin_numero",
+          "detalle": "Nudos sin numero_excel.",
+          "ocurrencias": 2,
+          "filas": [
+            105,
+            106
+          ]
+        }
+      ]
+    },
+    "alertas": {
+      "cifras": {
+        "insertados": 85,
+        "actualizados": 0,
+        "omitidos": 16,
+        "rechazados": 0,
+        "total": 101
+      },
+      "motivos": {
+        "omitidos": {
+          "ya_existe": 16
+        },
+        "rechazados": {}
+      },
+      "rechazos": [],
+      "advertencias": [
+        {
+          "codigo": "distrito_no_resuelto",
+          "detalle": "Distritos de alerta sin coincidencia única: se deja NULL.",
+          "ocurrencias": 25,
+          "filas": [
+            4,
+            6,
+            7,
+            13,
+            14,
+            19,
+            20,
+            23,
+            28,
+            29,
+            34,
+            47,
+            52,
+            57,
+            58,
+            63,
+            66,
+            67,
+            70,
+            73,
+            87,
+            92,
+            97,
+            98,
+            101
+          ]
+        },
+        {
+          "codigo": "alerta_codigo_generado",
+          "detalle": "Alertas sin codigo_reporte: se genera MATRIZ-A{fila:04d}.",
+          "ocurrencias": 51,
+          "filas": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            26,
+            62,
+            63,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75
+          ]
+        }
+      ]
+    },
+    "reuniones": {
+      "cifras": {
+        "insertados": 44,
+        "actualizados": 0,
+        "omitidos": 0,
+        "rechazados": 2,
+        "total": 46
+      },
+      "motivos": {
+        "omitidos": {},
+        "rechazados": {
+          "fecha_rango": 2
+        }
+      },
+      "rechazos": [
+        {
+          "clave": "MATRIZ-RR0033",
+          "fila": 33,
+          "motivo": "fecha_rango",
+          "detalle": "fecha_texto: 08-09/07/2026; fecha_estado: rango"
+        },
+        {
+          "clave": "MATRIZ-RR0036",
+          "fila": 36,
+          "motivo": "fecha_rango",
+          "detalle": "fecha_texto: 16-17/07/2026; fecha_estado: rango"
+        }
+      ],
+      "advertencias": [
+        {
+          "codigo": "reunion_tipo_vacio",
+          "detalle": "Reuniones sin tipo: se asume programada=True (default de la columna).",
+          "ocurrencias": 26,
+          "filas": [
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            34,
+            35,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47
+          ]
+        },
+        {
+          "codigo": "reunion_fecha_no_puntual",
+          "detalle": "Reuniones con fecha en rango o ausente: no se estima una fecha.",
+          "ocurrencias": 2,
+          "filas": [
+            33,
+            36
+          ]
+        }
+      ]
+    }
+  },
+  "total": {
+    "insertados": 419,
+    "actualizados": 28,
+    "omitidos": 75,
+    "rechazados": 9,
+    "total": 531
+  },
+  "decisiones_pendientes": [
+    {
+      "id": "D01",
+      "titulo": "Alertas sin caso",
+      "detalle": "85 alertas se importan con caso_id NULL: la hoja de alertas no trae caso y no hay vínculo verificable en el Excel."
+    },
+    {
+      "id": "D02",
+      "titulo": "Reuniones sin caso",
+      "detalle": "44 de 44 reuniones quedan con caso_id NULL. Con --mapa-reuniones {fila: codigo_caso} se pueden vincular."
+    },
+    {
+      "id": "D03",
+      "titulo": "Nivel de alerta sin equivalencia",
+      "detalle": "nivel_alerta_id queda NULL: REACTIVA/PREVENTIVA no es 1:1 con los niveles del catálogo de riesgos (Bajo/Intermedio/Inminente/Crítico)."
+    },
+    {
+      "id": "D04",
+      "titulo": "Tipo de reunión sin equivalencia",
+      "detalle": "tipo_id queda NULL: la hoja sólo distingue Programado/No Programado, que no es el catálogo cat_tipos_reunion (Asistencia_Tecnica, Reunion_Preparatoria, Reunion_Ordinaria_Plenaria, Otra)."
+    },
+    {
+      "id": "D05",
+      "titulo": "Bloques sin destino",
+      "detalle": "Los bloques 20, 43 y 49 no tienen destino en la base (N° de reporte 20, 13 y 16). Se reportan como sin_destino y no crean casos."
+    },
+    {
+      "id": "D06",
+      "titulo": "Bloque 128 duplicado",
+      "detalle": "El bloque 128 repite el N° 15 del bloque 48 (mismo enlace Canva). Se omite siempre, también con --incluir-anulados."
+    },
+    {
+      "id": "D07",
+      "titulo": "Caso anulado (bloque 64)",
+      "detalle": "El bloque 64 mapea a CS-MI-ITE-2026-02, con anulado_en no nulo: se omite salvo --incluir-anulados."
+    },
+    {
+      "id": "D08",
+      "titulo": "Casos sin bloque en el Excel",
+      "detalle": "CS-PA-INF-2022-01 y CS-PA-ITE-2026-02 existen en core.casos y no tienen bloque en la matriz: no se tocan."
+    },
+    {
+      "id": "D09",
+      "titulo": "Documentos de reunión sin destino",
+      "detalle": "La columna Documentos de reuniones es una etiqueta de texto, no un archivo: no se carga en core.documentos ni en otra tabla."
+    },
+    {
+      "id": "D10",
+      "titulo": "Vínculo nudo -> compromiso por posición",
+      "detalle": "El nudo se vincula al compromiso cuyo hito tiene la misma fila; si la acción no tiene hitos, a la acción con esa fila. Cuando esa coincidencia falla se aplica el respaldo posicional dentro del bloque del reporte (134 nudos). Es un vínculo por posición, no una clave del Excel: debe revisarse."
+    },
+    {
+      "id": "D11",
+      "titulo": "Temáticas fuera del catálogo",
+      "detalle": "8 demandas quedan con tematica_id NULL. El vocabulario del equipo (Recursos y Regulación, Socio-Ambiental, Ordenamiento...) se guarda como texto libre en los campos *_equipo; cat_tematicas no se modifica."
+    },
+    {
+      "id": "D12",
+      "titulo": "Tipo de compromiso fijado",
+      "detalle": "Los 8 compromisos existentes usan tipo_compromiso='Actividad'; se usa el mismo valor para todas las acciones importadas."
+    },
+    {
+      "id": "D13",
+      "titulo": "Demandas sin vínculo a compromiso",
+      "detalle": "compromisos.demanda_id queda NULL: el Excel no relaciona cada acción con una demanda concreta."
+    },
+    {
+      "id": "D14",
+      "titulo": "Migraciones 41/42 pendientes",
+      "detalle": "El esquema actual no tiene todo lo que el plan necesita; ver bloqueantes_apply. Mientras no se apliquen las migraciones, el plan es auditable pero no aplicable."
+    },
+    {
+      "id": "D15",
+      "titulo": "Siglas del catálogo de unidades",
+      "detalle": "El Excel usa DIPFORPA y el catálogo tiene DPFORPA (id 24): el texto no coincide y el resolver salta al siguiente token (p. ej. DGPA, id 37). No se corrige el catálogo; se advierte con unidad_no_resuelta."
+    },
+    {
+      "id": "D16",
+      "titulo": "Identidad de nudos por celda (origen_ref)",
+      "detalle": "Cada nudo se importa con origen_ref = MATRIZ-N{fila}-C{col}, que identifica la celda de la matriz: en re-ejecución decide insert vs update. 24 celdas con contenido idéntico se colapsan en una (repetido_identico), respaldadas por uq_caso_nudo_critico_dedupe."
+    }
+  ],
+  "datos_sin_destino": [
+    {
+      "campo": "acciones[].medios_verificacion_raw",
+      "ocurrencias": 50,
+      "nota": "Es una instrucción ('Acción 1: Adjuntar'), no un adjunto ni una URI."
+    },
+    {
+      "campo": "acciones[].documentos_raw",
+      "ocurrencias": 31,
+      "nota": "Etiqueta de columna del Excel; no identifica archivos."
+    },
+    {
+      "campo": "acciones[].valores_extra_en_span",
+      "ocurrencias": 56,
+      "nota": "Celdas combinadas con más de un valor: no hay columna para el residuo."
+    },
+    {
+      "campo": "casos[].narrativa_cronologica",
+      "ocurrencias": 36,
+      "nota": "Texto largo sin columna en core.casos."
+    },
+    {
+      "campo": "casos[].descripcion_riesgo",
+      "ocurrencias": 27,
+      "nota": "core.casos no tiene descripcion_riesgo; sólo alertas_tempranas."
+    },
+    {
+      "campo": "casos[].actores_estado_raw / actores_sociedad_raw",
+      "ocurrencias": 68,
+      "nota": "Texto libre de actores; core.actores no tiene columna equivalente."
+    },
+    {
+      "campo": "casos[].prioridad",
+      "ocurrencias": 37,
+      "nota": "Columna D del Excel (Urgente/Moderado/Bajo); no se actualiza core.casos.prioridad_id."
+    },
+    {
+      "campo": "casos[].nombre_oficial_metadatos",
+      "ocurrencias": 37,
+      "nota": "Nombre de otra hoja; no se sobrescribe casos.nombre."
+    },
+    {
+      "campo": "reporte_avance (alcance, subsector, validación, problemática)",
+      "ocurrencias": 123,
+      "nota": "No hay columnas de destino en core.casos; subsector sólo aplica a otras tablas."
+    },
+    {
+      "campo": "reuniones[].documentos",
+      "ocurrencias": 9,
+      "nota": "Etiqueta de texto: no se crea documento."
+    },
+    {
+      "campo": "reuniones[].asistencia / am / relatoria / publicacion",
+      "ocurrencias": 184,
+      "nota": "Columnas de migration/42 con semántica no confirmada (texto vs booleano): no se cargan para no adivinar."
+    },
+    {
+      "campo": "bloques_reporte[].resumen_ejecutivo",
+      "ocurrencias": 1,
+      "nota": "La mayoría son nulos o #REF!; sólo se carga el texto válido de casos.json."
+    }
+  ],
+  "bloqueantes_apply": [
+    {
+      "codigo": "migracion_41",
+      "detalle": "Falta ejecutar migration/41_matriz_equipo.sql: core.mapa_matriz_excel no existe. El plan del --dry-run usa la SEMILLA de la migración (34 bloques) y NO es aplicable."
+    },
+    {
+      "codigo": "esquema_incompleto",
+      "detalle": "Esquema incompleto para --apply: faltan core.mapa_matriz_excel (tabla ausente), core.caso_nudo_critico (tabla ausente), core.casos.estado_actualizacion, core.casos.nivel_riesgo_inicial_id, core.casos.tematica_equipo, core.casos.link_analisis_caso, core.compromisos.demanda_id, core.compromisos.punto_focal_usuario_id, core.compromisos.punto_focal_texto, core.compromisos.tematica_equipo, core.hitos_compromiso.responsable_usuario_id, core.hitos_compromiso.responsable_texto, core.hitos_compromiso.fecha_vencimiento_texto, core.hitos_compromiso.fecha_real_texto, core.reuniones_dialogo.codigo_legado, core.reuniones_dialogo.region_texto, core.reuniones_dialogo.asistencia_registrada, core.reuniones_dialogo.acta_am, core.reuniones_dialogo.relatoria_registrada, core.reuniones_dialogo.publicacion_registrada."
+    }
+  ],
+  "coherente": true,
+  "codigo_salida": 0,
+  "fatal": []
+}

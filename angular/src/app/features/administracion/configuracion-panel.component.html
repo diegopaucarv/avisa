@@ -1,0 +1,148 @@
+<section class="surface admin-section" aria-labelledby="titulo-admin-configuracion">
+  <div class="admin-panel-head">
+    <div>
+      <h2 id="titulo-admin-configuracion">Configuración</h2>
+      <p>
+        Parámetros de <code>core.configuracion</code> en formato clave/valor. El valor es JSON: para
+        un texto use comillas. La auditoría guarda la clave y la descripción, nunca el valor.
+      </p>
+    </div>
+    <div class="admin-actions">
+      <button
+        type="button"
+        class="button-primary"
+        [disabled]="formAbierto()"
+        (click)="abrirNuevo()"
+      >
+        <app-icono nombre="ajustes" [tamano]="14" />
+        Nuevo parámetro
+      </button>
+    </div>
+  </div>
+
+  @if (aviso(); as texto) {
+    <p class="form-hint" role="status">{{ texto }}</p>
+  }
+  @if (error(); as texto) {
+    <p class="form-error" role="alert">{{ texto }}</p>
+  }
+  @if (formAbierto()) {
+    <form class="admin-form" (submit)="$event.preventDefault(); guardar()">
+      <h3 class="admin-form-title">
+        {{ editandoClave() !== null ? 'Editar «' + editandoClave() + '»' : 'Nuevo parámetro' }}
+      </h3>
+
+      <div class="form-grid">
+        <label class="form-field">
+          <span class="form-label">Clave</span>
+          <input
+            class="form-input admin-mono"
+            type="text"
+            maxlength="80"
+            placeholder="por_ejemplo.umbral_alerta"
+            autocomplete="off"
+            [value]="fClave()"
+            [disabled]="editandoClave() !== null"
+            (input)="fClave.set(aTexto($event))"
+            required
+          />
+        </label>
+
+        <label class="form-field">
+          <span class="form-label">Descripción</span>
+          <input
+            class="form-input"
+            type="text"
+            maxlength="500"
+            autocomplete="off"
+            [value]="fDescripcion()"
+            (input)="fDescripcion.set(aTexto($event))"
+          />
+        </label>
+      </div>
+
+      <label class="form-field">
+        <span class="form-label">Valor (JSON)</span>
+        <textarea
+          class="form-textarea admin-mono"
+          rows="6"
+          spellcheck="false"
+          [value]="fValor()"
+          (input)="fValor.set(aTexto($event))"
+        ></textarea>
+        <span class="form-hint">
+          Ejemplos: 12 · "texto" · true · ["a","b"] · &#123;"clave": "valor"&#125;. Sin comillas,
+          «texto» no es JSON válido.
+        </span>
+      </label>
+
+      @if (errorFormulario(); as texto) {
+        <p class="form-error" role="alert">{{ texto }}</p>
+      }
+
+      <div class="admin-form-actions">
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="guardando()"
+          (click)="cerrarFormulario()"
+        >
+          Cancelar
+        </button>
+        <button type="submit" class="button-primary" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando…' : 'Guardar parámetro' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (cargando() && items().length === 0) {
+    <div class="empty-state" role="status">Cargando configuración…</div>
+  } @else if (items().length === 0) {
+    <div class="empty-state">
+      <strong>No hay parámetros definidos</strong>
+      <p>
+        <code>core.configuracion</code> no tiene filas. Cree el primero con «Nuevo parámetro»; hasta
+        entonces las pantallas usan sus valores por defecto.
+      </p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Clave</th>
+            <th scope="col">Valor</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Actualizado</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.clave) {
+            <tr>
+              <td>
+                <span class="admin-mono">{{ item.clave }}</span>
+              </td>
+              <td>
+                <span class="admin-valor" [attr.title]="valor(item.valor)">{{
+                  valor(item.valor)
+                }}</span>
+              </td>
+              <td class="admin-cell-wrap">{{ item.descripcion || '—' }}</td>
+              <td>
+                {{ fechaHora(item.actualizadoEn) }}
+                <span class="admin-sub">{{ item.actualizadoPorNombre || 'sin dato' }}</span>
+              </td>
+              <td>
+                <button type="button" class="button-secondary" (click)="editar(item)">
+                  Editar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

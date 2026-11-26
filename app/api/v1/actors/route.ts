@@ -1,4 +1,4 @@
-import { jsonError } from "@/lib/db/errors";
+import { ApiError, jsonError } from "@/lib/db/errors";
 import {
   conAliasDePagina,
   jsonOk,
@@ -6,7 +6,12 @@ import {
   queryParams,
   requireSession,
 } from "@/lib/db/http";
-import { listActors, type ActorListQuery } from "@/lib/db/repos/actors";
+import {
+  createActor,
+  listActors,
+  type ActorListQuery,
+  type ActorScope,
+} from "@/lib/db/repos/actors";
 import { withSession } from "@/lib/db/tenant";
 
 export const runtime = "nodejs";
@@ -32,6 +37,45 @@ export async function GET(request: Request) {
     );
 
     return jsonOk(conAliasDePagina(result));
+  } catch (error) {
+    return jsonError(error);
+  }
+}
+
+async function readJsonBody(
+  request: Request,
+): Promise<Record<string, unknown>> {
+  let parsed: unknown;
+  try {
+    parsed = await request.json();
+  } catch {
+    throw new ApiError(400, "Solicitud inválida.", "INVALID_BODY");
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new ApiError(400, "Solicitud inválida.", "INVALID_BODY");
+  }
+  return parsed as Record<string, unknown>;
+}
+
+/**
+ * Alta de actor. La validación (naturaleza, nombre, DNI de 8 dígitos, RUC de 11,
+ * fechas OSPA) vive en el repositorio; aquí sólo se exige sesión y cuerpo JSON.
+ */
+export async function POST(request: Request) {
+  try {
+    const session = requireSession(request);
+    const body = await readJsonBody(request);
+    const scope: ActorScope = {
+      usuarioId: session.uid,
+      rolCodigo: session.rol,
+      roles: session.roles,
+    };
+
+    const actor = await withSession(scope, (client) =>
+      createActor(client, scope, body),
+    );
+
+    return jsonOk(actor, 201);
   } catch (error) {
     return jsonError(error);
   }

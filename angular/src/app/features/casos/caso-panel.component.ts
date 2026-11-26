@@ -12,6 +12,8 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { RouterLink } from '@angular/router';
+
 import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
 import { esRegistro, leer, lista, texto } from '../../dominio/mapeo';
@@ -21,6 +23,11 @@ import {
   type OpcionTerritorio,
 } from '../../shared/ui/territorio-buscador.component';
 
+import {
+  etiquetaCriterio as etiquetaDeCriterio,
+  type DuplicadoCandidatoFila,
+} from './duplicados.mapeo';
+
 /** Cuerpo de `POST /api/v1/cases`. El código lo emite el servidor. */
 export type CuerpoCasoAlta = {
   titulo: string;
@@ -28,6 +35,8 @@ export type CuerpoCasoAlta = {
   tematica?: string;
   subsector?: string;
   riesgo?: string;
+  /** Texto libre: qué riesgo se observa hoy en el caso. */
+  descripcionRiesgo?: string;
   unidadResponsable?: string;
   resumen?: string;
   fechaInicio?: string;
@@ -75,6 +84,7 @@ type BorradorCaso = {
   naturaleza: string;
   subsector: string;
   riesgo: string;
+  descripcionRiesgo: string;
   unidadResponsable: string;
   resumen: string;
   fechaInicio: string;
@@ -160,7 +170,7 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
  */
 @Component({
   selector: 'app-caso-panel',
-  imports: [IconoComponent, TerritorioBuscadorComponent],
+  imports: [RouterLink, IconoComponent, TerritorioBuscadorComponent],
   templateUrl: './caso-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -178,22 +188,16 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
     .caso-panel-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
-
     .caso-panel-sub {
       margin: 4px 0 0;
       color: #647487;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -201,6 +205,59 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
       display: flex;
       flex-direction: column;
       gap: 12px;
+    }
+
+    /* Rótulos del modal en mayúsculas (ajuste del 22 nov). */
+    .form-label {
+      text-transform: uppercase;
+    }
+
+    /*
+     * Campos del alta sin recuadro: sólo rótulo tenue y valor, separados por
+     * espacio del flujo del formulario. Los colores salen de variables de tema
+     * para no romper el modo noche.
+     */
+    .form-campo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .form-campo > span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /*
+     * Descripción del riesgo y nivel en la misma fila: el texto ocupa el ancho
+     * disponible y el nivel queda a su derecha, como pide el diseño.
+     */
+    .fila-riesgo {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 190px;
+      gap: 12px;
+      align-items: start;
+    }
+
+    @media (max-width: 640px) {
+      .fila-riesgo {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .caso-formulario .form-input,
+    .caso-formulario .form-select,
+    .caso-formulario .form-textarea {
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      padding-left: 0;
+      padding-right: 0;
+      color: var(--ink);
     }
 
     .caso-regiones {
@@ -228,7 +285,7 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
       align-items: center;
       gap: 6px;
       color: #22303f;
-      font-size: 11.5px;
+      font-size: 13.5px;
       line-height: 1.4;
     }
 
@@ -244,7 +301,7 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
       border-radius: 6px;
       background: rgba(100, 116, 135, 0.06);
       color: #47566a;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
       text-align: center;
     }
@@ -255,14 +312,101 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
       gap: 8px;
       margin-top: 2px;
     }
+
+    /* Aviso de duplicados: se lee antes de confirmar, no después. */
+    .duplicados-aviso {
+      margin: 0 0 12px;
+      padding: 11px 12px;
+      border: 1px solid #e8d3a3;
+      border-radius: 7px;
+      background: #fdf8ec;
+    }
+
+    .duplicados-aviso h3 {
+      margin: 0 0 3px;
+      color: #7a5a16;
+      font: 700 14px var(--font-display);
+    }
+
+    .duplicados-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .duplicado-item {
+      padding: 8px 9px;
+      border: 1px solid #e6e0cd;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .duplicado-item.descartado {
+      border-style: dashed;
+      background: rgba(100, 116, 135, 0.05);
+    }
+
+    .duplicado-cabecera {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+    }
+
+    .duplicado-titulo {
+      color: #22303f;
+      font-size: 13.5px;
+      line-height: 1.35;
+    }
+
+    .duplicado-meta {
+      margin: 3px 0 0;
+      color: #647487;
+      font-size: 12.5px;
+    }
+
+    .duplicado-criterios {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 6px 0 0;
+    }
+
+    .duplicado-chip {
+      padding: 1px 7px;
+      border: 1px solid #e8d3a3;
+      border-radius: 10px;
+      background: #fff;
+      color: #7a5a16;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    .duplicado-item .button-secondary {
+      margin-top: 7px;
+    }
   `,
 })
 export class CasoPanelComponent {
   readonly guardando = input(false);
   readonly errorGuardado = input<string | null>(null);
 
+  /**
+   * Posibles duplicados del título/distrito en curso. El contenedor los pide
+   * antes de confirmar; el panel sólo los muestra y permite descartarlos.
+   */
+  readonly duplicados = input<readonly DuplicadoCandidatoFila[]>([]);
+  readonly verificando = input(false);
+  /** Códigos de los candidatos ya marcados como «no es duplicado». */
+  readonly descartes = input<readonly string[]>([]);
+  readonly errorDuplicados = input<string | null>(null);
+
   readonly cerrar = output<void>();
   readonly guardar = output<CuerpoCasoAlta>();
+  /** Pide registrar que el candidato (por código) no es un duplicado. */
+  readonly descartar = output<string>();
 
   readonly borrador = signal<BorradorCaso>({
     titulo: '',
@@ -271,6 +415,7 @@ export class CasoPanelComponent {
     naturaleza: '',
     subsector: '',
     riesgo: '',
+    descripcionRiesgo: '',
     unidadResponsable: '',
     resumen: '',
     fechaInicio: '',
@@ -332,17 +477,8 @@ export class CasoPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
-    // Escape cierra el panel aunque el foco esté dentro de un campo de texto.
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
-    this.destruccion.onDestroy(() => {
-      document.removeEventListener('keydown', alEscape);
-      this.focoPrevio?.focus?.();
-    });
+    // El panel sólo se cierra con Cancelar o Guardar: Escape no lo descarta.
+    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
   }
 
   campo(clave: CampoBorrador, evento: Event): void {
@@ -367,13 +503,31 @@ export class CasoPanelComponent {
     this.mensajeLocal.set(null);
   }
 
+  /**
+   * Texto del botón de envío. Con el aviso a la vista, el segundo envío confirma
+   * el registro («Registrar igualmente»): nunca se envía dos veces sin avisar.
+   */
+  readonly textoEnviar = computed(() => {
+    if (this.guardando()) return 'Registrando…';
+    if (this.verificando()) return 'Verificando duplicados…';
+    return this.duplicados().length > 0 ? 'Registrar igualmente' : 'Registrar caso';
+  });
+
+  etiquetaCriterio(criterio: DuplicadoCandidatoFila['coincidencias'][number]): string {
+    return etiquetaDeCriterio(criterio);
+  }
+
+  estaDescartado(candidato: DuplicadoCandidatoFila): boolean {
+    return this.descartes().includes(candidato.codigo);
+  }
+
   alEnviarFormulario(evento: Event): void {
     evento.preventDefault();
     this.guardarCambios();
   }
 
   guardarCambios(): void {
-    if (this.guardando()) return;
+    if (this.guardando() || this.verificando()) return;
 
     const borrador = this.borrador();
     const titulo = borrador.titulo.trim();
@@ -401,6 +555,9 @@ export class CasoPanelComponent {
     if (borrador.naturaleza) cuerpo.naturaleza = borrador.naturaleza;
     if (borrador.subsector) cuerpo.subsector = borrador.subsector;
     if (borrador.riesgo) cuerpo.riesgo = borrador.riesgo;
+    if (borrador.descripcionRiesgo.trim()) {
+      cuerpo.descripcionRiesgo = borrador.descripcionRiesgo.trim();
+    }
     if (borrador.unidadResponsable) cuerpo.unidadResponsable = borrador.unidadResponsable;
     if (borrador.resumen.trim()) cuerpo.resumen = borrador.resumen.trim();
     if (borrador.fechaInicio) cuerpo.fechaInicio = borrador.fechaInicio;
@@ -411,10 +568,6 @@ export class CasoPanelComponent {
 
     this.mensajeLocal.set(null);
     this.guardar.emit(cuerpo);
-  }
-
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
   }
 
   alTecla(evento: KeyboardEvent): void {

@@ -1,20 +1,18 @@
 <section class="view-body" aria-labelledby="titulo-direccion">
   <header class="view-head">
     <div>
-      <p class="section-eyebrow">Alta Dirección · lectura ejecutiva</p>
       <h1 id="titulo-direccion">Resumen de Dirección</h1>
-      <p class="view-subtitle">
-        Panorama agregado de la conflictividad sectorial construido con los totales reales que
-        reporta el servidor en cada listado paginado. Base normativa: Guía §8.1.2.3 «Reportes de
-        clima social» y Anexo 2 «Reporte Regional de Conflictividad y Demandas».
-      </p>
     </div>
 
     <div class="view-actions">
-      <app-exportar-menu entidad="casos" (fallo)="alFallarExportacion($event)" />
+      <app-exportar-menu
+        entidad="casos"
+        [consulta]="consultaExportacion"
+        (fallo)="alFallarExportacion($event)"
+      />
       <button type="button" class="button-secondary" (click)="imprimir()">
         <app-icono nombre="documentos" [tamano]="14" />
-        Imprimir / Guardar PDF
+        Preparar hoja de impresión
       </button>
     </div>
   </header>
@@ -33,7 +31,7 @@
     <a class="stat-card" routerLink="/casos" aria-label="Abrir la lista de casos">
       <span class="stat-icon"><app-icono nombre="casos" [tamano]="16" /></span>
       <span class="stat-copy">
-        <span>Casos abiertos</span>
+        <span>Casos vigentes</span>
         <strong>{{ casosAbiertos() ?? "—" }}</strong>
         <small>Abrir casos <app-icono nombre="chevron-derecha" [tamano]="11" /></small>
       </span>
@@ -75,15 +73,30 @@
     <p>La API no devolvió casos en la consulta de lectura.</p>
   </div>
   } @else {
+  <div class="scope-bar">
+    <span class="scope-label">Variante</span>
+    <div class="segmented" role="group" aria-label="Variante del Resumen de Dirección">
+      @for (opcion of variantes; track opcion.valor) {
+      <button
+        type="button"
+        [attr.aria-pressed]="variante() === opcion.valor"
+        (click)="cambiarVariante(opcion.valor)"
+      >
+        {{ etiquetaVariante(opcion.valor) }}
+      </button>
+      }
+    </div>
+    <p class="scope-note">{{ descripcionVariante() }}</p>
+  </div>
+
   <section class="surface detail-section" aria-labelledby="titulo-desglose">
     <div class="surface-heading">
       <div>
-        <p class="section-eyebrow">Panorama de casos</p>
-        <h3 id="titulo-desglose">Desglose por prioridad, riesgo, temática y región</h3>
-        <p>{{ notaBase() }}</p>
+        <h3 id="titulo-desglose">{{ tituloDesglose() }}</h3>
       </div>
     </div>
 
+    @if (variante() === 'nacional') {
     <div class="breakdown-grid">
       <div class="breakdown-card">
         <h3>Por prioridad</h3>
@@ -116,25 +129,11 @@
         </ul>
         <a class="link-button" routerLink="/casos">Abrir casos</a>
       </div>
-
+    </div>
+    } @else if (variante() === 'region') {
+    <div class="breakdown-grid una-columna">
       <div class="breakdown-card">
-        <h3>Por temática</h3>
-        <ul class="breakdown-list">
-          @for (grupo of porTematica(); track grupo.etiqueta) {
-          <li>
-            <span>{{ grupo.etiqueta }}</span>
-            <span class="breakdown-bar"><i [style.width.%]="grupo.porcentaje"></i></span>
-            <span class="breakdown-count">
-              {{ grupo.total }} <small>{{ grupo.porcentaje }}%</small>
-            </span>
-          </li>
-          }
-        </ul>
-        <a class="link-button" routerLink="/casos">Abrir casos</a>
-      </div>
-
-      <div class="breakdown-card">
-        <h3>Por región</h3>
+        <h3>Desglose regional</h3>
         @if (cargandoRegiones()) {
         <p class="empty-inline">Cargando regiones…</p>
         } @else if (porRegion().length === 0) {
@@ -164,6 +163,56 @@
         <a class="link-button" routerLink="/casos">Abrir casos</a>
       </div>
     </div>
+    } @else { @if (cargandoSubsectores()) {
+    <p class="empty-inline">Cargando subsectores…</p>
+    } @else if (porSubsector().length === 0) {
+    <p class="empty-inline">Sin casos por subsector.</p>
+    } @else {
+    <div class="table-wrap tabla-variante">
+      <table class="data-table">
+        <caption class="table-caption">
+          Casos vigentes por subsector y nivel de riesgo; el porcentaje se calcula sobre el total de
+          casos del agregado.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Subsector</th>
+            <th scope="col" class="num">Alto</th>
+            <th scope="col" class="num">{{ codigoRiesgoMedio() }}</th>
+            <th scope="col" class="num">Bajo</th>
+            <th scope="col" class="num">Total</th>
+            <th scope="col" class="num">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fila of porSubsector(); track fila.subsector) {
+          <tr>
+            <td>{{ fila.subsector }}</td>
+            <td class="num">{{ fila.alto }}</td>
+            <td class="num">{{ fila.medio }}</td>
+            <td class="num">{{ fila.bajo }}</td>
+            <td class="num">{{ fila.total }}</td>
+            <td class="num">{{ fila.porcentaje }}%</td>
+          </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>{{ porSubsector().length }} subsectores</td>
+            <td class="num">{{ totalesSubsector().alto }}</td>
+            <td class="num">{{ totalesSubsector().medio }}</td>
+            <td class="num">{{ totalesSubsector().bajo }}</td>
+            <td class="num">{{ totalesSubsector().total }}</td>
+            <td class="num">{{ porcentajeTotalSubsector() }}%</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <p class="variant-nota">
+      El listado de casos no admite filtro por subsector, así que estas filas no enlazan: la cifra
+      sólo existe en el agregado del servidor.
+    </p>
+    } }
   </section>
 
   <div class="executive-disclaimer">
@@ -172,7 +221,10 @@
       Este resumen ordena datos operativos; no reemplaza el Reporte Regional de Conflictividad y
       Demandas (Anexo 2), que distingue hechos confirmados de percepciones y añade el perfil de
       actores y la relevancia de cada caso. La API no acepta filtro por nivel de conflicto, así que
-      el desglose se agrupa por prioridad, riesgo, temática y región con los totales del servidor.
+      el desglose se agrupa por prioridad, riesgo, región y subsector con los totales del servidor.
+      La impresión reproduce la variante que está en pantalla; «Exportar» descarga el listado de
+      casos con alcance completo, no el agregado por región ni por subsector. La columna intermedia
+      de la tabla por subsector usa el código real del catálogo de niveles de riesgo.
     </span>
   </div>
   }

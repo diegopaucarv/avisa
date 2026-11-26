@@ -1,51 +1,75 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
-import {
-  normalizarColeccion,
-  paramsDePagina,
-  urlConParametros,
-  type Coleccion,
-} from '../../core/http/coleccion';
-import { consulta, type Consulta } from '../../core/http/consulta';
+import { urlConParametros } from '../../core/http/coleccion';
+import { consulta } from '../../core/http/consulta';
+import { aErrorApi } from '../../core/http/errores';
+import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { aAlerta, formatearPlazo, type Alerta } from '../alertas/alerta.mapeo';
 import {
-  aColeccionDemandas,
-  claseEstadoDemanda,
-  formatearFecha as formatearFechaDemanda,
-  type ColeccionDemandas,
-  type EstadoDemanda,
-} from '../casos/demanda-sin-caso.mapeo';
-import {
-  aCompromiso,
-  formatearFecha,
-  resolverVencimiento,
-  situacionDe,
-  type Compromiso,
-  type ResolucionVencimiento,
-  type Situacion,
-} from '../compromisos/compromiso.mapeo';
-import {
-  HORIZONTE_POR_VENCER_DIAS,
-  aTotal,
-  rangoPorVencer,
-  rangoVencidos,
-} from '../resumen/resumen.mapeo';
+  COLUMNAS_TABLERO,
+  ETIQUETAS_COLUMNA,
+  ETIQUETAS_TIPO,
+  OPCIONES_FILTRO,
+  claseFechaLimite,
+  claseRiesgo,
+  claseTipo,
+  claveTarjeta,
+  etiquetaFechaLimite,
+  fechaTexto,
+  normalizarCompletitud,
+  normalizarFiltroTipo,
+  normalizarTablero,
+  responsableDe,
+  rutaEntidad,
+  tieneResponsable,
+  type CambiosTarjeta,
+  type CandidatoTablero,
+  type ClaveColumna,
+  type CompletitudColumna,
+  type FiltroTipoTablero,
+  type TarjetaTablero,
+} from './bandeja.mapeo';
+import { BandejaService } from './bandeja.service';
+
+type FormularioTarjeta = {
+  asignacionTexto: string;
+  responsableTexto: string;
+  fechaLimite: string;
+  pospuestoHasta: string;
+  motivoPosposicion: string;
+};
+
+function formularioVacio(): FormularioTarjeta {
+  return {
+    asignacionTexto: '',
+    responsableTexto: '',
+    fechaLimite: '',
+    pospuestoHasta: '',
+    motivoPosposicion: '',
+  };
+}
 
 /**
- * Bandeja de trabajo.
+ * Bandeja de trabajo como tablero (Kanban).
  *
- * Reúne en una sola vista lo que exige atención. Cada bloque consulta su propio
- * endpoint paginado con un tamaño pequeño, lleva su estado de carga y error, y
- * enlaza a la pantalla completa. No repite la lógica de esas pantallas: sólo
- * reutiliza sus mapeos.
+ * Cuatro columnas persistidas en `core.tablero_tarjeta` (`backlog`, `en_curso`,
+ * `en_espera`, `hecho`). Cada tarjeta muestra los datos de la entidad dueña
+ * resueltos por la API y permite moverla y editar responsable, asignación,
+ * fecha límite y posposición; el servidor guarda el cambio y deja el evento de
+ * historial. Los registros que todavía no tienen tarjeta se listan debajo y se
+ * incorporan al tablero con el primer movimiento (upsert).
+ *
+ * No hay arrastre: el mockup no lo dibuja, así que se usan botones de columna.
+ * La completitud no se calcula aquí: llega del endpoint dedicado.
  */
 @Component({
   selector: 'app-bandeja',
-  imports: [RouterLink, IconoComponent, ExportarMenuComponent],
+  imports: [IconoComponent, ExportarMenuComponent, RouterLink],
   templateUrl: './bandeja.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -53,331 +77,616 @@ import {
       display: block;
     }
 
-    .view-body {
+    /* Tablero ------------------------------------------------------- */
+
+    .tablero {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+
+    .tablero-col {
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      width: 100%;
-      max-width: 1420px;
-      margin: 0 auto;
-      padding: 27px 34px 50px;
-      box-sizing: border-box;
+      gap: 8px;
+      min-width: 0;
+      padding: 10px 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fafb;
     }
 
-    .view-head {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
-    .bloque {
-      padding: 17px;
-    }
-
-    .bloque-titulo {
+    .tablero-col-head {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
 
-    .bloque-titulo app-icono {
-      color: #5b7290;
-    }
-
-    .tarea-lista {
-      margin: 10px 0 0;
-      padding: 0;
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .tarea {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 9px 0;
-      border-top: 1px solid #f0f2f4;
-    }
-
-    .tarea:first-child {
-      border-top: 0;
-      padding-top: 4px;
-    }
-
-    .tarea-principal {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .tarea-titulo {
-      color: #33465a;
-      font-size: 10.5px;
-      font-weight: 600;
-      line-height: 1.45;
-    }
-
-    .tarea-texto {
-      color: #748391;
-      font-size: 10px;
-      line-height: 1.5;
-    }
-
-    .tarea-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 7px;
-      color: #8b97a2;
-      font-size: 9px;
-    }
-
-    .tarea-codigo {
-      flex: none;
-      color: #7f8c98;
-      font-size: 9px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .bloque-nota,
-    .bloque-vacio {
-      margin: 10px 0 0;
-      font-size: 10px;
-      line-height: 1.5;
-    }
-
-    .bloque-nota {
-      color: #8b5a54;
-    }
-
-    .bloque-vacio {
-      color: #909ba4;
-    }
-
-    .bloque-pie {
-      margin: 9px 0 0;
-      color: #9aa5ae;
-      font-size: 9px;
-      line-height: 1.5;
-    }
-
-    .contadores-compromisos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .contador {
-      flex: 1 1 120px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding: 9px 11px;
-      border: 1px solid #e6ebef;
-      border-radius: 8px;
-      background: #fafbfc;
-    }
-
-    .contador-etiqueta {
-      color: #7b8896;
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
+    .tablero-col-head h2 {
+      margin: 0;
+      color: var(--ink);
+      font: 700 12px/1.3 var(--font-display);
+      letter-spacing: 0.04em;
       text-transform: uppercase;
     }
 
-    .contador-valor {
-      color: #1a2b3e;
-      font: 700 18px/1.2 var(--font-display);
+    .tablero-col-count {
+      min-width: 22px;
+      padding: 1px 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+      text-align: center;
     }
 
-    .contador-valor.contador-sin-dato {
-      color: #8b97a2;
+    .tablero-col-meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
+
+    .tablero-col-vacio {
+      margin: 0;
+      padding: 14px 8px;
+      border: 1px dashed #dfe4ea;
+      border-radius: 8px;
+      color: #97a3b0;
       font-size: 11px;
+      text-align: center;
+    }
+
+    /* Tarjeta ------------------------------------------------------- */
+
+    .tarjeta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px;
+      border: 1px solid #dfe4ea;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 1px 1px rgba(17, 32, 45, 0.04);
+    }
+
+    .tarjeta-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 1px 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .tag.tipo-alerta {
+      border-color: #f3c3bd;
+      background: #fdf1ef;
+      color: var(--red);
+    }
+
+    .tag.tipo-compromiso {
+      border-color: #f5d6b3;
+      background: #fdf6ec;
+      color: #8a5a00;
+    }
+
+    .tag.tipo-demanda {
+      border-color: #cddcef;
+      background: #eaf1f8;
+      color: #2455a2;
+    }
+
+    .tag.tipo-caso {
+      border-color: #c9e3d5;
+      background: #eef7f2;
+      color: var(--green);
+    }
+
+    .tag.r-alto {
+      border-color: #f3c3bd;
+      background: #fdf1ef;
+      color: var(--red);
+    }
+
+    .tag.r-moderado {
+      border-color: #f5d6b3;
+      background: #fdf6ec;
+      color: #ad741d;
+    }
+
+    .tag.r-bajo {
+      border-color: #c9e3d5;
+      background: #eef7f2;
+      color: var(--green);
+    }
+
+    .tarjeta-titulo {
+      margin: 0;
+      color: var(--ink);
+      font: 600 12.5px/1.35 var(--font-display);
+      overflow-wrap: anywhere;
+    }
+
+    .tarjeta-code {
+      margin: 0;
+      color: #8995a0;
+      font-size: 10.5px;
+      overflow-wrap: anywhere;
+    }
+
+    .tarjeta-code code {
+      padding: 0 3px;
+      border-radius: 3px;
+      background: #eef1f4;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 10px;
+    }
+
+    .tarjeta-asignacion {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .tarjeta-datos {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin: 0;
+    }
+
+    .tarjeta-datos > div {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .tarjeta-datos dt {
+      color: #97a3b0;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tarjeta-datos dd {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .sin-dato {
+      color: #97a3b0;
+    }
+
+    .tarjeta-pospuesta {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      margin: 0;
+      padding: 5px 7px;
+      border: 1px solid #f5d6b3;
+      border-radius: 6px;
+      background: #fdf6ec;
+      color: #8a5a00;
+      font-size: 10.5px;
+      line-height: 1.4;
+    }
+
+    .tarjeta-pospuesta app-icono {
+      margin-top: 1px;
+    }
+
+    .tarjeta-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 2px;
+      padding-top: 6px;
+      border-top: 1px solid #eef1f4;
+    }
+
+    .tarjeta-acciones button {
+      padding: 3px 7px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      color: var(--muted);
+      font: inherit;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .tarjeta-acciones button:hover:not(:disabled) {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .tarjeta-acciones button[aria-pressed='true'] {
+      border-color: var(--blue);
+      background: var(--blue-pale);
+      color: var(--blue-dark);
+      font-weight: 600;
+      cursor: default;
+    }
+
+    .tarjeta-acciones button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .tarjeta-acciones .editar {
+      margin-left: auto;
+      border-color: #cddcef;
+      color: var(--blue);
       font-weight: 600;
     }
 
-    @media (max-width: 760px) {
-      .view-body {
-        padding: 18px 16px 40px;
+    /* Formulario en la tarjeta -------------------------------------- */
+
+    .tarjeta-form {
+      display: grid;
+      gap: 6px;
+      padding: 8px;
+      border: 1px solid #cddcef;
+      border-radius: 7px;
+      background: #f8fbff;
+    }
+
+    .tarjeta-form label {
+      display: grid;
+      gap: 2px;
+      color: #647487;
+      font-size: 10px;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .tarjeta-form input {
+      min-height: 27px;
+      padding: 4px 7px;
+      border: 1px solid #dce3e8;
+      border-radius: 5px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 11px;
+    }
+
+    .tarjeta-form input:focus-visible {
+      border-color: var(--blue);
+      outline: 2px solid #cddcef;
+      outline-offset: 0;
+    }
+
+    .tarjeta-form-acciones {
+      display: flex;
+      gap: 5px;
+      margin-top: 2px;
+    }
+
+    .tarjeta-form-acciones button {
+      min-height: 26px;
+      padding: 0 9px;
+      font-size: 11px;
+    }
+
+    /* Candidatos y completitud -------------------------------------- */
+
+    .candidato-mover {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .candidato-mover button {
+      padding: 3px 7px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: #fff;
+      color: var(--muted);
+      font: inherit;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .candidato-mover button:hover:not(:disabled) {
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .candidato-mover button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .num {
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    .tablero-aviso {
+      margin: 0;
+      padding: 12px 14px;
+      border: 1px solid #f1d9a8;
+      border-radius: 8px;
+      background: #fffaf0;
+      color: #8a5a00;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .tablero-aviso strong {
+      color: #6d4700;
+    }
+
+    .accion-aviso {
+      margin: 0;
+      color: var(--green);
+      font-size: 12px;
+    }
+
+    .accion-error {
+      margin: 0;
+      color: var(--red);
+      font-size: 12px;
+    }
+
+    @media (max-width: 1080px) {
+      .tablero {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .tablero {
+        grid-template-columns: 1fr;
       }
     }
   `,
 })
 export class BandejaPage {
-  /* ------------------------------------------------------------------ *
-   * Alertas pendientes
-   * ------------------------------------------------------------------ */
+  private readonly ruta = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly servicio = inject(BandejaService);
+  private readonly capacidades = inject(CapacidadesService);
+
+  readonly opcionesTipo = OPCIONES_FILTRO;
+  readonly etiquetasColumna = ETIQUETAS_COLUMNA;
+  readonly etiquetasTipo = ETIQUETAS_TIPO;
+  readonly destinos = COLUMNAS_TABLERO.map((clave) => ({
+    clave,
+    etiqueta: ETIQUETAS_COLUMNA[clave],
+  }));
+
+  readonly puedeEditar = this.capacidades.puedeEditar;
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
+  readonly aviso = signal<string | null>(null);
+  readonly errorAccion = signal<string | null>(null);
+  readonly guardando = signal(false);
+  readonly tarjetaEnEdicion = signal<string | null>(null);
+  readonly formulario = signal<FormularioTarjeta>(formularioVacio());
 
-  private readonly recursoAlertas = consulta<Coleccion<Alerta>>({
+  /** `?tipo=` de la URL; cualquier variante desconocida cae en «todas». */
+  private readonly parametros = toSignal(
+    this.ruta.queryParamMap.pipe(
+      map((params) => ({ tipo: normalizarFiltroTipo(params.get('tipo')) })),
+    ),
+    { initialValue: { tipo: 'todas' as FiltroTipoTablero } },
+  );
+
+  readonly filtroTipo = computed(() => this.parametros().tipo);
+
+  private readonly recursoTablero = consulta({
     fuente: () =>
-      urlConParametros(urlApi('/v1/alerts'), {
-        ...paramsDePagina({ pagina: 1, tamano: 5 }),
-        estado: 'Pendiente de revisión',
-        sort: 'recent',
+      urlConParametros(urlApi('/v1/bandeja'), {
+        tipo: this.filtroTipo() === 'todas' ? null : this.filtroTipo(),
       }),
-    esquema: (bruto) => {
-      const coleccion = normalizarColeccion<unknown>(bruto);
-      return { ...coleccion, elementos: coleccion.elementos.map(aAlerta) };
-    },
+    esquema: normalizarTablero,
   });
 
-  readonly alertas = computed(() => this.recursoAlertas.valor()?.elementos ?? []);
-  readonly totalAlertas = computed(() => this.recursoAlertas.valor()?.total ?? 0);
-  readonly estadoAlertas = this.recursoAlertas.estado;
-  readonly errorAlertas = this.recursoAlertas.error;
-
-  /* ------------------------------------------------------------------ *
-   * Compromisos vencidos o por vencer
-   * ------------------------------------------------------------------ */
-
-  /** Días del horizonte que anuncia el bloque y que se envía al servidor. */
-  readonly horizonteDias = HORIZONTE_POR_VENCER_DIAS;
-
-  /**
-   * Contador de vencidos: `vencimiento_hasta` ayer, sin `desde`, y sin estados
-   * terminales. El `total` del sobre es la cifra exacta; no se traen filas.
-   *
-   * `situacionDe` marca `due-vencido` con la misma frontera (vence antes de
-   * hoy), así que el contador y las etiquetas de la cola no se contradicen.
-   */
-  private readonly kpiVencidos = consulta<number>({
-    fuente: () => {
-      const { hasta } = rangoVencidos();
-      return urlConParametros(urlApi('/v1/commitments'), {
-        ...paramsDePagina({ pagina: 1, tamano: 1 }),
-        excluir_terminales: 'true',
-        vencimiento_hasta: hasta,
-      });
-    },
-    esquema: aTotal,
-  });
-
-  /**
-   * Contador de «por vencer»: hoy y los próximos `horizonteDias`, ambos
-   * inclusive, sin estados terminales. También sale del `total`, no de filas.
-   */
-  private readonly kpiPorVencer = consulta<number>({
-    fuente: () => {
-      const rango = rangoPorVencer();
-      return urlConParametros(urlApi('/v1/commitments'), {
-        ...paramsDePagina({ pagina: 1, tamano: 1 }),
-        excluir_terminales: 'true',
-        vencimiento_desde: rango.desde,
-        vencimiento_hasta: rango.hasta,
-      });
-    },
-    esquema: aTotal,
-  });
-
-  /**
-   * Cola combinada: todo lo que vence hasta hoy + horizonte, sin `desde` y sin
-   * estados terminales. El servidor ordena por vencimiento efectivo ascendente,
-   * así que los vencidos salen primero; el `total` del sobre es el tamaño del
-   * conjunto y la página trae sólo las cinco filas más próximas.
-   */
-  private readonly recursoCompromisos = consulta<Coleccion<Compromiso>>({
-    fuente: () => {
-      const { hasta } = rangoPorVencer();
-      return urlConParametros(urlApi('/v1/commitments'), {
-        ...paramsDePagina({ pagina: 1, tamano: 5 }),
-        excluir_terminales: 'true',
-        vencimiento_hasta: hasta,
-      });
-    },
-    esquema: (bruto) => {
-      const coleccion = normalizarColeccion<unknown>(bruto);
-      return { ...coleccion, elementos: coleccion.elementos.map(aCompromiso) };
-    },
-  });
-
-  readonly compromisos = computed(() => this.recursoCompromisos.valor()?.elementos ?? []);
-  readonly totalCompromisos = computed(() => this.recursoCompromisos.valor()?.total ?? 0);
-  readonly estadoCompromisos = this.recursoCompromisos.estado;
-  readonly errorCompromisos = this.recursoCompromisos.error;
-
-  readonly textoVencidos = computed(() => this.textoTotal(this.kpiVencidos));
-  readonly textoPorVencer = computed(() => this.textoTotal(this.kpiPorVencer));
-  readonly estadoVencidos = this.kpiVencidos.estado;
-  readonly estadoPorVencer = this.kpiPorVencer.estado;
-
-  /* ------------------------------------------------------------------ *
-   * Demandas sin caso
-   * ------------------------------------------------------------------ */
-
-  private readonly recursoDemandas = consulta<ColeccionDemandas>({
+  private readonly recursoCompletitud = consulta({
     fuente: () =>
-      urlConParametros(urlApi('/v1/demandas'), {
-        ...paramsDePagina({ pagina: 1, tamano: 5 }),
-        sinCaso: 'true',
-        sort: 'recent',
+      urlConParametros(urlApi('/v1/bandeja/completitud'), {
+        tipo: this.filtroTipo() === 'todas' ? null : this.filtroTipo(),
       }),
-    esquema: aColeccionDemandas,
+    esquema: normalizarCompletitud,
   });
 
-  readonly demandas = computed(() => this.recursoDemandas.valor()?.elementos ?? []);
-  readonly totalDemandas = computed(() => this.recursoDemandas.valor()?.sinCasoTotal ?? 0);
-  readonly estadoDemandas = this.recursoDemandas.estado;
-  readonly errorDemandas = this.recursoDemandas.error;
+  readonly tablero = this.recursoTablero.valor;
+  readonly completitud = this.recursoCompletitud.valor;
+
+  readonly columnas = computed(() => this.tablero()?.columnas ?? []);
+  readonly candidatos = computed(() => this.tablero()?.candidatos ?? []);
+  readonly sinTarjetas = computed(() => (this.tablero()?.total ?? 0) === 0);
+  readonly sinCandidatos = computed(() => this.candidatos().length === 0);
+  readonly incompletas = computed(() => this.completitud()?.total.incompletas ?? 0);
+
+  readonly cargando = computed(
+    () =>
+      this.recursoTablero.estado() === 'cargando' || this.recursoTablero.estado() === 'inactivo',
+  );
+
+  readonly error = computed(
+    () => this.recursoTablero.error()?.message ?? this.recursoCompletitud.error()?.message ?? null,
+  );
 
   /* ------------------------------------------------------------------ *
    * Helpers de plantilla
    * ------------------------------------------------------------------ */
 
-  plazo(horas: number | null): string {
-    return formatearPlazo(horas);
+  /** Completitud de una columna; `null` mientras no llegó el endpoint. */
+  completitudDe(clave: ClaveColumna): CompletitudColumna | null {
+    return this.completitud()?.columnas.find((columna) => columna.clave === clave) ?? null;
   }
 
-  fecha(valor: string | null | undefined): string {
-    return formatearFecha(valor);
+  /** Conteo de los chips de tipo: lo entrega la API, ya sumado por tipo. */
+  contadorTipo(valor: FiltroTipoTablero): string {
+    const conteos = this.tablero()?.conteosTipo;
+    if (!conteos) return '';
+    if (valor === 'todas') {
+      return String(conteos.alerta + conteos.compromiso + conteos.demanda + conteos.caso);
+    }
+    return String(conteos[valor]);
   }
 
-  fechaDemanda(valor: string | null | undefined): string {
-    return formatearFechaDemanda(valor);
+  claseTipoDe(tarjeta: Pick<TarjetaTablero, 'entidadTipo'>): string {
+    return claseTipo(tarjeta.entidadTipo);
   }
 
-  situacion(compromiso: Compromiso): Situacion {
-    return situacionDe(compromiso);
+  claseRiesgoDe(tarjeta: Pick<TarjetaTablero, 'riesgo'>): string {
+    return claseRiesgo(tarjeta.riesgo);
   }
 
-  /** Texto del contador: «…» mientras carga, «No disponible» si falló. */
-  private textoTotal(recurso: Consulta<number>): string {
-    if (recurso.estado() === 'error') return 'No disponible';
-    const valor = recurso.valor();
-    return valor === undefined ? '…' : String(valor);
+  responsable(tarjeta: TarjetaTablero): string {
+    return responsableDe(tarjeta);
   }
 
-  vencimiento(compromiso: Compromiso): ResolucionVencimiento {
-    return resolverVencimiento(compromiso);
+  sinResponsable(tarjeta: TarjetaTablero): boolean {
+    return !tieneResponsable(tarjeta);
   }
 
-  claseDemanda(estado: EstadoDemanda): string {
-    return claseEstadoDemanda(estado);
+  fecha(valor: string | null): string {
+    return fechaTexto(valor);
+  }
+
+  claseFecha(tarjeta: TarjetaTablero): string {
+    return claseFechaLimite(tarjeta.fechaLimite, this.tablero()?.hoy ?? null);
+  }
+
+  etiquetaFecha(tarjeta: TarjetaTablero): string {
+    return etiquetaFechaLimite(tarjeta.fechaLimite, this.tablero()?.hoy ?? null);
+  }
+
+  rutaDe(tarjeta: TarjetaTablero): string | null {
+    const codigo = tarjeta.entidadTipo === 'caso' ? tarjeta.codigo : tarjeta.casoCodigo;
+    return rutaEntidad(tarjeta.entidadTipo, codigo);
+  }
+
+  rutaCandidato(candidato: CandidatoTablero): string | null {
+    return rutaEntidad(candidato.entidadTipo, candidato.casoCodigo);
+  }
+
+  enEdicion(tarjeta: TarjetaTablero): boolean {
+    return this.tarjetaEnEdicion() === claveTarjeta(tarjeta);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Acciones
+   * ------------------------------------------------------------------ */
+
+  editar(tarjeta: TarjetaTablero): void {
+    if (!this.puedeEditar()) return;
+    this.errorAccion.set(null);
+    this.aviso.set(null);
+    this.formulario.set({
+      asignacionTexto: tarjeta.asignacionTexto ?? '',
+      responsableTexto: tarjeta.responsableTexto ?? '',
+      fechaLimite: tarjeta.fechaLimite ?? '',
+      pospuestoHasta: tarjeta.pospuestoHasta ?? '',
+      motivoPosposicion: tarjeta.motivoPosposicion ?? '',
+    });
+    this.tarjetaEnEdicion.set(claveTarjeta(tarjeta));
+  }
+
+  cancelar(): void {
+    this.tarjetaEnEdicion.set(null);
+    this.errorAccion.set(null);
+    this.formulario.set(formularioVacio());
+  }
+
+  campo(campo: keyof FormularioTarjeta, evento: Event): void {
+    const valor = (evento.target as HTMLInputElement | HTMLTextAreaElement).value;
+    this.formulario.update((formulario) => ({ ...formulario, [campo]: valor }));
+  }
+
+  guardar(evento: Event, tarjeta: TarjetaTablero): void {
+    evento.preventDefault();
+    if (this.guardando() || !this.puedeEditar()) return;
+
+    const formulario = this.formulario();
+    const pospuestoHasta = formulario.pospuestoHasta || null;
+    const motivo = formulario.motivoPosposicion.trim() || null;
+
+    if (pospuestoHasta && !motivo) {
+      this.errorAccion.set('Indique el motivo de la posposición.');
+      return;
+    }
+
+    const cambios: CambiosTarjeta = {
+      asignacionTexto: formulario.asignacionTexto.trim() || null,
+      responsableTexto: formulario.responsableTexto.trim() || null,
+      fechaLimite: formulario.fechaLimite || null,
+      pospuestoHasta,
+      motivoPosposicion: pospuestoHasta ? motivo : null,
+    };
+
+    this.enviar(tarjeta, cambios, 'Tarjeta actualizada.');
+  }
+
+  mover(tarjeta: TarjetaTablero, columna: ClaveColumna): void {
+    if (!this.puedeEditar() || this.guardando() || tarjeta.columna === columna) return;
+    this.enviar(tarjeta, { columna }, `Tarjeta movida a ${ETIQUETAS_COLUMNA[columna]}.`);
+  }
+
+  moverCandidato(candidato: CandidatoTablero, columna: ClaveColumna): void {
+    if (!this.puedeEditar() || this.guardando()) return;
+    this.enviar(
+      { entidadTipo: candidato.entidadTipo, entidadId: candidato.entidadId },
+      { columna },
+      `Registro incorporado a ${ETIQUETAS_COLUMNA[columna]}.`,
+    );
+  }
+
+  private enviar(
+    ref: { entidadTipo: string; entidadId: string },
+    cambios: CambiosTarjeta,
+    mensaje: string,
+  ): void {
+    this.guardando.set(true);
+    this.errorAccion.set(null);
+    this.aviso.set(null);
+
+    this.servicio.actualizar(ref.entidadTipo, ref.entidadId, cambios).subscribe({
+      next: () => {
+        this.guardando.set(false);
+        this.tarjetaEnEdicion.set(null);
+        this.formulario.set(formularioVacio());
+        this.aviso.set(mensaje);
+        this.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.guardando.set(false);
+        this.errorAccion.set(aErrorApi(fallo).message);
+      },
+    });
+  }
+
+  /** Persiste el filtro en `?tipo=`, sin recargar la pantalla. */
+  cambiarTipo(tipo: FiltroTipoTablero): void {
+    if (tipo === this.filtroTipo()) return;
+    void this.router.navigate([], {
+      relativeTo: this.ruta,
+      queryParams: { tipo: tipo === 'todas' ? null : tipo },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   alFallarExportacion(mensaje: string): void {
@@ -385,10 +694,7 @@ export class BandejaPage {
   }
 
   recargar(): void {
-    this.recursoAlertas.recargar();
-    this.kpiVencidos.recargar();
-    this.kpiPorVencer.recargar();
-    this.recursoCompromisos.recargar();
-    this.recursoDemandas.recargar();
+    this.recursoTablero.recargar();
+    this.recursoCompletitud.recargar();
   }
 }

@@ -47,27 +47,14 @@ function normalizar(texto: string): string {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: var(--ink);
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
 
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.6;
-    }
 
     /* El estilo global de .help-nav sólo cubre button; aquí el índice son anclas. */
     .help-nav a {
       padding: 6px 8px;
       border-radius: 6px;
       color: var(--muted);
-      font-size: 10.5px;
+      font-size: 13px;
       text-decoration: none;
     }
 
@@ -80,7 +67,7 @@ function normalizar(texto: string): string {
     .help-section .help-fuente {
       margin: 0 0 8px;
       color: var(--muted);
-      font-size: 9px;
+      font-size: 12px;
     }
 
     @media (max-width: 720px) {

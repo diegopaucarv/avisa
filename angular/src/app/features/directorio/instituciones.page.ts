@@ -19,9 +19,13 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import { ActorPanelComponent } from './actor-panel.component';
 import {
   NATURALEZAS,
@@ -59,7 +63,13 @@ const FILTROS_INICIALES: FiltrosInstituciones = {
  */
 @Component({
   selector: 'app-instituciones',
-  imports: [IconoComponent, PaginacionComponent, ActorPanelComponent, ExportarMenuComponent],
+  imports: [
+    IconoComponent,
+    PaginacionComponent,
+    ActorPanelComponent,
+    BarraSeleccionComponent,
+    ThOrdenDirective,
+  ],
   templateUrl: './instituciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -86,21 +96,6 @@ const FILTROS_INICIALES: FiltrosInstituciones = {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
     .actor-nombre {
       display: block;
       width: 100%;
@@ -121,7 +116,7 @@ const FILTROS_INICIALES: FiltrosInstituciones = {
     .actor-actualizando {
       margin: 0;
       color: #8d99a6;
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     @media (max-width: 720px) {
@@ -175,6 +170,29 @@ export class InstitucionesPage {
 
   readonly instituciones = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
+
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<ActorDirectorio>();
+
+  private readonly accesores: Record<string, (actor: ActorDirectorio) => unknown> = {
+    nombre: (actor) => actor.nombre,
+    naturaleza: (actor) => actor.naturaleza,
+    tipo: (actor) => actor.tipo,
+    funcion: (actor) => actor.funcion,
+    region: (actor) => actor.region,
+    organizacion: (actor) => actor.organizacionAncla,
+  };
+
+  readonly filasVisibles = computed(() => this.orden.ordenar(this.instituciones(), this.accesores));
+
+  idsVisibles(): string[] {
+    return this.instituciones()
+      .map((institucion) => institucion.id)
+      .filter((id): id is string => !!id);
+  }
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
 

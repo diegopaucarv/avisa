@@ -6,6 +6,7 @@ import {
   ElementRef,
   afterNextRender,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -28,25 +29,37 @@ import { aCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
+import { formatearFechaHora } from '../../shared/formato-fecha';
 import {
   ALCANCES,
+  CLASIFICACIONES_ALCANCE,
   ESTADOS_COMPROMISO,
   ESTADOS_HITO,
+  ETIQUETA_ASUMIDO_MINISTRO,
+  FORMAS_VERBALES,
   NIVELES_GOBIERNO,
   TIPOS_COMPROMISO,
   aCatalogosCompromiso,
   aCompromiso,
   aDetalleCompromiso,
+  aHistorialCompromiso,
+  etiquetaClasificacionAlcance,
+  etiquetaFormalVerbal,
   etiquetaNivelGobierno,
   formatearFecha,
   resolverVencimiento,
+  situacionDe,
   type CatalogosCompromiso,
   type Compromiso,
   type DetalleCompromiso,
   type EstadoHito,
+  type EventoCompromiso,
   type Hito,
+  type HistorialCompromiso,
   type OpcionCatalogo,
   type ResolucionVencimiento,
+  type Situacion,
 } from './compromiso.mapeo';
 
 type FormularioCompromiso = {
@@ -54,25 +67,31 @@ type FormularioCompromiso = {
   fechaInicio: string;
   fechaVencimiento: string;
   tipo: string;
+  clasificacionAlcance: string;
+  formalVerbal: string;
+  asumidoMinistro: boolean;
   nivelGobierno: string;
   estado: string;
   unidad: string;
   alcance: string;
-  tematica: string;
   atiendeGenero: boolean;
   criteriosSmart: string;
   evidenciaUri: string;
 };
 
-type CampoTexto = Exclude<keyof FormularioCompromiso, 'atiendeGenero'>;
+type CampoTexto = Exclude<keyof FormularioCompromiso, 'atiendeGenero' | 'asumidoMinistro'>;
 
 type FormularioHito = {
   descripcion: string;
   fecha: string;
   estado: EstadoHito;
+  responsableTexto: string;
 };
 
 type ResultadoCriterios = { ok: true; valor: unknown } | { ok: false };
+
+/** Un criterio SMART legible: rótulo deducido de la clave y valor en texto. */
+type CriterioLegible = { clave: string; valor: string };
 
 function formularioVacio(): FormularioCompromiso {
   return {
@@ -80,11 +99,13 @@ function formularioVacio(): FormularioCompromiso {
     fechaInicio: '',
     fechaVencimiento: '',
     tipo: 'Actividad',
+    clasificacionAlcance: '',
+    formalVerbal: '',
+    asumidoMinistro: false,
     nivelGobierno: '',
     estado: 'Por iniciar',
     unidad: '',
     alcance: '',
-    tematica: '',
     atiendeGenero: false,
     criteriosSmart: '',
     evidenciaUri: '',
@@ -106,11 +127,13 @@ function formularioDe(compromiso: Compromiso): FormularioCompromiso {
     fechaInicio: compromiso.fechaInicio ?? '',
     fechaVencimiento: compromiso.fechaVencimiento ?? '',
     tipo: compromiso.tipo,
+    clasificacionAlcance: compromiso.clasificacionAlcance ?? '',
+    formalVerbal: compromiso.formalVerbal ?? '',
+    asumidoMinistro: compromiso.asumidoMinistro,
     nivelGobierno: compromiso.nivelGobierno ?? '',
     estado: compromiso.estado,
     unidad: compromiso.unidad ?? '',
     alcance: compromiso.alcance ?? '',
-    tematica: compromiso.tematica ?? '',
     atiendeGenero: compromiso.atiendeGenero,
     criteriosSmart: criterios,
     evidenciaUri: compromiso.evidenciaUri ?? '',
@@ -126,18 +149,12 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
 
 @Component({
   selector: 'app-compromiso-panel',
-  imports: [IconoComponent, GlosarioComponent],
+  imports: [IconoComponent, GlosarioComponent, AdjuntosPanelComponent],
   templateUrl: './compromiso-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     :host {
       display: contents;
-    }
-    .drawer-head h2 {
-      margin: 0;
-      font-size: 15px;
-      line-height: 1.3;
-      color: #1c2a38;
     }
     .panel-badges {
       display: flex;
@@ -157,6 +174,10 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       padding-top: 0;
       border-top: 0;
     }
+    .drawer-body .detail-section h3 {
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
     .panel-fecha {
       display: flex;
       flex-wrap: wrap;
@@ -169,7 +190,7 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       flex-direction: column;
       gap: 4px;
       margin-top: 12px;
-      font-size: 10px;
+      font-size: 12.5px;
       color: #52677a;
     }
     .panel-aviso {
@@ -179,19 +200,66 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       border-radius: 6px;
       background: #fff8ec;
       color: #8a5a1f;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.45;
     }
-    .criterios {
+    .criterios-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
       margin: 4px 0 0;
-      padding: 8px;
-      border: 1px solid #e6ecf1;
-      border-radius: 6px;
-      background: #fbfcfd;
-      color: #52677a;
-      font-size: 9.5px;
-      white-space: pre-wrap;
-      overflow-x: auto;
+    }
+    .criterios-lista > div {
+      display: grid;
+      grid-template-columns: minmax(110px, max-content) minmax(0, 1fr);
+      gap: 8px;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .criterios-lista dt {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .criterios-lista dd {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 12.5px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+    /*
+     * C3: el alta se lee sin recuadros. Cada campo es rótulo tenue y valor,
+     * separados por espacio; los colores salen de variables de tema.
+     */
+    .form-campo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .detail-section.form-alta .form-field {
+      gap: 6px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+    .detail-section.form-alta .form-field > .form-label {
+      text-align: left;
+    }
+    .detail-section.form-alta .form-grid {
+      gap: 18px 16px;
+    }
+    .detail-section.form-alta .form-grid .form-input,
+    .detail-section.form-alta .form-grid .form-select,
+    .detail-section.form-alta .form-grid .form-textarea {
+      padding-left: 0;
+      padding-right: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--ink);
     }
     .panel-hito-form {
       display: flex;
@@ -201,10 +269,52 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       padding-top: 12px;
       border-top: 1px dashed #e2e8ee;
     }
+    .panel-hito-adjuntos {
+      margin-top: 10px;
+    }
+    .panel-hito-toggle {
+      min-height: 24px;
+      padding: 0 8px;
+      border: 1px solid #dbe3ea;
+      border-radius: 6px;
+      background: #fff;
+      color: #1d427f;
+      font: 600 11.5px/1 var(--font-body, system-ui);
+      cursor: pointer;
+    }
+    .panel-hito-toggle:hover {
+      background: #eaf1fb;
+    }
+    .panel-hito-toggle:focus-visible {
+      outline: 2px solid #2455a2;
+      outline-offset: 1px;
+    }
+    .panel-evento-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #e2e8ee;
+    }
+    .panel-evento-form h4 {
+      margin: 0;
+      color: #3c4a59;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .panel-evento-form .form-field {
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
     .panel-hito-form h4 {
       margin: 0;
       color: #3c4a59;
-      font-size: 11px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
     .panel-hito-form .form-field {
       padding: 0;
@@ -214,6 +324,16 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
     .hito-estado {
       display: inline-flex;
     }
+    .hito-responsable {
+      display: inline-flex;
+    }
+    .hito-responsable-input {
+      min-width: 160px;
+      max-width: 220px;
+      height: 26px;
+      padding: 0 8px;
+      font-size: 13px;
+    }
     .panel-campo-ancho {
       grid-column: 1 / -1;
     }
@@ -222,7 +342,7 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       align-items: center;
       gap: 7px;
       color: #52677a;
-      font-size: 10px;
+      font-size: 12.5px;
     }
     .panel-permiso {
       margin: 0 auto 0 0;
@@ -254,17 +374,17 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
     }
     .panel-caso-codigo {
       color: var(--ink);
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 700;
     }
     .panel-caso-titulo {
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.45;
     }
     .panel-caso-region {
       color: var(--muted);
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.4px;
       text-transform: uppercase;
@@ -302,6 +422,9 @@ export class CompromisoPanelComponent {
   readonly estadosHito: readonly string[] = ESTADOS_HITO;
   readonly tiposCompromiso: readonly string[] = TIPOS_COMPROMISO;
   readonly nivelesGobierno: readonly string[] = NIVELES_GOBIERNO;
+  readonly clasificacionesAlcance = CLASIFICACIONES_ALCANCE;
+  readonly formasVerbales = FORMAS_VERBALES;
+  readonly etiquetaAsumidoMinistro = ETIQUETA_ASUMIDO_MINISTRO;
 
   readonly editando = signal(false);
   readonly guardando = signal(false);
@@ -324,10 +447,20 @@ export class CompromisoPanelComponent {
     descripcion: '',
     fecha: '',
     estado: 'Registrado',
+    responsableTexto: '',
   });
   readonly hitoGuardando = signal(false);
   readonly hitoCambiando = signal<string | null>(null);
   readonly hitosError = signal<string | null>(null);
+
+  /** Último compromiso cuyo historial se pintó; sirve para reiniciar la UI. */
+  private ultimoCompromisoId = '';
+
+  /** Hitos con el panel de adjuntos desplegado; se monta sólo al expandir. */
+  readonly adjuntosHito = signal<ReadonlySet<string>>(new Set());
+  readonly eventoTexto = signal('');
+  readonly eventoGuardando = signal(false);
+  readonly eventoError = signal<string | null>(null);
 
   private readonly recurso = consulta<DetalleCompromiso>({
     fuente: () => {
@@ -366,6 +499,24 @@ export class CompromisoPanelComponent {
   readonly estadoCarga = this.recurso.estado;
   readonly errorCarga = this.recurso.error;
 
+  /**
+   * Historia del compromiso: eventos de `core.compromiso_evento`, hitos con su
+   * estado y adjuntos del compromiso y de sus hitos, en una sola respuesta.
+   */
+  private readonly historialRecurso = consulta<HistorialCompromiso>({
+    fuente: () => {
+      const id = this.compromiso()?.id;
+      return id ? urlApi(`/v1/commitments/${encodeURIComponent(id)}/historial`) : null;
+    },
+    esquema: aHistorialCompromiso,
+  });
+
+  readonly historial = this.historialRecurso.valor;
+  readonly estadoHistorial = this.historialRecurso.estado;
+  readonly errorHistorial = this.historialRecurso.error;
+  readonly eventosHistorial = computed(() => this.historial()?.eventos ?? []);
+  readonly lineaHistorial = computed(() => this.historial()?.linea ?? []);
+
   readonly modoAlta = computed(() => this.compromiso() === null);
   readonly formularioVisible = computed(() => this.modoAlta() || this.editando());
 
@@ -379,6 +530,9 @@ export class CompromisoPanelComponent {
     resolverVencimiento(this.cabecera()),
   );
 
+  /** Semáforo del vencimiento efectivo (manual o derivado del próximo hito). */
+  readonly situacion = computed<Situacion>(() => situacionDe(this.cabecera()));
+
   readonly puedeModificar = computed(() =>
     this.modoAlta()
       ? this.capacidades.puedeEditar()
@@ -390,14 +544,28 @@ export class CompromisoPanelComponent {
     () => !this.modoAlta() && this.capacidades.puedeEliminar() && this.puedeModificar(),
   );
 
-  readonly criteriosJson = computed<string | null>(() => {
+  /**
+   * Lectura legible de los criterios SMART: sólo se muestran cuando el dato es
+   * un objeto plano de valores simples. Un objeto anidado o una lista no se
+   * puede leer sin jerga, así que se oculta en vez de mostrar JSON crudo.
+   */
+  readonly criteriosLegibles = computed<readonly CriterioLegible[] | null>(() => {
     const valor = this.cabecera().criteriosSmart;
-    if (valor === null || valor === undefined) return null;
-    try {
-      return JSON.stringify(valor, null, 2);
-    } catch {
-      return null;
+    if (valor === null || valor === undefined || typeof valor !== 'object') return null;
+    if (Array.isArray(valor)) return null;
+
+    const entradas = Object.entries(valor as Record<string, unknown>);
+    if (entradas.length === 0) return null;
+
+    const criterios: CriterioLegible[] = [];
+    for (const [clave, dato] of entradas) {
+      if (dato === null || dato === undefined || typeof dato === 'object') return null;
+      criterios.push({
+        clave: this.etiquetaCriterio(clave),
+        valor: typeof dato === 'boolean' ? (dato ? 'Sí' : 'No') : String(dato),
+      });
     }
+    return criterios;
   });
 
   /**
@@ -419,13 +587,6 @@ export class CompromisoPanelComponent {
     return [{ valor: actual, etiqueta: actual }, ...base];
   });
 
-  readonly tematicasFormulario = computed<OpcionCatalogo[]>(() => {
-    const base = this.catalogoRecurso.valor()?.tematicas ?? [];
-    const actual = this.formulario().tematica.trim();
-    if (!actual || base.some((opcion) => opcion.valor === actual)) return base;
-    return [{ valor: actual, etiqueta: actual }, ...base];
-  });
-
   readonly alcancesFormulario = computed<OpcionCatalogo[]>(() => {
     const base = this.catalogoRecurso.valor()?.alcances ?? [];
     if (base.length > 0) return base;
@@ -434,6 +595,18 @@ export class CompromisoPanelComponent {
 
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
+
+    // Al cambiar de compromiso se cierran los paneles de adjuntos por hito y se
+    // limpia el borrador de evento; el recurso de historial ya se refresca por
+    // la URL, así que aquí sólo se restablece la UI.
+    effect(() => {
+      const id = this.compromiso()?.id ?? '';
+      if (id === this.ultimoCompromisoId) return;
+      this.ultimoCompromisoId = id;
+      this.adjuntosHito.set(new Set());
+      this.eventoTexto.set('');
+      this.eventoError.set(null);
+    });
 
     // Escape cierra el panel aunque el foco esté dentro de un campo de texto.
     const alEscape = (evento: KeyboardEvent): void => {
@@ -485,6 +658,96 @@ export class CompromisoPanelComponent {
     this.recurso.recargar();
   }
 
+  recargarHistorial(): void {
+    this.historialRecurso.recargar();
+  }
+
+  /** Expande o contrae los adjuntos de un hito; el panel se monta bajo `@if`. */
+  alternarAdjuntosHito(id: string): void {
+    this.adjuntosHito.update((actual) => {
+      const siguiente = new Set(actual);
+      if (siguiente.has(id)) siguiente.delete(id);
+      else siguiente.add(id);
+      return siguiente;
+    });
+  }
+
+  adjuntosHitoAbiertos(id: string): boolean {
+    return this.adjuntosHito().has(id);
+  }
+
+  actualizarEventoTexto(evento: Event): void {
+    this.eventoTexto.set((evento.target as HTMLTextAreaElement).value);
+  }
+
+  /**
+   * `POST /v1/commitments/{id}/historial` con `{ tipo: 'nota', detalle }`.
+   * Sólo se ofrece a quien puede modificar; la API vuelve a autorizar.
+   */
+  async registrarEvento(): Promise<void> {
+    if (!this.puedeModificar()) {
+      this.eventoError.set('No tiene permisos para registrar eventos en este compromiso.');
+      return;
+    }
+
+    const texto = this.eventoTexto().trim();
+    if (!texto) {
+      this.eventoError.set('Escriba el detalle del evento.');
+      return;
+    }
+
+    const id = this.cabecera().id;
+    if (!id) {
+      this.eventoError.set('El compromiso no tiene identificador.');
+      return;
+    }
+
+    this.eventoGuardando.set(true);
+    this.eventoError.set(null);
+
+    try {
+      await firstValueFrom(
+        this.http.post<unknown>(urlApi(`/v1/commitments/${encodeURIComponent(id)}/historial`), {
+          tipo: 'nota',
+          detalle: { texto },
+        }),
+      );
+      this.eventoTexto.set('');
+      this.historialRecurso.recargar();
+    } catch (fallo) {
+      this.eventoError.set(this.mensajeDeError(fallo));
+    } finally {
+      this.eventoGuardando.set(false);
+    }
+  }
+
+  /** Etiqueta legible de un slug de evento; el slug se conserva si no hay traducción. */
+  etiquetaEvento(tipo: string): string {
+    const etiquetas: Record<string, string> = {
+      nota: 'Nota',
+      cambio_estado: 'Cambio de estado',
+      hito_creado: 'Hito registrado',
+      hito_actualizado: 'Hito actualizado',
+      adjunto: 'Adjunto',
+    };
+    return etiquetas[tipo] ?? tipo.replace(/[_-]+/g, ' ');
+  }
+
+  /** Sólo se pinta el texto declarado en `detalle.texto`; no se resume un JSON. */
+  detalleEvento(evento: EventoCompromiso): string {
+    const detalle = evento.detalle;
+    if (detalle && typeof detalle === 'object' && !Array.isArray(detalle)) {
+      const valor = (detalle as Record<string, unknown>)['texto'];
+      if (typeof valor === 'string' && valor.trim()) return valor.trim();
+    }
+    if (typeof detalle === 'string' && detalle.trim()) return detalle.trim();
+    return '';
+  }
+
+  fechaHoraTexto(valor: string | null | undefined): string {
+    return formatearFechaHora(valor);
+  }
+
   abrirEdicion(): void {
     if (this.modoAlta() || !this.puedeModificar()) return;
     this.formulario.set(formularioDe(this.cabecera()));
@@ -506,18 +769,26 @@ export class CompromisoPanelComponent {
     });
   }
 
-  actualizarBooleano(evento: Event): void {
+  actualizarBooleano(campo: 'atiendeGenero' | 'asumidoMinistro', evento: Event): void {
     const marcado = (evento.target as HTMLInputElement).checked;
-    this.formulario.update((actual) => ({ ...actual, atiendeGenero: marcado }));
+    this.formulario.update((actual) =>
+      campo === 'atiendeGenero'
+        ? { ...actual, atiendeGenero: marcado }
+        : { ...actual, asumidoMinistro: marcado },
+    );
   }
 
-  actualizarHito(campo: 'descripcion' | 'fecha', evento: Event): void {
+  actualizarHito(campo: 'descripcion' | 'fecha' | 'responsableTexto', evento: Event): void {
     const valor = leerValor(evento);
     if (campo === 'descripcion') {
       this.hitoNuevo.update((actual) => ({ ...actual, descripcion: valor }));
       return;
     }
-    this.hitoNuevo.update((actual) => ({ ...actual, fecha: valor }));
+    if (campo === 'fecha') {
+      this.hitoNuevo.update((actual) => ({ ...actual, fecha: valor }));
+      return;
+    }
+    this.hitoNuevo.update((actual) => ({ ...actual, responsableTexto: valor }));
   }
 
   actualizarEstadoHitoNuevo(evento: Event): void {
@@ -593,11 +864,13 @@ export class CompromisoPanelComponent {
         const cuerpo: Record<string, unknown> = {
           accion,
           tipo: form.tipo,
+          clasificacionAlcance: form.clasificacionAlcance || null,
+          formalVerbal: form.formalVerbal || null,
+          asumidoMinistro: form.asumidoMinistro,
           estado: form.estado,
           unidad: form.unidad.trim(),
           nivelGobierno: form.nivelGobierno || null,
           alcance: form.alcance || null,
-          tematica: form.tematica.trim() || null,
           atiendeGenero: form.atiendeGenero,
           criteriosSmart: criterios.valor,
           evidenciaUri: form.evidenciaUri.trim() || null,
@@ -613,6 +886,7 @@ export class CompromisoPanelComponent {
         );
         this.editando.set(false);
         this.recurso.recargar();
+        this.historialRecurso.recargar();
         this.actualizado.emit();
       }
     } catch (fallo) {
@@ -638,15 +912,15 @@ export class CompromisoPanelComponent {
       accion: form.accion.trim(),
       tipo: form.tipo,
       atiendeGenero: form.atiendeGenero,
+      asumidoMinistro: form.asumidoMinistro,
     };
 
     const unidad = form.unidad.trim();
     if (unidad) cuerpo['unidad'] = unidad;
+    if (form.clasificacionAlcance) cuerpo['clasificacionAlcance'] = form.clasificacionAlcance;
+    if (form.formalVerbal) cuerpo['formalVerbal'] = form.formalVerbal;
     if (form.nivelGobierno) cuerpo['nivelGobierno'] = form.nivelGobierno;
     if (form.alcance) cuerpo['alcance'] = form.alcance;
-
-    const tematica = form.tematica.trim();
-    if (tematica) cuerpo['tematica'] = tematica;
 
     const evidenciaUri = form.evidenciaUri.trim();
     if (evidenciaUri) cuerpo['evidenciaUri'] = evidenciaUri;
@@ -686,6 +960,9 @@ export class CompromisoPanelComponent {
       estado: form.estado,
     };
     if (form.fecha.trim()) cuerpo['fecha'] = form.fecha.trim();
+    if (form.responsableTexto.trim()) {
+      cuerpo['responsableTexto'] = form.responsableTexto.trim();
+    }
 
     this.hitoGuardando.set(true);
     this.hitosError.set(null);
@@ -694,8 +971,14 @@ export class CompromisoPanelComponent {
       await firstValueFrom(
         this.http.post<unknown>(urlApi(`/v1/commitments/${encodeURIComponent(id)}/hitos`), cuerpo),
       );
-      this.hitoNuevo.set({ descripcion: '', fecha: '', estado: 'Registrado' });
+      this.hitoNuevo.set({
+        descripcion: '',
+        fecha: '',
+        estado: 'Registrado',
+        responsableTexto: '',
+      });
       this.recurso.recargar();
+      this.historialRecurso.recargar();
       this.actualizado.emit();
     } catch (fallo) {
       this.hitosError.set(this.mensajeDeError(fallo));
@@ -734,9 +1017,51 @@ export class CompromisoPanelComponent {
         ),
       );
       this.recurso.recargar();
+      this.historialRecurso.recargar();
       this.actualizado.emit();
     } catch (fallo) {
       select.value = hito.estado;
+      this.hitosError.set(this.mensajeDeError(fallo));
+    } finally {
+      this.hitoCambiando.set(null);
+    }
+  }
+
+  async cambiarResponsableHito(hito: Hito, evento: Event): Promise<void> {
+    const input = evento.target as HTMLInputElement;
+    const nuevo = input.value.trim();
+    const actual = (hito.responsableTexto ?? '').trim();
+
+    if (nuevo === actual) return;
+
+    if (!this.puedeModificar()) {
+      input.value = actual;
+      this.hitosError.set('No tiene permisos para modificar este compromiso.');
+      return;
+    }
+
+    const id = this.cabecera().id;
+    if (!id) {
+      input.value = actual;
+      this.hitosError.set('El compromiso no tiene identificador.');
+      return;
+    }
+
+    this.hitoCambiando.set(hito.id);
+    this.hitosError.set(null);
+
+    try {
+      await firstValueFrom(
+        this.http.patch<unknown>(
+          urlApi(`/v1/commitments/${encodeURIComponent(id)}/hitos/${encodeURIComponent(hito.id)}`),
+          { responsableTexto: nuevo || null },
+        ),
+      );
+      this.recurso.recargar();
+      this.historialRecurso.recargar();
+      this.actualizado.emit();
+    } catch (fallo) {
+      input.value = actual;
       this.hitosError.set(this.mensajeDeError(fallo));
     } finally {
       this.hitoCambiando.set(null);
@@ -747,9 +1072,31 @@ export class CompromisoPanelComponent {
     return formatearFecha(valor);
   }
 
+  /**
+   * Los códigos de hito son largos (`CS-..._COMP001_H001`); la línea de tiempo
+   * muestra sólo el sufijo (`H001`) para no romper la lectura.
+   */
+  codigoHito(codigo: string | null | undefined): string {
+    const limpio = (codigo ?? '').trim();
+    if (!limpio) return 'Hito';
+    const partes = limpio.split('_');
+    const sufijo = partes[partes.length - 1] ?? limpio;
+    return /^H\d+$/i.test(sufijo) ? sufijo.toUpperCase() : limpio;
+  }
+
   /** «Regional» se muestra como GORE; el valor del catálogo no cambia. */
   nivelTexto(valor: string | null | undefined): string {
     return etiquetaNivelGobierno(valor ?? null);
+  }
+
+  /** Item 16: etiqueta legible de la clasificación de alcance. */
+  clasificacionAlcanceTexto(valor: string | null | undefined): string {
+    return etiquetaClasificacionAlcance(valor);
+  }
+
+  /** Item 16: etiqueta legible del carácter formal o verbal. */
+  formalVerbalTexto(valor: string | null | undefined): string {
+    return etiquetaFormalVerbal(valor);
   }
 
   esAlcanceConocido(valor: string): boolean {
@@ -801,6 +1148,16 @@ export class CompromisoPanelComponent {
     return (ESTADOS_HITO as readonly string[]).includes(valor);
   }
 
+  /** `plazo_entrega` / `plazoEntrega` → «Plazo entrega», sin jerga en la ficha. */
+  private etiquetaCriterio(clave: string): string {
+    const conEspacios = clave
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])/g, '$1 $2')
+      .trim();
+    if (!conEspacios) return clave;
+    return conEspacios.charAt(0).toUpperCase() + conEspacios.slice(1);
+  }
+
   private parsearCriterios(textoCrudo: string): ResultadoCriterios {
     const limpio = textoCrudo.trim();
     if (!limpio) return { ok: true, valor: null };
@@ -822,7 +1179,7 @@ export class CompromisoPanelComponent {
       return 'No tiene permisos para modificar este compromiso (403).';
     }
     if (error.estado === 422) {
-      return `El servidor rechazó los datos (422): ${error.message} Revise la unidad, la temática, el alcance y las fechas.`;
+      return `El servidor rechazó los datos (422): ${error.message} Revise la unidad, el alcance y las fechas.`;
     }
     if (error.estado === 404) {
       return 'El compromiso ya no existe; actualice el listado.';

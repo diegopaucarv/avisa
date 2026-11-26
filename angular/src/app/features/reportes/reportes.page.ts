@@ -20,15 +20,24 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
-import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import {
-  TIPOS_REPORTE,
-  aReporte,
-  formatearFecha,
-  type Reporte,
-} from './reportes.mapeo';
+  CeldaTablaDirectiva,
+  TablaComponent,
+  type ColumnaTabla,
+  type OrdenColumna,
+} from '../../shared/ui/tabla.component';
+import { aReporte, formatearFecha, type Reporte } from './reportes.mapeo';
+
+/** Tipo literal de `core.cat_tipos_documento` para cada pestaña de IyC. */
+const TIPO_REPORTE_ACTIVIDAD = 'Reporte de Actividad';
+const TIPO_INFORME_OFICIAL = 'Informe/Reporte institucional (POI, Willaqniki, bimestral…)';
+
+type PestanaIyC = 'actividad' | 'informe';
 
 type FiltrosReportes = {
   q: string;
@@ -68,7 +77,9 @@ const FILTROS_INICIALES: FiltrosReportes = {
     RouterLink,
     IconoComponent,
     PaginacionComponent,
-    ExportarMenuComponent,
+    BarraSeleccionComponent,
+    TablaComponent,
+    CeldaTablaDirectiva,
   ],
   templateUrl: './reportes.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -96,32 +107,10 @@ const FILTROS_INICIALES: FiltrosReportes = {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
-    .view-acciones {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
-    }
-
     .exportar-error {
       margin: 0;
       color: #b42318;
-      font-size: 10px;
+      font-size: 12.5px;
     }
 
     .select-filter input[type='date'] {
@@ -129,28 +118,26 @@ const FILTROS_INICIALES: FiltrosReportes = {
       outline: 0;
       background: transparent;
       color: #536779;
-      font-size: 10px;
+      font-size: 12.5px;
       font-family: inherit;
     }
 
     .celda-titulo {
+      display: block;
       max-width: 340px;
-      white-space: normal;
-    }
-
-    .celda-caso {
+      line-height: 1.35;
       white-space: normal;
     }
 
     .sin-dato {
-      color: #a0aab3;
+      color: var(--muted);
       font-style: italic;
     }
 
     .actualizando {
       margin: 0;
       color: #8d99a6;
-      font-size: 9.5px;
+      font-size: 12px;
     }
 
     @media (max-width: 720px) {
@@ -165,7 +152,19 @@ export class ReportesPage {
   private readonly router = inject(Router);
   private readonly destruccion = inject(DestroyRef);
 
-  readonly tipos = TIPOS_REPORTE;
+  readonly pestanas: readonly { codigo: PestanaIyC; etiqueta: string; tipo: string }[] = [
+    { codigo: 'actividad', etiqueta: 'Reporte de actividad', tipo: TIPO_REPORTE_ACTIVIDAD },
+    { codigo: 'informe', etiqueta: 'Informe oficial', tipo: TIPO_INFORME_OFICIAL },
+  ];
+
+  /** La pestaña activa se deriva del `tipo` de la URL; por defecto, actividad. */
+  readonly pestanaActiva = computed<PestanaIyC>(() =>
+    this.filtros().tipo === TIPO_INFORME_OFICIAL ? 'informe' : 'actividad',
+  );
+
+  private readonly tipoDePestana = computed(() =>
+    this.pestanaActiva() === 'informe' ? TIPO_INFORME_OFICIAL : TIPO_REPORTE_ACTIVIDAD,
+  );
 
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
@@ -190,7 +189,7 @@ export class ReportesPage {
       return urlConParametros(urlApi('/v1/reportes'), {
         ...paramsDePagina({ pagina: filtros.pagina, tamano: filtros.tamano }),
         q: filtros.q,
-        tipo: filtros.tipo,
+        tipo: this.tipoDePestana(),
         region: filtros.region,
         desde: filtros.desde,
         hasta: filtros.hasta,
@@ -207,6 +206,76 @@ export class ReportesPage {
 
   readonly reportes = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
+
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  /** Ids marcados, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() => this.seleccion.lista());
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<Reporte>();
+
+  /** Columnas del listado, en el orden del registro (Anexo N° 17). */
+  readonly columnas: readonly ColumnaTabla[] = [
+    { clave: 'tipo', titulo: 'Tipo', ordenable: true },
+    {
+      clave: 'codigo',
+      titulo: 'Código',
+      ordenable: true,
+      acceso: (fila) => (fila as unknown as Reporte).codigoReporte,
+    },
+    { clave: 'caso', titulo: 'Caso', ordenable: true },
+    { clave: 'responsable', titulo: 'Responsable', ordenable: true },
+    {
+      clave: 'fecha',
+      titulo: 'Fecha',
+      ordenable: true,
+      formato: (valor) => this.formatearFecha(valor as string | null),
+    },
+    { clave: 'region', titulo: 'Región', ordenable: true },
+    { clave: 'ubicacion', titulo: 'Ubicación', ordenable: true },
+    { clave: 'titulo', titulo: 'Título', ordenable: true },
+  ];
+
+  /** Orden que pinta `app-tabla`; la página ordena con `OrdenTabla`. */
+  readonly ordenTabla = computed<OrdenColumna | null>(() => {
+    const clave = this.orden.columna();
+    return clave ? { clave, direccion: this.orden.direccion() } : null;
+  });
+
+  private readonly accesoresReporte: Record<string, (reporte: Reporte) => unknown> = {
+    tipo: (reporte) => reporte.tipo,
+    codigo: (reporte) => reporte.codigoReporte,
+    caso: (reporte) => reporte.codigoCaso,
+    responsable: (reporte) => reporte.responsable,
+    fecha: (reporte) => reporte.fecha,
+    region: (reporte) => reporte.region,
+    ubicacion: (reporte) => reporte.ubicacion,
+    titulo: (reporte) => reporte.titulo,
+  };
+
+  readonly filasVisibles = computed(() =>
+    this.orden.ordenar(this.reportes(), this.accesoresReporte),
+  );
+
+  alCambiarOrden(cambio: OrdenColumna | null): void {
+    const clave = cambio?.clave ?? this.orden.columna();
+    if (clave) this.orden.alternar(clave);
+  }
+
+  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  alCambiarSeleccion(ids: readonly string[]): void {
+    // Las filas sin código llegan como `#índice`: no se pueden exportar.
+    const marcadas = new Set(ids.filter((id) => !!id && !id.startsWith('#')));
+    for (const id of this.seleccion.lista()) {
+      if (!marcadas.has(id)) this.seleccion.alternar(id);
+    }
+    for (const id of marcadas) {
+      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+    }
+  }
+
   readonly estadoListado = this.listado.estado;
   readonly errorListado = this.listado.error;
 
@@ -217,7 +286,7 @@ export class ReportesPage {
 
   readonly resumenTabla = computed(() => {
     const rango = this.rango();
-    return `${this.total()} reportes · ${rango.desde}–${rango.hasta} · registro de sólo lectura del Anexo N° 17 (reportes rápidos, clima social, actividad, informes oficiales y alertas tempranas).`;
+    return `${this.total()} reportes · ${rango.desde}–${rango.hasta} · productos de la Gestión de Información y Conocimiento (registro de sólo lectura).`;
   });
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
@@ -261,8 +330,10 @@ export class ReportesPage {
     }, 300);
   }
 
-  cambiarTipo(evento: Event): void {
-    void this.actualizar({ tipo: this.valorDe(evento), pagina: 1 });
+  cambiarPestana(pestana: PestanaIyC): void {
+    const opcion = this.pestanas.find((item) => item.codigo === pestana);
+    if (!opcion) return;
+    void this.actualizar({ tipo: opcion.tipo, pagina: 1 });
   }
 
   cambiarDesde(evento: Event): void {

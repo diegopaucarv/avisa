@@ -45,7 +45,7 @@ export type EnlaceRiel = {
     .riel-titulo {
       margin: 0 0 8px;
       color: var(--muted);
-      font: 700 9px var(--font-display);
+      font: 700 12px var(--font-display);
       letter-spacing: 0.06em;
       text-transform: uppercase;
     }
@@ -66,7 +66,7 @@ export type EnlaceRiel = {
       padding: 5px 4px;
       border-radius: 6px;
       color: var(--ink-2);
-      font-size: 10.5px;
+      font-size: 13px;
       text-decoration: none;
     }
 
@@ -86,7 +86,7 @@ export type EnlaceRiel = {
       border-radius: 999px;
       background: var(--canvas);
       color: var(--muted);
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       text-align: center;
     }

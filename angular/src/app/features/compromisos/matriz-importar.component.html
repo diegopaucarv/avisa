@@ -1,0 +1,158 @@
+<section class="surface importar" aria-labelledby="importar-titulo">
+  <div class="surface-heading">
+    <div>
+      <h3 id="importar-titulo">Revisar un CSV de la matriz</h3>
+    </div>
+  </div>
+
+  <label class="importar-archivo">
+    <span>Elegir archivo CSV</span>
+    <input type="file" accept=".csv,text/csv" (change)="alElegirArchivo($event)" />
+    @if (nombreArchivo(); as nombre) {
+      <span>{{ nombre }}</span>
+    }
+  </label>
+
+  <textarea
+    [value]="texto()"
+    (input)="escribir($event)"
+    aria-label="Contenido del CSV de la matriz"
+    placeholder="Pegue aquí el CSV con la cabecera del formato del equipo (A..W)…"
+  ></textarea>
+
+  <div class="importar-acciones">
+    <button type="button" class="button-primary" [disabled]="enviando()" (click)="previsualizar()">
+      {{ enviando() ? 'Previsualizando…' : 'Previsualizar' }}
+    </button>
+    <button type="button" class="button-secondary" (click)="descargarPlantilla()">
+      Descargar plantilla CSV
+    </button>
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar</button>
+    @if (!mapaCargado()) {
+      <span class="form-hint">
+        Sin equivalencias publicadas en la base: los códigos Excel los resolverá el servidor.
+      </span>
+    }
+  </div>
+
+  @if (error(); as mensaje) {
+    <p class="form-error" role="alert">{{ mensaje }}</p>
+    @if (sinEsquema()) {
+      <p class="form-hint">
+        No se ha modificado nada. Cuando el esquema esté aplicado podrá repetir la previsualización.
+      </p>
+    }
+  }
+  @if (local(); as chequeo) {
+    <p class="form-hint">
+      Chequeo local (orientativo): {{ chequeo.reconocidas }} de {{ chequeo.filasFuente }} filas
+      resolubles; {{ chequeo.rechazadas.length }} con problemas evidentes antes de consultar al
+      servidor.
+    </p>
+  }
+  @if (plan(); as actual) {
+    <p class="importar-mensaje">{{ actual.mensaje }}</p>
+
+    <p class="importar-resumen">
+      <span
+        ><b>{{ actual.resumen.filasFuente }}</b> filas en el archivo</span
+      >
+      <span
+        ><b>{{ actual.resumen.reconocidas }}</b> reconocidas</span
+      >
+      <span
+        ><b>{{ actual.resumen.rechazadas }}</b> rechazadas</span
+      >
+      <span
+        ><b>{{ actual.resumen.aCrear }}</b> a crear</span
+      >
+      <span
+        ><b>{{ actual.resumen.aActualizar }}</b> a actualizar</span
+      >
+    </p>
+
+    @if (columnasReconocidas().length > 0) {
+      <p class="form-hint">
+        Columnas reconocidas:
+        @for (columna of columnasReconocidas(); track columna.campo) {
+          <span
+            >{{ columna.rotulo }} → {{ columna.campo }}
+            @if (!$last) {
+              ·
+            }
+          </span>
+        }
+      </p>
+    }
+    @if (columnasIgnoradas().length > 0) {
+      <p class="form-hint">Columnas ignoradas: {{ columnasIgnoradas().join(' · ') }}</p>
+    }
+
+    <p class="importar-subtitulo">Filas a crear o actualizar ({{ filasPlan().length }})</p>
+
+    @if (filasPlan().length === 0) {
+      <div class="empty-state">Ninguna fila del archivo se puede crear ni actualizar.</div>
+    } @else {
+      <app-tabla
+        [columnas]="columnasPlan"
+        [filas]="filasPlanVisibles()"
+        [orden]="ordenPlanTabla()"
+        [ordenServidor]="true"
+        resumen="Plan de filas reconocidas por el servidor"
+        (ordenCambio)="alCambiarOrdenPlan($event)"
+      >
+        <ng-template appCeldaTabla="caso" let-fila>
+          {{ fila.codigoCaso }}
+          @if (fila.nombreCaso) {
+            <small class="matriz-codigos">{{ fila.nombreCaso }}</small>
+          }
+        </ng-template>
+
+        <ng-template appCeldaTabla="hito" let-fila>
+          {{ fila.hito || '—' }}
+          @if (fila.descripcionHito) {
+            <small class="matriz-codigos">{{ fila.descripcionHito }}</small>
+          }
+        </ng-template>
+
+        <ng-template appCeldaTabla="resultado" let-fila>
+          <span class="status-badge">{{ fila.accionPlan }}</span>
+          @if (fila.hitoNuevo) {
+            <small class="matriz-codigos">hito nuevo</small>
+          }
+        </ng-template>
+      </app-tabla>
+      @if (planRestantes() > 0) {
+        <p class="form-hint">
+          Se muestran {{ filasPlanVisibles().length }} filas; quedan {{ planRestantes() }} más en el
+          plan.
+        </p>
+      }
+    }
+
+    <p class="importar-subtitulo">Rechazos ({{ actual.rechazadas.length }})</p>
+
+    @if (rechazosVisibles().length === 0) {
+      <div class="empty-state">Ninguna fila fue rechazada.</div>
+    } @else {
+      <app-tabla
+        [columnas]="columnasRechazos"
+        [filas]="rechazosVisibles()"
+        [orden]="ordenRechazosTabla()"
+        [ordenServidor]="true"
+        resumen="Filas rechazadas y el motivo de cada una"
+        (ordenCambio)="alCambiarOrdenRechazos($event)"
+      >
+        <ng-template appCeldaTabla="codigo" let-fila>
+          <span class="status-badge">{{ fila.codigo }}</span>
+        </ng-template>
+      </app-tabla>
+      @if (rechazosRestantes() > 0) {
+        <p class="form-hint">
+          Se muestran {{ rechazosVisibles().length }} rechazos; quedan
+          {{ rechazosRestantes() }} más.
+        </p>
+      }
+    }
+  }
+</section>

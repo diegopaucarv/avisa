@@ -19,36 +19,34 @@ import { ESTADOS_DEMANDA } from './demanda-sin-caso.mapeo';
 
 /**
  * Cuerpo parcial de `POST /api/v1/demandas` (alta) y
- * `PATCH /api/v1/demandas/:id` (edición). Los nombres son los que leen
- * `createDemanda`/`updateDemanda` en `lib/db/repos/demandas.ts`: las 3P viajan
- * como `problema`, `propuesta` y `pedido`, y `descripcion` es obligatoria al
- * crear.
+ * `PATCH /api/v1/demandas/:id` (edición). Las demandas se registran como un
+ * único texto (`descripcion`) desde el ajuste del 22 nov: las 3P se retiraron
+ * de la interfaz y ya no viajan en el cuerpo.
  */
 export type CuerpoDemanda = {
   casoCode?: string;
-  descripcion?: string;
-  problema?: string | null;
-  propuesta?: string | null;
-  pedido?: string | null;
+  descripcion?: string | null;
   estado?: string;
 };
 
 type BorradorDemanda = {
-  problema: string;
-  propuesta: string;
-  pedido: string;
+  demanda: string;
   estado: string;
 };
 
 type CampoBorrador = keyof BorradorDemanda;
 
 /**
- * Panel lateral de una demanda (3P) de la ficha.
+ * Panel lateral de una demanda de la ficha.
  *
  * Mismo patrón que `EventoPanelComponent`: diálogo modal, cierre con Escape o
  * con el fondo, foco encerrado con Tab y devuelto al disparador al cerrar.
  * Sirve para alta (`demanda === null`) y para edición. No conoce HTTP: emite el
  * cuerpo ya diffado y el contenedor decide entre `POST` y `PATCH`.
+ *
+ * La demanda es un único texto: el ajuste del 22 nov retiró la estructura 3P
+ * (Problema · Propuesta · Pedido). Las organizaciones solicitantes se muestran
+ * como distintivos de solo lectura: el caso ya las relaciona como actores.
  */
 @Component({
   selector: 'app-demanda-panel',
@@ -70,22 +68,16 @@ type CampoBorrador = keyof BorradorDemanda;
     .demanda-panel-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
-
     .demanda-panel-sub {
       margin: 4px 0 0;
       color: #647487;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -93,6 +85,35 @@ type CampoBorrador = keyof BorradorDemanda;
       display: flex;
       flex-direction: column;
       gap: 12px;
+    }
+
+    /* Los rótulos de los campos del modal van en mayúsculas por el ajuste
+       del 22 nov, aunque el tema global ya los estilice así. */
+    .form-label {
+      text-transform: uppercase;
+    }
+
+    /* Organizaciones solicitantes: distintivos de solo lectura. */
+    .demanda-organizaciones {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .demanda-organizaciones-titulo {
+      margin: 0;
+      color: #7b8896;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .demanda-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
     }
 
     .demanda-formulario-acciones {
@@ -106,6 +127,7 @@ type CampoBorrador = keyof BorradorDemanda;
 export class DemandaPanelComponent {
   readonly demanda = input<DemandaCaso | null>(null);
   readonly codigoCaso = input<string>('');
+  readonly organizaciones = input<readonly string[]>([]);
   readonly puedeModificar = input(true);
   readonly guardando = input(false);
   readonly errorGuardado = input<string | null>(null);
@@ -114,9 +136,7 @@ export class DemandaPanelComponent {
   readonly guardar = output<CuerpoDemanda>();
 
   readonly borrador = signal<BorradorDemanda>({
-    problema: '',
-    propuesta: '',
-    pedido: '',
+    demanda: '',
     estado: 'Pendiente',
   });
   readonly mensajeLocal = signal<string | null>(null);
@@ -144,26 +164,16 @@ export class DemandaPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
-    // Escape cierra el panel aunque el foco esté dentro de un campo de texto.
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
-    this.destruccion.onDestroy(() => {
-      document.removeEventListener('keydown', alEscape);
-      this.focoPrevio?.focus?.();
-    });
+    // El panel sólo se cierra con Cancelar o Registrar: Escape no lo descarta.
+    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
 
     // El borrador se precarga con la demanda abierta (vacío en el alta) y se
-    // reinicia si el contenedor cambia de demanda.
+    // reinicia si el contenedor cambia de demanda. La ficha heredada puede
+    // traer el texto en `problema` (3P del legado): se toma como semilla.
     effect(() => {
       const demanda = this.demanda();
       this.borrador.set({
-        problema: demanda?.problema ?? '',
-        propuesta: demanda?.propuesta ?? '',
-        pedido: demanda?.pedido ?? '',
+        demanda: (demanda?.descripcion ?? demanda?.problema ?? '').trim(),
         estado: demanda?.estado?.trim() || 'Pendiente',
       });
     });
@@ -184,46 +194,39 @@ export class DemandaPanelComponent {
     if (!this.puedeModificar() || this.guardando()) return;
 
     const borrador = this.borrador();
-    const problema = borrador.problema.trim();
-    const propuesta = borrador.propuesta.trim();
-    const pedido = borrador.pedido.trim();
+    const texto = borrador.demanda.trim();
     const estado = borrador.estado.trim();
     const actual = this.demanda();
 
-    if (!actual) {
-      if (!problema) {
-        this.mensajeLocal.set('El problema (3P) es obligatorio para registrar la demanda.');
-        return;
-      }
+    if (!texto) {
+      this.mensajeLocal.set('La demanda es obligatoria.');
+      return;
+    }
 
+    if (!actual) {
       const casoCode = this.codigoCaso().trim();
       if (!casoCode) {
         this.mensajeLocal.set('No se pudo identificar el caso de la demanda.');
         return;
       }
 
-      // Alta: `POST /api/v1/demandas` exige `descripcion` no vacía; se usa el
-      // problema, que es el ancla conceptual de la demanda.
+      // Alta: `POST /api/v1/demandas` exige `descripcion` no vacía.
       const cambios: CuerpoDemanda = {
         casoCode,
-        descripcion: problema,
-        problema,
+        descripcion: texto,
         estado: estado || 'Pendiente',
       };
-      if (propuesta) cambios.propuesta = propuesta;
-      if (pedido) cambios.pedido = pedido;
 
       this.mensajeLocal.set(null);
       this.guardar.emit(cambios);
       return;
     }
 
-    // Edición: sólo los campos que cambian. Vaciar un 3P envía `null` porque el
-    // cuerpo del `PATCH` rechaza la cadena vacía.
+    // Edición: sólo los campos que cambian. La descripción es el texto de la
+    // demanda y no se vacía: el cuerpo del `PATCH` la exige.
+    const anterior = (actual.descripcion ?? actual.problema ?? '').trim();
     const cambios: CuerpoDemanda = {};
-    if (problema !== (actual.problema?.trim() ?? '')) cambios.problema = problema || null;
-    if (propuesta !== (actual.propuesta?.trim() ?? '')) cambios.propuesta = propuesta || null;
-    if (pedido !== (actual.pedido?.trim() ?? '')) cambios.pedido = pedido || null;
+    if (texto !== anterior) cambios.descripcion = texto;
     if (estado && estado !== (actual.estado ?? '')) cambios.estado = estado;
 
     if (Object.keys(cambios).length === 0) {
@@ -233,10 +236,6 @@ export class DemandaPanelComponent {
 
     this.mensajeLocal.set(null);
     this.guardar.emit(cambios);
-  }
-
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
   }
 
   alTecla(evento: KeyboardEvent): void {

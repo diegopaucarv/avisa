@@ -181,7 +181,7 @@ export async function listDemandas(
   if (search) {
     const like = bind(`%${search}%`);
     where.push(
-      `(coalesce(d.descripcion_demanda, '') ilike ${like} or coalesce(d.problema_3p, '') ilike ${like} or coalesce(d.pedido_3p, '') ilike ${like})`,
+      `(core.normalizar_ref(coalesce(d.descripcion_demanda, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(d.problema_3p, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(d.pedido_3p, '')) like core.normalizar_ref(${like}))`,
     );
   }
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);

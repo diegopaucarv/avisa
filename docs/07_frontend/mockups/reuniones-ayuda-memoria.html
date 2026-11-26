@@ -1,0 +1,1011 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Reuniones, ayuda memoria y relatoría · Mockup AVISA</title>
+        <style>
+            :root {
+                --ink:#17283a; --ink-2:#33475b; --muted:#778797; --line:#e6ebef;
+                --paper:#fff; --canvas:#f5f7f8;
+                --blue:#2455a2; --blue-dark:#1d427f; --blue-pale:#eaf1fb;
+                --teal:#397c79; --amber:#aa6a11; --amber-pale:#fff4e2;
+                --red:#ad4d46; --red-pale:#fbeceb;
+                --green:#34785b; --green-pale:#e9f5ef;
+                --font-sans:"DM Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+                --font-display:"Manrope","DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+            }
+            * { box-sizing:border-box; }
+            html { min-height:100%; background:var(--canvas); }
+            body { margin:0; color:var(--ink); font-family:var(--font-sans); font-size:13px; -webkit-font-smoothing:antialiased; }
+            a { color:var(--blue); }
+            :focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+            .sr { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+            .page { display:flex; flex-direction:column; gap:18px; width:100%; max-width:1420px; margin:0 auto; padding:28px 34px 64px; }
+            code.t {
+                padding:1px 4px; border:1px solid var(--line); border-radius:4px;
+                background:#f2f5f7; color:var(--ink-2);
+                font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+                font-size:9px; white-space:nowrap;
+            }
+
+            /* ── Cabecera del mockup ─────────────────────────────── */
+            .doc-head { padding:22px 24px 20px; border:1px solid var(--line); border-radius:12px; background:var(--paper); }
+            .eyebrow {
+                display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+                color:var(--blue); font:700 9.5px/1.2 var(--font-display);
+                letter-spacing:0.14em; text-transform:uppercase;
+            }
+            .eyebrow .dot { width:5px; height:5px; border-radius:50%; background:var(--blue); }
+            .doc-head h1 { margin:10px 0 0; font:700 27px/1.25 var(--font-display); letter-spacing:-0.7px; }
+            .doc-lead { max-width:950px; margin:8px 0 0; color:var(--ink-2); font-size:12.5px; line-height:1.65; }
+            .doc-lead b { color:var(--ink); }
+            .doc-meta { display:flex; flex-wrap:wrap; gap:7px; margin-top:14px; }
+            .meta-chip {
+                display:inline-flex; align-items:center; gap:6px; height:25px; padding:0 9px;
+                border:1px solid var(--line); border-radius:999px; background:#fbfcfd;
+                color:var(--ink-2); font-size:10px; white-space:nowrap;
+            }
+            .meta-chip b { color:var(--ink); }
+            .meta-chip.route { border-color:#cddcef; background:var(--blue-pale); color:var(--blue-dark); }
+            .meta-chip.route b { color:var(--blue-dark); }
+
+            /* ── Cinco bloques de anotación ──────────────────────── */
+            .ann {
+                display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:9px;
+                padding:12px; border:1px solid var(--line); border-radius:11px; background:#fbfcfd;
+            }
+            .ann-card {
+                padding:10px 12px 11px; border:1px solid #eef1f4; border-radius:8px;
+                background:var(--paper); color:var(--ink-2); font-size:10.5px; line-height:1.55;
+            }
+            .ann-card.wide { grid-column:1 / -1; }
+            .ann-card h3 {
+                margin:0 0 6px; color:var(--ink); font:700 9px/1.3 var(--font-display);
+                letter-spacing:0.09em; text-transform:uppercase;
+            }
+            .ann-card p { margin:0 0 5px; }
+            .ann-card p:last-child, .ann-card ul:last-child { margin-bottom:0; }
+            .ann-card ul { margin:0; padding-left:15px; }
+            .ann-card li { margin-bottom:4px; }
+            .ann-card li:last-child { margin-bottom:0; }
+            .ann-card b { color:var(--ink); }
+            .gap-list { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin-top:5px; }
+            .gap { padding:8px 10px; border:1px solid var(--line); border-radius:7px; background:#fbfcfd; font-size:10px; line-height:1.5; }
+            .gap b {
+                display:block; margin-bottom:3px; color:var(--amber);
+                font:700 8.5px/1.3 var(--font-display); letter-spacing:0.08em; text-transform:uppercase;
+            }
+
+            /* ── Título de artboard ──────────────────────────────── */
+            .board-title {
+                display:flex; flex-wrap:wrap; align-items:center; gap:11px;
+                margin:14px 0 0; padding-top:18px; border-top:1px solid var(--line);
+            }
+            .board-num {
+                display:grid; place-items:center; width:27px; height:27px; border-radius:8px;
+                background:var(--blue); color:#fff; font:700 12px/1 var(--font-display);
+            }
+            .board-title h2 { margin:0; font:700 17px/1.2 var(--font-display); letter-spacing:-0.3px; }
+            .board-sub { color:var(--ink-2); font-size:10.5px; }
+            .board-tag { margin-left:auto; color:var(--ink-2); font-size:9.5px; }
+
+            /* ── Indicadores de la base ──────────────────────────── */
+            .kpis { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; }
+            .kpi { padding:12px 14px; border:1px solid var(--line); border-radius:10px; background:var(--paper); }
+            .kpi .k-lbl {
+                color:var(--ink-2); font:700 8.5px/1.3 var(--font-display);
+                letter-spacing:0.09em; text-transform:uppercase;
+            }
+            .kpi .k-val { margin-top:5px; font:700 22px/1.1 var(--font-display); letter-spacing:-0.4px; }
+            .kpi .k-src { margin-top:4px; color:var(--ink-2); font-size:9.5px; }
+            .kpi.is-zero .k-val { color:var(--amber); }
+
+            /* ── Tarjetas ────────────────────────────────────────── */
+            .card { padding:14px 15px 13px; border:1px solid var(--line); border-radius:10px; background:var(--paper); }
+            .card-head {
+                display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between;
+                gap:10px; margin-bottom:10px;
+            }
+            .card-title { margin:0; font:700 13px/1.3 var(--font-display); }
+            .card-sub { margin:3px 0 0; color:var(--ink-2); font-size:9.5px; line-height:1.5; }
+            .tag {
+                display:inline-flex; align-items:center; height:18px; padding:0 6px;
+                border:1px solid var(--line); border-radius:999px; background:#fff;
+                color:var(--ink-2); font-size:8px; font-weight:700;
+                letter-spacing:0.08em; text-transform:uppercase; white-space:nowrap;
+            }
+            .tag.ej { border-color:#eedcbf; background:var(--amber-pale); color:var(--ink); }
+            .tag.base { border-color:#cddcef; background:var(--blue-pale); color:var(--blue-dark); }
+            .count { color:var(--ink-2); font-size:10px; white-space:nowrap; }
+
+            /* ── Botones ─────────────────────────────────────────── */
+            .btn {
+                display:inline-flex; align-items:center; justify-content:center; gap:6px;
+                height:32px; padding:0 12px; border:1px solid var(--line); border-radius:8px;
+                background:#fff; color:var(--ink-2); font:600 11px/1 var(--font-sans); cursor:pointer;
+            }
+            .btn:hover { background:#f7f9fa; }
+            .btn.primary { border-color:var(--blue); background:var(--blue); color:#fff; }
+            .btn.primary:hover { border-color:var(--blue-dark); background:var(--blue-dark); }
+            .btn.quiet { border-style:dashed; background:transparent; }
+            .btn[disabled] { border-color:var(--line); background:#f7f9fa; color:var(--ink-2); cursor:not-allowed; }
+            .btn svg { flex:0 0 auto; width:14px; height:14px; }
+            .btn .caret { width:8px; height:8px; }
+
+            /* ── Barra de filtros ────────────────────────────────── */
+            .filterbar { display:flex; flex-wrap:wrap; align-items:flex-end; gap:9px; }
+            .field { display:grid; gap:3px; }
+            .field > span, .field > label {
+                color:var(--ink-2); font-size:8.5px; font-weight:700;
+                letter-spacing:0.07em; text-transform:uppercase;
+            }
+            .search {
+                display:flex; flex:1 1 240px; align-items:center; gap:6px; height:32px;
+                min-width:210px; padding:0 10px; border:1px solid var(--line);
+                border-radius:8px; background:#fff; color:var(--ink-2);
+            }
+            .search svg { flex:0 0 auto; width:13px; height:13px; }
+            .search input { width:100%; border:0; outline:none; background:none; color:var(--ink); font:inherit; font-size:11px; }
+            select, input[type="date"] {
+                height:32px; min-width:150px; padding:0 8px; border:1px solid var(--line);
+                border-radius:8px; background:#fff; color:var(--ink); font:inherit; font-size:11px;
+            }
+            input[type="date"] { min-width:128px; }
+            .filter-actions { display:flex; flex-wrap:wrap; gap:7px; }
+            .debt {
+                display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 10px;
+                border:1px dashed #c9d4de; border-radius:8px; background:#fbfcfd;
+                color:var(--ink-2); font:600 10.5px/1 var(--font-sans); cursor:pointer;
+            }
+            .debt i { width:6px; height:6px; border-radius:50%; background:var(--amber); }
+            .debt:hover { background:var(--amber-pale); border-color:#eedcbf; }
+            .hint-row {
+                display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:10px;
+                padding:7px 11px; border:1px solid #cddcef; border-radius:8px;
+                background:#f7faff; color:var(--ink-2); font-size:9.5px; line-height:1.5;
+            }
+            .hint-row b { color:var(--blue-dark); }
+
+            /* ── Estado vacío ────────────────────────────────────── */
+            .empty {
+                margin-top:12px; padding:34px 24px 30px; border:1px dashed #cfd8df;
+                border-radius:10px; background:#fbfcfd; text-align:center;
+            }
+            .empty .ic {
+                display:inline-grid; place-items:center; width:52px; height:52px;
+                border:1px solid var(--line); border-radius:14px; background:#fff; color:var(--ink-2);
+            }
+            .empty .ic svg { width:25px; height:25px; }
+            .empty h3 { margin:12px 0 5px; font:700 15px/1.3 var(--font-display); letter-spacing:-0.2px; }
+            .empty p { max-width:540px; margin:0 auto; color:var(--ink-2); font-size:11.5px; line-height:1.65; }
+            .empty .empty-meta { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:12px; }
+            .empty .empty-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:16px; }
+            .empty .foot-note {
+                max-width:560px; margin:12px auto 0; color:var(--ink-2);
+                font-size:9.5px; line-height:1.55;
+            }
+
+            /* ── Tabla ───────────────────────────────────────────── */
+            .example-band {
+                display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px;
+                padding:8px 11px; border:1px solid #eedcbf; border-radius:8px;
+                background:var(--amber-pale); color:var(--ink-2); font-size:10px; line-height:1.5;
+            }
+            .example-band b { color:var(--ink); }
+            .table-scroll { overflow-x:auto; }
+            table.data {
+                width:100%; min-width:1150px; border-collapse:collapse;
+                table-layout:fixed; text-align:left;
+            }
+            table.data th {
+                height:30px; padding:0 7px; border-bottom:1px solid var(--line);
+                color:var(--ink-2); font-size:8px; font-weight:700; letter-spacing:0.08em;
+                text-transform:uppercase; vertical-align:middle; white-space:nowrap;
+            }
+            table.data td {
+                height:44px; padding:0 7px; border-bottom:1px solid #f1f3f5;
+                color:var(--ink); font-size:10.5px; vertical-align:middle;
+                overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+            }
+            table.data tbody tr:last-child td { border-bottom:0; }
+            table.data td.code { font-weight:700; }
+            table.data td.title-cell { color:var(--ink-2); }
+            table.data td.actions { overflow:visible; }
+            .act-group { display:flex; gap:2px; }
+            .ico-btn {
+                display:inline-flex; align-items:center; justify-content:center; width:21px; height:21px;
+                padding:0; border:1px solid var(--line); border-radius:6px; background:#fff;
+                color:var(--ink-2); cursor:pointer;
+            }
+            .ico-btn:hover { background:var(--blue-pale); border-color:#cddcef; }
+            .ico-btn svg { width:11px; height:11px; }
+            .row-legend {
+                display:flex; flex-wrap:wrap; gap:14px; margin-top:9px; padding-top:9px;
+                border-top:1px solid var(--line); color:var(--ink-2); font-size:9px;
+            }
+            .row-legend span { display:inline-flex; align-items:center; gap:5px; }
+            .row-legend svg { width:11px; height:11px; }
+
+            /* ── Banderas ────────────────────────────────────────── */
+            .flag {
+                display:inline-flex; align-items:center; gap:5px; height:21px; padding:0 7px;
+                border:1px solid var(--line); border-radius:999px; color:var(--ink-2);
+                font-size:9.5px; font-weight:600; line-height:1; white-space:nowrap;
+            }
+            .flag i { width:6px; height:6px; border-radius:50%; flex:0 0 auto; }
+            .flag-yes { background:var(--green-pale); }
+            .flag-yes i { background:var(--green); }
+            .flag-pend { background:var(--amber-pale); }
+            .flag-pend i { background:var(--amber); }
+            .flag-na { background:#f1f4f6; }
+            .flag-na i { background:#94a3b0; }
+
+            /* ── Pie de la tabla ─────────────────────────────────── */
+            .derive-note { margin-top:10px; color:var(--ink-2); font-size:9.5px; line-height:1.7; }
+            .derive-note b { color:var(--ink); }
+
+            /* ── Artboard 2 · documento editable ─────────────────── */
+            .doc-shell { border:1px solid var(--line); border-radius:11px; background:var(--paper); overflow:hidden; }
+            .doc-bar {
+                display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+                padding:11px 14px; border-bottom:1px solid var(--line); background:#fff;
+            }
+            .bar-title { font:700 13px/1.3 var(--font-display); }
+            .crumb { color:var(--ink-2); font-size:9.5px; }
+            .bar-actions { display:flex; flex-wrap:wrap; gap:7px; margin-left:auto; }
+            .shell-body { padding:14px; background:#f8fafb; }
+            .warn {
+                display:flex; align-items:flex-start; gap:9px; padding:9px 11px;
+                border:1px solid #eedcbf; border-radius:8px; background:var(--amber-pale);
+                color:var(--ink-2); font-size:10px; line-height:1.55;
+            }
+            .warn svg { flex:0 0 auto; width:14px; height:14px; margin-top:1px; color:var(--amber); }
+            .warn b { color:var(--ink); }
+            .doc-grid {
+                display:grid; grid-template-columns:minmax(0, 1fr) 344px; gap:14px; margin-top:12px;
+                align-items:start;
+            }
+            .paper { padding:18px 22px 22px; border:1px solid var(--line); border-radius:9px; background:#fff; }
+            .doc-meta-grid { display:grid; grid-template-columns:minmax(0, 1fr) 158px minmax(0, 1fr); gap:14px; }
+            .doc-field { display:grid; gap:3px; }
+            .doc-field span {
+                color:var(--ink-2); font-size:8px; font-weight:700;
+                letter-spacing:0.09em; text-transform:uppercase;
+            }
+            .doc-field input {
+                width:100%; padding:4px 0; border:0; border-bottom:1px solid var(--line);
+                background:transparent; color:var(--ink);
+                font:600 13px/1.4 var(--font-display);
+            }
+            .doc-field input::placeholder { color:var(--ink-2); font-weight:400; }
+            .doc-att { margin:11px 0 0; color:var(--ink-2); font-size:9.5px; line-height:1.5; }
+            .doc-att b { color:var(--ink); }
+            .tools {
+                display:flex; flex-wrap:wrap; align-items:center; gap:4px;
+                margin:14px 0 4px; padding:6px; border:1px solid var(--line);
+                border-radius:8px; background:#fbfcfd;
+            }
+            .tool {
+                display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:26px;
+                padding:0 5px; border:1px solid transparent; border-radius:6px;
+                background:#fff; color:var(--ink-2); font:600 10.5px/1 var(--font-sans);
+            }
+            .tool[disabled] { cursor:not-allowed; }
+            .tools .sep { width:1px; height:16px; margin:0 3px; background:var(--line); }
+            .tools .form-note { margin-left:auto; color:var(--ink-2); font-size:8.5px; }
+            .doc-sec { margin-top:16px; }
+            .doc-h {
+                display:flex; gap:8px; margin:0 0 7px; padding-bottom:4px;
+                border-bottom:1px solid var(--line); color:var(--ink);
+                font:700 11px/1.4 var(--font-display); letter-spacing:0.01em;
+            }
+            .doc-h .n { color:var(--blue); }
+            .ph { margin:0 0 7px; color:var(--ink-2); font-size:11.5px; line-height:1.7; }
+            .ph:last-child { margin-bottom:0; }
+            .ph.em { font-style:italic; }
+            .doc-note {
+                margin-top:8px; padding:7px 10px; border-left:2px solid #cddcef;
+                background:#f7faff; color:var(--ink-2); font-size:9.5px; line-height:1.55;
+            }
+
+            /* ── Riel del documento ──────────────────────────────── */
+            .rail { display:flex; flex-direction:column; gap:10px; }
+            .rail-card { padding:11px 12px 12px; border:1px solid var(--line); border-radius:9px; background:#fff; }
+            .rail-head {
+                display:flex; align-items:center; justify-content:space-between; gap:8px;
+                margin:0 0 7px; color:var(--ink);
+                font:700 9px/1.3 var(--font-display); letter-spacing:0.09em; text-transform:uppercase;
+            }
+            .rail-head .tag { height:16px; font-size:7px; }
+            .row {
+                display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+                padding:5px 0; border-bottom:1px solid #f1f3f5; font-size:10.5px; line-height:1.4;
+            }
+            .row:last-child { border-bottom:0; padding-bottom:0; }
+            .row dt, .row .k { color:var(--ink-2); flex:0 0 auto; }
+            .row dd, .row .v { margin:0; color:var(--ink); text-align:right; font-weight:600; }
+            .row .v.na { color:var(--ink-2); font-weight:400; }
+            .att { display:flex; align-items:flex-start; gap:8px; padding:6px 0; border-bottom:1px solid #f1f3f5; }
+            .att:last-child { border-bottom:0; padding-bottom:0; }
+            .att input { flex:0 0 auto; width:13px; height:13px; margin:2px 0 0; accent-color:var(--blue); }
+            .att label { display:grid; gap:2px; font-size:10.5px; line-height:1.35; color:var(--ink); }
+            .att label span { color:var(--ink-2); font-size:9px; }
+            .link-row {
+                display:flex; align-items:flex-start; justify-content:space-between; gap:8px;
+                padding:6px 0; border-bottom:1px solid #f1f3f5; font-size:10.5px; line-height:1.4;
+            }
+            .link-row:last-child { border-bottom:0; padding-bottom:0; }
+            .link-row .lr-k { color:var(--ink); }
+            .link-row .lr-k span { display:block; margin-top:2px; color:var(--ink-2); font-size:9px; }
+            .link-row a { font-size:9.5px; white-space:nowrap; }
+            .rail-foot { margin:0; color:var(--ink-2); font-size:9px; line-height:1.5; }
+            .rail-foot.mt { margin-top:8px; }
+            .shell-foot {
+                display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:12px;
+                padding-top:10px; border-top:1px solid var(--line);
+                color:var(--ink-2); font-size:9.5px; line-height:1.55;
+            }
+            .shell-foot b { color:var(--ink); }
+
+            @media (max-width: 1120px) {
+                .page { padding:22px 22px 52px; }
+                .ann { grid-template-columns:1fr 1fr; }
+                .kpis { grid-template-columns:1fr 1fr; }
+                .gap-list { grid-template-columns:1fr; }
+                .doc-head h1 { font-size:24px; }
+                .doc-grid { grid-template-columns:minmax(0, 1fr) 300px; }
+                .doc-meta-grid { grid-template-columns:minmax(0, 1fr) 140px; }
+                .doc-meta-grid .doc-field:last-child { grid-column:1 / -1; }
+            }
+        </style>
+    </head>
+    <body>
+        <svg width="0" height="0" aria-hidden="true" style="position:absolute" focusable="false">
+            <defs>
+                <symbol id="i-plus" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 3v10M3 8h10"></path></symbol>
+                <symbol id="i-search" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.2"></circle><path d="M10.2 10.2 14 14"></path></symbol>
+                <symbol id="i-open" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 13 12 4"></path><path d="M7 4h5v5"></path></symbol>
+                <symbol id="i-clip" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10.5 5.5 6.2 9.8a2 2 0 0 0 2.8 2.8l4.6-4.6a3.2 3.2 0 0 0-4.5-4.5L4 8.7"></path></symbol>
+                <symbol id="i-doc" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3.5" y="2.5" width="9" height="11" rx="1.5"></rect><path d="M5.8 6h4.4M5.8 8.5h4.4M5.8 11h2.6"></path></symbol>
+                <symbol id="i-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3.5 8.5 3 3 6-6.5"></path></symbol>
+                <symbol id="i-caret" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m4 6 4 4 4-4"></path></symbol>
+                <symbol id="i-warn" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 2.6 14.4 13H1.6L8 2.6Z"></path><path d="M8 6.4v3.1M8 11.4v.1"></path></symbol>
+            </defs>
+        </svg>
+        <main class="page">
+            <header class="doc-head">
+                <div class="eyebrow">
+                    <span class="dot" aria-hidden="true"></span>
+                    AVISA · mockup de forma · dos artboards
+                </div>
+                <h1>Reuniones, ayuda memoria y relatoría</h1>
+                <p class="doc-lead">
+                    El equipo mantiene hoy estas piezas en el Excel
+                    <b>Seguimiento de Reuniones</b> (922 filas). Esta maqueta
+                    propone traerlas al sistema vinculadas al caso: un registro de
+                    reuniones y un documento editable que reúne ayuda memoria y
+                    relatoría. La estructura existe; el contenido, la plantilla y
+                    la carga todavía no.
+                </p>
+                <div class="doc-meta">
+                    <span class="meta-chip route"><b>sin ruta · no está en el menú</b></span>
+                    <span class="meta-chip">Propuesta: pestaña <b>«Reuniones»</b> de <b>/casos/:codigo</b></span>
+                    <span class="meta-chip">reuniones-ayuda-memoria.html</span>
+                    <span class="meta-chip">Cubre 41, 72, 73, 74, 77 y 117 · toca 78</span>
+                </div>
+            </header>
+
+            <section class="ann" aria-label="Cabecera de cinco bloques">
+                <div class="ann-card">
+                    <h3>Cubre</h3>
+                    <p>
+                        Items <b>41</b> (pestaña Reuniones de la ficha),
+                        <b>72, 73, 74 y 77</b> (reuniones, actas y relatoría) y
+                        <b>117</b> (ayuda memoria y relatoría). Toca el <b>78</b>
+                        (texto plano para mensajería).
+                    </p>
+                    <p>
+                        Artboard 1: registro de reuniones. Artboard 2: documento
+                        editable de ayuda memoria y relatoría.
+                    </p>
+                </div>
+                <div class="ann-card">
+                    <h3>Dato por bloque</h3>
+                    <ul>
+                        <li>
+                            Registro: <code class="t">core.reuniones_dialogo</code> y
+                            <code class="t">core.reunion_participantes</code>; el tipo
+                            sale de <code class="t">core.cat_tipos_reunion</code>.
+                        </li>
+                        <li>
+                            Banderas derivadas: AM =
+                            <code class="t">core.documentos</code>
+                            <code class="t">tipo_id = 10</code>; relatoría =
+                            <code class="t">tipo_id = 11</code>; acta =
+                            <code class="t">tipo_id = 8</code>; publicación =
+                            <code class="t">nota_publicacion_url</code>.
+                        </li>
+                        <li>
+                            Asistencia: <code class="t">asistio</code> de
+                            <code class="t">reunion_participantes</code>.
+                        </li>
+                        <li>
+                            Compromisos: <code class="t">core.compromisos</code>;
+                            documentos: <code class="t">core.documentos</code>.
+                        </li>
+                        <li>
+                            <b>Departamento</b> no tiene columna en la reunión: se
+                            derivaría del ámbito del caso. Se declara hueco.
+                        </li>
+                    </ul>
+                </div>
+                <div class="ann-card">
+                    <h3>Sólo forma</h3>
+                    <ul>
+                        <li>
+                            El documento a dos columnas, las secciones fijas
+                            <b>1–5</b> y el riel de cinco bloques.
+                        </li>
+                        <li>
+                            La barra de formato y la barra superior de acciones:
+                            son forma, no función.
+                        </li>
+                        <li>
+                            El esquema de banderas
+                            <b>Sí · Pendiente · No aplica</b> con texto, tomado del
+                            Excel que el equipo ya reconoce.
+                        </li>
+                        <li>
+                            El estado vacío como estado principal del registro.
+                        </li>
+                    </ul>
+                </div>
+                <div class="ann-card">
+                    <h3>Bloqueado</h3>
+                    <ul>
+                        <li>
+                            <b>Alta de reunión</b>: no hay endpoint de escritura;
+                            el botón navega y no guarda.
+                        </li>
+                        <li>
+                            <b>Plantilla de redacción</b>:
+                            <code class="t">legacy.dim_redaccion</code> tiene 51
+                            filas sin cargar.
+                        </li>
+                        <li>
+                            <b>Envío por WhatsApp</b> (item 78): es texto plano
+                            para mensajería, sin integración.
+                        </li>
+                        <li>
+                            <b>Banderas</b>: exigen consultar documentos y la URL
+                            de publicación en cada fila.
+                        </li>
+                    </ul>
+                </div>
+                <div class="ann-card">
+                    <h3>Roles</h3>
+                    <ul>
+                        <li>
+                            <b>Especialista OAIPCS</b>: redacta la ayuda memoria y
+                            la relatoría.
+                        </li>
+                        <li>
+                            <b>Sectorista</b>: registra la reunión y la asistencia.
+                        </li>
+                        <li><b>Dirección</b>: lee el registro y el documento.</li>
+                        <li>
+                            <b>Administrador</b>: marca la publicación de la
+                            reunión.
+                        </li>
+                    </ul>
+                </div>
+                <div class="ann-card wide">
+                    <h3>Huecos declarados en esta maqueta</h3>
+                    <div class="gap-list">
+                        <div class="gap">
+                            <b>Hueco 1 · registro vacío</b>
+                            <code class="t">core.reuniones_dialogo</code> y
+                            <code class="t">core.reunion_participantes</code>
+                            existen con 0 filas. No hay alta todavía.
+                        </div>
+                        <div class="gap">
+                            <b>Hueco 2 · banderas derivadas</b>
+                            La reunión no tiene columnas de AM, relatoría ni
+                            publicación: se derivan de
+                            <code class="t">core.documentos</code> y de
+                            <code class="t">nota_publicacion_url</code>.
+                        </div>
+                        <div class="gap">
+                            <b>Hueco 3 · plantilla sin cargar</b>
+                            <code class="t">legacy.dim_redaccion</code> tiene 51
+                            filas sin cargar: la redacción guiada es trabajo de
+                            cargador.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="board-title">
+                <span class="board-num" aria-hidden="true">1</span>
+                <h2>Registro de reuniones</h2>
+                <span class="board-sub">Pestaña «Reuniones» de la ficha del caso</span>
+                <span class="board-tag">estado principal: registro vacío</span>
+            </div>
+
+            <section class="kpis" aria-label="Estado verificado de la base">
+                <div class="kpi">
+                    <div class="k-lbl">Excel del equipo</div>
+                    <div class="k-val">922</div>
+                    <div class="k-src">filas en <b>Seguimiento de Reuniones</b></div>
+                </div>
+                <div class="kpi is-zero">
+                    <div class="k-lbl">Reuniones en AVISA</div>
+                    <div class="k-val">0</div>
+                    <div class="k-src"><code class="t">core.reuniones_dialogo</code></div>
+                </div>
+                <div class="kpi is-zero">
+                    <div class="k-lbl">Participantes</div>
+                    <div class="k-val">0</div>
+                    <div class="k-src"><code class="t">core.reunion_participantes</code></div>
+                </div>
+                <div class="kpi is-zero">
+                    <div class="k-lbl">AM y relatorías</div>
+                    <div class="k-val">0</div>
+                    <div class="k-src"><code class="t">core.documentos</code> tipo 10 y 11</div>
+                </div>
+            </section>
+
+            <section class="card" aria-labelledby="reg-title">
+                <div class="card-head">
+                    <div>
+                        <h3 class="card-title" id="reg-title">Reuniones del caso</h3>
+                        <p class="card-sub">
+                            Casos / (código del caso) / Reuniones · el código se
+                            muestra cuando la pestaña vive dentro de la ficha.
+                        </p>
+                    </div>
+                    <div class="count">0 registros · 0 con AM · 0 con relatoría</div>
+                </div>
+
+                <div class="filterbar">
+                    <div class="search" role="group" aria-label="Buscar por código o palabra clave">
+                        <svg aria-hidden="true"><use href="#i-search"></use></svg>
+                        <input id="q-reu" type="search" aria-label="Buscar por código o palabra clave" placeholder="Buscar por código o palabra clave" />
+                    </div>
+                    <div class="field">
+                        <label for="tipo-reu">Tipo</label>
+                        <select id="tipo-reu">
+                            <option selected>Todos los tipos</option>
+                            <option>Asistencia técnica</option>
+                            <option>Reunión preparatoria</option>
+                            <option>Reunión ordinaria plenaria</option>
+                            <option>Otra</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="desde-reu">Desde</label>
+                        <input id="desde-reu" type="date" />
+                    </div>
+                    <div class="field">
+                        <label for="hasta-reu">Hasta</label>
+                        <input id="hasta-reu" type="date" />
+                    </div>
+                    <div class="field">
+                        <span>Deuda documental</span>
+                        <div class="filter-actions">
+                            <button class="debt" type="button" aria-pressed="false"><i aria-hidden="true"></i> Sin AM</button>
+                            <button class="debt" type="button" aria-pressed="false"><i aria-hidden="true"></i> Sin relatoría</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hint-row">
+                    <b>Los atajos son deuda documental, no un estado de la reunión.</b>
+                    «Sin AM» y «Sin relatoría» filtran filas con la bandera en
+                    Pendiente o No aplica. Hoy devuelven 0 porque el registro está vacío.
+                </div>
+
+                <div class="empty">
+                    <span class="ic" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                            <rect x="3" y="5" width="18" height="15" rx="2.5"></rect>
+                            <path d="M3 9.5h18"></path>
+                            <path d="M8 3v4M16 3v4"></path>
+                            <path d="M8 14h8M8 17h5"></path>
+                        </svg>
+                    </span>
+                    <h3>No hay reuniones registradas.</h3>
+                    <p>
+                        El registro existe en la base; falta la carga y el alta.
+                        Todavía no hay filas que mostrar, y esta maqueta no las inventa.
+                    </p>
+                    <div class="empty-meta">
+                        <span class="tag base">reuniones_dialogo · 0 filas</span>
+                        <span class="tag base">reunion_participantes · 0 filas</span>
+                        <span class="tag">Excel · 922 filas por cargar</span>
+                    </div>
+                    <div class="empty-actions">
+                        <button class="btn primary" type="button">
+                            <svg aria-hidden="true"><use href="#i-plus"></use></svg>
+                            Registrar reunión
+                        </button>
+                        <a class="btn quiet" href="#ejemplo">Ver tabla de ejemplo</a>
+                    </div>
+                    <p class="foot-note">
+                        Hoy «Registrar reunión» navega al formulario y pierde el
+                        contexto de la ficha. Falta abrirlo sin cambiar de ruta
+                        (item 65). La acción no guarda en esta maqueta.
+                    </p>
+                </div>
+            </section>
+
+            <section class="card" id="ejemplo" aria-labelledby="ej-title">
+                <div class="card-head">
+                    <div>
+                        <h3 class="card-title" id="ej-title">Vista con datos de ejemplo</h3>
+                        <p class="card-sub">
+                            Tres filas rotuladas <b>ejemplo</b>. No provienen de la base
+                            y no completan el estado vacío: lo ilustran.
+                        </p>
+                    </div>
+                    <span class="tag ej">ejemplo</span>
+                </div>
+
+                <div class="example-band">
+                    <span class="tag ej">ejemplo</span>
+                    <span>
+                        <b>Ninguna de estas filas está en AVISA.</b> Sirven para
+                        mostrar el esquema de banderas del Excel: Sí, Pendiente y
+                        No aplica, siempre con texto.
+                    </span>
+                </div>
+
+                <div class="table-scroll">
+                    <table class="data">
+                        <caption class="sr">Tres reuniones de ejemplo con el esquema de banderas</caption>
+                        <colgroup>
+                            <col style="width:100px" /><col style="width:108px" /><col style="width:80px" />
+                            <col style="width:86px" /><col style="width:92px" /><col style="width:172px" />
+                            <col style="width:100px" /><col style="width:86px" /><col style="width:90px" />
+                            <col style="width:94px" /><col style="width:94px" /><col style="width:118px" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">Código</th>
+                                <th scope="col">Tipo</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Departamento</th>
+                                <th scope="col">Lugar</th>
+                                <th scope="col">Título</th>
+                                <th scope="col">Responsable</th>
+                                <th scope="col">Asistencia</th>
+                                <th scope="col">AM</th>
+                                <th scope="col">Relatoría</th>
+                                <th scope="col">Publicación</th>
+                                <th scope="col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="code">REU-EJ-01 <span class="tag ej">ej</span></td>
+                                <td>Asistencia técnica</td>
+                                <td>18 nov 2026</td>
+                                <td>Loreto</td>
+                                <td>Auditorio municipal</td>
+                                <td class="title-cell">Asistencia técnica sobre la demanda de agua</td>
+                                <td>Sectorista</td>
+                                <td><span class="flag flag-yes"><i aria-hidden="true"></i>Sí</span></td>
+                                <td><span class="flag flag-yes"><i aria-hidden="true"></i>Sí</span></td>
+                                <td><span class="flag flag-pend"><i aria-hidden="true"></i>Pendiente</span></td>
+                                <td><span class="flag flag-na"><i aria-hidden="true"></i>No aplica</span></td>
+                                <td class="actions">
+                                    <span class="act-group">
+                                        <button class="ico-btn" type="button" aria-label="Abrir reunión REU-EJ-01" title="Abrir"><svg aria-hidden="true"><use href="#i-open"></use></svg></button>
+                                        <button class="ico-btn" type="button" aria-label="Adjuntar ayuda memoria a REU-EJ-01" title="Adjuntar AM"><svg aria-hidden="true"><use href="#i-clip"></use></svg></button>
+                                        <button class="ico-btn" type="button" aria-label="Adjuntar relatoría a REU-EJ-01" title="Adjuntar relatoría"><svg aria-hidden="true"><use href="#i-doc"></use></svg></button>
+                                        <button class="ico-btn" type="button" aria-label="Marcar publicación de REU-EJ-01" title="Marcar publicación"><svg aria-hidden="true"><use href="#i-check"></use></svg></button>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="code">REU-EJ-02 <span class="tag ej">ej</span></td>
+                                <td>Reunión preparatoria</td>
+                                <td>05 nov 2026</td>
+                                <td>Piura</td>
+                                <td>Sala de la GOR</td>
+                                <td class="title-cell">Preparación de la mesa de diálogo</td>
+                                <td>Especialista OAIPCS</td>
+                                <td><span class="flag flag-yes"><i aria-hidden="true"></i>Sí</span></td>
+                                <td><span class="flag flag-pend"><i aria-hidden="true"></i>Pendiente</span></td>
+                                <td><span class="flag flag-pend"><i aria-hidden="true"></i>Pendiente</span></td>
+                                <td><span class="flag flag-na"><i aria-hidden="true"></i>No aplica</span></td>
+                                <td class="actions">
+                                    <span class="act-group">
+                                        <button class="ico-btn" type="button" aria-label="Abrir reunión REU-EJ-02" title="Abrir"><svg aria-hidden="true"><use href="#i-open"></use></svg></button>
+                                        <button class="ico-btn" type="button" aria-label="Adjuntar ayuda memoria a REU-EJ-02" title="Adjuntar AM"><svg aria-hidden="true"><use href="#i-clip"></use></svg></button>
+                                        <button class="ico-btn" type="button" aria-label="Adjuntar relatoría a REU-EJ-02" title="Adjuntar relatoría"><svg aria-hidden="true"><use href="#i-doc"></use></svg></button>
+                                        <button class="ico-btn" type="button" aria-label="Marcar publicación de REU-EJ-02" title="Marcar publicación"><svg aria-hidden="true"><use href="#i-check"></use></svg></button>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="code">REU-EJ-03 <span class="tag ej">ej</span></td>
+                                <td>Reunión ordinaria plenaria</td>
+                                <td>21 oct 2026</td>
+                                <td>Ucayali</td>
+                                <td>Local comunal</td>
+                                <td class="title-cell">Plenaria de seguimiento de acuerdos</td>
+                                <td>Dirección</td>
+                                <td><span class="flag flag-na"><i aria-hidden="true"></i>No aplica</span></td>
+                                <td><span class="flag flag-yes"><i aria-hidden="true"></i>Sí</span></td>
+                                <td><span class="flag flag-yes"><i aria-hidden="true"></i>Sí</span></td>
+                                <td><span class="flag flag-na"><i aria-hidden="true"></i>No aplica</span></td>
+                                <td class="actions">
+                                    <span class="act-group">
+                                        <button class="ico-btn" type="button" aria-label="Abrir reunión REU-EJ-03" title="Abrir"><svg aria-hidden="true"><use href="#i-open"></use></svg></button>
+                                        <button class="ico-btn" type="button" aria-label="Adjuntar ayuda memoria a REU-EJ-03" title="Adjuntar AM"><svg aria-hidden="true"><use href="#i-clip"></use></svg></button>
+                                        <button class="ico-btn" type="button" aria-label="Adjuntar relatoría a REU-EJ-03" title="Adjuntar relatoría"><svg aria-hidden="true"><use href="#i-doc"></use></svg></button>
+                                        <button class="ico-btn" type="button" aria-label="Marcar publicación de REU-EJ-03" title="Marcar publicación"><svg aria-hidden="true"><use href="#i-check"></use></svg></button>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row-legend">
+                    <span><svg aria-hidden="true"><use href="#i-open"></use></svg> Abrir</span>
+                    <span><svg aria-hidden="true"><use href="#i-clip"></use></svg> Adjuntar AM</span>
+                    <span><svg aria-hidden="true"><use href="#i-doc"></use></svg> Adjuntar relatoría</span>
+                    <span><svg aria-hidden="true"><use href="#i-check"></use></svg> Marcar publicación</span>
+                </div>
+
+                <p class="derive-note">
+                    <b>Cómo se deriva cada bandera.</b>
+                    La reunión no guarda AM, relatoría ni publicación. AM es un
+                    documento de <code class="t">core.documentos</code> con
+                    <code class="t">tipo_id = 10</code>; relatoría,
+                    <code class="t">tipo_id = 11</code>; acta,
+                    <code class="t">tipo_id = 8</code>. Publicación se lee de
+                    <code class="t">core.reuniones_dialogo.nota_publicacion_url</code>.
+                    Si no hay documento, la bandera dice <b>Pendiente</b>; si el tipo
+                    de reunión no la requiere, <b>No aplica</b>.
+                </p>
+            </section>
+
+            <div class="board-title">
+                <span class="board-num" aria-hidden="true">2</span>
+                <h2>Ayuda memoria y relatoría</h2>
+                <span class="board-sub">Documento editable a dos columnas, vinculado a la reunión</span>
+                <span class="board-tag">sólo forma: sin plantilla cargada</span>
+            </div>
+
+            <section class="doc-shell" aria-labelledby="doc-title">
+                <div class="doc-bar">
+                    <div>
+                        <div class="bar-title" id="doc-title">Ayuda memoria · reunión sin alta en la base</div>
+                        <div class="crumb">Casos / (código del caso) / Reuniones / Ayuda memoria</div>
+                    </div>
+                    <div class="bar-actions">
+                        <button class="btn primary" type="button">
+                            <svg aria-hidden="true"><use href="#i-check"></use></svg>
+                            Guardar borrador
+                        </button>
+                        <button class="btn" type="button">
+                            <svg aria-hidden="true"><use href="#i-doc"></use></svg>
+                            Generar PDF
+                        </button>
+                        <button class="btn" type="button">
+                            <svg aria-hidden="true"><use href="#i-check"></use></svg>
+                            Marcar como publicada
+                        </button>
+                        <button class="btn" type="button" disabled>
+                            Enviar por WhatsApp
+                            <svg class="caret" aria-hidden="true"><use href="#i-caret"></use></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="shell-body">
+                    <div class="warn">
+                        <svg aria-hidden="true"><use href="#i-warn"></use></svg>
+                        <span>
+                            <b>La plantilla de redacción no está cargada.</b>
+                            <code class="t">legacy.dim_redaccion</code> tiene 51 filas
+                            sin cargar. Las secciones 1 a 5 son fijas en esta maqueta y
+                            la barra de formato es sólo forma. El envío por WhatsApp
+                            está bloqueado (item 78: texto plano para mensajería).
+                        </span>
+                    </div>
+
+                    <div class="doc-grid">
+                        <div class="paper">
+                            <div class="doc-meta-grid">
+                                <div class="doc-field">
+                                    <span>Título del documento</span>
+                                    <input type="text" aria-label="Título del documento" placeholder="Ayuda memoria de la reunión" />
+                                </div>
+                                <div class="doc-field">
+                                    <span>Fecha</span>
+                                    <input type="text" aria-label="Fecha del documento" placeholder="00 mes 0000" />
+                                </div>
+                                <div class="doc-field">
+                                    <span>Lugar</span>
+                                    <input type="text" aria-label="Lugar de la reunión" placeholder="Lugar de la reunión" />
+                                </div>
+                            </div>
+
+                            <p class="doc-att">
+                                <b>Asistentes</b> · 4 en el riel, con casilla de
+                                asistencia y cargo (valores de ejemplo).
+                            </p>
+
+                            <div class="tools" role="group" aria-label="Barra de formato del documento">
+                                <button class="tool" type="button" disabled aria-label="Negrita"><b>B</b></button>
+                                <button class="tool" type="button" disabled aria-label="Cursiva"><i>I</i></button>
+                                <button class="tool" type="button" disabled aria-label="Subrayado"><u>U</u></button>
+                                <span class="sep" aria-hidden="true"></span>
+                                <button class="tool" type="button" disabled aria-label="Viñetas">• —</button>
+                                <button class="tool" type="button" disabled aria-label="Lista numerada">1.</button>
+                                <span class="sep" aria-hidden="true"></span>
+                                <button class="tool" type="button" disabled aria-label="Enlace">↗</button>
+                                <button class="tool" type="button" disabled aria-label="Cita">“ ”</button>
+                                <span class="form-note">forma · sin función en esta maqueta</span>
+                            </div>
+
+                            <div class="doc-sec">
+                                <h4 class="doc-h"><span class="n">1.</span> Antecedentes</h4>
+                                <p class="ph em">
+                                    Describa la convocatoria, el motivo de la reunión y
+                                    los antecedentes del caso. Este texto es un marcador
+                                    de posición: la plantilla de redacción no está cargada.
+                                </p>
+                            </div>
+
+                            <div class="doc-sec">
+                                <h4 class="doc-h"><span class="n">2.</span> Desarrollo de la reunión</h4>
+                                <p class="ph em">
+                                    Ordene los puntos tratados, quién intervino y en qué
+                                    orden. La asistencia se toma del riel «Asistentes».
+                                </p>
+                            </div>
+
+                            <div class="doc-sec">
+                                <h4 class="doc-h"><span class="n">3.</span> Acuerdos y compromisos</h4>
+                                <p class="ph em">
+                                    Cada acuerdo con responsable y plazo. Los compromisos
+                                    que se generen quedan enlazados a
+                                    <code class="t">core.compromisos</code> y aparecen en el riel.
+                                </p>
+                                <div class="doc-note">
+                                    El compromiso se crea una vez, en el riel, y no se copia
+                                    dentro del texto del documento.
+                                </div>
+                            </div>
+
+                            <div class="doc-sec">
+                                <h4 class="doc-h"><span class="n">4.</span> Conclusiones</h4>
+                                <p class="ph em">
+                                    Cierre de la reunión y siguiente paso acordado con los
+                                    actores.
+                                </p>
+                            </div>
+
+                            <div class="doc-sec">
+                                <h4 class="doc-h"><span class="n">5.</span> Anexos</h4>
+                                <p class="ph em">
+                                    Liste los anexos y vincule el acta o la relatoría desde
+                                    el riel «Documentos vinculados».
+                                </p>
+                            </div>
+                        </div>
+
+                        <aside class="rail" aria-label="Datos, asistentes y vínculos del documento">
+                            <div class="rail-card">
+                                <h4 class="rail-head">Datos de la reunión</h4>
+                                <dl>
+                                    <div class="row"><dt>Código</dt><dd class="v na">sin alta</dd></div>
+                                    <div class="row"><dt>Tipo</dt><dd class="v na">sin dato</dd></div>
+                                    <div class="row"><dt>Fecha</dt><dd class="v na">sin dato</dd></div>
+                                    <div class="row"><dt>Lugar</dt><dd class="v na">sin dato</dd></div>
+                                    <div class="row"><dt>Departamento</dt><dd class="v na">derivado del caso</dd></div>
+                                    <div class="row"><dt>Responsable</dt><dd class="v na">sin asignar</dd></div>
+                                    <div class="row"><dt>Convocante</dt><dd class="v na">sin dato</dd></div>
+                                </dl>
+                                <p class="rail-foot mt">
+                                    Fuente: <code class="t">core.reuniones_dialogo</code>.
+                                </p>
+                            </div>
+
+                            <div class="rail-card">
+                                <h4 class="rail-head">Asistentes <span class="tag ej">ejemplo</span></h4>
+                                <div class="att">
+                                    <input type="checkbox" id="a-1" checked />
+                                    <label for="a-1">Representante de la comunidad<span>Cargo por registrar</span></label>
+                                </div>
+                                <div class="att">
+                                    <input type="checkbox" id="a-2" checked />
+                                    <label for="a-2">Representante de la empresa<span>Cargo por registrar</span></label>
+                                </div>
+                                <div class="att">
+                                    <input type="checkbox" id="a-3" />
+                                    <label for="a-3">Especialista OAIPCS<span>Redacta el documento</span></label>
+                                </div>
+                                <div class="att">
+                                    <input type="checkbox" id="a-4" checked />
+                                    <label for="a-4">Sectorista<span>Registra la reunión</span></label>
+                                </div>
+                                <p class="rail-foot mt">
+                                    La casilla es <code class="t">asistio</code> en
+                                    <code class="t">core.reunion_participantes</code>.
+                                    El cargo, en la misma fila.
+                                </p>
+                            </div>
+
+                            <div class="rail-card">
+                                <h4 class="rail-head">Compromisos generados</h4>
+                                <div class="link-row">
+                                    <div class="lr-k">
+                                        Compromiso derivado del acuerdo 1
+                                        <span>Responsable y plazo por definir</span>
+                                    </div>
+                                    <span class="flag flag-pend"><i aria-hidden="true"></i>Pendiente</span>
+                                </div>
+                                <div class="link-row">
+                                    <div class="lr-k">
+                                        Ver todos los compromisos del caso
+                                        <span>Se guardan en core.compromisos</span>
+                                    </div>
+                                    <a href="#ejemplo">/compromisos</a>
+                                </div>
+                            </div>
+
+                            <div class="rail-card">
+                                <h4 class="rail-head">Documentos vinculados</h4>
+                                <div class="link-row">
+                                    <div class="lr-k">Ayuda memoria<span>tipo_id 10 · este documento</span></div>
+                                    <span class="tag base">borrador</span>
+                                </div>
+                                <div class="link-row">
+                                    <div class="lr-k">Relatoría<span>tipo_id 11</span></div>
+                                    <span class="flag flag-pend"><i aria-hidden="true"></i>Pendiente</span>
+                                </div>
+                                <div class="link-row">
+                                    <div class="lr-k">Acta<span>tipo_id 8</span></div>
+                                    <span class="flag flag-na"><i aria-hidden="true"></i>No aplica</span>
+                                </div>
+                                <p class="rail-foot mt">
+                                    Fuente: <code class="t">core.documentos</code>.
+                                </p>
+                            </div>
+
+                            <div class="rail-card">
+                                <h4 class="rail-head">Firmantes</h4>
+                                <div class="link-row">
+                                    <div class="lr-k">Especialista OAIPCS<span>Redacta</span></div>
+                                    <span class="flag flag-pend"><i aria-hidden="true"></i>Por firmar</span>
+                                </div>
+                                <div class="link-row">
+                                    <div class="lr-k">Sectorista<span>Registra y asiste</span></div>
+                                    <span class="flag flag-pend"><i aria-hidden="true"></i>Por firmar</span>
+                                </div>
+                                <p class="rail-foot mt">
+                                    La firma no existe como campo: se declara pendiente.
+                                </p>
+                            </div>
+                        </aside>
+                    </div>
+
+                    <div class="shell-foot">
+                        <b>Derivación.</b>
+                        AM y relatoría salen de <code class="t">core.documentos</code>
+                        (tipo 10 y 11); acta, de tipo 8; publicación, de
+                        <code class="t">nota_publicacion_url</code>. La reunión no
+                        guarda estas banderas como columnas.
+                    </div>
+                </div>
+            </section>
+        </main>
+    </body>
+</html>

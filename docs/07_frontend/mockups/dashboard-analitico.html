@@ -220,7 +220,7 @@
                 color: #93621d;
             }
             .risk-bajo {
-                background: #e9f5ef;
+                background: eef3fa;
                 color: #34785b;
             }
             .button-primary,
@@ -869,6 +869,104 @@
                 font-size: 8.5px;
                 line-height: 1.6;
             }
+            .head-note {
+                margin: 2px 0 0;
+                color: #5a6c7d;
+                font-size: 10.5px;
+                line-height: 1.5;
+            }
+            .head-note b {
+                color: var(--ink);
+            }
+            .scope-bar {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 9px 16px;
+                padding: 9px 12px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--paper);
+            }
+            .scope-bar .scope-label {
+                color: #77878f;
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+            }
+            .scope-bar .scope-note {
+                flex: 1 1 100%;
+                padding-left: 8px;
+                border-left: 2px solid var(--amber);
+                color: #8b97a1;
+                font-size: 9.5px;
+                line-height: 1.5;
+            }
+            .sec-head {
+                margin-top: 6px;
+            }
+            .sec-h2 {
+                margin: 4px 0 2px;
+                color: var(--ink);
+                font: 700 15px/1.2 var(--font-display);
+                letter-spacing: -0.3px;
+            }
+            .sec-sub {
+                margin: 0 0 12px;
+                color: var(--muted);
+                font-size: 11px;
+                line-height: 1.5;
+            }
+            .chart-h3 {
+                margin: 0 0 2px;
+                color: var(--ink);
+                font: 700 12px/1.3 var(--font-display);
+            }
+            .heat {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 3px;
+                font-size: 9.5px;
+            }
+            .heat th {
+                padding: 2px 4px;
+                color: #8b97a1;
+                font-size: 8px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-align: center;
+                text-transform: uppercase;
+            }
+            .heat th:first-child {
+                text-align: left;
+            }
+            .heat td {
+                padding: 7px 6px;
+                border-radius: 4px;
+                color: #3c4d5c;
+                font-weight: 600;
+                text-align: center;
+                font-variant-numeric: tabular-nums;
+            }
+            .heat td.row-lab {
+                background: transparent;
+                color: #526577;
+                text-align: left;
+            }
+            .heat .h-bajo {
+                background: #eef5f0;
+            }
+            .heat .h-medio {
+                background: #fdf1de;
+            }
+            .heat .h-alto {
+                background: #f8e2e0;
+            }
+            .heat .h-none {
+                background: #f4f6f8;
+                color: #c3cbd2;
+            }
             @media print {
                 body {
                     background: #fff;
@@ -908,6 +1006,24 @@
                         <b>vista de agregación</b>; si esa vista no existe, la
                         tarjeta se marca <b>requiere</b> y no se dibuja una
                         cifra plausible.
+                    </p>
+                    <p class="head-note">
+                        <b>Bloqueado para construir:</b> la bandeja de series
+                        temporales, la exportación SQL y las vistas
+                        <code>vw_*</code> del panel OAIPCS no existen todavía;
+                        en este mockup sólo se dibuja su forma.
+                    </p>
+                    <p class="head-note">
+                        <b>Roles:</b> Dirección y Secretaría General ven ambos
+                        subsectores; cada Viceministerio ve sólo el suyo (Pesca
+                        y acuicultura · MYPE e industria). Las tarjetas de
+                        capacidad del equipo son de la OAIPCS.
+                    </p>
+                    <p class="head-note">
+                        <b>Ruta:</b> <code>/resumen</code> · dos lecturas del
+                        mismo corte (Dirección institucional y Operación
+                        OAIPCS). Reemplaza el antiguo resumen operativo de cinco
+                        bloques.
                     </p>
                 </div>
                 <div class="view-actions">
@@ -973,9 +1089,54 @@
                     aria-controls="panel-oaipcs"
                     data-mode="oaipcs"
                 >
-                    Panel de operación OAIPCS <span class="num">ITEM 85</span>
+                    Panel de operación OAIPCS
+                    <span class="num">ITEM 85 · superficie en /resumen</span>
                 </button>
             </nav>
+
+            <div class="scope-bar">
+                <span class="scope-label">Ventana de datos</span>
+                <div
+                    class="segmented"
+                    role="group"
+                    aria-label="Ventana temporal del análisis"
+                >
+                    <button type="button" aria-pressed="true">7 días</button>
+                    <button type="button" aria-pressed="false">30 días</button>
+                    <button type="button" aria-pressed="false">90 días</button>
+                    <button type="button" aria-pressed="false">
+                        Personalizado…
+                    </button>
+                </div>
+                <span class="scope-label">Rol</span>
+                <div class="segmented" role="group" aria-label="Ámbito del rol">
+                    <button type="button" aria-pressed="true">Dirección</button>
+                    <button type="button" aria-pressed="false">
+                        Secretaría General
+                    </button>
+                    <button type="button" aria-pressed="false">
+                        Viceministerio
+                    </button>
+                </div>
+                <span class="scope-label">Subsector</span>
+                <div class="segmented" role="group" aria-label="Subsector">
+                    <button type="button" aria-pressed="true">Ambos</button>
+                    <button type="button" aria-pressed="false">
+                        Pesca y acuicultura
+                    </button>
+                    <button type="button" aria-pressed="false">
+                        MYPE e industria
+                    </button>
+                </div>
+                <p class="scope-note">
+                    <b>X6 · el ámbito lo fija el rol, no el filtro:</b>
+                    Dirección y Secretaría General ven ambos subsectores; cada
+                    Viceministerio ve sólo el suyo y el conmutador «Ambos» se
+                    deshabilita. El corte del mockup es de 22.11.2026 y las
+                    ventanas 7/30/90 no están implementadas: el snapshot es
+                    único.
+                </p>
+            </div>
 
             <div class="filter-bar filter-bar-wrap">
                 <label class="select-filter">
@@ -1997,6 +2158,361 @@
                     recuento directo del snapshot, no la salida de la vista, y
                     no hay una serie dibujada por encima de ellas.
                 </p>
+
+                <p class="meta-line">
+                    <b>Duplicidad resuelta:</b> el item 85 tiene una sola
+                    superficie de uso,
+                    <code>/resumen</code> (<code>resumen-operativo.html</code>:
+                    Prevención · Gestión · Seguimiento + franja de operación).
+                    Esta pestaña del dashboard es la <b>lectura de datos</b> del
+                    mismo panel para el equipo analítico y no se navega desde el
+                    menú; no se construye dos veces.
+                </p>
+            </section>
+
+            <!-- ─────────────── ANÁLISIS · BIBLIOTECA DE GRÁFICOS ─────────────── -->
+            <section id="biblioteca-graficos" aria-labelledby="graf-titulo">
+                <div class="sec-head">
+                    <h2 class="sec-h2" id="graf-titulo">
+                        Análisis · biblioteca de gráficos
+                    </h2>
+                    <p class="sec-sub">
+                        Cinco piezas para leer la conflictividad en el tiempo y
+                        por territorio. Todas son <b>forma</b>: las series
+                        temporales y los cruces no tienen vista de agregación
+                        (item 57); sólo el aging se calcula del snapshot. Los
+                        valores van rotulados como <b>ejemplo</b> y no se
+                        presentan como dato.
+                    </p>
+                </div>
+
+                <div class="grid two-col">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="chart-h3">
+                                    1 · Serie temporal de casos
+                                </h3>
+                                <p class="card-sub">
+                                    Casos registrados por mes (zona
+                                    <code>America/Lima</code>).
+                                </p>
+                            </div>
+                            <span class="flag flag-off">Ejemplo</span>
+                        </div>
+                        <svg
+                            class="series"
+                            viewBox="0 0 320 96"
+                            role="img"
+                            aria-label="Serie temporal de ejemplo: casos registrados por mes"
+                        >
+                            <line
+                                x1="0"
+                                y1="80"
+                                x2="320"
+                                y2="80"
+                                stroke="#e6ebef"
+                            />
+                            <line
+                                x1="0"
+                                y1="52"
+                                x2="320"
+                                y2="52"
+                                stroke="#f0f3f6"
+                            />
+                            <line
+                                x1="0"
+                                y1="24"
+                                x2="320"
+                                y2="24"
+                                stroke="#f0f3f6"
+                            />
+                            <polyline
+                                fill="none"
+                                stroke="#2455a2"
+                                stroke-width="2"
+                                stroke-linejoin="round"
+                                points="8,70 34,64 60,66 86,58 112,44 138,50 164,38 190,42 216,30 242,36 268,24 294,28"
+                            />
+                            <g fill="#2455a2">
+                                <circle cx="8" cy="70" r="2.4" />
+                                <circle cx="86" cy="58" r="2.4" />
+                                <circle cx="164" cy="38" r="2.4" />
+                                <circle cx="242" cy="36" r="2.4" />
+                                <circle cx="294" cy="28" r="2.4" />
+                            </g>
+                        </svg>
+                        <div class="legend">
+                            <span
+                                ><i style="background: #2455a2"></i>casos/mes
+                                (ejemplo)</span
+                            >
+                            <span>eje X: 12 meses · eje Y: conteo</span>
+                        </div>
+                        <dl class="meta">
+                            <dt>Definición</dt>
+                            <dd>
+                                Eventos «alta de caso» agrupados por mes, sin
+                                hora ambigua.
+                            </dd>
+                            <dt>Fuente</dt>
+                            <dd>
+                                <a href="#src-casos">core.casos</a> · requiere
+                                <code>vw_casos_por_mes</code>
+                            </dd>
+                        </dl>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="chart-h3">
+                                    2 · Antigüedad de casos (aging)
+                                </h3>
+                                <p class="card-sub">
+                                    Días desde <code>fecha_inicio</code> de los
+                                    34 casos vigentes.
+                                </p>
+                            </div>
+                            <span class="flag flag-off">Ejemplo</span>
+                        </div>
+                        <div class="bars" role="list">
+                            <div class="bar-row" role="listitem">
+                                <span class="bar-lab">0–30 días</span>
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg"
+                                        style="width: 42%; background: #34785b"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">5</span>
+                            </div>
+                            <div class="bar-row" role="listitem">
+                                <span class="bar-lab">31–90 días</span>
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg"
+                                        style="width: 75%; background: #397c79"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">9</span>
+                            </div>
+                            <div class="bar-row" role="listitem">
+                                <span class="bar-lab">91–180 días</span>
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg"
+                                        style="width: 100%; background: #aa6a11"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">12</span>
+                            </div>
+                            <div class="bar-row" role="listitem">
+                                <span class="bar-lab">&gt; 180 días</span>
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg"
+                                        style="width: 67%; background: #ad4d46"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">8</span>
+                            </div>
+                        </div>
+                        <p class="footnote" style="margin: 8px 0 0">
+                            Total <b>34</b> casos vigentes. El corte de fechas
+                            viene del legado: 8 casos superan los 180 días y
+                            concentran la prioridad de atención.
+                        </p>
+                    </article>
+                </div>
+
+                <div class="grid two-col" style="margin-top: 14px">
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="chart-h3">
+                                    3 · T_COMP · compromisos por plazo
+                                </h3>
+                                <p class="card-sub">
+                                    8 compromisos vivos y su estado de plazo.
+                                </p>
+                            </div>
+                            <span class="flag flag-off">Ejemplo</span>
+                        </div>
+                        <div class="bars" role="list">
+                            <div class="bar-row" role="listitem">
+                                <span class="bar-lab">Vencidos</span>
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg"
+                                        style="width: 67%; background: #ad4d46"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">2</span>
+                            </div>
+                            <div class="bar-row" role="listitem">
+                                <span class="bar-lab">Por vencer ≤30 d</span>
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg"
+                                        style="width: 100%; background: #aa6a11"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">3</span>
+                            </div>
+                            <div class="bar-row" role="listitem">
+                                <span class="bar-lab">Vigentes</span>
+                                <span class="bar-track"
+                                    ><span
+                                        class="bar-seg"
+                                        style="width: 100%; background: #34785b"
+                                    ></span
+                                ></span>
+                                <span class="bar-val">3</span>
+                            </div>
+                        </div>
+                        <p class="footnote" style="margin: 8px 0 0">
+                            <code>core.hitos_compromiso</code> no guarda
+                            responsable: la carga por especialista no se puede
+                            derivar todavía.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="chart-h3">
+                                    4 · T_ESTANC · estancamiento por región
+                                </h3>
+                                <p class="card-sub">
+                                    Casos sin movimiento, intensidad por región.
+                                </p>
+                            </div>
+                            <span class="flag flag-off">Ejemplo</span>
+                        </div>
+                        <table class="heat">
+                            <caption class="table-caption">
+                                Filas: regiones con más casos · columnas:
+                                intensidad de estancamiento.
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Región</th>
+                                    <th scope="col">Bajo</th>
+                                    <th scope="col">Medio</th>
+                                    <th scope="col">Alto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="row-lab">Lima</td>
+                                    <td class="h-bajo">3</td>
+                                    <td class="h-medio">5</td>
+                                    <td class="h-alto">2</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-lab">Piura</td>
+                                    <td class="h-bajo">1</td>
+                                    <td class="h-medio">3</td>
+                                    <td class="h-alto">4</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-lab">La Libertad</td>
+                                    <td class="h-none">0</td>
+                                    <td class="h-medio">2</td>
+                                    <td class="h-alto">3</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-lab">Áncash</td>
+                                    <td class="h-bajo">1</td>
+                                    <td class="h-bajo">1</td>
+                                    <td class="h-medio">2</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-lab">Junín</td>
+                                    <td class="h-none">0</td>
+                                    <td class="h-bajo">1</td>
+                                    <td class="h-bajo">1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </article>
+                </div>
+
+                <article class="card" style="margin-top: 14px">
+                    <div class="card-head">
+                        <div>
+                            <h3 class="chart-h3">
+                                5 · T_ALTA_DET · densidad de riesgo alto
+                            </h3>
+                            <p class="card-sub">
+                                Casos de riesgo alto por región y nivel de
+                                conflictividad, en tres bandas.
+                            </p>
+                        </div>
+                        <span class="flag flag-off">Ejemplo</span>
+                    </div>
+                    <div class="table-wrap" style="border: 0">
+                        <table class="heat">
+                            <caption class="table-caption">
+                                Rejilla de densidad: cada celda es el número de
+                                casos de riesgo Alto en esa banda.
+                            </caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Región</th>
+                                    <th scope="col">Bajo</th>
+                                    <th scope="col">Medio</th>
+                                    <th scope="col">Alto</th>
+                                    <th scope="col" class="num">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="row-lab">Piura</td>
+                                    <td class="h-bajo">1</td>
+                                    <td class="h-medio">2</td>
+                                    <td class="h-alto">3</td>
+                                    <td class="num">6</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-lab">Lima</td>
+                                    <td class="h-bajo">2</td>
+                                    <td class="h-bajo">1</td>
+                                    <td class="h-none">0</td>
+                                    <td class="num">3</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-lab">La Libertad</td>
+                                    <td class="h-none">0</td>
+                                    <td class="h-bajo">1</td>
+                                    <td class="h-medio">2</td>
+                                    <td class="num">3</td>
+                                </tr>
+                                <tr>
+                                    <td class="row-lab">Áncash</td>
+                                    <td class="h-none">0</td>
+                                    <td class="h-bajo">1</td>
+                                    <td class="h-bajo">1</td>
+                                    <td class="num">2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <dl class="meta">
+                        <dt>Definición</dt>
+                        <dd>
+                            Casos con <code>nivel_riesgo = Alto</code>,
+                            agrupados por región y banda de conflictividad.
+                        </dd>
+                        <dt>Fuente</dt>
+                        <dd>
+                            <a href="#src-casos">core.casos</a> ·
+                            <code>core.caso_regiones</code> · requiere
+                            <code>vw_riesgo_alto_detalle</code>
+                        </dd>
+                    </dl>
+                </article>
             </section>
 
             <!-- ─────────────────── CONTRATO DE SERIES ─────────────────── -->
@@ -2345,16 +2861,22 @@
                 <h2 id="fuera-titulo">Fuera de alcance de este mockup</h2>
                 <ul>
                     <li>
-                        <b>Capa cartográfica (item 53):</b> aplazada por
-                        decisión de producto hasta que exista el dataset de
-                        ubigeo y centroide. La SPA ya sirve «Panorama
-                        territorial» con datos reales; aquí no se dibuja
-                        geometría.
+                        <b>Capa cartográfica (item 53):</b> aquí no se dibuja
+                        geometría. La capa distrital ya existe como archivo
+                        (<code>gis/derived/distritos_capa.geojson</code>, 1 892
+                        distritos con <code>UBIGEO</code> INEI) y desbloquea las
+                        coropletas (129), los centroides (130) y las tasas por
+                        100 000 (131), pero todavía no está cargada en PostGIS
+                        (item 128). Hasta entonces el mapa vive en «Panorama
+                        territorial» y no en este dashboard.
                     </li>
                     <li>
-                        <b>SLA, <i>aging</i> y tendencia interanual:</b> no hay
-                        historia de estados ni serie plurianual; se dibujaría
-                        una forma sin dato.
+                        <b>SLA y tendencia interanual:</b> no hay historia de
+                        estados ni serie plurianual; el aging (pieza 2) se
+                        calcula sólo desde <code>fecha_inicio</code> del
+                        snapshot y las fechas vienen del legado, por eso va
+                        rotulado <b>ejemplo</b>. No se dibuja una tendencia de
+                        varios años sin dato.
                     </li>
                     <li>
                         <b>Módulos 2027 y <code>T_CLIMA</code>:</b> sin tablas

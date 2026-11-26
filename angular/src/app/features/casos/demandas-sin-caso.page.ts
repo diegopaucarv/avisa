@@ -24,19 +24,22 @@ import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import {
   ESTADOS_DEMANDA,
   aColeccionDemandas,
   claseEstadoDemanda,
   formatearFecha,
-  partesDemanda,
   type ColeccionDemandas,
   type Demanda,
   type EstadoDemanda,
-  type ParteDemanda,
 } from './demanda-sin-caso.mapeo';
 
 type FiltrosDemandas = {
@@ -64,7 +67,13 @@ const FILTROS_INICIALES: FiltrosDemandas = {
  */
 @Component({
   selector: 'app-demandas-sin-caso',
-  imports: [IconoComponent, PaginacionComponent, ExportarMenuComponent],
+  imports: [
+    IconoComponent,
+    PaginacionComponent,
+    BarraSeleccionComponent,
+    ExportarMenuComponent,
+    ThOrdenDirective,
+  ],
   templateUrl: './demandas-sin-caso.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -91,46 +100,11 @@ const FILTROS_INICIALES: FiltrosDemandas = {
       gap: 16px;
     }
 
-    .view-head h1 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: #7b8896;
-      font-size: 11px;
-      line-height: 1.6;
-    }
-
     .celda-descripcion {
       min-width: 220px;
       max-width: 320px;
       white-space: normal;
       line-height: 1.5;
-    }
-
-    .celda-3p {
-      min-width: 240px;
-      max-width: 380px;
-      white-space: normal;
-      line-height: 1.5;
-    }
-
-    .p3-linea {
-      display: block;
-    }
-
-    .p3-linea strong {
-      margin-right: 4px;
-      color: #4a6076;
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
     }
 
     .celda-fecha {
@@ -140,7 +114,7 @@ const FILTROS_INICIALES: FiltrosDemandas = {
     .fecha-origen {
       margin-left: 4px;
       color: #a0aab3;
-      font-size: 8px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.3px;
       text-transform: uppercase;
@@ -153,7 +127,7 @@ const FILTROS_INICIALES: FiltrosDemandas = {
     .boton-vincular {
       min-height: 26px;
       padding: 3px 8px;
-      font-size: 9px;
+      font-size: 12px;
       white-space: nowrap;
     }
 
@@ -164,28 +138,21 @@ const FILTROS_INICIALES: FiltrosDemandas = {
       border-radius: 7px;
       background: #f1f7f3;
       color: #416b52;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.5;
     }
 
     .drawer-error {
       margin: 0;
       color: #a84f49;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
-    }
-
-    /* El estilo global de .drawer-head sólo tipografía h3. */
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font-size: 15px;
     }
 
     .drawer-num {
       margin: 0;
       color: #7b8896;
-      font-size: 10px;
+      font-size: 12.5px;
     }
 
     .caso-lista {
@@ -229,20 +196,20 @@ const FILTROS_INICIALES: FiltrosDemandas = {
 
     .caso-opcion-codigo {
       color: #33465a;
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 700;
     }
 
     .caso-opcion-titulo {
       color: #7b8896;
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.45;
     }
 
     .micro-label {
       margin: 0 0 4px;
       color: #8a98a5;
-      font-size: 8px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.9px;
       text-transform: uppercase;
@@ -296,7 +263,6 @@ export class DemandasSinCasoPage {
 
   readonly demandas = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
-  readonly sinCasoTotal = computed(() => this.listado.valor()?.sinCasoTotal ?? 0);
 
   /**
    * Filtros de la exportación. `sinCaso=true` no viaja en la URL de la vista
@@ -324,6 +290,27 @@ export class DemandasSinCasoPage {
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
+
+  /** Selección de la tabla (página visible) para exportar o anular en lote. */
+  readonly seleccion = new SeleccionTabla();
+
+  /** Orden local de la página visible. */
+  readonly orden = new OrdenTabla<Demanda>();
+
+  private readonly accesores: Record<string, (demanda: Demanda) => unknown> = {
+    descripcion: (demanda) => demanda.descripcion,
+    estado: (demanda) => demanda.estado,
+    fecha: (demanda) => demanda.fechaHecho ?? demanda.fechaRegistro,
+    mujeres: (demanda) => demanda.afectaMujeres,
+  };
+
+  readonly filasVisibles = computed(() => this.orden.ordenar(this.demandas(), this.accesores));
+
+  idsVisibles(): string[] {
+    return this.demandas()
+      .map((demanda) => demanda.id)
+      .filter((id): id is string => !!id);
+  }
 
   private readonly busquedaCaso = signal('');
 
@@ -400,6 +387,12 @@ export class DemandasSinCasoPage {
 
   recargar(): void {
     this.listado.recargar();
+  }
+
+  alAnularLote(cantidad: number): void {
+    this.seleccion.limpiar();
+    this.aviso.set(cantidad === 1 ? '1 registro anulado.' : `${cantidad} registros anulados.`);
+    this.recargar();
   }
 
   alFallarExportacion(mensaje: string): void {
@@ -484,10 +477,6 @@ export class DemandasSinCasoPage {
   /* ------------------------------------------------------------------ *
    * Helpers de plantilla
    * ------------------------------------------------------------------ */
-
-  partes(demanda: Demanda): ParteDemanda[] {
-    return partesDemanda(demanda);
-  }
 
   claseEstado(estado: EstadoDemanda): string {
     return claseEstadoDemanda(estado);

@@ -1,0 +1,405 @@
+{
+  "fuente": "docs/01_requisitos/23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (1).xlsx",
+  "generado_por": "scripts/matriz/parse_matriz.py",
+  "regla_bloques": "Bloque = fila con 'Nombre de Caso' (E) no vacía; los campos A..K se rellenan hacia abajo.",
+  "dimensiones_hoja": {
+    "filas": 1003,
+    "columnas": 28,
+    "merges": 408
+  },
+  "conteos": {
+    "casos": 37,
+    "casos_con_codigo": 31,
+    "casos_sin_codigo": 6,
+    "bloques_por_a": 34,
+    "bloques_por_e": 37,
+    "demandas": 23,
+    "acciones": 56,
+    "hitos": 111,
+    "hitos_en_acciones": 111,
+    "hitos_sin_accion": 0,
+    "hitos_filas_etiquetadas": 111
+  },
+  "validacion": {
+    "esperado": {
+      "demandas": 23,
+      "acciones": 56,
+      "hitos": 111
+    },
+    "obtenido": {
+      "demandas": 23,
+      "acciones": 56,
+      "hitos": 111
+    },
+    "cuadra": true,
+    "bloque_1": {
+      "esperado_por_enunciado": {
+        "demandas": 6,
+        "acciones": 5,
+        "hitos": 13
+      },
+      "obtenido": {
+        "demandas": 7,
+        "acciones": 5,
+        "hitos": 13
+      },
+      "cuadra_con_realidad": true,
+      "cuadra_con_enunciado": false,
+      "nota": "El bloque 1 (filas 3..15) tiene 7 demandas, no 6: las filas 3, 4, 5, 6, 9, 12 y 15 traen texto distinto en L, sin celdas fusionadas. El total de 23 demandas se reparte 7+3+6+3+4 entre los casos 1, 2, 8, 11 y el bloque duplicado '15'. El desvío es del enunciado, no del parser."
+    },
+    "bloques_a_contra_e": {
+      "por_a": 34,
+      "por_e": 37,
+      "casos_que_a_engulle": [
+        {
+          "fila": 118,
+          "nombre": "Presunta depredación de Anchoveta por alta pesca juvenil"
+        },
+        {
+          "fila": 127,
+          "nombre": "Disconformidad ciudadana en Chilca en horarios de asistencia"
+        },
+        {
+          "fila": 132,
+          "nombre": "Mortandad masiva de truchas (~2 millones) en Pariahuanca, Junín"
+        }
+      ],
+      "nota": "Usar la columna A como delimitador deja 34 bloques y atribuye las acciones de estas tres filas a los casos 31 y al bloque '15' duplicado. La columna E delimita 37 casos y conserva los totales 23/56/111."
+    },
+    "hitos_asignados": {
+      "asignados_a_accion": 111,
+      "filas_con_hito": 111,
+      "cuadra": true
+    }
+  },
+  "no_mapeado": [
+    {
+      "elemento": "Código de Caso",
+      "detalle": "6 de 37 casos no tienen código en METADATOS CASOS",
+      "casos": [
+        {
+          "n": null,
+          "fila": 118,
+          "nombre": "Presunta depredación de Anchoveta por alta pesca juvenil"
+        },
+        {
+          "n": 33,
+          "fila": 122,
+          "nombre": "Presunto impacto ambiental y sanitario por proyecto de planta de cal – CALCESUR"
+        },
+        {
+          "n": 34,
+          "fila": 124,
+          "nombre": "DPA Ilo en Moquegua"
+        },
+        {
+          "n": null,
+          "fila": 127,
+          "nombre": "Disconformidad ciudadan en Chilca en horarios para de asistencia para mecanismos de participación ciudadana del EIA-d Aceros Americanos"
+        },
+        {
+          "n": 15,
+          "fila": 128,
+          "nombre": "Restricciones internacionales a especies de tiburón"
+        },
+        {
+          "n": null,
+          "fila": 132,
+          "nombre": "Mortandad masiva de truchas (~2 millones) en Pariahuanca, Junín."
+        }
+      ],
+      "destino": null
+    },
+    {
+      "elemento": "Análisis de Caso (Canva), columna G",
+      "detalle": "32 hipervínculos a carpetas de Google Drive; es un enlace, no texto, y no existe columna de destino",
+      "enlaces_duplicados": [
+        "https://drive.google.com/drive/folders/1vtvQ0LcamPV4u6do_pkybTGo8GjCCTI8?usp=drive_link"
+      ],
+      "destino": "core.casos.link_reporte_pdf (discutible) / sin columna propia"
+    },
+    {
+      "elemento": "Responsable del Hito, columna U",
+      "detalle": "100 hitos traen responsable; core.hitos_compromiso no tiene columna de responsable",
+      "destino": null
+    },
+    {
+      "elemento": "Medios de Verificaciones, columna O",
+      "detalle": "es una instrucción ('Acción 1: Adjuntar'), no un adjunto ni una URI",
+      "destino": "core.hitos_compromiso.descripcion_evidencia / link_evidencia (previo adjuntar)"
+    },
+    {
+      "elemento": "Documentos / Archivos / Otros, columna R",
+      "detalle": "etiqueta ('Documentos'), no un archivo",
+      "destino": "core.documentos (previo alta del archivo)"
+    },
+    {
+      "elemento": "Timestamp de última actualización, columna H",
+      "detalle": "contiene estados ('No aplica', 'Pendiente', 'Actualizado'), no fechas",
+      "destino": "core.casos.fecha_ultima_actualizacion (no aplicable)"
+    },
+    {
+      "elemento": "Temática de la demanda, columna M",
+      "detalle": "7 demandas sin temática; no se hereda de la fila anterior",
+      "destino": "core.demandas.tematica_id"
+    },
+    {
+      "elemento": "Estado Actual del hito, columna X",
+      "detalle": "43 hitos con 'No Cumplido', valor ausente de core.cat_estados_hito",
+      "destino": "core.hitos_compromiso.estado_id"
+    },
+    {
+      "elemento": "Fechas no convertibles",
+      "detalle": "21 valores de fecha no son fechas completas",
+      "valores": [
+        {
+          "caso": "CS-PA-REG-2024-01",
+          "fila": 14,
+          "campo": "fecha_planificada",
+          "raw": "31.12.2025, 02, 03 y 05.01.2026",
+          "estado": "fecha_multiple"
+        },
+        {
+          "caso": "CS-PA-REG-2024-01",
+          "fila": 14,
+          "campo": "fecha_real",
+          "raw": "31.12.2025, 02, 03 y 05.01.2026",
+          "estado": "fecha_multiple"
+        },
+        {
+          "caso": "CS-PA-REG-2025-04",
+          "fila": 21,
+          "campo": "fecha_planificada",
+          "raw": "No aplica",
+          "estado": "no_aplica"
+        },
+        {
+          "caso": "CS-PA-REG-2025-04",
+          "fila": 21,
+          "campo": "fecha_real",
+          "raw": "No aplica",
+          "estado": "no_aplica"
+        },
+        {
+          "caso": "CS-PA-REG-2020-06",
+          "fila": 26,
+          "campo": "fecha_planificada",
+          "raw": "Constante",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-REG-2020-06",
+          "fila": 26,
+          "campo": "fecha_real",
+          "raw": "Constante",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-REG-2025-10",
+          "fila": 38,
+          "campo": "fecha_planificada",
+          "raw": "12, 20, 21, 25 y 27,02,2026",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-REG-2019-17",
+          "fila": 51,
+          "campo": "fecha_planificada",
+          "raw": 2024.0,
+          "estado": "solo_anio"
+        },
+        {
+          "caso": "CS-PA-REG-2019-17",
+          "fila": 51,
+          "campo": "fecha_real",
+          "raw": 2025.0,
+          "estado": "solo_anio"
+        },
+        {
+          "caso": "CS-MI-REG-2020-22",
+          "fila": 83,
+          "campo": "fecha_planificada",
+          "raw": "Depende de entrega de obra",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-SOC-2019-27",
+          "fila": 101,
+          "campo": "fecha_planificada",
+          "raw": "Indefinido",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-SOC-2019-27",
+          "fila": 102,
+          "campo": "fecha_planificada",
+          "raw": "Indefinido",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-SOC-2019-27",
+          "fila": 103,
+          "campo": "fecha_planificada",
+          "raw": "Indefinido",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-SOC-2019-27",
+          "fila": 104,
+          "campo": "fecha_planificada",
+          "raw": "Indefinido",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-SOC-2019-27",
+          "fila": 105,
+          "campo": "fecha_planificada",
+          "raw": "Indefinido",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-SOC-2019-28",
+          "fila": 107,
+          "campo": "fecha_planificada",
+          "raw": "Depende del hito 1",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-INF-2017-29",
+          "fila": 111,
+          "campo": "fecha_planificada",
+          "raw": "Julio 2026 - Noviembre 2026",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-INF-2017-29",
+          "fila": 111,
+          "campo": "fecha_real",
+          "raw": "Julio 2026 - Noviembre 2026",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-INF-2017-29",
+          "fila": 112,
+          "campo": "fecha_planificada",
+          "raw": "Diciembre 2026 - Junio 2027",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "CS-PA-INF-2017-29",
+          "fila": 112,
+          "campo": "fecha_real",
+          "raw": "Diciembre 2026 - Junio 2027",
+          "estado": "texto_no_fecha"
+        },
+        {
+          "caso": "N°34",
+          "fila": 126,
+          "campo": "fecha_planificada",
+          "raw": "Noviembre - Diciembre 2026",
+          "estado": "texto_no_fecha"
+        }
+      ],
+      "destino": "core.hitos_compromiso.fecha_vencimiento / fecha_real"
+    },
+    {
+      "elemento": "Acciones sin hito",
+      "detalle": "11 acciones no tienen ningún hito",
+      "acciones": [
+        {
+          "caso": "CS-PA-REG-2021-11",
+          "fila": 39,
+          "accion": "Respuesta de SANIPES, sobre realización de estudio sanitario"
+        },
+        {
+          "caso": "CS-PA-INF-2023-18",
+          "fila": 54,
+          "accion": "Plan Multisectorial para la Zona Marina Costera 2026\n Fortal"
+        },
+        {
+          "caso": "CS-PA-INF-2023-18",
+          "fila": 56,
+          "accion": "Plan de Reactivación Económica de la Zona Merina Costera 202"
+        },
+        {
+          "caso": "CS-PA-INF-2023-18",
+          "fila": 57,
+          "accion": "Plan de Reactivación Económica de la Zona Merina Costera 202"
+        },
+        {
+          "caso": "CS-PA-INF-2023-18",
+          "fila": 59,
+          "accion": "Plan de Reactivación Económica de la Zona Merina Costera 202"
+        },
+        {
+          "caso": "CS-MI-REG-2019-20",
+          "fila": 68,
+          "accion": "Produce tiene el compromiso de fortalecer el Programa Compra"
+        },
+        {
+          "caso": "CS-MI-REG-2025-30",
+          "fila": 113,
+          "accion": "DPA San José en Lambayeque"
+        },
+        {
+          "caso": "N°None",
+          "fila": 118,
+          "accion": "Evaluación técnica y pronunciamiento oficial de PRODUCE sobr"
+        },
+        {
+          "caso": "N°None",
+          "fila": 120,
+          "accion": "Análisis de discrepancias entre los volúmenes declarados y p"
+        },
+        {
+          "caso": "N°33",
+          "fila": 122,
+          "accion": "Reunión, requiriendo atención del caso y respuesta directa."
+        },
+        {
+          "caso": "N°None",
+          "fila": 132,
+          "accion": "1. FONDES dará asistencia técnica, previa viabilidad hidroló"
+        }
+      ],
+      "destino": "core.compromisos + core.hitos_compromiso"
+    },
+    {
+      "elemento": "Desglose 3P de la demanda",
+      "detalle": "el Excel trae una sola columna de texto; problema/propuesta/pedido no existen",
+      "destino": "core.demandas.problema_3p / propuesta_3p / pedido_3p"
+    },
+    {
+      "elemento": "Seguimiento semanal de nudos críticos",
+      "detalle": "16 columnas en 'Reporte de avance'; no hay tabla en la base",
+      "destino": null
+    },
+    {
+      "elemento": "Nivel de Riesgo Inicial y Actual",
+      "detalle": "dos escalas en 'Reporte de avance' (Inicial/Actual) con valores fuera de core.cat_niveles_riesgo",
+      "destino": "core.casos.nivel_riesgo_id (sólo el actual)"
+    },
+    {
+      "elemento": "Capacidades 1-5 y Postura vs PRODUCE (hoja DVPA)",
+      "detalle": "no hay columnas en core.actores; 'Postura' sólo se parece a casos_actores.posicion",
+      "destino": null
+    },
+    {
+      "elemento": "Sectorista, columna C",
+      "detalle": "es un nombre; core.usuarios.nombre existe y la FK es punto_focal_usuario_id",
+      "destino": "core.usuarios + core.casos.punto_focal_usuario_id"
+    },
+    {
+      "elemento": "Prioridad de Atención vs Nivel de Riesgo, columna D",
+      "detalle": "D sólo trae Urgente/Moderado/Bajo (prioridad); el riesgo vive en otra hoja y con otra escala",
+      "destino": "core.casos.prioridad_id"
+    }
+  ],
+  "advertencias_globales": [
+    "La numeración N° no es clave: existe un '15' duplicado en la fila 128 y faltan el 32 y los números de dos casos.",
+    "METADATOS CASOS se alinea con la hoja principal por posición (su fila r-1 corresponde al caso que empieza en r); no hay clave real.",
+    "Sólo 31 de 37 casos tienen Código de Caso.",
+    "Los códigos del Excel no coinciden con core.casos.codigo_caso de Neon: de 31 códigos, 2 coinciden textualmente y ambos apuntan a otro caso (fuente: consulta de sólo lectura).",
+    "El '15' duplicado comparte el mismo enlace de Canva que el caso 15 de la fila 48."
+  ]
+}

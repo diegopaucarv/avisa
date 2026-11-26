@@ -1,4 +1,4 @@
-<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+<div class="drawer-scrim" (keydown)="alTecla($event)">
   <aside
     #panel
     class="drawer"
@@ -12,12 +12,11 @@
         @if (codigo()) {
           <p class="anular-panel-codigo">{{ codigo() }}</p>
         }
-        <h2 id="anular-panel-titulo">
-          {{ esAnular() ? 'Anular ' : 'Restaurar ' }}{{ entidad() }}
-        </h2>
+        <h2 id="anular-panel-titulo">{{ esAnular() ? 'Anular ' : 'Restaurar ' }}{{ entidad() }}</h2>
         <p class="anular-panel-sub">
           @if (esAnular()) {
-            La anulación es lógica: el registro deja de mostrarse y conserva el motivo y su historial.
+            La anulación es lógica: el registro deja de mostrarse y conserva el motivo y su
+            historial.
           } @else {
             La restauración recupera el registro y los que se anularon en la misma operación.
           }
@@ -36,9 +35,7 @@
 
     <div class="drawer-body">
       @if (!puedeConfirmar()) {
-        <p class="form-hint" role="status">
-          Su rol no permite anular ni restaurar este registro.
-        </p>
+        <p class="form-hint" role="status">Su rol no permite anular ni restaurar este registro.</p>
       }
       @if (bloqueo(); as motivoBloqueo) {
         <p class="anular-bloqueo" role="note">{{ motivoBloqueo }}</p>
@@ -84,8 +81,8 @@
               Al anular {{ entidad() }} también se anulan en cascada {{ detalleCascada() }}.
               Restaurar revierte esa misma operación.
             } @else {
-              Al restaurar {{ entidad() }} se recuperan también {{ detalleCascada() }}, anulados
-              en la misma operación.
+              Al restaurar {{ entidad() }} se recuperan también {{ detalleCascada() }}, anulados en
+              la misma operación.
             }
           </p>
         }

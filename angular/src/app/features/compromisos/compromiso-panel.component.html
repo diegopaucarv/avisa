@@ -13,14 +13,6 @@
         <h2 id="panel-compromiso-titulo">
           {{ modoAlta() ? 'Registrar compromiso' : cabecera().accion }}
         </h2>
-        <p>
-          @if (modoAlta()) {
-            El código lo genera el servidor al guardar.
-          } @else {
-            Caso {{ cabecera().casoCodigo || '—' }} ·
-            {{ cabecera().casoTitulo || 'Sin caso asociado' }}
-          }
-        </p>
       </div>
       <button
         type="button"
@@ -54,6 +46,17 @@
             {{ cabecera().estado }}
           </span>
           <span class="badge">{{ cabecera().tipo }}</span>
+          @if (cabecera().clasificacionAlcance) {
+            <span class="badge">
+              {{ clasificacionAlcanceTexto(cabecera().clasificacionAlcance) }}
+            </span>
+          }
+          @if (cabecera().formalVerbal) {
+            <span class="badge">{{ formalVerbalTexto(cabecera().formalVerbal) }}</span>
+          }
+          @if (cabecera().asumidoMinistro) {
+            <span class="badge badge-formal">{{ etiquetaAsumidoMinistro }}</span>
+          }
           @if (cabecera().nivelGobierno) {
             <span class="badge">{{ nivelTexto(cabecera().nivelGobierno) }}</span>
           }
@@ -82,10 +85,6 @@
               <small class="form-hint">Se registra a mano; no se deriva de la región.</small>
             </div>
             <div>
-              <span>Temática</span>
-              <strong>{{ cabecera().tematica || '—' }}</strong>
-            </div>
-            <div>
               <span>Nivel de gobierno <app-glosario termino="nivel-gobierno" /></span>
               <strong>{{ nivelTexto(cabecera().nivelGobierno) }}</strong>
             </div>
@@ -97,18 +96,10 @@
               <span>Fecha de inicio</span>
               <strong>{{ fechaTexto(cabecera().fechaInicio) }}</strong>
             </div>
-            <div>
-              <span>Clasificación</span>
-              <strong>{{ cabecera().clasificacion }}</strong>
-            </div>
-            <div>
-              <span>Origen del dato</span>
-              <strong>{{ cabecera().origen || '—' }}</strong>
-            </div>
           </div>
 
           <div class="panel-linea">
-            <span class="form-label">Evidencia</span>
+            <span class="form-label">Medios de verificación</span>
             @if (cabecera().evidenciaUri; as evidencia) {
               @if (esEnlace(evidencia)) {
                 <a [href]="evidencia" target="_blank" rel="noopener">{{ evidencia }}</a>
@@ -116,7 +107,7 @@
                 <span>{{ evidencia }}</span>
               }
             } @else {
-              <span class="form-hint">Sin evidencia registrada.</span>
+              <span class="form-hint">Sin medios de verificación registrados.</span>
             }
           </div>
 
@@ -130,29 +121,44 @@
             </div>
           }
 
-          @if (criteriosJson(); as criteriosVista) {
+          @if (criteriosLegibles(); as criteriosVista) {
             <div class="panel-linea">
               <span class="form-label">Criterios SMART</span>
-              <pre class="criterios">{{ criteriosVista }}</pre>
+              <dl class="criterios-lista">
+                @for (criterio of criteriosVista; track criterio.clave) {
+                  <div>
+                    <dt>{{ criterio.clave }}</dt>
+                    <dd>{{ criterio.valor }}</dd>
+                  </div>
+                }
+              </dl>
             </div>
           }
+        </section>
+
+        <section class="detail-section" aria-labelledby="adjuntos-compromiso">
+          <h3 id="adjuntos-compromiso">Adjuntos del compromiso</h3>
+          <p class="form-hint">Archivos que respaldan el compromiso y sus hitos.</p>
+          <app-adjuntos-panel
+            entidadTipo="compromiso"
+            [entidadId]="cabecera().id"
+            titulo="Adjuntos del compromiso"
+            [editable]="puedeModificar()"
+          />
         </section>
       }
 
       @if (formularioVisible()) {
-        <section class="detail-section" aria-labelledby="editar-compromiso">
+        <section
+          class="detail-section"
+          [class.form-alta]="modoAlta()"
+          aria-labelledby="editar-compromiso"
+        >
           <div class="detail-section-title">
             <div>
               <h3 id="editar-compromiso">
                 {{ modoAlta() ? 'Datos del nuevo compromiso' : 'Modificar compromiso' }}
               </h3>
-              <p>
-                @if (modoAlta()) {
-                  El código y el estado inicial los asigna el servidor.
-                } @else {
-                  Sólo se envían los campos del PATCH.
-                }
-              </p>
             </div>
           </div>
 
@@ -213,7 +219,7 @@
           }
 
           <div class="form-grid">
-            <div class="form-field panel-campo-ancho">
+            <div class="form-field form-campo panel-campo-ancho">
               <label class="form-label" for="comp-accion">Acción comprometida</label>
               <textarea
                 id="comp-accion"
@@ -224,7 +230,7 @@
               ></textarea>
             </div>
 
-            <div class="form-field">
+            <div class="form-field form-campo">
               <label class="form-label" for="comp-inicio">Fecha de inicio</label>
               <input
                 id="comp-inicio"
@@ -235,7 +241,7 @@
               />
             </div>
 
-            <div class="form-field">
+            <div class="form-field form-campo">
               <label class="form-label" for="comp-vencimiento"> Fecha de vencimiento </label>
               <input
                 id="comp-vencimiento"
@@ -260,7 +266,7 @@
               }
             </div>
 
-            <div class="form-field">
+            <div class="form-field form-campo">
               <label class="form-label" for="comp-tipo">Tipo de compromiso</label>
               <select id="comp-tipo" class="form-select" (change)="actualizarTexto('tipo', $event)">
                 @for (tipo of tiposCompromiso; track tipo) {
@@ -271,7 +277,61 @@
               </select>
             </div>
 
-            <div class="form-field">
+            <div class="form-field form-campo">
+              <label class="form-label" for="comp-clasificacion-alcance">
+                Clasificación del alcance
+              </label>
+              <select
+                id="comp-clasificacion-alcance"
+                class="form-select"
+                (change)="actualizarTexto('clasificacionAlcance', $event)"
+              >
+                <option value="" [selected]="!formulario().clasificacionAlcance">
+                  Sin declarar
+                </option>
+                @for (clasificacion of clasificacionesAlcance; track clasificacion.valor) {
+                  <option
+                    [value]="clasificacion.valor"
+                    [selected]="clasificacion.valor === formulario().clasificacionAlcance"
+                  >
+                    {{ clasificacion.etiqueta }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field form-campo">
+              <label class="form-label" for="comp-formal-verbal">Carácter del compromiso</label>
+              <select
+                id="comp-formal-verbal"
+                class="form-select"
+                (change)="actualizarTexto('formalVerbal', $event)"
+              >
+                <option value="" [selected]="!formulario().formalVerbal">Sin declarar</option>
+                @for (forma of formasVerbales; track forma.valor) {
+                  <option
+                    [value]="forma.valor"
+                    [selected]="forma.valor === formulario().formalVerbal"
+                  >
+                    {{ forma.etiqueta }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field form-campo">
+              <span class="form-label">Asumido por el Señor Ministro</span>
+              <label class="panel-check">
+                <input
+                  type="checkbox"
+                  [checked]="formulario().asumidoMinistro"
+                  (change)="actualizarBooleano('asumidoMinistro', $event)"
+                />
+                Compromiso asumido por el Señor Ministro
+              </label>
+            </div>
+
+            <div class="form-field form-campo">
               <label class="form-label" for="comp-nivel">Nivel de gobierno</label>
               <select
                 id="comp-nivel"
@@ -296,7 +356,7 @@
             </div>
 
             @if (!modoAlta()) {
-              <div class="form-field">
+              <div class="form-field form-campo">
                 <label class="form-label" for="comp-estado">Estado</label>
                 <select
                   id="comp-estado"
@@ -312,7 +372,7 @@
               </div>
             }
 
-            <div class="form-field">
+            <div class="form-field form-campo">
               <label class="form-label" for="comp-unidad">Unidad responsable</label>
               @if (unidadesFormulario().length > 0) {
                 <select
@@ -344,7 +404,7 @@
               }
             </div>
 
-            <div class="form-field">
+            <div class="form-field form-campo">
               <label class="form-label" for="comp-alcance"> Alcance geográfico </label>
               <select
                 id="comp-alcance"
@@ -368,49 +428,20 @@
               </select>
             </div>
 
-            <div class="form-field">
-              <label class="form-label" for="comp-tematica">Temática</label>
-              @if (tematicasFormulario().length > 0) {
-                <select
-                  id="comp-tematica"
-                  class="form-select"
-                  (change)="actualizarTexto('tematica', $event)"
-                >
-                  <option value="" [selected]="!formulario().tematica">Sin temática</option>
-                  @for (tematica of tematicasFormulario(); track tematica.valor) {
-                    <option
-                      [value]="tematica.valor"
-                      [selected]="tematica.valor === formulario().tematica"
-                    >
-                      {{ tematica.etiqueta }}
-                    </option>
-                  }
-                </select>
-              } @else {
-                <input
-                  id="comp-tematica"
-                  class="form-input"
-                  [value]="formulario().tematica"
-                  (input)="actualizarTexto('tematica', $event)"
-                  placeholder="Nombre exacto de la temática"
-                />
-              }
-            </div>
-
-            <div class="form-field">
+            <div class="form-field form-campo">
               <span class="form-label">Brecha de género</span>
               <label class="panel-check">
                 <input
                   type="checkbox"
                   [checked]="formulario().atiendeGenero"
-                  (change)="actualizarBooleano($event)"
+                  (change)="actualizarBooleano('atiendeGenero', $event)"
                 />
                 Atiende brecha de género
               </label>
             </div>
 
-            <div class="form-field">
-              <label class="form-label" for="comp-evidencia">Evidencia (URI)</label>
+            <div class="form-field form-campo">
+              <label class="form-label" for="comp-evidencia">Medios de verificación</label>
               <input
                 id="comp-evidencia"
                 class="form-input"
@@ -418,22 +449,6 @@
                 (input)="actualizarTexto('evidenciaUri', $event)"
                 placeholder="https://…"
               />
-            </div>
-
-            <div class="form-field panel-campo-ancho">
-              <label class="form-label" for="comp-criterios"> Criterios SMART (JSON) </label>
-              <textarea
-                id="comp-criterios"
-                class="form-textarea"
-                rows="4"
-                [value]="formulario().criteriosSmart"
-                (input)="actualizarTexto('criteriosSmart', $event)"
-              ></textarea>
-              @if (modoAlta()) {
-                <p class="form-hint">Objeto JSON opcional.</p>
-              } @else {
-                <p class="form-hint">Objeto JSON, o vacío para quitarlos del compromiso.</p>
-              }
             </div>
           </div>
         </section>
@@ -445,14 +460,12 @@
           @if (vencimiento().fecha; as fechaVencimiento) {
             <p class="panel-fecha">
               <strong>{{ fechaTexto(fechaVencimiento) }}</strong>
+              <span [class]="'due-state ' + situacion().clase">{{ situacion().etiqueta }}</span>
               <span class="badge">
                 {{
                   vencimiento().origen === 'manual' ? 'Fecha manual' : 'Derivada del próximo hito'
                 }}
               </span>
-              @if (cabecera().vencido) {
-                <span class="due-state due-vencido">Vencido</span>
-              }
             </p>
             <p class="form-hint">
               @if (vencimiento().origen === 'manual') {
@@ -485,7 +498,7 @@
         <section class="detail-section" aria-labelledby="hitos-compromiso">
           <div class="detail-section-title">
             <div>
-              <h3 id="hitos-compromiso">Hitos ({{ hitos().length }})</h3>
+              <h3 id="hitos-compromiso">Hitos</h3>
               <p>Estados vigentes del Anexo 14.</p>
             </div>
           </div>
@@ -503,7 +516,7 @@
                   ></span>
                   <div>
                     <div class="timeline-meta">
-                      <strong>{{ hito.codigo || 'Hito' }}</strong>
+                      <strong>{{ codigoHito(hito.codigo) }}</strong>
                       <time>{{ fechaTexto(hito.fecha) }}</time>
                     </div>
                     <p>{{ hito.descripcion || 'Sin descripción' }}</p>
@@ -522,13 +535,29 @@
                         <span class="badge badge-formal">
                           Real: {{ fechaTexto(hito.fechaReal) }}
                         </span>
+                      } @else if (hito.fechaRealTexto) {
+                        <span class="badge badge-formal">Real: {{ hito.fechaRealTexto }}</span>
                       } @else {
                         <span class="badge badge-unclassified">Sin fecha real</span>
                       }
+                      @if (hito.fechaTexto && !hito.fecha) {
+                        <span class="badge badge-unclassified">{{ hito.fechaTexto }}</span>
+                      }
+                      @if (hito.responsableTexto && !puedeModificar()) {
+                        <span class="badge">Responsable: {{ hito.responsableTexto }}</span>
+                      }
+                      <button
+                        type="button"
+                        class="panel-hito-toggle"
+                        [attr.aria-expanded]="adjuntosHitoAbiertos(hito.id)"
+                        (click)="alternarAdjuntosHito(hito.id)"
+                      >
+                        {{ adjuntosHitoAbiertos(hito.id) ? 'Ocultar adjuntos' : 'Adjuntos' }}
+                      </button>
                       @if (puedeModificar()) {
                         <label class="hito-estado">
                           <span class="sr-only">
-                            Cambiar estado del hito {{ hito.codigo || '' }}
+                            Cambiar estado del hito {{ codigoHito(hito.codigo) }}
                           </span>
                           <select
                             class="form-select hito-select"
@@ -542,8 +571,33 @@
                             }
                           </select>
                         </label>
+                        <label class="hito-responsable">
+                          <span class="sr-only">
+                            Responsable del hito {{ codigoHito(hito.codigo) }}
+                          </span>
+                          <input
+                            class="form-input hito-responsable-input"
+                            type="text"
+                            maxlength="200"
+                            autocomplete="off"
+                            placeholder="Responsable"
+                            [value]="hito.responsableTexto ?? ''"
+                            [disabled]="hitoCambiando() === hito.id"
+                            (change)="cambiarResponsableHito(hito, $event)"
+                          />
+                        </label>
                       }
                     </div>
+                    @if (adjuntosHitoAbiertos(hito.id)) {
+                      <div class="panel-hito-adjuntos">
+                        <app-adjuntos-panel
+                          entidadTipo="hito"
+                          [entidadId]="hito.id"
+                          titulo="Adjuntos del hito"
+                          [editable]="puedeModificar()"
+                        />
+                      </div>
+                    }
                   </div>
                 </li>
               }
@@ -572,6 +626,17 @@
                     type="date"
                     [value]="hitoNuevo().fecha"
                     (input)="actualizarHito('fecha', $event)"
+                  />
+                </div>
+                <div class="form-field">
+                  <label class="form-label" for="hito-responsable">Responsable del hito</label>
+                  <input
+                    id="hito-responsable"
+                    class="form-input"
+                    maxlength="200"
+                    [value]="hitoNuevo().responsableTexto"
+                    (input)="actualizarHito('responsableTexto', $event)"
+                    placeholder="Persona o área responsable"
                   />
                 </div>
                 <div class="form-field">
@@ -605,6 +670,146 @@
             </div>
           } @else if (hitosError(); as errorHito) {
             <p class="form-error" role="alert">{{ errorHito }}</p>
+          }
+        </section>
+
+        <section class="detail-section" aria-labelledby="historial-compromiso">
+          <div class="detail-section-title">
+            <div>
+              <h3 id="historial-compromiso">Historial</h3>
+              <p>Eventos declarados, hitos y adjuntos en orden cronológico.</p>
+            </div>
+          </div>
+
+          @if (estadoHistorial() === 'inactivo' || estadoHistorial() === 'cargando') {
+            <p class="form-hint" role="status">Cargando el historial…</p>
+          } @else if (estadoHistorial() === 'error') {
+            <div class="panel-aviso" role="alert">
+              <p>{{ errorHistorial()?.message }}</p>
+              <button type="button" class="button-secondary" (click)="recargarHistorial()">
+                Reintentar
+              </button>
+            </div>
+          } @else {
+            @if (eventosHistorial().length === 0) {
+              <p class="form-hint">
+                Sin eventos registrados para este compromiso. Los hitos y los adjuntos se muestran
+                igualmente.
+              </p>
+            }
+
+            @if (lineaHistorial().length === 0) {
+              <p class="form-hint">
+                Sin movimientos registrados: ni eventos, ni hitos, ni adjuntos.
+              </p>
+            } @else {
+              <ol class="timeline">
+                @for (item of lineaHistorial(); track item.tipo + ':' + item.id) {
+                  <li class="timeline-event">
+                    <span
+                      class="timeline-dot"
+                      [class.dot-validated]="item.hito?.estado === 'Cumplido'"
+                      [class.dot-pending]="item.hito?.estado !== 'Cumplido'"
+                    ></span>
+                    <div>
+                      @if (item.evento; as eventoHistorial) {
+                        <div class="timeline-meta">
+                          <strong>{{ etiquetaEvento(eventoHistorial.tipo) }}</strong>
+                          <time>{{ fechaHoraTexto(eventoHistorial.createdAt) }}</time>
+                        </div>
+                        @if (detalleEvento(eventoHistorial); as textoEvento) {
+                          <p>{{ textoEvento }}</p>
+                        }
+                        <div class="timeline-actions">
+                          <span class="badge">Evento</span>
+                          @if (eventoHistorial.autor) {
+                            <span class="badge">{{ eventoHistorial.autor }}</span>
+                          }
+                        </div>
+                      }
+
+                      @if (item.hito; as hitoHistorial) {
+                        <div class="timeline-meta">
+                          <strong>Hito {{ codigoHito(hitoHistorial.codigo) }}</strong>
+                          <time>{{
+                            fechaTexto(hitoHistorial.fechaReal ?? hitoHistorial.fecha)
+                          }}</time>
+                        </div>
+                        <p>{{ hitoHistorial.descripcion || 'Sin descripción' }}</p>
+                        <div class="timeline-actions">
+                          <span
+                            class="commit-status"
+                            [class.commit-cumplido]="hitoHistorial.estado === 'Cumplido'"
+                            [class.commit-paralizado]="hitoHistorial.estado === 'Paralizado'"
+                          >
+                            {{ hitoHistorial.estado }}
+                          </span>
+                          <span class="badge">
+                            {{ hitoHistorial.adjuntos }}
+                            {{ hitoHistorial.adjuntos === 1 ? 'adjunto' : 'adjuntos' }}
+                          </span>
+                          @if (hitoHistorial.responsableTexto) {
+                            <span class="badge"
+                              >Responsable: {{ hitoHistorial.responsableTexto }}</span
+                            >
+                          }
+                        </div>
+                      }
+
+                      @if (item.adjunto; as adjuntoHistorial) {
+                        <div class="timeline-meta">
+                          <strong>Adjunto</strong>
+                          <time>{{ fechaHoraTexto(adjuntoHistorial.createdAt) }}</time>
+                        </div>
+                        <p>{{ adjuntoHistorial.nombre }}</p>
+                        <div class="timeline-actions">
+                          <span class="badge">
+                            {{ adjuntoHistorial.entidadTipo === 'hito' ? 'Hito' : 'Compromiso' }}
+                          </span>
+                          @if (adjuntoHistorial.hitoCodigo) {
+                            <span class="badge">{{ codigoHito(adjuntoHistorial.hitoCodigo) }}</span>
+                          }
+                          @if (adjuntoHistorial.descripcion) {
+                            <span class="badge">{{ adjuntoHistorial.descripcion }}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </li>
+                }
+              </ol>
+            }
+
+            @if (puedeModificar()) {
+              <div class="panel-evento-form">
+                <h4>Registrar evento</h4>
+                <div class="form-field">
+                  <label class="form-label" for="evento-detalle">Detalle</label>
+                  <textarea
+                    id="evento-detalle"
+                    class="form-textarea"
+                    rows="2"
+                    [value]="eventoTexto()"
+                    (input)="actualizarEventoTexto($event)"
+                  ></textarea>
+                </div>
+
+                @if (eventoError(); as errorEvento) {
+                  <p class="form-error" role="alert">{{ errorEvento }}</p>
+                }
+
+                <button
+                  type="button"
+                  class="button-secondary"
+                  [disabled]="eventoGuardando()"
+                  (click)="registrarEvento()"
+                >
+                  {{ eventoGuardando() ? 'Registrando…' : 'Registrar nota' }}
+                </button>
+              </div>
+            } @else if (eventoError(); as errorEvento) {
+              <p class="form-error" role="alert">{{ errorEvento }}</p>
+            }
           }
         </section>
       }

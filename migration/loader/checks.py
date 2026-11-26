@@ -71,7 +71,9 @@ CONTEO: tuple[tuple[str, str, int | tuple[int, int]], ...] = (
     ),
     ("log_accesos", "SELECT count(*) FROM core.log_accesos", 857),
     ("cronologia_vinculos", "SELECT count(*) FROM core.cronologia_vinculos", 5),
-    ("migracion_conflicto", "SELECT count(*) FROM core.migracion_conflicto", 498),
+    # 498 de la carga original + 46 de la detección nueva `BRIDGE_CLAVE_DUPLICADA`
+    # (22 claves de `BRIDGE_Alerta_Demandas` repetidas, 46 filas afectadas).
+    ("migracion_conflicto", "SELECT count(*) FROM core.migracion_conflicto", 544),
 )
 
 # Comprobaciones estructurales: el SQL debe devolver 0 para pasar.
@@ -127,10 +129,14 @@ INTEGRIDAD: tuple[tuple[str, str], ...] = (
         "AND NOT EXISTS (SELECT 1 FROM core.casos c WHERE c.id = a.caso_id)",
     ),
     (
+        # Una demanda sin caso declarado NO contradice a su alerta: sólo es una
+        # demanda sin caso (D1 revisada). La contradicción existe cuando la
+        # demanda tiene un caso propio distinto del de su alerta.
         "ninguna demanda con caso distinto al de su alerta",
         "SELECT count(*) FROM core.demandas d "
         "JOIN core.alertas_tempranas a ON a.id = d.alerta_id "
-        "WHERE a.caso_id IS NOT NULL AND d.caso_id IS DISTINCT FROM a.caso_id",
+        "WHERE d.caso_id IS NOT NULL AND a.caso_id IS NOT NULL "
+        "AND d.caso_id IS DISTINCT FROM a.caso_id",
     ),
 )
 
@@ -189,16 +195,22 @@ DESGLOSE: tuple[tuple[str, str, int], ...] = (
         "SELECT count(*) FROM core.demandas WHERE alerta_id IS NOT NULL",
         222,
     ),
+    # Demandas (D1 revisada 2026-11-24). Estas cifras describen una CARGA LIMPIA
+    # desde cero con el importador corregido, que sólo vincula el caso declarado
+    # en `DIM_Demandas.ID_Caso` (99 de 325). Una base REPARADA con la migración
+    # 54 —que sólo desvincula las 16 mal asignadas— da 202 con caso / 123 sin
+    # caso: la diferencia (103) son las demandas que `migration/37` vinculó por
+    # herencia desde su alerta y que siguen pendientes de decisión humana.
     (
         "demandas con caso",
         "SELECT count(*) FROM core.demandas WHERE caso_id IS NOT NULL",
-        218,
+        99,
     ),
     (
         "demandas sin caso pero con alerta",
         "SELECT count(*) FROM core.demandas "
         "WHERE caso_id IS NULL AND alerta_id IS NOT NULL",
-        81,
+        200,
     ),
     (
         "demandas sin caso ni alerta",

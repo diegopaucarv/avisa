@@ -1,0 +1,191 @@
+<div class="fusion-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+  <div
+    #modal
+    class="fusion-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="fusion-titulo"
+    tabindex="-1"
+  >
+    <header class="fusion-cabecera">
+      <div>
+        <h2 id="fusion-titulo">Fusionar duplicados</h2>
+        <p>
+          Comparación lado a lado antes de confirmar. Los vínculos del origen pasan al destino en
+          una sola transacción y el origen queda inactivo.
+        </p>
+      </div>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar el panel de fusión"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="fusion-cuerpo">
+      <p class="fusion-aviso" role="note">
+        <strong>El origen no se borra:</strong> queda inactivo y marcado como fusionado, con el
+        motivo en la auditoría. Se reasignan los casos, demandas, documentos, alertas y membresías
+        del origen al destino. La traza se registra en <code>core.actor_fusion</code>; si esa
+        migración aún no está aplicada, queda en la auditoría de la sesión.
+      </p>
+
+      <p class="fusion-origen">
+        <app-icono nombre="actores" [tamano]="14" />
+        Origen · {{ codigoDe(origen()) }} — {{ origen().nombre }}
+      </p>
+
+      <label class="fusion-campo">
+        Buscar el actor destino
+        <input
+          type="search"
+          autocomplete="off"
+          placeholder="Nombre, abreviatura o cargo (mínimo 2 caracteres)"
+          [value]="busqueda()"
+          (input)="alBuscar($event)"
+        />
+      </label>
+
+      @if (buscando()) {
+        <p class="fusion-vacio" role="status">Buscando en el directorio…</p>
+      } @else if (resultados().length > 0) {
+        <ul class="fusion-resultados" aria-label="Coincidencias del directorio">
+          @for (actor of resultados(); track actor.id) {
+            <li>
+              <span>
+                <strong>{{ actor.nombre }}</strong>
+                · {{ actor.abreviatura || actor.tipo || actor.naturaleza }}
+              </span>
+              <button
+                type="button"
+                class="button-secondary"
+                [attr.aria-label]="'Elegir ' + actor.nombre + ' como destino de la fusión'"
+                (click)="elegirDestino(actor)"
+              >
+                Elegir
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (destino(); as destino) {
+        <p class="fusion-destino">
+          <app-icono nombre="check" [tamano]="14" />
+          Destino · {{ codigoDe(destino) }} — {{ destino.nombre }}
+        </p>
+      } @else {
+        <p class="fusion-vacio">Aún no eligió el actor destino.</p>
+      }
+
+      <table class="fusion-comparar">
+        <thead>
+          <tr>
+            <th scope="col">Campo</th>
+            <th scope="col">Origen · {{ codigoDe(origen()) }}</th>
+            <th scope="col">Destino · {{ codigoDe(destino()) }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="campo">Nombre</td>
+            <td>{{ textoDe(origen().nombre) }}</td>
+            <td>{{ textoDe(destino()?.nombre) }}</td>
+          </tr>
+          <tr>
+            <td class="campo">Tipo de actor</td>
+            <td>{{ textoDe(origen().tipo) }}</td>
+            <td>{{ textoDe(destino()?.tipo) }}</td>
+          </tr>
+          <tr>
+            <td class="campo">Función</td>
+            <td>{{ textoDe(origen().funcion) }}</td>
+            <td>{{ textoDe(destino()?.funcion) }}</td>
+          </tr>
+          <tr>
+            <td class="campo">Identificación</td>
+            <td>{{ nivelDe(origen()) }}</td>
+            <td>{{ nivelDe(destino()) }}</td>
+          </tr>
+          <tr>
+            <td class="campo">Cargo</td>
+            <td>{{ textoDe(origen().cargo) }}</td>
+            <td>{{ textoDe(destino()?.cargo) }}</td>
+          </tr>
+          <tr>
+            <td class="campo">Región</td>
+            <td>{{ textoDe(origen().region) }}</td>
+            <td>{{ textoDe(destino()?.region) }}</td>
+          </tr>
+          <tr>
+            <td class="campo">Correo (PII)</td>
+            <td>
+              @if (origen().email) {
+                <span class="fusion-enmascarado">{{ mascaraCorreo }}</span>
+              } @else {
+                <span class="fusion-vacio">{{ sinDato }}</span>
+              }
+            </td>
+            <td>
+              @if (destino()?.email) {
+                <span class="fusion-enmascarado">{{ mascaraCorreo }}</span>
+              } @else {
+                <span class="fusion-vacio">{{ sinDato }}</span>
+              }
+            </td>
+          </tr>
+          <tr>
+            <td class="campo">Código</td>
+            <td>{{ codigoDe(origen()) }}</td>
+            <td>{{ codigoDe(destino()) }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <label class="fusion-motivo">
+        Motivo de la fusión
+        <textarea
+          rows="4"
+          placeholder="Explique por qué ambos registros son el mismo actor (mínimo 10 caracteres)."
+          [value]="motivo()"
+          (input)="alEscribirMotivo($event)"
+        ></textarea>
+        <span class="fusion-vacio">{{ motivoLongitud() }} / 10 caracteres mínimos</span>
+      </label>
+
+      <label class="fusion-confirmar">
+        <input type="checkbox" [checked]="confirmado()" (change)="alConfirmar($event)" />
+        <span>
+          Confirmo que revisé ambos registros y que la fusión es correcta. Entiendo que el origen
+          quedará inactivo y que esta acción no se deshace desde el directorio.
+        </span>
+      </label>
+
+      @if (error(); as mensaje) {
+        <p class="fusion-error" role="alert">{{ mensaje }}</p>
+      }
+    </div>
+
+    <footer class="fusion-pie">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="enviando()"
+        (click)="cerrar.emit()"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="button-danger"
+        [disabled]="!puedeFusionar()"
+        (click)="fusionar()"
+      >
+        {{ enviando() ? 'Fusionando…' : 'Fusionar' }}
+      </button>
+    </footer>
+  </div>
+</div>

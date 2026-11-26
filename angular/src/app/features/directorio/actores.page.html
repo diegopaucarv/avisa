@@ -1,13 +1,37 @@
 <section class="view-body" aria-labelledby="titulo-actores">
   <header class="view-head">
-    <div>
-      <h1 id="titulo-actores">Actores</h1>
-      <p class="view-subtitle">
-        Personas, organizaciones sociales y entidades registradas en el directorio, con su tipo,
-        función y posicionamiento en el escenario de conflictividad (Guía §7.4).
-      </p>
-    </div>
+    <h1 id="titulo-actores">{{ titulo() }}</h1>
     <div class="view-actions">
+      <details class="menu-nuevo">
+        <summary class="button-primary menu-nuevo-toggle">Nuevo</summary>
+        <div class="menu-nuevo-lista" role="menu" aria-label="Crear registro">
+          <button
+            type="button"
+            role="menuitem"
+            [disabled]="!capacidades.puedeEditar()"
+            [title]="capacidades.puedeEditar() ? 'Registrar un actor persona' : 'Su rol no permite crear actores'"
+            (click)="abrirAlta('persona')"
+          >
+            Nuevo actor
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            [disabled]="!capacidades.puedeEditar()"
+            [title]="capacidades.puedeEditar() ? 'Registrar una organización' : 'Su rol no permite crear organizaciones'"
+            (click)="abrirAlta('organizacion')"
+          >
+            Nueva organización
+          </button>
+        </div>
+      </details>
+
+      <!--
+        La fusión de duplicados y la baja lógica masiva se retiraron del
+        encabezado; la baja y la restauración siguen accesibles desde la ficha
+        del actor seleccionado.
+      -->
+
       <button
         type="button"
         class="button-secondary"
@@ -15,10 +39,15 @@
         aria-controls="lista-temporal-actores"
         (click)="listaTemporalAbierta.set(!listaTemporalAbierta())"
       >
-        Lista temporal <span class="lista-contador">{{ listaTemporal().length }}</span>
+        Lista temporal ({{ listaTemporal().length }})
       </button>
-      <app-exportar-menu entidad="actores" (fallo)="alFallarExportacion($event)" />
-      <p class="result-count" aria-live="polite">{{ total() }} actores</p>
+
+      <app-barra-seleccion
+        entidad="actores"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (fallo)="alFallarExportacion($event)"
+      />
     </div>
   </header>
 
@@ -33,21 +62,9 @@
         type="search"
         placeholder="Buscar por nombre, abreviatura o cargo"
         [value]="filtros().q"
-        aria-label="Buscar actores"
+        [attr.aria-label]="'Buscar ' + sustantivo()"
         (input)="buscar($event)"
       />
-    </label>
-
-    <label class="select-filter">
-      Naturaleza
-      <select aria-label="Filtrar por naturaleza del actor" (change)="cambiarNaturaleza($event)">
-        <option value="" [selected]="filtros().naturaleza === ''">Todas</option>
-        @for (naturaleza of naturalezas; track naturaleza.valor) {
-        <option [value]="naturaleza.valor" [selected]="filtros().naturaleza === naturaleza.valor">
-          {{ naturaleza.etiqueta }}
-        </option>
-        }
-      </select>
     </label>
 
     @if (tiposActor().length > 0) {
@@ -64,50 +81,58 @@
     </label>
     }
 
-    <div class="territorio-filtro">
-      <app-territorio-buscador
-        etiqueta="Región por distrito"
-        marcador="Distrito o lugar: Islay, Piura…"
-        [compacto]="true"
-        [inicial]="regionFiltroInicial()"
-        (elegido)="alElegirTerritorio($event)"
-      />
-    </div>
-
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
 
   @if (listaTemporalAbierta()) {
-  <section class="lista-temporal-panel" id="lista-temporal-actores" aria-labelledby="titulo-lista-temporal">
+  <section
+    class="lista-temporal-panel"
+    id="lista-temporal-actores"
+    aria-labelledby="titulo-lista-temporal"
+  >
     <header class="lista-temporal-cabecera">
       <div>
         <h2 id="titulo-lista-temporal">Lista temporal de actores</h2>
-        <p>Selección de trabajo de esta sesión; se conserva al cambiar los filtros y las páginas.</p>
+        <p>
+          Selección de trabajo de esta sesión; se conserva al cambiar los filtros y las páginas.
+        </p>
       </div>
       <div class="lista-temporal-acciones">
         @if (listaTemporal().length > 0) {
-        <button type="button" class="button-secondary" (click)="abrirPadron()">Generar padrón</button>
+        <button type="button" class="button-secondary" (click)="abrirPadron()">
+          Generar lista
+        </button>
         <button type="button" class="button-secondary" (click)="vaciarLista()">Vaciar lista</button>
         }
-        <button type="button" class="button-secondary" (click)="listaTemporalAbierta.set(false)">Cerrar</button>
+        <button type="button" class="button-secondary" (click)="listaTemporalAbierta.set(false)">
+          Cerrar
+        </button>
       </div>
     </header>
     @if (listaTemporal().length === 0) {
-    <p class="lista-temporal-vacia">Aún no agregaste actores. Usa «Agregar» en cualquier fila del directorio.</p>
+    <p class="lista-temporal-vacia">
+      Aún no agregaste actores. Usa el icono «Agregar a lista temporal» en cualquier fila del
+      directorio.
+    </p>
     } @else {
     <ul class="lista-temporal-items">
-      @for (actor of listaTemporal(); track actor.id) {
+      @for (actor of listaTemporal(); track $index) {
       <li>
         <div>
           <strong>{{ actor.nombre }}</strong>
-          <span>{{ actor.tipo || actor.naturaleza }} · {{ actor.region || 'Región no registrada' }}</span>
+          <span
+            >{{ actor.cargo || actor.tipo || actor.naturaleza }} · {{ actor.region || 'Región no
+            registrada' }}</span
+          >
         </div>
         <button
           type="button"
           class="lista-quitar"
           [attr.aria-label]="'Quitar ' + actor.nombre + ' de la lista temporal'"
-          (click)="quitarDeLista(actor.id)"
-        >Quitar</button>
+          (click)="quitarDeListaPorIndice($index)"
+        >
+          Quitar
+        </button>
       </li>
       }
     </ul>
@@ -117,10 +142,10 @@
 
   <dialog #dialogoPadron class="padron-dialogo" aria-labelledby="titulo-padron">
     <form class="padron-form" (submit)="$event.preventDefault(); descargarPadron()">
-      <h2 id="titulo-padron">Generar padrón de asistencia</h2>
+      <h2 id="titulo-padron">Lista de asistencia</h2>
       <p>
-        El archivo incluye sólo datos institucionales públicos de la lista temporal; no incorpora DNI,
-        teléfonos ni correos personales.
+        El archivo incluye sólo datos institucionales públicos de la lista temporal; no incorpora
+        DNI, teléfonos ni correos personales.
       </p>
       <label>
         Título de la sesión
@@ -149,9 +174,11 @@
           (input)="padronFecha.set($any($event.target).value)"
         />
       </label>
-      <p>{{ listaTemporal().length }} actores seleccionados. Las firmas se dejan en blanco.</p>
+      <p>Las firmas se dejan en blanco.</p>
       <div class="padron-actions">
-        <button type="button" class="button-secondary" (click)="dialogoPadron.close()">Cancelar</button>
+        <button type="button" class="button-secondary" (click)="dialogoPadron.close()">
+          Cancelar
+        </button>
         <button type="submit" class="button-primary">Descargar CSV</button>
       </div>
     </form>
@@ -159,19 +186,16 @@
 
   @if (estado() === "error") {
   <div class="empty-state" role="alert">
-    <strong>No se pudieron cargar los actores</strong>
+    <strong>No se pudieron cargar las {{ sustantivo() }}</strong>
     <p>{{ error()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
   </div>
   } @else if (actores().length === 0) { @if (estado() === "cargando" || estado() === "inactivo") {
-  <div class="empty-state" role="status">Cargando actores…</div>
+  <div class="empty-state" role="status">Cargando {{ sustantivo() }}…</div>
   } @else {
   <div class="empty-state">
-    <strong>Sin actores para estos filtros</strong>
-    <p>
-      No hay actores que coincidan con la búsqueda. La región se compara con el nombre registrado,
-      así que debe escribirse completo (por ejemplo, el departamento).
-    </p>
+    <strong>Sin {{ sustantivo() }} para estos filtros</strong>
+    <p>No hay actores que coincidan con la búsqueda.</p>
   </div>
   } } @else { @if (estado() === "cargando") {
   <p class="actor-actualizando" role="status">Actualizando el listado…</p>
@@ -179,29 +203,61 @@
 
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        Pulse una fila para abrir la ficha en el panel lateral. Los datos personales sólo se
-        consultan desde la ficha y quedan registrados en la auditoría de la base.
-      </caption>
       <thead>
         <tr>
-          <th scope="col">Nombre</th>
-          <th scope="col">Naturaleza</th>
-          <th scope="col">Tipo</th>
-          <th scope="col">Función</th>
-          <th scope="col">Región</th>
-          <th scope="col">Organización ancla</th>
-          <th scope="col"><span class="sr-only">Lista temporal</span></th>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
+          <th scope="col" class="col-foto">Foto</th>
+          <th scope="col" class="col-nombre" [appThOrden]="'nombre'" [orden]="orden">
+            Apellidos y Nombres
+          </th>
+          <th scope="col">Contacto</th>
+          <th scope="col" [appThOrden]="'organizacion'" [orden]="orden">
+            Organización / Institución
+          </th>
+          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
+          <th scope="col" class="col-acciones">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        @for (actor of actores(); track actor.id) {
+        @for (actor of filasVisibles(); track actor.id) {
         <tr
           class="case-row-clickable"
           [class.row-selected]="seleccionado()?.id === actor.id"
+          [class.fila-inactiva]="!actor.activo"
           (click)="abrir(actor)"
         >
-          <td>
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(actor.id)"
+              [attr.aria-label]="'Seleccionar a ' + actor.nombre"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(actor.id)"
+            />
+          </td>
+          <td class="col-foto">
+            @if (fotoDe(actor.id); as foto) {
+            <img
+              class="tabla-foto"
+              [src]="foto.url"
+              [alt]="foto.alt || foto.titulo || actor.nombre"
+              loading="lazy"
+              decoding="async"
+              referrerpolicy="no-referrer"
+            />
+            } @else {
+            <span class="sin-dato">—</span>
+            }
+          </td>
+          <td class="col-nombre">
             <button
               type="button"
               class="table-link actor-nombre"
@@ -209,26 +265,99 @@
               (click)="abrir(actor); $event.stopPropagation()"
             >
               <strong>{{ actor.nombre }}</strong>
-              @if (actor.abreviatura) {
-              <small>{{ actor.abreviatura }}</small>
+              @if (!actor.activo) {
+              <small class="actor-inactivo">Inactivo</small>
               }
             </button>
           </td>
-          <td>{{ actor.naturaleza }}</td>
-          <td>{{ actor.tipo || "—" }}</td>
-          <td>{{ actor.funcion || "No determinado" }}</td>
-          <td>{{ actor.region || "—" }}</td>
-          <td class="actor-organizacion">{{ actor.organizacionAncla || "—" }}</td>
-          <td>
-            <button
-              type="button"
-              class="button-secondary button-lista"
-              [attr.aria-pressed]="estaEnLista(actor)"
-              [attr.aria-label]="(estaEnLista(actor) ? 'Quitar de' : 'Agregar a') + ' lista temporal: ' + actor.nombre"
-              (click)="alternarLista(actor, $event)"
-            >
-              {{ estaEnLista(actor) ? 'Quitar' : 'Agregar' }}
-            </button>
+          <td class="actor-contacto">
+            @if (actor.telefono; as tel) {
+            <span class="contacto-linea">
+              <span>{{ tel }}</span>
+              <button
+                type="button"
+                class="boton-copiar-icono"
+                [attr.aria-label]="'Copiar el teléfono de ' + actor.nombre"
+                [attr.title]="copiado() === tel ? 'Copiado' : 'Copiar teléfono'"
+                (click)="copiar(tel, $event)"
+              >
+                <app-icono [nombre]="copiado() === tel ? 'check' : 'copiar'" [tamano]="13" />
+              </button>
+            </span>
+            } @if (actor.email; as correo) {
+            <span class="contacto-linea">
+              <span>{{ correo }}</span>
+              <button
+                type="button"
+                class="boton-copiar-icono"
+                [attr.aria-label]="'Copiar el correo de ' + actor.nombre"
+                [attr.title]="copiado() === correo ? 'Copiado' : 'Copiar correo'"
+                (click)="copiar(correo, $event)"
+              >
+                <app-icono [nombre]="copiado() === correo ? 'check' : 'copiar'" [tamano]="13" />
+              </button>
+            </span>
+            } @if (!actor.telefono && !actor.email) {
+            <span class="sin-dato">{{ sinDato }}</span>
+            }
+          </td>
+          <td class="actor-organizacion">
+            @if (actor.organizacionAncla || actor.abreviatura) {
+            <strong>{{ actor.organizacionAncla || actor.abreviatura }}</strong>
+            } @if (actor.cargo) { <small>{{ actor.cargo }}</small> } @if (!actor.organizacionAncla
+            && !actor.abreviatura && !actor.cargo) { {{ sinDato }} }
+          </td>
+          <td>{{ actor.region || sinDato }}</td>
+          <td class="col-acciones" (click)="$event.stopPropagation()">
+            <div class="acciones-fila">
+              <button
+                type="button"
+                class="accion"
+                [attr.aria-label]="'Ver la ficha de ' + actor.nombre"
+                [attr.title]="'Ver la ficha de ' + actor.nombre"
+                (click)="abrir(actor)"
+              >
+                <app-icono nombre="ojo" [tamano]="15" />
+              </button>
+              <button
+                type="button"
+                class="accion"
+                [attr.aria-label]="'Editar a ' + actor.nombre"
+                [attr.title]="'Editar a ' + actor.nombre"
+                (click)="abrirEdicion(actor, $event)"
+              >
+                <app-icono nombre="lapiz" [tamano]="15" />
+              </button>
+              <button
+                type="button"
+                class="accion"
+                [class.activa]="estaEnLista(actor)"
+                [attr.aria-pressed]="estaEnLista(actor)"
+                [attr.aria-label]="
+                  (estaEnLista(actor) ? 'Quitar de' : 'Agregar a') +
+                  ' lista temporal: ' +
+                  actor.nombre
+                "
+                [attr.title]="
+                  (estaEnLista(actor) ? 'Quitar de' : 'Agregar a') +
+                  ' lista temporal: ' +
+                  actor.nombre
+                "
+                (click)="alternarLista(actor, $event)"
+              >
+                <app-icono nombre="reloj-mas" [tamano]="15" />
+              </button>
+              <button
+                type="button"
+                class="accion"
+                [disabled]="!capacidades.puedeModificar(actor.clasificacion)"
+                [attr.aria-label]="(actor.activo ? 'Dar de baja a ' : 'Restaurar a ') + actor.nombre"
+                [attr.title]="(actor.activo ? 'Dar de baja a ' : 'Restaurar a ') + actor.nombre"
+                (click)="abrirBaja(actor, actor.activo ? 'anular' : 'restaurar')"
+              >
+                <app-icono nombre="papelera" [tamano]="15" />
+              </button>
+            </div>
           </td>
         </tr>
         }
@@ -246,8 +375,35 @@
   } @if (seleccionado(); as actorAbierto) {
   <app-actor-panel
     [actor]="actorAbierto"
+    [editarInicial]="editarAlAbrir()"
+    [enLista]="estaEnLista(actorAbierto)"
     (cerrar)="cerrarPanel()"
     (actualizado)="alActualizarActor($event)"
+    (alternarLista)="alternarLista(actorAbierto)"
+    (solicitarBaja)="abrirBaja(actorAbierto, 'anular')"
+    (solicitarRestaurar)="abrirBaja(actorAbierto, 'restaurar')"
+  />
+  } @if (altaNaturaleza(); as naturaleza) {
+  <app-actor-panel-alta
+    [naturalezaInicial]="naturaleza"
+    (cerrar)="cerrarAlta()"
+    (creado)="alCrearActor($event)"
+  />
+  } @if (fusionOrigen(); as origenFusion) {
+  <app-actor-panel-fusion
+    [origen]="origenFusion"
+    (cerrar)="cerrarFusion()"
+    (fusionado)="alFusionar()"
+  />
+  } @if (bajaAbierta(); as baja) {
+  <app-anular-panel
+    [modo]="baja.modo"
+    entidad="actor"
+    [codigo]="baja.actor.abreviatura"
+    [enviando]="enviandoBaja()"
+    [errorEnvio]="errorBaja()"
+    (cerrar)="cerrarBaja()"
+    (hecho)="alConfirmarBaja($event)"
   />
   }
 </section>

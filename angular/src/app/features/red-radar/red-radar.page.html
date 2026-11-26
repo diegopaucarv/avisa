@@ -1,0 +1,619 @@
+<section class="view-body" aria-labelledby="titulo-red-radar">
+  <header class="view-head">
+    <div>
+      <p class="eyebrow">Alertas tempranas · bandeja</p>
+      <h1 id="titulo-red-radar">Bandeja RED-RADAR · señales</h1>
+      <p class="view-subtitle">
+        Cola de <b>alertas tempranas</b> pendientes de triaje, con el estado guardado en
+        <code>core.alerta_triaje</code>. La red RED-RADAR produciría las señales; como el conector
+        no existe, la cola trabaja sobre <code>core.alertas_tempranas</code> y el código mostrado es
+        el de la alerta.
+      </p>
+    </div>
+    <div class="view-actions">
+      <button type="button" class="button-secondary" (click)="recargar()">
+        <app-icono nombre="actividad" [tamano]="14" />
+        Recargar
+      </button>
+    </div>
+  </header>
+
+  <p class="nota-fuente">
+    <b>Nota de fuente.</b> No existe tabla de señales ni conector RED-RADAR: la cola es la lista
+    real de <code>core.alertas_tempranas</code> vigentes con su estado de triaje en
+    <code>core.alerta_triaje</code>. Donde falta un dato se declara «—» o «sin dato»; no se rellena.
+  </p>
+
+  @if (aviso(); as mensaje) {
+  <p class="rr-aviso" role="status">{{ mensaje }}</p>
+  } @if (errorAccion(); as mensaje) {
+  <p class="rr-error" role="alert">{{ mensaje }}</p>
+  }
+
+  <!-- ═══════════ 1 · Estado de la fuente ═══════════ -->
+  <section class="rr-section" aria-labelledby="fuente-red-radar">
+    <div class="section-head">
+      <div>
+        <h2 id="fuente-red-radar">Estado de la fuente</h2>
+        <p>Cada tarjeta declara de dónde sale su número, o <b>sin dato</b>.</p>
+      </div>
+    </div>
+
+    <div class="src-cards">
+      <div class="src-card">
+        <span class="lab">Señales recibidas</span>
+        <div class="val">—</div>
+        <p class="ori">
+          <span class="sin">sin dato</span> · origen: conector RED-RADAR, que no existe. No hay
+          tabla de señales.
+        </p>
+      </div>
+
+      <div class="src-card">
+        <span class="lab">Pendientes de triaje</span>
+        <div class="val">{{ contar('pendiente') }}</div>
+        <p class="ori">
+          origen: <code>core.alerta_triaje.estado = 'pendiente'</code>, o alerta que todavía no
+          tiene fila de triaje. Respeta los filtros de territorio, fecha y búsqueda.
+        </p>
+      </div>
+
+      <div class="src-card">
+        <span class="lab">Convertidas en alerta</span>
+        <div class="val">—</div>
+        <p class="ori">
+          <span class="sin">sin dato</span> · origen: filas con <code>fuente_tipo</code> que
+          declaren RADAR. Hoy hay {{ fuente().conFuenteRadar }} alerta(s) así en toda la base; sin
+          señales, el concepto «convertida» no existe.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 2 · Cola de señales ═══════════ -->
+  <section class="rr-section" aria-labelledby="cola-red-radar">
+    <div class="section-head">
+      <div>
+        <h2 id="cola-red-radar">Cola de señales</h2>
+        <p>
+          Estado de triaje por alerta. Los contadores de los chips salen de los conteos reales de la
+          cola; el filtro de estado no los recorta.
+        </p>
+      </div>
+      <span class="badge warn">fuente no conectada</span>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar" role="group" aria-label="Filtros por estado de triaje">
+        @for (opcion of opcionesFiltro; track opcion.valor) {
+        <button
+          type="button"
+          class="chip"
+          [attr.aria-pressed]="filtros().estado === opcion.valor"
+          (click)="cambiarEstado(opcion.valor)"
+        >
+          {{ opcion.etiqueta }}
+          <span class="count">{{ contar(opcion.valor) }}</span>
+        </button>
+        }
+      </div>
+
+      <div class="filtros">
+        <label class="filtro-campo">
+          <span>Región</span>
+          <select aria-label="Filtrar por región" (change)="cambiarRegion($event)">
+            <option value="" [selected]="filtros().region === null">Todas las regiones</option>
+            @for (region of regiones(); track region.id) {
+            <option [value]="region.id" [selected]="filtros().region === region.id">
+              {{ region.nombre }}
+            </option>
+            }
+          </select>
+        </label>
+
+        <div class="filtro-campo filtro-territorio">
+          <span>Distrito</span>
+          @for (generacion of generacionesBuscador(); track generacion.id) {
+          <app-territorio-buscador
+            etiqueta="Distrito"
+            marcador="Distrito: Islay, Piura…"
+            [soloDistritos]="true"
+            [compacto]="true"
+            [inicial]="distritoInicial()"
+            (elegido)="elegirDistrito($event)"
+          />
+          }
+        </div>
+
+        <label class="filtro-campo">
+          <span>Desde</span>
+          <input
+            type="date"
+            aria-label="Fecha desde"
+            [value]="filtros().desde"
+            (change)="cambiarDesde($event)"
+          />
+        </label>
+
+        <label class="filtro-campo">
+          <span>Hasta</span>
+          <input
+            type="date"
+            aria-label="Fecha hasta"
+            [value]="filtros().hasta"
+            (change)="cambiarHasta($event)"
+          />
+        </label>
+
+        <div class="filtro-campo buscador">
+          <span>Buscar</span>
+          <div class="buscador-caja">
+            <app-icono nombre="buscar" [tamano]="14" />
+            <input
+              type="search"
+              aria-label="Buscar en la cola"
+              placeholder="Código o texto"
+              [value]="filtros().q"
+              (input)="alTeclearBusqueda($event)"
+            />
+          </div>
+        </div>
+
+        @if (hayFiltros()) {
+        <button type="button" class="btn limpiar" (click)="limpiar()">Limpiar filtros</button>
+        }
+      </div>
+
+      @if (!cola()) { @if (error(); as mensaje) {
+      <div class="empty-state" role="alert">
+        <span class="ico" aria-hidden="true"><app-icono nombre="alerta" [tamano]="22" /></span>
+        <div>
+          <h3>No se pudo cargar la cola.</h3>
+          <p>{{ mensaje }}</p>
+          <button type="button" class="btn" (click)="recargar()">Reintentar</button>
+        </div>
+      </div>
+      } @else if (cargando()) {
+      <p class="vacio-panel" role="status">Cargando la cola…</p>
+      } } @else if (sinRegistros()) {
+      <div class="empty-state" role="note">
+        <span class="ico" aria-hidden="true">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 12h4l2 5 4-11 2 6h6" />
+          </svg>
+        </span>
+        <div>
+          @if (hayFiltros()) {
+          <h3>No hay alertas para estos filtros.</h3>
+          <p>
+            La cola está vacía con el estado, el territorio o las fechas elegidas. Ajusta los
+            filtros o límpialos para ver la cola completa.
+          </p>
+          } @else {
+          <h3>La cola está vacía.</h3>
+          <p>
+            No hay alertas tempranas vigentes que triar. No es un error: es el estado real de la
+            base.
+          </p>
+          }
+          <ul>
+            <li>La fuente RED-RADAR no está conectada: no existe tabla de señales ni conector.</li>
+            <li>La cola se alimenta de <code>core.alertas_tempranas</code> vigentes.</li>
+          </ul>
+        </div>
+      </div>
+      } @else if (cola(); as c) {
+      <div class="tabla-scroll">
+        <table class="q">
+          <caption>
+            {{ c.total }} alerta(s) con los filtros activos · {{ elementos().length }} en esta
+            página. «Tipo de señal» no existe en la base y se declara así.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Código / origen</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Distrito · ubigeo</th>
+              <th scope="col">Tipo de señal</th>
+              <th scope="col">Extracto</th>
+              <th scope="col">Prioridad propuesta</th>
+              <th scope="col">Duplicado de</th>
+              <th scope="col">Estado de triaje</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (senal of elementos(); track senal.codigo) {
+            <tr
+              [class.sel]="esSeleccionada(senal)"
+              tabindex="0"
+              (click)="seleccionar(senal)"
+              (keydown.enter)="seleccionar(senal)"
+            >
+              <td>
+                <div class="code">{{ senal.codigo }}</div>
+                <span class="sub">{{ senal.fuenteTipo ?? 'sin dato' }}</span>
+              </td>
+              <td>{{ senal.fechaTexto }}</td>
+              <td>
+                {{ senal.distrito ?? '—' }}
+                <span class="sub code">{{ senal.ubigeo ?? '—' }}</span>
+              </td>
+              <td class="nd">no existe</td>
+              <td>{{ senal.extracto ?? '—' }}</td>
+              <td>
+                @if (senal.prioridad) {
+                <span [class]="'tag ' + clasePrioridad(senal.prioridad)">
+                  {{ etiquetaPrioridad(senal.prioridad) }}
+                </span>
+                } @else {
+                <span class="nd">—</span>
+                }
+              </td>
+              <td>
+                @if (senal.duplicadaDe) {
+                <span class="code">{{ senal.duplicadaDe }}</span>
+                } @else {
+                <span class="nd">—</span>
+                }
+              </td>
+              <td>
+                <span [class]="'tag ' + clasesEstado[senal.estado]">
+                  {{ etiquetasEstado[senal.estado] }}
+                </span>
+                @if (senal.motivo) {
+                <span class="motivo"><b>Motivo:</b> {{ senal.motivo }}</span>
+                }
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pie-tabla">
+        <app-paginacion
+          [pagina]="c.pagina"
+          [tamano]="c.tamanoPagina"
+          [total]="c.total"
+          (paginaCambia)="cambiarPagina($event)"
+          (tamanoCambia)="cambiarTamano($event)"
+        />
+      </div>
+      }
+    </div>
+  </section>
+
+  <!-- ═══════════ 3 · Triage ═══════════ -->
+  <section class="rr-section" aria-labelledby="triaje-red-radar">
+    <div class="section-head">
+      <div>
+        <h2 id="triaje-red-radar">Triage</h2>
+        <p>
+          La fila completa, su fuente y la sugerencia del sistema —presentada como
+          <b>sugerencia, no como hecho</b>— y las decisiones que persisten en
+          <code>core.alerta_triaje</code>.
+        </p>
+      </div>
+      @if (senalActual(); as seleccion) {
+      <span class="badge">{{ seleccion.codigo }}</span>
+      }
+    </div>
+
+    @if (senalActual(); as senal) {
+    <div class="split">
+      <nav class="ctx" aria-label="Cola · contexto">
+        <h3>Cola · contexto</h3>
+        <ul>
+          @for (item of elementos(); track item.codigo) {
+          <li>
+            <button
+              type="button"
+              [attr.aria-current]="esSeleccionada(item)"
+              (click)="seleccionar(item)"
+            >
+              <span class="cd">{{ item.codigo }}</span> · {{ item.distrito ?? item.region ?? 'sin
+              dato' }}
+              <span class="st">
+                {{ etiquetasEstado[item.estado] }} @if (item.duplicadaDe) { · {{ item.duplicadaDe }}
+                }
+              </span>
+            </button>
+          </li>
+          }
+        </ul>
+      </nav>
+
+      <aside class="drawer" aria-label="Panel de triaje">
+        <div class="drawer-head">
+          <div>
+            <div class="t">{{ senal.codigo }}</div>
+            <span class="s">
+              Alerta temprana · {{ senal.region ?? 'sin dato' }} · {{ senal.fechaTexto }}
+            </span>
+          </div>
+          <div class="drawer-acciones">
+            <button
+              type="button"
+              class="btn"
+              [disabled]="!puedeTriar(senal) || guardando()"
+              [attr.title]="puedeTriar(senal) ? null : motivoSinPermiso"
+              (click)="marcarEnTriage()"
+            >
+              Marcar en triaje
+            </button>
+            <button
+              type="button"
+              class="btn"
+              [disabled]="!puedeTriar(senal) || guardando()"
+              [attr.title]="puedeTriar(senal) ? null : motivoSinPermiso"
+              (click)="devolverPendiente()"
+            >
+              Devolver a pendiente
+            </button>
+            <button
+              type="button"
+              class="x"
+              aria-label="Cerrar panel de triaje"
+              (click)="cerrarPanel()"
+            >
+              <app-icono nombre="cerrar" [tamano]="14" />
+            </button>
+          </div>
+        </div>
+
+        <div class="drawer-body">
+          <!-- La señal -->
+          <div class="block">
+            <h3>La señal</h3>
+            <dl class="kv">
+              <dt>Código</dt>
+              <dd>
+                {{ senal.codigo }}
+                <span class="sub-inline">· código de alerta, no de señal</span>
+              </dd>
+              <dt>Distrito</dt>
+              <dd>
+                @if (senal.distrito) { {{ senal.distrito }} @if (senal.ubigeo) { ·
+                <code>{{ senal.ubigeo }}</code>
+                } } @else {
+                <span class="nd">sin dato</span>
+                }
+              </dd>
+              <dt>Tipo de señal</dt>
+              <dd class="nd">no existe</dd>
+              <dt>Fecha</dt>
+              <dd>{{ senal.fechaTexto }}</dd>
+              <dt>Extracto</dt>
+              <dd>{{ senal.extracto ?? '—' }}</dd>
+              <dt>Situación</dt>
+              <dd>{{ senal.situacion ?? 'sin dato' }}</dd>
+              <dt>Caso</dt>
+              <dd>
+                @if (senal.casoCodigo) {
+                <code>{{ senal.casoCodigo }}</code>
+                } @else {
+                <span class="nd">sin caso</span>
+                }
+              </dd>
+              <dt>Nivel</dt>
+              <dd>{{ senal.nivel ?? 'sin dato' }}</dd>
+            </dl>
+          </div>
+
+          <!-- Fuente -->
+          <div class="block">
+            <h3>Fuente</h3>
+            <dl class="kv">
+              <dt>Tipo</dt>
+              <dd>{{ senal.fuenteTipo ?? 'sin dato' }}</dd>
+              <dt>Descripción</dt>
+              <dd>{{ senal.fuenteDescripcion ?? 'sin dato' }}</dd>
+              <dt>URL</dt>
+              <dd>
+                @if (senal.fuenteUrl) {
+                <a [href]="senal.fuenteUrl" target="_blank" rel="noopener">{{ senal.fuenteUrl }}</a>
+                } @else {
+                <span class="nd">sin dato</span>
+                }
+              </dd>
+            </dl>
+          </div>
+
+          <!-- Ubicación -->
+          <div class="block">
+            <h3>Ubicación</h3>
+            <dl class="kv">
+              <dt>Distrito</dt>
+              <dd>{{ senal.distrito ?? 'sin dato' }}</dd>
+              <dt>Ubigeo</dt>
+              <dd>{{ senal.ubigeo ?? 'sin dato' }}</dd>
+              <dt>Provincia</dt>
+              <dd>{{ senal.provincia ?? 'sin dato' }}</dd>
+              <dt>Región</dt>
+              <dd>{{ senal.region ?? 'sin dato' }}</dd>
+            </dl>
+          </div>
+
+          <!-- Sugerencia -->
+          <div class="block">
+            <h3>Sugerencia del sistema</h3>
+            <div class="suggest">
+              <span class="tag-sug">Sugerencia · no validada</span>
+              <p>
+                Se lee de <code>riesgos_json</code> y <code>acciones_sugeridas_json</code>. Es una
+                propuesta: no afirma el riesgo ni la acción hasta que una persona la valide.
+              </p>
+              @if (senal.riesgos.length || senal.accionesSugeridas.length) {
+              <ul>
+                @for (riesgo of senal.riesgos; track $index) {
+                <li>Riesgo sugerido: {{ riesgo }}</li>
+                } @for (accion of senal.accionesSugeridas; track $index) {
+                <li>Acción sugerida: {{ accion }}</li>
+                }
+              </ul>
+              } @else {
+              <p class="nd">sin dato</p>
+              }
+            </div>
+          </div>
+
+          <!-- Decisiones -->
+          <div class="block">
+            <h3>Decisiones de triaje</h3>
+            <div class="decisions">
+              <div class="decision" [class.on]="senal.estado === 'pendiente'">
+                <h4><span class="num">1</span>Confirmar alerta</h4>
+                <p class="note-inline">
+                  La fila ya es una alerta en <code>core.alertas_tempranas</code>: confirmar no crea
+                  otra fila, sólo fija el estado de triaje.
+                </p>
+                <button
+                  type="button"
+                  class="btn primary"
+                  [disabled]="
+                      !puedeTriar(senal) || guardando() || senal.estado === 'confirmada'
+                    "
+                  [attr.title]="puedeTriar(senal) ? null : motivoSinPermiso"
+                  (click)="confirmar()"
+                >
+                  {{ senal.estado === 'confirmada' ? 'Confirmada' : 'Confirmar alerta' }}
+                </button>
+              </div>
+
+              <div class="decision">
+                <h4><span class="num">2</span>Descartar con motivo</h4>
+                <form (submit)="descartar($event)">
+                  <div class="field">
+                    <label for="rr-motivo-descarte">Motivo</label>
+                    <textarea
+                      id="rr-motivo-descarte"
+                      [value]="motivoDescarte()"
+                      [disabled]="!puedeTriar(senal) || guardando()"
+                      (input)="motivoDescarte.set($any($event.target).value)"
+                    ></textarea>
+                    <span class="hint">
+                      El motivo es obligatorio: ninguna fila se descarta sin él.
+                    </span>
+                  </div>
+                  <button
+                    type="submit"
+                    class="btn"
+                    [disabled]="!puedeTriar(senal) || guardando()"
+                    [attr.title]="puedeTriar(senal) ? null : motivoSinPermiso"
+                  >
+                    Descartar con motivo
+                  </button>
+                </form>
+              </div>
+
+              <div class="decision">
+                <h4><span class="num">3</span>Marcar duplicada de…</h4>
+                <form (submit)="marcarDuplicada($event)">
+                  <div class="field">
+                    <label for="rr-dup-codigo">Alerta de la que es duplicada</label>
+                    <input
+                      id="rr-dup-codigo"
+                      type="text"
+                      placeholder="AT-2026-088"
+                      [value]="codigoDuplicada()"
+                      [disabled]="!puedeTriar(senal) || guardando()"
+                      (input)="codigoDuplicada.set($any($event.target).value)"
+                    />
+                    <span class="hint"
+                      >Código de una alerta existente; si no existe, la API lo rechaza.</span
+                    >
+                  </div>
+                  <div class="field">
+                    <label for="rr-dup-motivo">Motivo</label>
+                    <textarea
+                      id="rr-dup-motivo"
+                      [value]="motivoDuplicada()"
+                      [disabled]="!puedeTriar(senal) || guardando()"
+                      (input)="motivoDuplicada.set($any($event.target).value)"
+                    ></textarea>
+                    <span class="hint">El motivo es obligatorio.</span>
+                  </div>
+                  <button
+                    type="submit"
+                    class="btn"
+                    [disabled]="!puedeTriar(senal) || guardando()"
+                    [attr.title]="puedeTriar(senal) ? null : motivoSinPermiso"
+                  >
+                    Marcar duplicada
+                  </button>
+                </form>
+              </div>
+
+              @if (senal.motivo) {
+              <p class="note-inline"><b>Motivo registrado:</b> {{ senal.motivo }}</p>
+              } @if (senal.triadoPor) {
+              <p class="note-inline">
+                Triado por {{ senal.triadoPor }} @if (senal.triadoEn) { · {{
+                fechaTriaje(senal.triadoEn) }} }
+              </p>
+              }
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+    } @else {
+    <p class="vacio-panel">Selecciona una fila de la cola para ver el detalle y triar.</p>
+    }
+  </section>
+
+  <!-- ═══════════ 4 · Qué falta ═══════════ -->
+  <section class="rr-section" aria-labelledby="falta-red-radar">
+    <div class="section-head">
+      <div>
+        <h2 id="falta-red-radar">Qué falta para que esta bandeja funcione</h2>
+        <p>Tres piezas concretas. Mientras falten, la cola sigue siendo la de alertas reales.</p>
+      </div>
+    </div>
+    <div class="gap-grid">
+      <div class="gap-card">
+        <span class="k">a</span>
+        <strong>Conector de fuente RADAR</strong>
+        <p>
+          No hay tabla de señales ni fuente cargada. Sin conector no llega ninguna señal; la cola
+          sólo puede mostrar alertas ya registradas.
+        </p>
+        <span class="item">Origen RED-RADAR</span>
+      </div>
+      <div class="gap-card">
+        <span class="k">b</span>
+        <strong>Catálogo de tipos de señal</strong>
+        <p>
+          La base no declara tipos de señal, así que la columna se muestra «no existe» en vez de
+          inventar una clasificación.
+        </p>
+        <span class="item">Anexo 03 · formato de alerta</span>
+      </div>
+      <div class="gap-card">
+        <span class="k">c</span>
+        <strong>Deduplicación automática</strong>
+        <p>
+          El marcado manual persiste en <code>core.alerta_triaje</code>, pero falta la regla que
+          compara fuentes y propone duplicados.
+        </p>
+        <span class="item">Item 38</span>
+      </div>
+    </div>
+  </section>
+
+  <p class="foot">
+    Vocabulario: nivel de conflictividad <b>latente</b> (Diferencia · Controversia) y
+    <b>manifiesto</b> (Conflicto social · Crisis social); <b>caso abierto</b>; sectores
+    <b>Pesca y acuicultura</b> y <b>MYPE e industria</b>; espacios <b>Auditorios</b>. Los datos que
+    la base no declara se muestran «—» o «sin dato».
+  </p>
+</section>

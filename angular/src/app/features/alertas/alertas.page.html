@@ -2,10 +2,6 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-alertas">Alertas tempranas</h1>
-      <p class="view-subtitle">
-        Candidatos de conflicto social del sistema RED-RADAR. Cada alerta recorre elaboración,
-        validación previa, aprobación definitiva de la Dirección OAIPCS, remisión y archivo.
-      </p>
     </div>
     <div class="view-actions">
       @if (puedeRegistrar()) {
@@ -14,21 +10,29 @@
         Registrar alerta
       </button>
       }
-      <app-exportar-menu
+      <app-barra-seleccion
         entidad="alertas"
+        anulable="alertas"
         [consulta]="filtrosExportacion()"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (anulado)="alAnularLote($event)"
         (fallo)="alFallarExportacion($event)"
       />
-      <p class="result-count" aria-live="polite">{{ total() }} alertas</p>
     </div>
   </header>
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
   } @if (avisoAnulacion(); as aviso) {
-  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  <p class="form-hint aviso-ok" role="status">
+    {{ aviso }}
+    <a class="table-link" routerLink="/archivo">Abrir el Archivo</a>
+  </p>
   } @if (avisoAlta(); as avisoRegistro) {
   <p class="form-hint aviso-ok" role="status">{{ avisoRegistro }}</p>
+  } @if (avisoArchivo(); as avisoArchivo) {
+  <p class="form-hint aviso-ok" role="status">{{ avisoArchivo }}</p>
   }
 
   <div class="executive-kpis">
@@ -49,20 +53,20 @@
     <div class="stat-card">
       <span class="stat-icon amber"><app-icono nombre="reloj" [tamano]="16" /></span>
       <span class="stat-copy">
-        <span>Pendientes de revisión</span>
+        <span>Pendientes</span>
         <strong>{{ pendientes() ?? '—' }}</strong>
       </span>
     </div>
     <div class="stat-card">
-      <span class="stat-icon"><app-icono nombre="bandeja" [tamano]="16" /></span>
+      <span class="stat-icon"><app-icono nombre="alertas" [tamano]="16" /></span>
       <span class="stat-copy">
-        <span>Sin caso asignado</span>
-        <strong>{{ sinCasoTotales() ?? '—' }}</strong>
+        <span>Sin caso</span>
+        <strong>{{ sinCaso() ?? '—' }}</strong>
       </span>
     </div>
   </div>
 
-  <div class="filter-bar filter-bar-wrap">
+  <div class="filter-bar">
     <label class="search-field">
       <app-icono nombre="buscar" [tamano]="14" />
       <input
@@ -75,49 +79,12 @@
     </label>
 
     <label class="select-filter">
-      Prioridad
-      <select aria-label="Filtrar por prioridad de la alerta" (change)="cambiarPrioridad($event)">
-        <option value="" [selected]="filtros().prioridad === ''">Todas</option>
-        @for (prioridad of prioridades; track prioridad) {
-        <option [value]="prioridad" [selected]="filtros().prioridad === prioridad">
-          {{ etiquetaPrioridad(prioridad) }}
-        </option>
-        }
-      </select>
-    </label>
-
-    <div class="territorio-filtro">
-      <app-territorio-buscador
-        etiqueta="Distrito"
-        marcador="Distrito: Islay, Piura…"
-        [soloDistritos]="true"
-        [compacto]="true"
-        [inicial]="distritoFiltroInicial()"
-        (elegido)="alElegirDistrito($event)"
-      />
-    </div>
-
-    <label class="select-filter">
       Riesgo
-      <select aria-label="Filtrar por riesgo (nivel de alerta)" (change)="cambiarNivel($event)">
-        <option value="" [selected]="filtros().nivel === ''">Todos</option>
-        @for (nivel of niveles; track nivel.valor) {
-        <option [value]="nivel.valor" [selected]="filtros().nivel === nivel.valor">
-          {{ nivel.etiqueta }}
-        </option>
+      <select aria-label="Filtrar por nivel de riesgo" (change)="cambiarRiesgo($event)">
+        <option value="" [selected]="filtros().riesgo === ''">Todos</option>
+        @for (riesgo of riesgos; track riesgo) {
+        <option [value]="riesgo" [selected]="filtros().riesgo === riesgo">{{ riesgo }}</option>
         }
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Sin caso asignado
-      <select
-        aria-label="Filtrar alertas con o sin caso asignado"
-        (change)="cambiarSinCaso($event)"
-      >
-        <option value="" [selected]="filtros().sinCaso === ''">Todos</option>
-        <option value="true" [selected]="filtros().sinCaso === 'true'">Sí</option>
-        <option value="false" [selected]="filtros().sinCaso === 'false'">No</option>
       </select>
     </label>
 
@@ -126,8 +93,33 @@
       <select aria-label="Filtrar por estado de la alerta" (change)="cambiarEstado($event)">
         <option value="" [selected]="filtros().estado === ''">Todos</option>
         @for (estado of estados; track estado) {
-        <option [value]="estado" [selected]="filtros().estado === estado">{{ estado }}</option>
+        <option [value]="estado" [selected]="filtros().estado === estado">
+          {{ etiquetaEstadoFiltro(estado) }}
+        </option>
         }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Caso
+      <select aria-label="Filtrar por caso asignado" (change)="cambiarCaso($event)">
+        <option value="" [selected]="filtros().sinCaso === ''">
+          Todos los registros ({{ totalActivas() ?? '—' }})
+        </option>
+        <option value="false" [selected]="filtros().sinCaso === 'false'">
+          Con caso asignado ({{ conCaso() ?? '—' }})
+        </option>
+        <option value="true" [selected]="filtros().sinCaso === 'true'">
+          Sin caso asignado ({{ sinCaso() ?? '—' }})
+        </option>
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Archivo
+      <select aria-label="Ver alertas archivadas" (change)="cambiarArchivados($event)">
+        <option value="" [selected]="filtros().archivados === ''">Activas</option>
+        <option value="true" [selected]="filtros().archivados === 'true'">Archivadas</option>
       </select>
     </label>
 
@@ -145,113 +137,162 @@
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
 
+  <p class="alerta-guia">Pulse una fila para abrir la ficha en el panel lateral.</p>
+
   @if (estadoListado() === 'error') {
   <div class="empty-state" role="alert">
     <strong>No se pudieron cargar las alertas</strong>
     <p>{{ errorListado()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargarListado()">Reintentar</button>
   </div>
-  } @else if (alertas().length === 0) { @if (estadoListado() === 'cargando' || estadoListado() ===
-  'inactivo') {
-  <div class="empty-state" role="status">Cargando alertas…</div>
-  } @else {
-  <div class="empty-state">
-    <strong>No hay alertas con estos filtros</strong>
-    <p>Pruebe a quitar algún filtro o a revisar el texto de búsqueda.</p>
-  </div>
-  } } @else { @if (estadoListado() === 'cargando') {
+  } @else { @if (estadoListado() === 'cargando' && alertas().length > 0) {
   <p class="alerta-actualizando" role="status">Actualizando el listado…</p>
+  } @if (aprobacionFila(); as aprobacion) {
+  <div
+    class="form-hint view-actions"
+    role="group"
+    aria-label="Confirmación de aprobación definitiva"
+  >
+    <span>
+      <strong>{{ aprobacion.alerta.codigo || 'Sin código' }}</strong>
+      · {{ tituloAlerta(aprobacion.alerta) }} · Aprobación definitiva · paso {{ aprobacion.paso }}
+      de 5
+    </span>
+    <button
+      type="button"
+      class="button-primary"
+      [disabled]="enviandoFila() !== null"
+      (click)="confirmarAprobacionFila()"
+    >
+      Confirmar aprobación
+    </button>
+    <button
+      type="button"
+      class="button-secondary"
+      [disabled]="enviandoFila() !== null"
+      (click)="cancelarAprobacionFila()"
+    >
+      Cancelar
+    </button>
+  </div>
+  } @if (revisionFila(); as revision) {
+  <div class="form-hint view-actions" role="group" aria-label="Confirmación de envío a revisión">
+    <span>
+      ¿Desea enviar la alerta <strong>{{ tituloAlerta(revision.alerta) }}</strong> con nivel de
+      riesgo <strong>{{ etiquetaRiesgo(revision.alerta.riesgo) }}</strong> a la Dirección para su
+      revisión?
+    </span>
+    <button
+      type="button"
+      class="button-primary"
+      [disabled]="enviandoFila() !== null"
+      (click)="confirmarRevisionFila()"
+    >
+      Aceptar
+    </button>
+    <button
+      type="button"
+      class="button-secondary"
+      [disabled]="enviandoFila() !== null"
+      (click)="cancelarRevisionFila()"
+    >
+      Cancelar
+    </button>
+  </div>
+  } @if (avisoFila(); as aviso) {
+  <div
+    [class]="aviso.tipo === 'ok' ? 'form-hint aviso-ok view-actions' : 'form-error view-actions'"
+    [attr.role]="aviso.tipo === 'ok' ? 'status' : 'alert'"
+  >
+    <span>{{ aviso.texto }}</span>
+    @if (aviso.tipo === 'ok' && deshacerFila()?.id === aviso.id && puedeDeshacerFila()) {
+    <button
+      type="button"
+      class="button-secondary"
+      [disabled]="enviandoFila() !== null"
+      (click)="deshacerAccionFila()"
+    >
+      Deshacer
+    </button>
+    }
+  </div>
   }
 
-  <p class="tabla-nota">Pulse una fila para abrir la ficha en el panel lateral.</p>
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [seleccionable]="true"
+    [seleccion]="idsSeleccionados()"
+    [cargando]="estadoListado() === 'cargando' || estadoListado() === 'inactivo'"
+    vacio="No hay alertas con estos filtros. Pruebe a quitar algún filtro o a revisar el texto de búsqueda."
+    (ordenCambio)="alCambiarOrden($event)"
+    (seleccionCambio)="alCambiarSeleccion($event)"
+    (filaClic)="alClicFila($event)"
+  >
+    <ng-template appCeldaTabla="codigo" let-fila>
+      <button
+        type="button"
+        class="table-link"
+        [attr.aria-label]="'Abrir la alerta ' + fila.codigo"
+        (click)="abrir(fila); $event.stopPropagation()"
+      >
+        {{ fila.codigo || 'Sin código' }}
+      </button>
+    </ng-template>
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <colgroup>
-        <col class="col-codigo" />
-        <col />
-        <col class="col-caso" />
-        <col class="col-prioridad" />
-        <col class="col-riesgo" />
-        <col class="col-fecha" />
-        <col class="col-estado" />
-        <col class="col-acciones" />
-      </colgroup>
-      <thead>
-        <tr>
-          <th scope="col">Código</th>
-          <th scope="col">Título</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Prioridad</th>
-          <th scope="col">Riesgo</th>
-          <th scope="col">Fecha de reporte</th>
-          <th scope="col">Estado</th>
-          <th scope="col">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (alerta of alertas(); track alerta.id) {
-        <tr
-          class="case-row-clickable"
-          [class.row-selected]="seleccionadaId() === alerta.id"
-          (click)="abrir(alerta)"
-        >
-          <td>
-            <button
-              type="button"
-              class="table-link"
-              [attr.aria-label]="'Abrir la alerta ' + alerta.codigo"
-              (click)="abrir(alerta); $event.stopPropagation()"
-            >
-              {{ alerta.codigo || 'Sin código' }}
-            </button>
-          </td>
-          <td class="alerta-titulo">{{ alerta.titulo || 'Sin título' }}</td>
-          <td class="alerta-caso">
-            @if (alerta.casoCodigo) {
-            <strong>{{ alerta.casoCodigo }}</strong>
-            <small>{{ alerta.casoTitulo || 'Sin título del caso' }}</small>
-            } @else {
-            <span class="alerta-sin-caso">Sin caso</span>
-            }
-          </td>
-          <td>
-            <span [class]="'status-badge alerta-prioridad--' + clavePrioridad(alerta.prioridad)">
-              <span class="status-dot"></span>
-              {{ etiquetaPrioridad(alerta.prioridad) }}
-            </span>
-            @if (alerta.grave) {
-            <span class="alerta-grave">
-              <app-icono nombre="alerta" [tamano]="11" />
-              Grave
-            </span>
-            }
-          </td>
-          <td>{{ alerta.nivel || '—' }}</td>
-          <td>{{ fechaReporte(alerta.fechaReporte) }}</td>
-          <td>
-            <span [class]="'status-badge ' + claseEstado(alerta.estado)">
-              <span class="status-dot"></span>
-              {{ alerta.estado || 'Sin estado' }}
-            </span>
-          </td>
-          <td class="celda-anular">
-            @if (puedeAnular(alerta)) {
-            <button
-              type="button"
-              class="button-secondary"
-              [attr.aria-label]="'Anular la alerta ' + (alerta.codigo || alerta.titulo)"
-              (click)="abrirAnulacion(alerta); $event.stopPropagation()"
-            >
-              Anular
-            </button>
-            }
-          </td>
-        </tr>
+    <ng-template appCeldaTabla="titulo" let-fila>
+      <div class="alerta-titulo">
+        <strong>{{ tituloAlerta(fila) }}</strong>
+        <span class="alerta-meta">
+          <span class="alerta-geografia">{{ geografia(fila) }}</span>
+          ·
+          <span [class]="claseRiesgo(fila)">Riesgo {{ etiquetaRiesgo(fila.riesgo) }}</span>
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="caso" let-fila>
+      <div class="alerta-caso">
+        @if (fila.casoCodigo) {
+        <strong>{{ fila.casoCodigo }}</strong>
+        @if (fila.casoTitulo) {
+        <small>{{ fila.casoTitulo }}</small>
+        } } @else {
+        <span class="sin-caso">Sin caso</span>
         }
-      </tbody>
-    </table>
-  </div>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="revisor" let-fila>
+      <div class="alerta-revisor">
+        <strong>{{ fila.ultimoRevisor || '—' }}</strong>
+        <small>{{ fechaReporte(fila.ultimaModificacion) }}</small>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="estado" let-fila>
+      <span [class]="claseEstadoAlerta(fila)">
+        <span class="status-dot"></span>
+        {{ etiquetaEstadoAlerta(fila) }}
+      </span>
+      @if (fila.archivadoEn) {
+      <span class="alerta-archivada">Archivada</span>
+      }
+    </ng-template>
+
+    <ng-template appCeldaTabla="acciones" let-fila>
+      <app-acciones-fila
+        [acciones]="accionesFila(fila)"
+        [puedeAnular]="puedeAnular(fila)"
+        [codigo]="fila.codigo || fila.titulo || ''"
+        [ocupado]="enviandoFila() === fila.id"
+        (accion)="accionFila(fila, $event)"
+        (anular)="abrirAnulacion(fila)"
+      />
+    </ng-template>
+  </app-tabla>
   } @if (total() > 0 && estadoListado() !== 'error') {
   <app-paginacion
     [pagina]="filtros().pagina"
@@ -263,22 +304,38 @@
   } @if (panelAbierto()) {
   <app-alerta-panel
     [alerta]="alertaPanel()"
-    [demandas]="demandasPanel()"
     [cargando]="cargandoDetalle()"
     [errorCarga]="errorDetalle()"
     [puedeModificar]="puedePanel()"
     [guardando]="guardando()"
     [errorGuardado]="errorGuardado()"
     [aviso]="aviso()"
+    [modoInicial]="modoPanel()"
     [casoInicial]="casoInicial()"
-    [prioridadesCatalogo]="prioridadesCatalogo()"
-    [cargandoPrioridades]="cargandoPrioridades()"
-    [errorPrioridades]="errorPrioridades()"
+    [casos]="casos()"
     (cerrar)="cerrarPanel()"
     (reintentar)="recargarDetalle()"
     (guardar)="guardar($event)"
     (registrar)="registrarAlerta($event)"
-    (accion)="accionFlujo($event)"
+  />
+  } @if (alertaModificacion(); as mod) {
+  <app-alerta-modificacion
+    [codigo]="mod.codigo"
+    [titulo]="tituloAlerta(mod)"
+    [sitio]="geografia(mod)"
+    [enviando]="enviandoModificacion()"
+    [errorEnvio]="errorModificacion()"
+    (cerrar)="cerrarModificacion()"
+    (enviar)="enviarModificacion($event)"
+  />
+  } @if (alertaWhatsapp(); as wa) {
+  <app-alerta-whatsapp
+    [codigo]="wa.codigo"
+    [titulo]="tituloAlerta(wa)"
+    [sitio]="geografia(wa)"
+    [riesgo]="wa.riesgo"
+    [mensaje]="mensajeWhatsapp(wa)"
+    (cerrar)="cerrarWhatsapp()"
   />
   } @if (alertaAnulacion(); as alertaAnular) {
   <app-anular-panel
@@ -290,6 +347,18 @@
     [puedeConfirmar]="puedeAnular(alertaAnular)"
     (cerrar)="cerrarAnulacion()"
     (hecho)="confirmarAnulacion($event)"
+  />
+  } @if (alertaArchivo(); as alertaArchivar) {
+  <app-alerta-archivo
+    [modo]="alertaArchivar.archivadoEn ? 'desarchivar' : 'archivar'"
+    [codigo]="alertaArchivar.codigo"
+    [titulo]="tituloAlerta(alertaArchivar)"
+    [sitio]="geografia(alertaArchivar)"
+    [motivoActual]="alertaArchivar.motivoArchivo"
+    [enviando]="enviandoArchivo()"
+    [errorEnvio]="errorArchivo()"
+    (cerrar)="cerrarArchivo()"
+    (confirmar)="confirmarArchivo($event)"
   />
   }
 </section>

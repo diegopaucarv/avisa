@@ -52,6 +52,16 @@ export type CuerpoEvento = {
   evidencia?: string | null;
 };
 
+/**
+ * «Otro» es la salida de escape del catálogo: el ajuste del 22 nov la deja al
+ * final de la lista para que no abra el desplegable.
+ */
+function esTipoOtro(opcion: OpcionTipoHecho): boolean {
+  const valor = opcion.valor.trim().toLowerCase();
+  const etiqueta = opcion.etiqueta.trim().toLowerCase();
+  return valor === 'otro' || etiqueta === 'otro';
+}
+
 type BorradorEvento = {
   fecha: string;
   tipo: string;
@@ -90,22 +100,16 @@ type CampoBorrador = keyof BorradorEvento;
     .evento-panel-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
-
     .evento-panel-sub {
       margin: 4px 0 0;
       color: #647487;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -113,6 +117,11 @@ type CampoBorrador = keyof BorradorEvento;
       display: flex;
       flex-direction: column;
       gap: 12px;
+    }
+
+    /* Rótulos del modal en mayúsculas (ajuste del 22 nov). */
+    .form-label {
+      text-transform: uppercase;
     }
 
     .evento-formulario-acciones {
@@ -145,13 +154,18 @@ export class EventoPanelComponent {
 
   /**
    * Opciones del `<select>`: el catálogo más el tipo actual si aún no ha llegado
-   * la respuesta. Así el valor precargado no se pierde mientras carga.
+   * la respuesta, con «Otro» siempre al final. Así el valor precargado no se
+   * pierde mientras carga.
    */
   readonly opcionesTipo = computed<OpcionTipoHecho[]>(() => {
     const base = this.tipos();
     const actual = this.borrador().tipo.trim();
-    if (!actual || base.some((opcion) => opcion.valor === actual)) return [...base];
-    return [{ valor: actual, etiqueta: actual }, ...base];
+    const opciones =
+      !actual || base.some((opcion) => opcion.valor === actual)
+        ? [...base]
+        : [{ valor: actual, etiqueta: actual }, ...base];
+    // `sort` es estable: el resto del catálogo conserva su orden original.
+    return opciones.sort((a, b) => Number(esTipoOtro(a)) - Number(esTipoOtro(b)));
   });
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
@@ -164,17 +178,8 @@ export class EventoPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
-    // Escape cierra el panel aunque el foco esté dentro de un campo de texto.
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
-    this.destruccion.onDestroy(() => {
-      document.removeEventListener('keydown', alEscape);
-      this.focoPrevio?.focus?.();
-    });
+    // El panel sólo se cierra con Cancelar o Registrar: Escape no lo descarta.
+    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
 
     // El borrador se precarga con el hecho abierto (vacío en el alta) y se
     // reinicia si el contenedor cambia de hecho.
@@ -241,10 +246,6 @@ export class EventoPanelComponent {
 
     this.mensajeLocal.set(null);
     this.guardar.emit(cambios);
-  }
-
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
   }
 
   alTecla(evento: KeyboardEvent): void {

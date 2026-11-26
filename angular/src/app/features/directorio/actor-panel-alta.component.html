@@ -1,0 +1,377 @@
+<div class="alta-scrim" (keydown)="alTecla($event)">
+  <div
+    #modal
+    class="alta-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="alta-titulo"
+    tabindex="-1"
+  >
+    <header class="alta-cabecera">
+      <div>
+        <h2 id="alta-titulo">{{ esOrganizacion() ? 'Nueva organización' : 'Nuevo actor' }}</h2>
+        <p>
+          Alta con o sin documento, membresía OSPA opcional y contacto opcional. El aviso de
+          duplicados compara el nombre contra el directorio mientras escribe.
+        </p>
+      </div>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar el formulario de alta"
+        (click)="cerrar.emit()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <form class="alta-cuerpo" (submit)="guardar($event)">
+      <section class="alta-bloque" aria-labelledby="alta-naturaleza">
+        <h3 id="alta-naturaleza"><span class="num">01</span>Naturaleza del actor</h3>
+        <div class="alta-radios" role="radiogroup" aria-labelledby="alta-naturaleza">
+          <label>
+            <input
+              type="radio"
+              name="naturaleza"
+              value="persona"
+              [checked]="!esOrganizacion()"
+              (change)="cambiarNaturaleza('persona')"
+            />
+            <span>Persona</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="naturaleza"
+              value="organizacion"
+              [checked]="esOrganizacion()"
+              (change)="cambiarNaturaleza('organizacion')"
+            />
+            <span>Organización</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="alta-bloque" aria-labelledby="alta-identidad">
+        <h3 id="alta-identidad"><span class="num">02</span>Identidad</h3>
+        <div class="alta-grid">
+          <label class="ancho">
+            Nombre completo o razón social *
+            <input
+              type="text"
+              required
+              maxlength="255"
+              autocomplete="off"
+              placeholder="Ej. Asociación de Pescadores Artesanales…"
+              [value]="nombre()"
+              (input)="alEscribirNombre($event)"
+            />
+            <span class="alta-pista">Se compara contra el directorio mientras escribe.</span>
+          </label>
+
+          <div class="ancho alta-campo">
+            <span>Identificación</span>
+            <div class="alta-radios" role="radiogroup" aria-label="Tipo de identificación">
+              <label>
+                <input
+                  type="radio"
+                  name="identificacion"
+                  value="dni"
+                  [checked]="identificacion() === 'dni'"
+                  (change)="identificacion.set('dni')"
+                />
+                <span>Con DNI</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="identificacion"
+                  value="otro"
+                  [checked]="identificacion() === 'otro'"
+                  (change)="identificacion.set('otro')"
+                />
+                <span>Otro documento / RUC</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="identificacion"
+                  value="sin"
+                  [checked]="identificacion() === 'sin'"
+                  (change)="identificacion.set('sin')"
+                />
+                <span>Sin documento</span>
+              </label>
+            </div>
+            <span class="alta-pista">
+              El DNI se guarda como dni_hmac y cifrado; el valor en claro no se recupera desde el
+              directorio.
+            </span>
+          </div>
+
+          @if (!esOrganizacion() && identificacion() === 'dni') {
+            <label>
+              DNI
+              <input
+                type="text"
+                inputmode="numeric"
+                maxlength="8"
+                autocomplete="off"
+                placeholder="8 dígitos"
+                [value]="dni()"
+                (input)="dni.set($any($event.target).value)"
+              />
+              <span class="alta-pista">Exactamente 8 dígitos.</span>
+            </label>
+          }
+
+          @if (esOrganizacion()) {
+            <label>
+              RUC
+              <input
+                type="text"
+                inputmode="numeric"
+                maxlength="11"
+                autocomplete="off"
+                placeholder="11 dígitos (opcional)"
+                [value]="ruc()"
+                (input)="ruc.set($any($event.target).value)"
+              />
+              <span class="alta-pista">Exactamente 11 dígitos; no es dato personal cifrado.</span>
+            </label>
+          }
+
+          <label>
+            Abreviatura / siglas
+            <input
+              type="text"
+              maxlength="150"
+              [value]="abreviatura()"
+              (input)="abreviatura.set($any($event.target).value)"
+            />
+          </label>
+          <label>
+            Cargo
+            <input
+              type="text"
+              maxlength="150"
+              [value]="cargo()"
+              (input)="cargo.set($any($event.target).value)"
+            />
+          </label>
+          <label>
+            Nivel de gobierno
+            <select
+              [value]="nivelGobierno()"
+              (change)="nivelGobierno.set($any($event.target).value)"
+            >
+              @for (nivel of nivelesGobierno; track nivel) {
+                <option [value]="nivel">{{ nivel || 'Sin especificar' }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Región
+            <select [value]="region()" (change)="region.set($any($event.target).value)">
+              <option value="">Sin especificar</option>
+              @for (opcion of regiones(); track opcion.valor) {
+                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Tipo de actor
+            <select [value]="tipo()" (change)="tipo.set($any($event.target).value)">
+              @for (opcion of tiposActor; track opcion) {
+                <option [value]="opcion">{{ opcion }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Función del actor
+            <select [value]="funcion()" (change)="funcion.set($any($event.target).value)">
+              <option value="">No determinado</option>
+              @for (opcion of funciones(); track opcion.valor) {
+                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            Posicionamiento
+            <select
+              [value]="posicionamiento()"
+              (change)="posicionamiento.set($any($event.target).value)"
+            >
+              <option value="">Sin posicionamiento</option>
+              @for (opcion of perfiles(); track opcion.valor) {
+                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="alta-dup" aria-live="polite">
+          <h4>Aviso de duplicados</h4>
+          @if (nombre().trim().length < 3) {
+            <p>Escriba el nombre para comparar contra los actores existentes.</p>
+          } @else if (buscandoDuplicados()) {
+            <p>Comparando con el directorio…</p>
+          } @else if (duplicados().length === 0) {
+            <p>Sin coincidencias en el directorio para ese nombre.</p>
+          } @else {
+            <p>
+              <strong>{{ duplicados().length }}</strong> posible(s) coincidencia(s). ¿Es el mismo
+              actor?
+            </p>
+            <ul>
+              @for (actor of duplicados(); track actor.id) {
+                <li>
+                  {{ actor.nombre }} · {{ actor.abreviatura || actor.tipo || actor.naturaleza }}
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
+
+      @if (esOrganizacion()) {
+        <section class="alta-bloque" aria-labelledby="alta-ospa">
+          <h3 id="alta-ospa"><span class="num">03</span>Identificación OSPA (opcional)</h3>
+          <div class="alta-grid">
+            <label>
+              Expediente OSPA
+              <input
+                type="text"
+                maxlength="50"
+                [value]="expedienteOspa()"
+                (input)="expedienteOspa.set($any($event.target).value)"
+              />
+              <span class="alta-pista">Se captura; no se valida contra padrón.</span>
+            </label>
+            <label>
+              Estado OSPA
+              <input
+                type="text"
+                maxlength="50"
+                [value]="estadoOspa()"
+                (input)="estadoOspa.set($any($event.target).value)"
+              />
+            </label>
+            <label>
+              Vigencia desde
+              <input
+                type="date"
+                [value]="vigenciaDesde()"
+                (input)="vigenciaDesde.set($any($event.target).value)"
+              />
+            </label>
+            <label>
+              Vigencia hasta
+              <input
+                type="date"
+                [value]="vigenciaHasta()"
+                (input)="vigenciaHasta.set($any($event.target).value)"
+              />
+            </label>
+          </div>
+        </section>
+      } @else {
+        <section class="alta-bloque" aria-labelledby="alta-membresia">
+          <h3 id="alta-membresia"><span class="num">03</span>Membresía OSPA (opcional)</h3>
+          <div class="alta-grid">
+            <label class="ancho">
+              Organización
+              <select
+                [value]="organizacionUid()"
+                (change)="organizacionUid.set($any($event.target).value)"
+              >
+                <option value="">Sin membresía</option>
+                @for (organizacion of opcionesOrganizacion(); track organizacion.id) {
+                  <option [value]="organizacion.id">{{ organizacion.nombre }}</option>
+                }
+              </select>
+              <span class="alta-pista">
+                En las organizaciones, expediente y estado OSPA suelen estar vacíos: el vínculo se
+                captura, no se valida contra padrón.
+              </span>
+            </label>
+            <label>
+              Cargo en la organización
+              <input
+                type="text"
+                maxlength="100"
+                [value]="membresiaCargo()"
+                (input)="membresiaCargo.set($any($event.target).value)"
+              />
+            </label>
+            <label>
+              Vigente desde
+              <input
+                type="date"
+                [value]="membresiaDesde()"
+                (input)="membresiaDesde.set($any($event.target).value)"
+              />
+            </label>
+          </div>
+        </section>
+      }
+
+      <section class="alta-bloque" aria-labelledby="alta-contacto">
+        <h3 id="alta-contacto"><span class="num">04</span>Contacto (opcional · PII)</h3>
+        <div class="alta-grid">
+          <label>
+            Teléfono
+            <input
+              type="text"
+              autocomplete="off"
+              [value]="telefono()"
+              (input)="telefono.set($any($event.target).value)"
+            />
+          </label>
+          <label>
+            Correo
+            <input
+              type="text"
+              autocomplete="off"
+              [value]="correo()"
+              (input)="correo.set($any($event.target).value)"
+            />
+            <span class="alta-pista">
+              En personas el correo se guarda cifrado; en organizaciones es contacto institucional.
+            </span>
+          </label>
+          <label>
+            Base legal
+            <input type="text" value="LEGADO_AVISA_2026" readonly />
+            <span class="alta-pista">
+              Único valor presente en las filas de PII; no hay consentimientos registrados.
+            </span>
+          </label>
+        </div>
+      </section>
+
+      @if (error(); as mensaje) {
+        <p class="alta-error" role="alert">{{ mensaje }}</p>
+      }
+    </form>
+
+    <footer class="alta-pie">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="enviando()"
+        (click)="cerrar.emit()"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="button-primary"
+        [disabled]="enviando() || !nombre().trim()"
+        (click)="guardar($event)"
+      >
+        {{ enviando() ? 'Guardando…' : esOrganizacion() ? 'Crear organización' : 'Crear actor' }}
+      </button>
+    </footer>
+  </div>
+</div>

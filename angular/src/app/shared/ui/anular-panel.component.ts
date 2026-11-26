@@ -55,22 +55,16 @@ export type ResultadoAnulacion = {
     .anular-panel-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
-
     .anular-panel-sub {
       margin: 4px 0 0;
       color: #647487;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.5;
     }
 
@@ -95,7 +89,7 @@ export type ResultadoAnulacion = {
     .anular-confirmacion {
       margin: 0;
       color: #465a6c;
-      font-size: 11.5px;
+      font-size: 13.5px;
       line-height: 1.6;
     }
 
@@ -108,7 +102,7 @@ export type ResultadoAnulacion = {
       margin: 0;
       padding: 9px 11px;
       border-radius: 6px;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.55;
     }
 
@@ -164,9 +158,7 @@ export class AnularPanelComponent {
 
   /** `aria-describedby` del textarea: contador y, si hay fallo, su mensaje. */
   readonly descritoPor = computed(() =>
-    this.errorMotivo()
-      ? 'anular-motivo-contador anular-motivo-error'
-      : 'anular-motivo-contador',
+    this.errorMotivo() ? 'anular-motivo-contador anular-motivo-error' : 'anular-motivo-contador',
   );
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
@@ -179,17 +171,8 @@ export class AnularPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
 
-    // Escape cierra el panel aunque el foco esté dentro del textarea.
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
-    this.destruccion.onDestroy(() => {
-      document.removeEventListener('keydown', alEscape);
-      this.focoPrevio?.focus?.();
-    });
+    // El panel sólo se cierra con Cancelar o Confirmar: Escape no lo descarta.
+    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
   }
 
   alEscribir(evento: Event): void {
@@ -214,10 +197,6 @@ export class AnularPanelComponent {
 
     // El backend restaura sin cuerpo ni motivo: basta la confirmación.
     this.hecho.emit({ modo: 'restaurar', motivo: null });
-  }
-
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
   }
 
   alTecla(evento: KeyboardEvent): void {

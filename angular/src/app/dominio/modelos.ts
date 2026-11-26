@@ -9,11 +9,11 @@
 /** Niveles de conflictividad (Guía §7.5.1). */
 export type NivelConflicto = 'Diferencia' | 'Controversia' | 'Conflicto social' | 'Crisis social';
 
-/** Riesgo del caso: atributo propio, recalculable. «Moderado», nunca «Medio». */
-export type Riesgo = 'Bajo' | 'Moderado' | 'Alto';
+/** Riesgo del caso: atributo propio, recalculable. Valores «Bajo», «Medio», «Alto». */
+export type Riesgo = 'Bajo' | 'Medio' | 'Alto';
 
 /** Prioridad de atención (eje distinto del riesgo). */
-export type PrioridadAtencion = 'Urgente' | 'Moderado' | 'Bajo';
+export type PrioridadAtencion = 'Urgente' | 'Medio' | 'Bajo';
 
 /**
  * Estado operativo del caso. `Activo` y «En seguimiento» se unificaron en
@@ -63,12 +63,28 @@ export type Caso = {
   /** Fecha real del caso (`fecha_inicio`), no la de carga del legado. */
   inicio: string | null;
   region: string | null;
+  /**
+   * URL del tablero de análisis del caso (Canva). `null` mientras no se haya
+   * pegado un enlace; la vista previa y el expediente lo tratan como opcional.
+   */
+  enlaceAnalisis: string | null;
+  /**
+   * Distrito principal declarado, por nombre (sólo para mostrar). La llave es
+   * `distritoUbigeo`: no se empareja por nombre porque hay quince «Santa Rosa».
+   */
+  distrito: string | null;
+  /** Ubigeo INEI de seis dígitos del distrito principal; `null` si no hay. */
+  distritoUbigeo: string | null;
   estado: EstadoCaso;
   /** Riesgo del caso. Se recalcula en el caso, no se hereda de la alerta. */
   riesgo: Riesgo;
   prioridad: PrioridadAtencion;
   alcance: Alcance;
-  nivelConflicto: NivelConflicto;
+  /**
+   * Nivel de conflictividad declarado (Guía §7.5.1). `null` = sin declarar: la
+   * interfaz no lo estima ni lo sustituye por `Diferencia`.
+   */
+  nivelConflicto: NivelConflicto | null;
   /** Naturaleza declarada; `null` mientras no se declare. */
   naturaleza: NaturalezaCaso | null;
   etapa: EtapaCiclo;

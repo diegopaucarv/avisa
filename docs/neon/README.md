@@ -56,6 +56,11 @@ que consulta datos. Es el mismo comportamiento que en local.
     pg_dump -Fc --no-owner --no-acl -f /backup/avisa_neon.dump
   ```
 
+  En **Git Bash** de Windows hay que anteponer `MSYS_NO_PATHCONV=1` al
+  `docker run`: sin eso, MSYS reescribe las rutas del contenedor (`/backup/...`
+  pasa a ser `C:/Program Files/Git/backup/...`) y `pg_dump` falla con
+  `could not open output file`.
+
   `--no-acl` sólo es aceptable para un respaldo de seguridad; para el camino A
   (restaurar conservando los 276 `GRANT`) hay que omitirlo.
 

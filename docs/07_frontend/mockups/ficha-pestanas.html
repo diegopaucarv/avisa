@@ -133,7 +133,7 @@
                 color: #93621d;
             }
             .risk-bajo {
-                background: #e9f5ef;
+                background: eef3fa;
                 color: #34785b;
             }
             .priority-urgente {
@@ -1196,7 +1196,6 @@
                     </h2>
                     <div class="loc">
                         <b>Región</b> Piura · <b>Alcance derivado</b> Norte ·
-                        <b>Temática</b> Ordenamiento y acceso territorial ·
                         <b>Subsector</b> Pesca y Acuicultura
                     </div>
                     <div class="badge-row">
@@ -2023,21 +2022,6 @@
                                     <textarea
                                         placeholder="Qué se solicita concretamente"
                                     ></textarea>
-                                </label>
-                                <label
-                                    >Temática
-                                    <select>
-                                        <option>
-                                            Ordenamiento y acceso territorial
-                                        </option>
-                                        <option>Infraestructura</option>
-                                        <option>Normatividad</option>
-                                        <option>
-                                            Distribución de beneficios
-                                        </option>
-                                        <option>Gobernanza</option>
-                                        <option>Impactos de terceros</option>
-                                    </select>
                                 </label>
                                 <label
                                     >Estado de atención
@@ -3475,7 +3459,11 @@
                         ¿La pestaña Demandas cuenta las demandas del caso
                         (<code>caso_id</code>) o también las heredadas de sus
                         alertas (<code>alerta_id</code>)? El mockup usa el
-                        segundo criterio y lo marca.
+                        segundo criterio y lo marca. <b>2026-11-24:</b> la
+                        herencia automática se retiró del importador (migración
+                        54), así que la pestaña debe contar por
+                        <code>caso_id</code>; listar por alerta reintroduce el
+                        cruce de temas que motivó la corrección.
                     </li>
                     <li>
                         ¿Se parte <code>nombre_actual</code> en Apellidos |

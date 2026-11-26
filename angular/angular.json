@@ -28,6 +28,7 @@
             "styles": [
               "src/styles/global.css",
               "src/styles/theme-dark.generated.css",
+              "src/styles/theme-dark-overrides.css",
               "node_modules/leaflet/dist/leaflet.css"
             ],
             "allowedCommonJsDependencies": ["leaflet"],

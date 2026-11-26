@@ -14,6 +14,12 @@
  * —y de código para las demandas, cuyo listado no trae `codigo_legado`—. Si el
  * registro no aparece en el índice, el valor queda en `null` y la tarjeta
  * pinta «—»: nunca se inventa.
+ *
+ * Territorio (cambio 30): `GET /api/v1/search` también publica `provincia`,
+ * `distrito` y `ubigeo`, derivados del distrito propio del registro (alerta,
+ * actor) o del distrito principal del caso. La ficha que se abre desde la
+ * búsqueda los muestra cuando existen; los listados por entidad no los traen,
+ * así que el índice es su única fuente.
  */
 
 import { normalizarColeccion, type Coleccion } from '../../core/http/coleccion';
@@ -32,7 +38,12 @@ export const TOPE_INDICE = 100;
 export type TipoBusqueda = 'case' | 'alert' | 'commitment' | 'document' | 'actor' | 'demanda';
 
 export type ClaveGrupo =
-  'casos' | 'alertas' | 'compromisos' | 'documentos' | 'actores' | 'demandas';
+  | 'casos'
+  | 'alertas'
+  | 'compromisos'
+  | 'documentos'
+  | 'actores'
+  | 'demandas';
 
 /** Fila ya normalizada; todavía sin ruta, que depende del término vigente. */
 export type Resultado = {
@@ -46,6 +57,12 @@ export type Resultado = {
   codigo: string | null;
   /** Región del registro; `null` cuando el listado no la trae y el índice no la cubre. */
   region: string | null;
+  /** Provincia derivada del distrito; `null` si no hay distrito conocido. */
+  provincia: string | null;
+  /** Distrito propio del registro o el principal de su caso; `null` si falta. */
+  distrito: string | null;
+  /** Ubigeo INEI de 6 dígitos del distrito; `null` si no hay distrito. */
+  ubigeo: string | null;
   icono: string;
 };
 
@@ -63,6 +80,9 @@ export type ResultadoEnlazado = Resultado &
 export type FilaIndice = {
   codigo: string | null;
   region: string | null;
+  provincia: string | null;
+  distrito: string | null;
+  ubigeo: string | null;
 };
 
 export type IndiceBusqueda = ReadonlyMap<string, FilaIndice>;
@@ -189,6 +209,9 @@ export function aResultado(definicion: DefinicionGrupo, bruto: unknown): Resulta
     subtitulo: texto(fila, definicion.claves.subtitulo),
     codigo,
     region: texto(fila, ['region']),
+    provincia: texto(fila, ['provincia']),
+    distrito: texto(fila, ['distrito']),
+    ubigeo: texto(fila, ['ubigeo', 'distritoUbigeo', 'distrito_ubigeo']),
     icono: definicion.icono,
   };
 }
@@ -200,12 +223,14 @@ export function aColeccionGrupo(bruto: unknown, definicion: DefinicionGrupo): Co
 }
 
 /**
- * índice `tipo:id → {codigo, region}` a partir de `GET /api/v1/search`.
+ * índice `tipo:id → {codigo, region, provincia, distrito, ubigeo}` a partir de
+ * `GET /api/v1/search`.
  *
- * Es la única fuente de región de alertas, compromisos, documentos y demandas
- * (la heredan del caso) y del código de las demandas. La respuesta se limita a
- * 100 filas ordenadas por tipo: un término muy amplio puede dejar fuera filas
- * de los últimos grupos, que se quedan sin región.
+ * Es la única fuente de región y territorio de alertas, compromisos,
+ * documentos y demandas (los heredan del caso) y del código de las demandas. La
+ * respuesta se limita a 100 filas ordenadas por tipo: un término muy amplio
+ * puede dejar fuera filas de los últimos grupos, que se quedan sin región ni
+ * territorio.
  */
 export function aIndiceBusqueda(bruto: unknown): IndiceBusqueda {
   const registro: Registro = esRegistro(bruto) ? bruto : {};
@@ -221,22 +246,35 @@ export function aIndiceBusqueda(bruto: unknown): IndiceBusqueda {
     indice.set(`${tipo}:${id}`, {
       codigo: texto(crudo, ['code']),
       region: texto(crudo, ['region']),
+      provincia: texto(crudo, ['provincia']),
+      distrito: texto(crudo, ['distrito']),
+      ubigeo: texto(crudo, ['ubigeo']),
     });
   }
 
   return indice;
 }
 
-/** Completa código y región con el índice; lo que no esté sigue en `null`. */
+/** Completa código, región y territorio con el índice; lo que falte sigue en `null`. */
 export function enriquecer(resultado: Resultado, indice: IndiceBusqueda): Resultado {
   const referencia = indice.get(`${resultado.tipo}:${resultado.id}`);
   if (!referencia) return resultado;
 
   const codigo = resultado.codigo ?? referencia.codigo;
   const region = resultado.region ?? referencia.region;
-  if (codigo === resultado.codigo && region === resultado.region) return resultado;
+  const provincia = resultado.provincia ?? referencia.provincia;
+  const distrito = resultado.distrito ?? referencia.distrito;
+  const ubigeo = resultado.ubigeo ?? referencia.ubigeo;
 
-  return { ...resultado, codigo, region };
+  const sinCambios =
+    codigo === resultado.codigo &&
+    region === resultado.region &&
+    provincia === resultado.provincia &&
+    distrito === resultado.distrito &&
+    ubigeo === resultado.ubigeo;
+  if (sinCambios) return resultado;
+
+  return { ...resultado, codigo, region, provincia, distrito, ubigeo };
 }
 
 /**

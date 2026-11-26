@@ -62,6 +62,21 @@ export const routes: Routes = [
         loadComponent: () => import('./features/alertas/alertas.page').then((m) => m.AlertasPage),
       },
       {
+        path: 'clima-social',
+        loadComponent: () =>
+          import('./features/clima-social/clima-social.page').then((m) => m.ClimaSocialPage),
+      },
+      {
+        path: 'reuniones',
+        loadComponent: () =>
+          import('./features/reuniones/reuniones.page').then((m) => m.ReunionesPage),
+      },
+      {
+        path: 'resultados',
+        loadComponent: () =>
+          import('./features/resultados/resultados.page').then((m) => m.ResultadosPage),
+      },
+      {
         path: 'compromisos',
         loadComponent: () =>
           import('./features/compromisos/compromisos.page').then((m) => m.CompromisosPage),
@@ -72,9 +87,13 @@ export const routes: Routes = [
           import('./features/documentos/documentos.page').then((m) => m.DocumentosPage),
       },
       {
+        path: 'archivo',
+        loadComponent: () => import('./features/archivo/archivo.page').then((m) => m.ArchivoPage),
+      },
+      {
         path: 'papelera',
-        loadComponent: () =>
-          import('./features/papelera/papelera.page').then((m) => m.PapeleraPage),
+        redirectTo: 'archivo',
+        pathMatch: 'full',
       },
       {
         path: 'reportes',
@@ -86,11 +105,62 @@ export const routes: Routes = [
         data: { titulo: 'Panorama territorial' },
         loadComponent: () => import('./features/mapa/mapa.page').then((m) => m.MapaPage),
       },
+      {
+        path: 'dashboard',
+        data: { titulo: 'Dashboard analítico' },
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
+      },
+      {
+        path: 'red-radar',
+        data: { titulo: 'Bandeja RED-RADAR' },
+        loadComponent: () =>
+          import('./features/red-radar/red-radar.page').then((m) => m.RedRadarPage),
+      },
+      {
+        path: 'matriz-conflictividad',
+        data: { titulo: 'Matriz de conflictividad' },
+        loadComponent: () =>
+          import('./features/matriz-conflictividad/matriz-conflictividad.page').then(
+            (m) => m.MatrizConflictividadPage,
+          ),
+      },
+      {
+        path: 'gobierno-sugerencias',
+        data: { titulo: 'Archivo de sugerencias' },
+        loadComponent: () =>
+          import('./features/gobierno-sugerencias/gobierno-sugerencias.page').then(
+            (m) => m.GobiernoSugerenciasPage,
+          ),
+      },
+      {
+        path: 'exportaciones',
+        data: { titulo: 'Exportaciones' },
+        loadComponent: () =>
+          import('./features/exportaciones/exportaciones.page').then((m) => m.ExportacionesPage),
+      },
+      {
+        path: 'administracion/etl',
+        data: { titulo: 'Consola ETL' },
+        loadComponent: () => import('./features/etl/etl.page').then((m) => m.EtlPage),
+      },
+      {
+        path: 'administracion',
+        data: { titulo: 'Administración' },
+        loadComponent: () =>
+          import('./features/administracion/administracion.page').then((m) => m.AdministracionPage),
+      },
 
       {
         path: 'directorio',
         loadComponent: () =>
           import('./features/directorio/directorio.page').then((m) => m.DirectorioPage),
+      },
+      {
+        path: 'directorio/personas',
+        data: { naturalezaFija: 'persona' },
+        loadComponent: () =>
+          import('./features/directorio/actores.page').then((m) => m.ActoresPage),
       },
       {
         path: 'directorio/actores',
@@ -103,14 +173,21 @@ export const routes: Routes = [
           import('./features/directorio/organizaciones.page').then((m) => m.OrganizacionesPage),
       },
       {
+        // Alias heredado: el directorio de organizaciones absorbió a las
+        // antiguas «instituciones» (vocabulario que ya no se usa en la UI).
         path: 'directorio/instituciones',
-        loadComponent: () =>
-          import('./features/directorio/instituciones.page').then((m) => m.InstitucionesPage),
+        redirectTo: '/directorio/organizaciones',
+        pathMatch: 'full',
       },
       {
         path: 'directorio/locales',
         loadComponent: () =>
           import('./features/directorio/locales.page').then((m) => m.LocalesPage),
+      },
+      {
+        path: 'directorio/autoridades',
+        loadComponent: () =>
+          import('./features/directorio/autoridades.page').then((m) => m.AutoridadesPage),
       },
 
       {

@@ -1,0 +1,16 @@
+@if (inactividad.avisando()) {
+  <div class="aviso-inactividad" role="status" aria-live="polite">
+    <app-icono nombre="reloj" [tamano]="16" />
+    <p class="aviso-inactividad-texto">
+      Tu sesión se cerrará por inactividad en
+      <strong>{{ inactividad.segundosRestantes() }} s</strong>.
+    </p>
+    <div class="aviso-inactividad-acciones">
+      <button type="button" class="button-primary" (click)="seguir()">Seguir en sesión</button>
+      <button type="button" class="button-secondary" (click)="cerrarSesion()">
+        <app-icono nombre="salir" [tamano]="14" />
+        Cerrar sesión
+      </button>
+    </div>
+  </div>
+}

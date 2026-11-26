@@ -1,23 +1,32 @@
 <section class="view-body" aria-labelledby="titulo-reportes">
   <header class="view-head">
     <div>
-      <h1 id="titulo-reportes">Registro de reportes</h1>
-      <p class="view-subtitle">
-        Anexo N° 17 de la Guía de Prevención y Gestión de Conflictos Sociales: registro consolidado
-        de reportes rápidos, de clima social, de actividad, informes oficiales y alertas tempranas.
-        Es una vista de sólo lectura; el alta se realiza desde las pantallas de Documentos y
-        Alertas.
-      </p>
+      <h1 id="titulo-reportes">
+        {{ pestanaActiva() === 'informe' ? 'Informe oficial' : 'Reporte de actividad' }}
+      </h1>
     </div>
-    <div class="view-acciones">
-      <app-exportar-menu
+    <div class="view-actions">
+      <app-barra-seleccion
         entidad="reportes"
-        etiqueta="Exportar"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
         (fallo)="alFallarExportacion($event)"
       />
-      <p class="result-count" aria-live="polite">{{ total() }} reportes</p>
     </div>
   </header>
+
+  <div class="segmented" role="tablist" aria-label="Tipo de reporte de IyC">
+    @for (opcion of pestanas; track opcion.codigo) {
+    <button
+      type="button"
+      role="tab"
+      [attr.aria-selected]="pestanaActiva() === opcion.codigo"
+      (click)="cambiarPestana(opcion.codigo)"
+    >
+      {{ opcion.etiqueta }}
+    </button>
+    }
+  </div>
 
   @if (exportarError(); as mensaje) {
   <p class="exportar-error" role="alert">{{ mensaje }}</p>
@@ -33,18 +42,6 @@
         aria-label="Buscar reportes"
         (input)="buscar($event)"
       />
-    </label>
-
-    <label class="select-filter">
-      Tipo
-      <select aria-label="Filtrar reportes por tipo" (change)="cambiarTipo($event)">
-        <option value="" [selected]="filtros().tipo === ''">Todos</option>
-        @for (tipo of tipos; track tipo.valor) {
-        <option [value]="tipo.valor" [selected]="filtros().tipo === tipo.valor">
-          {{ tipo.etiqueta }}
-        </option>
-        }
-      </select>
     </label>
 
     <label class="search-field">
@@ -87,8 +84,8 @@
     <p>{{ errorListado()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargarListado()">Reintentar</button>
   </div>
-  } @else if (reportes().length === 0) { @if (estadoListado() === 'cargando' || estadoListado()
-  === 'inactivo') {
+  } @else if (reportes().length === 0) { @if (estadoListado() === 'cargando' || estadoListado() ===
+  'inactivo') {
   <div class="empty-state" role="status">Cargando reportes…</div>
   } @else {
   <div class="empty-state">
@@ -99,47 +96,30 @@
   <p class="actualizando" role="status">Actualizando el listado…</p>
   }
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <caption class="table-caption">
-        {{ resumenTabla() }}
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col">Tipo</th>
-          <th scope="col">Código</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Responsable</th>
-          <th scope="col">Fecha</th>
-          <th scope="col">Región</th>
-          <th scope="col">Ubicación</th>
-          <th scope="col">Título</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (reporte of reportes(); track (reporte.codigoReporte || '') + '|' + (reporte.titulo || '')) {
-        <tr>
-          <td>{{ reporte.tipo || '—' }}</td>
-          <td>{{ reporte.codigoReporte || '—' }}</td>
-          <td class="celda-caso">
-            @if (reporte.codigoCaso) {
-            <a class="table-link" [routerLink]="['/casos', reporte.codigoCaso]">
-              {{ reporte.codigoCaso }}
-            </a>
-            } @else {
-            <span class="sin-dato">No vinculado</span>
-            }
-          </td>
-          <td>{{ reporte.responsable || '—' }}</td>
-          <td>{{ formatearFecha(reporte.fecha) }}</td>
-          <td>{{ reporte.region || '—' }}</td>
-          <td>{{ reporte.ubicacion || '—' }}</td>
-          <td class="celda-titulo">{{ reporte.titulo || 'Sin título' }}</td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [seleccionable]="true"
+    [seleccion]="idsSeleccionados()"
+    [cargando]="estadoListado() === 'cargando'"
+    claveFila="codigoReporte"
+    (ordenCambio)="alCambiarOrden($event)"
+    (seleccionCambio)="alCambiarSeleccion($event)"
+  >
+    <ng-template appCeldaTabla="caso" let-fila>
+      @if (fila.codigoCaso) {
+      <a class="table-link" [routerLink]="['/casos', fila.codigoCaso]">{{ fila.codigoCaso }}</a>
+      } @else {
+      <span class="sin-dato">No vinculado</span>
+      }
+    </ng-template>
+
+    <ng-template appCeldaTabla="titulo" let-fila>
+      <span class="celda-titulo">{{ fila.titulo || 'Sin título' }}</span>
+    </ng-template>
+  </app-tabla>
   } @if (total() > 0 && estadoListado() !== 'error') {
   <app-paginacion
     [pagina]="filtros().pagina"

@@ -14,7 +14,12 @@
  *   tipo no tiene anexo y no se fabrica ninguno.
  */
 
-import { booleano, esRegistro, leer, lista, numero, texto } from '../../dominio/mapeo';
+import { booleano, esRegistro, fechaIso, leer, lista, numero, texto } from '../../dominio/mapeo';
+import {
+  formatearFechaCompacta,
+  formatearFechaHora as formatearFechaHoraCompartida,
+  partesFecha,
+} from '../../shared/formato-fecha';
 
 /* ------------------------------------------------------------------------- *
  * Vocabulario
@@ -87,12 +92,24 @@ export type Documento = {
   archivo: string | null;
   urlLista: string | null;
   urlFoto: string | null;
+  /** MIME del binario almacenado; `null` si no hay archivo. */
+  mime: string | null;
+  /** Tamaño del binario en bytes; `null` si no hay archivo. */
+  tamanoBytes: number | null;
+  /** SHA-256 del binario (64 hex); `null` si no hay archivo. */
+  hashSha256: string | null;
+  /** `true` si el documento tiene binario almacenado (no se envía el bytea). */
+  tieneArchivo: boolean;
+  /** Versión vigente: histórico + 1. */
+  versionActual: number;
   origen: string | null;
   /** 0..1 (`core.documentos.confidence`). */
   confianza: number | null;
   validado: boolean;
   clasificacion: number;
   responsableUsuarioId: string | null;
+  /** Nombre legible del responsable; `null` si no se puede resolver. */
+  responsableNombre: string | null;
   reunionId: string | null;
   distritoId: number | null;
   /** Sólo viene en `GET /api/v1/documents/:id`. */
@@ -122,10 +139,76 @@ export type DetalleDocumento = {
   fuentes: FuenteDocumento[];
 };
 
+/** Fila de `GET /api/v1/documents/:id/versiones` (metadatos, sin bytea). */
+export type VersionDocumento = {
+  id: string;
+  numero: number;
+  titulo: string | null;
+  mime: string | null;
+  tamanoBytes: number | null;
+  hashSha256: string | null;
+  /** Ruta externa cuando la versión sólo referencia una URL. */
+  url: string | null;
+  nota: string | null;
+  creadoPorNombre: string | null;
+  createdAt: string;
+  /** `true` si conserva binario descargable. */
+  tieneArchivo: boolean;
+};
+
+export type EstadoExtraccion = 'pendiente' | 'en_proceso' | 'listo' | 'error' | 'no_disponible';
+
+/** Término clave calculado por frecuencia local. */
+export type TemaClave = { termino: string; frecuencia: number };
+
+/** Fila de `GET /api/v1/documents/:id/extraccion`. */
+export type ExtraccionDocumento = {
+  id: string;
+  tipo: 'ocr' | 'temas';
+  estado: EstadoExtraccion;
+  texto: string | null;
+  /** Cuerpo libre: temas, motivo de `no_disponible`, … */
+  resultado: unknown;
+  error: string | null;
+  /** Motor o método usado (`frecuencia-local`, nombre del motor, …). */
+  modelo: string | null;
+  createdAt: string;
+};
+
 export type OpcionCatalogo = {
   valor: string;
   etiqueta: string;
   anexoNumero: number | null;
+};
+
+/**
+ * Norma del marco legal que el árbol del RAG publica aparte de los documentos.
+ * No es un documento del catálogo: no abre la ficha ni se pagina.
+ */
+export type Normativa = {
+  id: string;
+  codigo: string | null;
+  titulo: string;
+  tipoNorma: string;
+  ambito: string;
+  entidadEmisora: string | null;
+  /** `YYYY-MM-DD`; `null` si no viene o no es una fecha válida. */
+  fechaPublicacion: string | null;
+  url: string | null;
+  resumen: string | null;
+};
+
+/** Documento indexado en el árbol que no es un documento del RAG ni una norma. */
+export type OtroDocumento = {
+  id: string;
+  codigo: string | null;
+  titulo: string;
+  tipo: string | null;
+  /** `YYYY-MM-DD`; `null` si no viene o no es una fecha válida. */
+  fecha: string | null;
+  entidad: string | null;
+  url: string | null;
+  resumen: string | null;
 };
 
 /**
@@ -199,11 +282,17 @@ export function aDocumento(bruto: unknown): Documento {
     archivo: texto(registro, ['archivo']),
     urlLista: texto(registro, ['urlLista', 'url_lista']),
     urlFoto: texto(registro, ['urlFoto', 'url_foto']),
+    mime: texto(registro, ['mime']),
+    tamanoBytes: numero(registro, ['tamanoBytes', 'tamano_bytes']),
+    hashSha256: texto(registro, ['hashSha256', 'hash_sha256']),
+    tieneArchivo: booleano(registro, ['tieneArchivo', 'tiene_archivo']),
+    versionActual: numero(registro, ['versionActual', 'version_actual']) ?? 1,
     origen: texto(registro, ['origen']),
     confianza: numero(registro, ['confianza']),
     validado: booleano(registro, ['validado']),
     clasificacion: numero(registro, ['clasificacion']) ?? 1,
     responsableUsuarioId: texto(registro, ['responsableUsuarioId', 'responsable_usuario_id']),
+    responsableNombre: texto(registro, ['responsableNombre', 'responsable_nombre']),
     reunionId: texto(registro, ['reunionId', 'reunion_id']),
     distritoId: numero(registro, ['distritoId', 'distrito_id']),
     codigoLegado: texto(registro, ['codigoLegado', 'codigo_legado']),
@@ -237,6 +326,62 @@ export function aDetalleDocumento(bruto: unknown): DetalleDocumento {
   };
 }
 
+/** Versión de `GET /api/v1/documents/:id/versiones` (`items[]`). */
+export function aVersionDocumento(bruto: unknown): VersionDocumento {
+  const registro = esRegistro(bruto) ? bruto : {};
+
+  return {
+    id: texto(registro, ['id']) ?? '',
+    numero: numero(registro, ['numero']) ?? 0,
+    titulo: texto(registro, ['titulo']),
+    mime: texto(registro, ['mime']),
+    tamanoBytes: numero(registro, ['tamanoBytes', 'tamano_bytes']),
+    hashSha256: texto(registro, ['hashSha256', 'hash_sha256']),
+    url: texto(registro, ['url']),
+    nota: texto(registro, ['nota']),
+    creadoPorNombre: texto(registro, ['creadoPorNombre', 'creado_por_nombre']),
+    createdAt: texto(registro, ['createdAt', 'created_at']) ?? '',
+    tieneArchivo: booleano(registro, ['tieneArchivo', 'tiene_archivo']),
+  };
+}
+
+/** Extracción de `GET /api/v1/documents/:id/extraccion` (`items[]`). */
+export function aExtraccionDocumento(bruto: unknown): ExtraccionDocumento {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const tipo = texto(registro, ['tipo']);
+
+  return {
+    id: texto(registro, ['id']) ?? '',
+    tipo: tipo === 'temas' ? 'temas' : 'ocr',
+    estado: (texto(registro, ['estado']) as EstadoExtraccion) ?? 'pendiente',
+    texto: texto(registro, ['texto']),
+    resultado: leer(registro, ['resultado', 'resultadoJson', 'resultado_json']),
+    error: texto(registro, ['error']),
+    modelo: texto(registro, ['modelo']),
+    createdAt: texto(registro, ['createdAt', 'created_at']) ?? '',
+  };
+}
+
+/** Temas declarados dentro de `resultado`, si vienen con la forma esperada. */
+export function temasDeExtraccion(extraccion: ExtraccionDocumento | null): TemaClave[] {
+  if (!extraccion || !esRegistro(extraccion.resultado)) return [];
+  return lista(extraccion.resultado, ['terminos'])
+    .map((item): TemaClave | null => {
+      const fila = esRegistro(item) ? item : {};
+      const termino = texto(fila, ['termino']);
+      const frecuencia = numero(fila, ['frecuencia']);
+      if (!termino || frecuencia === null) return null;
+      return { termino, frecuencia };
+    })
+    .filter((item): item is TemaClave => item !== null);
+}
+
+/** Origen declarado dentro de `resultado` (para temas clave). */
+export function origenDeExtraccion(extraccion: ExtraccionDocumento | null): string | null {
+  if (!extraccion || !esRegistro(extraccion.resultado)) return null;
+  return texto(extraccion.resultado, ['origen']);
+}
+
 /** Tipos de documento de `GET /api/v1/catalogs` (`catalogs.tiposDocumento`). */
 export function aTiposDocumento(bruto: unknown): readonly OpcionCatalogo[] {
   const registro = esRegistro(bruto) ? bruto : {};
@@ -258,40 +403,55 @@ export function aTiposDocumento(bruto: unknown): readonly OpcionCatalogo[] {
     .filter((opcion): opcion is OpcionCatalogo => opcion !== null);
 }
 
+/** Normativa de `normativas[]` en `GET /api/v1/documents/arbol`. */
+export function aNormativa(bruto: unknown): Normativa {
+  const registro = esRegistro(bruto) ? bruto : {};
+
+  return {
+    id: texto(registro, ['id']) ?? '',
+    codigo: texto(registro, ['codigo']),
+    titulo: texto(registro, ['titulo']) ?? '',
+    tipoNorma: texto(registro, ['tipoNorma', 'tipo_norma']) ?? '',
+    ambito: texto(registro, ['ambito']) ?? '',
+    entidadEmisora: texto(registro, ['entidadEmisora', 'entidad_emisora']),
+    fechaPublicacion: fechaIso(texto(registro, ['fechaPublicacion', 'fecha_publicacion', 'fecha'])),
+    url: texto(registro, ['url']),
+    resumen: texto(registro, ['resumen']),
+  };
+}
+
+/** Otro documento de `otros[]` en `GET /api/v1/documents/arbol`. */
+export function aOtroDocumento(bruto: unknown): OtroDocumento {
+  const registro = esRegistro(bruto) ? bruto : {};
+
+  return {
+    id: texto(registro, ['id']) ?? '',
+    codigo: texto(registro, ['codigo']),
+    titulo: texto(registro, ['titulo']) ?? '',
+    tipo: texto(registro, ['tipo']),
+    fecha: fechaIso(texto(registro, ['fecha', 'fechaPublicacion', 'fecha_publicacion'])),
+    entidad: texto(registro, ['entidad']),
+    url: texto(registro, ['url']),
+    resumen: texto(registro, ['resumen']),
+  };
+}
+
 /* ------------------------------------------------------------------------- *
  * Presentación
  * ------------------------------------------------------------------------- */
 
-/** `YYYY-MM-DD` → `DD/MM/YYYY`; cualquier otra forma se muestra tal cual. */
+/** `YYYY-MM-DD` → `02NOV2025`; cualquier otra forma se muestra tal cual. */
 export function formatearFecha(valor: string | null | undefined): string {
   if (!valor) return '—';
-
-  const partes = valor.slice(0, 10).split('-');
-  if (partes.length !== 3) return valor;
-
-  const anio = partes[0];
-  const mes = partes[1];
-  const dia = partes[2];
-  if (!anio || !mes || !dia) return valor;
-
-  return `${dia}/${mes}/${anio}`;
+  return partesFecha(valor) ? formatearFechaCompacta(valor) : valor;
 }
 
 /**
- * `2026-11-22T09:07:00.776Z` → `22/11/2026 04:07` (hora local del navegador).
+ * `2026-11-22T09:07:00.776Z` → `22NOV2026 04:07` (hora local del navegador).
  * La anulación es un timestamp: no se rotula con ningún estado de catálogo.
  */
 export function formatearFechaHora(valor: string | null | undefined): string {
-  if (!valor) return '—';
-
-  const fecha = new Date(valor);
-  if (Number.isNaN(fecha.getTime())) return valor;
-
-  const dia = String(fecha.getDate()).padStart(2, '0');
-  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-  const hora = String(fecha.getHours()).padStart(2, '0');
-  const minuto = String(fecha.getMinutes()).padStart(2, '0');
-  return `${dia}/${mes}/${fecha.getFullYear()} ${hora}:${minuto}`;
+  return formatearFechaHoraCompartida(valor);
 }
 
 /** «Anexo N° 16». No se fabrica un anexo para los tipos que no lo tienen. */
@@ -310,6 +470,63 @@ export function claseEstado(estado: string | null): string {
 /** `confidence` está acotada a 0..1 en la base. */
 export function formatearConfianza(valor: number | null): string {
   return valor === null ? '—' : `${Math.round(valor * 100)} %`;
+}
+
+/**
+ * Etapa de flujo del documento, derivada del estado registrado.
+ *
+ * No se inventa un paso: si la base no trae estado y el documento no está
+ * validado, se declara «Sin etapa». El valor crudo «Activo» se rotula «Cargado»
+ * igual que en el resto de la pantalla.
+ */
+export function etapaFlujo(documento: Documento): string {
+  const estado = (documento.estado ?? '').trim().toLowerCase();
+  if (documento.validado || estado === 'validado') return 'Validado';
+  if (estado === 'en análisis' || estado === 'en analisis') return 'En análisis';
+  if (estado === 'extraído' || estado === 'extraido') return 'Extraído';
+  if (estado === 'rechazado') return 'Rechazado';
+  if (estado) return 'Cargado';
+  return 'Sin etapa';
+}
+
+/** Rama del árbol documental: un tipo del catálogo con sus documentos. */
+export type RamaDocumental = {
+  clave: string;
+  etiqueta: string;
+  documentos: Documento[];
+};
+
+/**
+ * Orden alfanumérico por código y, si no hay, por título. Los códigos mezclan
+ * letras y números (`ACTA-2` / `ACTA-10`), por eso la comparación es numérica.
+ */
+export function ordenarAlfabetico<T extends { codigo: string | null; titulo: string | null }>(
+  filas: readonly T[],
+): T[] {
+  const clave = (fila: T): string =>
+    (fila.codigo?.trim() || fila.titulo?.trim() || '').toLowerCase();
+  return [...filas].sort((a, b) =>
+    clave(a).localeCompare(clave(b), 'es', { numeric: true, sensitivity: 'base' }),
+  );
+}
+
+/**
+ * Agrupa los documentos de la página por tipo documental para el árbol del RAG.
+ * No añade filas ni tipos que la página no traiga; las hojas van en orden
+ * alfanumérico dentro de cada rama.
+ */
+export function agruparDocumentosPorTipo(documentos: readonly Documento[]): RamaDocumental[] {
+  const mapa = new Map<string, RamaDocumental>();
+  for (const documento of documentos) {
+    const clave = documento.tipo ?? 'sin-tipo';
+    const etiqueta = documento.tipoNombre ?? documento.tipo ?? 'Sin tipo';
+    const rama = mapa.get(clave) ?? { clave, etiqueta, documentos: [] };
+    rama.documentos.push(documento);
+    mapa.set(clave, rama);
+  }
+  return [...mapa.values()]
+    .sort((a, b) => a.etiqueta.localeCompare(b.etiqueta, 'es'))
+    .map((rama) => ({ ...rama, documentos: ordenarAlfabetico(rama.documentos) }));
 }
 
 /** Nombre legible de un archivo o enlace: el último segmento de la ruta. */

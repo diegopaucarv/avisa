@@ -1,5 +1,10 @@
 # Migración del frontend AVISA a Angular
 
+> **Documento histórico.** Fotografía del **21-nov-2026**. No se reescribe: las
+> cifras y decisiones describen el punto de partida del porting. El estado
+> vigente de la migración está en `07_frontend/angular/ESTADO_MIGRACION_ANGULAR.md`
+> y el estado pantalla por pantalla, en `07_frontend/frontend.md`.
+
 **Tipo de documento:** diagnóstico previo (no implementación); la migración está **en curso**
 **Fecha:** 21-nov-2026
 **Alcance:** la UI Next congelada (`app/`, `components/`, `lib/` de navegador) y su relación con el BFF (`app/api/`, `lib/db/`)

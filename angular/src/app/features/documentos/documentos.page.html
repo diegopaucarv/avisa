@@ -2,26 +2,22 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-documentos">Documentos</h1>
-      <p class="view-subtitle">
-        Evidencia documental del caso: anexos y formatos de la Guía (§7.7.1 y §8.3.3; Anexos 1–17)
-        para sistematizar demandas, alertas, actas, compromisos, reuniones y reportes. Pulse una
-        fila para revisar la ficha en el panel lateral, sin salir del listado.
-      </p>
     </div>
-    <div class="view-acciones">
+    <div class="view-actions">
       @if (puedeRegistrar()) {
       <button type="button" class="button-primary" (click)="abrirAlta()">
         Registrar documento
       </button>
-      }
-      <app-exportar-menu
+      } @if (!verPapelera()) {
+      <app-barra-seleccion
         entidad="documentos"
-        etiqueta="Exportar"
+        anulable="documentos"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (anulado)="alAnularLote($event)"
         (fallo)="alFallarExportacion($event)"
       />
-      <p class="result-count" aria-live="polite">
-        {{ total() }} {{ verPapelera() ? 'documentos anulados' : 'documentos' }}
-      </p>
+      }
     </div>
   </header>
 
@@ -80,7 +76,7 @@
       Tipo
       <select aria-label="Filtrar documentos por tipo" (change)="cambiarTipo($event)">
         <option value="" [selected]="filtros().tipo === ''">Todos</option>
-        @for (tipo of tipos(); track tipo.valor) {
+        @for (tipo of tiposFiltro(); track tipo.valor) {
         <option [value]="tipo.valor" [selected]="filtros().tipo === tipo.valor">
           {{ tipo.etiqueta }}
         </option>
@@ -113,8 +109,8 @@
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
 
-  @if (puedeVerPapelera()) {
   <div class="view-toolbar">
+    @if (puedeVerPapelera()) {
     <div class="segmented" role="group" aria-label="Documentos activos o anulados">
       <button type="button" [attr.aria-pressed]="!verPapelera()" (click)="cambiarVer('activos')">
         Activos
@@ -123,8 +119,25 @@
         Anulados
       </button>
     </div>
+    }
+    <div class="segmented" role="group" aria-label="Vista del listado">
+      <button
+        type="button"
+        [attr.aria-pressed]="vista() === 'arbol'"
+        (click)="cambiarVista('arbol')"
+      >
+        Árbol
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="vista() === 'tabla'"
+        (click)="cambiarVista('tabla')"
+      >
+        Tabla
+      </button>
+    </div>
   </div>
-  } @if (estadoListado() === 'error') {
+  @if (estadoListado() === 'error') {
   <div class="empty-state" role="alert">
     <strong>No se pudieron cargar los documentos</strong>
     <p>{{ errorListado()?.message }}</p>
@@ -146,122 +159,189 @@
   } } @else { @if (estadoListado() === 'cargando') {
   <p class="actualizando" role="status">Actualizando el listado…</p>
   } @if (verPapelera()) {
-  <div class="table-wrap">
-    <table class="data-table">
-      <caption class="table-caption">
-        {{ resumenPapelera() }}
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col">Código</th>
-          <th scope="col">Título</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Fecha de anulación</th>
-          <th scope="col">Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (documento of documentos(); track documento.id) {
-        <tr>
-          <td>{{ documento.codigo || 'Sin código' }}</td>
-          <td class="celda-titulo">{{ documento.titulo || 'Sin título' }}</td>
-          <td class="celda-caso">
-            @if (documento.casoCode) {
-            <strong>{{ documento.casoCode }}</strong>
-            @if (documento.casoTitulo) {
-            <small>{{ documento.casoTitulo }}</small>
-            } } @else {
-            <span class="sin-dato">Sin caso</span>
-            }
-          </td>
-          <td>{{ fechaHoraTexto(documento.anuladoEn) }}</td>
-          <td>
-            <button
-              type="button"
-              class="button-secondary"
-              [attr.aria-label]="
-                'Restaurar el documento ' +
-                (documento.codigo || documento.titulo || 'sin código')
-              "
-              (click)="abrirRestauracion(documento)"
-            >
-              Restaurar
-            </button>
-          </td>
-        </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-  } @else {
+  <app-tabla
+    [columnas]="columnasPapelera"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    (ordenCambio)="alCambiarOrden($event)"
+  >
+    <ng-template appCeldaTabla="titulo" let-fila>
+      <div class="celda-titulo">{{ fila.titulo || 'Sin título' }}</div>
+    </ng-template>
 
-  <div class="table-wrap">
-    <table class="data-table">
-      <caption class="table-caption">
-        {{ resumenTabla() }}
-      </caption>
-      <thead>
-        <tr>
-          <th scope="col">Código</th>
-          <th scope="col">Título</th>
-          <th scope="col">Tipo</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Fecha</th>
-          <th scope="col">Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (documento of documentos(); track documento.id) {
-        <tr
-          class="fila-documento case-row-clickable"
-          [class.row-selected]="seleccionadaId() === documento.id"
-          (click)="abrir(documento)"
-        >
-          <td>
-            <button
-              type="button"
-              class="table-link"
-              [attr.aria-label]="
-                    'Abrir el documento ' +
-                    (documento.codigo || documento.titulo || 'sin código') +
-                    ' en el panel lateral'
-                  "
-              (click)="abrir(documento); $event.stopPropagation()"
-              (keydown.arrowdown)="moverFoco($event, 1)"
-              (keydown.arrowup)="moverFoco($event, -1)"
-            >
-              {{ documento.codigo || 'Sin código' }}
-            </button>
-          </td>
-          <td class="celda-titulo">{{ documento.titulo || 'Sin título' }}</td>
-          <td class="celda-tipo">
-            {{ documento.tipoNombre || documento.tipo || '—' }} @if (documento.anexoNumero !== null)
-            {
-            <small>{{ etiquetaAnexo(documento.anexoNumero) }}</small>
-            }
-          </td>
-          <td class="celda-caso">
-            @if (documento.casoCode) {
-            <strong>{{ documento.casoCode }}</strong>
-            @if (documento.casoTitulo) {
-            <small>{{ documento.casoTitulo }}</small>
-            } } @else {
-            <span class="sin-dato">Sin caso</span>
-            }
-          </td>
-          <td>{{ formatearFecha(documento.fecha) }}</td>
-          <td>
-            <span [class]="'status-badge ' + claseEstado(documento.estadoUi)">
-              <span class="status-dot"></span>
-              {{ documento.estadoUi }}
-            </span>
-          </td>
-        </tr>
+    <ng-template appCeldaTabla="caso" let-fila>
+      <div class="celda-caso">
+        @if (fila.casoCode) {
+        <strong>{{ fila.casoCode }}</strong>
+        @if (fila.casoTitulo) {
+        <small>{{ fila.casoTitulo }}</small>
+        } } @else {
+        <span class="sin-dato">Sin caso</span>
         }
-      </tbody>
-    </table>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="accion" let-fila>
+      <button
+        type="button"
+        class="button-secondary"
+        [attr.aria-label]="
+          'Restaurar el documento ' + (fila.codigo || fila.titulo || 'sin código')
+        "
+        (click)="abrirRestauracion(fila)"
+      >
+        Restaurar
+      </button>
+    </ng-template>
+  </app-tabla>
+  } @else if (!verPapelera() && vista() === 'arbol') {
+  <div class="panel arbol-documentos">
+    @if (estadoArbol() === 'cargando') {
+    <p class="actualizando" role="status">Cargando el árbol completo…</p>
+    } @else if (estadoArbol() === 'error') {
+    <p class="panel-nota" role="alert">
+      No se pudo cargar el árbol completo: {{ errorArbol()?.message }}
+      <button type="button" class="link-button" (click)="recargarArbol()">Reintentar</button>
+    </p>
+    }
+    <details class="arbol-rama">
+      <summary>
+        <span>Todo</span>
+        <span class="arbol-cuenta">{{ totalArbol() }}</span>
+      </summary>
+      @for (rama of arbol(); track rama.clave) {
+      <details class="arbol-rama arbol-subrama">
+        <summary>
+          <span>{{ rama.etiqueta }}</span>
+          <span class="arbol-cuenta">{{ rama.documentos.length }}</span>
+        </summary>
+        <ul class="arbol-hojas">
+          @for (documento of rama.documentos; track documento.id) {
+          <li>
+            <button type="button" class="arbol-hoja" (click)="abrir(documento)">
+              <span class="arbol-hoja-codigo">{{ documento.codigo || 'Sin código' }}</span>
+              <span class="arbol-hoja-titulo">{{ documento.titulo || 'Sin título' }}</span>
+              <span [class]="'status-badge arbol-hoja-etapa ' + claseEstado(etapa(documento))">
+                <span class="status-dot"></span>
+                {{ etapa(documento) }}
+              </span>
+            </button>
+          </li>
+          }
+        </ul>
+      </details>
+      }
+    </details>
+    @if (hayFiltroDocumental()) { } @else {
+    <details class="arbol-rama">
+      <summary>
+        <span>Normativas</span>
+        <span class="arbol-cuenta">{{ normativas().length }}</span>
+      </summary>
+      @if (normativas().length === 0) { } @else {
+      <ul class="arbol-hojas">
+        @for (normativa of normativas(); track normativa.id || $index) {
+        <li class="arbol-hoja arbol-hoja--estatica">
+          <span class="arbol-hoja-codigo">{{ normativa.codigo || 'Sin código' }}</span>
+          <span class="arbol-hoja-titulo">{{ normativa.titulo || 'Sin título' }}</span>
+          <span class="arbol-hoja-dato">{{ normativa.tipoNorma || 'Sin tipo' }}</span>
+          <span class="arbol-hoja-fecha">{{ formatearFecha(normativa.fechaPublicacion) }}</span>
+        </li>
+        }
+      </ul>
+      }
+    </details>
+    <details class="arbol-rama">
+      <summary>
+        <span>Otros documentos</span>
+        <span class="arbol-cuenta">{{ otrosDocumentos().length }}</span>
+      </summary>
+      @if (otrosDocumentos().length === 0) { } @else {
+      <ul class="arbol-hojas">
+        @for (otro of otrosDocumentos(); track otro.id || $index) {
+        <li class="arbol-hoja arbol-hoja--estatica">
+          <span class="arbol-hoja-codigo">{{ otro.codigo || 'Sin código' }}</span>
+          <span class="arbol-hoja-titulo">{{ otro.titulo || 'Sin título' }}</span>
+          <span class="arbol-hoja-dato">{{ otro.tipo || 'Sin tipo' }}</span>
+          <span class="arbol-hoja-fecha">{{ formatearFecha(otro.fecha) }}</span>
+        </li>
+        }
+      </ul>
+      }
+    </details>
+    }
   </div>
-  } } @if (total() > 0 && estadoListado() !== 'error') {
+  @if (documentosArbol().length > filtros().tamano) {
+  <app-paginacion
+    [pagina]="filtros().pagina"
+    [tamano]="filtros().tamano"
+    [total]="documentosArbol().length"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  } } @else {
+  <app-tabla
+    [columnas]="columnasListado"
+    [filas]="filasVisibles()"
+    [orden]="ordenTabla()"
+    [ordenServidor]="true"
+    [seleccionable]="true"
+    [seleccion]="idsSeleccionados()"
+    [clicable]="true"
+    (ordenCambio)="alCambiarOrden($event)"
+    (seleccionCambio)="alCambiarSeleccion($event)"
+    (filaClic)="alClicFila($event)"
+  >
+    <ng-template appCeldaTabla="codigo" let-fila>
+      <button
+        type="button"
+        class="table-link"
+        [attr.aria-label]="
+          'Abrir el documento ' +
+          (fila.codigo || fila.titulo || 'sin código') +
+          ' en el panel lateral'
+        "
+        (click)="abrir(fila); $event.stopPropagation()"
+        (keydown.arrowdown)="moverFoco($event, 1)"
+        (keydown.arrowup)="moverFoco($event, -1)"
+      >
+        {{ fila.codigo || 'Sin código' }}
+      </button>
+    </ng-template>
+
+    <ng-template appCeldaTabla="titulo" let-fila>
+      <div class="celda-titulo">{{ fila.titulo || 'Sin título' }}</div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="tipo" let-fila>
+      <div class="celda-tipo">
+        {{ fila.tipoNombre || fila.tipo || '—' }} @if (fila.anexoNumero !== null) {
+        <small>{{ etiquetaAnexo(fila.anexoNumero) }}</small>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="caso" let-fila>
+      <div class="celda-caso">
+        @if (fila.casoCode) {
+        <strong>{{ fila.casoCode }}</strong>
+        @if (fila.casoTitulo) {
+        <small>{{ fila.casoTitulo }}</small>
+        } } @else {
+        <span class="sin-dato">Sin caso</span>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="etapa" let-fila>
+      <span [class]="'status-badge ' + claseEstado(etapa(fila))">
+        <span class="status-dot"></span>
+        {{ etapa(fila) }}
+      </span>
+    </ng-template>
+  </app-tabla>
+  } } @if (total() > 0 && estadoListado() !== 'error' && !enArbol()) {
   <app-paginacion
     [pagina]="filtros().pagina"
     [tamano]="filtros().tamano"

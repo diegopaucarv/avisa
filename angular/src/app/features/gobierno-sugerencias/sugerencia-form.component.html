@@ -1,0 +1,396 @@
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="panel-sugerencia-titulo"
+  >
+    <header class="drawer-head">
+      <div>
+        <p class="micro-label">{{ etiquetaCabecera() }}</p>
+        <h2 id="panel-sugerencia-titulo">{{ tituloCabecera() }}</h2>
+      </div>
+      <button
+        type="button"
+        class="button-secondary"
+        aria-label="Cerrar el formulario de la sugerencia"
+        (click)="cerrar()"
+      >
+        <app-icono nombre="cerrar" [tamano]="14" />
+      </button>
+    </header>
+
+    <form class="drawer-form" (submit)="$event.preventDefault()">
+      <div class="drawer-body">
+        @if (error(); as mensaje) {
+          <p class="panel-aviso" role="alert">{{ mensaje }}</p>
+        }
+
+        <section class="form-grupo" aria-labelledby="form-entidad">
+          <h3 id="form-entidad">Entidad afectada</h3>
+
+          <div class="entidad-toggle segmented" role="group" aria-label="Tipo de entidad">
+            <button
+              type="button"
+              [attr.aria-pressed]="formulario().entidadTipo === 'caso'"
+              (click)="cambiarEntidad('caso')"
+            >
+              Caso
+            </button>
+            <button
+              type="button"
+              [attr.aria-pressed]="formulario().entidadTipo === 'territorio'"
+              (click)="cambiarEntidad('territorio')"
+            >
+              Territorio
+            </button>
+          </div>
+
+          @if (formulario().entidadTipo === 'caso') {
+            @if (casoElegido(); as casoSel) {
+              <div class="panel-caso-elegido">
+                <div class="panel-caso-elegido-copia">
+                  <span class="panel-caso-codigo">{{ casoSel.codigo }}</span>
+                  <span class="panel-caso-titulo">{{ casoSel.titulo }}</span>
+                  <span class="panel-caso-region">{{ casoSel.region || 'Sin región' }}</span>
+                </div>
+                <button type="button" class="button-secondary" (click)="quitarCaso()">
+                  Cambiar
+                </button>
+              </div>
+            } @else {
+              <div class="form-field">
+                <label class="form-label" for="sug-caso">Caso</label>
+                <input
+                  id="sug-caso"
+                  class="form-input"
+                  type="search"
+                  placeholder="Buscar caso por código o título"
+                  [value]="busquedaCaso()"
+                  (input)="buscarCaso($event)"
+                />
+                @if (estadoCasos() === 'cargando' || estadoCasos() === 'inactivo') {
+                  @if (busquedaCaso().trim()) {
+                    <p class="form-hint" role="status">Buscando casos…</p>
+                  }
+                } @else if (estadoCasos() === 'error') {
+                  <p class="form-error" role="alert">{{ errorCasos()?.message }}</p>
+                } @else if (casosEncontrados().length === 0) {
+                  @if (busquedaCaso().trim()) {
+                    <p class="form-hint">Sin casos para la búsqueda.</p>
+                  }
+                } @else {
+                  <ul class="panel-caso-lista">
+                    @for (casoSugerido of casosEncontrados(); track casoSugerido.id) {
+                      <li>
+                        <button
+                          type="button"
+                          class="panel-caso-opcion"
+                          (click)="elegirCaso(casoSugerido)"
+                        >
+                          <span class="panel-caso-codigo">{{ casoSugerido.codigo }}</span>
+                          <span class="panel-caso-titulo">{{ casoSugerido.titulo }}</span>
+                          <span class="panel-caso-region">{{
+                            casoSugerido.region || 'Sin región'
+                          }}</span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+            }
+          } @else {
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-label" for="sug-region">Región</label>
+                <select
+                  id="sug-region"
+                  class="form-select"
+                  (change)="actualizar('regionId', $event)"
+                >
+                  <option value="" [selected]="!formulario().regionId">Sin región</option>
+                  @for (region of regiones(); track region.id) {
+                    <option
+                      [value]="region.id"
+                      [selected]="idTexto(region.id) === formulario().regionId"
+                    >
+                      {{ region.nombre }}
+                    </option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label" for="sug-territorio">Territorio declarado</label>
+                <input
+                  id="sug-territorio"
+                  class="form-input"
+                  type="text"
+                  placeholder="Provincia, distrito, cuenca u otro ámbito"
+                  [value]="formulario().territorioTexto"
+                  (input)="actualizar('territorioTexto', $event)"
+                />
+                <p class="form-hint">Al menos una región o un texto de territorio.</p>
+              </div>
+            </div>
+          }
+        </section>
+
+        <section class="form-grupo" aria-labelledby="form-contenido">
+          <h3 id="form-contenido">Qué se sugiere</h3>
+
+          <div class="form-field">
+            <label class="form-label" for="sug-titulo">Título de la sugerencia</label>
+            <input
+              id="sug-titulo"
+              class="form-input"
+              type="text"
+              placeholder="Qué se sugiere, en una línea"
+              [value]="formulario().titulo"
+              (input)="actualizar('titulo', $event)"
+            />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="sug-detalle">Detalle</label>
+            <textarea
+              id="sug-detalle"
+              class="form-textarea"
+              rows="3"
+              placeholder="Descripción de la recomendación de intervención"
+              [value]="formulario().detalle"
+              (input)="actualizar('detalle', $event)"
+            ></textarea>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label" for="sug-tipo">Tipo de sugerencia</label>
+              <select id="sug-tipo" class="form-select" (change)="actualizar('tipo', $event)">
+                <option value="" [selected]="!formulario().tipo">Sin declarar</option>
+                @for (tipo of opciones()?.tipos ?? []; track tipo.codigo) {
+                  <option [value]="tipo.codigo" [selected]="tipo.codigo === formulario().tipo">
+                    {{ tipo.etiqueta }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="sug-prioridad">Prioridad</label>
+              <select
+                id="sug-prioridad"
+                class="form-select"
+                (change)="actualizar('prioridad', $event)"
+              >
+                <option value="" [selected]="!formulario().prioridad">Sin declarar</option>
+                @for (prioridad of prioridadesFormulario(); track prioridad.codigo) {
+                  <option
+                    [value]="prioridad.codigo"
+                    [selected]="prioridad.codigo === formulario().prioridad"
+                  >
+                    {{ prioridad.codigo }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="sug-estado">Estado</label>
+              <select id="sug-estado" class="form-select" (change)="actualizar('estado', $event)">
+                @for (estado of opciones()?.estados ?? []; track estado.codigo) {
+                  <option
+                    [value]="estado.codigo"
+                    [selected]="estado.codigo === formulario().estado"
+                  >
+                    {{ estado.etiqueta }}
+                  </option>
+                }
+                @if (!opciones()?.estados?.length) {
+                  <option value="pendiente" selected>Pendiente</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="sug-origen">Origen</label>
+              <select id="sug-origen" class="form-select" (change)="actualizar('origen', $event)">
+                @for (origen of origenes; track origen) {
+                  <option [value]="origen" [selected]="origen === formulario().origen">
+                    {{ etiquetaOrigen(origen) }}
+                  </option>
+                }
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-grupo" aria-labelledby="form-destino">
+          <h3 id="form-destino">A quién y quién atiende</h3>
+
+          <div class="form-grid">
+            <div class="form-field panel-campo-ancho">
+              <label class="form-label" for="sug-destinatario">A quién se dirige</label>
+              <input
+                id="sug-destinatario"
+                class="form-input"
+                type="text"
+                placeholder="Persona, unidad o institución destinataria"
+                [value]="formulario().destinatario"
+                (input)="actualizar('destinatario', $event)"
+              />
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="sug-unidad">Unidad responsable</label>
+              <select id="sug-unidad" class="form-select" (change)="actualizar('unidad', $event)">
+                <option value="" [selected]="!formulario().unidad">Sin unidad</option>
+                @for (unidad of unidadesFormulario(); track unidad.siglas) {
+                  <option
+                    [value]="unidad.siglas"
+                    [selected]="unidad.siglas === formulario().unidad"
+                  >
+                    {{ unidad.siglas }}{{ unidad.nombre ? ' · ' + unidad.nombre : '' }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="sug-responsable">Atiende (usuario)</label>
+              <select
+                id="sug-responsable"
+                class="form-select"
+                (change)="actualizar('responsableUsuarioId', $event)"
+              >
+                <option value="" [selected]="!formulario().responsableUsuarioId">
+                  Sin asignar
+                </option>
+                @for (responsable of opciones()?.responsables ?? []; track responsable.id) {
+                  <option
+                    [value]="responsable.id"
+                    [selected]="responsable.id === formulario().responsableUsuarioId"
+                  >
+                    {{ responsable.nombre }}{{ responsable.cargo ? ' · ' + responsable.cargo : '' }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="sug-responsable-texto">O declare un nombre</label>
+              <input
+                id="sug-responsable-texto"
+                class="form-input"
+                type="text"
+                placeholder="Nombre o cargo sin usuario del sistema"
+                [value]="formulario().responsableTexto"
+                (input)="actualizar('responsableTexto', $event)"
+              />
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="sug-vence">Vence el</label>
+              <input
+                id="sug-vence"
+                class="form-input"
+                type="date"
+                [value]="formulario().venceEn"
+                (input)="actualizar('venceEn', $event)"
+              />
+              <p class="form-hint">Opcional; vacío deja la sugerencia sin vencimiento.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-grupo" aria-labelledby="form-sustento">
+          <h3 id="form-sustento">Con qué sustento</h3>
+
+          <div class="form-field">
+            <label class="form-label" for="sug-sustento">Sustento</label>
+            <textarea
+              id="sug-sustento"
+              class="form-textarea"
+              rows="2"
+              placeholder="Evidencia o fundamento de la sugerencia"
+              [value]="formulario().sustento"
+              (input)="actualizar('sustento', $event)"
+            ></textarea>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label" for="sug-sustento-uri">Enlace al sustento</label>
+              <input
+                id="sug-sustento-uri"
+                class="form-input"
+                type="url"
+                placeholder="https://…"
+                [value]="formulario().sustentoUri"
+                (input)="actualizar('sustentoUri', $event)"
+              />
+            </div>
+
+            <div class="form-field">
+              <label class="form-label" for="sug-confianza">Confianza (%)</label>
+              <input
+                id="sug-confianza"
+                class="form-input"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                placeholder="Sin dato"
+                [value]="formulario().confianza"
+                (input)="actualizar('confianza', $event)"
+              />
+              <p class="form-hint">Sólo si la propuesta es automática; vacío = sin dato.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-grupo" aria-labelledby="form-decision">
+          <h3 id="form-decision">Decisión</h3>
+
+          @if (formulario().estado === 'rechazada') {
+            <div class="form-field">
+              <label class="form-label" for="sug-motivo">Motivo del rechazo</label>
+              <textarea
+                id="sug-motivo"
+                class="form-textarea"
+                rows="2"
+                placeholder="Obligatorio al rechazar"
+                [value]="formulario().motivoRechazo"
+                (input)="actualizar('motivoRechazo', $event)"
+              ></textarea>
+            </div>
+          }
+
+          <div class="form-field">
+            <label class="form-label" for="sug-nota">Nota de la decisión</label>
+            <textarea
+              id="sug-nota"
+              class="form-textarea"
+              rows="2"
+              placeholder="Qué decidió la persona y por qué"
+              [value]="formulario().decisionNota"
+              (input)="actualizar('decisionNota', $event)"
+            ></textarea>
+          </div>
+        </section>
+      </div>
+
+      <footer class="drawer-foot">
+        <button type="button" class="button-secondary" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="button-primary" [disabled]="guardando()" (click)="guardar()">
+          {{
+            guardando() ? 'Guardando…' : esEdicion() ? 'Guardar cambios' : 'Registrar sugerencia'
+          }}
+        </button>
+      </footer>
+    </form>
+  </aside>
+</div>

@@ -1,7 +1,16 @@
 # Mapeo de mockups consolidados a Angular
 
-**Actualizado:** 2026-11-23
+**Actualizado:** 2026-11-24 (base del 2026-11-23)
 **Alcance:** correspondencia entre los mockups elegidos/consolidados de `docs/07_frontend/mockups/` y la SPA Angular existente. Es un mapa de diseño e implementación; **no modifica los componentes Angular**.
+
+> **Nota de alcance.** Este documento cubre sólo los **ocho mockups
+> consolidados** y las pantallas que ya existían al 2026-11-23. Las ocho vistas
+> añadidas después —Dashboard analítico, Bandeja RED-RADAR, Matriz de
+> conflictividad, Archivo de sugerencias, Exportaciones, Administración, Consola
+> ETL y Autoridades y agentes— y el estado real pantalla por pantalla viven en
+> `docs/07_frontend/frontend.md`. El catálogo de mockups tiene 18 artboards
+> canónicos más 17 variantes heredadas (`docs/07_frontend/mockups/index.html`);
+> las variantes no son fuente de datos.
 
 ## Criterio de aplicación
 
@@ -50,7 +59,7 @@ Los mockups son referencias de presentación, no fuentes para copiar registros d
 - **Mockup canónico:** `panorama-territorial.html`; absorbe el resumen KPI, las bandas de macroámbito, los chips de alcance y la tabla regional de `panorama_territorial_vista_geogr_fica_y_regiones.html`.
 - **Vista Angular:** ruta `/mapa` → `MapaPage`, `angular/src/app/features/mapa/mapa.page.{ts,html}`.
 - **Componentes/servicios de datos:** `PanoramaService` (`features/mapa/panorama.service.ts`) consulta casos abiertos paginados; `panorama.agregados.ts` produce bandas, conteos regionales y riesgo alto; `centroides.regiones.ts` aporta centroides referenciales. La página implementa mapa Leaflet, selección de ámbito, lista priorizada y cajón «Ver casos».
-- **Qué actualizar:** orden y agrupación visual del resumen, barras por macroámbito, selector y desglose regional. El mapa sigue rotulado referencial: no convertir los esquemas del mockup en polígonos o geografía distrital. No trasladar cifras estáticas de la variante eliminada.
+- **Qué actualizar:** orden y agrupación visual del resumen, barras por macroámbito, selector y desglose regional. El mapa **ya dibuja los polígonos distritales reales** de `territorio.distrito` (1 892 distritos, migration/47 y `scripts/cargar-gis-neon.mjs`) además de los círculos regionales; las capas opcionales de puntos del KML y auditorios se encienden sobre él. No trasladar cifras estáticas de la variante eliminada.
 
 ### Solicitud de modificación de alerta según usuario
 
@@ -68,16 +77,16 @@ Los mockups son referencias de presentación, no fuentes para copiar registros d
 
 ## Resumen de impacto
 
-| Mockup canónico | Angular existente a actualizar | Estado / trabajo faltante |
-| --- | --- | --- |
-| Perfil del actor | `ActoresPage` + `ActorPanelComponent` | Rediseño del drawer; preservar acceso PII auditado |
-| Edición del actor | `ActoresPage` + `ActorPanelComponent` | ✔ Edición de atributos públicos y PATCH auditado; PII, alta, fusión y baja lógica pendientes |
-| Lista temporal | `ActoresPage` | ✔ Selección temporal en memoria entre filtros/páginas; padrón de asistencia y exportación siguen pendientes |
-| Tarjetas de casos | `CasosPage` + `CasoVistaPreviaComponent` | Base existente; aplicar presentación sin alterar filtros/datos |
-| Detalle de alerta | `AlertasPage` + `AlertaPanelComponent` | Base de detalle/flujo existente; actualizar composición |
-| Panorama territorial | `MapaPage` + `PanoramaService` + `panorama.agregados.ts` | Las dos variantes describían la misma superficie, ya hay mapa/bandas/tabla/cajón |
-| Solicitud de modificación | `AlertaPanelComponent` + `AlertasPage` | Falta flujo específico, política por rol y contrato de auditoría/notificación |
-| Detalle completo del caso | `CasoDetallePage`; vista previa como acceso corto | Mantener la ficha completa en ruta; revisar campos que la API aún no entrega |
+| Mockup canónico           | Angular existente a actualizar                           | Estado / trabajo faltante                                                                                   |
+| ------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Perfil del actor          | `ActoresPage` + `ActorPanelComponent`                    | Rediseño del drawer; preservar acceso PII auditado                                                          |
+| Edición del actor         | `ActoresPage` + `ActorPanelComponent`                    | ✔ Edición de atributos públicos y PATCH auditado; PII, alta, fusión y baja lógica pendientes                |
+| Lista temporal            | `ActoresPage`                                            | ✔ Selección temporal en memoria entre filtros/páginas; padrón de asistencia y exportación siguen pendientes |
+| Tarjetas de casos         | `CasosPage` + `CasoVistaPreviaComponent`                 | Base existente; aplicar presentación sin alterar filtros/datos                                              |
+| Detalle de alerta         | `AlertasPage` + `AlertaPanelComponent`                   | Base de detalle/flujo existente; actualizar composición                                                     |
+| Panorama territorial      | `MapaPage` + `PanoramaService` + `panorama.agregados.ts` | Las dos variantes describían la misma superficie, ya hay mapa/bandas/tabla/cajón                            |
+| Solicitud de modificación | `AlertaPanelComponent` + `AlertasPage`                   | Falta flujo específico, política por rol y contrato de auditoría/notificación                               |
+| Detalle completo del caso | `CasoDetallePage`; vista previa como acceso corto        | Mantener la ficha completa en ruta; revisar campos que la API aún no entrega                                |
 
 ## Alternativas retiradas
 
@@ -96,4 +105,4 @@ Se eliminaron 12 alternativas después de conservar ocho fuentes canónicas:
 - `alertas_tempranas_solicitar_modificaci_n_2.html`
 - `casos_modal_detalle_y_mapa_de_actores.html`
 
-**Avance de implementación (2026-11-23).** La lista temporal y la edición de atributos públicos del mockup de actores ya están integradas en Angular; el `PATCH` aplica RLS y audita la mutación. Siguen pendientes la creación/captura de PII/fusión/baja de actores y la solicitud/auditoría/notificación de modificación de alertas, que requieren completar sus contratos antes de habilitar sus flujos.
+**Avance de implementación (2026-11-24).** La lista temporal, la edición de atributos públicos del mockup de actores y la edición del actor del directorio (con PII bajo motivo auditado) están integradas en Angular; el `PATCH` aplica RLS y audita la mutación. El mapa dibuja ya la capa distrital, los puntos del KML y los auditorios. Siguen pendientes la creación/captura de PII/fusión/baja de actores y la solicitud/auditoría/notificación de modificación de alertas, que requieren completar sus contratos antes de habilitar sus flujos.

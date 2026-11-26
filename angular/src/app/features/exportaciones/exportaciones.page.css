@@ -1,0 +1,255 @@
+:host {
+  display: block;
+}
+
+.eyebrow {
+  margin: 0 0 2px;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.controles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 18px 0 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+}
+
+.campo-ancho {
+  flex: 1 1 240px;
+  min-width: 220px;
+}
+
+.campo-etq {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.campo select,
+.campo input {
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 13px;
+}
+
+.campo select:focus-visible,
+.campo input:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+.nota-filtros {
+  margin: 0 2px 14px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.estado-carga {
+  margin: 24px 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.anexos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.anexo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: 0 1px 2px rgb(23 40 58 / 4%);
+}
+
+.anexo-card.activo {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 1px var(--blue) inset;
+}
+
+.anexo-card.no-disponible {
+  background: var(--canvas);
+}
+
+.anexo-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.anexo-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  background: var(--blue-pale);
+  color: var(--blue);
+}
+
+.anexo-titulo {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.anexo-ref {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.anexo-titulo h2 {
+  margin: 1px 0 0;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.pill {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pill-ok {
+  background: var(--green-pale);
+  color: var(--green);
+}
+
+.pill-off {
+  background: var(--red-pale);
+  color: var(--red);
+}
+
+.anexo-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.anexo-meta strong {
+  color: var(--ink-2);
+}
+
+.faltantes {
+  margin: 0;
+  padding: 10px 12px 10px 26px;
+  border: 1px solid var(--amber-pale);
+  border-radius: 9px;
+  background: var(--amber-pale);
+  color: var(--ink-2);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.faltantes li + li {
+  margin-top: 4px;
+}
+
+.sin-faltantes {
+  margin: 0;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.anexo-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.anexo-acciones .button-secondary {
+  min-height: 34px;
+  font-size: 12.5px;
+}
+
+.vista-previa {
+  margin-top: 22px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.vista-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.vista-cabecera h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.vista-acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.vista-frame {
+  display: block;
+  width: 100%;
+  height: 74vh;
+  min-height: 420px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+@media (max-width: 640px) {
+  .anexos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .campo {
+    min-width: 100%;
+  }
+}

@@ -2,110 +2,90 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-casos">Casos</h1>
-      <p class="view-subtitle">
-        Seguimiento de la conflictividad registrada, con su nivel, prioridad y riesgo propio del
-        caso.
-      </p>
     </div>
     @if (!verPapelera()) {
     <div class="view-actions">
-      @if (capacidades.puedeEditar()) {
-      <button type="button" class="button-primary" (click)="abrirAlta()">Nuevo caso</button>
-      }
+      <div class="segmented" role="group" aria-label="Formato de la lista de casos">
+        <button
+          type="button"
+          [attr.aria-pressed]="modo() === 'tarjetas'"
+          (click)="cambiarModo('tarjetas')"
+        >
+          Tarjetas
+        </button>
+        <button
+          type="button"
+          [attr.aria-pressed]="modo() === 'tabla'"
+          (click)="cambiarModo('tabla')"
+        >
+          Tabla
+        </button>
+      </div>
       <app-exportar-menu
         entidad="casos"
         [consulta]="filtrosExportacion()"
         (fallo)="alFallarExportacion($event)"
       />
+      @if (capacidades.puedeEditar()) {
+      <button type="button" class="button-primary" (click)="abrirAlta()">Nuevo caso</button>
+      }
     </div>
     }
   </header>
 
-  @if (exportarError(); as mensaje) {
+  @if (!verPapelera() && seleccion.cantidad() > 0) {
+  <div class="view-toolbar">
+    <app-barra-seleccion
+      entidad="casos"
+      anulable="casos"
+      [consulta]="filtrosExportacion()"
+      [cantidad]="seleccion.cantidad()"
+      [idsSeleccionados]="seleccion.lista()"
+      [cascada]="true"
+      (anulado)="alAnularLote($event)"
+      (fallo)="alFallarExportacion($event)"
+    />
+  </div>
+  } @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
   } @if (aviso(); as mensaje) {
   <p class="aviso-ok" role="status">{{ mensaje }}</p>
   }
 
-  <div class="filter-bar filter-bar-wrap">
-    <label class="search-field">
+  <div class="filter-bar filter-bar-wrap barra-filtros-casos">
+    <label class="search-field search-field-angosta">
       <app-icono nombre="buscar" [tamano]="14" />
       <input
         type="search"
-        placeholder="Buscar por código, título o resumen"
+        placeholder="Buscar por palabra clave..."
         [value]="filtros().q"
         aria-label="Buscar casos"
         (input)="buscar($event)"
       />
     </label>
 
-    <label class="select-filter">
-      Estado
-      <select
-        aria-label="Filtrar casos por estado"
-        [value]="estadoSeleccionado()"
-        (change)="cambiarEstado($event)"
+    <div class="tab-bar chips-en-linea" role="group" aria-label="Filtrar casos por nivel de riesgo">
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="filtros().riesgo === ''"
+        [attr.aria-pressed]="filtros().riesgo === ''"
+        (click)="seleccionarRiesgo('')"
       >
-        <option value="todos">Todos ({{ conteos().todos }})</option>
-        <option value="abiertos">Abiertos ({{ conteos().abiertos }})</option>
-        <option value="Resuelto">Resueltos ({{ conteos().resueltos }})</option>
-        <option value="Archivado">Archivados ({{ conteos().archivados }})</option>
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Nivel de conflictividad
-      <select
-        aria-label="Filtrar casos por nivel de conflictividad"
-        [value]="filtros().nivel"
-        (change)="cambiarNivel($event)"
+        Todos
+      </button>
+      @for (opcion of riesgos(); track opcion.valor) {
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="filtros().riesgo === opcion.valor"
+        [attr.aria-pressed]="filtros().riesgo === opcion.valor"
+        (click)="seleccionarRiesgo(opcion.valor)"
       >
-        <option value="">Todos</option>
-        @for (opcion of conflictividades(); track opcion.valor) {
-        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-        }
-      </select>
-    </label>
-
-    <button
-      type="button"
-      class="button-secondary"
-      [attr.aria-expanded]="avanzado()"
-      aria-controls="filtros-avanzados"
-      (click)="alternarAvanzado()"
-    >
-      Búsqueda avanzada @if (filtrosAvanzadosActivos()) {<strong>· activos</strong>}
-    </button>
-  </div>
-
-  @if (avanzado() || filtrosAvanzadosActivos()) {
-  <div class="filter-bar filter-bar-wrap" id="filtros-avanzados">
-    <label class="select-filter">
-      Prioridad de atención
-      <select
-        aria-label="Filtrar casos por prioridad de atención"
-        (change)="cambiarPrioridad($event)"
-      >
-        <option value="" [selected]="filtros().prioridad === ''">Todas</option>
-        @for (opcion of prioridades(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().prioridad === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
-        }
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Alcance
-      <select aria-label="Filtrar casos por alcance geográfico" (change)="cambiarAlcance($event)">
-        <option value="" [selected]="filtros().alcance === ''">Todos</option>
-        @for (opcion of alcances(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().alcance === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
-        }
-      </select>
-    </label>
+        {{ opcion.etiqueta }}
+      </button>
+      }
+    </div>
 
     <label class="select-filter">
       Región
@@ -122,50 +102,67 @@
       </select>
     </label>
 
+    <label class="edit-switch" [class.activo]="archivados()">
+      <span [class.activo]="!archivados()">Abiertos</span>
+      <input
+        type="checkbox"
+        role="switch"
+        [checked]="archivados()"
+        aria-label="Ver casos archivados en lugar de abiertos"
+        (change)="cambiarArchivados($event)"
+      />
+      <span class="edit-switch-track" aria-hidden="true">
+        <span class="edit-switch-thumb"></span>
+      </span>
+      <span [class.activo]="archivados()">Archivados</span>
+    </label>
+
+    <button
+      type="button"
+      class="link-button avanzado-enlace"
+      [attr.aria-expanded]="avanzado()"
+      aria-controls="filtros-avanzados"
+      (click)="alternarAvanzado()"
+    >
+      Búsqueda avanzada @if (filtrosAvanzadosActivos()) {<strong>· activos</strong>}
+    </button>
+  </div>
+
+  @if (avanzado() || filtrosAvanzadosActivos()) {
+  <div class="filter-bar filter-bar-wrap" id="filtros-avanzados">
     <label class="select-filter">
-      Temática
-      <select aria-label="Filtrar casos por temática" (change)="cambiarTematica($event)">
-        <option value="" [selected]="filtros().tematica === ''">Todas</option>
-        @for (opcion of tematicas(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().tematica === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
+      Nivel de conflictividad
+      <select
+        aria-label="Filtrar casos por nivel de conflictividad"
+        [value]="filtros().nivel"
+        (change)="cambiarNivel($event)"
+      >
+        <option value="">Todos</option>
+        @for (opcion of conflictividades(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
         }
       </select>
     </label>
 
-    <label class="select-filter">
-      Naturaleza
-      <select
-        aria-label="Filtrar casos por naturaleza: territorial o nacional o sectorial"
-        (change)="cambiarNaturaleza($event)"
+    <div class="tab-bar chips-en-linea" role="group" aria-label="Filtrar casos resueltos">
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="resueltosActivo()"
+        [attr.aria-pressed]="resueltosActivo()"
+        (click)="alternarResueltos()"
       >
-        <option value="" [selected]="filtros().naturaleza === ''">Todas</option>
-        @for (opcion of naturalezas(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().naturaleza === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
-        }
-        <option value="Sin declarar" [selected]="filtros().naturaleza === 'Sin declarar'">
-          Sin declarar
-        </option>
-      </select>
-    </label>
+        Resueltos ({{ conteos().resueltos }})
+      </button>
+    </div>
 
     <label class="select-filter">
-      Unidad responsable
-      <select
-        aria-label="Filtrar casos por unidad orgánica responsable"
-        (change)="cambiarUnidad($event)"
-      >
-        <option value="" [selected]="filtros().unidad === ''">Todas</option>
-        @for (opcion of unidades(); track opcion.valor) {
-        <option
-          [value]="opcion.valor"
-          [selected]="filtros().unidad === opcion.valor"
-          [title]="opcion.etiqueta"
-        >
-          {{ opcion.valor }}
+      Alcance
+      <select aria-label="Filtrar casos por alcance geográfico" (change)="cambiarAlcance($event)">
+        <option value="" [selected]="filtros().alcance === ''">Todos</option>
+        @for (opcion of alcances(); track opcion.valor) {
+        <option [value]="opcion.valor" [selected]="filtros().alcance === opcion.valor">
+          {{ opcion.etiqueta }}
         </option>
         }
       </select>
@@ -182,34 +179,73 @@
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
-  }
-
-  <div class="view-toolbar">
-    @if (puedeVerPapelera()) {
-    <div class="segmented" role="group" aria-label="Estado del registro: vigentes o anulados">
-      <button type="button" [attr.aria-pressed]="!verPapelera()" (click)="cambiarVer('activos')">
-        Vigentes
-      </button>
-      <button type="button" [attr.aria-pressed]="verPapelera()" (click)="cambiarVer('anulados')">
-        Anulados
-      </button>
+  <!--} @if (!verPapelera()) {
+  <section class="nudos-semana" aria-labelledby="nudos-semana-titulo">
+    <div class="nudos-semana-head">
+      <h2 id="nudos-semana-titulo">Nudos de la semana</h2>
+      @if (nudosSemana(); as tablero) {
+      <span>Semana {{ tablero.periodo.etiqueta }}</span>
+      }
     </div>
-    } @if (!verPapelera()) {
-    <label class="select-filter">
-      Vista
-      <select
-        aria-label="Formato de la lista de casos"
-        [value]="modo()"
-        (change)="cambiarModoDesde($event)"
-      >
-        <option value="tarjetas">Tarjetas</option>
-        <option value="tabla">Tabla</option>
-      </select>
-    </label>
-    }
-  </div>
 
-  @if (estado() === 'cargando') {
+    @if (estadoNudos() === 'cargando') {
+    <p class="empty-inline" role="status">Cargando nudos de la semana…</p>
+    } @else if (errorNudos(); as error) {
+    <p class="form-error" role="alert">{{ error.message }}</p>
+    } @else if (nudosSemana(); as tablero) { @if (tablero.periodoSinRegistro) {
+    <p class="empty-inline">
+      Periodo sin registro: no se declaró ningún nudo en la semana. No se muestra 0 porque la
+      cobertura aún no es completa.
+    </p>
+    } @else {
+    <div class="nudos-semana-cifras">
+      <div>
+        <b>{{ tablero.casosConNudoAbierto }} de {{ tablero.casosDelAmbito }}</b>
+        <span>casos con nudo abierto esta semana</span>
+      </div>
+      <div>
+        <b>{{ tablero.casosConNudo }}</b>
+        <span>casos con nudo registrado</span>
+      </div>
+      <div>
+        <b>{{ tablero.filas }}</b>
+        <span>nudos declarados en el periodo</span>
+      </div>
+    </div>
+
+    <ul class="nudos-semana-lista">
+      @for (item of tablero.items; track item.casoId) {
+      <li>
+        <div class="nudos-semana-caso">
+          <a class="table-link" [routerLink]="['/casos', item.codigo]">{{ item.codigo }}</a>
+          <span class="nudos-semana-titulo">{{ item.titulo }}</span>
+          @if (item.region) {
+          <span class="nudos-semana-region">{{ item.region }}</span>
+          } @if (item.abiertos > 0) {
+          <span class="status-badge">{{ item.abiertos }} abierto(s)</span>
+          } @else {
+          <span class="status-badge">Nudo cerrado</span>
+          }
+        </div>
+        @for (nudo of item.nudos; track nudo.id) {
+        <p class="nudos-semana-nudo">
+          {{ nudo.descripcion || 'Sin nudo declarado' }} @if (nudo.estado) {
+          <span class="detail-hint">
+            {{ nudo.estado }} · {{ nudo.seguimiento || 'Sin seguimiento declarado' }}
+          </span>
+          } @else {
+          <span class="detail-hint">
+            Sin estado declarado · {{ nudo.seguimiento || 'Sin seguimiento declarado' }}
+          </span>
+          }
+        </p>
+        }
+      </li>
+      }
+    </ul>
+    } }
+  </section>-->
+  } @if (estado() === 'cargando') {
   <div class="empty-state" role="status">Cargando casos…</div>
   } @else if (estado() === 'error') {
   <div class="empty-state" role="alert">
@@ -229,20 +265,17 @@
   } } @else if (verPapelera()) {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ total() }} casos anulados · se restauran a la vista de vigentes.
-      </caption>
       <thead>
         <tr>
-          <th scope="col">Código</th>
-          <th scope="col">Caso</th>
-          <th scope="col">Región</th>
-          <th scope="col">Fecha de anulación</th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
+          <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
+          <th scope="col" [appThOrden]="'anulado'" [orden]="orden">Fecha de anulación</th>
           <th scope="col">Acción</th>
         </tr>
       </thead>
       <tbody>
-        @for (caso of casos(); track caso.codigo) {
+        @for (caso of filasVisibles(); track caso.codigo) {
         <tr>
           <td>{{ caso.codigo }}</td>
           <td>{{ caso.titulo }}</td>
@@ -275,35 +308,23 @@
     >
       <div class="case-card-top">
         <span class="case-code">{{ caso.codigo }}</span>
-        <span class="status-badge" [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
-          <span class="status-dot"></span>
-          Nivel de riesgo: {{ caso.riesgo }}
+        <span class="case-location">
+          <app-icono nombre="mapa" [tamano]="13" />
+          {{ caso.region || 'Sin región' }}
         </span>
       </div>
       <h3>{{ caso.titulo }}</h3>
-      <div class="case-location">
-        <app-icono nombre="mapa" [tamano]="14" />
-        {{ caso.region || 'Sin región' }}
-      </div>
-      @if (caso.naturaleza; as naturaleza) {
-      <span class="case-naturaleza" [title]="'Naturaleza declarada: ' + naturaleza">
-        {{ naturaleza }}
-      </span>
-      } @else {
-      <span
-        class="case-naturaleza sin-declarar"
-        title="La naturaleza del caso aún no se declaró (Territorial o Nacional o sectorial)."
-      >
-        Sin declarar
-      </span>
-      }
       <p class="case-summary">{{ caso.resumen || 'Sin resumen registrado.' }}</p>
+
       <div class="case-card-bottom">
-        <span>{{ caso.etapa }}</span>
+        <span [class]="claseRiesgo(caso)">
+          <span class="status-dot"></span>
+          R: {{ riesgoMostrado(caso) }}
+        </span>
         <span
           title="Fecha de última actualización del registro; en los casos del legado es la fecha en que se cargaron."
         >
-          Actualización: {{ fechaCorta(caso.actualizado) }}
+          Act. {{ fechaCorta(caso.actualizado) }}
         </span>
       </div>
     </button>
@@ -312,34 +333,43 @@
   } @else {
   <div class="table-wrap">
     <table class="data-table">
-      <caption class="table-caption">
-        {{ total() }} casos · el riesgo es atributo del caso y se recalcula en su ficha.
-      </caption>
       <thead>
         <tr>
-          <th scope="col">Caso</th>
-          <th scope="col">Región</th>
-          <th scope="col">Temática</th>
-          <th scope="col">Estado</th>
-          <th scope="col">Prioridad</th>
-          <th scope="col">Riesgo</th>
-          <th scope="col">Unidad</th>
-          <th scope="col">Etapa</th>
-          <th scope="col">Inicio</th>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
+          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
+          <th scope="col" [appThOrden]="'riesgo'" [orden]="orden">Riesgo</th>
+          <th scope="col" [appThOrden]="'etapa'" [orden]="orden">Etapa</th>
+          <th scope="col" [appThOrden]="'inicio'" [orden]="orden">Inicio</th>
         </tr>
       </thead>
       <tbody>
-        @for (caso of casos(); track caso.codigo) {
+        @for (caso of filasVisibles(); track caso.codigo) {
         <tr class="case-row-clickable" [routerLink]="['/casos', caso.codigo]">
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(caso.codigo)"
+              [attr.aria-label]="'Seleccionar el caso ' + caso.codigo"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(caso.codigo)"
+            />
+          </td>
           <td>
             <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
           </td>
           <td>{{ caso.region || '—' }}</td>
-          <td>{{ caso.tematica || '—' }}</td>
           <td>{{ caso.estado }}</td>
-          <td>{{ caso.prioridad }}</td>
-          <td>{{ caso.riesgo }}</td>
-          <td>{{ caso.unidadResponsable || '—' }}</td>
+          <td>{{ riesgoMostrado(caso) }}</td>
           <td>{{ caso.etapa }}</td>
           <td [attr.title]="caso.inicio ? null : 'Sin fecha de inicio registrada'">
             {{ caso.inicio ? fechaTexto(caso.inicio) : '—' }}
@@ -358,13 +388,23 @@
     (tamanoCambia)="cambiarTamano($event)"
   />
   } @if (casoPrevio(); as caso) {
-  <app-caso-vista-previa [caso]="caso" (cerrar)="cerrarVistaPrevia()" />
+  <app-caso-vista-previa
+    [caso]="caso"
+    [puedeEditar]="capacidades.puedeEditar()"
+    (guardarEnlace)="guardarEnlaceAnalisis(caso, $event)"
+    (cerrar)="cerrarVistaPrevia()"
+  />
   } @if (panelAbierto()) {
   <app-caso-panel
     [guardando]="guardando()"
     [errorGuardado]="errorAlta()"
+    [duplicados]="duplicadosAlta()"
+    [verificando]="verificandoDuplicados()"
+    [descartes]="descartesDuplicados()"
+    [errorDuplicados]="errorDuplicadosAlta()"
     (cerrar)="cerrarAlta()"
     (guardar)="registrarCaso($event)"
+    (descartar)="marcarNoDuplicado($event)"
   />
   }
 </section>

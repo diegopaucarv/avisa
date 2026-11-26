@@ -14,7 +14,7 @@ function celdaCsv(valor: string): string {
 
 export function crearCsvPadronAsistencia({ titulo, lugar, fecha, actores }: DatosPadron): string {
   const filas = [
-    ['Padrón de asistencia'],
+    ['Lista de asistencia'],
     ['Sesión', titulo],
     ['Lugar', lugar],
     ['Fecha', fecha],

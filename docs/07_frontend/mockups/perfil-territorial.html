@@ -3,10 +3,10 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Perfil territorial · artes, OSPA y caleta · Mockup AVISA</title>
+        <title>Perfil territorial por región · Mockup AVISA</title>
         <style>
-            /* Tokens copiados de angular/src/styles/global.css. Sin webfonts, sin JS, sin CDN:
-               el archivo se abre por doble clic. */
+            /* Tokens copiados de angular/src/styles/global.css y de panorama-territorial.html.
+               Sin webfonts, sin JS, sin CDN: el archivo se abre por doble clic. */
             :root {
                 --ink: #17283a;
                 --ink-2: #33475b;
@@ -30,6 +30,9 @@
                 --font-display:
                     "Manrope", "DM Sans", system-ui, -apple-system, "Segoe UI",
                     sans-serif;
+                /* Derivado del token --muted para texto secundario: #778797 no
+                   llega a 4.5:1 sobre blanco. */
+                --ink-3: #5f7183;
             }
             * {
                 box-sizing: border-box;
@@ -43,7 +46,23 @@
                 color: var(--ink);
                 font-family: var(--font-sans);
                 font-size: 13px;
+                line-height: 1.5;
                 -webkit-font-smoothing: antialiased;
+            }
+            a {
+                color: var(--blue-dark);
+            }
+            :focus-visible {
+                outline: 2px solid var(--blue);
+                outline-offset: 2px;
+            }
+            .sr {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+                clip: rect(0 0 0 0);
+                white-space: nowrap;
             }
 
             /* ── Lienzo y cabecera de página ─────────────────────────── */
@@ -65,54 +84,65 @@
             }
             .view-head h1 {
                 margin: 0;
-                font: 700 22px/1.3 var(--font-display);
-                letter-spacing: -0.65px;
+                font: 700 24px/1.25 var(--font-display);
+                letter-spacing: -0.7px;
             }
             .view-subtitle {
-                max-width: 860px;
-                margin: 6px 0 0;
-                color: var(--muted);
-                font-size: 11px;
-                line-height: 1.6;
+                max-width: 900px;
+                margin: 7px 0 0;
+                color: var(--ink-3);
+                font-size: 12px;
+                line-height: 1.65;
+            }
+            .view-subtitle b {
+                color: var(--ink-2);
             }
             .badge {
                 display: inline-flex;
                 align-items: center;
-                height: 26px;
-                padding: 0 10px;
+                height: 28px;
+                padding: 0 11px;
                 border: 1px solid #cddcef;
                 border-radius: 999px;
                 background: var(--blue-pale);
-                color: var(--blue);
-                font-size: 9px;
+                color: var(--blue-dark);
+                font-size: 10.5px;
                 font-weight: 700;
-                letter-spacing: 0.05em;
+                letter-spacing: 0.04em;
                 text-transform: uppercase;
                 white-space: nowrap;
             }
-            .lede {
+            .route {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: baseline;
+                gap: 4px 8px;
                 padding: 12px 14px;
                 border: 1px solid #cddcef;
+                border-left: 3px solid var(--blue);
                 border-radius: 9px;
                 background: var(--blue-pale);
                 color: var(--blue-dark);
-                font-size: 10.5px;
+                font-size: 11.5px;
                 line-height: 1.65;
             }
-            .lede b {
+            .route b {
                 color: var(--blue-dark);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                font-size: 11px;
             }
-            .lede code,
-            .notes code,
-            .ann-card code {
+            code {
                 padding: 0 3px;
                 border-radius: 3px;
                 background: #eef1f4;
+                color: var(--ink-2);
                 font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-                font-size: 9px;
+                font-size: 10.5px;
             }
-            .lede code {
+            .route code {
                 background: #dae5f6;
+                color: var(--blue-dark);
             }
             .ex {
                 color: var(--amber);
@@ -132,62 +162,115 @@
                 align-items: flex-start;
                 justify-content: space-between;
                 gap: 14px;
-                padding: 14px 16px;
+                padding: 16px 18px;
                 border-bottom: 1px solid var(--line);
                 background: #fbfcfd;
             }
             .kicker {
                 display: inline-block;
-                color: var(--blue);
-                font: 700 8.5px/1.3 var(--font-display);
+                color: var(--blue-dark);
+                font: 700 10.5px/1.3 var(--font-display);
                 letter-spacing: 0.1em;
                 text-transform: uppercase;
             }
             .art-head h2 {
                 margin: 4px 0 0;
-                font: 700 16px/1.3 var(--font-display);
-                letter-spacing: -0.3px;
+                font: 700 18px/1.3 var(--font-display);
+                letter-spacing: -0.35px;
             }
             .art-head p {
-                max-width: 820px;
-                margin: 5px 0 0;
-                color: var(--muted);
-                font-size: 10px;
+                max-width: 860px;
+                margin: 6px 0 0;
+                color: var(--ink-3);
+                font-size: 11.5px;
                 line-height: 1.6;
             }
             .flag {
                 display: inline-flex;
                 align-items: flex-start;
                 gap: 6px;
-                max-width: 240px;
-                padding: 6px 9px;
+                max-width: 260px;
+                padding: 7px 10px;
                 border: 1px solid #f0d9b5;
                 border-radius: 7px;
                 background: var(--amber-pale);
-                color: var(--amber);
-                font-size: 9px;
+                color: #7a4f0d;
+                font-size: 10.5px;
                 font-weight: 700;
                 line-height: 1.45;
             }
             .flag::before {
                 content: "▲";
                 flex: 0 0 auto;
-                font-size: 8px;
-                line-height: 1.6;
+                font-size: 9px;
+                line-height: 1.7;
             }
             .art-body {
                 display: flex;
                 flex-direction: column;
                 gap: 14px;
-                padding: 16px;
+                padding: 18px;
             }
 
-            /* ── Filtros (estáticos) ─────────────────────────────────── */
-            .toolbar {
+            /* ── Cabecera de región ──────────────────────────────────── */
+            .region {
                 display: flex;
                 flex-wrap: wrap;
                 align-items: flex-end;
-                gap: 9px;
+                justify-content: space-between;
+                gap: 14px;
+                padding: 14px 16px;
+                border: 1px solid #dbe4ec;
+                border-radius: 10px;
+                background: #fbfcfd;
+            }
+            .region-name {
+                margin: 2px 0 0;
+                font: 700 30px/1.1 var(--font-display);
+                letter-spacing: -0.9px;
+            }
+            .region-meta {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 6px 14px;
+                margin: 9px 0 0;
+                color: var(--ink-2);
+                font-size: 11.5px;
+            }
+            .region-meta b {
+                color: var(--ink);
+                font-variant-numeric: tabular-nums;
+            }
+            .region-note {
+                max-width: 720px;
+                margin: 7px 0 0;
+                color: var(--ink-3);
+                font-size: 10.5px;
+                line-height: 1.55;
+            }
+            .field {
+                display: inline-flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+            .field > label {
+                color: var(--ink-3);
+                font-size: 10.5px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .pick {
+                height: 34px;
+                min-width: 200px;
+                padding: 0 10px;
+                border: 1px solid #cddcef;
+                border-radius: 7px;
+                background: #fff;
+                color: var(--ink-2);
+                font: 600 12px var(--font-sans);
+                cursor: pointer;
             }
             .seg {
                 display: inline-flex;
@@ -196,148 +279,96 @@
                 border-radius: 7px;
                 background: #fff;
             }
-            .seg span {
-                padding: 5px 10px;
+            .seg button {
+                padding: 6px 10px;
+                border: 0;
                 border-right: 1px solid #e3ebf5;
-                color: var(--muted);
-                font-size: 9.5px;
-                font-weight: 600;
-                white-space: nowrap;
-            }
-            .seg span:last-child {
-                border-right: 0;
-            }
-            .seg span.on {
-                background: var(--blue-pale);
-                color: var(--blue);
-            }
-            .field {
-                display: inline-flex;
-                flex-direction: column;
-                gap: 3px;
-            }
-            .field > label {
-                color: #97a1aa;
-                font-size: 8px;
-                font-weight: 600;
-                letter-spacing: 0.5px;
-                text-transform: uppercase;
-            }
-            .pick {
-                display: inline-flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 14px;
-                min-width: 128px;
-                height: 28px;
-                padding: 0 9px;
-                border: 1px solid #d8e0e8;
-                border-radius: 6px;
                 background: #fff;
                 color: var(--ink-2);
-                font-size: 9.5px;
+                font: 600 11px var(--font-sans);
+                cursor: pointer;
+                white-space: nowrap;
             }
-            .pick::after {
-                content: "▾";
-                color: #9aa6b1;
-                font-size: 8px;
+            .seg button:last-child {
+                border-right: 0;
             }
-            .pick.ph {
-                color: #9aa6b1;
-            }
-            .toolbar .hint {
-                margin-left: auto;
-                padding-bottom: 5px;
-                color: var(--muted);
-                font-size: 9px;
+            .seg button[aria-pressed="true"] {
+                background: var(--blue-pale);
+                color: var(--blue-dark);
             }
 
-            /* ── Grupos y fichas ────────────────────────────────────── */
-            .groups {
+            /* ── Indicadores ─────────────────────────────────────────── */
+            .kpis {
                 display: grid;
-                grid-template-columns: repeat(3, minmax(0, 1fr));
-                gap: 12px;
+                grid-template-columns: repeat(6, minmax(0, 1fr));
+                gap: 9px;
             }
             @media (max-width: 1080px) {
-                .groups {
-                    grid-template-columns: 1fr;
+                .kpis {
+                    grid-template-columns: repeat(3, 1fr);
                 }
             }
-            .group {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                padding: 11px 12px 12px;
+            .kpi {
+                padding: 11px 13px;
                 border: 1px solid var(--line);
                 border-radius: 9px;
                 background: #fff;
             }
-            .group h3 {
-                margin: 0;
-                font: 700 12px/1.3 var(--font-display);
+            .kpi b {
+                display: block;
+                font: 700 22px/1.1 var(--font-display);
+                font-variant-numeric: tabular-nums;
+                letter-spacing: -0.5px;
             }
-            .g-meta {
-                margin: 0;
-                color: var(--muted);
-                font-size: 9px;
-                line-height: 1.45;
+            .kpi span {
+                display: block;
+                margin-top: 4px;
+                color: var(--ink-3);
+                font-size: 10.5px;
+                line-height: 1.4;
             }
-            .chips {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                gap: 5px;
-            }
-            .chip {
-                padding: 2px 7px;
-                border: 1px solid #e3e9ef;
-                border-radius: 999px;
-                background: #f7f9fb;
-                color: var(--ink-2);
-                font-size: 8.5px;
-                white-space: nowrap;
-            }
-            .chip.tipo {
-                border-color: #cddcef;
-                background: var(--blue-pale);
-                color: var(--blue);
-                font-weight: 700;
-            }
-            .chip.tipo.act {
-                border-color: #cfe4d9;
-                background: var(--green-pale);
-                color: var(--green);
+            .kpi.zero b {
+                color: #8b97a1;
             }
 
+            /* ── Superficies ─────────────────────────────────────────── */
             .card {
                 display: flex;
                 flex-direction: column;
-                gap: 9px;
-                padding: 12px 13px;
+                gap: 11px;
+                padding: 14px 15px;
                 border: 1px solid var(--line);
-                border-radius: 9px;
+                border-radius: 10px;
                 background: #fff;
             }
             .card-head {
                 display: flex;
+                flex-wrap: wrap;
                 align-items: flex-start;
                 justify-content: space-between;
                 gap: 10px;
             }
             .card-title {
                 margin: 0;
-                font: 700 12px/1.3 var(--font-display);
-                letter-spacing: -0.1px;
+                font: 700 14px/1.35 var(--font-display);
+                letter-spacing: -0.15px;
+            }
+            .card-title .pill {
+                vertical-align: 1px;
             }
             .card-sub {
-                margin: 2px 0 0;
-                color: var(--muted);
-                font-size: 9px;
-                line-height: 1.5;
+                max-width: 780px;
+                margin: 3px 0 0;
+                color: var(--ink-3);
+                font-size: 11px;
+                line-height: 1.55;
+            }
+            .card-sub b {
+                color: var(--ink-2);
             }
             .split {
                 display: grid;
-                grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr);
+                grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
                 gap: 12px;
                 align-items: start;
             }
@@ -347,27 +378,57 @@
                 }
             }
 
+            /* ── Exportar ────────────────────────────────────────────── */
+            .exp {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .exp-btn {
+                height: 26px;
+                padding: 0 9px;
+                border: 1px solid #cddcef;
+                border-radius: 6px;
+                background: #fff;
+                color: var(--blue-dark);
+                font: 700 10.5px var(--font-sans);
+                letter-spacing: 0.03em;
+                cursor: pointer;
+            }
+            .exp-btn:hover {
+                background: var(--blue-pale);
+            }
+
+            /* ── Tablas ──────────────────────────────────────────────── */
             .data-table {
                 width: 100%;
                 border-collapse: collapse;
                 text-align: left;
             }
+            .data-table caption {
+                caption-side: top;
+                padding-bottom: 6px;
+                color: var(--ink-3);
+                font-size: 10.5px;
+                text-align: left;
+            }
             .data-table th {
-                height: 32px;
-                padding: 0 8px;
-                border-bottom: 1px solid #edf0f2;
-                color: #97a1aa;
-                font-size: 8px;
-                font-weight: 600;
-                letter-spacing: 0.5px;
+                height: 34px;
+                padding: 0 9px;
+                border-bottom: 1px solid #dbe4ec;
+                color: var(--ink-2);
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.05em;
                 text-transform: uppercase;
                 white-space: nowrap;
             }
             .data-table td {
-                padding: 6px 8px;
+                height: 44px;
+                padding: 8px 9px;
                 border-bottom: 1px solid #f0f2f4;
-                color: #687988;
-                font-size: 9.5px;
+                color: var(--ink-2);
+                font-size: 11.5px;
                 line-height: 1.45;
                 vertical-align: middle;
             }
@@ -386,125 +447,18 @@
                 color: var(--ink);
                 font-weight: 600;
             }
+            .data-table tfoot td {
+                border-top: 1px solid #dbe4ec;
+                border-bottom: 0;
+                background: #fbfcfd;
+                color: var(--ink);
+                font-weight: 700;
+            }
             .miss {
-                color: #b3bcc4;
-            }
-            .link {
-                border: 0;
-                padding: 0;
-                background: none;
-                color: #4c7099;
-                font: inherit;
-                font-size: 9.5px;
-                white-space: nowrap;
-            }
-
-            /* ── Indicadores ────────────────────────────────────────── */
-            .kpis {
-                display: grid;
-                grid-template-columns: repeat(6, minmax(0, 1fr));
-                gap: 9px;
-            }
-            @media (max-width: 1080px) {
-                .kpis {
-                    grid-template-columns: repeat(3, 1fr);
-                }
-            }
-            .kpi {
-                padding: 10px 12px;
-                border: 1px solid var(--line);
-                border-radius: 9px;
-                background: #fff;
-            }
-            .kpi b {
-                display: block;
-                font: 700 20px/1.1 var(--font-display);
-                font-variant-numeric: tabular-nums;
-                letter-spacing: -0.4px;
-            }
-            .kpi span {
-                display: block;
-                margin-top: 3px;
-                color: var(--muted);
-                font-size: 9px;
-                line-height: 1.35;
-            }
-            .kpi.zero b {
-                color: #9aa6b1;
-            }
-
-            /* ── Personas y estados ─────────────────────────────────── */
-            .actor {
-                display: flex;
-                align-items: center;
-                gap: 7px;
-            }
-            .avatar {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                flex: 0 0 auto;
-                width: 22px;
-                height: 22px;
-                border-radius: 50%;
-                background: var(--blue-pale);
-                color: var(--blue);
-                font-size: 8px;
-                font-weight: 700;
-            }
-            .avatar.none {
-                background: #f1f4f6;
-                color: #b3bcc4;
-            }
-            .pill {
-                display: inline-block;
-                padding: 1px 7px;
-                border-radius: 999px;
-                font-size: 8px;
-                font-weight: 700;
-                white-space: nowrap;
-            }
-            .pill.empty {
-                background: #f1f4f6;
-                color: #8b97a1;
-            }
-            .pill.warn {
-                background: var(--amber-pale);
-                color: var(--amber);
-            }
-            .pill.ok {
-                background: var(--green-pale);
-                color: var(--green);
-            }
-            .pill.bad {
-                background: var(--red-pale);
-                color: var(--red);
-            }
-            .pill.soft {
-                border: 1px solid #e3e9ef;
-                background: #f7f9fb;
                 color: #7d8a96;
-                font-weight: 600;
             }
 
-            .dl {
-                display: grid;
-                grid-template-columns: auto minmax(0, 1fr);
-                gap: 6px 12px;
-                margin: 0;
-                font-size: 9.5px;
-            }
-            .dl dt {
-                color: #97a1aa;
-                white-space: nowrap;
-            }
-            .dl dd {
-                margin: 0;
-                color: var(--ink-2);
-                line-height: 1.45;
-            }
-
-            /* ── Matriz de conflictividad ───────────────────────────── */
+            /* ── Matriz ──────────────────────────────────────────────── */
             .matrix-wrap {
                 overflow-x: auto;
                 border: 1px solid var(--line);
@@ -513,15 +467,23 @@
             .matrix {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: 9px;
+                font-size: 11px;
+            }
+            .matrix caption {
+                caption-side: top;
+                padding: 8px 9px;
+                color: var(--ink-3);
+                font-size: 10.5px;
+                text-align: left;
             }
             .matrix th,
             .matrix td {
-                padding: 6px 7px;
+                padding: 10px 9px;
                 border-bottom: 1px solid #f0f2f4;
                 border-right: 1px solid #f4f6f8;
                 text-align: center;
                 white-space: nowrap;
+                font-variant-numeric: tabular-nums;
             }
             .matrix tr th:last-child,
             .matrix tr td:last-child {
@@ -529,74 +491,236 @@
             }
             .matrix thead th {
                 background: #fbfcfd;
-                color: #97a1aa;
-                font-size: 8px;
-                font-weight: 600;
+                color: var(--ink-2);
+                font-size: 11px;
+                font-weight: 700;
                 letter-spacing: 0.04em;
                 text-transform: uppercase;
             }
             .matrix th.rowh,
             .matrix td.rowh {
-                position: sticky;
-                left: 0;
-                z-index: 1;
                 background: #fff;
                 color: var(--ink);
-                font-weight: 600;
+                font-weight: 700;
                 text-align: left;
             }
             .matrix thead th.rowh {
-                z-index: 2;
                 background: #fbfcfd;
             }
-            .matrix tbody tr:last-child td {
+            .matrix tbody tr:last-child td,
+            .matrix tbody tr:last-child th {
                 border-bottom: 0;
             }
-            .sema {
+
+            /* ── Estados y etiquetas ─────────────────────────────────── */
+            .pill {
                 display: inline-block;
-                width: 13px;
-                height: 13px;
-                border-radius: 4px;
-                vertical-align: -2px;
+                padding: 2px 8px;
+                border-radius: 999px;
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.02em;
+                white-space: nowrap;
             }
-            .sema.d1 {
-                background: #dbe8f6;
+            .pill.empty {
+                background: #f1f4f6;
+                color: #56636e;
             }
-            .sema.d2 {
-                background: #f3e2bf;
+            .pill.warn {
+                background: var(--amber-pale);
+                color: #7a4f0d;
             }
-            .sema.d3 {
-                background: #f0c9c5;
+            .pill.ok {
+                background: var(--green-pale);
+                color: var(--green);
             }
-            .sema.d4 {
-                background: #c9544c;
+            .pill.bad {
+                background: var(--red-pale);
+                color: #8c3b35;
             }
+            .pill.soft {
+                border: 1px solid #e3e9ef;
+                background: #f7f9fb;
+                color: var(--ink-2);
+                font-weight: 600;
+            }
+            .pill.lat {
+                border: 1px solid #cddcef;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+            }
+            .pill.man {
+                border: 1px solid #f0d9b5;
+                background: var(--amber-pale);
+                color: #7a4f0d;
+            }
+
+            .dl {
+                display: grid;
+                grid-template-columns: auto minmax(0, 1fr);
+                gap: 8px 14px;
+                margin: 0;
+                font-size: 11.5px;
+            }
+            .dl dt {
+                color: var(--ink-3);
+                white-space: nowrap;
+            }
+            .dl dd {
+                margin: 0;
+                color: var(--ink-2);
+                line-height: 1.5;
+            }
+
+            /* ── Mapa ────────────────────────────────────────────────── */
+            .map {
+                position: relative;
+                border: 1px solid #dbe4ec;
+                border-radius: 9px;
+                background: #eaf2f7;
+                overflow: hidden;
+            }
+            .map svg {
+                display: block;
+                width: 100%;
+                height: auto;
+            }
+            .map-label {
+                position: absolute;
+                left: 10px;
+                bottom: 10px;
+                padding: 5px 9px;
+                border: 1px solid #cddcef;
+                border-radius: 6px;
+                background: rgba(255, 255, 255, 0.94);
+                color: var(--blue-dark);
+                font-size: 10px;
+                font-weight: 700;
+                letter-spacing: 0.02em;
+            }
+            .map-tools {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .map-tool {
+                padding: 4px 9px;
+                border: 1px solid #cddcef;
+                border-radius: 5px;
+                background: rgba(255, 255, 255, 0.95);
+                color: var(--ink-2);
+                font-size: 10px;
+                font-weight: 600;
+            }
+            .map-tool.off {
+                border-color: #dbe4ec;
+                color: #56636e;
+            }
+            .grat line {
+                stroke: #c3d6e2;
+                stroke-width: 0.6;
+                opacity: 0.7;
+            }
+            .divs path {
+                fill: none;
+                stroke: #9dbf9d;
+                stroke-width: 1.1;
+                stroke-dasharray: 5 4;
+            }
+            .prov-lab text {
+                fill: #40575f;
+                font-family: system-ui, sans-serif;
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+            }
+            .casos circle {
+                stroke: #fff;
+                stroke-width: 1.2;
+            }
+            .dpa path {
+                fill: #7a4f0d;
+                stroke: #fff4e2;
+                stroke-width: 0.9;
+            }
+            .scale line {
+                stroke: #6d8598;
+                stroke-width: 1.2;
+            }
+            .scale text,
+            .north text {
+                fill: #40575f;
+                font-family: system-ui, sans-serif;
+                font-size: 8px;
+            }
+
             .legend {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 12px;
-                color: var(--muted);
-                font-size: 9px;
+                gap: 7px 16px;
+                color: var(--ink-2);
+                font-size: 11px;
             }
             .legend .k {
                 display: inline-flex;
                 align-items: center;
-                gap: 5px;
+                gap: 6px;
             }
+            .legend .k b {
+                color: var(--ink);
+            }
+            .sw {
+                display: inline-block;
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                flex: 0 0 auto;
+            }
+            .sw.d1 {
+                background: #6f8fa8;
+            }
+            .sw.d2 {
+                background: #4c7099;
+            }
+            .sw.d3 {
+                background: #a6732d;
+            }
+            .sw.d4 {
+                background: #a84f49;
+            }
+            .sw.dpa {
+                background: #7a4f0d;
+                border-radius: 2px;
+                transform: rotate(45deg) scale(0.82);
+            }
+            .sw.none {
+                background: #8b97a1;
+            }
+            .legend-note {
+                margin: 0;
+                color: var(--ink-3);
+                font-size: 10.5px;
+                line-height: 1.55;
+            }
+
+            /* ── Avisos ──────────────────────────────────────────────── */
             .banner {
                 display: flex;
                 align-items: flex-start;
-                gap: 9px;
-                padding: 10px 12px;
+                gap: 10px;
+                padding: 11px 13px;
                 border: 1px solid #f0d9b5;
                 border-radius: 8px;
                 background: var(--amber-pale);
-                color: #7a4f0d;
-                font-size: 9.5px;
-                line-height: 1.55;
+                color: #6b450b;
+                font-size: 11px;
+                line-height: 1.6;
             }
             .banner b {
-                color: #6b450b;
+                color: #573802;
             }
             .banner.neutral {
                 border-color: #dbe4ec;
@@ -607,27 +731,26 @@
                 color: var(--ink);
             }
             .banner code {
-                padding: 0 3px;
-                border-radius: 3px;
                 background: #eee3cd;
-                font-family: ui-monospace, Menlo, monospace;
-                font-size: 8.5px;
+                color: #573802;
             }
             .banner.neutral code {
                 background: #e9eef2;
+                color: var(--ink-2);
             }
 
+            /* ── Barras ──────────────────────────────────────────────── */
             .bars {
                 display: flex;
                 flex-direction: column;
-                gap: 6px;
+                gap: 8px;
             }
             .bar-row {
                 display: grid;
-                grid-template-columns: 132px minmax(0, 1fr) 34px;
+                grid-template-columns: 168px minmax(0, 1fr) 44px;
                 align-items: center;
-                gap: 9px;
-                font-size: 9.5px;
+                gap: 10px;
+                font-size: 11.5px;
             }
             .bar-row .lbl {
                 overflow: hidden;
@@ -637,10 +760,10 @@
             }
             .bar-track {
                 display: block;
-                height: 9px;
+                height: 10px;
                 overflow: hidden;
                 border-radius: 5px;
-                background: #f0f3f6;
+                background: #eef2f5;
             }
             .bar-fill {
                 display: block;
@@ -652,16 +775,65 @@
                 text-align: right;
                 color: var(--ink);
                 font-variant-numeric: tabular-nums;
-                font-weight: 600;
+                font-weight: 700;
             }
 
-            /* ── Anotaciones ────────────────────────────────────────── */
+            /* ── Bloqueado ───────────────────────────────────────────── */
+            .nodis {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 10px;
+            }
+            @media (max-width: 1080px) {
+                .nodis {
+                    grid-template-columns: 1fr;
+                }
+            }
+            .blk {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+                padding: 12px 13px;
+                border: 1px dashed #d6b98e;
+                border-radius: 9px;
+                background: #fffcf6;
+            }
+            .blk-head {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .blk h4 {
+                margin: 0;
+                color: var(--ink);
+                font: 700 12.5px/1.35 var(--font-display);
+            }
+            .blk p {
+                margin: 0;
+                color: var(--ink-2);
+                font-size: 11px;
+                line-height: 1.55;
+            }
+            .blk p b {
+                color: var(--ink);
+            }
+            .blk .why {
+                padding-top: 7px;
+                border-top: 1px solid #f0e6d6;
+                color: #6b450b;
+                font-size: 10.5px;
+                line-height: 1.5;
+            }
+
+            /* ── Cabecera obligatoria y notas ────────────────────────── */
             .ann {
                 display: grid;
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-                gap: 8px;
-                padding: 12px 14px;
-                border-top: 1px solid var(--line);
+                gap: 10px;
+                padding: 14px 16px;
+                border: 1px solid var(--line);
+                border-radius: 12px;
                 background: #fbfcfd;
             }
             @media (max-width: 980px) {
@@ -670,23 +842,38 @@
                 }
             }
             .ann-card {
-                padding: 9px 11px;
+                padding: 11px 13px;
                 border: 1px solid #eef1f4;
-                border-radius: 7px;
+                border-radius: 8px;
                 background: #fff;
                 color: var(--ink-2);
-                font-size: 9.5px;
-                line-height: 1.55;
+                font-size: 11px;
+                line-height: 1.6;
             }
             .ann-card.wide {
                 grid-column: 1 / -1;
             }
             .ann-card h3 {
-                margin: 0 0 5px;
+                display: flex;
+                align-items: baseline;
+                gap: 7px;
+                margin: 0 0 6px;
                 color: var(--ink);
-                font: 700 8.5px/1.3 var(--font-display);
+                font: 700 10.5px/1.3 var(--font-display);
                 letter-spacing: 0.07em;
                 text-transform: uppercase;
+            }
+            .ann-card h3 .n {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 17px;
+                height: 17px;
+                border-radius: 50%;
+                background: var(--blue-pale);
+                color: var(--blue-dark);
+                font-size: 10px;
+                letter-spacing: 0;
             }
             .ann-card b {
                 color: var(--ink);
@@ -694,66 +881,105 @@
             .ann-table {
                 width: 100%;
                 border-collapse: collapse;
-                font-size: 8.5px;
+                font-size: 10.5px;
             }
             .ann-table th {
-                padding: 2px 6px 3px;
-                border-bottom: 1px solid #edf0f2;
-                color: #97a1aa;
-                font-size: 7.5px;
-                font-weight: 600;
+                padding: 3px 7px 4px;
+                border-bottom: 1px solid #dbe4ec;
+                color: var(--ink-2);
+                font-size: 10px;
+                font-weight: 700;
                 letter-spacing: 0.04em;
                 text-align: left;
                 text-transform: uppercase;
             }
             .ann-table td {
-                padding: 3px 6px;
+                padding: 5px 7px;
                 border-bottom: 1px solid #f4f6f8;
                 color: var(--ink-2);
                 vertical-align: top;
+                line-height: 1.5;
             }
             .ann-table tr:last-child td {
                 border-bottom: 0;
             }
+            .ann-table code {
+                font-size: 10px;
+            }
+            .ann ul {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin: 0;
+                padding-left: 16px;
+            }
 
-            /* ── Notas finales ──────────────────────────────────────── */
             .notes {
-                padding: 18px 20px;
+                padding: 20px 22px;
                 border: 1px solid var(--line);
                 border-radius: 12px;
                 background: #fff;
             }
             .notes h2 {
-                margin: 0 0 4px;
-                font: 700 15px/1.3 var(--font-display);
+                margin: 0 0 5px;
+                font: 700 17px/1.3 var(--font-display);
             }
             .notes h3 {
-                margin: 15px 0 5px;
-                font: 700 11px/1.3 var(--font-display);
+                margin: 18px 0 6px;
                 color: var(--ink);
+                font: 700 12.5px/1.3 var(--font-display);
             }
             .notes p,
             .notes li {
                 color: var(--ink-2);
-                font-size: 10px;
+                font-size: 11.5px;
                 line-height: 1.7;
             }
             .notes ul {
                 display: flex;
                 flex-direction: column;
-                gap: 4px;
+                gap: 5px;
                 margin: 0;
-                padding-left: 16px;
+                padding-left: 17px;
+            }
+            .notes table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 11px;
+            }
+            .notes th {
+                padding: 5px 8px;
+                border-bottom: 1px solid #dbe4ec;
+                color: var(--ink-2);
+                font-size: 10.5px;
+                letter-spacing: 0.04em;
+                text-align: left;
+                text-transform: uppercase;
+            }
+            .notes td {
+                padding: 6px 8px;
+                border-bottom: 1px solid #f0f2f4;
+                color: var(--ink-2);
+                vertical-align: top;
+            }
+            .notes tr:last-child td {
+                border-bottom: 0;
+            }
+            .notes td:first-child {
+                white-space: nowrap;
             }
             .notes .rule {
-                margin-top: 14px;
-                padding: 10px 12px;
+                margin-top: 16px;
+                padding: 12px 14px;
                 border: 1px solid #cddcef;
                 border-radius: 8px;
                 background: var(--blue-pale);
                 color: var(--blue-dark);
-                font-size: 10px;
-                line-height: 1.6;
+                font-size: 11.5px;
+                line-height: 1.65;
+            }
+            .notes .rule b {
+                color: var(--blue-dark);
             }
         </style>
     </head>
@@ -761,1137 +987,1479 @@
         <main class="view-body">
             <header class="view-head">
                 <div>
-                    <h1>Perfil territorial: arte de pesca, OSPA y caleta</h1>
+                    <h1>Perfil territorial por región</h1>
                     <p class="view-subtitle">
-                        Tres artboards sobre el corte que pide la dirección:
-                        quién está en cada región y caleta, con qué arte de
-                        pesca, y qué conflictos se concentran por recurso. El
-                        corte es real en su estructura y <b>vacío</b> en varios
-                        campos: las columnas existen en el modelo, pero no están
-                        pobladas. Lo dibujado con valores de ejemplo va marcado
-                        con <span class="ex">≈</span>.
+                        Una ficha que responde
+                        <b>«qué pasa en este territorio»</b> cruzando casos,
+                        actores, demandas, infraestructura y conflictividad, con
+                        el mapa de la región como entrada. Cubre los items
+                        <b>119–124</b> y toca <b>128–131</b>. El ejemplo está
+                        dibujado con <b>Piura</b>: las cifras en negrita se
+                        midieron en la base el 2026-11-23 y lo marcado
+                        <span class="ex">≈</span>
+                        es ejemplo.
                     </p>
                 </div>
                 <div>
                     <span class="badge"
-                        >Ola 4 · artboard 3 · items 119–124</span
+                        >sin ruta · no está en el menú · items 119–124</span
                     >
                 </div>
             </header>
 
-            <p class="lede">
-                <b>Estado del dato, medido en la base.</b> El directorio tiene
-                <b>1 160 actores</b> (936 personas y 224 organizaciones) y las
-                <b>224 organizaciones</b> ya traen región donde el origen la
-                tiene. Lo que falta es el eje de arte de pesca —no existe
-                catálogo en ninguna tabla— y la marca OSPA, que existe como
-                columna (<code>expediente_ospa</code>, <code>estado_ospa</code>)
-                pero está <b>vacía en 0 de 224</b>. El maestro de caletas
-                (<code>territorio.caleta_detalle</code>) existe y tiene
-                <b>0 filas</b>. Por eso los tres artboards declaran el hueco en
-                vez de rellenarlo.
-            </p>
+            <div class="route" role="note">
+                <b>Ruta propuesta</b>
+                <code>/mapa/:region</code>
+                <span>
+                    — detalle de una región del panorama territorial
+                    (<code>/mapa</code>). Se abre al hacer clic en una región
+                    del mapa o de la tabla regional. No se agrega al menú del
+                    shell: hereda el ámbito de sesión (subsector y regiones del
+                    rol). Mientras la ruta no exista, la ficha vive como
+                    artboard.
+                </span>
+            </div>
 
-            <!-- ═══════════════════ ARTBOARD 1 ═══════════════════ -->
-            <section class="artboard" id="arte-1">
-                <div class="art-head">
-                    <div>
-                        <span class="kicker">Artboard 1 · ítem 119</span>
-                        <h2>Catálogo de artes de pesca</h2>
-                        <p>
-                            Tres grupos de primer nivel —selectivos, cerco y
-                            buzos— con sus precisiones dentro. Cada arte lleva
-                            tipo (pasiva o activa), para qué se usa, dónde se
-                            usa y nivel de impacto al ecosistema. La eslora se
-                            modela como
-                            <b>dimensión aparte</b> del arte, nunca como un
-                            nivel más de la jerarquía.
-                        </p>
-                    </div>
-                    <span class="flag"
-                        >Catálogo de ejemplo · pendiente de ratificación por
-                        OAIPCS</span
-                    >
+            <!-- ═══════════ Cabecera obligatoria · cinco apartados ═══════════ -->
+            <section class="ann" aria-label="Cabecera obligatoria del artboard">
+                <div class="ann-card">
+                    <h3><span class="n">1</span>Cubre</h3>
+                    <b>119</b> catálogo de artes de pesca · <b>120</b> actores
+                    por región y arte · <b>121</b> OSPA por región y caleta ·
+                    <b>122</b> demandas por OSPA · <b>123</b> compromisos
+                    asumidos por el Señor Ministro · <b>124</b> conflictos por
+                    región y recurso. <br /><b>Toca</b> <b>128</b> (geometría
+                    distrital en PostGIS), <b>129</b> (coropletas),
+                    <b>130</b> (centroide del distrito) y <b>131</b> (tasas por
+                    100 000 habitantes). <br /><b>Pantalla:</b> ficha de una
+                    región; no es una de las 26 rutas del mapa del sitio.
+                    <b>Diseño por lote:</b> A4 · lote C.
                 </div>
 
-                <div class="art-body">
-                    <div class="toolbar">
-                        <div class="field">
-                            <label>Agrupar por</label>
-                            <div class="seg">
-                                <span class="on">Grupo</span>
-                                <span>Tipo (pasiva / activa)</span>
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label>Impacto al ecosistema</label>
-                            <div class="pick">Todos</div>
-                        </div>
-                        <div class="field">
-                            <label>Eslora</label>
-                            <div class="pick">Todas</div>
-                        </div>
-                        <span class="hint"
-                            >El segundo agrupamiento responde a cómo se discute
-                            en las reuniones: pasiva frente a activa.</span
-                        >
-                    </div>
-
-                    <div class="groups">
-                        <div class="group">
-                            <h3>Selectivos</h3>
-                            <p class="g-meta">
-                                Captura dirigida a una especie o talla.
-                                <span class="ex">≈ 6 precisiones</span>
-                            </p>
-                            <div class="chips">
-                                <span class="chip tipo">Pasiva</span>
-                                <span class="chip">Espinel</span>
-                                <span class="chip">Línea de mano</span>
-                                <span class="chip">Pinta</span>
-                                <span class="chip">+ 3 más</span>
-                            </div>
-                        </div>
-                        <div class="group">
-                            <h3>Cerco</h3>
-                            <p class="g-meta">
-                                Captura envolviendo el cardumen.
-                                <span class="ex">≈ 4 precisiones</span>
-                            </p>
-                            <div class="chips">
-                                <span class="chip tipo act">Activa</span>
-                                <span class="chip">Macaco</span>
-                                <span class="chip">Cerco mecanizado</span>
-                                <span class="chip">+ 2 más</span>
-                            </div>
-                        </div>
-                        <div class="group">
-                            <h3>Buzos</h3>
-                            <p class="g-meta">
-                                Extracción manual en el fondo.
-                                <span class="ex">≈ 4 precisiones</span>
-                            </p>
-                            <div class="chips">
-                                <span class="chip tipo act">Activa</span>
-                                <span class="chip">Buceo con compresora</span>
-                                <span class="chip">Buceo a pulmón</span>
-                                <span class="chip">+ 2 más</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-head">
-                            <div>
-                                <h3 class="card-title">Atributos por arte</h3>
-                                <p class="card-sub">
-                                    Los cinco atributos que pidió la dirección.
-                                    Todos los valores son
-                                    <span class="ex">≈ ejemplo</span>: no hay
-                                    tabla de la que leerlos.
-                                </p>
-                            </div>
-                            <span class="pill warn">Sin fuente</span>
-                        </div>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Arte (precisión)</th>
-                                    <th scope="col">Grupo</th>
-                                    <th scope="col">Tipo</th>
-                                    <th scope="col">Para qué se usa</th>
-                                    <th scope="col">Dónde se usa</th>
-                                    <th scope="col">Impacto</th>
-                                    <th scope="col">Eslora típica</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="strong">
-                                        Pinta <span class="ex">≈</span>
-                                    </td>
-                                    <td>Selectivos</td>
-                                    <td>Pasiva</td>
-                                    <td>Peces demersales</td>
-                                    <td>Litoral norte y centro</td>
-                                    <td><span class="pill ok">Bajo</span></td>
-                                    <td>0–10 m</td>
-                                </tr>
-                                <tr>
-                                    <td class="strong">
-                                        Espinel <span class="ex">≈</span>
-                                    </td>
-                                    <td>Selectivos</td>
-                                    <td>Pasiva</td>
-                                    <td>Tiburones y peces de fondo</td>
-                                    <td>Litoral y altura</td>
-                                    <td>
-                                        <span class="pill warn">Medio</span>
-                                    </td>
-                                    <td>0–10 m</td>
-                                </tr>
-                                <tr>
-                                    <td class="strong">
-                                        Macaco <span class="ex">≈</span>
-                                    </td>
-                                    <td>Cerco</td>
-                                    <td>Activa</td>
-                                    <td>Cardúmenes costeros</td>
-                                    <td>Bahías y caletas</td>
-                                    <td>
-                                        <span class="pill warn">Medio</span>
-                                    </td>
-                                    <td>10–20 m</td>
-                                </tr>
-                                <tr>
-                                    <td class="strong">
-                                        Cerco mecanizado
-                                        <span class="ex">≈</span>
-                                    </td>
-                                    <td>Cerco</td>
-                                    <td>Activa</td>
-                                    <td>Anchoveta y jurel</td>
-                                    <td>Litoral centro-sur</td>
-                                    <td>
-                                        <span class="pill warn">Medio</span>
-                                    </td>
-                                    <td>20–32 m</td>
-                                </tr>
-                                <tr>
-                                    <td class="strong">
-                                        Buceo con compresora
-                                        <span class="ex">≈</span>
-                                    </td>
-                                    <td>Buzos</td>
-                                    <td>Activa</td>
-                                    <td>Concha de abanico y erizo</td>
-                                    <td>Bahías someras</td>
-                                    <td><span class="pill bad">Alto</span></td>
-                                    <td>0–10 m</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-head">
-                            <div>
-                                <h3 class="card-title">
-                                    Eslora: dimensión aparte
-                                </h3>
-                                <p class="card-sub">
-                                    La eslora describe la <b>embarcación</b>, no
-                                    el arte. Un mismo arte se opera en más de un
-                                    rango, así que la relación es muchos a
-                                    muchos y va en su propia tabla de cruce.
-                                </p>
-                            </div>
-                            <span class="pill soft">No es jerarquía</span>
-                        </div>
-                        <div class="groups">
-                            <div class="group">
-                                <h3>0–10 m</h3>
-                                <p class="g-meta">
-                                    Flota artesanal de caleta.
-                                    <span class="ex">≈ 61 %</span>
-                                </p>
-                                <div class="chips">
-                                    <span class="chip">Pinta</span>
-                                    <span class="chip">Espinel</span>
-                                    <span class="chip">Buceo</span>
-                                </div>
-                            </div>
-                            <div class="group">
-                                <h3>10–20 m</h3>
-                                <p class="g-meta">
-                                    Artesanal de mayor porte.
-                                    <span class="ex">≈ 27 %</span>
-                                </p>
-                                <div class="chips">
-                                    <span class="chip">Macaco</span>
-                                    <span class="chip">Cerco</span>
-                                </div>
-                            </div>
-                            <div class="group">
-                                <h3>20–32 m</h3>
-                                <p class="g-meta">
-                                    Cerco de mayor capacidad.
-                                    <span class="ex">≈ 12 %</span>
-                                </p>
-                                <div class="chips">
-                                    <span class="chip">Cerco mecanizado</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="ann-card">
+                    <h3><span class="n">2</span>Sólo forma · no implementar</h3>
+                    La ficha como detalle de <code>/mapa</code>, el orden de los
+                    bloques, el selector de región, el mapa esquemático, los
+                    botones <b>XLSX · PDF</b> por bloque y la lectura
+                    <b>latente / manifiesto</b> son decisiones de diseño. No se
+                    inventa ninguna regla de agregación: cada corte se muestra
+                    como lo sostiene la base y cada hueco se declara.
                 </div>
 
-                <div class="ann" aria-label="Anotaciones del artboard 1">
-                    <div class="ann-card">
-                        <h3>① Items que cubre</h3>
-                        <b>119</b> · catálogo de artes de pesca.
-                        <b>Estado: mockup puro.</b> Los grupos y las precisiones
-                        del artboard son el diseño, no un catálogo ratificado.
-                        <b>Diseño por lote:</b>
-                        lote A4 · modelo de datos nuevo.
-                    </div>
-                    <div class="ann-card">
-                        <h3>② No existe hoy</h3>
-                        No hay tabla de artes en ningún esquema: una búsqueda
-                        <code>%arte%</code> sólo devuelve
-                        <code>domain.artefacto</code>, sin relación con pesca.
-                        <code>legacy.dim_recurso_pesca</code> (37 filas) es
-                        <b>especie/recurso</b>, no arte: sirve para el artboard
-                        3, no para éste.
-                    </div>
-                    <div class="ann-card">
-                        <h3>③ Qué hay que ratificar</h3>
-                        (a) la lista de precisiones de cada grupo; (b) la escala
-                        de impacto al ecosistema (Bajo · Medio · Alto) y qué la
-                        determina; (c) si el arte se asocia a la
-                        <b>embarcación</b>, al <b>permiso</b> o a ambos —hoy no
-                        hay ninguno de los dos modelado—.
-                    </div>
-                    <div class="ann-card">
-                        <h3>④ Decisión de diseño</h3>
-                        Dos ejes en la misma pantalla: la jerarquía
-                        <b>grupo → precisión</b> y el eje operativo
-                        <b>pasiva / activa</b>, que es como se discute en
-                        reunión. La eslora queda fuera de la jerarquía, en su
-                        propio bloque y su propia tabla de cruce.
-                    </div>
-                    <div class="ann-card wide">
-                        <h3>⑤ Cómo se cierra</h3>
-                        OAIPCS entrega el listado de artes con sus atributos; se
-                        carga en <code>core.cat_artes_pesca</code> (o el nombre
-                        que fije el equipo .NET) con <code>grupo</code>,
-                        <code>tipo_pasiva_activa</code>, <code>uso</code>,
-                        <code>ambito</code> e <code>impacto</code>, y una tabla
-                        de cruce arte–eslora. Hasta entonces el catálogo se
-                        muestra como aquí, con el flag visible y sin pretender
-                        ser dato institucional.
-                    </div>
+                <div class="ann-card wide">
+                    <h3><span class="n">3</span>Dato por bloque</h3>
+                    <table class="ann-table">
+                        <tr>
+                            <th scope="col">Bloque o celda</th>
+                            <th scope="col">Campo real</th>
+                            <th scope="col">Estado</th>
+                        </tr>
+                        <tr>
+                            <td>Cabecera de región</td>
+                            <td>
+                                <code>core.regiones.nombre</code> ·
+                                <code>core.provincias</code> ·
+                                <code>core.distritos</code>
+                            </td>
+                            <td>existe · 1 891 distritos</td>
+                        </tr>
+                        <tr>
+                            <td>Población (sólo denominador)</td>
+                            <td><code>total</code> distrital del Censo 2025</td>
+                            <td>
+                                sólo en
+                                <code>gis/derived/distritos_capa.geojson</code>
+                                · no en PostGIS
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Mapa de la región</td>
+                            <td>polígonos distritales</td>
+                            <td>archivo sí · base no <b>(item 128)</b></td>
+                        </tr>
+                        <tr>
+                            <td>Casos por nivel y estado</td>
+                            <td>
+                                <code>core.casos.nivel_conflicto_id</code> ·
+                                <code>estado</code> ·
+                                <code>region_principal_id</code>
+                            </td>
+                            <td>existe · 35 casos</td>
+                        </tr>
+                        <tr>
+                            <td>Actores por tipo y rol</td>
+                            <td>
+                                <code>core.actores.tipo_actor_id</code> ·
+                                <code>rol_actor_id</code> ·
+                                <code>region_id</code>
+                            </td>
+                            <td>existe · 1 160</td>
+                        </tr>
+                        <tr>
+                            <td>Marca OSPA</td>
+                            <td>
+                                <code>core.organizaciones.expediente_ospa</code>
+                                · <code>estado_ospa</code>
+                            </td>
+                            <td>existe · <b>0 de 224</b> con valor</td>
+                        </tr>
+                        <tr>
+                            <td>Demandas por temática</td>
+                            <td>
+                                <code>core.demandas.tematica_id</code> ·
+                                <code>core.cat_tematicas</code>
+                            </td>
+                            <td>existe · 325 demandas · 6 temáticas</td>
+                        </tr>
+                        <tr>
+                            <td>Compromisos (123)</td>
+                            <td>
+                                <code>core.compromisos</code> ·
+                                <code>core.hitos_compromiso</code>
+                            </td>
+                            <td>
+                                existe · 8 y 12 · «asumido por»
+                                <b>no existe</b>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Región × recurso (124)</td>
+                            <td><code>legacy.bridge_caso_recurso</code></td>
+                            <td>existe · <b>0 filas</b></td>
+                        </tr>
+                        <tr>
+                            <td>DPA del departamento</td>
+                            <td>KML <code>IDENTI = DPA - GORE</code></td>
+                            <td>existe · 31 (11 en Piura)</td>
+                        </tr>
+                        <tr>
+                            <td>Redes RADAR</td>
+                            <td>—</td>
+                            <td><b>no existe</b> fuente</td>
+                        </tr>
+                        <tr>
+                            <td>Artes de pesca (119)</td>
+                            <td>—</td>
+                            <td><b>no existe</b> tabla</td>
+                        </tr>
+                        <tr>
+                            <td>Caletas y OSPA por caleta (121)</td>
+                            <td><code>territorio.caleta_detalle</code></td>
+                            <td>existe · <b>0 filas</b></td>
+                        </tr>
+                        <tr>
+                            <td>Actores × arte (120)</td>
+                            <td>—</td>
+                            <td><b>no existe</b> tabla de cruce</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="ann-card">
+                    <h3><span class="n">4</span>Bloqueado y por qué</h3>
+                    <ul>
+                        <li>
+                            <b>119–121:</b> sin catálogo de artes no hay eje
+                            para el cruce; sin maestro de caletas ni marca OSPA
+                            poblada no hay perfil por caleta.
+                        </li>
+                        <li>
+                            <b>124:</b> el puente caso–recurso tiene 0 filas;
+                            ninguna celda de la matriz se puede calcular.
+                        </li>
+                        <li>
+                            <b>129–131:</b> la geometría distrital existe como
+                            archivo, no en PostGIS (item 128). Sin ella no hay
+                            coropletas, ni centroides, ni tasas por distrito.
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="ann-card wide">
+                    <h3><span class="n">5</span>Roles que ven cada bloque</h3>
+                    <b>Dirección</b> y <b>Secretaría General:</b> ambos
+                    subsectores y todas las regiones; ven los seis bloques.
+                    <b>Viceministerio:</b> sólo su subsector; el selector de
+                    región queda dentro de su ámbito. <b>Sectorista:</b> su
+                    territorio; el selector no ofrece «Todas». El subsector no
+                    es un filtro de pantalla: lo impone el rol (X6). Teléfono y
+                    correo se enmascaran salvo para <code>administrador</code>,
+                    y la exportación hereda la máscara.
                 </div>
             </section>
 
-            <!-- ═══════════════════ ARTBOARD 2 ═══════════════════ -->
-            <section class="artboard" id="arte-2">
+            <!-- ═══════════════════════ FICHA ═══════════════════════ -->
+            <section class="artboard" aria-label="Ficha de región">
                 <div class="art-head">
                     <div>
-                        <span class="kicker"
-                            >Artboard 2 · ítems 120 · 121 · 122</span
-                        >
-                        <h2>Actores y OSPA por región y caleta</h2>
+                        <span class="kicker">Ficha · región de ejemplo</span>
+                        <h2>Piura · perfil territorial</h2>
                         <p>
-                            El corte que pidió la directora: quién es quién por
-                            región y arte de pesca, con datos de contacto,
-                            perfil de diálogo y foto. Debajo, la marca OSPA
-                            sobre la organización y la atribución de la demanda
-                            a su solicitante, que es la llave para cortar por
-                            organización.
+                            La ficha se abre desde <code>/mapa</code> y responde
+                            en una sola pantalla qué casos, actores, demandas y
+                            obras hay en la región. Las cifras de región están
+                            marcadas <span class="ex">≈</span>: los totales
+                            nacionales son reales y el corte por región se
+                            calcula en la consulta, no se estima aquí.
                         </p>
                     </div>
                     <span class="flag"
-                        >Dirección: 3 campos poblados de 224
-                        organizaciones</span
+                        >Geometría distrital no cargada · mapa referencial</span
                     >
                 </div>
 
                 <div class="art-body">
-                    <div class="toolbar">
-                        <div class="field">
-                            <label>Región</label>
-                            <div class="pick">Todas</div>
+                    <!-- ── Cabecera de región ─────────────────────── -->
+                    <div class="region">
+                        <div>
+                            <span class="kicker">Región</span>
+                            <h3 class="region-name">Piura</h3>
+                            <p class="region-meta">
+                                <span class="pill soft"
+                                    >Pesca y Acuicultura</span
+                                >
+                                <span class="pill soft">MYPE e Industria</span>
+                                <span><b>8</b> provincias</span>
+                                <span><b>65</b> distritos</span>
+                                <span><b>2 115 215</b> habitantes</span>
+                                <span><b>35 365,9</b> km²</span>
+                            </p>
+                            <p class="region-note">
+                                Provincias y distritos contados sobre la capa
+                                INEI 2025 (1 892 polígonos) y contrastados con
+                                <code>core.distritos</code> (1 891 filas). La
+                                población es la suma del campo
+                                <code>total</code> de los 65 distritos: existe
+                                sólo en el archivo derivado del Censo 2025, no
+                                en PostGIS, y <b>se usa como denominador</b>,
+                                nunca como indicador (item 131).
+                            </p>
                         </div>
                         <div class="field">
-                            <label>Arte de pesca</label>
-                            <div class="pick ph">Sin catálogo</div>
+                            <label for="region">Región</label>
+                            <select id="region" class="pick">
+                                <option selected>Piura</option>
+                                <option>Tumbes</option>
+                                <option>Lambayeque</option>
+                                <option>La Libertad</option>
+                                <option>Áncash</option>
+                            </select>
                         </div>
-                        <div class="field">
-                            <label>Caleta</label>
-                            <div class="pick">Todas</div>
-                        </div>
-                        <div class="field">
-                            <label>OSPA</label>
-                            <div class="pick">Todas</div>
-                        </div>
-                        <div class="field">
-                            <label>Subsector</label>
-                            <div class="pick">
-                                Pesca y Acuicultura · MYPE e Industria
-                            </div>
-                        </div>
-                        <span class="hint"
-                            >El subsector no se elige: lo fija el rol. La
-                            Dirección y la Secretaría General ven ambos; cada
-                            Viceministerio ve sólo el suyo.</span
-                        >
                     </div>
 
                     <div class="kpis">
                         <div class="kpi">
-                            <b>1 160</b><span>Actores en el directorio</span>
+                            <b><span class="ex">≈</span> 5</b
+                            ><span>Casos en la región · nacional 35</span>
                         </div>
                         <div class="kpi">
-                            <b>224</b
-                            ><span>Organizaciones (OSPAS incluidas)</span>
-                        </div>
-                        <div class="kpi zero">
-                            <b>0</b><span>con expediente OSPA</span>
-                        </div>
-                        <div class="kpi zero">
-                            <b>0</b><span>caletas en el maestro</span>
+                            <b><span class="ex">≈</span> 0,24</b
+                            ><span
+                                >Casos por 100 000 hab · denominador Censo
+                                2025</span
+                            >
                         </div>
                         <div class="kpi">
-                            <b>20</b><span>organizaciones con foto</span>
+                            <b><span class="ex">≈</span> 84</b
+                            ><span>Actores con región · nacional 1 160</span>
                         </div>
                         <div class="kpi">
-                            <b>24</b><span>con flota declarada</span>
+                            <b><span class="ex">≈</span> 27</b
+                            ><span>Demandas · nacional 325</span>
+                        </div>
+                        <div class="kpi">
+                            <b><span class="ex">≈</span> 2</b
+                            ><span>Compromisos · nacional 8 · hitos 12</span>
+                        </div>
+                        <div class="kpi">
+                            <b>11</b
+                            ><span>Desembarcaderos DPA · KML, real</span>
                         </div>
                     </div>
 
+                    <!-- ── Mapa de la región ──────────────────────── -->
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <h2 class="card-title">Mapa de la región</h2>
+                                <p class="card-sub">
+                                    Contorno esquemático de la región,
+                                    divisiones internas
+                                    <b>declaradas como referenciales</b>
+                                    y puntos de caso por nivel de
+                                    conflictividad. Las anclas son los
+                                    desembarcaderos DPA del KML. No se dibujan
+                                    límites distritales finos: esa geometría no
+                                    está en la base.
+                                </p>
+                            </div>
+                            <span class="pill warn">referencial</span>
+                        </div>
+
+                        <div class="map">
+                            <svg
+                                viewBox="0 0 640 340"
+                                role="img"
+                                aria-label="Mapa referencial de la región Piura: contorno esquemático e divisiones internas punteadas que no representan límites distritales, cinco puntos de caso coloreados por nivel de conflictividad y once anclas de desembarcaderos DPA. La geometría distrital existe como archivo, no en la base."
+                            >
+                                <title>
+                                    Mapa referencial de Piura: formas
+                                    esquemáticas, casos por conflictividad y
+                                    desembarcaderos DPA
+                                </title>
+                                <defs>
+                                    <linearGradient
+                                        id="sea"
+                                        x1="0"
+                                        y1="0"
+                                        x2="0"
+                                        y2="1"
+                                    >
+                                        <stop offset="0" stop-color="#dfeef7" />
+                                        <stop offset="1" stop-color="#cfe6f2" />
+                                    </linearGradient>
+                                </defs>
+                                <rect
+                                    width="640"
+                                    height="340"
+                                    fill="url(#sea)"
+                                />
+                                <g class="grat" aria-hidden="true">
+                                    <line x1="80" y1="0" x2="80" y2="340" />
+                                    <line x1="160" y1="0" x2="160" y2="340" />
+                                    <line x1="240" y1="0" x2="240" y2="340" />
+                                    <line x1="320" y1="0" x2="320" y2="340" />
+                                    <line x1="400" y1="0" x2="400" y2="340" />
+                                    <line x1="480" y1="0" x2="480" y2="340" />
+                                    <line x1="560" y1="0" x2="560" y2="340" />
+                                    <line x1="0" y1="60" x2="640" y2="60" />
+                                    <line x1="0" y1="120" x2="640" y2="120" />
+                                    <line x1="0" y1="180" x2="640" y2="180" />
+                                    <line x1="0" y1="240" x2="640" y2="240" />
+                                    <line x1="0" y1="300" x2="640" y2="300" />
+                                </g>
+                                <path
+                                    d="M170 20 C240 28 320 36 380 56 C450 80 500 104 512 148
+                                       C522 190 492 228 452 258 C412 288 342 312 268 320
+                                       C210 326 158 310 128 274 C96 234 74 192 82 146
+                                       C90 100 122 56 170 20 Z"
+                                    fill="#d6e7d6"
+                                    stroke="#8fb58f"
+                                    stroke-width="1.4"
+                                />
+                                <g class="divs" aria-hidden="true">
+                                    <path
+                                        d="M206 24 C196 112 212 214 202 316"
+                                    />
+                                    <path
+                                        d="M330 44 C320 132 342 232 318 314"
+                                    />
+                                    <path
+                                        d="M88 156 C170 150 260 162 340 178 C382 188 428 202 486 214"
+                                    />
+                                </g>
+                                <g class="prov-lab" aria-hidden="true">
+                                    <text x="238" y="112">SULLANA</text>
+                                    <text x="196" y="88">TALARA</text>
+                                    <text x="286" y="72">AYABACA</text>
+                                    <text x="176" y="196">PAITA</text>
+                                    <text x="270" y="200">PIURA</text>
+                                    <text x="388" y="146">MORROPÓN</text>
+                                    <text x="196" y="286">SECHURA</text>
+                                    <text x="392" y="242">HUANCABAMBA</text>
+                                </g>
+
+                                <!-- 11 desembarcaderos DPA del departamento -->
+                                <g class="dpa" aria-hidden="true">
+                                    <path d="M150 82 l4 4 -4 4 -4 -4 Z" />
+                                    <path d="M158 96 l4 4 -4 4 -4 -4 Z" />
+                                    <path d="M166 110 l4 4 -4 4 -4 -4 Z" />
+                                    <path d="M174 124 l4 4 -4 4 -4 -4 Z" />
+                                    <path d="M182 138 l4 4 -4 4 -4 -4 Z" />
+                                    <path d="M190 152 l4 4 -4 4 -4 -4 Z" />
+                                    <path d="M152 186 l4 4 -4 4 -4 -4 Z" />
+                                    <path d="M162 200 l4 4 -4 4 -4 -4 Z" />
+                                    <path d="M172 214 l4 4 -4 4 -4 -4 Z" />
+                                    <path d="M170 258 l4 4 -4 4 -4 -4 Z" />
+                                    <path d="M182 274 l4 4 -4 4 -4 -4 Z" />
+                                </g>
+
+                                <!-- Casos de ejemplo, color por nivel -->
+                                <g class="casos">
+                                    <circle
+                                        cx="250"
+                                        cy="216"
+                                        r="5.5"
+                                        fill="#6f8fa8"
+                                    />
+                                    <circle
+                                        cx="302"
+                                        cy="242"
+                                        r="5.5"
+                                        fill="#4c7099"
+                                    />
+                                    <circle
+                                        cx="362"
+                                        cy="212"
+                                        r="5.5"
+                                        fill="#4c7099"
+                                    />
+                                    <circle
+                                        cx="332"
+                                        cy="152"
+                                        r="5.5"
+                                        fill="#a6732d"
+                                    />
+                                    <circle
+                                        cx="394"
+                                        cy="182"
+                                        r="5.5"
+                                        fill="#a84f49"
+                                    />
+                                </g>
+
+                                <g class="scale">
+                                    <line x1="40" y1="322" x2="109" y2="322" />
+                                    <line x1="40" y1="318" x2="40" y2="326" />
+                                    <line x1="109" y1="318" x2="109" y2="326" />
+                                    <text x="40" y="334">0</text>
+                                    <text x="96" y="334">200 km</text>
+                                </g>
+                                <g class="north" text-anchor="middle">
+                                    <text x="606" y="44">N</text>
+                                    <line
+                                        x1="606"
+                                        y1="48"
+                                        x2="606"
+                                        y2="62"
+                                        stroke="#8fa4b6"
+                                        stroke-width="1.2"
+                                    />
+                                    <path
+                                        d="M606 48 l-2.6 5 h5.2 Z"
+                                        fill="#8fa4b6"
+                                    />
+                                </g>
+                            </svg>
+                            <div class="map-tools">
+                                <span class="map-tool"
+                                    >Sin teselas · sin CDN</span
+                                >
+                                <span class="map-tool off"
+                                    >Distritos sin cargar</span
+                                >
+                                <span class="map-tool off"
+                                    >RADAR sin fuente</span
+                                >
+                            </div>
+                            <span class="map-label"
+                                >Mapa referencial · formas esquemáticas</span
+                            >
+                        </div>
+
+                        <div class="legend" aria-label="Leyenda del mapa">
+                            <span class="k"
+                                ><b>latente</b>
+                                <span class="sw d1"></span> Diferencia</span
+                            >
+                            <span class="k"
+                                ><span class="sw d2"></span> Controversia</span
+                            >
+                            <span class="k"
+                                ><b>manifiesto</b>
+                                <span class="sw d3"></span> Conflicto
+                                social</span
+                            >
+                            <span class="k"
+                                ><span class="sw d4"></span> Crisis social</span
+                            >
+                            <span class="k"
+                                ><span class="sw dpa"></span> DPA (11)</span
+                            >
+                            <span class="k"
+                                ><span class="sw none"></span> Sin nivel: no se
+                                etiqueta</span
+                            >
+                        </div>
+
+                        <div class="banner neutral">
+                            <span aria-hidden="true">▲</span>
+                            <div>
+                                <b>Nota obligatoria del mapa.</b> La geometría
+                                de los 1 892 distritos
+                                <b>existe como archivo</b>
+                                (<code>gis/derived/distritos_capa.geojson</code>)
+                                pero <b>no está cargada en PostGIS</b>: es el
+                                item 128, todavía pendiente. Por eso el contorno
+                                y las divisiones internas son esquemáticos y no
+                                representan límites distritales. Al cargar la
+                                capa, este bloque pasa a polígonos reales,
+                                coropletas (129) y centroides (130).
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Casos por nivel y por estado ───────────── -->
                     <div class="split">
-                        <div class="card" style="overflow-x: auto">
+                        <div class="card">
                             <div class="card-head">
                                 <div>
                                     <h3 class="card-title">
-                                        Directorio filtrado
+                                        Casos por nivel de conflictividad
                                     </h3>
                                     <p class="card-sub">
-                                        Orden por región y apellidos. Teléfono y
-                                        correo son PII: se enmascaran salvo para
-                                        <code>administrador</code>.
+                                        Agrupación X3: <b>latente</b> =
+                                        Diferencia + Controversia;
+                                        <b>manifiesto</b> = Conflicto social +
+                                        Crisis social. Un caso sin nivel
+                                        declarado no se etiqueta.
                                     </p>
                                 </div>
-                                <span class="pill soft">Máscara activa</span>
+                                <div class="exp">
+                                    <button
+                                        type="button"
+                                        class="exp-btn"
+                                        aria-label="Exportar casos por nivel de conflictividad a XLSX"
+                                    >
+                                        XLSX
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="exp-btn"
+                                        aria-label="Exportar casos por nivel de conflictividad a PDF"
+                                    >
+                                        PDF
+                                    </button>
+                                </div>
                             </div>
                             <table class="data-table">
+                                <caption class="sr">
+                                    Casos de la región por nivel de
+                                    conflictividad y agrupación latente o
+                                    manifiesto. Valores aproximados: ejemplo.
+                                </caption>
                                 <thead>
                                     <tr>
-                                        <th scope="col">Apellidos y nombres</th>
-                                        <th scope="col">Organización</th>
-                                        <th scope="col">OSPA</th>
-                                        <th scope="col">Región</th>
-                                        <th scope="col">Caleta</th>
-                                        <th scope="col">Arte</th>
-                                        <th scope="col">Teléfono</th>
-                                        <th scope="col">Correo</th>
-                                        <th scope="col">Perfil</th>
-                                        <th scope="col">Foto</th>
+                                        <th scope="col">
+                                            Nivel de conflictividad
+                                        </th>
+                                        <th scope="col">Agrupación</th>
+                                        <th scope="col" class="num">
+                                            Casos en la región
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="strong">
-                                            <span class="actor"
-                                                ><span class="avatar">SM</span
-                                                >Salas Salas, María Luisa</span
+                                        <td class="strong">Diferencia</td>
+                                        <td>
+                                            <span class="pill lat"
+                                                >latente</span
                                             >
                                         </td>
-                                        <td>OSPAS del Norte</td>
-                                        <td>
-                                            <span class="pill empty"
-                                                >Sin expediente</span
-                                            >
+                                        <td class="num">
+                                            <span class="ex">≈</span> 1
                                         </td>
-                                        <td>Piura</td>
-                                        <td>Paita</td>
-                                        <td>Cerco</td>
-                                        <td>
-                                            999 <span class="miss">***</span>
-                                            <span class="miss">***</span>
-                                        </td>
-                                        <td>
-                                            m<span class="miss">***</span
-                                            >@gmail.com
-                                        </td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="avatar">ML</span></td>
                                     </tr>
                                     <tr>
-                                        <td class="strong">
-                                            <span class="actor"
-                                                ><span class="avatar">CF</span
-                                                >Chunga Fiestas, Julio</span
+                                        <td class="strong">Controversia</td>
+                                        <td>
+                                            <span class="pill lat"
+                                                >latente</span
                                             >
                                         </td>
-                                        <td>OSPAS San José</td>
+                                        <td class="num">
+                                            <span class="ex">≈</span> 2
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Conflicto social</td>
                                         <td>
-                                            <span class="pill empty"
-                                                >Sin expediente</span
+                                            <span class="pill man"
+                                                >manifiesto</span
                                             >
                                         </td>
-                                        <td>Piura</td>
-                                        <td>La Islilla</td>
-                                        <td>Buzos</td>
-                                        <td>
-                                            9<span class="miss">**</span>
-                                            <span class="miss">***</span>
-                                            <span class="miss">***</span>
+                                        <td class="num">
+                                            <span class="ex">≈</span> 1
                                         </td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Crisis social</td>
                                         <td>
-                                            <span class="avatar none">—</span>
+                                            <span class="pill man"
+                                                >manifiesto</span
+                                            >
+                                        </td>
+                                        <td class="num">
+                                            <span class="ex">≈</span> 1
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="strong">
-                                            <span class="actor"
-                                                ><span class="avatar">VR</span
-                                                >Vílchez Ramos, Ana</span
+                                            Sin nivel declarado
+                                        </td>
+                                        <td>
+                                            <span class="miss"
+                                                >no se etiqueta</span
                                             >
                                         </td>
-                                        <td>OSPAS Cabo Blanco</td>
-                                        <td>
-                                            <span class="pill empty"
-                                                >Sin expediente</span
-                                            >
-                                        </td>
-                                        <td>Tumbes</td>
-                                        <td>Zorritos</td>
-                                        <td>Selectivos</td>
-                                        <td>
-                                            9<span class="miss">**</span>
-                                            <span class="miss">***</span>
-                                            <span class="miss">***</span>
-                                        </td>
-                                        <td>
-                                            a<span class="miss">***</span
-                                            >@hotmail.com
-                                        </td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="avatar">VR</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="strong">
-                                            <span class="actor"
-                                                ><span class="avatar">AP</span
-                                                >Asociación de Pescadores San
-                                                José
-                                                <span class="pill soft"
-                                                    >Organización</span
-                                                ></span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="miss">—</span>
-                                            <span class="pill empty"
-                                                >es la organización</span
-                                            >
-                                        </td>
-                                        <td>
-                                            <span class="pill empty"
-                                                >Sin expediente</span
-                                            >
-                                        </td>
-                                        <td>Áncash</td>
-                                        <td>Chimbote</td>
-                                        <td><span class="miss">—</span></td>
-                                        <td>
-                                            9<span class="miss">**</span>
-                                            <span class="miss">***</span>
-                                            <span class="miss">***</span>
-                                        </td>
-                                        <td>
-                                            a<span class="miss">***</span
-                                            >@gmail.com
-                                        </td>
-                                        <td>Colaborativo</td>
-                                        <td><span class="avatar">AP</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="strong">
-                                            <span class="actor"
-                                                ><span class="avatar">QH</span
-                                                >Quispe Huamán, Rosa</span
-                                            >
-                                        </td>
-                                        <td><span class="miss">—</span></td>
-                                        <td>
-                                            <span class="pill empty"
-                                                >Sin expediente</span
-                                            >
-                                        </td>
-                                        <td>Lima</td>
-                                        <td><span class="miss">—</span></td>
-                                        <td>Selectivos</td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td>
-                                            <span class="avatar none">—</span>
-                                        </td>
+                                        <td class="num">0</td>
                                     </tr>
                                 </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2">
+                                            Total de casos en la región
+                                        </td>
+                                        <td class="num">
+                                            <span class="ex">≈</span> 5
+                                        </td>
+                                    </tr>
+                                </tfoot>
                             </table>
+                            <p class="card-sub">
+                                Fuente:
+                                <code>core.casos.nivel_conflicto_id</code> y
+                                <code>region_principal_id</code> (35 casos en la
+                                base). No existe «casos abiertos» como nivel:
+                                «abierto» describe el estado, no la
+                                conflictividad.
+                            </p>
                         </div>
 
                         <div class="card">
                             <div class="card-head">
                                 <div>
-                                    <h3 class="card-title">
-                                        Ficha de la organización
-                                    </h3>
+                                    <h3 class="card-title">Casos por estado</h3>
                                     <p class="card-sub">
-                                        OSPAS del Norte · Piura · Paita
+                                        Estados del catálogo del caso: Activo ·
+                                        En seguimiento · Resuelto · Archivado.
+                                        El estado no se mezcla con el nivel de
+                                        conflictividad.
                                     </p>
                                 </div>
-                                <span class="pill empty">0 de 224</span>
+                                <div class="exp">
+                                    <button
+                                        type="button"
+                                        class="exp-btn"
+                                        aria-label="Exportar casos por estado a XLSX"
+                                    >
+                                        XLSX
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="exp-btn"
+                                        aria-label="Exportar casos por estado a PDF"
+                                    >
+                                        PDF
+                                    </button>
+                                </div>
                             </div>
-                            <dl class="dl">
-                                <dt>Expediente OSPA</dt>
-                                <dd><span class="miss">—</span></dd>
-                                <dt>Estado OSPA</dt>
-                                <dd><span class="miss">—</span></dd>
-                                <dt>Vigencia</dt>
-                                <dd>
-                                    <span class="miss">—</span> a
-                                    <span class="miss">—</span>
-                                </dd>
-                                <dt>Inscripción SUNARP</dt>
-                                <dd><span class="miss">—</span></dd>
-                                <dt>Caleta</dt>
-                                <dd><span class="miss">—</span></dd>
-                                <dt>Embarcaciones</dt>
-                                <dd><span class="miss">—</span></dd>
-                                <dt>Armadores</dt>
-                                <dd><span class="miss">—</span></dd>
-                                <dt>Integrantes</dt>
-                                <dd><span class="miss">—</span></dd>
-                                <dt>Perfil de diálogo</dt>
-                                <dd><span class="miss">—</span></dd>
-                                <dt>Foto</dt>
-                                <dd><span class="avatar">ML</span></dd>
-                            </dl>
+                            <div class="bars">
+                                <div class="bar-row">
+                                    <span class="lbl">Activo</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="width: 60%"
+                                        ></span></span
+                                    ><span class="v"
+                                        ><span class="ex">≈</span> 3</span
+                                    >
+                                </div>
+                                <div class="bar-row">
+                                    <span class="lbl">En seguimiento</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="width: 20%"
+                                        ></span></span
+                                    ><span class="v"
+                                        ><span class="ex">≈</span> 1</span
+                                    >
+                                </div>
+                                <div class="bar-row">
+                                    <span class="lbl">Resuelto</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="width: 20%"
+                                        ></span></span
+                                    ><span class="v"
+                                        ><span class="ex">≈</span> 1</span
+                                    >
+                                </div>
+                                <div class="bar-row">
+                                    <span class="lbl">Archivado</span
+                                    ><span class="bar-track"
+                                        ><span
+                                            class="bar-fill"
+                                            style="width: 2%"
+                                        ></span></span
+                                    ><span class="v">0</span>
+                                </div>
+                            </div>
                             <p class="card-sub">
-                                Las diez filas existen como columnas en
-                                <code>core.organizaciones</code>. Se dibujan
-                                vacías porque lo están: sólo 20 organizaciones
-                                tienen <code>foto_url</code>, 24 tienen cifras
-                                de flota y <b>1</b> tiene <code>perfil</code>.
+                                Fuente: <code>core.casos.estado</code>. Los
+                                valores son <span class="ex">≈ ejemplo</span>;
+                                el agregado real por región sale de
+                                <code>/v1/cases?region=…&amp;group=estado</code
+                                >.
                             </p>
                         </div>
                     </div>
 
+                    <!-- ── Actores del territorio ─────────────────── -->
+                    <div class="split">
+                        <div class="card">
+                            <div class="card-head">
+                                <div>
+                                    <h3 class="card-title">
+                                        Actores del territorio
+                                    </h3>
+                                    <p class="card-sub">
+                                        Tipo y rol del catálogo sobre
+                                        <code>core.actores.region_id</code>.
+                                        Nacional: <b>1 160</b> actores. La marca
+                                        OSPA vive en la organización, no en la
+                                        persona.
+                                    </p>
+                                </div>
+                                <div class="exp">
+                                    <button
+                                        type="button"
+                                        class="exp-btn"
+                                        aria-label="Exportar actores del territorio a XLSX"
+                                    >
+                                        XLSX
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="exp-btn"
+                                        aria-label="Exportar actores del territorio a PDF"
+                                    >
+                                        PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="matrix-wrap">
+                                <table class="matrix">
+                                    <caption>
+                                        Actores de la región por tipo y rol.
+                                        Valores aproximados: ejemplo.
+                                    </caption>
+                                    <thead>
+                                        <tr>
+                                            <th class="rowh" scope="col">
+                                                Tipo
+                                            </th>
+                                            <th scope="col">Principal</th>
+                                            <th scope="col">Secundario</th>
+                                            <th scope="col">
+                                                Tercero imparcial
+                                            </th>
+                                            <th scope="col">No determinado</th>
+                                            <th scope="col">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Actor social
+                                            </th>
+                                            <td>
+                                                <span class="ex">≈</span> 21
+                                            </td>
+                                            <td>
+                                                <span class="ex">≈</span> 14
+                                            </td>
+                                            <td><span class="ex">≈</span> 2</td>
+                                            <td><span class="ex">≈</span> 6</td>
+                                            <td>
+                                                <b
+                                                    ><span class="ex">≈</span>
+                                                    43</b
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Actor público
+                                            </th>
+                                            <td><span class="ex">≈</span> 9</td>
+                                            <td><span class="ex">≈</span> 8</td>
+                                            <td><span class="ex">≈</span> 3</td>
+                                            <td><span class="ex">≈</span> 2</td>
+                                            <td>
+                                                <b
+                                                    ><span class="ex">≈</span>
+                                                    22</b
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Actor privado
+                                            </th>
+                                            <td><span class="ex">≈</span> 7</td>
+                                            <td><span class="ex">≈</span> 6</td>
+                                            <td><span class="miss">0</span></td>
+                                            <td><span class="ex">≈</span> 1</td>
+                                            <td>
+                                                <b
+                                                    ><span class="ex">≈</span>
+                                                    14</b
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Sin tipo declarado
+                                            </th>
+                                            <td><span class="miss">—</span></td>
+                                            <td><span class="miss">—</span></td>
+                                            <td><span class="miss">—</span></td>
+                                            <td><span class="ex">≈</span> 5</td>
+                                            <td>
+                                                <b
+                                                    ><span class="ex">≈</span>
+                                                    5</b
+                                                >
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Total
+                                            </th>
+                                            <td>
+                                                <span class="ex">≈</span> 37
+                                            </td>
+                                            <td>
+                                                <span class="ex">≈</span> 28
+                                            </td>
+                                            <td><span class="ex">≈</span> 5</td>
+                                            <td>
+                                                <span class="ex">≈</span> 14
+                                            </td>
+                                            <td>
+                                                <b
+                                                    ><span class="ex">≈</span>
+                                                    84</b
+                                                >
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <p class="card-sub">
+                                Fuente:
+                                <code>core.actores.tipo_actor_id</code>,
+                                <code>rol_actor_id</code> y
+                                <code>region_id</code>. Los actores sin
+                                <code>region_id</code> no entran en la ficha: se
+                                declaran fuera, no se reparten por estimación.
+                            </p>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-head">
+                                <div>
+                                    <h3 class="card-title">Marca OSPA</h3>
+                                    <p class="card-sub">
+                                        Item 121. Las columnas existen en la
+                                        organización; la marca está vacía.
+                                    </p>
+                                </div>
+                                <span class="pill bad">0 de 224</span>
+                            </div>
+                            <dl class="dl">
+                                <dt><code>expediente_ospa</code></dt>
+                                <dd>
+                                    existe · <b>0</b> de 224 organizaciones con
+                                    valor
+                                </dd>
+                                <dt><code>estado_ospa</code></dt>
+                                <dd>existe · <b>0</b> de 224 con valor</dd>
+                                <dt>Organizaciones con región</dt>
+                                <dd>
+                                    <b>119</b> de 224 · las 105 restantes están
+                                    declaradas, no se estiman
+                                </dd>
+                                <dt><code>territorio.caleta_detalle</code></dt>
+                                <dd>
+                                    existe · <b>0 filas</b> · no hay maestro de
+                                    caletas
+                                </dd>
+                                <dt>Vínculo organización–caleta</dt>
+                                <dd><span class="miss">no existe</span></dd>
+                            </dl>
+                            <div class="banner">
+                                <span aria-hidden="true">▲</span>
+                                <div>
+                                    Sin maestro de caletas y sin marca OSPA
+                                    poblada, el corte <b>OSPA por caleta</b> no
+                                    se puede dibujar. Lo que se muestra es la
+                                    <b>ausencia</b>, no un cero.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Demandas por temática ──────────────────── -->
                     <div class="card">
                         <div class="card-head">
                             <div>
                                 <h3 class="card-title">
-                                    Demandas por OSPA
-                                    <span class="pill warn">ítem 122</span>
+                                    Demandas por temática
                                 </h3>
                                 <p class="card-sub">
-                                    El corte por organización exige que cada
-                                    demanda declare a quién pertenece. Hoy no
-                                    hay ese vínculo:
-                                    <code>core.demandas</code> no tiene columna
-                                    de solicitante-organización.
+                                    <code>core.demandas.tematica_id</code> ×
+                                    <code>core.cat_tematicas</code> (6 filas,
+                                    §7.6). Nacional: <b>325</b> demandas. El
+                                    corte por OSPA y por arte (item 122) no se
+                                    puede hacer.
                                 </p>
                             </div>
-                            <span class="pill bad">0 con atribución</span>
+                            <div class="exp">
+                                <button
+                                    type="button"
+                                    class="exp-btn"
+                                    aria-label="Exportar demandas por temática a XLSX"
+                                >
+                                    XLSX
+                                </button>
+                                <button
+                                    type="button"
+                                    class="exp-btn"
+                                    aria-label="Exportar demandas por temática a PDF"
+                                >
+                                    PDF
+                                </button>
+                            </div>
                         </div>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">OSPA</th>
-                                    <th scope="col">Región</th>
-                                    <th scope="col">Arte</th>
-                                    <th scope="col" class="num">Demandas</th>
-                                    <th scope="col" class="num">
-                                        Con solicitante
-                                    </th>
-                                    <th scope="col">Estado de la atribución</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="strong">
-                                        OSPAS del Norte
-                                        <span class="ex">≈</span>
-                                    </td>
-                                    <td>Piura</td>
-                                    <td>Cerco</td>
-                                    <td class="num">
-                                        <span class="miss">—</span>
-                                    </td>
-                                    <td class="num">0</td>
-                                    <td>
-                                        <span class="pill empty"
-                                            >Sin vínculo</span
-                                        >
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="strong">
-                                        OSPAS San José <span class="ex">≈</span>
-                                    </td>
-                                    <td>Piura</td>
-                                    <td>Buzos</td>
-                                    <td class="num">
-                                        <span class="miss">—</span>
-                                    </td>
-                                    <td class="num">0</td>
-                                    <td>
-                                        <span class="pill empty"
-                                            >Sin vínculo</span
-                                        >
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="strong">
-                                        OSPAS Cabo Blanco
-                                        <span class="ex">≈</span>
-                                    </td>
-                                    <td>Tumbes</td>
-                                    <td>Selectivos</td>
-                                    <td class="num">
-                                        <span class="miss">—</span>
-                                    </td>
-                                    <td class="num">0</td>
-                                    <td>
-                                        <span class="pill empty"
-                                            >Sin vínculo</span
-                                        >
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="ann" aria-label="Anotaciones del artboard 2">
-                    <div class="ann-card">
-                        <h3>① Items que cubre</h3>
-                        <b>120</b> actores por región × arte · <b>121</b> OSPA
-                        por región y caleta · <b>122</b> demandas por OSPA. El
-                        primero y el tercero <b>requieren dato</b>; el segundo
-                        es implementable en parte y mockup en el resto.
-                    </div>
-                    <div class="ann-card">
-                        <h3>② Cifras reales de hoy</h3>
-                        <table class="ann-table">
-                            <tr>
-                                <th>Campo</th>
-                                <th>Valor</th>
-                            </tr>
-                            <tr>
-                                <td><code>core.actores</code></td>
-                                <td>
-                                    1 160 (936 personas · 224 organizaciones)
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <code>expediente_ospa</code> /
-                                    <code>estado_ospa</code>
-                                </td>
-                                <td>existen · 0 de 224 con valor</td>
-                            </tr>
-                            <tr>
-                                <td><code>territorio.caleta_detalle</code></td>
-                                <td>existe · 0 filas</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <code>foto_url</code> · <code>perfil</code>
-                                </td>
-                                <td>20 de 224 · 1 de 224</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <code>n_embarcaciones</code> ·
-                                    <code>n_armadores</code> ·
-                                    <code>numero_integrantes</code>
-                                </td>
-                                <td>24 de 224 cada uno</td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="ann-card">
-                        <h3>③ Qué falta exactamente</h3>
-                        <b>120:</b> el catálogo de artes (artboard 1) y el
-                        vínculo actor–arte. <b>121:</b> poblar la marca OSPA y
-                        el maestro de caletas; la estructura ya existe.
-                        <b>122:</b> una columna de solicitante-organización en
-                        <code>core.demandas</code>; sin ella no hay corte por
-                        OSPA ni por arte.
-                    </div>
-                    <div class="ann-card">
-                        <h3>④ Permisos y PII</h3>
-                        Teléfono y correo se enmascaran para todo rol salvo
-                        <code>administrador</code>: son 642 DNI, 606 teléfonos y
-                        141 correos con base legal aún sin sustituir (P3). El
-                        filtro de subsector no es un control de usuario: lo
-                        impone el rol del perfil.
-                    </div>
-                    <div class="ann-card wide">
-                        <h3>⑤ Cómo se cierra</h3>
-                        Poblar
-                        <code>core.organizaciones.expediente_ospa</code> /
-                        <code>estado_ospa</code> desde el registro de OSPAS,
-                        cargar <code>territorio.caleta_detalle</code> con el
-                        maestro de caletas y añadir el vínculo
-                        organización–caleta. Para el corte por arte, crear el
-                        catálogo 119 y una tabla actor–arte. Para 122, modelar
-                        el solicitante en la demanda. Los cuatro son cambios de
-                        modelo, no de pantalla.
-                    </div>
-                </div>
-            </section>
-
-            <!-- ═══════════════════ ARTBOARD 3 ═══════════════════ -->
-            <section class="artboard" id="arte-3">
-                <div class="art-head">
-                    <div>
-                        <span class="kicker">Artboard 3 · ítem 124</span>
-                        <h2>Conflictos por región y recurso</h2>
-                        <p>
-                            Matriz región por recurso con el semáforo de
-                            <b>conflictividad</b> —Diferencia, Controversia,
-                            Conflicto social, Crisis social—, nunca con el
-                            semáforo de riesgo. Es el tablero que pide la
-                            dirección, dibujado con su estructura real y sus
-                            celdas vacías.
+                        <div class="bars">
+                            <div class="bar-row">
+                                <span class="lbl">Gobernanza</span
+                                ><span class="bar-track"
+                                    ><span
+                                        class="bar-fill"
+                                        style="width: 100%"
+                                    ></span></span
+                                ><span class="v"
+                                    ><span class="ex">≈</span> 9</span
+                                >
+                            </div>
+                            <div class="bar-row">
+                                <span class="lbl"
+                                    >Ordenamiento y acceso territorial</span
+                                ><span class="bar-track"
+                                    ><span
+                                        class="bar-fill"
+                                        style="width: 67%"
+                                    ></span></span
+                                ><span class="v"
+                                    ><span class="ex">≈</span> 6</span
+                                >
+                            </div>
+                            <div class="bar-row">
+                                <span class="lbl">Normatividad</span
+                                ><span class="bar-track"
+                                    ><span
+                                        class="bar-fill"
+                                        style="width: 44%"
+                                    ></span></span
+                                ><span class="v"
+                                    ><span class="ex">≈</span> 4</span
+                                >
+                            </div>
+                            <div class="bar-row">
+                                <span class="lbl">Infraestructura</span
+                                ><span class="bar-track"
+                                    ><span
+                                        class="bar-fill"
+                                        style="width: 33%"
+                                    ></span></span
+                                ><span class="v"
+                                    ><span class="ex">≈</span> 3</span
+                                >
+                            </div>
+                            <div class="bar-row">
+                                <span class="lbl"
+                                    >Distribución de beneficios</span
+                                ><span class="bar-track"
+                                    ><span
+                                        class="bar-fill"
+                                        style="width: 33%"
+                                    ></span></span
+                                ><span class="v"
+                                    ><span class="ex">≈</span> 3</span
+                                >
+                            </div>
+                            <div class="bar-row">
+                                <span class="lbl">Impactos de terceros</span
+                                ><span class="bar-track"
+                                    ><span
+                                        class="bar-fill"
+                                        style="width: 22%"
+                                    ></span></span
+                                ><span class="v"
+                                    ><span class="ex">≈</span> 2</span
+                                >
+                            </div>
+                        </div>
+                        <p class="card-sub">
+                            Etiquetas leídas del catálogo documentado (6 filas).
+                            <b>Por confirmar contra la base</b> antes de
+                            fijarlas. La atribución de la demanda a su
+                            solicitante organización (122) <b>no existe</b>:
+                            <code>core.demandas</code> no declara
+                            solicitante-organización, así que no hay corte por
+                            OSPA, región y arte.
                         </p>
                     </div>
-                    <span class="flag">Puente caso–recurso sin poblar</span>
-                </div>
 
-                <div class="art-body">
-                    <div class="banner">
-                        <span aria-hidden="true">▲</span>
-                        <div>
-                            <b>El corte caso × recurso no existe todavía.</b>
-                            <code>legacy.bridge_caso_recurso</code> tiene
-                            <b>0 filas</b>: ningún caso declara su recurso. Seis
-                            de los 35 casos heredan una o varias especies de sus
-                            alertas, pero eso no es una llave caso–recurso. Las
-                            celdas con <span class="ex">≈</span> son de ejemplo
-                            para mostrar el diseño; el resto está vacío porque
-                            no hay dato, no porque el valor sea cero.
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-head">
-                            <div>
-                                <h3 class="card-title">Matriz objetivo</h3>
-                                <p class="card-sub">
-                                    Encabezados tomados de la capa distrital (25
-                                    departamentos); se muestran siete. Filas,
-                                    del catálogo
-                                    <code>legacy.dim_recurso_pesca</code>
-                                    (37 recursos).
-                                </p>
-                            </div>
-                            <span class="pill bad"
-                                >0 de 35 declaran recurso</span
-                            >
-                        </div>
-                        <div class="matrix-wrap">
-                            <table class="matrix">
-                                <thead>
-                                    <tr>
-                                        <th class="rowh" scope="col">
-                                            Recurso
-                                        </th>
-                                        <th scope="col">Tumbes</th>
-                                        <th scope="col">Piura</th>
-                                        <th scope="col">Lambayeque</th>
-                                        <th scope="col">La Libertad</th>
-                                        <th scope="col">Áncash</th>
-                                        <th scope="col">Lima</th>
-                                        <th scope="col">Arequipa</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <th class="rowh" scope="row">
-                                            Anchoveta
-                                        </th>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td>
-                                            <span class="sema d2"></span>
-                                            <span class="ex">≈</span>
-                                        </td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="rowh" scope="row">Jurel</th>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="rowh" scope="row">Bonito</th>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td>
-                                            <span class="sema d1"></span>
-                                            <span class="ex">≈</span>
-                                        </td>
-                                        <td><span class="miss">—</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="rowh" scope="row">Pota</th>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="rowh" scope="row">Perico</th>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="rowh" scope="row">
-                                            Concha de abanico
-                                        </th>
-                                        <td><span class="miss">—</span></td>
-                                        <td>
-                                            <span class="sema d3"></span>
-                                            <span class="ex">≈</span>
-                                        </td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="rowh" scope="row">
-                                            Erizo rojo
-                                        </th>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                    </tr>
-                                    <tr>
-                                        <th class="rowh" scope="row">
-                                            Trucha arcoíris
-                                        </th>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                        <td><span class="miss">—</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="legend">
-                            <span class="k"
-                                ><span class="sema d1"></span>Diferencia</span
-                            >
-                            <span class="k"
-                                ><span class="sema d2"></span>Controversia</span
-                            >
-                            <span class="k"
-                                ><span class="sema d3"></span>Conflicto
-                                social</span
-                            >
-                            <span class="k"
-                                ><span class="sema d4"></span>Crisis
-                                social</span
-                            >
-                            <span class="k"
-                                ><span class="miss">—</span> sin dato
-                                declarado</span
-                            >
-                        </div>
-                    </div>
-
+                    <!-- ── Compromisos (123) + Región × recurso (124) ── -->
                     <div class="split">
                         <div class="card">
                             <div class="card-head">
                                 <div>
                                     <h3 class="card-title">
-                                        Lo único que sí se puede cortar hoy:
-                                        alertas por especie
+                                        Compromisos asumidos por el Señor
+                                        Ministro
+                                        <span class="pill warn">123</span>
                                     </h3>
                                     <p class="card-sub">
-                                        <code>core.alerta_especies</code>: 30
-                                        vínculos, 24 alertas, 12 especies. Es un
-                                        corte por <b>alerta</b>, no por caso, y
-                                        no lleva región.
+                                        La dimensión <b>«asumido por»</b>
+                                        (Despacho Ministerial) debe ir separada
+                                        de la unidad responsable, por región y
+                                        arte. Hoy no está modelada.
                                     </p>
                                 </div>
-                                <span class="pill soft">30 vínculos</span>
-                            </div>
-                            <div class="bars">
-                                <div class="bar-row">
-                                    <span class="lbl">Bonito</span
-                                    ><span class="bar-track"
-                                        ><span
-                                            class="bar-fill"
-                                            style="display: block; width: 100%"
-                                        ></span></span
-                                    ><span class="v">7</span>
-                                </div>
-                                <div class="bar-row">
-                                    <span class="lbl">Erizo rojo</span
-                                    ><span class="bar-track"
-                                        ><span
-                                            class="bar-fill"
-                                            style="display: block; width: 71%"
-                                        ></span></span
-                                    ><span class="v">5</span>
-                                </div>
-                                <div class="bar-row">
-                                    <span class="lbl">Jurel</span
-                                    ><span class="bar-track"
-                                        ><span
-                                            class="bar-fill"
-                                            style="display: block; width: 57%"
-                                        ></span></span
-                                    ><span class="v">4</span>
-                                </div>
-                                <div class="bar-row">
-                                    <span class="lbl">Pota</span
-                                    ><span class="bar-track"
-                                        ><span
-                                            class="bar-fill"
-                                            style="display: block; width: 43%"
-                                        ></span></span
-                                    ><span class="v">3</span>
-                                </div>
-                                <div class="bar-row">
-                                    <span class="lbl">Trucha arcoíris</span
-                                    ><span class="bar-track"
-                                        ><span
-                                            class="bar-fill"
-                                            style="display: block; width: 29%"
-                                        ></span></span
-                                    ><span class="v">2</span>
-                                </div>
-                                <div class="bar-row">
-                                    <span class="lbl">Perico</span
-                                    ><span class="bar-track"
-                                        ><span
-                                            class="bar-fill"
-                                            style="display: block; width: 29%"
-                                        ></span></span
-                                    ><span class="v">2</span>
-                                </div>
-                                <div class="bar-row">
-                                    <span class="lbl">Anchoveta</span
-                                    ><span class="bar-track"
-                                        ><span
-                                            class="bar-fill"
-                                            style="display: block; width: 29%"
-                                        ></span></span
-                                    ><span class="v">2</span>
-                                </div>
-                                <div class="bar-row">
-                                    <span class="lbl">5 especies más</span
-                                    ><span class="bar-track"
-                                        ><span
-                                            class="bar-fill"
-                                            style="display: block; width: 14%"
-                                        ></span></span
-                                    ><span class="v">5</span>
+                                <div class="exp">
+                                    <button
+                                        type="button"
+                                        class="exp-btn"
+                                        aria-label="Exportar compromisos a XLSX"
+                                    >
+                                        XLSX
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="exp-btn"
+                                        aria-label="Exportar compromisos a PDF"
+                                    >
+                                        PDF
+                                    </button>
                                 </div>
                             </div>
+                            <p class="region-meta">
+                                <span><b>8</b> compromisos</span>
+                                <span><b>12</b> hitos</span>
+                                <span
+                                    >en la región
+                                    <span class="ex">≈</span> 2</span
+                                >
+                            </p>
+                            <table class="data-table">
+                                <caption class="sr">
+                                    Columnas que pide el item 123 y su estado
+                                    real en el modelo.
+                                </caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">
+                                            Columna que pide 123
+                                        </th>
+                                        <th scope="col">Estado</th>
+                                        <th scope="col">Qué pasa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="strong">Asumido por</td>
+                                        <td>
+                                            <span class="pill bad"
+                                                >no existe</span
+                                            >
+                                        </td>
+                                        <td>
+                                            Despacho Ministerial no es un campo:
+                                            todos los compromisos se leen igual.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">
+                                            Unidad responsable
+                                        </td>
+                                        <td>
+                                            <span class="pill ok">existe</span>
+                                        </td>
+                                        <td>
+                                            Se muestra tal cual; no se deduce el
+                                            despacho a partir de ella.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Región</td>
+                                        <td>
+                                            <span class="pill warn"
+                                                >derivada</span
+                                            >
+                                        </td>
+                                        <td>
+                                            Sólo por el caso
+                                            (<code>region_principal_id</code>);
+                                            el compromiso no declara región.
+                                            <b>Por confirmar.</b>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">Arte de pesca</td>
+                                        <td>
+                                            <span class="pill bad"
+                                                >no existe</span
+                                            >
+                                        </td>
+                                        <td>Depende del catálogo 119.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
                         <div class="card">
                             <div class="card-head">
                                 <div>
                                     <h3 class="card-title">
-                                        Qué hay en cada puente
+                                        Región × recurso
+                                        <span class="pill warn">124</span>
                                     </h3>
+                                    <p class="card-sub">
+                                        El puente caso–recurso está vacío: no
+                                        hay celda que calcular.
+                                    </p>
                                 </div>
+                                <span class="pill bad">0 de 35</span>
                             </div>
-                            <dl class="dl">
-                                <dt><code>bridge_caso_recurso</code></dt>
-                                <dd>
-                                    0 filas ·
-                                    <span class="pill bad">vacío</span>
-                                </dd>
-                                <dt><code>bridge_alerta_recurso</code></dt>
-                                <dd>
-                                    32 filas ·
-                                    <span class="pill ok">con dato</span>
-                                </dd>
-                                <dt><code>alerta_especies</code></dt>
-                                <dd>30 filas · 24 alertas · 12 especies</dd>
-                                <dt><code>dim_recurso_pesca</code></dt>
-                                <dd>37 recursos en 11 grupos biológicos</dd>
-                            </dl>
+                            <div class="matrix-wrap">
+                                <table class="matrix">
+                                    <caption>
+                                        Recursos discutidos en la región. Sin
+                                        dato declarado: el puente caso–recurso
+                                        tiene 0 filas.
+                                    </caption>
+                                    <thead>
+                                        <tr>
+                                            <th class="rowh" scope="col">
+                                                Recurso
+                                            </th>
+                                            <th scope="col">Piura</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Anchoveta
+                                            </th>
+                                            <td><span class="miss">—</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Jurel
+                                            </th>
+                                            <td><span class="miss">—</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Bonito
+                                            </th>
+                                            <td><span class="miss">—</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Pota
+                                            </th>
+                                            <td><span class="miss">—</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Concha de abanico
+                                            </th>
+                                            <td><span class="miss">—</span></td>
+                                        </tr>
+                                        <tr>
+                                            <th class="rowh" scope="row">
+                                                Erizo rojo
+                                            </th>
+                                            <td><span class="miss">—</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                             <p class="card-sub">
-                                El catálogo de recursos está listo. Lo que falta
-                                es la llave del caso: mientras siga en 0, la
-                                matriz se dibuja vacía.
+                                Seis de 37 recursos de
+                                <code>legacy.dim_recurso_pesca</code>.
+                                <code>legacy.bridge_caso_recurso</code> tiene
+                                <b>0 filas</b>; seis de los 35 casos heredan
+                                especie de sus alertas, pero eso no es una llave
+                                caso–recurso y no se usa para rellenar la
+                                matriz.
                             </p>
                         </div>
                     </div>
-                </div>
 
-                <div class="ann" aria-label="Anotaciones del artboard 3">
-                    <div class="ann-card">
-                        <h3>① Item que cubre</h3>
-                        <b>124</b> · conflictos por región y recurso.
-                        <b>Estado: mockup.</b> El diseño es final; los datos no
-                        existen a nivel de caso.
+                    <!-- ── Infraestructura ────────────────────────── -->
+                    <div class="split">
+                        <div class="card">
+                            <div class="card-head">
+                                <div>
+                                    <h3 class="card-title">
+                                        Desembarcaderos DPA del departamento
+                                    </h3>
+                                    <p class="card-sub">
+                                        11 de los <b>31</b> DPA del país, con
+                                        nombre y distrito tomados del KML (<code
+                                            >IDENTI = DPA - GORE</code
+                                        >, más uno con la errata
+                                        <code>DPA -GORE</code>).
+                                    </p>
+                                </div>
+                                <div class="exp">
+                                    <button
+                                        type="button"
+                                        class="exp-btn"
+                                        aria-label="Exportar desembarcaderos DPA a XLSX"
+                                    >
+                                        XLSX
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="exp-btn"
+                                        aria-label="Exportar desembarcaderos DPA a PDF"
+                                    >
+                                        PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <table class="data-table">
+                                <caption class="sr">
+                                    Desembarcaderos DPA del departamento de
+                                    Piura, con provincia, distrito y ubigeo del
+                                    KML de infraestructuras.
+                                </caption>
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Desembarcadero</th>
+                                        <th scope="col">Provincia</th>
+                                        <th scope="col">Distrito</th>
+                                        <th scope="col" class="num">Ubigeo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="strong">DPA Cabo Blanco</td>
+                                        <td>Talara</td>
+                                        <td>El Alto</td>
+                                        <td class="num">200702</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">DPA El Ñuro</td>
+                                        <td>Talara</td>
+                                        <td>Los Órganos</td>
+                                        <td class="num">200705</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">DPA Lobitos</td>
+                                        <td>Talara</td>
+                                        <td>Lobitos</td>
+                                        <td class="num">200704</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">DPA Los Órganos</td>
+                                        <td>Talara</td>
+                                        <td>Los Órganos</td>
+                                        <td class="num">200705</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">DPA Máncora</td>
+                                        <td>Talara</td>
+                                        <td>Máncora</td>
+                                        <td class="num">200706</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">DPA Talara</td>
+                                        <td>Talara</td>
+                                        <td>Pariñas</td>
+                                        <td class="num">200701</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">DPA La Islilla</td>
+                                        <td>Paita</td>
+                                        <td>Paita</td>
+                                        <td class="num">200501</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">DPA Paita</td>
+                                        <td>Paita</td>
+                                        <td>Paita</td>
+                                        <td class="num">200501</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">DPA Yacila</td>
+                                        <td>Paita</td>
+                                        <td>Paita</td>
+                                        <td class="num">200501</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">DPA Las Delicias</td>
+                                        <td>Sechura</td>
+                                        <td>Sechura</td>
+                                        <td class="num">200801</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="strong">DPA Parachique</td>
+                                        <td>Sechura</td>
+                                        <td>Sechura</td>
+                                        <td class="num">200801</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="card-sub">
+                                En Piura el KML aporta <b>343 puntos</b>: 322
+                                derechos acuícolas y 21 sedes institucionales
+                                (11 DPA, 3 FONDEPES, 2 SANIPES y una de ITP,
+                                IMARPE, DIREPRO, PNACP y TUEMPRESA). El estado
+                                de proyecto de cada DPA <b>no tiene fuente</b>
+                                (item 127).
+                            </p>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-head">
+                                <div>
+                                    <h3 class="card-title">Redes RADAR</h3>
+                                    <p class="card-sub">
+                                        Item 125. Capa pedida sin fuente
+                                        cargada.
+                                    </p>
+                                </div>
+                                <span class="pill empty">sin fuente</span>
+                            </div>
+                            <dl class="dl">
+                                <dt>Tabla</dt>
+                                <dd><span class="miss">no existe</span></dd>
+                                <dt>Ni redes ni estado</dt>
+                                <dd>
+                                    no hay campo que leer; el mapa las dibuja
+                                    sólo como <b>ejemplo</b>
+                                </dd>
+                                <dt>Contrato propuesto</dt>
+                                <dd>
+                                    <code>GET /v1/gis/radar</code> →
+                                    <code
+                                        >200 {items: [], sin_fuente: true}</code
+                                    >
+                                </dd>
+                                <dt>Infraestructura por distrito</dt>
+                                <dd>
+                                    <code
+                                        >gis.v_infraestructuras_por_distrito</code
+                                    >
+                                    existe; se usa cuando el item 128 esté
+                                    cargado
+                                </dd>
+                            </dl>
+                            <div class="banner">
+                                <span aria-hidden="true">▲</span>
+                                <div>
+                                    Los DPA <b>sí</b> tienen fuente (KML); las
+                                    redes RADAR <b>no</b>. No se dibuja ninguna
+                                    red en el mapa de la región para no sugerir
+                                    una cobertura inexistente.
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="ann-card">
-                        <h3>② Por qué no se puede calcular</h3>
-                        El recurso sólo aparece por la vía de la alerta
-                        (<code>alerta_especies</code>), nunca por el caso: hoy
-                        <b>6 de los 35 casos</b> tienen especie, y siempre así.
-                        Derivar el recurso del caso a partir de sus alertas
-                        sería inventar la regla: un caso puede tener varias
-                        alertas y varias especies. No se hace.
-                    </div>
-                    <div class="ann-card">
-                        <h3>③ Qué escala usa</h3>
-                        Sólo <b>nivel de conflictividad</b> (Diferencia ·
-                        Controversia · Conflicto social · Crisis social). El
-                        riesgo (Bajo · Moderado · Alto) es otra escala y no se
-                        mezcla: no hay semáforo de riesgo en esta matriz.
-                    </div>
-                    <div class="ann-card">
-                        <h3>④ Cómo se cierra</h3>
-                        Cargar <code>bridge_caso_recurso</code> desde el
-                        expediente —qué recurso discute cada caso— y recién
-                        entonces la matriz se puebla. Es un cambio de datos con
-                        captura en la ficha (ítem 37), no de esta pantalla.
-                    </div>
-                    <div class="ann-card wide">
-                        <h3>⑤ Lo que el mockup no promete</h3>
-                        No hay cifra por celda, ni total por región, ni color de
-                        riesgo. La matriz no sirve todavía para tomar
-                        decisiones: sirve para acordar la forma. Cuando el
-                        puente tenga filas, el color de cada celda sale del caso
-                        de mayor conflictividad de ese cruce, y la regla de
-                        agregación se pide a OAIPCS antes de fijarla.
+
+                    <!-- ── No disponible todavía ──────────────────── -->
+                    <div class="card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="card-title">
+                                    No disponible todavía
+                                </h3>
+                                <p class="card-sub">
+                                    Los tres ejes del <b>119–121</b> que
+                                    bloquean la ficha. Cada columna declara su
+                                    motivo; ninguna se rellena con un valor
+                                    verosímil.
+                                </p>
+                            </div>
+                            <span class="pill bad">bloqueo de dato</span>
+                        </div>
+                        <div class="nodis">
+                            <div class="blk">
+                                <div class="blk-head">
+                                    <h4>Artes de pesca · 119</h4>
+                                    <span class="pill bad">principal</span>
+                                </div>
+                                <p>
+                                    <b>No existe tabla de artes</b> en ningún
+                                    esquema. Una búsqueda
+                                    <code>%arte%</code> sólo devuelve
+                                    <code>domain.artefacto</code>, sin relación
+                                    con pesca.
+                                </p>
+                                <p class="why">
+                                    Motivo: sin catálogo no hay eje para 120,
+                                    122 ni 124. Es el bloqueo raíz de la pieza.
+                                </p>
+                            </div>
+                            <div class="blk">
+                                <div class="blk-head">
+                                    <h4>OSPA por caleta · 121</h4>
+                                    <span class="pill bad">sin dato</span>
+                                </div>
+                                <p>
+                                    <code>expediente_ospa</code> y
+                                    <code>estado_ospa</code> existen con
+                                    <b>0 de 224</b> organizaciones con valor.
+                                    <code>territorio.caleta_detalle</code> tiene
+                                    <b>0 filas</b>: no hay maestro de caletas ni
+                                    tabla de caletas.
+                                </p>
+                                <p class="why">
+                                    Motivo: sin marca ni caleta no hay perfil
+                                    por caleta. La estructura existe; falta el
+                                    dato.
+                                </p>
+                            </div>
+                            <div class="blk">
+                                <div class="blk-head">
+                                    <h4>Actores × arte · 120</h4>
+                                    <span class="pill bad">sin dato</span>
+                                </div>
+                                <p>
+                                    Depende de 119 y de una tabla de cruce
+                                    actor–arte que <b>no existe</b>.
+                                    <code>core.actores</code> no tiene arte de
+                                    pesca, así que el filtro por arte no tiene
+                                    de dónde leer.
+                                </p>
+                                <p class="why">
+                                    Motivo: primero el catálogo, después la
+                                    llave. Hoy no hay ninguno de los dos.
+                                </p>
+                            </div>
+                        </div>
+                        <p class="card-sub">
+                            Cómo se cierra: OAIPCS entrega el listado de artes
+                            (grupo, tipo pasiva/activa, uso, ámbito, impacto);
+                            se carga el maestro de caletas y la marca OSPA por
+                            organización; recién entonces se crea la tabla
+                            actor–arte. Son cambios de modelo, no de pantalla.
+                        </p>
                     </div>
                 </div>
             </section>
@@ -1902,71 +2470,272 @@
                 <p>
                     Este archivo no entra en la SPA: es HTML autónomo, sin
                     <code>&lt;script&gt;</code>, sin CDN y sin llamadas a la
-                    API. Sirve para acordar la forma de tres pantallas antes de
+                    API. Sirve para acordar la forma de la ficha antes de
                     escribir su lógica. Las cifras en <b>negrita</b> se midieron
                     en la base el 2026-11-23; lo marcado
-                    <span class="ex">≈</span> es ejemplo.
+                    <span class="ex">≈</span> es ejemplo y así se rotula también
+                    en la exportación.
                 </p>
 
-                <h3>Fuentes por artboard</h3>
-                <ul>
-                    <li>
-                        <b>Arte 1 (119).</b> Sin fuente: no hay tabla de artes
-                        en ningún esquema.
-                        <code>legacy.dim_recurso_pesca</code> es recurso, no
-                        arte, y no sirve aquí.
-                    </li>
-                    <li>
-                        <b>Arte 2 (120–122).</b> <code>core.actores</code> (1
-                        160), <code>core.organizaciones</code> (224),
-                        <code>territorio.caleta_detalle</code> (0 filas),
-                        <code>core.demandas</code> (sin columna de solicitante).
-                    </li>
-                    <li>
-                        <b>Arte 3 (124).</b>
-                        <code>legacy.dim_recurso_pesca</code> (37),
-                        <code>legacy.bridge_alerta_recurso</code> (32),
-                        <code>core.alerta_especies</code> (30),
-                        <code>legacy.bridge_caso_recurso</code> (0).
-                    </li>
-                </ul>
+                <h3>Fuentes por bloque</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Fuente</th>
+                            <th scope="col">Filas o contenido</th>
+                            <th scope="col">Uso</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <code>core.regiones</code> /
+                                <code>provincias</code> / <code>distritos</code>
+                            </td>
+                            <td>
+                                25 regiones · 196 provincias · 1 891 distritos
+                            </td>
+                            <td>cabecera y selector</td>
+                        </tr>
+                        <tr>
+                            <td><code>core.casos</code></td>
+                            <td>
+                                35 · <code>nivel_conflicto_id</code>,
+                                <code>nivel_riesgo_id</code>,
+                                <code>region_principal_id</code>,
+                                <code>distrito_principal_id</code>,
+                                <code>subsector_id</code>
+                            </td>
+                            <td>casos por nivel y estado; puntos del mapa</td>
+                        </tr>
+                        <tr>
+                            <td><code>core.actores</code></td>
+                            <td>
+                                1 160 · tipo, rol, <code>region_id</code>,
+                                <code>distrito_id</code>,
+                                <code>perfil_id</code>,
+                                <code>cargo_actual</code>
+                            </td>
+                            <td>actores por tipo y rol</td>
+                        </tr>
+                        <tr>
+                            <td><code>core.demandas</code></td>
+                            <td>325</td>
+                            <td>demandas por temática</td>
+                        </tr>
+                        <tr>
+                            <td><code>core.cat_tematicas</code></td>
+                            <td>6 (documentado, §7.6)</td>
+                            <td>etiquetas de temática</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code>core.compromisos</code> /
+                                <code>hitos_compromiso</code>
+                            </td>
+                            <td>8 · 12</td>
+                            <td>bloque 123</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code>core.documentos</code> ·
+                                <code>alertas_tempranas</code>
+                            </td>
+                            <td>153 · 83</td>
+                            <td>contexto; no se dibujan</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code>core.reuniones_dialogo</code> ·
+                                <code>caso_factores</code>
+                            </td>
+                            <td><b>0</b> · <b>0</b></td>
+                            <td>huecos declarados</td>
+                        </tr>
+                        <tr>
+                            <td><code>core.organizaciones</code></td>
+                            <td>224 · 119 con región · 0 con marca OSPA</td>
+                            <td>bloque 121</td>
+                        </tr>
+                        <tr>
+                            <td><code>territorio.caleta_detalle</code></td>
+                            <td>0 filas</td>
+                            <td>121 bloqueado</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code>legacy.bridge_caso_recurso</code> /
+                                <code>dim_recurso_pesca</code>
+                            </td>
+                            <td>0 · 37</td>
+                            <td>124 bloqueado</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code>gis.v_infraestructuras_por_distrito</code>
+                            </td>
+                            <td>existe</td>
+                            <td>infraestructura por distrito (tras 128)</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code>gis/derived/distritos_capa.geojson</code>
+                            </td>
+                            <td>
+                                1 892 polígonos · población Censo 2025 ·
+                                <code>area_km2</code>
+                            </td>
+                            <td>mapa y denominador</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code
+                                    >gis/derived/infraestructuras_puntos.geojson</code
+                                >
+                            </td>
+                            <td>13 456 puntos · 31 DPA · 227 sedes</td>
+                            <td>bloque de infraestructura</td>
+                        </tr>
+                        <tr>
+                            <td>Artes de pesca</td>
+                            <td><b>no existe</b></td>
+                            <td>119 bloqueado</td>
+                        </tr>
+                        <tr>
+                            <td>Redes RADAR</td>
+                            <td><b>no existe</b></td>
+                            <td>bloque sin fuente</td>
+                        </tr>
+                    </tbody>
+                </table>
 
                 <h3>Endpoints propuestos</h3>
                 <ul>
                     <li>
-                        <code>GET /v1/artes-pesca</code> — catálogo, agrupable
-                        por grupo o por tipo.
+                        <code>GET /v1/territorio/regiones/{ubigeo}/perfil</code>
+                        — cabecera, conteos y marcas de ausencia.
                     </li>
                     <li>
                         <code
-                            >GET
-                            /v1/actores?region=&amp;arte=&amp;caleta=&amp;ospa=&amp;subsector=</code
+                            >GET /v1/cases?region=…&amp;group=nivel|estado</code
                         >
-                        — directorio filtrado.
+                        — casos agrupados; nunca «abiertos» como nivel.
                     </li>
                     <li>
-                        <code>GET /v1/organizaciones/{id}/ospa</code> — marca
-                        OSPA y caleta.
-                    </li>
-                    <li>
-                        <code>GET /v1/demandas/agregado?por=ospa</code> — sólo
-                        posible tras el vínculo.
+                        <code>GET /v1/actores?region=…&amp;group=tipo|rol</code>
+                        — matriz de actores, sin PII salvo rol autorizado.
                     </li>
                     <li>
                         <code
                             >GET
-                            /v1/conflictos/matriz?filas=region&amp;columnas=recurso</code
+                            /v1/demandas/agregado?region=…&amp;por=tematica</code
+                        >
+                        — demandas por temática.
+                    </li>
+                    <li>
+                        <code
+                            >GET
+                            /v1/compromisos?region=…&amp;por=asumido_por</code
+                        >
+                        — <code>501</code> con <code>sin_fuente: true</code>
+                        hasta modelar «asumido por».
+                    </li>
+                    <li>
+                        <code
+                            >GET
+                            /v1/conflictos/matriz?region=…&amp;filas=recurso</code
                         >
                         — vacío hasta poblar el puente.
+                    </li>
+                    <li>
+                        <code>GET /v1/gis/dpa?departamento=PIURA</code> — los 31
+                        DPA del KML, con nombre, ubigeo y coordenada.
+                    </li>
+                    <li>
+                        <code>GET /v1/gis/radar</code> — sin fuente:
+                        <code>200 {items: [], sin_fuente: true}</code>.
+                    </li>
+                    <li>
+                        <code>GET /v1/artes-pesca</code> — <code>501</code>: no
+                        existe el catálogo.
+                    </li>
+                    <li>
+                        <code>GET /v1/gis/distritos?region=…</code> — depende de
+                        la carga del item 128.
+                    </li>
+                </ul>
+
+                <h3>Huecos de dato que la ficha declara</h3>
+                <ul>
+                    <li>
+                        <b>Artes de pesca (119):</b> no existe tabla. Bloqueo
+                        principal.
+                    </li>
+                    <li>
+                        <b>Caletas y OSPA por caleta (121):</b> maestro en 0
+                        filas y marca vacía en 0 de 224.
+                    </li>
+                    <li>
+                        <b>Actores × arte (120):</b> falta el catálogo y la
+                        tabla de cruce.
+                    </li>
+                    <li>
+                        <b>Demandas por OSPA (122):</b> sin solicitante
+                        organización en <code>core.demandas</code>.
+                    </li>
+                    <li>
+                        <b>«Asumido por» (123):</b> dimensión no modelada;
+                        región sólo derivable del caso.
+                    </li>
+                    <li>
+                        <b>Caso × recurso (124):</b> puente en 0 filas; no se
+                        deriva de las alertas.
+                    </li>
+                    <li>
+                        <b>Geometría, coropletas y centroides (128–130):</b>
+                        archivo sí, PostGIS no.
+                    </li>
+                    <li>
+                        <b>Población (131):</b> sólo como denominador y sólo en
+                        el archivo derivado; no está en la base.
+                    </li>
+                    <li><b>RADAR:</b> sin tabla y sin fuente; no se dibuja.</li>
+                    <li>
+                        <b>Reuniones de diálogo y factores del caso:</b>
+                        <code>core.reuniones_dialogo</code> y
+                        <code>core.caso_factores</code> en 0 filas.
+                    </li>
+                    <li>
+                        <b>Alertas:</b> 83 filas, pero no llevan región; no
+                        sirven para cortar el perfil.
                     </li>
                 </ul>
 
                 <h3>Reglas que la interfaz no puede relajar</h3>
                 <ul>
                     <li>
+                        <b>Latente / manifiesto.</b> Latente = Diferencia +
+                        Controversia; manifiesto = Conflicto social + Crisis
+                        social. «Abierto» sólo es un estado del caso; «activo»
+                        no se usa como sinónimo de manifiesto.
+                    </li>
+                    <li>
+                        <b>Ausente no es cero.</b> Una celda sin dato muestra
+                        <code>—</code> y su motivo; nunca un valor verosímil.
+                    </li>
+                    <li>
                         <b>Escalas separadas.</b> Conflictividad, riesgo y
-                        prioridad de atención nunca comparten semáforo ni se
+                        prioridad de atención no comparten semáforo ni se
                         promedian.
+                    </li>
+                    <li>
+                        <b>Mapa referencial.</b> Mientras el item 128 no esté
+                        cargado, no se dibujan límites distritales finos ni
+                        coropletas.
+                    </li>
+                    <li>
+                        <b>Población sólo denominador.</b> Se usa para tasas por
+                        100 000 habitantes, con el año y la fuente a la vista.
                     </li>
                     <li>
                         <b>PII enmascarada.</b> Teléfono y correo sólo para
@@ -1975,24 +2744,16 @@
                     </li>
                     <li>
                         <b>Subsector por rol.</b> Dirección y Secretaría General
-                        ven Pesca y Acuicultura y MYPE e Industria; cada
-                        Viceministerio ve sólo el suyo. No es un filtro de
-                        pantalla.
-                    </li>
-                    <li>
-                        <b>Ausente no es cero.</b> Una celda sin dato muestra
-                        <code>—</code> y, cuando aplica, una etiqueta que
-                        explica por qué falta.
+                        ven ambos subsectores; cada Viceministerio ve sólo el
+                        suyo. No es un filtro de pantalla.
                     </li>
                 </ul>
 
                 <div class="rule">
                     <b>Regla de oro.</b> El dato ausente se declara, no se
-                    estima. Ninguno de los tres artboards rellena un hueco con
-                    un valor verosímil: los valores de ejemplo están marcados y
-                    separados del dato medido. Si el equipo .NET recibe un campo
-                    vacío, la decisión correcta es mostrarlo vacío y decir por
-                    qué.
+                    estima. Ningún bloque de la ficha rellena un hueco con un
+                    valor verosímil: los valores de ejemplo van marcados con
+                    <code>≈</code> y su origen a la vista.
                 </div>
             </section>
         </main>

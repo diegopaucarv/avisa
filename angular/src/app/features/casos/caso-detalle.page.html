@@ -13,19 +13,131 @@
       <div class="breadcrumb-current">
         <a routerLink="/casos">Casos</a>
         <app-icono nombre="chevron-derecha" [tamano]="13" />
-        <strong>{{ d.caso.codigo }}</strong>
+        <strong>📁 {{ d.caso.codigo }}</strong>
+        <span class="view-actualizacion"
+          >🕒 Última actualización: {{ fechaTexto(d.caso.actualizado) }}</span
+        >
       </div>
       <h1 id="titulo-caso">{{ d.caso.titulo }}</h1>
-      <p class="view-subtitle">{{ d.caso.resumen || 'Sin resumen registrado.' }}</p>
     </div>
     <div class="view-actions">
+      <button
+        type="button"
+        [class]="modoEdicion() ? 'button-secondary' : 'button-primary'"
+        [disabled]="!puedeModificar()"
+        [attr.aria-pressed]="modoEdicion()"
+        [attr.aria-label]="
+          modoEdicion() ? 'Desactivar la edición de la ficha' : 'Activar la edición de la ficha'
+        "
+        (click)="alternarModoEdicion()"
+      >
+        Modificar
+      </button>
       @if (anulado()) {
       <span class="status-badge">Anulado</span>
       @if (puedeAnular()) {
       <button type="button" class="button-secondary" (click)="abrirRestauracion()">
         Restaurar caso
       </button>
-      } } @else {
+      } } @else { @if (editando() === 'nivelConflicto') {
+      <div class="badge-edit">
+        <select class="form-select" (change)="alCambiarCampo($event)">
+          <option value="" [selected]="!valorControl()">Sin declarar</option>
+          @if (opcionDesconocida('nivelConflicto'); as desconocida) {
+          <option [value]="desconocida" [selected]="desconocida === valorControl()">
+            {{ desconocida }}
+          </option>
+          } @for (opcion of opcionesDe('nivelConflicto'); track opcion.valor) {
+          <option [value]="opcion.valor" [selected]="opcion.valor === valorControl()">
+            {{ opcion.etiqueta }}
+          </option>
+          }
+        </select>
+        <button
+          type="button"
+          class="button-primary"
+          [disabled]="guardandoCampo()"
+          (click)="guardarCampo()"
+        >
+          {{ guardandoCampo() ? 'Guardando…' : 'Guardar' }}
+        </button>
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="guardandoCampo()"
+          (click)="cancelarEdicion()"
+        >
+          Cancelar
+        </button>
+      </div>
+      } @else {
+      <span class="status-badge">
+        Nivel de conflictividad: {{ d.caso.nivelConflicto || 'Sin declarar' }} @if (puedeModificar()
+        && modoEdicion()) {
+        <button
+          type="button"
+          class="badge-edit-btn"
+          aria-label="Editar el nivel de conflictividad"
+          (click)="abrirEdicion('nivelConflicto')"
+        >
+          ✎
+        </button>
+        }
+      </span>
+      } @if (editando() === 'riesgo') {
+      <div class="badge-edit">
+        <select class="form-select" (change)="alCambiarCampo($event)">
+          @if (opcionDesconocida('riesgo'); as desconocida) {
+          <option [value]="desconocida" [selected]="desconocida === valorControl()">
+            {{ desconocida }}
+          </option>
+          } @for (opcion of opcionesDe('riesgo'); track opcion.valor) {
+          <option [value]="opcion.valor" [selected]="opcion.valor === valorControl()">
+            {{ opcion.etiqueta }}
+          </option>
+          }
+        </select>
+        <button
+          type="button"
+          class="button-primary"
+          [disabled]="guardandoCampo()"
+          (click)="guardarCampo()"
+        >
+          {{ guardandoCampo() ? 'Guardando…' : 'Guardar' }}
+        </button>
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="guardandoCampo()"
+          (click)="cancelarEdicion()"
+        >
+          Cancelar
+        </button>
+      </div>
+      } @else {
+      <span
+        [class]="
+          riesgoInactivo()
+            ? 'status-badge risk-inactivo'
+            : 'status-badge risk-' + d.caso.riesgo.toLowerCase()
+        "
+      >
+        <span class="status-dot"></span>
+        Nivel de riesgo: {{ estaArchivado() ? 'Inactivo' : d.caso.riesgo }} @if (puedeModificar() &&
+        modoEdicion()) {
+        <button
+          type="button"
+          class="badge-edit-btn"
+          aria-label="Editar el nivel de riesgo"
+          (click)="abrirEdicion('riesgo')"
+        >
+          ✎
+        </button>
+        }
+      </span>
+      }
+      <span class="status-badge">📍 Región: {{ d.caso.region || 'Sin región' }}</span>
+      <span class="status-badge">Estado: {{ d.caso.estado }}</span>
       <app-exportar-menu entidad="casos" [id]="d.caso.id" (fallo)="alFallarExportacion($event)" />
       <button
         type="button"
@@ -36,31 +148,54 @@
         <app-icono nombre="documentos" [tamano]="14" />
         {{ esAdmin() ? 'Imprimir / Guardar PDF' : 'Guardar PDF' }}
       </button>
-      <span
-        [class]="
-          riesgoInactivo()
-            ? 'status-badge risk-inactivo'
-            : 'status-badge risk-' + d.caso.riesgo.toLowerCase()
-        "
+      @if (puedeModificar()) { @if (accionEstado(); as accion) {
+      <button
+        type="button"
+        class="button-secondary"
+        [title]="accion.ayuda"
+        (click)="abrirConfirmacionArchivo()"
       >
-        <span class="status-dot"></span>
-        Riesgo {{ d.caso.riesgo }}
-      </span>
-      <app-glosario termino="nivel-riesgo" [alineacion]="'fin'" />
-      <span class="status-badge">{{ d.caso.nivelConflicto }}</span>
-      <app-glosario termino="nivel-conflictividad" [alineacion]="'fin'" />
-      <span class="status-badge">{{ d.caso.estado }}</span>
-      @if (puedeAnular()) {
-      <button type="button" class="button-danger" (click)="abrirAnulacion()">Anular caso</button>
+        {{ accion.etiqueta }}
+      </button>
+      } } @if (puedeAnular()) {
+      <button type="button" class="button-danger anular-sep" (click)="abrirAnulacion()">
+        Anular caso
+      </button>
       } }
     </div>
   </div>
 
-  <p class="detail-hint">
-    El nivel de riesgo proviene de la matriz del caso; la ficha no lo recalcula.
-  </p>
-
-  @if (avisoAnulacion(); as aviso) {
+  @if (confirmandoArchivo(); as modo) {
+  <div class="archivo-confirmacion" role="group" aria-label="Confirmación de cambio de estado">
+    <p class="form-hint">
+      @if (modo === 'archivar') { ¿Archivar el caso {{ d.caso.codigo }}? Pasará al estado
+      <strong>Archivado</strong>: el expediente sigue disponible y puede reabrirse. } @else {
+      ¿Reabrir el caso {{ d.caso.codigo }}? Volverá al estado <strong>Abierto</strong>. }
+    </p>
+    <div class="inline-form">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="enviandoArchivo()"
+        (click)="cancelarArchivo()"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="button-primary"
+        [disabled]="enviandoArchivo()"
+        (click)="confirmarArchivo()"
+      >
+        {{ enviandoArchivo() ? 'Guardando…' : 'Confirmar' }}
+      </button>
+    </div>
+  </div>
+  } @if (errorArchivo(); as error) {
+  <p class="form-error" role="alert">{{ error }}</p>
+  } @if (avisoArchivo(); as aviso) {
+  <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+  } @if (anulado()) { } @else if (accionEstado(); as accion) { } @if (avisoAnulacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   } @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
@@ -68,65 +203,183 @@
 
   <div class="ficha-layout">
     <div class="ficha-principal">
+      @if (avisoCampo(); as aviso) {
+      <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
+      }
+      <section class="resumen-caso" aria-labelledby="resumen-caso-titulo">
+        <h2 id="resumen-caso-titulo">☰ Resumen del caso</h2>
+        @if (editando() === 'resumenEjecutivo') {
+        <div class="edit-form">
+          <textarea
+            class="form-textarea"
+            rows="5"
+            [attr.maxlength]="20000"
+            [value]="borrador()"
+            (input)="alCambiarCampo($event)"
+          ></textarea>
+          @if (errorCampo(); as error) {
+          <p class="form-error" role="alert">{{ error }}</p>
+          }
+          <div>
+            <button
+              type="button"
+              class="button-secondary"
+              [disabled]="guardandoCampo()"
+              (click)="cancelarEdicion()"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="button-primary"
+              [disabled]="guardandoCampo()"
+              (click)="guardarCampo()"
+            >
+              {{ guardandoCampo() ? 'Guardando…' : 'Guardar cambios' }}
+            </button>
+          </div>
+        </div>
+        } @else {
+        <p class="resumen-texto">{{ d.caso.resumen || 'Sin resumen registrado.' }}</p>
+        @if (puedeModificar() && modoEdicion() && !editando()) {
+        <button type="button" class="link-button" (click)="abrirEdicion('resumenEjecutivo')">
+          Editar
+        </button>
+        } }
+      </section>
       <dl class="detail-grid" id="datos-caso">
-        <div>
-          <dt>Región</dt>
-          <dd>{{ d.caso.region || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Temática <app-glosario termino="tematica" /></dt>
-          <dd>{{ d.caso.tematica || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Subsector <app-glosario termino="subsector" /></dt>
-          <dd>{{ d.caso.subsector || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Unidad responsable</dt>
-          <dd>{{ d.caso.unidadResponsable || '—' }}</dd>
-        </div>
-        <div>
-          <dt>Prioridad de atención <app-glosario termino="prioridad-atencion" /></dt>
-          <dd>{{ d.caso.prioridad }}</dd>
-        </div>
-        <div>
-          <dt>Alcance</dt>
+        @for (def of campos; track def.campo) { @if (def.campo === 'riesgo') {
+        <div class="campo-editable campo-riesgo">
+          <dt>Descripción del riesgo actual</dt>
           <dd>
-            {{ d.caso.alcance }}
-            <small class="detail-hint">Derivado de las regiones del caso</small>
+            <span class="campo-valor"
+              >{{ d.caso.descripcionRiesgo || 'Sin descripción de riesgo registrada.' }}</span
+            >
+            <span
+              [class]="
+                riesgoInactivo()
+                  ? 'status-badge risk-inactivo'
+                  : 'status-badge risk-' + d.caso.riesgo.toLowerCase()
+              "
+            >
+              <span class="status-dot"></span>
+              Nivel de riesgo: {{ estaArchivado() ? 'Inactivo' : d.caso.riesgo }}
+            </span>
           </dd>
         </div>
-        <div>
-          <dt>Naturaleza del caso <app-glosario termino="naturaleza-caso" /></dt>
-          <dd>
-            @if (d.caso.naturaleza; as naturaleza) {
-            <span class="naturaleza-chip">{{ naturaleza }}</span>
-            } @else {
-            <span class="naturaleza-chip sin-declarar">Sin declarar</span>
-            <small class="detail-hint">Se declara a mano; no se deriva del alcance</small>
+        }
+        <div class="campo-editable">
+          <dt>
+            {{ def.etiqueta }} @if (def.glosario; as termino) {
+            <app-glosario [termino]="termino" />
             }
+          </dt>
+          <dd>
+            @if (editando() === def.campo) {
+            <div class="edit-form">
+              @switch (def.control) { @case ('select') { @if (cargandoCatalogos()) {
+              <p class="form-hint" role="status">Cargando catálogos…</p>
+              } @else {
+              <select class="form-select" (change)="alCambiarCampo($event)">
+                @if (def.obligatorio) { @if (!valorControl()) {
+                <option value="" selected disabled>Seleccione…</option>
+                } } @else {
+                <option value="" [selected]="!valorControl()">Sin declarar</option>
+                } @if (opcionDesconocida(def.campo); as desconocida) {
+                <option [value]="desconocida" [selected]="desconocida === valorControl()">
+                  {{ desconocida }}
+                </option>
+                } @for (opcion of opcionesDe(def.campo); track opcion.valor) {
+                <option [value]="opcion.valor" [selected]="opcion.valor === valorControl()">
+                  {{ opcion.etiqueta }}
+                </option>
+                }
+              </select>
+              } } @case ('textoLargo') {
+              <textarea
+                class="form-textarea"
+                rows="3"
+                [attr.maxlength]="def.longitudMaxima ?? null"
+                [value]="borrador()"
+                (input)="alCambiarCampo($event)"
+              ></textarea>
+              } @case ('numero') {
+              <input
+                class="form-input"
+                type="number"
+                min="0"
+                max="100"
+                [value]="borrador()"
+                (input)="alCambiarCampo($event)"
+              />
+              } @case ('fecha') {
+              <input
+                class="form-input"
+                type="date"
+                [value]="borrador()"
+                (input)="alCambiarCampo($event)"
+              />
+              } @default {
+              <input
+                class="form-input"
+                type="text"
+                [attr.maxlength]="def.longitudMaxima ?? null"
+                [value]="borrador()"
+                (input)="alCambiarCampo($event)"
+              />
+              } }
+              <p class="form-hint">
+                El clic fuera no cierra ni cancela: sólo «Cancelar» o «Guardar cambios» terminan la
+                edición.
+              </p>
+              @if (errorCampo(); as error) {
+              <p class="form-error" role="alert">{{ error }}</p>
+              }
+              <div>
+                <button
+                  type="button"
+                  class="button-secondary"
+                  [disabled]="guardandoCampo()"
+                  (click)="cancelarEdicion()"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  class="button-primary"
+                  [disabled]="guardandoCampo()"
+                  (click)="guardarCampo()"
+                >
+                  {{ guardandoCampo() ? 'Guardando…' : 'Guardar cambios' }}
+                </button>
+              </div>
+            </div>
+            } @else {
+            <span class="campo-valor">{{ valorMostrado(def.campo) }}</span>
+            @if (puedeModificar() && modoEdicion() && !editando()) {
+            <button type="button" class="link-button" (click)="abrirEdicion(def.campo)">
+              Editar
+            </button>
+            } }
           </dd>
         </div>
-        <div>
-          <dt>Componente del ciclo</dt>
-          <dd>{{ d.caso.etapa }}</dd>
-        </div>
-        <div>
-          <dt>Inicio</dt>
-          <dd>{{ fechaTexto(d.caso.inicio) }}</dd>
-        </div>
+        }
       </dl>
 
       <section class="detail-section" aria-labelledby="actores-caso">
         <div class="detail-section-title">
-          <h2 id="actores-caso">Actores ({{ d.actores.length }})</h2>
-          @if (d.actores.length > 0) {
+          <h2 id="actores-caso">Actores ({{ actoresVigentes().length }})</h2>
           <div class="actores-acciones">
+            @if (puedeModificar()) {
+            <button type="button" class="button-primary" (click)="abrirVincularActor()">
+              Vincular actor
+            </button>
+            } @if (actoresVigentes().length > 0) {
             <button
               type="button"
               class="button-secondary"
               title="Copia una línea por actor: - Nombre - Organización - teléfono - correo"
-              (click)="copiarActoresWhatsApp(d.actores)"
+              (click)="copiarActoresWhatsApp(actoresVigentes())"
             >
               Copiar para WhatsApp
             </button>
@@ -134,31 +387,41 @@
               type="button"
               class="button-secondary"
               title="Descarga las filas de esta tabla en un archivo CSV"
-              (click)="exportarActoresCsv(d.actores)"
+              (click)="exportarActoresCsv(actoresVigentes())"
             >
               Exportar CSV
             </button>
+            }
           </div>
-          }
         </div>
         @if (avisoActores(); as aviso) {
         <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
-        } @if (d.actores.length === 0) {
-        <p class="empty-inline">Sin actores registrados.</p>
+        } @if (actoresVigentes().length === 0) {
+        <p class="empty-inline">Sin actores vinculados.</p>
         } @else {
         <div class="table-wrap">
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Actor</th>
-                <th scope="col">Correo</th>
-                <th scope="col">Tipo <app-glosario termino="tipo-actor" /></th>
-                <th scope="col">Función <app-glosario termino="funcion-actor" /></th>
-                <th scope="col">Posicionamiento</th>
+                <th scope="col" [appThOrden]="'actor'" [orden]="ordenActores">
+                  Actor (Apellidos, Nombres)
+                </th>
+                <th scope="col" [appThOrden]="'institucion'" [orden]="ordenActores">Institución</th>
+                <th scope="col" [appThOrden]="'telefono'" [orden]="ordenActores">Teléfono</th>
+                <th scope="col" [appThOrden]="'correo'" [orden]="ordenActores">Correo</th>
+                <th scope="col" [appThOrden]="'posicionamiento'" [orden]="ordenActores">
+                  Posicionamiento
+                </th>
+                <th scope="col">Posición en el caso</th>
+                <th scope="col">Influencia</th>
+                <th scope="col">Rol en el caso</th>
+                @if (puedeModificar()) {
+                <th scope="col">Acciones</th>
+                }
               </tr>
             </thead>
             <tbody>
-              @for (actor of d.actores; track actor.id) {
+              @for (actor of actoresVigentes(); track actor.id) {
               <tr>
                 <td>
                   <a
@@ -169,87 +432,116 @@
                     {{ nombreActor(actor) }}
                   </a>
                 </td>
+                <td>{{ institucionActor(actor) }}</td>
+                <td>{{ telefonoActor(actor) }}</td>
                 <td>{{ actor.correo || '—' }}</td>
-                <td>{{ actor.tipo || '—' }}</td>
-                <td>{{ actor.funcion || '—' }}</td>
                 <td>{{ actor.posicionamiento || '—' }}</td>
+                <td>{{ posicionDe(actor.id) }}</td>
+                <td>{{ nivelDe(actor.id) }}</td>
+                <td>{{ rolDe(actor.id) }}</td>
+                @if (puedeModificar()) {
+                <td>
+                  <button
+                    type="button"
+                    class="button-secondary timeline-edit"
+                    [attr.aria-label]="'Desvincular a ' + nombreActor(actor) + ' del caso'"
+                    (click)="pedirDesvincular(actor.id)"
+                  >
+                    Desvincular
+                  </button>
+                  @if (modoEdicion()) {
+                  <a
+                    class="button-secondary timeline-edit"
+                    [routerLink]="['/directorio/actores']"
+                    [queryParams]="{ q: nombreActor(actor) }"
+                    [attr.aria-label]="'Editar ' + nombreActor(actor) + ' en el directorio de actores'"
+                  >
+                    Editar
+                  </a>
+                  }
+                </td>
+                }
               </tr>
-              }
+              @if (actorADesvincular() === actor.id) {
+              <tr>
+                <td [attr.colspan]="puedeModificar() ? 9 : 8">
+                  <div class="baja-inline">
+                    <p class="form-hint baja-pregunta">
+                      ¿Desvincular a <strong>{{ nombreActor(actor) }}</strong> del caso? La baja es
+                      lógica: se conserva el histórico con autor y fecha.
+                    </p>
+                    <button
+                      type="button"
+                      class="button-primary"
+                      [disabled]="enviandoBaja()"
+                      (click)="confirmarDesvincular()"
+                    >
+                      {{ enviandoBaja() ? 'Desvinculando…' : 'Confirmar desvinculación' }}
+                    </button>
+                    <button
+                      type="button"
+                      class="button-secondary"
+                      [disabled]="enviandoBaja()"
+                      (click)="cancelarDesvincular()"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              } }
             </tbody>
           </table>
         </div>
+        } @if (errorActoresVinculo(); as error) {
+        <p class="form-error" role="alert">{{ error.message }}</p>
+        } @if (errorBaja(); as error) {
+        <p class="form-error" role="alert">{{ error }}</p>
         }
       </section>
 
       <section class="detail-section" aria-labelledby="eventos-caso">
         <div class="detail-section-title">
           <h2 id="eventos-caso">Cronología ({{ d.eventos.length }})</h2>
-          @if (puedeModificar()) {
-          <button type="button" class="button-secondary" (click)="registrarHecho()">
-            <app-icono nombre="documentos" [tamano]="14" />
-            Registrar hecho
-          </button>
-          }
+          <div class="cronologia-acciones">
+            @if (puedeModificar()) {
+            <button type="button" class="button-secondary" (click)="registrarHecho()">
+              <app-icono nombre="documentos" [tamano]="14" />
+              Registrar hecho
+            </button>
+            } @if (d.eventos.length > 0) {
+            <button
+              type="button"
+              class="button-secondary"
+              title="Copia la cronología completa en formato WhatsApp"
+              (click)="copiarCronologia(d.eventos)"
+            >
+              <app-icono nombre="copiar" [tamano]="14" />
+              Copiar
+            </button>
+            }
+          </div>
         </div>
-        <p class="detail-hint">
-          La validación es una acción humana explícita, no automática: use «Validar» para
-          acreditarla y «Quitar validación» para retirarla.
-        </p>
-        @if (avisoValidacion(); as aviso) {
+        @if (avisoCronologia(); as aviso) {
         <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
-        } @if (errorValidacion(); as error) {
-        <p class="form-error" role="alert">{{ error }}</p>
         } @if (d.eventos.length === 0) {
         <p class="empty-inline">Sin hechos registrados.</p>
         } @else {
         <ol class="timeline-list">
           @for (evento of d.eventos; track evento.id) {
           <li>
-            <span class="timeline-date">{{ fechaTexto(evento.fecha) }}</span>
-            <div>
-              <div class="timeline-meta">
-                <strong>{{ evento.tipo || 'Hecho' }}</strong>
-                <span
-                  class="status-badge"
-                  [class]="
-                          evento.validado
-                            ? 'status-badge state-approved'
-                            : 'status-badge state-pending'
-                        "
-                >
-                  <span class="status-dot"></span>
-                  {{ evento.validado ? 'Validado' : 'Pendiente' }}
-                </span>
-              </div>
-              @if (evento.actor) {
-              <p class="timeline-actor">Actor: {{ evento.actor }}</p>
-              }
-              <p>{{ evento.descripcion }}</p>
-              @if (puedeModificar()) {
-              <div class="timeline-acciones">
-                <button
-                  type="button"
-                  class="button-secondary timeline-edit"
-                  [attr.aria-label]="'Editar el hecho del ' + (evento.fecha || 'sin fecha')"
-                  (click)="editarHecho(evento)"
-                >
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  class="button-secondary timeline-edit"
-                  [disabled]="validandoEvento() === evento.id"
-                  [attr.aria-label]="
-                    (evento.validado ? 'Quitar la validación del hecho del ' : 'Validar el hecho del ') +
-                    (evento.fecha || 'sin fecha')
-                  "
-                  (click)="alternarValidacion(evento)"
-                >
-                  {{ evento.validado ? 'Quitar validación' : 'Validar' }}
-                </button>
-              </div>
-              }
-            </div>
+            <span class="tl-fecha">{{ fechaCorta(evento.fecha) }} -</span>
+            <span class="tl-texto">{{ evento.descripcion }}</span>
+            @if (modoEdicion() && puedeModificar()) {
+            <button
+              type="button"
+              class="button-secondary timeline-edit"
+              [attr.aria-label]="'Editar el hecho del ' + fechaCorta(evento.fecha)"
+              (click)="editarHecho(evento)"
+            >
+              Editar
+            </button>
+            }
           </li>
           }
         </ol>
@@ -258,9 +550,7 @@
 
       <section class="detail-section" aria-labelledby="demandas-caso">
         <div class="detail-section-title">
-          <h2 id="demandas-caso">
-            Demandas ({{ d.demandas.length }}) <app-glosario termino="3p" />
-          </h2>
+          <h2 id="demandas-caso">Demandas ({{ d.demandas.length }})</h2>
           @if (puedeModificar()) {
           <button type="button" class="button-secondary" (click)="altaDemanda()">
             <app-icono nombre="bandeja" [tamano]="14" />
@@ -277,22 +567,20 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Problema</th>
-                <th scope="col">Propuesta</th>
-                <th scope="col">Pedido</th>
-                <th scope="col">Estado de atención</th>
-                <th scope="col">Documento de origen</th>
-                @if (puedeModificar()) {
+                <th scope="col" [appThOrden]="'demanda'" [orden]="ordenDemandas">Demanda</th>
+                <th scope="col" [appThOrden]="'estado'" [orden]="ordenDemandas">
+                  Estado de atención
+                </th>
+                <th scope="col" [appThOrden]="'origen'" [orden]="ordenDemandas">Origen</th>
+                @if (puedeModificar() && modoEdicion()) {
                 <th scope="col">Acciones</th>
                 }
               </tr>
             </thead>
             <tbody>
-              @for (demanda of d.demandas; track demanda.id) {
+              @for (demanda of filasDemandas(); track demanda.id) {
               <tr>
-                <td>{{ demanda.problema || demanda.descripcion || '—' }}</td>
-                <td>{{ demanda.propuesta || '—' }}</td>
-                <td>{{ demanda.pedido || '—' }}</td>
+                <td class="celda-larga">{{ demanda.descripcion || demanda.problema || '—' }}</td>
                 <td>{{ demanda.estado || '—' }}</td>
                 <td class="celda-larga">
                   @if (demanda.documentoOrigenCodigo; as codigoOrigen) {
@@ -310,7 +598,7 @@
                   <span aria-hidden="true">—</span>
                   }
                 </td>
-                @if (puedeModificar()) {
+                @if (puedeModificar() && modoEdicion()) {
                 <td>
                   <button
                     type="button"
@@ -339,15 +627,15 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Código</th>
-                <th scope="col">Nivel</th>
-                <th scope="col">Prioridad</th>
-                <th scope="col">Estado</th>
-                <th scope="col">Fecha de reporte</th>
+                <th scope="col" [appThOrden]="'codigo'" [orden]="ordenAlertas">Código</th>
+                <th scope="col" [appThOrden]="'nivel'" [orden]="ordenAlertas">Nivel</th>
+                <th scope="col" [appThOrden]="'prioridad'" [orden]="ordenAlertas">Prioridad</th>
+                <th scope="col" [appThOrden]="'estado'" [orden]="ordenAlertas">Estado</th>
+                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenAlertas">Fecha de reporte</th>
               </tr>
             </thead>
             <tbody>
-              @for (alerta of d.alertas; track alerta.id) {
+              @for (alerta of filasAlertas(); track alerta.id) {
               <tr>
                 <td>
                   <a
@@ -376,29 +664,49 @@
       </section>
 
       <section class="detail-section" aria-labelledby="compromisos-caso">
-        <h2 id="compromisos-caso">Compromisos ({{ d.compromisos.length }})</h2>
+        <h2 id="compromisos-caso">Acuerdos y compromisos ({{ d.compromisos.length }})</h2>
         @if (d.compromisos.length === 0) {
-        <p class="empty-inline">Sin compromisos registrados.</p>
+        <p class="empty-inline">Sin acuerdos y compromisos registrados.</p>
         } @else {
         <div class="table-wrap">
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Código</th>
-                <th scope="col">Acción</th>
-                <th scope="col">Estado</th>
-                <th scope="col">Nivel de gobierno <app-glosario termino="nivel-gobierno" /></th>
-                <th scope="col">Unidad</th>
-                <th scope="col">Vencimiento</th>
+                <th scope="col" [appThOrden]="'codigo'" [orden]="ordenCompromisos">Código</th>
+                <th scope="col" [appThOrden]="'compromiso'" [orden]="ordenCompromisos">
+                  Compromiso
+                </th>
+                <th scope="col" [appThOrden]="'clasificacion'" [orden]="ordenCompromisos">
+                  Clasificación
+                </th>
+                <th scope="col" [appThOrden]="'estado'" [orden]="ordenCompromisos">Estado</th>
+                <th scope="col" [appThOrden]="'nivel'" [orden]="ordenCompromisos">
+                  Nivel de gobierno <app-glosario termino="nivel-gobierno" />
+                </th>
+                <th scope="col" [appThOrden]="'unidad'" [orden]="ordenCompromisos">Unidad</th>
+                <th scope="col" [appThOrden]="'vencimiento'" [orden]="ordenCompromisos">
+                  Vencimiento
+                </th>
               </tr>
             </thead>
             <tbody>
-              @for (compromiso of d.compromisos; track compromiso.id) {
+              @for (compromiso of filasCompromisos(); track compromiso.id) {
               <tr>
                 <td>
                   <strong>{{ compromiso.codigo }}</strong>
                 </td>
                 <td class="celda-larga">{{ compromiso.accion }}</td>
+                <td>
+                  <span class="status-badge"
+                    >{{ clasificacionAlcanceTexto(compromiso.clasificacionAlcance) }}</span
+                  >
+                  <span class="status-badge">
+                    Carácter: {{ formalVerbalTexto(compromiso.formalVerbal) }}
+                  </span>
+                  @if (compromiso.asumidoMinistro) {
+                  <span class="status-badge">Asumido por el Señor Ministro</span>
+                  }
+                </td>
                 <td>{{ compromiso.estado || '—' }}</td>
                 <td>{{ nivelGobiernoTexto(compromiso.nivelGobierno) }}</td>
                 <td>{{ compromiso.unidad || '—' }}</td>
@@ -425,14 +733,14 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Código</th>
-                <th scope="col">Título</th>
-                <th scope="col">Tipo</th>
-                <th scope="col">Fecha</th>
+                <th scope="col" [appThOrden]="'codigo'" [orden]="ordenDocumentos">Código</th>
+                <th scope="col" [appThOrden]="'titulo'" [orden]="ordenDocumentos">Título</th>
+                <th scope="col" [appThOrden]="'tipo'" [orden]="ordenDocumentos">Tipo</th>
+                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenDocumentos">Fecha</th>
               </tr>
             </thead>
             <tbody>
-              @for (documento of d.documentos; track documento.id) {
+              @for (documento of filasDocumentos(); track documento.id) {
               <tr>
                 <td>
                   <strong>{{ documento.codigo || 'Sin código' }}</strong>
@@ -449,7 +757,7 @@
       </section>
 
       <section class="detail-section" aria-labelledby="historial-caso">
-        <h2 id="historial-caso">Historial ({{ d.historial.length }})</h2>
+        <h2 id="historial-caso">Historial / Auditoría ({{ d.historial.length }})</h2>
         @if (d.historial.length === 0) {
         <p class="empty-inline">Sin historial de estados registrado.</p>
         } @else {
@@ -457,15 +765,15 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col">Estado</th>
-                <th scope="col">Desde</th>
-                <th scope="col">Hasta</th>
-                <th scope="col">Motivo</th>
-                <th scope="col">Usuario</th>
+                <th scope="col" [appThOrden]="'estado'" [orden]="ordenHistorial">Estado</th>
+                <th scope="col" [appThOrden]="'desde'" [orden]="ordenHistorial">Desde</th>
+                <th scope="col" [appThOrden]="'hasta'" [orden]="ordenHistorial">Hasta</th>
+                <th scope="col" [appThOrden]="'motivo'" [orden]="ordenHistorial">Motivo</th>
+                <th scope="col" [appThOrden]="'usuario'" [orden]="ordenHistorial">Usuario</th>
               </tr>
             </thead>
             <tbody>
-              @for (tramo of d.historial; track tramo.id) {
+              @for (tramo of filasHistorial(); track tramo.id) {
               <tr>
                 <td>{{ tramo.estado || '—' }}</td>
                 <td>{{ fechaTexto(tramo.desde) }}</td>
@@ -483,10 +791,54 @@
 
     <aside class="ficha-lateral" aria-label="Expediente del caso">
       <app-riel-relaciones [enlaces]="enlacesRiel()" />
-      <p class="detail-hint">
-        El expediente se compone de la línea de tiempo, el mapeo de actores, el caso de análisis y
-        los documentos vinculados.
-      </p>
+      <section class="canva-riel" aria-labelledby="analisis-caso">
+        <h2 id="analisis-caso" class="canva-titulo">📊 Análisis de caso (Canva)</h2>
+        @if (d.caso.enlaceAnalisis; as enlace) {
+        <a class="canva-enlace" [href]="enlace" target="_blank" rel="noopener noreferrer">
+          <app-icono nombre="ojo" [tamano]="14" />
+          Abrir tablero
+        </a>
+        } @else if (editandoCanva()) {
+        <form class="canva-editor" (submit)="guardarCanva($event)">
+          <input
+            type="url"
+            [value]="borradorCanva()"
+            placeholder="https://www.canva.com/design/…"
+            aria-label="URL del tablero de Canva"
+            (input)="alEscribirCanva($event)"
+          />
+          <button
+            type="submit"
+            class="button-primary"
+            [disabled]="!borradorCanva().trim() || guardandoCanva()"
+          >
+            Guardar
+          </button>
+          <button
+            type="button"
+            class="button-secondary"
+            [disabled]="guardandoCanva()"
+            (click)="cancelarCanva()"
+          >
+            Cancelar
+          </button>
+        </form>
+        } @else {
+        <button
+          type="button"
+          class="canva-vacio"
+          [disabled]="!puedeModificar() || !modoEdicion()"
+          (click)="abrirCanva()"
+        >
+          <span class="canva-vacio-texto">Vacío</span>
+          @if (puedeModificar() && modoEdicion()) {
+          <span class="canva-mas" aria-hidden="true">＋</span>
+          }
+        </button>
+        } @if (errorCanva(); as error) {
+        <p class="form-error" role="alert">{{ error }}</p>
+        }
+      </section>
     </aside>
   </div>
 
@@ -506,11 +858,22 @@
   <app-demanda-panel
     [demanda]="demandaEditada()"
     [codigoCaso]="d.caso.codigo"
+    [organizaciones]="organizacionesDelCaso()"
     [puedeModificar]="puedeModificar()"
     [guardando]="guardandoDemanda()"
     [errorGuardado]="errorDemanda()"
     (cerrar)="cerrarPanelDemanda()"
     (guardar)="guardarDemanda($event)"
+  />
+  } @if (panelVincularAbierto()) {
+  <app-vincular-actor
+    [codigoCaso]="d.caso.codigo"
+    [vinculo]="actoresVinculo()?.vinculo ?? null"
+    [vinculados]="idsActoresVinculados()"
+    [guardando]="guardandoVinculo()"
+    [errorEnvio]="errorVinculo()"
+    (cerrar)="cerrarVincularActor()"
+    (guardar)="guardarVincularActor($event)"
   />
   } @if (panelAnulacion(); as modoAnulacion) {
   <app-anular-panel

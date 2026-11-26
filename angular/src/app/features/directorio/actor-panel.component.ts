@@ -16,16 +16,27 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { urlApi } from '../../core/config/entorno';
-import { urlConParametros } from '../../core/http/coleccion';
+import { normalizarColeccion, urlConParametros } from '../../core/http/coleccion';
+import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import { aFoto, esFotoPintable, fotoPrincipal, type Foto } from '../../dominio/medios';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import {
   aActorDirectorio,
   aDatosPersonales,
+  errorDeCorreo,
+  errorDeDni,
+  errorDeExpedienteOspa,
+  errorDeRuc,
+  errorDeTelefono,
+  formatearFechaActor,
   FUNCIONES_ACTOR,
-  NATURALEZAS,
+  MASCARA_CORREO,
+  MASCARA_DNI,
+  nivelIdentificacionDe,
   POSICIONAMIENTOS_ACTOR,
+  SIN_DATO,
   TIPOS_ACTOR,
   type ActorDirectorio,
   type DatosPersonales,
@@ -38,7 +49,18 @@ import {
  */
 const MOTIVO_PII = 'Consulta de datos personales desde el directorio';
 
-type EstadoPii = 'inactivo' | 'cargando' | 'listo' | 'prohibido' | 'error';
+const NIVELES_GOBIERNO = ['Nacional', 'Regional', 'Local', 'Empresa', 'Sociedad Civil'] as const;
+
+type EstadoPii =
+  | 'inactivo'
+  | 'cargando'
+  /** Los campos descifrados ya están en pantalla. */
+  | 'listo'
+  /** 200 con `tieneFicha: false`: el actor no tiene fila de datos personales. */
+  | 'sin_ficha'
+  /** 403: el rol no autoriza PII (no se ofrece reintento). */
+  | 'prohibido'
+  | 'error';
 type CampoActorEdicion =
   | 'nombre'
   | 'abreviatura'
@@ -49,7 +71,15 @@ type CampoActorEdicion =
   | 'cargo'
   | 'nivelGobierno'
   | 'categoria'
-  | 'perfilDescripcion';
+  | 'perfilDescripcion'
+  | 'dni'
+  | 'telefono'
+  | 'email'
+  | 'ruc'
+  | 'expedienteOspa'
+  | 'estadoOspa'
+  | 'vigenciaDesde'
+  | 'vigenciaHasta';
 type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
 
 /**
@@ -57,11 +87,12 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
  *
  * Se abre al pulsar una fila; no navega. Toda la caracterización viene del
  * listado (`GET /api/v1/actors`) y se pinta al instante. Los datos personales
- * son la única excepción: se piden sólo al pulsar «Ver DNI y teléfonos», con un
- * motivo explícito, y se descartan al cerrar el panel o cambiar de actor.
+ * (DNI y teléfono) son la única excepción: se piden sólo al pulsar «Ver datos
+ * personales», con un motivo explícito, y se descartan al cerrar el panel o
+ * cambiar de actor. El correo de contacto del listado sí se muestra sin gate.
  *
- * No usa `consulta` a propósito: esa fachada cachea por URL y conservaría la PII
- * en memoria. Aquí la petición vive en el ciclo de vida del panel.
+ * No usa `consulta` para la PII a propósito: esa fachada cachea por URL y
+ * conservaría la PII en memoria. Las fotos sí lo usan, porque son públicas.
  */
 @Component({
   selector: 'app-actor-panel',
@@ -78,117 +109,189 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       width: min(560px, 100%);
     }
 
-    .actor-panel-cabecera {
+    /* El cuerpo cede el alto justo para que el pie quede anclado abajo. */
+    .drawer-body {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    /* Cabecera: foto cuadrada pequeña + identidad, sin insignias. */
+    .panel-cabecera {
       display: flex;
-      flex-direction: column;
-      gap: 3px;
+      align-items: center;
+      gap: 12px;
       min-width: 0;
     }
 
-    .actor-panel-etiqueta {
-      margin: 0;
-      color: #8a98a5;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.7px;
-      text-transform: uppercase;
-    }
-
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-      overflow-wrap: anywhere;
-    }
-
-    .actor-panel-badges {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 6px;
-      margin-top: 8px;
-    }
-
-    .actor-chip {
-      background: #f0f3f5;
-      color: #657684;
-    }
-
-    .actor-validado {
-      background: #edf4ef;
-      color: #557a64;
-    }
-
-    .actor-pendiente {
-      background: #fff3e5;
-      color: #a6732d;
-    }
-
-    .actor-seccion {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .actor-seccion h3 {
-      margin: 0;
-      color: #33475b;
-      font: 700 11px var(--font-display);
-    }
-
-    .actor-datos {
+    .panel-foto {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px 16px;
-      margin: 0;
+      flex: none;
+      width: 64px;
+      height: 64px;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #eef2f6;
+      color: #607284;
+      font: 700 20px/1 var(--font-display);
     }
 
-    .actor-datos > div {
+    .panel-foto img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .panel-identidad {
       display: flex;
       flex-direction: column;
       gap: 2px;
       min-width: 0;
     }
 
-    .actor-datos dt {
+    .panel-identidad h2 {
+      overflow: hidden;
+      margin: 0;
+      color: #1c2a38;
+      font: 700 17px/1.3 var(--font-display);
+      text-overflow: ellipsis;
+    }
+
+    /* Cargo y organización: máximo dos líneas cada uno. */
+    .panel-linea {
+      display: -webkit-box;
+      overflow: hidden;
+      color: #647487;
+      font-size: 12.5px;
+      line-height: 1.35;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+
+    /* Estado de baja lógica: ámbar, nunca verde (no es «cumplido»). */
+    .panel-inactivo {
+      color: #aa6a11;
+      font-weight: 700;
+    }
+
+    /* Valor restringido por PII: máscara, no un hueco ni una cifra inventada. */
+    .panel-enmascarado {
       color: #97a1aa;
-      font-size: 8.5px;
+      letter-spacing: 0.08em;
+    }
+
+    /* Dos columnas: contacto a la izquierda, organización y región a la derecha. */
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 20px;
+      border-bottom: 1px solid #eef2f6;
+      padding-bottom: 14px;
+    }
+
+    .panel-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .panel-campo {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .panel-etiqueta {
+      color: #97a1aa;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
     }
 
-    .actor-datos dd {
-      margin: 0;
+    .panel-valor {
       color: #465a6c;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.45;
       overflow-wrap: anywhere;
     }
 
-    .actor-perfil {
+    .panel-pista {
+      font-size: 12px;
+      color: #8b97a1;
+    }
+
+    .panel-dato {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .panel-dato .panel-valor {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .boton-copiar {
+      flex: none;
+      padding: 2px 6px;
+      border: 1px solid #dce3e8;
+      border-radius: 5px;
+      background: #fff;
+      color: #526577;
+      font-size: 11.5px;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .boton-copiar:hover {
+      background: #f5f7f8;
+    }
+
+    .panel-seccion {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .panel-seccion h3 {
+      margin: 0;
+      color: #7b8896;
+      font: 700 11px var(--font-display);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .panel-perfil {
       margin: 0;
       color: #52677a;
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.65;
       white-space: pre-line;
     }
 
-    .actor-nota {
+    .panel-nota {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
       margin: 0;
-      color: #8d99a6;
-      font-size: 10px;
+      color: #7d8b98;
+      font-size: 12px;
       line-height: 1.5;
     }
 
-    .actor-vacio {
-      margin: 0;
-      color: #a0aab3;
-      font-size: 10.5px;
-      font-style: italic;
+    .panel-nota app-icono {
+      margin-top: 1px;
+      color: #96a3af;
     }
 
-    .actor-error {
+    .panel-error {
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -197,76 +300,110 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       border-radius: 6px;
       background: #fdf6f5;
       color: #a3402f;
-      font-size: 10.5px;
+      font-size: 13px;
     }
 
-    .actor-error p {
+    .panel-error p {
       margin: 0;
     }
 
-    .actor-pii {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 12px;
-      border: 1px solid #e6ebf0;
-      border-radius: 8px;
-      background: #fafbfc;
+    .panel-vacio {
+      margin: 0;
+      color: #a0aab3;
+      font-size: 13px;
+      font-style: italic;
     }
 
-    .actor-pii > button {
-      align-self: flex-start;
-    }
-
-    .actor-pii-aviso {
-      display: flex;
-      align-items: flex-start;
+    /* Posicionamiento: un color por valor del catálogo. */
+    .panel-posicionamiento {
+      display: inline-flex;
+      width: max-content;
+      align-items: center;
       gap: 6px;
-      margin: 0;
-      color: #7d8b98;
-      font-size: 9.5px;
-      line-height: 1.5;
-    }
-
-    .actor-pii-aviso app-icono {
-      margin-top: 1px;
-      color: #96a3af;
-    }
-
-    .actor-editar-boton {
-      align-self: flex-start;
-      margin-bottom: 4px;
-    }
-
-    .actor-editor {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .actor-editor h3,
-    .actor-editor > p,
-    .actor-editor-ancho {
-      grid-column: 1 / -1;
-    }
-
-    .actor-editor h3 {
-      margin: 0;
-      color: #33475b;
-      font: 700 12px var(--font-display);
-    }
-
-    .actor-editor label {
-      display: grid;
-      gap: 5px;
-      color: #596c7e;
-      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
       font-weight: 600;
     }
 
-    .actor-editor input:not([type='checkbox']),
-    .actor-editor select,
-    .actor-editor textarea {
+    .panel-posicionamiento::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentcolor;
+    }
+
+    .pos-dialogante {
+      background: #edf6f0;
+      color: #2f7a52;
+    }
+
+    .pos-legitimante {
+      background: #eef2fb;
+      color: #31599f;
+    }
+
+    .pos-conflictivo {
+      background: #fdeceb;
+      color: #b03a2e;
+    }
+
+    .pos-sin {
+      background: #f0f3f5;
+      color: #657684;
+    }
+
+    /* Pie: «Agregar a lista temporal» a la izquierda, Cerrar/Editar a la derecha. */
+    .panel-pie {
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-pie-acciones {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Formulario de edición por bloques numerados. */
+    .actor-editor {
+      display: grid;
+      gap: 16px;
+    }
+
+    .actor-bloque {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eef2f6;
+    }
+
+    .actor-bloque h3 {
+      grid-column: 1 / -1;
+      margin: 0;
+      color: #33475b;
+      font: 700 11.5px var(--font-display);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .actor-bloque .ancho {
+      grid-column: 1 / -1;
+    }
+
+    .actor-bloque label {
+      display: grid;
+      gap: 5px;
+      color: #596c7e;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .actor-bloque input:not([type='checkbox']),
+    .actor-bloque select,
+    .actor-bloque textarea {
       width: 100%;
       min-height: 34px;
       padding: 7px 9px;
@@ -278,13 +415,25 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       font-weight: 400;
     }
 
-    .actor-editor textarea {
+    .actor-bloque input:disabled,
+    .actor-bloque select:disabled {
+      background: #f5f7f8;
+      color: #8a98a5;
+      cursor: not-allowed;
+    }
+
+    .actor-bloque textarea {
       resize: vertical;
     }
 
-    .actor-editor-estado {
+    .actor-pista {
+      color: #97a1aa;
+      font-size: 11.5px;
+      font-weight: 400;
+    }
+
+    .actor-estado {
       display: flex !important;
-      grid-column: 1 / -1;
       align-items: center;
       gap: 8px !important;
     }
@@ -293,19 +442,16 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       display: flex;
       justify-content: flex-end;
       gap: 8px;
-      padding-top: 8px;
-      border-top: 1px solid #edf0f2;
     }
 
     @media (max-width: 520px) {
-      .actor-editor {
+      .panel-grid,
+      .actor-bloque {
         grid-template-columns: 1fr;
       }
 
-      .actor-editor h3,
-      .actor-editor > p,
-      .actor-editor-ancho,
-      .actor-editor-estado {
+      .actor-bloque h3,
+      .actor-bloque .ancho {
         grid-column: 1;
       }
     }
@@ -313,8 +459,18 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
 })
 export class ActorPanelComponent {
   readonly actor = input<ActorDirectorio | null>(null);
+  /** Abre la ficha directamente en modo edición (acción «Editar» de la tabla). */
+  readonly editarInicial = input(false);
+  /** Indica si el actor ya está en la lista temporal, para alternar la etiqueta. */
+  readonly enLista = input(false);
 
   readonly cerrar = output<void>();
+  readonly actualizado = output<ActorDirectorio>();
+  readonly alternarLista = output<void>();
+  /** El contenedor abre el panel de baja lógica con el motivo. */
+  readonly solicitarBaja = output<void>();
+  /** El contenedor restaura el actor (activo = true). */
+  readonly solicitarRestaurar = output<void>();
 
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
@@ -328,8 +484,7 @@ export class ActorPanelComponent {
   readonly tiposActor = TIPOS_ACTOR;
   readonly funcionesActor = FUNCIONES_ACTOR;
   readonly posicionamientos = POSICIONAMIENTOS_ACTOR;
-  readonly naturalezas = NATURALEZAS;
-  readonly actualizado = output<ActorDirectorio>();
+  readonly nivelesGobierno = NIVELES_GOBIERNO;
 
   readonly editando = signal(false);
   readonly guardandoEdicion = signal(false);
@@ -345,6 +500,14 @@ export class ActorPanelComponent {
     nivelGobierno: '',
     categoria: '',
     perfilDescripcion: '',
+    dni: '',
+    telefono: '',
+    email: '',
+    ruc: '',
+    expedienteOspa: '',
+    estadoOspa: '',
+    vigenciaDesde: '',
+    vigenciaHasta: '',
     activo: true,
   });
 
@@ -352,7 +515,89 @@ export class ActorPanelComponent {
   readonly errorPii = signal<string | null>(null);
   readonly datos = signal<DatosPersonales | null>(null);
 
+  /** Valor copiado recientemente, para confirmar la acción. */
+  readonly copiado = signal<string | null>(null);
+  private temporizadorCopiado?: ReturnType<typeof setTimeout>;
+
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
+
+  /** Fotografía principal del actor; `null` pinta las iniciales. */
+  private readonly media = consulta<Foto[]>({
+    fuente: () => {
+      const id = this.actor()?.id;
+      if (!id) return null;
+      return urlConParametros(urlApi('/v1/media'), {
+        entidadTipo: 'actor',
+        entidadId: id,
+        pageSize: '1',
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return coleccion.elementos.map(aFoto).filter(esFotoPintable);
+    },
+  });
+
+  readonly foto = computed(() => fotoPrincipal(this.media.valor() ?? []));
+
+  readonly iniciales = computed(() => {
+    const nombre = this.actor()?.nombre ?? '';
+    return nombre
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((parte) => parte[0]?.toUpperCase() ?? '')
+      .join('');
+  });
+
+  /** `true` cuando el DNI y el teléfono auditados ya están en pantalla. */
+  readonly piiVisible = computed(() => this.estadoPii() === 'listo');
+
+  /**
+   * `true` cuando la UI sabe que no hay PII que mostrar por falta de permiso:
+   * el rol no puede descifrar o la API respondió 403. Se distingue de «sin
+   * dato», que es una fila existente con el campo vacío.
+   */
+  readonly sinAutorizacionPii = computed(
+    () => !this.puedeVerPii() || this.estadoPii() === 'prohibido',
+  );
+
+  /** Organización: la ficha muestra RUC y OSPA en lugar de membresía. */
+  readonly esOrganizacion = computed(() => this.actor()?.naturaleza === 'Organización');
+
+  readonly nivelIdentificacion = computed(() =>
+    nivelIdentificacionDe(this.actor()?.nivelIdentificacion),
+  );
+
+  readonly vigenciaDesdeTexto = computed(() => formatearFechaActor(this.actor()?.vigenciaDesde));
+  readonly vigenciaHastaTexto = computed(() => formatearFechaActor(this.actor()?.vigenciaHasta));
+
+  /** Correo de una organización: contacto institucional público del listado. */
+  readonly correoOrganizacion = computed(() =>
+    this.esOrganizacion() ? (this.actor()?.email ?? null) : null,
+  );
+
+  readonly correoContacto = computed(() => this.datos()?.email ?? null);
+  readonly telefonoContacto = computed(() => this.datos()?.telefono ?? null);
+
+  /** Texto de dato ausente y máscara, expuestos a la plantilla. */
+  readonly sinDato = SIN_DATO;
+  readonly mascaraDni = MASCARA_DNI;
+  readonly mascaraCorreo = MASCARA_CORREO;
+
+  /** `02NOV2025` de una fecha ISO; `null` si no se reconoce. */
+  fechaDe(valor: string | null | undefined): string | null {
+    return formatearFechaActor(valor);
+  }
+
+  /** Clase de color del posicionamiento; `sin` cuando la base no lo declara. */
+  readonly clasePosicionamiento = computed(() => {
+    const valor = (this.actor()?.posicionamiento ?? '').toLowerCase();
+    if (valor.includes('dialogante')) return 'pos-dialogante';
+    if (valor.includes('legitimante')) return 'pos-legitimante';
+    if (valor.includes('conflictivo')) return 'pos-conflictivo';
+    return 'pos-sin';
+  });
 
   /** Elemento que tenía el foco al abrir, para devolvérselo al cerrar. */
   private readonly focoPrevio =
@@ -360,6 +605,8 @@ export class ActorPanelComponent {
 
   /** Identificador de la ficha cuyos datos personales se están mostrando. */
   private actorVigente: string | null = null;
+  /** Evita reabrir la edición en cada recálculo del efecto. */
+  private edicionForzadaAplicada = false;
 
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus());
@@ -373,16 +620,22 @@ export class ActorPanelComponent {
       this.reiniciarPii();
     });
 
-    // Escape cierra el panel aunque el foco se haya ido a un bloque de texto.
-    const alEscape = (evento: KeyboardEvent): void => {
-      if (evento.key !== 'Escape') return;
-      evento.preventDefault();
-      this.cerrar.emit();
-    };
-    document.addEventListener('keydown', alEscape);
+    // «Editar» desde la tabla abre la ficha ya en modo edición.
+    effect(() => {
+      const quiereEditar = this.editarInicial();
+      if (!quiereEditar) {
+        this.edicionForzadaAplicada = false;
+        return;
+      }
+      const actor = this.actor();
+      if (!actor || this.edicionForzadaAplicada || !this.puedeEditar()) return;
+      this.edicionForzadaAplicada = true;
+      this.iniciarEdicion();
+    });
 
+    // El panel sólo se cierra con Cancelar o Confirmar: Escape no lo descarta.
     this.destruccion.onDestroy(() => {
-      document.removeEventListener('keydown', alEscape);
+      clearTimeout(this.temporizadorCopiado);
       this.focoPrevio?.focus?.();
       this.reiniciarPii();
     });
@@ -402,10 +655,26 @@ export class ActorPanelComponent {
       nivelGobierno: actor.nivelGobierno ?? '',
       categoria: actor.categoria ?? '',
       perfilDescripcion: actor.perfil ?? '',
+      // El DNI sólo se precarga cuando ya se descifró con motivo: escribir a
+      // ciegas sobre el campo no debe borrar el valor cifrado existente.
+      dni: this.piiVisible() ? (this.datos()?.dni ?? '') : '',
+      // Teléfono y correo se precargan sólo con PII descifrada (o el correo
+      // institucional del listado); vacío significa «no lo cambie».
+      telefono: this.datos()?.telefono ?? '',
+      email: this.datos()?.email ?? this.correoOrganizacion() ?? '',
+      ruc: actor.ruc ?? '',
+      expedienteOspa: actor.expedienteOspa ?? '',
+      estadoOspa: actor.estadoOspa ?? '',
+      vigenciaDesde: actor.vigenciaDesde ?? '',
+      vigenciaHasta: actor.vigenciaHasta ?? '',
       activo: actor.activo,
     });
     this.errorEdicion.set(null);
     this.editando.set(true);
+    // El DNI sólo se edita con la PII descifrada. Al abrir la edición se pide una
+    // sola vez: si el rol no autoriza no se hace ninguna llamada y el campo queda
+    // deshabilitado, como antes.
+    this.asegurarPiiParaEdicion();
   }
 
   cancelarEdicion(): void {
@@ -413,8 +682,35 @@ export class ActorPanelComponent {
     this.editando.set(false);
   }
 
+  /**
+   * Pide la PII al abrir la edición, en lugar de exigir el botón «Ver datos
+   * personales» (retirado). Cada apertura que llega a la API deja su fila en
+   * `audit.datos_personales_acceso`, así que el registro de quién consultó qué
+   * se mantiene. No reintenta cuando el rol no autoriza ni cuando ya se cargó.
+   */
+  private asegurarPiiParaEdicion(): void {
+    if (!this.puedeVerPii()) return;
+    const estado = this.estadoPii();
+    if (estado === 'inactivo' || estado === 'error') this.solicitarPii();
+  }
+
+  /**
+   * Completa el borrador con la PII recién descifrada. Sólo rellena campos
+   * vacíos: no pisa lo que el usuario ya escribió mientras llegaba la respuesta.
+   */
+  private completarBorradorConPii(datos: DatosPersonales): void {
+    if (!this.editando()) return;
+    this.borrador.update((actual) => ({
+      ...actual,
+      dni: actual.dni || datos.dni || '',
+      telefono: actual.telefono || datos.telefono || '',
+      email: actual.email || datos.email || '',
+    }));
+  }
+
   actualizarTexto(campo: CampoActorEdicion, evento: Event): void {
-    const valor = (evento.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).value;
+    const valor = (evento.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)
+      .value;
     this.borrador.update((actual) => ({ ...actual, [campo]: valor }));
   }
 
@@ -435,19 +731,94 @@ export class ActorPanelComponent {
       return;
     }
 
+    const esOrganizacion = draft.naturaleza === 'organizacion';
+
+    // El DNI sólo viaja si hay autorización PII y el usuario escribió uno: un
+    // campo vacío no debe borrar el valor cifrado almacenado.
+    const dni = draft.dni.trim();
+    if (dni) {
+      if (!this.piiVisible() || !this.puedeVerPii()) {
+        this.errorEdicion.set(
+          'El DNI aún no se descifró; espere un momento y vuelva a intentarlo.',
+        );
+        return;
+      }
+      const error = errorDeDni(dni);
+      if (error) {
+        this.errorEdicion.set(error);
+        return;
+      }
+    }
+
+    const ruc = draft.ruc.trim();
+    if (esOrganizacion && ruc) {
+      const error = errorDeRuc(ruc);
+      if (error) {
+        this.errorEdicion.set(error);
+        return;
+      }
+    }
+
+    const expedienteError = errorDeExpedienteOspa(draft.expedienteOspa);
+    if (esOrganizacion && expedienteError) {
+      this.errorEdicion.set(expedienteError);
+      return;
+    }
+
+    const telefono = draft.telefono.trim();
+    if (telefono) {
+      const error = errorDeTelefono(telefono);
+      if (error) {
+        this.errorEdicion.set(error);
+        return;
+      }
+    }
+
+    const email = draft.email.trim();
+    if (email) {
+      const error = errorDeCorreo(email);
+      if (error) {
+        this.errorEdicion.set(error);
+        return;
+      }
+    }
+
+    if (esOrganizacion && draft.vigenciaDesde && draft.vigenciaHasta) {
+      if (draft.vigenciaHasta < draft.vigenciaDesde) {
+        this.errorEdicion.set('La vigencia OSPA no puede terminar antes de empezar.');
+        return;
+      }
+    }
+
     this.guardandoEdicion.set(true);
     this.errorEdicion.set(null);
-    const payload = {
-      ...draft,
-      nivelGobierno: draft.nivelGobierno.replace(/ /g, '_') || null,
+
+    // `activo` no viaja por la edición: la baja y la restauración tienen su
+    // propio flujo con motivo y auditoría (panel de anulación).
+    const payload: Record<string, unknown> = {
+      nombre: draft.nombre,
       abreviatura: draft.abreviatura || null,
       cargo: draft.cargo || null,
       categoria: draft.categoria || null,
       perfilDescripcion: draft.perfilDescripcion || null,
+      nivelGobierno: draft.nivelGobierno.replace(/ /g, '_') || null,
       tipo: draft.tipo || undefined,
       funcion: draft.funcion || undefined,
       posicionamiento: draft.posicionamiento || null,
     };
+
+    if (dni) payload['dni'] = dni;
+    // Un campo vacío no borra el valor cifrado almacenado: sólo se envía lo escrito.
+    if (telefono) payload['telefono'] = telefono;
+    if (email) payload['email'] = email;
+
+    if (esOrganizacion) {
+      payload['ruc'] = ruc || null;
+      payload['expedienteOspa'] = draft.expedienteOspa.trim() || null;
+      payload['estadoOspa'] = draft.estadoOspa.trim() || null;
+      payload['vigenciaDesde'] = draft.vigenciaDesde || null;
+      payload['vigenciaHasta'] = draft.vigenciaHasta || null;
+    }
 
     this.http
       .patch<unknown>(urlApi(`/v1/actors/${encodeURIComponent(actor.id)}`), payload)
@@ -466,9 +837,9 @@ export class ActorPanelComponent {
   }
 
   /**
-   * Pide DNI, correo y teléfonos. Nunca se llama al cargar la ficha: sólo desde
-   * el botón, y una sola vez por pulsación (el estado `cargando` frena el doble
-   * envío para no duplicar el registro de auditoría).
+   * Pide DNI, correo y teléfonos. Se llama al abrir la edición (una sola vez por
+   * apertura) y no al cargar la ficha, para no auditar cada consulta del
+   * directorio. El estado `cargando` frena el doble envío.
    */
   solicitarPii(): void {
     const ficha = this.actor();
@@ -495,8 +866,12 @@ export class ActorPanelComponent {
       .pipe(takeUntilDestroyed(this.destruccion))
       .subscribe({
         next: (bruto) => {
-          this.datos.set(aDatosPersonales(bruto));
-          this.estadoPii.set('listo');
+          const datos = aDatosPersonales(bruto);
+          this.datos.set(datos);
+          // «sin ficha» no es un error ni «sin autorización»: el actor existe y
+          // su rol alcanza, pero no registró datos personales.
+          this.estadoPii.set(datos.tieneFicha ? 'listo' : 'sin_ficha');
+          this.completarBorradorConPii(datos);
         },
         error: (fallo: unknown) => {
           const error = aErrorApi(fallo);
@@ -515,13 +890,15 @@ export class ActorPanelComponent {
       });
   }
 
-  /** Descarta lo mostrado sin cerrar el panel; un nuevo acceso vuelve a auditarse. */
-  ocultarPii(): void {
-    this.reiniciarPii();
-  }
+  /** Copia al portapapeles y confirma el valor copiado durante un instante. */
+  copiar(valor: string | null | undefined, evento?: Event): void {
+    evento?.stopPropagation();
+    if (!valor) return;
 
-  alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
+    void navigator.clipboard?.writeText(valor);
+    this.copiado.set(valor);
+    clearTimeout(this.temporizadorCopiado);
+    this.temporizadorCopiado = setTimeout(() => this.copiado.set(null), 1600);
   }
 
   alTecla(evento: KeyboardEvent): void {

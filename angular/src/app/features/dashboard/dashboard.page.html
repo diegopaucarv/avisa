@@ -1,0 +1,871 @@
+<section class="view-body" aria-labelledby="titulo-dashboard">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-dashboard">Dashboard analítico</h1>
+      <p class="view-subtitle">
+        Series temporales de la actividad de la oficina: altas de <b>casos</b>, <b>demandas</b>,
+        <b>alertas</b>, <b>compromisos</b>, <b>documentos</b> y <b>reuniones</b>, leídas por fecha
+        de negocio y por marca de creación. Cada cifra sale de una consulta de solo lectura; lo que
+        el registro no puede sostener se muestra como «sin dato» y no se estima.
+      </p>
+      <p class="head-note">
+        <b>Zona horaria:</b> <code>{{ zonaHoraria() }}</code> · <b>Corte de datos:</b> {{
+        corteTexto() }} · <b>Generado:</b> {{ generadoTexto() }}
+      </p>
+      <p class="head-note">
+        <b>Roles:</b> la RLS limita cada lectura al ámbito del usuario; los nombres de usuario sólo
+        aparecen si la política de fila los expone.
+      </p>
+    </div>
+
+    <div class="view-actions">
+      <span class="anexo-badge">Items 51 · 52 · 57 · 85</span>
+      <button type="button" class="button-secondary" (click)="imprimir()">
+        <app-icono nombre="documentos" [tamano]="14" />
+        Preparar hoja de impresión
+      </button>
+    </div>
+  </header>
+
+  <!-- Declaración: qué cubre, qué dato necesita y qué es sólo forma. -->
+  <div class="declaracion">
+    <p><b>Items que cubre:</b> 51 · 52 · 57 · 85.</p>
+    <p>
+      <b>Dato que necesita:</b> consulta de solo lectura sobre <code>core.casos</code>,
+      <code>core.demandas</code>, <code>core.alertas_tempranas</code>,
+      <code>core.compromisos</code>, <code>core.documentos</code> y
+      <code>core.reuniones_dialogo</code>, a través de <code>GET /api/v1/analitica</code>. No se
+      crean vistas <code>analytics.vw_*</code>: el agregado se calcula en la misma transacción de la
+      sesión, con la RLS aplicada a cada tabla.
+    </p>
+    <p>
+      <b>Solo forma (sin dato):</b> los gráficos SVG, la hoja de impresión y las series que la tabla
+      no puede sostener (actividad por <code>created_at</code> y tiempo de resolución de
+      compromisos). Esas tarjetas se dibujan sólo cuando existe la serie; si no, muestran su motivo.
+    </p>
+  </div>
+
+  <div class="scope-bar">
+    <span class="scope-label">Ventana</span>
+    <app-rango-fechas
+      [desde]="filtros().desde || null"
+      [hasta]="filtros().hasta || null"
+      [atajos]="false"
+      etiquetaGrupo="Ventana de fechas del dashboard"
+      idBase="dashboard-ventana"
+      (cambio)="cambiarRango($event)"
+    />
+
+    <span class="scope-label">Agregación</span>
+    <div class="segmented" role="group" aria-label="Granularidad de la serie">
+      <button
+        type="button"
+        [attr.aria-pressed]="filtros().granularidad === 'mes' ? 'true' : 'false'"
+        (click)="cambiarGranularidad('mes')"
+      >
+        Mes
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="filtros().granularidad === 'semana' ? 'true' : 'false'"
+        (click)="cambiarGranularidad('semana')"
+      >
+        Semana
+      </button>
+    </div>
+
+    <span class="scope-label">Atajos</span>
+    <div class="segmented" role="group" aria-label="Rangos rápidos">
+      <button
+        type="button"
+        [attr.aria-pressed]="presetActivo() === 'todo' ? 'true' : 'false'"
+        (click)="aplicarPreset('todo')"
+      >
+        Todo el registro
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="presetActivo() === '12m' ? 'true' : 'false'"
+        (click)="aplicarPreset('12m')"
+      >
+        Últimos 12 meses
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="presetActivo() === '5a' ? 'true' : 'false'"
+        (click)="aplicarPreset('5a')"
+      >
+        Últimos 5 años
+      </button>
+    </div>
+
+    <p class="scope-note">
+      <b>Dos ejes que no se mezclan:</b> el volumen usa la fecha de negocio
+      (<code>fecha_inicio</code>, <code>fecha_registro</code>, <code>fecha_reporte</code>,
+      <code>fecha</code>); la actividad de la oficina usa <code>created_at</code> y
+      <code>created_by</code>. Todo se agrupa en la zona <b>{{ zonaHoraria() }}</b> y las fechas se
+      muestran en <b>dd/mm/aaaa</b>. El ámbito institucional lo fija el <b>rol</b> y la RLS, no un
+      conmutador: aquí sólo se filtran territorio y subsector.
+    </p>
+  </div>
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="select-filter">
+      <span>Región</span>
+      <select
+        [value]="filtros().region"
+        (change)="filtrarRegion($event)"
+        aria-label="Filtrar por región"
+      >
+        <option value="">Todas las regiones</option>
+        @for (opcion of regiones(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      <span>Subsector</span>
+      <select
+        [value]="filtros().subsector"
+        (change)="filtrarSubsector($event)"
+        aria-label="Filtrar por subsector"
+      >
+        <option value="">Ambos subsectores</option>
+        @for (opcion of subsectores(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
+        }
+      </select>
+    </label>
+
+    <span class="cut-chip" title="Corte de datos de la consulta">
+      Corte de datos <b>{{ corteTexto() }}</b> · zona <b>{{ zonaHoraria() }}</b>
+    </span>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+
+    <span class="result-count">{{ filtrosTexto() }}</span>
+  </div>
+
+  @if (esquemaPendiente() || error()) {
+  <div class="empty-state" role="alert">
+    <strong>No se pudo cargar el dashboard analítico</strong>
+    <p>{{ error()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  } @else if (cargando()) {
+  <div class="empty-state" role="status">Cargando series…</div>
+  } @else {
+  <div class="grid kpi-grid">
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Registros con fecha</h2>
+          <p class="card-sub">Suma de las seis entidades en la ventana.</p>
+        </div>
+      </div>
+      <div class="kpi-val">{{ sinDatos() ? '—' : formatearNumero(totalVolumen()) }}</div>
+      <div class="kpi-note">
+        @if (sinDatos()) { Sin registros con fecha para los filtros vigentes. } @else { Casos {{
+        formatearNumero(totales().casos) }} · demandas {{ formatearNumero(totales().demandas) }} ·
+        alertas {{ formatearNumero(totales().alertas) }} · compromisos {{
+        formatearNumero(totales().compromisos) }} · documentos {{
+        formatearNumero(totales().documentos) }} · reuniones {{ formatearNumero(totales().reuniones)
+        }}. }
+      </div>
+      <dl class="meta">
+        <dt>Definición</dt>
+        <dd>Conteo de filas por fecha de negocio de cada entidad.</dd>
+        <dt>Filtros</dt>
+        <dd>{{ filtrosTexto() }}</dd>
+        <dt>Fuente</dt>
+        <dd>Las seis tablas de <code>core</code> declaradas arriba.</dd>
+        <dt>Corte</dt>
+        <dd>{{ corteTexto() }}</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Marcas de creación</h2>
+          <p class="card-sub">Registros con <code>created_at</code>, la actividad real de carga.</p>
+        </div>
+      </div>
+      <div class="kpi-val">
+        {{ actividad().totalRegistros === 0 ? '—' : formatearNumero(actividad().totalRegistros) }}
+      </div>
+      <div class="kpi-note">
+        @if (actividad().confiable) { {{ formatearNumero(actividad().dias) }} día(s) con marcas · {{
+        formatearNumero(actividad().porUsuario.length) }} usuario(s). } @else { {{
+        actividad().motivo ?? 'Sin serie diaria confiable.' }} }
+      </div>
+      <dl class="meta">
+        <dt>Definición</dt>
+        <dd>Filas con <code>created_at</code> no nulo, agrupadas por día en Lima.</dd>
+        <dt>Filtros</dt>
+        <dd>{{ filtrosTexto() }}</dd>
+        <dt>Fuente</dt>
+        <dd><code>created_at</code> · <code>created_by</code> de las seis tablas.</dd>
+        <dt>Corte</dt>
+        <dd>{{ corteTexto() }}</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Casos manifiesto</h2>
+          <p class="card-sub">Conflicto social o crisis social, sobre casos con fecha.</p>
+        </div>
+      </div>
+      <div class="kpi-val">
+        {{ totales().casos === 0 ? '—' : formatearNumero(totales().manifiesto) }}<small
+          >/ {{ formatearNumero(totales().casos) }}</small
+        >
+      </div>
+      <div class="kpi-note">
+        @if (totales().casos === 0) { Sin casos con fecha en la ventana. } @else { {{
+        formatearPorcentaje(porcentajeManifiesto()) }} del total · latente {{
+        formatearNumero(latenteTotal()) }} @if (totales().sinNivel > 0) { (incluye {{
+        formatearNumero(totales().sinNivel) }} sin nivel) } }
+      </div>
+      <dl class="meta">
+        <dt>Definición</dt>
+        <dd>Casos con nivel de conflictividad «Conflicto social» o «Crisis social».</dd>
+        <dt>Filtros</dt>
+        <dd>{{ filtrosTexto() }}</dd>
+        <dt>Fuente</dt>
+        <dd><code>core.casos.nivel_conflicto_id</code></dd>
+        <dt>Corte</dt>
+        <dd>{{ corteTexto() }}</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Compromisos en gestión</h2>
+          <p class="card-sub">Compromisos de la ventana y su cierre.</p>
+        </div>
+      </div>
+      <div class="kpi-val">
+        {{ totales().compromisos === 0 ? '—' : formatearNumero(totales().compromisos) }}
+      </div>
+      <div class="kpi-note">
+        @if (resolucion().motivo) { {{ resolucion().motivo }} } @else { {{
+        formatearNumero(resolucion().terminales) }} en estado «Cumplido» · media {{
+        formatearDias(resolucion().mediaDias) }}. }
+      </div>
+      <dl class="meta">
+        <dt>Definición</dt>
+        <dd>Compromisos no anulados con <code>fecha_inicio</code> en la ventana.</dd>
+        <dt>Filtros</dt>
+        <dd>{{ filtrosTexto() }}</dd>
+        <dt>Fuente</dt>
+        <dd><code>core.compromisos</code> · <code>core.hitos_compromiso</code></dd>
+        <dt>Corte</dt>
+        <dd>{{ corteTexto() }}</dd>
+      </dl>
+    </article>
+  </div>
+
+  <!-- ───────────────────────── Volumen por periodo ───────────────────────── -->
+  <section class="sec-head" aria-labelledby="sec-volumen">
+    <h2 class="sec-h2" id="sec-volumen">Volumen por periodo</h2>
+    <p class="sec-sub">
+      Altas, demandas, alertas, compromisos, documentos y reuniones por {{ granularidad() === 'mes'
+      ? 'mes' : 'semana' }}, según la fecha de negocio de cada registro.
+    </p>
+  </section>
+
+  <article class="card">
+    <div class="card-head">
+      <div>
+        <h3 class="chart-h3">Serie de actividad registrada</h3>
+        <p class="card-sub">Una línea por entidad; eje Y compartido.</p>
+      </div>
+      <span class="flag">
+        {{ periodos().length }} {{ granularidad() === 'mes' ? 'meses' : 'semanas' }}
+      </span>
+    </div>
+
+    @if (!haySerieVolumen()) {
+    <div class="chart-empty">
+      <strong>«—» Sin registros con fecha en la ventana</strong>
+      {{ motivoSinVolumen() }}
+    </div>
+    } @else {
+    <div class="legend">
+      @for (serie of seriesVolumen(); track serie.clave) {
+      <span><i [style.background]="serie.color"></i>{{ serie.etiqueta }}</span>
+      }
+    </div>
+
+    <svg
+      class="series"
+      [attr.viewBox]="viewBox(graficoVolumen())"
+      role="img"
+      [attr.aria-label]="ariaVolumen()"
+    >
+      @for (linea of graficoVolumen().lineas; track $index) {
+      <line
+        class="rejilla"
+        [attr.x1]="graficoVolumen().x0"
+        [attr.y1]="linea.y"
+        [attr.x2]="graficoVolumen().x1"
+        [attr.y2]="linea.y"
+      />
+      <text
+        class="eje-valor"
+        [attr.x]="graficoVolumen().x0 - 6"
+        [attr.y]="linea.y + 3"
+        text-anchor="end"
+      >
+        {{ formatearNumero(linea.valor) }}
+      </text>
+      } @for (marca of graficoVolumen().marcasX; track $index) {
+      <text
+        class="eje-marca"
+        [attr.x]="marca.x"
+        [attr.y]="graficoVolumen().y0 + 16"
+        text-anchor="middle"
+      >
+        {{ marca.etiqueta }}
+      </text>
+      } @for (serie of graficoVolumen().series; track serie.clave) {
+      <polyline
+        fill="none"
+        stroke-width="2"
+        stroke-linejoin="round"
+        stroke-linecap="round"
+        [attr.points]="serie.puntos"
+        [style.stroke]="serie.color"
+      />
+      @for (punto of serie.circulos; track $index) {
+      <circle [attr.cx]="punto.x" [attr.cy]="punto.y" r="2.4" [style.fill]="serie.color" />
+      } }
+    </svg>
+
+    <p class="footnote">
+      La serie usa la fecha de negocio, no <code>created_at</code>. Los registros sin fecha (<b
+        >{{ formatearNumero(resumen().totalSinFecha) }}</b
+      >
+      en la ventana) no se pueden ubicar en el tiempo y quedan fuera del gráfico.
+    </p>
+
+    <details class="sql-box">
+      <summary>Ver la serie como tabla</summary>
+      <div class="table-wrap sql-tabla">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Periodo</th>
+              <th scope="col" class="num">Casos</th>
+              <th scope="col" class="num">Demandas</th>
+              <th scope="col" class="num">Alertas</th>
+              <th scope="col" class="num">Compromisos</th>
+              <th scope="col" class="num">Documentos</th>
+              <th scope="col" class="num">Reuniones</th>
+              <th scope="col" class="num">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (periodo of periodosConDato(); track periodo.inicio) {
+            <tr>
+              <td>{{ etiquetaPeriodo(periodo) }}</td>
+              <td class="num">{{ formatearNumero(periodo.casos) }}</td>
+              <td class="num">{{ formatearNumero(periodo.demandas) }}</td>
+              <td class="num">{{ formatearNumero(periodo.alertas) }}</td>
+              <td class="num">{{ formatearNumero(periodo.compromisos) }}</td>
+              <td class="num">{{ formatearNumero(periodo.documentos) }}</td>
+              <td class="num">{{ formatearNumero(periodo.reuniones) }}</td>
+              <td class="num">{{ formatearNumero(totalPeriodo(periodo)) }}</td>
+            </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>{{ periodosConDato().length }} periodos con dato</td>
+              <td class="num">{{ formatearNumero(totales().casos) }}</td>
+              <td class="num">{{ formatearNumero(totales().demandas) }}</td>
+              <td class="num">{{ formatearNumero(totales().alertas) }}</td>
+              <td class="num">{{ formatearNumero(totales().compromisos) }}</td>
+              <td class="num">{{ formatearNumero(totales().documentos) }}</td>
+              <td class="num">{{ formatearNumero(totales().reuniones) }}</td>
+              <td class="num">{{ formatearNumero(totalVolumen()) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      @if (periodosOmitidos() > 0) {
+      <p class="footnote" style="padding: 8px 11px">
+        Se omiten {{ formatearNumero(periodosOmitidos()) }} periodos sin registros; el gráfico sí
+        los recorre para conservar el eje temporal.
+      </p>
+      }
+    </details>
+
+    <dl class="meta">
+      <dt>Definición</dt>
+      <dd>Conteo de altas por periodo, con la fecha de negocio de cada entidad.</dd>
+      <dt>Filtros</dt>
+      <dd>{{ filtrosTexto() }}</dd>
+      <dt>Fuente</dt>
+      <dd>
+        <code>core.casos.fecha_inicio</code> · <code>core.demandas.fecha_registro</code> ·
+        <code>core.alertas_tempranas.fecha_reporte</code> ·
+        <code>core.compromisos.fecha_inicio</code> · <code>core.documentos.fecha</code> ·
+        <code>core.reuniones_dialogo.fecha</code>
+      </dd>
+      <dt>Corte</dt>
+      <dd>{{ corteTexto() }} · zona {{ zonaHoraria() }}</dd>
+    </dl>
+    }
+  </article>
+
+  <!-- ─────────────── Mezcla latente vs manifiesto (sólo casos) ─────────────── -->
+  <section class="sec-head" aria-labelledby="sec-mezcla">
+    <h2 class="sec-h2" id="sec-mezcla">Mezcla latente vs manifiesto</h2>
+    <p class="sec-sub">
+      Clasificación por <b>nivel de conflictividad</b>. Aplica sólo a <b>casos</b>: las demás
+      entidades no guardan nivel en esta consulta.
+    </p>
+  </section>
+
+  <div class="grid two-col">
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h3 class="chart-h3">Casos por grupo en el tiempo</h3>
+          <p class="card-sub">
+            Manifiesto = conflicto social o crisis social. Latente = diferencia, controversia o sin
+            nivel.
+          </p>
+        </div>
+        <span class="tag-mini">sólo casos</span>
+      </div>
+
+      @if (totales().casos === 0) {
+      <div class="chart-empty">
+        <strong>«—» Sin casos con fecha en la ventana</strong>
+        El nivel de conflictividad sólo existe en <code>core.casos</code>; sin casos no hay mezcla
+        que dibujar.
+      </div>
+      } @else {
+      <div class="legend">
+        <span><i [style.background]="seriesMezcla()[0].color"></i>Manifiesto</span>
+        <span><i [style.background]="seriesMezcla()[1].color"></i>Latente</span>
+        <span><i [style.background]="seriesMezcla()[2].color"></i>Sin nivel</span>
+      </div>
+
+      <svg
+        class="series"
+        [attr.viewBox]="viewBox(graficoMezcla())"
+        role="img"
+        [attr.aria-label]="ariaMezcla()"
+      >
+        @for (linea of graficoMezcla().lineas; track $index) {
+        <line
+          class="rejilla"
+          [attr.x1]="graficoMezcla().x0"
+          [attr.y1]="linea.y"
+          [attr.x2]="graficoMezcla().x1"
+          [attr.y2]="linea.y"
+        />
+        <text
+          class="eje-valor"
+          [attr.x]="graficoMezcla().x0 - 6"
+          [attr.y]="linea.y + 3"
+          text-anchor="end"
+        >
+          {{ formatearNumero(linea.valor) }}
+        </text>
+        } @for (marca of graficoMezcla().marcasX; track $index) {
+        <text
+          class="eje-marca"
+          [attr.x]="marca.x"
+          [attr.y]="graficoMezcla().y0 + 16"
+          text-anchor="middle"
+        >
+          {{ marca.etiqueta }}
+        </text>
+        } @for (serie of graficoMezcla().series; track serie.clave) {
+        <polyline
+          fill="none"
+          stroke-width="2"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          [attr.points]="serie.puntos"
+          [style.stroke]="serie.color"
+        />
+        @for (punto of serie.circulos; track $index) {
+        <circle [attr.cx]="punto.x" [attr.cy]="punto.y" r="2.4" [style.fill]="serie.color" />
+        } }
+      </svg>
+
+      <p class="footnote">
+        La suma de las tres líneas es la serie de <b>casos</b>; no incluye demandas, alertas,
+        compromisos, documentos ni reuniones.
+      </p>
+      }
+
+      <dl class="meta">
+        <dt>Definición</dt>
+        <dd>Casos agrupados por nivel de conflictividad y periodo.</dd>
+        <dt>Filtros</dt>
+        <dd>{{ filtrosTexto() }}</dd>
+        <dt>Fuente</dt>
+        <dd><code>core.casos.nivel_conflicto_id</code></dd>
+        <dt>Corte</dt>
+        <dd>{{ corteTexto() }}</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h3 class="chart-h3">Distribución del periodo</h3>
+          <p class="card-sub">Composición de los casos con fecha, en la ventana.</p>
+        </div>
+        <span class="flag">{{ formatearNumero(totales().casos) }} casos</span>
+      </div>
+
+      @if (totales().casos === 0) {
+      <div class="chart-empty">
+        <strong>«—» Sin casos que distribuir</strong>
+        Cambia la ventana o quita el filtro territorial.
+      </div>
+      } @else {
+      <div class="bars">
+        @for (barra of barrasMezcla(); track barra.etiqueta) {
+        <div class="bar-row">
+          <span class="bar-lab" [title]="barra.etiqueta">{{ barra.etiqueta }}</span>
+          <span class="bar-track">
+            <span
+              class="bar-seg"
+              [style.width.%]="barra.ancho"
+              [style.background]="barra.color"
+            ></span>
+          </span>
+          <span class="bar-val">{{ formatearNumero(barra.valor) }}</span>
+        </div>
+        }
+      </div>
+
+      <p class="footnote">
+        Porcentajes sobre {{ formatearNumero(totales().casos) }} casos con fecha. «Sin nivel» es un
+        subconjunto de latente: el vocabulario del proyecto lo trata como latente, aquí se separa
+        para que la clasificación sea auditable.
+      </p>
+      }
+    </article>
+  </div>
+
+  <!-- ───────────────────── Actividad de la oficina ───────────────────── -->
+  <section class="sec-head" aria-labelledby="sec-actividad">
+    <h2 class="sec-h2" id="sec-actividad">Actividad de la oficina</h2>
+    <p class="sec-sub">
+      Registros por día y por usuario, leídos desde <code>created_at</code> y
+      <code>created_by</code>. Es la carga de trabajo real, no la fecha del hecho.
+    </p>
+  </section>
+
+  <div class="grid two-col">
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h3 class="chart-h3">Registros por día (created_at)</h3>
+          <p class="card-sub">Altas registradas por el sistema, en zona Lima.</p>
+        </div>
+        <span
+          class="flag"
+          [class.flag-ok]="actividad().confiable"
+          [class.flag-off]="!actividad().confiable"
+        >
+          {{ actividad().confiable ? 'confiable' : 'sin serie' }}
+        </span>
+      </div>
+
+      @if (graficoActividad(); as grafico) {
+      <svg
+        class="series"
+        [attr.viewBox]="viewBox(grafico)"
+        role="img"
+        [attr.aria-label]="ariaActividad()"
+      >
+        @for (linea of grafico.lineas; track $index) {
+        <line
+          class="rejilla"
+          [attr.x1]="grafico.x0"
+          [attr.y1]="linea.y"
+          [attr.x2]="grafico.x1"
+          [attr.y2]="linea.y"
+        />
+        <text class="eje-valor" [attr.x]="grafico.x0 - 6" [attr.y]="linea.y + 3" text-anchor="end">
+          {{ formatearNumero(linea.valor) }}
+        </text>
+        } @for (marca of grafico.marcasX; track $index) {
+        <text class="eje-marca" [attr.x]="marca.x" [attr.y]="grafico.y0 + 16" text-anchor="middle">
+          {{ marca.etiqueta }}
+        </text>
+        } @for (serie of grafico.series; track serie.clave) {
+        <polyline
+          fill="none"
+          stroke-width="2"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+          [attr.points]="serie.puntos"
+          [style.stroke]="serie.color"
+        />
+        @for (punto of serie.circulos; track $index) {
+        <circle [attr.cx]="punto.x" [attr.cy]="punto.y" r="2.4" [style.fill]="serie.color" />
+        } }
+      </svg>
+      } @else {
+      <div class="chart-empty">
+        <strong>«—» Serie diaria no disponible</strong>
+        {{ actividad().motivo ?? 'No hay suficientes días con marca de creación para dibujar una
+        tendencia.' }} @if (actividad().totalRegistros > 0) { Hay {{
+        formatearNumero(actividad().totalRegistros) }} marca(s) en {{
+        formatearNumero(actividad().dias) }} día(s): no alcanza para una serie. }
+      </div>
+      } @if (actividad().porDia.length > 0) {
+      <details class="sql-box">
+        <summary>Ver los días con marca ({{ actividad().porDia.length }})</summary>
+        <div class="table-wrap sql-tabla">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Día</th>
+                <th scope="col" class="num">Registros</th>
+                <th scope="col" class="num">Usuarios</th>
+                <th scope="col" class="num">Legado</th>
+                <th scope="col" class="num">Sin usuario</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (dia of actividad().porDia; track dia.fecha) {
+              <tr>
+                <td>{{ formatearFecha(dia.fecha) }}</td>
+                <td class="num">{{ formatearNumero(dia.registros) }}</td>
+                <td class="num">{{ formatearNumero(dia.usuarios) }}</td>
+                <td class="num">{{ formatearNumero(dia.legado) }}</td>
+                <td class="num">{{ formatearNumero(dia.sinUsuario) }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </details>
+      }
+
+      <dl class="meta">
+        <dt>Definición</dt>
+        <dd>Filas con <code>created_at</code>, agrupadas por día en Lima.</dd>
+        <dt>Filtros</dt>
+        <dd>{{ filtrosTexto() }}</dd>
+        <dt>Fuente</dt>
+        <dd><code>created_at</code> · <code>origen_dato</code> de las seis tablas.</dd>
+        <dt>Corte</dt>
+        <dd>{{ corteTexto() }}</dd>
+      </dl>
+    </article>
+
+    <article class="card">
+      <div class="card-head">
+        <div>
+          <h3 class="chart-h3">Carga por usuario (created_by)</h3>
+          <p class="card-sub">Registros creados por cada usuario; no mide esfuerzo ni horas.</p>
+        </div>
+        <span class="flag">{{ actividad().porUsuario.length }} usuario(s)</span>
+      </div>
+
+      @if (barrasUsuarios().length === 0) {
+      <div class="chart-empty">
+        <strong>«—» Sin usuarios con carga</strong>
+        La consulta no devolvió registros con <code>created_by</code> en la ventana filtrada.
+      </div>
+      } @else {
+      <div class="bars">
+        @for (usuario of barrasUsuarios(); track $index) {
+        <div class="bar-row">
+          <span class="bar-lab" [title]="usuario.titulo">{{ usuario.etiqueta }}</span>
+          <span class="bar-track">
+            <span class="bar-seg" [style.width.%]="usuario.ancho"></span>
+          </span>
+          <span class="bar-val">{{ formatearNumero(usuario.registros) }}</span>
+        </div>
+        }
+      </div>
+
+      <p class="footnote">
+        @if (proporcionLegado() > 0) { {{ formatearPorcentaje(proporcionLegado()) }} de las marcas
+        proviene de la carga del legado. } La RLS sólo expone el nombre del usuario de la sesión: el
+        resto aparece como <b>«sin nombre visible»</b> y nunca se rellena con un nombre inventado.
+      </p>
+      }
+
+      <dl class="meta">
+        <dt>Definición</dt>
+        <dd>Conteo de registros por <code>created_by</code>.</dd>
+        <dt>Filtros</dt>
+        <dd>{{ filtrosTexto() }}</dd>
+        <dt>Fuente</dt>
+        <dd><code>created_by</code> · <code>core.usuarios</code> bajo RLS.</dd>
+        <dt>Corte</dt>
+        <dd>{{ corteTexto() }}</dd>
+      </dl>
+    </article>
+  </div>
+
+  <!-- ─────────────────── Resolución de compromisos ─────────────────── -->
+  <section class="sec-head" aria-labelledby="sec-resolucion">
+    <h2 class="sec-h2" id="sec-resolucion">Resolución de compromisos</h2>
+    <p class="sec-sub">
+      Días entre el alta del compromiso y su cumplimiento. Si el registro no permite calcularlo, la
+      tarjeta queda vacía y declara por qué.
+    </p>
+  </section>
+
+  <article class="card">
+    <div class="card-head">
+      <div>
+        <h3 class="chart-h3">Tiempo medio de resolución</h3>
+        <p class="card-sub">
+          Muestra = compromisos en estado «Cumplido» con fecha de cumplimiento.
+        </p>
+      </div>
+      <span
+        class="flag"
+        [class.flag-ok]="resolucion().mediaDias !== null"
+        [class.flag-off]="resolucion().mediaDias === null"
+      >
+        {{ resolucion().mediaDias !== null ? 'con dato' : 'sin dato' }}
+      </span>
+    </div>
+
+    @if (resolucion().muestra > 0 && resolucion().mediaDias !== null) {
+    <div class="metric-inline">
+      <b>{{ formatearDias(resolucion().mediaDias) }}</b>
+      <span>
+        media sobre {{ formatearNumero(resolucion().muestra) }} compromiso(s) cumplido(s)
+      </span>
+    </div>
+    } @else {
+    <div class="chart-empty">
+      <strong>«—» Sin dato de resolución</strong>
+      {{ resolucion().motivo ?? 'No hay compromisos cumplidos con fecha de cumplimiento en la
+      ventana.' }}
+    </div>
+    } @if (resolucion().hitosCumplidos > 0) {
+    <p class="footnote">
+      <b>Proxy declarado, no sustituye el dato:</b>
+      {{ formatearNumero(resolucion().hitosCumplidos) }} compromiso(s) tienen hitos con
+      <code>fecha_real</code>; el promedio entre el alta y el último hito es {{
+      formatearDias(resolucion().mediaHitosDias) }} (rango {{
+      formatearDias(resolucion().hitosMinDias) }} a {{ formatearDias(resolucion().hitosMaxDias) }}).
+      Eso mide el avance de hitos, <b>no</b> el tiempo de resolución del compromiso.
+    </p>
+    }
+
+    <dl class="meta">
+      <dt>Definición</dt>
+      <dd>
+        Días entre <code>fecha_inicio</code> y la fecha de cumplimiento; muestra = compromisos
+        «Cumplido» con fecha.
+      </dd>
+      <dt>Filtros</dt>
+      <dd>{{ filtrosTexto() }}</dd>
+      <dt>Fuente</dt>
+      <dd><code>core.compromisos</code> · <code>core.hitos_compromiso</code></dd>
+      <dt>Corte</dt>
+      <dd>{{ corteTexto() }}</dd>
+    </dl>
+  </article>
+
+  <!-- ────────────────────── Tabla-resumen del periodo ────────────────────── -->
+  <section class="sec-head" aria-labelledby="sec-resumen">
+    <h2 class="sec-h2" id="sec-resumen">Resumen del periodo</h2>
+    <p class="sec-sub">
+      Registros con y sin fecha por entidad. Lo que no tiene marca de tiempo no entra en las series
+      y se declara como «sin fecha».
+    </p>
+  </section>
+
+  <article class="card">
+    <div class="card-head">
+      <div>
+        <h3 class="chart-h3">Tabla-resumen</h3>
+        <p class="card-sub">Ventana {{ ventanaTexto() }} · zona {{ zonaHoraria() }}</p>
+      </div>
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="descargando()"
+        (click)="descargarCsv()"
+      >
+        <app-icono nombre="documentos" [tamano]="14" />
+        {{ descargando() ? 'Generando…' : 'Descargar CSV' }}
+      </button>
+    </div>
+
+    @if (errorDescarga(); as mensaje) {
+    <p class="form-error" role="alert">{{ mensaje }}</p>
+    }
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <caption class="table-caption">
+          Conteos por entidad; «sin fecha» son filas sin columna de fecha de negocio (por ejemplo,
+          altas del legado sin
+          <code>fecha_inicio</code
+          >).
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Entidad</th>
+            <th scope="col" class="num">Con fecha</th>
+            <th scope="col" class="num">Sin fecha</th>
+            <th scope="col">Primera fecha</th>
+            <th scope="col">Última fecha</th>
+            <th scope="col" class="num">Usuarios con carga</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fila of resumen().filas; track fila.clave) {
+          <tr>
+            <td>{{ fila.etiqueta }}</td>
+            <td class="num">{{ formatearNumero(fila.conFecha) }}</td>
+            <td class="num">{{ formatearNumero(fila.sinFecha) }}</td>
+            <td>{{ formatearFecha(fila.primera) }}</td>
+            <td>{{ formatearFecha(fila.ultima) }}</td>
+            <td class="num">{{ formatearNumero(fila.usuarios) }}</td>
+          </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td class="num">{{ formatearNumero(resumen().totalRegistros) }}</td>
+            <td class="num">{{ formatearNumero(resumen().totalSinFecha) }}</td>
+            <td colspan="2"></td>
+            <td class="num">—</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <p class="footnote">
+      «Usuarios con carga» cuenta <code>created_by</code> distinto por entidad, aunque el nombre no
+      sea visible por RLS; por eso no se suma en el pie.
+    </p>
+  </article>
+
+  <p class="meta-line">
+    Endpoint <code>GET /api/v1/analitica</code> · exportación
+    <code>GET /api/v1/analitica/export</code> · todo agregado en la transacción de la sesión, con la
+    RLS aplicada. La pantalla y el CSV comparten la misma carga, así que no pueden divergir.
+  </p>
+  }
+</section>

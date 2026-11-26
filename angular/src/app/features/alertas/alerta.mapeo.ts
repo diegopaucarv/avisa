@@ -6,15 +6,16 @@
  * españolas van primero en cada lectura, de modo que el rename del backend no
  * obliga a tocar los componentes.
  *
- * Dos reglas que no se negocian aquí:
- * - La prioridad es una etiqueta y el plazo vive en `slaHoras`: nunca se
- *   concatena el SLA dentro de la prioridad.
- * - El nivel de alerta es Inmediato · Táctico · Preventivo · Monitoreo; el
- *   catálogo heredado aún guarda `Inmediato (24h)` y el código `NA-00x`, así
- *   que la etiqueta se normaliza y el código se usa como respaldo.
+ * El eje de riesgo de la alerta es el del caso vinculado: Bajo · Medio ·
+ * Alto.
+ *
+ * `prioridad`, `plazoHoras` y `grave` se conservan sólo para no romper
+ * `features/bandeja` y `features/resumen` (fuera del alcance de esta pantalla):
+ * `aAlerta` los deja vacíos y ninguna vista de `features/alertas` los usa.
  */
 
 import {
+  RIESGOS,
   booleano,
   esRegistro,
   leer,
@@ -23,11 +24,14 @@ import {
   texto,
   type Registro,
 } from '../../dominio/mapeo';
+import type { Riesgo } from '../../dominio/modelos';
+import { formatearFechaCompacta } from '../../shared/formato-fecha';
 
 /* ------------------------------------------------------------------------- *
  * Vocabulario congelado
  * ------------------------------------------------------------------------- */
 
+/** @deprecated Eje retirado de la alerta; el riesgo del caso lo sustituye. */
 export const PRIORIDADES_ALERTA = [
   'Crítica inmediata',
   'Urgente',
@@ -35,13 +39,10 @@ export const PRIORIDADES_ALERTA = [
   'Seguimiento',
 ] as const;
 
+/** @deprecated */
 export type PrioridadAlerta = (typeof PRIORIDADES_ALERTA)[number];
 
-/**
- * Plazo de atención congelado de cada prioridad. Es el mismo dato que
- * `sla_horas` en `cat_prioridades_alerta`; se declara aquí para que el filtro y
- * la tabla lo muestren sin pedir el catálogo en cada pantalla.
- */
+/** @deprecated */
 export const PLAZO_POR_PRIORIDAD: Record<PrioridadAlerta, string> = {
   'Crítica inmediata': '24 h',
   Urgente: '48 h',
@@ -56,7 +57,7 @@ export type NivelAlerta = (typeof NIVELES_ALERTA)[number];
 
 /**
  * Opciones del filtro `nivel`: la API compara contra `codigo_legado`, no contra
- * el nombre. La etiqueta visible es la del vocabulario congelado.
+ * el nombre.
  */
 export const OPCIONES_NIVEL: readonly { valor: string; etiqueta: NivelAlerta }[] = [
   { valor: 'NA-001', etiqueta: 'Inmediato' },
@@ -65,11 +66,7 @@ export const OPCIONES_NIVEL: readonly { valor: string; etiqueta: NivelAlerta }[]
   { valor: 'NA-004', etiqueta: 'Monitoreo' },
 ];
 
-/**
- * Estados derivados que el servidor acepta filtrar (`ESTADOS` de
- * `lib/db/repos/alerts.ts`). Son los mismos cinco que emite `ALERT_STATE`; si se
- * añade uno aquí sin añadirlo allá, el filtro devolvería vacío en silencio.
- */
+/** Estados derivados que el servidor acepta filtrar. */
 export const ESTADOS_ALERTA = [
   'Pendiente de revisión',
   'En revisión',
@@ -80,12 +77,59 @@ export const ESTADOS_ALERTA = [
 
 export const ORDENES_ALERTA: readonly { valor: string; etiqueta: string }[] = [
   { valor: 'recent', etiqueta: 'Fecha de reporte (más reciente)' },
-  { valor: 'prioridad', etiqueta: 'Prioridad (crítica primero)' },
+  { valor: 'riesgo', etiqueta: 'Riesgo (alto primero)' },
 ];
+
+/**
+ * Alcance geográfico declarado de la alerta.
+ *
+ * No se reutiliza `Alcance` de `dominio/modelos.ts`: aquél es el eje
+ * Norte · Centro · Sur · Oriente · Nacional del caso, no la granularidad
+ * territorial de la alerta.
+ */
+export const ALCANCES_ALERTA = ['Distrito', 'Región', 'Nacional'] as const;
+
+export type AlcanceAlerta = (typeof ALCANCES_ALERTA)[number];
+
+/** Regiones del Perú para la selección derivada de un alcance regional. */
+export const REGIONES_PERU = [
+  'Amazonas',
+  'Áncash',
+  'Apurímac',
+  'Arequipa',
+  'Ayacucho',
+  'Cajamarca',
+  'Callao',
+  'Cusco',
+  'Huancavelica',
+  'Huánuco',
+  'Ica',
+  'Junín',
+  'La Libertad',
+  'Lambayeque',
+  'Lima',
+  'Loreto',
+  'Madre de Dios',
+  'Moquegua',
+  'Pasco',
+  'Piura',
+  'Puno',
+  'San Martín',
+  'Tacna',
+  'Tumbes',
+  'Ucayali',
+] as const;
 
 /* ------------------------------------------------------------------------- *
  * Tipos de dominio
  * ------------------------------------------------------------------------- */
+
+/** Una entrada del historial de revisiones de la alerta. */
+export type RevisionAlerta = {
+  autor: string;
+  fecha: string;
+  accion: string | null;
+};
 
 export type Alerta = {
   id: string;
@@ -94,9 +138,20 @@ export type Alerta = {
   casoId: string | null;
   casoCodigo: string | null;
   casoTitulo: string | null;
-  /** Etiqueta congelada; `null` si el catálogo no la reconoce. */
+  /**
+   * Riesgo heredado del caso vinculado (o declarado a mano). Es el eje de la
+   * tarjeta de riesgo y del filtro `riesgo`.
+   */
+  riesgo: Riesgo;
+  /** Granularidad geográfica declarada de la alerta. */
+  alcance: AlcanceAlerta;
+  region: string | null;
+  provincia: string | null;
+  /** @deprecated El eje de prioridad se retiró de la alerta. */
   prioridad: PrioridadAlerta | null;
+  /** @deprecated Ver `prioridad`. */
   plazoHoras: number | null;
+  /** @deprecated Ver `prioridad`. */
   grave: boolean;
   /** Etiqueta congelada; `null` si el nivel no se puede resolver. */
   nivel: NivelAlerta | null;
@@ -109,30 +164,39 @@ export type Alerta = {
   fechaAprobacion: string | null;
   aprobadaPor: string | null;
   validadaPor: string | null;
+  /** Quién revisó por última vez; alimenta la columna «Último revisor». */
+  ultimoRevisor: string | null;
+  /** ISO de la última modificación del contenido o los metadatos. */
+  ultimaModificacion: string | null;
+  /** Quién modificó por última vez. */
+  modificadoPor: string | null;
+  /** Revisiones registradas, de la más reciente a la más antigua. */
+  historial: RevisionAlerta[];
   descripcionRiesgo: string | null;
   hechosRecientes: string | null;
   situacionActual: string | null;
+  /** @deprecated Se retiró de la ficha; se conserva por compatibilidad. */
   accionesOaipcs: string | null;
   /** `riesgos_json` aplanado a líneas legibles. */
   riesgos: string[];
   /** `acciones_sugeridas_json` aplanado a líneas legibles. */
   accionesSugeridas: string[];
+  /** Actores clave del territorio o del sector. */
+  actoresClave: string[];
+  /** Demandas inmediatas recogidas en campo. */
+  demandasInmediatas: string[];
+  /** Plantilla de WhatsApp editada a mano; `null` usa la generada. */
+  plantillaWhatsapp: string | null;
   fuenteTipo: string | null;
   fuenteDescripcion: string | null;
   fuenteUrl: string | null;
-  /** `core.distritos.id`; `null` si la alerta no declara distrito. */
   distritoId: number | null;
   distrito: string | null;
   /** «Distrito · Provincia · Región» para desambiguar nombres repetidos. */
   distritoRuta: string | null;
-  /** Distrito principal del caso vinculado, si lo tiene. */
   casoDistritoId: number | null;
   casoDistrito: string | null;
   casoDistritoRuta: string | null;
-  /**
-   * `null` si falta uno de los dos distritos. `false` no es un error: una
-   * alerta puede ocurrir en otro punto del territorio que el expediente.
-   */
   distritoCoincideConCaso: boolean | null;
   subsector: string | null;
   origen: string | null;
@@ -141,16 +205,19 @@ export type Alerta = {
   clasificacion: number;
   estado: string;
   atendida: boolean;
-  /** ISO de la anulación lógica; `null` mientras la alerta está vigente. */
   anuladoEn: string | null;
-  /** Motivo declarado al anular; sólo se puebla en la papelera. */
   motivoAnulacion: string | null;
-  /** Usuario que anuló (id); sólo se puebla en la papelera. */
   anuladoPor: string | null;
-  /** Nombre legible de quien anuló; `null` si no se puede resolver. */
   anuladoPorNombre: string | null;
-  /** Lote de anulación al que pertenece la fila. */
   anulacionId: string | null;
+  /** Marca de archivo (ISO 8601). Archivada no es anulada. */
+  archivadoEn: string | null;
+  /** Motivo declarado al archivar. */
+  motivoArchivo: string | null;
+  /** Usuario que archivó (id). */
+  archivadoPor: string | null;
+  /** Nombre legible de quien archivó. */
+  archivadoPorNombre: string | null;
 };
 
 export type DemandaAlerta = {
@@ -171,62 +238,50 @@ export type DetalleAlerta = {
 /**
  * Cuerpo parcial de `PATCH /api/v1/alerts/:id`.
  *
- * Sólo las claves que el repositorio acepta
- * (`lib/db/repos/alerts.ts` → `updateAlert`). `pasoActual` se envía aparte,
- * desde las acciones de flujo, para no mezclar contenido con recorrido.
+ * Los metadatos (`riesgo`, `alcance`, `region`, `provincia`, `casoCode`,
+ * `distritoId`, `plantillaWhatsapp`) los puede editar cualquier perfil con
+ * escritura; el contenido narrativo exige además clasificación suficiente.
  */
 export type PatchAlerta = {
-  titulo?: string;
-  /** Etiqueta de `cat_prioridades_alerta.codigo`; `null` desvincula. */
-  prioridad?: string | null;
-  /** `codigo_legado` del nivel (`NA-00x`); `null` desvincula. */
-  nivel?: string | null;
+  titulo?: string | null;
+  riesgo?: Riesgo | null;
+  alcance?: AlcanceAlerta | null;
+  region?: string | null;
+  provincia?: string | null;
   situacionActual?: string | null;
   hechosRecientes?: string | null;
   descripcionRiesgo?: string | null;
-  accionesOaipcs?: string | null;
+  actoresClave?: string[] | null;
+  demandasInmediatas?: string[] | null;
   accionesSugeridas?: string[] | null;
+  plantillaWhatsapp?: string | null;
   casoCode?: string | null;
-  /**
-   * `core.distritos.id`; `null` deja la alerta sin distrito. Ausente = sin
-   * cambio: el repositorio sólo hereda el del caso si la alerta no tenía uno.
-   */
   distritoId?: number | null;
 };
 
 /**
  * Cuerpo de `POST /api/v1/alerts` (alta).
  *
- * `createAlert` (`lib/db/repos/alerts.ts`) exige `titulo` y `prioridad`; el
- * resto son opcionales. No se incluye `nivel`: `/api/v1/catalogs` no expone
- * `cat_niveles_alerta`, así que el cliente no puede ofrecer sus opciones sin
- * inventarlas.
+ * `riesgo` y `alcance` son obligatorios: el formulario no deja registrar una
+ * alerta sin nivel de riesgo ni sin ámbito geográfico.
  */
 export type AltaAlerta = {
   titulo: string;
-  /** `cat_prioridades_alerta.codigo` tal como lo devuelve `/v1/catalogs`. */
-  prioridad: string;
-  /**
-   * `core.distritos.id` del catálogo INEI. `core.alertas_tempranas` sólo tiene
-   * `distrito_id` (sin lugares operativos), por eso el buscador de la alerta se
-   * restringe a distritos.
-   */
+  riesgo: Riesgo;
+  alcance: AlcanceAlerta;
   distritoId?: number;
   casoCode?: string;
+  region?: string;
+  provincia?: string;
   descripcionRiesgo?: string;
   hechosRecientes?: string;
   situacionActual?: string;
-  accionesOaipcs?: string;
+  actoresClave?: string[];
+  demandasInmediatas?: string[];
+  accionesSugeridas?: string[];
 };
 
-/**
- * Opción de `catalogs.prioridadesAlerta` (`GET /api/v1/catalogs`).
- *
- * El catálogo usa `codigo` con espacios (`Critica inmediata`), pero
- * `createAlert` lo resuelve con `core.normalizar_ref`, así que se reenvía tal
- * cual. `slaHoras` y `grave` sólo alimentan el formulario: el plazo no se edita
- * ni se concatena a la etiqueta.
- */
+/** @deprecated Sólo lo consume el antiguo formulario de prioridad. */
 export type OpcionPrioridadAlerta = {
   valor: string;
   etiqueta: string;
@@ -234,7 +289,7 @@ export type OpcionPrioridadAlerta = {
   grave: boolean;
 };
 
-/** `GET /api/v1/catalogs` → `catalogs.prioridadesAlerta`. */
+/** @deprecated `GET /api/v1/catalogs` → `catalogs.prioridadesAlerta`. */
 export function aPrioridadesAlerta(bruto: unknown): OpcionPrioridadAlerta[] {
   const registro = esRegistro(bruto) ? bruto : {};
   const crudo = leer(registro, ['catalogs', 'catalogos']);
@@ -269,16 +324,6 @@ function plegar(valor: string): string {
     .toLowerCase();
 }
 
-const PRIORIDAD_POR_ETIQUETA = new Map<string, PrioridadAlerta>();
-for (const prioridad of PRIORIDADES_ALERTA) {
-  PRIORIDAD_POR_ETIQUETA.set(plegar(prioridad), prioridad);
-}
-
-function aPrioridad(valor: string | null): PrioridadAlerta | null {
-  if (!valor) return null;
-  return PRIORIDAD_POR_ETIQUETA.get(plegar(valor)) ?? null;
-}
-
 const NIVEL_POR_CODIGO = new Map<string, NivelAlerta>(
   OPCIONES_NIVEL.map((opcion) => [opcion.valor, opcion.etiqueta]),
 );
@@ -288,10 +333,7 @@ for (const nivel of NIVELES_ALERTA) {
   NIVEL_POR_ETIQUETA.set(plegar(nivel), nivel);
 }
 
-/**
- * El catálogo heredado guarda `Inmediato (24h)`; el SLA ya vive en
- * `sla_horas`, así que el paréntesis se descarta.
- */
+/** El catálogo heredado guarda `Inmediato (24h)`; el SLA se descarta. */
 function aNivel(nombre: string | null, codigo: string | null): NivelAlerta | null {
   if (nombre) {
     const limpio = nombre.replace(/\([^)]*\)/g, '');
@@ -303,6 +345,48 @@ function aNivel(nombre: string | null, codigo: string | null): NivelAlerta | nul
     if (encontrado) return encontrado;
   }
   return null;
+}
+
+const RIESGO_POR_ETIQUETA = new Map<string, Riesgo>();
+for (const riesgo of RIESGOS) {
+  RIESGO_POR_ETIQUETA.set(plegar(riesgo), riesgo);
+}
+
+/** «Alto», «alto», «Medio» (descartado) → `Riesgo | null`. */
+function aRiesgo(valor: string | null): Riesgo | null {
+  if (!valor) return null;
+  return RIESGO_POR_ETIQUETA.get(plegar(valor)) ?? null;
+}
+
+const ALCANCE_POR_ETIQUETA = new Map<string, AlcanceAlerta>();
+for (const alcance of ALCANCES_ALERTA) {
+  ALCANCE_POR_ETIQUETA.set(plegar(alcance), alcance);
+}
+
+function aAlcance(valor: string | null): AlcanceAlerta | null {
+  if (!valor) return null;
+  return ALCANCE_POR_ETIQUETA.get(plegar(valor)) ?? null;
+}
+
+/** «Distrito · Provincia · Región» → provincia y región. */
+function partirRuta(ruta: string | null): { provincia: string | null; region: string | null } {
+  if (!ruta) return { provincia: null, region: null };
+  const partes = ruta
+    .split('·')
+    .map((parte) => parte.trim())
+    .filter((parte) => parte.length > 0);
+  return { provincia: partes[1] ?? null, region: partes[2] ?? null };
+}
+
+function aRevisiones(bruto: unknown): RevisionAlerta[] {
+  return lista(esRegistro(bruto) ? bruto : {}, ['historial', 'revisiones']).map((item) => {
+    const fila = esRegistro(item) ? item : {};
+    return {
+      autor: texto(fila, ['autor', 'usuario', 'actor', 'por']) ?? 'Sin identificar',
+      fecha: texto(fila, ['fecha', 'fechaHora', 'fecha_hora', 'creadoEn']) ?? '',
+      accion: texto(fila, ['accion', 'detalle', 'motivo']),
+    };
+  });
 }
 
 const CLAVES_TEXTO = [
@@ -324,10 +408,9 @@ function lineaDeRegistro(registro: Registro): string | null {
 }
 
 /**
- * `riesgos_json` y `acciones_sugeridas_json` son «narrativa semiestructurada»:
- * no hay forma garantizada. Se acepta lista de textos, lista de objetos o un
- * texto con viñetas y se aplana a líneas. Lo que no se puede leer, no se
- * inventa: se descarta.
+ * `riesgos_json`, `actores_clave` y `demandas_inmediatas` son «narrativa
+ * semiestructurada»: se acepta lista de textos, lista de objetos o un texto con
+ * viñetas y se aplana a líneas. Lo que no se puede leer, no se inventa.
  */
 export function aLineas(valor: unknown): string[] {
   if (typeof valor === 'string') {
@@ -355,10 +438,7 @@ export function aJsonLineas(lineas: readonly string[]): string[] | null {
   return limpias.length ? limpias : null;
 }
 
-/**
- * Tri-estado: `null` cuando el backend no pudo comparar (falta uno de los dos
- * distritos). `booleano` no sirve aquí porque colapsa «no sé» con «no».
- */
+/** Tri-estado: `null` cuando el backend no pudo comparar. */
 function booleanoONull(registro: Registro, claves: readonly string[]): boolean | null {
   const valor = leer(registro, claves);
   return typeof valor === 'boolean' ? valor : null;
@@ -368,6 +448,16 @@ function booleanoONull(registro: Registro, claves: readonly string[]): boolean |
 export function aAlerta(bruto: unknown): Alerta {
   const registro = esRegistro(bruto) ? bruto : {};
   const nivelCodigo = texto(registro, ['nivelCodigo', 'nivel_codigo']);
+  const distritoId = numero(registro, ['distritoId', 'distrito_id']);
+  const distritoRuta = texto(registro, ['distritoRuta', 'distrito_ruta']);
+  const partes = partirRuta(distritoRuta);
+  const region = texto(registro, ['region']) ?? partes.region;
+  const provincia = texto(registro, ['provincia']) ?? partes.provincia;
+  const historial = aRevisiones(leer(registro, ['historial', 'revisiones']));
+  const riesgo =
+    aRiesgo(texto(registro, ['riesgo'])) ??
+    aRiesgo(texto(registro, ['casoRiesgo', 'caso_riesgo'])) ??
+    'Bajo';
 
   return {
     id: texto(registro, ['id']) ?? '',
@@ -376,9 +466,15 @@ export function aAlerta(bruto: unknown): Alerta {
     casoId: texto(registro, ['casoId', 'caso_id']),
     casoCodigo: texto(registro, ['casoCode', 'caso_code']),
     casoTitulo: texto(registro, ['casoTitulo', 'caso_titulo']),
-    prioridad: aPrioridad(texto(registro, ['prioridad'])),
-    plazoHoras: numero(registro, ['slaHoras', 'sla_horas']),
-    grave: booleano(registro, ['grave']),
+    riesgo,
+    alcance:
+      aAlcance(texto(registro, ['alcance'])) ??
+      (distritoId !== null ? 'Distrito' : region ? 'Región' : 'Nacional'),
+    region,
+    provincia,
+    prioridad: null,
+    plazoHoras: null,
+    grave: false,
     nivel: aNivel(texto(registro, ['nivel']), nivelCodigo),
     nivelCodigo,
     pasoActual: numero(registro, ['pasoActual', 'paso_actual']) ?? 1,
@@ -389,18 +485,30 @@ export function aAlerta(bruto: unknown): Alerta {
     fechaAprobacion: texto(registro, ['fechaAprobacion', 'fecha_aprobacion']),
     aprobadaPor: texto(registro, ['aprobadaPor', 'aprobada_por']),
     validadaPor: texto(registro, ['validadaPor', 'validada_por']),
+    ultimoRevisor:
+      texto(registro, ['ultimoRevisor', 'ultimo_revisor']) ??
+      historial[0]?.autor ??
+      texto(registro, ['validadaPor', 'validada_por']),
+    ultimaModificacion:
+      texto(registro, ['ultimaModificacion', 'ultima_modificacion']) ?? historial[0]?.fecha ?? null,
+    modificadoPor:
+      texto(registro, ['modificadoPor', 'modificado_por']) ?? historial[0]?.autor ?? null,
+    historial,
     descripcionRiesgo: texto(registro, ['descripcionRiesgo', 'descripcion_riesgo']),
     hechosRecientes: texto(registro, ['hechosRecientes', 'hechos_recientes']),
     situacionActual: texto(registro, ['situacionActual', 'situacion_actual']),
     accionesOaipcs: texto(registro, ['accionesOaipcs', 'acciones_oaipcs']),
     riesgos: aLineas(leer(registro, ['riesgos'])),
     accionesSugeridas: aLineas(leer(registro, ['accionesSugeridas', 'acciones_sugeridas'])),
+    actoresClave: aLineas(leer(registro, ['actoresClave', 'actores_clave'])),
+    demandasInmediatas: aLineas(leer(registro, ['demandasInmediatas', 'demandas_inmediatas'])),
+    plantillaWhatsapp: texto(registro, ['plantillaWhatsapp', 'plantilla_whatsapp']),
     fuenteTipo: texto(registro, ['fuenteTipo', 'fuente_tipo']),
     fuenteDescripcion: texto(registro, ['fuenteDescripcion', 'fuente_descripcion']),
     fuenteUrl: texto(registro, ['fuenteUrl', 'fuente_url']),
-    distritoId: numero(registro, ['distritoId', 'distrito_id']),
+    distritoId,
     distrito: texto(registro, ['distrito']),
-    distritoRuta: texto(registro, ['distritoRuta', 'distrito_ruta']),
+    distritoRuta,
     casoDistritoId: numero(registro, ['casoDistritoId', 'caso_distrito_id']),
     casoDistrito: texto(registro, ['casoDistrito', 'caso_distrito']),
     casoDistritoRuta: texto(registro, ['casoDistritoRuta', 'caso_distrito_ruta']),
@@ -420,6 +528,10 @@ export function aAlerta(bruto: unknown): Alerta {
     anuladoPor: texto(registro, ['anuladoPor', 'anulado_por']),
     anuladoPorNombre: texto(registro, ['anuladoPorNombre', 'anulado_por_nombre']),
     anulacionId: texto(registro, ['anulacionId', 'anulacion_id']),
+    archivadoEn: texto(registro, ['archivadoEn', 'archivado_en']),
+    motivoArchivo: texto(registro, ['motivoArchivo', 'motivo_archivo']),
+    archivadoPor: texto(registro, ['archivadoPor', 'archivado_por']),
+    archivadoPorNombre: texto(registro, ['archivadoPorNombre', 'archivado_por_nombre']),
   };
 }
 
@@ -449,21 +561,18 @@ export function aDetalleAlerta(bruto: unknown): DetalleAlerta {
  * Presentación
  * ------------------------------------------------------------------------- */
 
-/** «48 h» o «Sin plazo». El SLA nunca se mete dentro de la prioridad. */
+/** @deprecated «48 h» o «Sin plazo». */
 export function formatearPlazo(horas: number | null): string {
   return horas === null ? 'Sin plazo' : `${horas} h`;
 }
 
-/**
- * Prioridad con su plazo entre paréntesis: «Crítica inmediata (24 h)»,
- * «Seguimiento (sin plazo)». Es la forma que pide la tabla del item 106 y la
- * misma que ofrece el filtro de prioridad del item 104.
- */
+/** @deprecated */
 export function etiquetaPrioridadConPlazo(prioridad: PrioridadAlerta | null): string {
   if (!prioridad) return 'Sin prioridad';
   return `${prioridad} (${PLAZO_POR_PRIORIDAD[prioridad]})`;
 }
 
+/** @deprecated */
 export function clavePrioridad(prioridad: PrioridadAlerta | null): string {
   switch (prioridad) {
     case 'Crítica inmediata':
@@ -491,6 +600,132 @@ export function claseEstado(estado: string): string {
   }
 }
 
+/**
+ * Rótulos cortos de estado para la tabla y la ficha. «En revisión» y
+ * «Validada» se abrevian; el valor canónico sigue siendo el de
+ * `ESTADOS_ALERTA`.
+ */
+export function etiquetaEstado(estado: string | null): string {
+  switch (estado) {
+    case 'Pendiente de revisión':
+      return 'Pendiente';
+    case 'En revisión':
+      return 'Revisión';
+    case 'En modificación':
+      return 'Modificación';
+    case 'Validada':
+      return 'Validado';
+    case 'Aprobada':
+      return 'Aprobado';
+    default:
+      return estado?.trim() || 'Sin estado';
+  }
+}
+
+/** Clave de color del riesgo (`risk-alto` / `risk-medio` / `risk-bajo`). */
+export function claveRiesgo(riesgo: Riesgo): string {
+  switch (riesgo) {
+    case 'Alto':
+      return 'alto';
+    case 'Medio':
+      return 'medio';
+    default:
+      return 'bajo';
+  }
+}
+
+/** «REPORTE DE ALERTA TEMPRANA | …» y el 🔔 inicial fuera del título. */
+const PREFIJO_TITULO = /^(?:\s*🔔)?\s*reporte\s+de\s+alerta\s+temprana\s*\|\s*/i;
+
+export function tituloLimpio(titulo: string | null | undefined): string {
+  return (titulo ?? '').replace(PREFIJO_TITULO, '').trim();
+}
+
+/** «Región / Provincia», o el distrito cuando no hay región conocida. */
+export function geografiaAlerta(alerta: Alerta): string {
+  if (alerta.region && alerta.provincia) return `${alerta.region} / ${alerta.provincia}`;
+  return alerta.region ?? alerta.provincia ?? alerta.distrito ?? 'Sin geografía';
+}
+
+/**
+ * «Local · distrito», «Regional · región» o «Nacional · …» según el alcance.
+ * Usa un solo nombre de lugar (no «región / provincia») y degrada al nivel
+ * territorial cuando la alerta no tiene geografía cargada.
+ */
+export function ambitoAlerta(alerta: Alerta): string {
+  const lugar =
+    alerta.alcance === 'Distrito'
+      ? (alerta.distrito ?? alerta.provincia ?? alerta.region ?? '')
+      : (alerta.region ?? alerta.provincia ?? alerta.distrito ?? '');
+
+  switch (alerta.alcance) {
+    case 'Distrito':
+      return lugar ? `Local · ${lugar}` : 'Local';
+    case 'Región':
+      return lugar ? `Regional · ${lugar}` : 'Regional';
+    default:
+      return lugar ? `Nacional · ${lugar}` : 'Nacional';
+  }
+}
+
+function bloque(titulo: string, lineas: readonly string[]): string {
+  const contenido = lineas
+    .map((linea) => linea.trim())
+    .filter((linea) => linea.length > 0)
+    .join('\n');
+  return contenido ? `*${titulo}*\n${contenido}` : `*${titulo}*`;
+}
+
+/**
+ * Mensaje de WhatsApp con la estructura del «Reporte de alerta temprana».
+ * `*` es negrita en WhatsApp y los encabezados llevan emoji para que el mensaje
+ * se lea desde el móvil sin formato. Las fechas van en forma compacta
+ * (`05NOV2026`).
+ *
+ * Las secciones aparecen siempre: `bloque` conserva el encabezado aunque no
+ * haya contenido, para que el reporte no pierda su esqueleto. Los encabezados
+ * son los del reporte de alerta temprana, en ese orden y con esos emojis.
+ *
+ * No incorpora `plantillaWhatsapp`: si la alerta tiene una plantilla guardada,
+ * es ella la que manda (la decide quien llama).
+ */
+export function plantillaWhatsapp(alerta: Alerta): string {
+  const titulo = tituloLimpio(alerta.titulo) || alerta.codigo;
+  const fecha = alerta.fechaReporte ? formatearFechaCompacta(alerta.fechaReporte) : 'Sin fecha';
+  const descripcion = (alerta.descripcionRiesgo ?? '').trim();
+  const riesgos = alerta.riesgos.filter((riesgo) => riesgo.trim() !== descripcion);
+
+  const acciones = [
+    'De considerarlo pertinente, se sugiere:',
+    ...alerta.accionesSugeridas
+      .map((accion) => accion.trim())
+      .map((accion) => accion.replace(/^de\s+considerarlo\s+pertinente,?\s*se\s+sugiere:?\s*/i, ''))
+      .filter((accion) => accion.length > 0)
+      .map((accion) => `- ${accion}`),
+  ];
+
+  const partes = [
+    [
+      `*🔔 REPORTE DE ALERTA TEMPRANA | ${titulo}*`,
+      `📅 _*Fecha de emisión*: ${fecha}_`,
+      `🌍 _*Ámbito*: ${ambitoAlerta(alerta)}_`,
+    ].join('\n'),
+    bloque('🔍 1. SITUACIÓN ACTUAL', [alerta.situacionActual ?? '']),
+    bloque('🏗️ 2. HECHOS RECIENTES Y ACCIONES EN CURSO', [alerta.hechosRecientes ?? '']),
+    bloque(
+      '👥 3. ACTORES CLAVE',
+      alerta.actoresClave.map((actor) => `- ${actor}`),
+    ),
+    bloque(
+      '📌 4. DEMANDAS INMEDIATAS',
+      alerta.demandasInmediatas.map((demanda) => `- ${demanda}`),
+    ),
+    bloque('⚠️ RIESGOS', [descripcion, ...riesgos.map((riesgo) => `- ${riesgo}`)]),
+    bloque('🧭 ACCIONES SUGERIDAS', acciones),
+  ];
+  return partes.filter((parte) => parte.trim()).join('\n\n');
+}
+
 export type EtapaFlujo = {
   paso: number;
   nombre: string;
@@ -501,12 +736,7 @@ export type EtapaFlujo = {
 /** Los cinco pasos de `core.flujo_definicion` (`tipo_flujo = 'alerta'`). */
 const ETAPAS_FLUJO: readonly EtapaFlujo[] = [
   { paso: 1, nombre: 'Elaboración', estado: 'Registrado', responsable: 'Sectorista' },
-  {
-    paso: 2,
-    nombre: 'Validación previa',
-    estado: 'Validado',
-    responsable: 'Sectorista',
-  },
+  { paso: 2, nombre: 'Validación previa', estado: 'Validado', responsable: 'Sectorista' },
   {
     paso: 3,
     nombre: 'Aprobación definitiva',
@@ -522,12 +752,17 @@ export function etapaDeFlujo(paso: number): EtapaFlujo | null {
 }
 
 export type AccionFlujo = {
-  /** Paso de destino. */
   paso: number;
   etiqueta: string;
   detalle: string;
   responsable: string;
 };
+
+/** Paso 3: la aprobación definitiva de la Dirección OAIPCS. */
+export const PASO_APROBACION_DEFINITIVA = 3;
+
+/** Paso 2: revisión / validación previa a la que se devuelve una alerta. */
+export const PASO_REVISION = 2;
 
 /**
  * Transiciones legales desde cada paso, según `docs/03_ejecucion/mvp.md` §3.4:
@@ -537,9 +772,6 @@ export type AccionFlujo = {
  * 3 → 4 Remisión, o devolución a 2 o a 1.
  * 4 → 5 Archivo.
  * 5 → ninguna: reabrir exige una alerta nueva.
- *
- * `updateAlert` acepta cualquier `pasoActual` entre 1 y 99, así que la
- * restricción la pone el cliente; el backend no la valida.
  */
 const ACCIONES_POR_PASO: Readonly<Record<number, readonly AccionFlujo[]>> = {
   1: [

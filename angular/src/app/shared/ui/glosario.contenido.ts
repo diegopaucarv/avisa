@@ -32,14 +32,6 @@ export const GLOSARIO: Record<string, EntradaGlosario> = {
     fuente: 'Guía §7.5.2 · Tabla 3',
     ayudaId: 'riesgos',
   },
-  tematica: {
-    id: 'tematica',
-    termino: 'Temática',
-    definicion:
-      'Naturaleza de la disputa y rol del sector. Una sola temática por caso, entre las seis de la Guía; no admite texto libre.',
-    fuente: 'Guía §7.6',
-    ayudaId: 'tematicas',
-  },
   'naturaleza-caso': {
     id: 'naturaleza-caso',
     termino: 'Naturaleza del caso',

@@ -13,6 +13,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { DomSanitizer, type SafeResourceUrl, type SafeUrl } from '@angular/platform-browser';
 
 import { urlApi } from '../../core/config/entorno';
 import {
@@ -27,18 +28,30 @@ import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
+import {
+  ACEPTADOS_DOCUMENTO,
+  DocumentoArchivoService,
+  MAX_DOCUMENTO_BYTES,
+} from './documento-archivo.service';
 import {
   aDetalleDocumento,
   claseEstado,
+  etapaFlujo,
   etiquetaAnexo,
-  formatearConfianza,
   formatearFecha,
+  formatearFechaHora,
   nombreArchivo,
+  origenDeExtraccion,
+  temasDeExtraccion,
   type AltaDocumento,
   type DetalleDocumento,
   type Documento,
+  type EstadoExtraccion,
+  type ExtraccionDocumento,
   type OpcionCatalogo,
   type PatchDocumento,
+  type VersionDocumento,
 } from './documento.mapeo';
 
 type BorradorDocumento = {
@@ -93,7 +106,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
  */
 @Component({
   selector: 'app-documento-panel',
-  imports: [IconoComponent],
+  imports: [IconoComponent, AdjuntosPanelComponent],
   templateUrl: './documento-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -106,12 +119,6 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       width: min(640px, 100%);
     }
 
-    .drawer-head h2 {
-      margin: 0;
-      color: #1c2a38;
-      font: 700 16px/1.35 var(--font-display);
-    }
-
     .panel-cabecera {
       display: flex;
       flex-direction: column;
@@ -122,7 +129,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .panel-codigo {
       margin: 0;
       color: #8a98a5;
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.7px;
       text-transform: uppercase;
@@ -165,6 +172,11 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-top: 0;
     }
 
+    .drawer-body .detail-section h3 {
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
     .panel-datos {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -181,7 +193,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
 
     .panel-datos dt {
       color: #97a1aa;
-      font-size: 8.5px;
+      font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -190,7 +202,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .panel-datos dd {
       margin: 0;
       color: #465a6c;
-      font-size: 10.5px;
+      font-size: 13px;
       line-height: 1.45;
       overflow-wrap: anywhere;
     }
@@ -198,7 +210,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .panel-texto {
       margin: 8px 0 0;
       color: #52677a;
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.65;
       white-space: pre-line;
     }
@@ -206,14 +218,14 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
     .panel-vacio {
       margin: 8px 0 0;
       color: #a0aab3;
-      font-size: 10.5px;
+      font-size: 13px;
       font-style: italic;
     }
 
     .panel-nota {
       margin: 0;
       color: #8d99a6;
-      font-size: 10px;
+      font-size: 12.5px;
       line-height: 1.5;
     }
 
@@ -223,7 +235,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-radius: 6px;
       background: #edf6f0;
       color: #52806a;
-      font-size: 10.5px;
+      font-size: 13px;
     }
 
     .panel-error {
@@ -235,7 +247,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-radius: 6px;
       background: #fdf6f5;
       color: #a3402f;
-      font-size: 10.5px;
+      font-size: 13px;
     }
 
     .panel-error p {
@@ -275,7 +287,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       border-radius: 6px;
       background: #fdf8ef;
       color: #7a5a24;
-      font-size: 10.5px;
+      font-size: 13px;
     }
 
     .panel-confirmacion p {
@@ -302,12 +314,12 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
 
     .panel-fuentes strong {
       color: #465a6c;
-      font-size: 10.5px;
+      font-size: 13px;
     }
 
     .panel-fuentes small {
       color: #97a1aa;
-      font-size: 9px;
+      font-size: 12px;
     }
 
     .panel-caso-lista {
@@ -339,13 +351,13 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
 
     .panel-caso-codigo {
       color: var(--ink);
-      font-size: 10px;
+      font-size: 12.5px;
       font-weight: 700;
     }
 
     .panel-caso-titulo {
       color: var(--muted);
-      font-size: 9.5px;
+      font-size: 12px;
       line-height: 1.45;
     }
 
@@ -365,6 +377,270 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       flex-direction: column;
       gap: 3px;
       min-width: 0;
+    }
+
+    /* ── Archivo, visor, versiones y extracciones ──────────────── */
+
+    .panel-acciones-archivo {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0 6px;
+    }
+
+    .subir-archivo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--line, #e6ebef);
+      border-radius: 8px;
+      background: var(--paper, #fff);
+      color: var(--blue-dark, #1d427f);
+      font: 600 12.5px/1 var(--font-body, system-ui);
+      cursor: pointer;
+    }
+
+    .subir-archivo:hover {
+      background: var(--blue-pale, #eaf1fb);
+    }
+
+    .subir-archivo:focus-within {
+      outline: 2px solid var(--blue, #2455a2);
+      outline-offset: 1px;
+    }
+
+    .subir-archivo input[type='file'] {
+      max-width: 210px;
+      font-size: 12px;
+    }
+
+    .mono {
+      color: #5c7285;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 11.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .visor {
+      margin-top: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line, #e6ebef);
+      border-radius: 10px;
+      background: var(--canvas, #f5f7f8);
+    }
+
+    .visor-marco {
+      display: block;
+      width: 100%;
+      height: 520px;
+      border: 0;
+      background: #fff;
+    }
+
+    .visor-imagen {
+      display: block;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 8px;
+    }
+
+    .visor-texto {
+      max-height: 380px;
+      margin: 0;
+      padding: 12px 14px;
+      overflow: auto;
+      color: var(--ink-2, #33475b);
+      font:
+        12px/1.5 ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .visor-texto.extracto {
+      margin-top: 6px;
+      border: 1px solid var(--line, #e6ebef);
+      border-radius: 8px;
+      background: #fbfcfd;
+    }
+
+    .flag {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      padding: 7px 10px;
+      border: 1px solid #f3e0c2;
+      border-radius: 7px;
+      background: var(--amber-pale, #fff4e2);
+      color: var(--amber, #aa6a11);
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.45;
+    }
+
+    .flag::before {
+      content: '⚑';
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .flag-info {
+      border-color: #cddcef;
+      background: var(--blue-pale, #eaf1fb);
+      color: var(--blue, #2455a2);
+    }
+
+    .flag-mini {
+      display: inline-flex;
+      padding: 2px 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+    }
+
+    .docs {
+      width: 100%;
+      margin-top: 8px;
+      border-collapse: collapse;
+    }
+
+    .docs th {
+      padding: 4px 8px 4px 0;
+      border-bottom: 1px solid var(--line, #e6ebef);
+      color: #97a1aa;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    .docs td {
+      padding: 6px 8px 6px 0;
+      border-bottom: 1px solid #f1f3f5;
+      color: var(--ink-2, #33475b);
+      font-size: 12px;
+      line-height: 1.45;
+      vertical-align: top;
+    }
+
+    .docs tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .docs .tipo {
+      display: inline-flex;
+      align-items: center;
+      min-height: 18px;
+      padding: 0 6px;
+      border: 1px solid var(--line, #e6ebef);
+      border-radius: 4px;
+      background: #f7f9fa;
+      color: #6d8296;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .docs .fecha {
+      color: var(--muted, #778797);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .docs .doc-link {
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--blue, #2455a2);
+      font: 600 12px/1.4 var(--font-body, system-ui);
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .docs .doc-link:hover {
+      text-decoration: underline;
+    }
+
+    .docs .doc-link:focus-visible {
+      outline: 2px solid var(--blue, #2455a2);
+      outline-offset: 1px;
+    }
+
+    .grupo-titulo {
+      margin: 10px 0 4px;
+      color: var(--ink, #17283a);
+      font: 700 13px/1.2 var(--font-display, system-ui);
+    }
+
+    .extraccion-bloque + .extraccion-bloque {
+      margin-top: 12px;
+    }
+
+    .panel-datos-linea {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+    }
+
+    .chips-temas {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 19px;
+      padding: 0 8px;
+      border: 1px solid var(--line, #e6ebef);
+      border-radius: 999px;
+      background: #f7f9fa;
+      color: var(--muted, #778797);
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .chip-tema {
+      background: var(--paper, #fff);
+      color: var(--ink-2, #33475b);
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .chip-listo {
+      border-color: #cbe6d8;
+      background: #eef7f2;
+      color: var(--green, #34785b);
+    }
+
+    .chip-error {
+      border-color: #f0d2cf;
+      background: var(--red-pale, #fbeceb);
+      color: var(--red, #ad4d46);
+    }
+
+    .chip-no_disponible,
+    .chip-pendiente,
+    .chip-en_proceso {
+      border-color: #f3e0c2;
+      background: var(--amber-pale, #fff4e2);
+      color: var(--amber, #aa6a11);
     }
   `,
 })
@@ -405,6 +681,12 @@ export class DocumentoPanelComponent {
     () => this.detalle()?.documento ?? this.documento(),
   );
   readonly fuentes = computed(() => this.detalle()?.fuentes ?? []);
+
+  /** Etapa de flujo derivada del estado (ver `etapaFlujo`). */
+  readonly etapa = computed(() => {
+    const documento = this.cabecera();
+    return documento ? etapaFlujo(documento) : 'Sin etapa';
+  });
   readonly errorDetalle = this.detalleRecurso.error;
   readonly cargandoDetalle = computed(
     () => this.detalleRecurso.estado() === 'cargando' && this.detalle() === null,
@@ -439,6 +721,48 @@ export class DocumentoPanelComponent {
   readonly guardandoEstado = signal(false);
   readonly errorEstado = signal<string | null>(null);
   readonly avisoEstado = signal<string | null>(null);
+
+  /* -------- Archivo binario, visor, versiones y extracciones -------- */
+
+  private readonly archivoServicio = inject(DocumentoArchivoService);
+  private readonly sanitizer = inject(DomSanitizer);
+
+  readonly aceptadosArchivo = ACEPTADOS_DOCUMENTO;
+
+  readonly subiendoArchivo = signal(false);
+  readonly errorArchivo = signal<string | null>(null);
+  readonly avisoArchivo = signal<string | null>(null);
+
+  /** `null` = visor cerrado; `otro` = hay archivo pero no se previsualiza. */
+  readonly tipoVisor = signal<'pdf' | 'imagen' | 'texto' | 'otro' | null>(null);
+  readonly cargandoVisor = signal(false);
+  readonly urlIframe = signal<SafeResourceUrl | null>(null);
+  readonly urlImagen = signal<SafeUrl | null>(null);
+  readonly textoVisor = signal<string | null>(null);
+  private urlObjeto: string | null = null;
+  private tokenVisor = 0;
+
+  readonly versiones = signal<readonly VersionDocumento[]>([]);
+  readonly cargandoVersiones = signal(false);
+  readonly errorVersiones = signal<string | null>(null);
+  readonly errorDescargaVersion = signal<string | null>(null);
+  private suscripcionVersiones?: { unsubscribe: () => void };
+
+  readonly extracciones = signal<readonly ExtraccionDocumento[]>([]);
+  readonly cargandoExtracciones = signal(false);
+  readonly errorExtraccion = signal<string | null>(null);
+  readonly avisoExtraccion = signal<string | null>(null);
+  readonly ejecutandoExtraccion = signal<'ocr' | 'temas' | null>(null);
+  private suscripcionExtracciones?: { unsubscribe: () => void };
+
+  readonly extraccionOcr = computed(
+    () => this.extracciones().find((item) => item.tipo === 'ocr') ?? null,
+  );
+  readonly extraccionTemas = computed(
+    () => this.extracciones().find((item) => item.tipo === 'temas') ?? null,
+  );
+  readonly temasClave = computed(() => temasDeExtraccion(this.extraccionTemas()));
+  readonly origenTemas = computed(() => origenDeExtraccion(this.extraccionTemas()));
 
   readonly opcionesTipo = computed<readonly OpcionCatalogo[]>(() => {
     const base = this.tipos();
@@ -522,15 +846,42 @@ export class DocumentoPanelComponent {
       this.borradorAlta.set(borradorAltaVacio());
       this.busquedaCaso.set('');
       this.casoElegido.set(null);
+
+      this.limpiarVisor();
+      this.errorArchivo.set(null);
+      this.avisoArchivo.set(null);
+      this.subiendoArchivo.set(false);
+
+      this.versiones.set([]);
+      this.errorVersiones.set(null);
+      this.errorDescargaVersion.set(null);
+      this.cargandoVersiones.set(false);
+
+      this.extracciones.set([]);
+      this.errorExtraccion.set(null);
+      this.avisoExtraccion.set(null);
+      this.ejecutandoExtraccion.set(null);
+      this.cargandoExtracciones.set(false);
+
+      if (id) {
+        this.cargarVersiones(id);
+        this.cargarExtracciones(id);
+      }
+    });
+
+    // El visor usa un object URL: hay que revocarlo al cerrar el panel.
+    this.destruccion.onDestroy(() => {
+      this.suscripcionVersiones?.unsubscribe();
+      this.suscripcionExtracciones?.unsubscribe();
+      if (this.urlObjeto) {
+        URL.revokeObjectURL(this.urlObjeto);
+        this.urlObjeto = null;
+      }
     });
   }
 
   formatearFecha(valor: string | null | undefined): string {
     return formatearFecha(valor);
-  }
-
-  formatearConfianza(valor: number | null): string {
-    return formatearConfianza(valor);
   }
 
   claseEstado(estado: string | null): string {
@@ -797,6 +1148,292 @@ export class DocumentoPanelComponent {
 
   alTecla(evento: KeyboardEvent): void {
     if (evento.key === 'Tab') this.atraparFoco(evento);
+  }
+
+  /* -------- Archivo binario: visor, versiones y extracciones -------- */
+
+  /** Cierra el visor y revoca el object URL vigente. */
+  limpiarVisor(): void {
+    this.tokenVisor += 1;
+    if (this.urlObjeto) {
+      URL.revokeObjectURL(this.urlObjeto);
+      this.urlObjeto = null;
+    }
+    this.tipoVisor.set(null);
+    this.urlIframe.set(null);
+    this.urlImagen.set(null);
+    this.textoVisor.set(null);
+    this.cargandoVisor.set(false);
+  }
+
+  /**
+   * Abre o cierra el visor del archivo vigente. El binario se pide con `fetch`
+   * (cookie `HttpOnly`) y nunca se cachea: cada apertura revalida.
+   */
+  async verArchivo(): Promise<void> {
+    if (this.tipoVisor() !== null) {
+      this.limpiarVisor();
+      return;
+    }
+
+    const documento = this.cabecera();
+    if (!documento || !documento.tieneArchivo) return;
+
+    this.limpiarVisor();
+    const token = this.tokenVisor;
+    this.errorArchivo.set(null);
+    this.cargandoVisor.set(true);
+
+    try {
+      const blob = await this.archivoServicio.blobActual(documento.id);
+      if (token !== this.tokenVisor) return;
+
+      const mime = (blob.type || documento.mime || '').toLowerCase();
+
+      if (mime.startsWith('image/')) {
+        const objeto = URL.createObjectURL(blob);
+        this.urlObjeto = objeto;
+        this.urlImagen.set(this.sanitizer.bypassSecurityTrustUrl(objeto));
+        this.tipoVisor.set('imagen');
+        return;
+      }
+
+      if (mime === 'application/pdf') {
+        const objeto = URL.createObjectURL(blob);
+        this.urlObjeto = objeto;
+        this.urlIframe.set(this.sanitizer.bypassSecurityTrustResourceUrl(objeto));
+        this.tipoVisor.set('pdf');
+        return;
+      }
+
+      if (mime.startsWith('text/') || mime === 'application/csv') {
+        const texto = await blob.text();
+        if (token !== this.tokenVisor) return;
+        this.textoVisor.set(texto.slice(0, 20_000));
+        this.tipoVisor.set('texto');
+        return;
+      }
+
+      this.tipoVisor.set('otro');
+    } catch (fallo) {
+      if (token !== this.tokenVisor) return;
+      this.errorArchivo.set(aErrorApi(fallo, 'No se pudo abrir el archivo del documento.').message);
+    } finally {
+      if (token === this.tokenVisor) this.cargandoVisor.set(false);
+    }
+  }
+
+  /**
+   * Sube o reemplaza el binario. El servidor valida contra la lista blanca y
+   * versiona el archivo anterior; aquí sólo se evita enviar más de 20 MB.
+   */
+  alSeleccionarArchivo(evento: Event): void {
+    const entrada = evento.target as HTMLInputElement;
+    const archivo = entrada.files?.[0] ?? null;
+    entrada.value = '';
+
+    const documento = this.cabecera();
+    if (!archivo || !documento) return;
+
+    this.errorArchivo.set(null);
+    this.avisoArchivo.set(null);
+
+    if (archivo.size > MAX_DOCUMENTO_BYTES) {
+      this.errorArchivo.set('El archivo supera el máximo de 20 MB.');
+      return;
+    }
+
+    this.subiendoArchivo.set(true);
+    this.archivoServicio.subir(documento.id, archivo).subscribe({
+      next: () => {
+        this.subiendoArchivo.set(false);
+        this.avisoArchivo.set('Archivo actualizado. La versión anterior quedó en el historial.');
+        this.detalleRecurso.recargar();
+        this.cargarVersiones(documento.id);
+        this.cargarExtracciones(documento.id);
+        this.actualizado.emit();
+        // Si el visor estaba abierto, se reabre con el binario nuevo.
+        if (this.tipoVisor() !== null) {
+          this.limpiarVisor();
+          void this.verArchivo();
+        }
+      },
+      error: (fallo: unknown) => {
+        this.subiendoArchivo.set(false);
+        this.errorArchivo.set(aErrorApi(fallo, 'No se pudo subir el archivo.').message);
+      },
+    });
+  }
+
+  async descargarActual(): Promise<void> {
+    const documento = this.cabecera();
+    if (!documento) return;
+    this.errorArchivo.set(null);
+    try {
+      await this.archivoServicio.descargarActual(documento.id, this.nombreDescarga(documento));
+    } catch (fallo) {
+      this.errorArchivo.set(aErrorApi(fallo, 'No se pudo descargar el archivo.').message);
+    }
+  }
+
+  async descargarVersion(version: VersionDocumento): Promise<void> {
+    const documento = this.cabecera();
+    if (!documento) return;
+    this.errorDescargaVersion.set(null);
+    try {
+      await this.archivoServicio.descargarVersion(
+        documento.id,
+        version.numero,
+        this.nombreDescarga(documento, version.numero),
+      );
+    } catch (fallo) {
+      this.errorDescargaVersion.set(aErrorApi(fallo, 'No se pudo descargar la versión.').message);
+    }
+  }
+
+  reintentarVersiones(): void {
+    const documento = this.cabecera();
+    if (documento) this.cargarVersiones(documento.id);
+  }
+
+  reintentarExtracciones(): void {
+    const documento = this.cabecera();
+    if (documento) this.cargarExtracciones(documento.id);
+  }
+
+  /** `POST /api/v1/documents/:id/extraccion` con `{ tipo }`. */
+  ejecutarExtraccion(tipo: 'ocr' | 'temas'): void {
+    const documento = this.cabecera();
+    if (!documento || this.ejecutandoExtraccion() !== null) return;
+
+    if (!this.puedeModificar()) {
+      this.errorExtraccion.set('Su rol no permite ejecutar extracciones.');
+      return;
+    }
+
+    this.ejecutandoExtraccion.set(tipo);
+    this.errorExtraccion.set(null);
+    this.avisoExtraccion.set(null);
+
+    this.archivoServicio.extraer(documento.id, tipo).subscribe({
+      next: (item) => {
+        this.ejecutandoExtraccion.set(null);
+        this.extracciones.update((lista) => [
+          item,
+          ...lista.filter((actual) => actual.tipo !== item.tipo),
+        ]);
+        this.avisoExtraccion.set(this.mensajeExtraccion(item));
+      },
+      error: (fallo: unknown) => {
+        this.ejecutandoExtraccion.set(null);
+        this.errorExtraccion.set(aErrorApi(fallo, 'No se pudo ejecutar la extracción.').message);
+      },
+    });
+  }
+
+  tamano(bytes: number | null): string {
+    if (bytes === null) return 'sin declarar';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) {
+      const kb = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 1 }).format(bytes / 1024);
+      return `${kb} kB`;
+    }
+    const mb = new Intl.NumberFormat('es-PE', { maximumFractionDigits: 1 }).format(
+      bytes / (1024 * 1024),
+    );
+    return `${mb} MB`;
+  }
+
+  hashCorto(hash: string | null): string {
+    if (!hash) return 'sin hash';
+    return hash.length > 12 ? `${hash.slice(0, 12)}…` : hash;
+  }
+
+  fechaHora(valor: string | null): string {
+    return formatearFechaHora(valor);
+  }
+
+  etiquetaEstadoExtraccion(estado: EstadoExtraccion): string {
+    switch (estado) {
+      case 'listo':
+        return 'Listo';
+      case 'en_proceso':
+        return 'En proceso';
+      case 'pendiente':
+        return 'Pendiente';
+      case 'error':
+        return 'Error';
+      case 'no_disponible':
+        return 'No disponible';
+      default:
+        return estado;
+    }
+  }
+
+  claseExtraccion(estado: EstadoExtraccion): string {
+    return `chip-${estado}`;
+  }
+
+  nombreDescarga(documento: Documento, numero?: number): string {
+    const base =
+      (documento.titulo || documento.codigo || 'documento')
+        .replace(/[\\/:*?"<>|]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim() || 'documento';
+    return numero ? `${base} (v${numero})` : base;
+  }
+
+  private mensajeExtraccion(item: ExtraccionDocumento): string {
+    if (item.estado === 'listo') {
+      return item.tipo === 'ocr'
+        ? `OCR completado con el motor «${item.modelo ?? 'externo'}».`
+        : `Temas calculados por frecuencia local (${item.modelo ?? 'frecuencia-local'}).`;
+    }
+    if (item.estado === 'no_disponible') {
+      return item.error ?? 'La extracción no está disponible.';
+    }
+    return item.error ?? 'La extracción no terminó correctamente.';
+  }
+
+  private cargarVersiones(id: string): void {
+    if (!id) return;
+    this.suscripcionVersiones?.unsubscribe();
+    this.cargandoVersiones.set(true);
+    this.errorVersiones.set(null);
+    this.errorDescargaVersion.set(null);
+
+    this.suscripcionVersiones = this.archivoServicio.listarVersiones(id).subscribe({
+      next: (items) => {
+        this.versiones.set(items);
+        this.cargandoVersiones.set(false);
+      },
+      error: (fallo: unknown) => {
+        this.versiones.set([]);
+        this.errorVersiones.set(aErrorApi(fallo, 'No se pudieron cargar las versiones.').message);
+        this.cargandoVersiones.set(false);
+      },
+    });
+  }
+
+  private cargarExtracciones(id: string): void {
+    if (!id) return;
+    this.suscripcionExtracciones?.unsubscribe();
+    this.cargandoExtracciones.set(true);
+    this.errorExtraccion.set(null);
+
+    this.suscripcionExtracciones = this.archivoServicio.listarExtracciones(id).subscribe({
+      next: (items) => {
+        this.extracciones.set(items);
+        this.cargandoExtracciones.set(false);
+      },
+      error: (fallo: unknown) => {
+        this.extracciones.set([]);
+        this.errorExtraccion.set(
+          aErrorApi(fallo, 'No se pudo cargar el estado de las extracciones.').message,
+        );
+        this.cargandoExtracciones.set(false);
+      },
+    });
   }
 
   private enviar(id: string, cambios: PatchDocumento): void {

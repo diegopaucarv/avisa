@@ -9,6 +9,11 @@
 | **Índice**           | `docs/README.md`                                                                                                                 |
 | **Alcance**          | Los cuarenta documentos vigentes de `docs/` (sin `_archivo/`, `avisa_actual/`, `img/`, `casos_uso/` ni los artefactos generados) |
 
+> **Documento histórico (auditoría del 2026-11-22).** Los «Estados reales» que siguen describen
+> ese día. El estado vigente de la interfaz está en `docs/07_frontend/frontend.md`, y el de la
+> migración a Angular, en `docs/07_frontend/angular/ESTADO_MIGRACION_ANGULAR.md`. Al final de §3
+> se anota qué filas cambiaron al 2026-11-24.
+
 Este documento fija **cómo** se alinea cada documento y **qué hechos** debe respetar el barrido.
 No sustituye a la Guía ni al glosario: los aplica. Cada bloque de trabajo registra sus ediciones
 en `/tmp/auditoria_docs/` y su resumen queda aquí (§4).
@@ -106,6 +111,23 @@ Ningún documento los cambia por redacción: cambiarlos exige migración.
 | **Caso con al menos un atributo**                      | no se admite un caso vacío                                                                                                          | **Decidido**                                                                                                                                                                                                                     |
 | **83 alertas históricas**                              | se documentan como **Atendidas**                                                                                                    | **Decidido**; el dato sigue como `Archivado`                                                                                                                                                                                     |
 | **Aplazado: ubigeo/centroide y calibración de riesgo** | no se construye la pantalla `mapa` ni se documenta una fórmula de riesgo                                                            | **Aplazado por el usuario**                                                                                                                                                                                                      |
+
+**Actualización al 2026-11-24.** De las filas anteriores cambiaron:
+
+- **Angular es el frontend definitivo.** Ya no queda ninguna pantalla en `EnMigracionComponent`:
+  hay **33 pantallas con componente** (32 hijas del shell y `/acceso`). `/mapa` es la ventana
+  principal y dibuja la capa distrital y la nube de puntos; `/directorio/instituciones` redirige a
+  `/directorio/organizaciones`.
+- **Anulación lógica.** Hecha de punta a punta: los `DELETE` de casos, alertas, compromisos,
+  documentos, demandas y la baja de actores pasan por `core.anular_caso` / `anular_registro`,
+  exigen motivo y tienen `…/restaurar` por fila. El **Archivo** (`/archivo`) restaura las cinco
+  entidades.
+- **Exportación PDF, Excel y JSON.** Hecha: `GET /v1/export` sirve JSON, XLSX y PDF con el menú
+  montado en 15 vistas, más los anexos (`/v1/export/anexos`, `anexo-14`, `anexo-15`).
+- **Demandas sin caso.** Cableada en `/casos/sin-caso`.
+- **Ubigeo/centroide y `mapa`.** El aplazamiento se levantó: `territorio.distrito` tiene 1 892
+  polígonos y la nube del KML, 13 456 puntos, ambos dibujados.
+- **83 alertas históricas.** Sin cambio de dato: siguen como `Archivado`.
 
 ---
 

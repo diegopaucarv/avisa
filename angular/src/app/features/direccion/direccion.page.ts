@@ -16,18 +16,15 @@ import { PRIORIDADES, RIESGOS, esRegistro, numero } from '../../dominio/mapeo';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { DesgloseRegionesService, SIN_REGION } from './desglose-regiones.service';
+import { DesgloseSubsectoresService } from './direccion-subsectores.service';
+import {
+  VARIANTES,
+  etiquetaSubsector,
+  etiquetaVariante,
+  type VarianteDireccion,
+} from './direccion.variantes';
 
-const SIN_TEMATICA = 'Sin temática';
 const SIN_CLASIFICAR = 'Sin clasificar';
-
-const TEMATICAS = [
-  'Infraestructura',
-  'Ordenamiento y acceso territorial',
-  'Normatividad',
-  'Distribución de beneficios',
-  'Gobernanza',
-  'Impactos de terceros',
-] as const;
 
 type Grupo = {
   etiqueta: string;
@@ -38,6 +35,16 @@ type Grupo = {
    * grupo no se corresponde con un filtro del servidor (el resto sin clasificar).
    */
   enlace: Record<string, string> | null;
+};
+
+/** Fila de la variante «Por subsector». */
+type FilaSubsectorVista = {
+  subsector: string;
+  total: number;
+  alto: number;
+  medio: number;
+  bajo: number;
+  porcentaje: number;
 };
 
 /** `total` del sobre paginado (`{items,total,...}`), sin construir filas. */
@@ -60,7 +67,7 @@ function totalDemandas(bruto: unknown): number {
  * `/api/v1/dashboard` y no se crea.
  *
  * El desglose agrupa por los filtros que el servidor expone de forma exacta
- * (`prioridad`, `riesgo`, `tematica`, `region`). La API no acepta filtro por
+ * (`prioridad`, `riesgo`, `region`). La API no acepta filtro por
  * nivel de conflicto, así que esa dimensión no se estima con una muestra: se
  * omite. La región sí se desglosa: `GET /api/v1/catalogs` publica `regiones` y
  * cada grupo se cuenta con el `total` de `region=<nombre>` (o `sinregion=true`
@@ -68,13 +75,19 @@ function totalDemandas(bruto: unknown): number {
  *
  * Base normativa: Guía §8.1.2.3 (Reportes de clima social) y Anexo 2 (Reporte
  * Regional de Conflictividad y Demandas).
+ *
+ * Cambio 52: la misma pantalla se lee en tres variantes conmutables —nacional,
+ * por región y por subsector—. «Nacional» reúne los desgloses por prioridad y
+ * riesgo; «por región» reutiliza el desglose regional existente (no se
+ * duplica); «por subsector» consume `GET /api/v1/search/subsectores`, el único
+ * corte que la API de casos no puede reproducir (no acepta `subsector`).
  */
 @Component({
   selector: 'app-direccion',
   imports: [RouterLink, IconoComponent, ExportarMenuComponent],
   templateUrl: './direccion.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [DesgloseRegionesService],
+  providers: [DesgloseRegionesService, DesgloseSubsectoresService],
   styles: `
     :host {
       display: block;
@@ -97,21 +110,6 @@ function totalDemandas(bruto: unknown): number {
       align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
-    }
-
-    .view-head h1 {
-      margin: 0;
-      color: var(--ink);
-      font: 700 22px/1.3 var(--font-display);
-      letter-spacing: -0.65px;
-    }
-
-    .view-subtitle {
-      max-width: 760px;
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.6;
     }
 
     .executive-kpis {
@@ -142,6 +140,62 @@ function totalDemandas(bruto: unknown): number {
       text-decoration: underline;
     }
 
+    .scope-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 9px 16px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--paper);
+    }
+
+    .scope-bar .scope-label {
+      color: #77878f;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .scope-bar .scope-note {
+      flex: 1 1 100%;
+      margin: 0;
+      padding-left: 8px;
+      border-left: 2px solid var(--amber, #d69a2d);
+      color: #8b97a1;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .data-table .num {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .data-table tfoot td {
+      border-top: 1px solid #e6ebef;
+      background: #fafbfc;
+      color: #465a6c;
+      font-weight: 600;
+    }
+
+    .breakdown-grid.una-columna {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tabla-variante {
+      margin-top: 12px;
+    }
+
+    .variant-nota {
+      margin: 10px 0 0;
+      color: #8b97a2;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
     @media (max-width: 980px) {
       .executive-kpis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -162,9 +216,21 @@ function totalDemandas(bruto: unknown): number {
 export class DireccionPage {
   private readonly plataforma = inject(PLATFORM_ID);
   private readonly desgloseRegiones = inject(DesgloseRegionesService);
+  private readonly desgloseSubsectores = inject(DesgloseSubsectoresService);
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
+
+  readonly variantes = VARIANTES;
+
+  /** Variante activa; la impresión reproduce la que está en pantalla. */
+  readonly variante = signal<VarianteDireccion>('nacional');
+
+  /**
+   * Filtros de la exportación: el export descarga casos, no el agregado. Se fija
+   * `alcance=todos` para que el archivo no reaplique la preferencia de ámbito.
+   */
+  readonly consultaExportacion: Record<string, string> = { alcance: 'todos' };
 
   /* ------------------------------------------------------------------ *
    * Totales del servidor: una fila por consulta, se lee `total`
@@ -208,11 +274,6 @@ export class DireccionPage {
     recurso: this.contarCasos({ riesgo: valor }),
   }));
 
-  private readonly tematica = TEMATICAS.map((valor) => ({
-    etiqueta: valor,
-    recurso: this.contarCasos({ tematica: valor }),
-  }));
-
   readonly casosAbiertos = computed(() => this.casosAbiertosRec.valor() ?? null);
   readonly alertas = computed(() => this.alertasRec.valor() ?? null);
   readonly compromisos = computed(() => this.compromisosRec.valor() ?? null);
@@ -221,7 +282,6 @@ export class DireccionPage {
 
   readonly porPrioridad = computed(() => this.desglosar(this.prioridad, SIN_CLASIFICAR));
   readonly porRiesgo = computed(() => this.desglosar(this.riesgo, SIN_CLASIFICAR));
-  readonly porTematica = computed(() => this.desglosar(this.tematica, SIN_TEMATICA));
 
   /**
    * Desglose por región principal. Cada fila enlaza al listado con el mismo
@@ -250,8 +310,75 @@ export class DireccionPage {
     this.demandasRec,
     ...this.prioridad.map(({ recurso }) => recurso),
     ...this.riesgo.map(({ recurso }) => recurso),
-    ...this.tematica.map(({ recurso }) => recurso),
   ]);
+
+  /* ------------------------------------------------------------------ *
+   * Variante «Por subsector» (cambio 52)
+   * ------------------------------------------------------------------ */
+
+  readonly porSubsector = computed<FilaSubsectorVista[]>(() => {
+    const base = this.desgloseSubsectores.totalCasos();
+
+    return this.desgloseSubsectores.grupos().map((fila) => ({
+      subsector: etiquetaSubsector(fila.subsector),
+      total: fila.total,
+      alto: fila.alto,
+      medio: fila.medio,
+      bajo: fila.bajo,
+      porcentaje: base > 0 ? Math.round((fila.total / base) * 100) : 0,
+    }));
+  });
+
+  readonly totalesSubsector = computed(() =>
+    this.porSubsector().reduce(
+      (acumulado, fila) => ({
+        alto: acumulado.alto + fila.alto,
+        medio: acumulado.medio + fila.medio,
+        bajo: acumulado.bajo + fila.bajo,
+        total: acumulado.total + fila.total,
+      }),
+      { alto: 0, medio: 0, bajo: 0, total: 0 },
+    ),
+  );
+
+  /**
+   * Peso del total de la tabla sobre la base del agregado. No se imprime 100%
+   * fijo: si algún caso quedara fuera del corte por subsector, el pie lo delata.
+   */
+  readonly porcentajeTotalSubsector = computed(() => {
+    const base = this.desgloseSubsectores.totalCasos();
+    return base > 0 ? Math.round((this.totalesSubsector().total / base) * 100) : 0;
+  });
+
+  /**
+   * Rótulo de la columna intermedia. Se usa el código real del catálogo que
+   * devuelve el agregado; «Medio» sólo como respaldo si el catálogo no responde.
+   */
+  readonly codigoRiesgoMedio = computed(() => this.desgloseSubsectores.codigoMedio() ?? RIESGOS[1]);
+
+  readonly cargandoSubsectores = computed(() => this.desgloseSubsectores.estado() === 'cargando');
+
+  readonly tituloDesglose = computed(() => {
+    switch (this.variante()) {
+      case 'region':
+        return 'Desglose regional';
+      case 'subsector':
+        return 'Desglose por subsector';
+      default:
+        return 'Lectura nacional';
+    }
+  });
+
+  readonly descripcionVariante = computed(() => {
+    switch (this.variante()) {
+      case 'region':
+        return 'Casos vigentes por región principal. Cada fila abre el listado de casos con el mismo recorte (región o «sin región» y alcance completo).';
+      case 'subsector':
+        return 'Casos vigentes por subsector y nivel de riesgo. La API de casos no acepta filtro por subsector: este corte viene de un agregado del servidor y no se puede reproducir en el listado.';
+      default:
+        return 'Cifras del conjunto completo de casos vigentes: prioridad de atención y nivel de riesgo. Es la lectura institucional, sin recorte territorial ni por subsector.';
+    }
+  });
 
   /**
    * La tarjeta de región tiene su propio estado: el desglose necesita el catálogo
@@ -267,6 +394,7 @@ export class DireccionPage {
   readonly error = computed(
     () =>
       this.desgloseRegiones.error() ??
+      this.desgloseSubsectores.error() ??
       this.recursos()
         .map((fuente) => fuente.error())
         .find((fallo) => fallo !== null) ??
@@ -287,8 +415,17 @@ export class DireccionPage {
     this.exportarError.set(mensaje);
   }
 
+  cambiarVariante(variante: VarianteDireccion): void {
+    this.variante.set(variante);
+  }
+
+  etiquetaVariante(variante: VarianteDireccion): string {
+    return etiquetaVariante(variante);
+  }
+
   recargar(): void {
     this.desgloseRegiones.recargar();
+    this.desgloseSubsectores.recargar();
     for (const fuente of this.recursos()) fuente.recargar();
   }
 
