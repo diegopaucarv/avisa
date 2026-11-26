@@ -102,17 +102,6 @@
       </select>
     </label>
 
-    <label class="search-field search-field--compacta">
-      <app-icono nombre="buscar" [tamano]="14" />
-      <input
-        type="search"
-        placeholder="Sectorista..."
-        [value]="filtros().sectorista"
-        aria-label="Filtrar casos por sectorista"
-        (input)="cambiarSectorista($event)"
-      />
-    </label>
-
     <label class="edit-switch" [class.activo]="archivados()">
       <span [class.activo]="!archivados()">Abiertos</span>
       <input
