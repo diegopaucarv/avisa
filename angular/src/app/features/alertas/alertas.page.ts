@@ -241,18 +241,25 @@ function totalDe(bruto: unknown): number {
       color: var(--red);
     }
 
-    .alerta-caso strong {
+    /*
+     * Caso vinculado: sólo el código, como enlace al expediente. El título vive
+     * en el `title` del enlace (aparece al pasar el puntero) para que la columna
+     * no reserve ancho para una segunda línea.
+     */
+    .alerta-caso-enlace {
       display: block;
+      max-width: 100%;
+      overflow: hidden;
       color: var(--ink-2);
       font-size: 12px;
       font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
-    .alerta-caso small {
-      display: block;
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 12px;
+    .alerta-caso-enlace:hover {
+      color: var(--blue-dark);
+      text-decoration: underline;
     }
 
     .sin-caso {
@@ -579,7 +586,7 @@ export class AlertasPage {
   readonly columnas: readonly ColumnaTabla[] = [
     { clave: 'codigo', titulo: 'Código', ancho: '108px', ordenable: true },
     { clave: 'titulo', titulo: 'Título', ordenable: true },
-    { clave: 'caso', titulo: 'Caso vinculado', ancho: '160px', ordenable: true },
+    { clave: 'caso', titulo: 'Caso vinculado', ancho: '104px', ordenable: true },
     { clave: 'revisor', titulo: 'Último revisor', ancho: '150px', ordenable: true },
     {
       clave: 'fecha',
