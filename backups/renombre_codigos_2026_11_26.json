@@ -1,0 +1,142 @@
+[
+  {
+    "antes": "CS-PA-INF-2012-01",
+    "despues": "CS-2012-0001"
+  },
+  {
+    "antes": "CS-PA-INF-2017-01",
+    "despues": "CS-2017-0001"
+  },
+  {
+    "antes": "CS-PA-INF-2022-01",
+    "despues": "CS-2022-0001"
+  },
+  {
+    "antes": "CS-PA-ITE-2022-01",
+    "despues": "CS-2022-0002"
+  },
+  {
+    "antes": "CS-PA-INF-2024-01",
+    "despues": "CS-2024-0001"
+  },
+  {
+    "antes": "CS-PA-INF-2024-02",
+    "despues": "CS-2024-0002"
+  },
+  {
+    "antes": "CS-PA-OAT-2024-01",
+    "despues": "CS-2024-0003"
+  },
+  {
+    "antes": "CS-PA-OAT-2024-02",
+    "despues": "CS-2024-0004"
+  },
+  {
+    "antes": "CS-PA-OAT-2024-03",
+    "despues": "CS-2024-0005"
+  },
+  {
+    "antes": "CS-MI-INF-2025-01",
+    "despues": "CS-2025-0001"
+  },
+  {
+    "antes": "CS-MI-ITE-2025-01",
+    "despues": "CS-2025-0002"
+  },
+  {
+    "antes": "CS-MI-ITE-2025-02",
+    "despues": "CS-2025-0003"
+  },
+  {
+    "antes": "CS-PA-DBE-2025-01",
+    "despues": "CS-2025-0004"
+  },
+  {
+    "antes": "CS-PA-INF-2025-01",
+    "despues": "CS-2025-0005"
+  },
+  {
+    "antes": "CS-PA-INF-2025-02",
+    "despues": "CS-2025-0006"
+  },
+  {
+    "antes": "CS-PA-INF-2025-03",
+    "despues": "CS-2025-0007"
+  },
+  {
+    "antes": "CS-PA-INF-2025-04",
+    "despues": "CS-2025-0008"
+  },
+  {
+    "antes": "CS-PA-INF-2025-05",
+    "despues": "CS-2025-0009"
+  },
+  {
+    "antes": "CS-PA-INF-2025-06",
+    "despues": "CS-2025-0010"
+  },
+  {
+    "antes": "CS-PA-NOR-2025-01",
+    "despues": "CS-2025-0011"
+  },
+  {
+    "antes": "CS-MI-ITE-2026-01",
+    "despues": "CS-2026-0001"
+  },
+  {
+    "antes": "CS-MI-ITE-2026-02",
+    "despues": "CS-2026-0002"
+  },
+  {
+    "antes": "CS-MI-ITE-2026-03",
+    "despues": "CS-2026-0003"
+  },
+  {
+    "antes": "CS-PA-GOB-2026-01",
+    "despues": "CS-2026-0004"
+  },
+  {
+    "antes": "CS-PA-GOB-2026-02",
+    "despues": "CS-2026-0005"
+  },
+  {
+    "antes": "CS-PA-INF-2026-01",
+    "despues": "CS-2026-0006"
+  },
+  {
+    "antes": "CS-PA-INF-2026-02",
+    "despues": "CS-2026-0007"
+  },
+  {
+    "antes": "CS-PA-ITE-2026-01",
+    "despues": "CS-2026-0008"
+  },
+  {
+    "antes": "CS-PA-ITE-2026-02",
+    "despues": "CS-2026-0009"
+  },
+  {
+    "antes": "CS-PA-ITE-2026-03",
+    "despues": "CS-2026-0010"
+  },
+  {
+    "antes": "CS-PA-ITE-2026-04",
+    "despues": "CS-2026-0011"
+  },
+  {
+    "antes": "CS-PA-OAT-2026-01",
+    "despues": "CS-2026-0012"
+  },
+  {
+    "antes": "CS-PA-OAT-2026-02",
+    "despues": "CS-2026-0013"
+  },
+  {
+    "antes": "CS-PA-OAT-2026-03",
+    "despues": "CS-2026-0014"
+  },
+  {
+    "antes": "CS-PA-OAT-2026-04",
+    "despues": "CS-2026-0015"
+  }
+]

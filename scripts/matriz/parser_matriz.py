@@ -391,6 +391,19 @@ def parsear(
             if entrada.get("codigo_excel"):
                 mapa_codigos[int(bloque)] = entrada["codigo_excel"]
 
+    # Dos bloques con el mismo `caso_id` son el mismo caso: el primero manda y
+    # el resto se marca como duplicado (la matriz repite un bloque completo).
+    primero_por_caso: dict[str, int] = {}
+    duplicados: dict[int, int] = {}
+    for bloque in sorted(mapa_casos):
+        caso = mapa_casos[bloque].get("caso_id")
+        if not caso:
+            continue
+        if caso in primero_por_caso:
+            duplicados[bloque] = primero_por_caso[caso]
+        else:
+            primero_por_caso[caso] = bloque
+
     casos: list[dict[str, Any]] = []
     anomalias: list[dict[str, Any]] = []
     for posicion, inicio in enumerate(inicios):
@@ -551,6 +564,7 @@ def parsear(
                 "caso_id_existente": (mapa_casos.get(inicio) or {}).get("caso_id"),
                 "clave_importacion": (mapa_casos.get(inicio) or {}).get("caso_id")
                 or f"nuevo-{inicio}",
+                "duplicado_de": duplicados.get(inicio),
                 "mapa_confianza": (mapa_casos.get(inicio) or {}).get("confianza"),
                 "fecha_registro": meta.get("fecha_registro"),
                 "nombre": nombre,
