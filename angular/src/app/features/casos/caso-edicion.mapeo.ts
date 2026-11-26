@@ -421,7 +421,18 @@ export function sinCambios(cuerpo: CuerpoPatchCaso): boolean {
 
 export type OpcionCatalogo = { valor: string; etiqueta: string };
 
-export type CatalogosEdicion = Record<CatalogoEditable, readonly OpcionCatalogo[]>;
+/** Opción del catálogo de sectoristas: su `id` es el UUID del usuario. */
+export type OpcionSectorista = { id: string; nombre: string };
+
+/**
+ * Catálogos de los desplegables de edición. `sectoristas` no es un campo del
+ * formulario —alimenta el select del punto focal y se identifica por UUID—, así
+ * que va aparte y con otra forma. Compartir la misma respuesta de
+ * `GET /v1/catalogs` evita una segunda petición idéntica.
+ */
+export type CatalogosEdicion = Record<CatalogoEditable, readonly OpcionCatalogo[]> & {
+  sectoristas: readonly OpcionSectorista[];
+};
 
 const CATALOGOS_VACIOS: CatalogosEdicion = {
   prioridad: [],
@@ -433,6 +444,7 @@ const CATALOGOS_VACIOS: CatalogosEdicion = {
   unidadResponsable: [],
   ciclo: [],
   estado: [],
+  sectoristas: [],
 };
 
 export function catalogoVacio(): CatalogosEdicion {
@@ -469,7 +481,27 @@ export function aCatalogosEdicion(bruto: unknown): CatalogosEdicion {
     unidadResponsable: opcionesDeCatalogo(catalogo, 'unidades'),
     ciclo: opcionesDeCatalogo(catalogo, 'ciclos'),
     estado: opcionesDeCatalogo(catalogo, 'estadosCaso'),
+    sectoristas: opcionesDeSectoristas(catalogo),
   };
+}
+
+/**
+ * Usuarios activos con rol `sectorista`, para el select del punto focal. Si la
+ * API aún no publica el catálogo, la lista queda vacía y el campo se pinta en
+ * solo lectura en vez de romper la vista.
+ */
+function opcionesDeSectoristas(catalogo: Record<string, unknown>): readonly OpcionSectorista[] {
+  const filas = catalogo['sectoristas'];
+  if (!Array.isArray(filas)) return [];
+
+  const opciones: OpcionSectorista[] = [];
+  for (const fila of filas) {
+    if (!esRegistro(fila)) continue;
+    const id = texto(fila, ['id']);
+    const nombre = texto(fila, ['nombre', 'etiqueta']);
+    if (id && nombre) opciones.push({ id, nombre });
+  }
+  return opciones;
 }
 
 export function opcionesDeCampo(

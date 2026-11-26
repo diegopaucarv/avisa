@@ -138,12 +138,6 @@ type UbicacionMenu = { top: number; left: number; ancho: number };
       letter-spacing: 0.06em;
       text-transform: uppercase;
     }
-
-    .menu-separador {
-      height: 1px;
-      margin: 5px 6px;
-      background: #e8edf1;
-    }
   `,
 })
 export class AccionesFilaComponent {
@@ -249,9 +243,10 @@ export class AccionesFilaComponent {
 
   private altoEstimado(): number {
     const secciones = this.grupos().filter((grupo) => grupo.titulo !== null).length;
+    // «Anular» se pinta dentro del último grupo, no como acción suelta: cuenta
+    // como una acción más y no suma separador propio.
     const anular = this.puedeAnular() ? 1 : 0;
-    const separador = this.acciones().length > 0 && anular > 0 ? 1 : 0;
-    return 12 + secciones * 22 + this.acciones().length * 33 + separador * 11 + anular * 33;
+    return 12 + secciones * 22 + (this.acciones().length + anular) * 33;
   }
 
   private escuchar(activo: boolean): void {

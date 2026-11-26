@@ -950,8 +950,11 @@ export async function updateActor(
     set("region_id", "region_id", regionId);
   }
 
-  const tipo = leerTexto(input, "tipo", 100, "El tipo de actor", true);
-  const funcion = leerTexto(input, "funcion", 100, "La función", true);
+  // Igual que `naturaleza`: se validan sólo si el PATCH los envía. Exigirlos en
+  // cada edición devolvía 422 al guardar cualquier otro campo de una ficha
+  // antigua que no los tenía.
+  const tipo = leerTexto(input, "tipo", 100, "El tipo de actor", false);
+  const funcion = leerTexto(input, "funcion", 100, "La función", false);
   const posicionamiento = leerTexto(
     input,
     "posicionamiento",

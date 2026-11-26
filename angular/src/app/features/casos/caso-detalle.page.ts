@@ -87,7 +87,6 @@ import {
   type CasoActoresCaso,
   type CuerpoVincularActor,
   aCasoActores,
-  etiquetaPosicion,
 } from './nudos-matriz.mapeo';
 import { VincularActorComponent } from './vincular-actor.component';
 import { EnlaceRiel, RielRelacionesComponent } from './riel-relaciones.component';
@@ -428,29 +427,6 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
     compromisos,
     demandas,
   };
-}
-
-/** Opción del catálogo de sectoristas: su `id` es el UUID del usuario. */
-type OpcionSectorista = { id: string; nombre: string };
-
-/**
- * Recorta `GET /api/v1/catalogs` al catálogo `sectoristas`, que `aCatalogosEdicion`
- * no conoce. Si la API no lo entrega, devuelve una lista vacía y el campo queda
- * en solo lectura sin romper la vista.
- */
-function aSectoristas(bruto: unknown): readonly OpcionSectorista[] {
-  const registro = esRegistro(bruto) ? bruto : {};
-  const catalogo = registro['catalogs'] ?? registro['catalogos'];
-  const filas = esRegistro(catalogo) ? catalogo['sectoristas'] : undefined;
-  if (!Array.isArray(filas)) return [];
-
-  const opciones: OpcionSectorista[] = [];
-  for (const fila of filas) {
-    const id = textoDe(fila, 'id');
-    const nombre = textoDe(fila, 'nombre', 'etiqueta');
-    if (id && nombre) opciones.push({ id, nombre });
-  }
-  return opciones;
 }
 
 @Component({
@@ -1424,17 +1400,6 @@ export class CasoDetallePage {
   readonly errorCampo = signal<string | null>(null);
   readonly avisoCampo = signal<string | null>(null);
 
-  /**
-   * Catálogo de sectoristas para el select del cuadro de datos. `sectoristas`
-   * sale del catálogo aditivo de `/v1/catalogs`; si no llega, la lista queda
-   * vacía y el campo se pinta en solo lectura.
-   */
-  private readonly catalogoSectoristas = consulta<readonly OpcionSectorista[]>({
-    fuente: () => (this.puedeModificar() ? urlApi('/v1/catalogs') : null),
-    esquema: aSectoristas,
-  });
-  readonly sectoristas = computed(() => this.catalogoSectoristas.valor() ?? []);
-
   readonly editandoSectorista = signal(false);
   readonly borradorSectorista = signal('');
   readonly guardandoSectorista = signal(false);
@@ -1456,6 +1421,12 @@ export class CasoDetallePage {
     const estado = this.catalogoEdicion.estado();
     return estado === 'inactivo' || estado === 'cargando';
   });
+
+  /**
+   * Catálogo de sectoristas para el select del cuadro de datos. Sale de la misma
+   * respuesta de `/v1/catalogs` que el resto de desplegables: una sola petición.
+   */
+  readonly sectoristas = computed(() => this.catalogoEdicion.valor()?.sectoristas ?? []);
 
   /**
    * Valores actuales del caso. Los campos de catálogo se resuelven a su valor
@@ -2149,21 +2120,8 @@ export class CasoDetallePage {
     return this.mapaActores().get(id);
   }
 
-  posicionDe(id: string): string {
-    return etiquetaPosicion(this.actorVinculo(id)?.posicion ?? null);
-  }
-
-  nivelDe(id: string): string {
-    const nivel = this.actorVinculo(id)?.nivelInfluencia;
-    return nivel === null || nivel === undefined ? '—' : String(nivel);
-  }
-
   estaVigente(id: string): boolean {
     return this.actorVinculo(id)?.vigente ?? true;
-  }
-
-  rolDe(id: string): string {
-    return this.actorVinculo(id)?.rolEnCaso ?? '—';
   }
 
   abrirVincularActor(): void {
