@@ -21,6 +21,15 @@ import { ENTORNO } from '../../core/config/entorno';
 import { NotificacionesService } from '../../core/http/notificaciones.service';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { ALCANCES } from '../../dominio/mapeo';
+import { ActorPanelAltaComponent } from '../../features/directorio/actor-panel-alta.component';
+import { ImportacionService } from '../../features/importacion/importacion.service';
+import { ImportarPanelComponent } from '../../features/importacion/importar-panel.component';
+import {
+  tiposPorGrupo,
+  type TipoImportacionId,
+} from '../../features/importacion/importacion.tipos';
+import { AvisosComponent } from '../../shared/ui/avisos.component';
+import { AvisosService } from '../../shared/ui/avisos.service';
 import { IconoComponent } from '../../shared/ui/icono.component';
 
 type EnlaceNav = {
@@ -190,20 +199,20 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
   },
 ];
 
-const CLAVE_MENU_COLAPSADO = 'avisa-menu-colapsado';
-
-/** Estado guardado del ancho del menú; sin almacenamiento, arranca expandido. */
-function leerMenuColapsado(): boolean {
-  try {
-    return localStorage.getItem(CLAVE_MENU_COLAPSADO) === '1';
-  } catch {
-    return false;
-  }
-}
+/** Variante del alta de actor que ofrece el menú «Nuevo». */
+type AltaDesdeMenu = 'organizacion' | 'institucion';
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, IconoComponent],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    IconoComponent,
+    ActorPanelAltaComponent,
+    ImportarPanelComponent,
+    AvisosComponent,
+  ],
   templateUrl: './shell.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -375,6 +384,32 @@ function leerMenuColapsado(): boolean {
       border-color: var(--blue-dark);
     }
 
+    /*
+     * «Importar» es la acción secundaria de la barra: mismo tamaño que «Nuevo»
+     * para que la pareja se lea como un grupo, pero con el azul sólo en el
+     * borde —crea registros de golpe y no debe competir con el alta unitaria.
+     */
+    .registrar-trigger-suave {
+      background: var(--paper, #fff);
+      color: var(--blue-dark);
+    }
+
+    .registrar-trigger-suave:hover,
+    .registrar-trigger-suave[aria-expanded='true'] {
+      background: var(--blue-pale, #eef4fd);
+      border-color: var(--blue-dark);
+      color: var(--blue-dark);
+    }
+
+    .importar-menu-nota {
+      margin: 6px 2px 2px;
+      padding-top: 7px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
     .registrar-panel {
       position: absolute;
       z-index: 50;
@@ -448,6 +483,12 @@ function leerMenuColapsado(): boolean {
       .registrar-trigger::before {
         content: '+';
         font-size: 20px;
+      }
+
+      /* En móvil «Importar» pasa a icono: no cabe otra palabra en la barra. */
+      .registrar-trigger-suave::before {
+        content: '↓';
+        font-size: 18px;
       }
     }
 
@@ -552,8 +593,18 @@ export class ShellComponent {
 
   readonly puedeRegistrar = this.capacidades.puedeEditar;
   readonly registrarAbierto = signal(false);
+  readonly importarAbierto = signal(false);
+  /** `null` = cerrado; si no, qué variante de actor está en alta. */
+  readonly altaActor = signal<AltaDesdeMenu | null>(null);
   readonly ambitoAbierto = signal(false);
   readonly alcances = ALCANCES;
+
+  /** Servicio de importación; el panel lee su estado, el shell sólo lo abre. */
+  readonly importacion = inject(ImportacionService);
+  private readonly avisos = inject(AvisosService);
+
+  /** Tipos de importación agrupados por vista, para el menú «Importar». */
+  readonly gruposImportacion = tiposPorGrupo();
 
   private readonly ambitoTrigger = viewChild<ElementRef<HTMLButtonElement>>('ambitoTrigger');
   private readonly ambitoPanel = viewChild<ElementRef<HTMLElement>>('ambitoPanel');
@@ -603,7 +654,6 @@ export class ShellComponent {
   });
 
   readonly menuAbierto = signal(false);
-  readonly menuColapsado = signal(leerMenuColapsado());
   readonly perfilAbierto = signal(false);
 
   constructor() {
@@ -659,24 +709,50 @@ export class ShellComponent {
     this.menuAbierto.update((abierto) => !abierto);
   }
 
-  /** Colapsa el menú a íconos en escritorio y recuerda la elección. */
-  alternarColapso(): void {
-    const colapsado = !this.menuColapsado();
-    this.menuColapsado.set(colapsado);
-    try {
-      localStorage.setItem(CLAVE_MENU_COLAPSADO, colapsado ? '1' : '0');
-    } catch {
-      // Sin almacenamiento la preferencia dura lo que la sesión.
-    }
-  }
-
   alternarPerfil(): void {
     this.perfilAbierto.update((abierto) => !abierto);
   }
 
+  /** Abre el menú «Nuevo» y cierra cualquier otro panel de la barra. */
   alternarRegistrar(): void {
     this.ambitoAbierto.set(false);
+    this.importarAbierto.set(false);
     this.registrarAbierto.update((abierto) => !abierto);
+  }
+
+  /** Abre el menú «Importar»; es excluyente con «Nuevo» y con el ámbito. */
+  alternarImportar(): void {
+    this.ambitoAbierto.set(false);
+    this.registrarAbierto.set(false);
+    this.importarAbierto.update((abierto) => !abierto);
+  }
+
+  /** Abre el panel de importación con un tipo ya elegido. */
+  abrirImportacion(tipo: TipoImportacionId): void {
+    this.importarAbierto.set(false);
+    this.registrarAbierto.set(false);
+    this.perfilAbierto.set(false);
+    if (!this.puedeRegistrar()) return;
+    this.importacion.abrir(tipo);
+  }
+
+  /**
+   * Alta de actor desde el menú: la misma ficha que ofrece el directorio, con la
+   * naturaleza ya fijada. «Institución» no es otra naturaleza —la base sólo
+   * conoce persona y organización—: es una organización pública, así que se
+   * abre con el tipo y el nivel de gobierno preseleccionados.
+   */
+  abrirAltaActor(variante: AltaDesdeMenu): void {
+    this.registrarAbierto.set(false);
+    this.perfilAbierto.set(false);
+    if (!this.puedeRegistrar()) return;
+    this.altaActor.set(variante);
+  }
+
+  /** El panel de alta avisa del éxito: se cierra y se confirma con un aviso. */
+  alCrearActorDesdeShell(): void {
+    this.altaActor.set(null);
+    this.avisos.exito('Actor creado', 'La ficha quedó guardada en el directorio.');
   }
 
   alternarAmbito(): void {
@@ -765,7 +841,7 @@ export class ShellComponent {
     });
   }
 
-  abrirRegistro(tipo: 'caso' | 'alerta' | 'demanda' | 'compromiso' | 'documento'): void {
+  abrirRegistro(tipo: 'caso' | 'alerta' | 'demanda' | 'compromiso' | 'clima'): void {
     this.registrarAbierto.set(false);
     this.perfilAbierto.set(false);
     if (!this.puedeRegistrar()) return;
@@ -781,23 +857,33 @@ export class ShellComponent {
       caso: '/casos',
       alerta: '/alertas',
       compromiso: '/compromisos',
-      documento: '/documentos',
+      clima: '/clima-social',
     } as const;
+
+    // Clima social aún no tiene formulario propio: la entrada lleva a su vista,
+    // donde el reporte se arma a partir de los documentos.
+    if (tipo === 'clima') {
+      void this.router.navigateByUrl(rutas[tipo]);
+      return;
+    }
+
     void this.router.navigate([rutas[tipo]], { queryParams: { registrar: tipo } });
   }
 
   @HostListener('document:click')
   cerrarPanelesAlHacerClicFuera(): void {
     this.registrarAbierto.set(false);
+    this.importarAbierto.set(false);
     this.ambitoAbierto.set(false);
   }
 
   @HostListener('document:keydown.escape', ['$event'])
   cerrarPanelesConEscape(evento: Event): void {
-    if (!this.registrarAbierto() && !this.ambitoAbierto()) return;
+    if (!this.registrarAbierto() && !this.importarAbierto() && !this.ambitoAbierto()) return;
     evento.preventDefault();
     const cerrabaAmbito = this.ambitoAbierto();
     this.registrarAbierto.set(false);
+    this.importarAbierto.set(false);
     this.ambitoAbierto.set(false);
     // Sólo Escape devuelve el foco; un clic fuera no debe robarlo.
     if (cerrabaAmbito) this.enfocarDisparadorAmbito();

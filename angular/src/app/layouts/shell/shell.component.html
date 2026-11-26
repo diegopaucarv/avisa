@@ -115,21 +115,30 @@
             class="registrar-trigger"
             [attr.aria-expanded]="registrarAbierto()"
             aria-controls="menu-registrar"
+            aria-haspopup="menu"
             (click)="alternarRegistrar()"
           >
             + Nuevo
           </button>
           @if (registrarAbierto()) {
-            <div class="registrar-panel" id="menu-registrar" aria-label="Opciones de registro">
-              <p class="registrar-titulo">Nuevo registro</p>
-              <button type="button" class="registrar-opcion" (click)="abrirRegistro('caso')">
+            <div
+              class="registrar-panel"
+              id="menu-registrar"
+              role="menu"
+              aria-label="Nuevo registro"
+            >
+              <p class="registrar-titulo">Registro</p>
+              <button
+                type="button"
+                role="menuitem"
+                class="registrar-opcion"
+                (click)="abrirRegistro('caso')"
+              >
                 <span>Caso</span><span class="registrar-ayuda">CS-…</span>
-              </button>
-              <button type="button" class="registrar-opcion" (click)="abrirRegistro('alerta')">
-                <span>Alerta</span><span class="registrar-ayuda">AT-…</span>
               </button>
               <button
                 type="button"
+                role="menuitem"
                 class="registrar-opcion"
                 [disabled]="!codigoCasoActual()"
                 [attr.title]="
@@ -144,30 +153,102 @@
                   codigoCasoActual() ? 'del caso' : 'requiere caso'
                 }}</span>
               </button>
-              <button type="button" class="registrar-opcion" (click)="abrirRegistro('compromiso')">
+              <button
+                type="button"
+                role="menuitem"
+                class="registrar-opcion"
+                (click)="abrirRegistro('compromiso')"
+              >
                 <span>Compromiso</span>
               </button>
-              <button type="button" class="registrar-opcion" (click)="abrirRegistro('documento')">
-                <span>Documento</span>
+              <button
+                type="button"
+                role="menuitem"
+                class="registrar-opcion"
+                (click)="abrirRegistro('alerta')"
+              >
+                <span>Alerta temprana</span><span class="registrar-ayuda">AT-…</span>
               </button>
+
               <div class="registrar-separador"></div>
-              <p class="registrar-titulo">Sin capa de datos · no registrable</p>
+              <p class="registrar-titulo">Directorio</p>
               <button
                 type="button"
+                role="menuitem"
                 class="registrar-opcion"
-                disabled
-                title="Requiere tabla y endpoint"
+                (click)="abrirAltaActor('organizacion')"
               >
-                <span>Reunión</span><span class="registrar-ayuda">requiere endpoint</span>
+                <span>Organización</span><span class="registrar-ayuda">razón social</span>
               </button>
               <button
                 type="button"
+                role="menuitem"
+                class="registrar-opcion"
+                (click)="abrirAltaActor('institucion')"
+              >
+                <span>Institución</span><span class="registrar-ayuda">entidad pública</span>
+              </button>
+
+              <div class="registrar-separador"></div>
+              <p class="registrar-titulo">Sesiones</p>
+              <button
+                type="button"
+                role="menuitem"
+                class="registrar-opcion"
+                (click)="abrirImportacion('asistencia')"
+              >
+                <span>Lista de asistencia</span><span class="registrar-ayuda">padrón</span>
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                class="registrar-opcion"
+                (click)="abrirRegistro('clima')"
+              >
+                <span>Clima social</span><span class="registrar-ayuda">reporte</span>
+              </button>
+              <button
+                type="button"
+                role="menuitem"
                 class="registrar-opcion"
                 disabled
-                title="Requiere reuniones y endpoint"
+                title="Requiere tabla y endpoint de boletines"
               >
-                <span>Acta y relatoría</span><span class="registrar-ayuda">requiere reunión</span>
+                <span>Boletín</span><span class="registrar-ayuda">requiere endpoint</span>
               </button>
+            </div>
+          }
+        </div>
+
+        <div class="registrar-wrap" (click)="$event.stopPropagation()">
+          <button
+            type="button"
+            class="registrar-trigger registrar-trigger-suave"
+            [attr.aria-expanded]="importarAbierto()"
+            aria-controls="menu-importar"
+            aria-haspopup="menu"
+            (click)="alternarImportar()"
+          >
+            Importar
+          </button>
+          @if (importarAbierto()) {
+            <div class="registrar-panel" id="menu-importar" role="menu" aria-label="Importar">
+              @for (grupo of gruposImportacion; track grupo.grupo) {
+                <p class="registrar-titulo">{{ grupo.grupo }}</p>
+                @for (tipo of grupo.tipos; track tipo.id) {
+                  <button
+                    type="button"
+                    role="menuitem"
+                    class="registrar-opcion"
+                    (click)="abrirImportacion(tipo.id)"
+                  >
+                    <span>{{ tipo.etiqueta }}</span>
+                  </button>
+                }
+              }
+              <p class="importar-menu-nota">
+                CSV, TSV o celdas pegadas de Excel. Se previsualiza antes de escribir.
+              </p>
             </div>
           }
         </div>
@@ -233,7 +314,7 @@
   </header>
 
   <div class="app-layout">
-    <aside class="avisa-sidebar" [class.open]="menuAbierto()" [class.colapsado]="menuColapsado()">
+    <aside class="avisa-sidebar" [class.open]="menuAbierto()">
       <div class="sidebar-scroll">
         @for (grupo of grupos(); track grupo.etiqueta) {
           <div class="sidebar-label" [class.section-nav-label]="!$first">{{ grupo.etiqueta }}</div>
@@ -244,7 +325,6 @@
                 [routerLink]="enlace.ruta"
                 routerLinkActive="selected"
                 [routerLinkActiveOptions]="{ exact: enlace.exacto ?? false }"
-                [attr.title]="menuColapsado() ? enlace.etiqueta : null"
                 (click)="menuAbierto.set(false)"
               >
                 <app-icono [nombre]="enlace.icono" [tamano]="17" />
@@ -258,18 +338,6 @@
       <div class="sidebar-bottom">
         <div class="sidebar-rule"></div>
         <div class="sidebar-version">AVISA <span>·</span> v{{ version }}</div>
-        <button
-          type="button"
-          class="sidebar-colapso"
-          [attr.aria-label]="menuColapsado() ? 'Expandir menú' : 'Contraer menú'"
-          [attr.aria-expanded]="!menuColapsado()"
-          (click)="alternarColapso()"
-        >
-          <app-icono
-            [nombre]="menuColapsado() ? 'chevron-derecha' : 'chevron-izquierda'"
-            [tamano]="16"
-          />
-        </button>
       </div>
     </aside>
 
@@ -293,4 +361,24 @@
       </footer>
     </main>
   </div>
+
+  <!--
+    El alta de actores y la importación se hospedan aquí y no en una vista
+    concreta: el menú «Nuevo»/«Importar» las ofrece desde cualquier pantalla.
+  -->
+  @if (altaActor(); as naturaleza) {
+    <app-actor-panel-alta
+      naturalezaInicial="organizacion"
+      [tipoInicial]="naturaleza === 'institucion' ? 'Actor público' : ''"
+      [nivelGobiernoInicial]="naturaleza === 'institucion' ? 'Nacional' : ''"
+      (cerrar)="altaActor.set(null)"
+      (creado)="alCrearActorDesdeShell()"
+    />
+  }
+
+  @if (importacion.abierto()) {
+    <app-importar-panel />
+  }
+
+  <app-avisos />
 </div>

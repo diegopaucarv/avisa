@@ -1,19 +1,19 @@
 <div class="drawer-scrim">
-  <aside
-    class="drawer"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="importar-titulo"
-  >
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="importar-titulo">
     <header class="drawer-head">
       <div>
         <h2 id="importar-titulo">Importar</h2>
         <p>
-          Lea una hoja (CSV, TSV o celdas pegadas de Excel), revísela y confirme. Nada se
-          escribe en la base hasta que pulse el botón de importar.
+          Lea una hoja (CSV, TSV o celdas pegadas de Excel), revísela y confirme. Nada se escribe en
+          la base hasta que pulse el botón de importar.
         </p>
       </div>
-      <button type="button" class="icon-button" aria-label="Cerrar la importación" (click)="cerrar()">
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la importación"
+        (click)="cerrar()"
+      >
         <app-icono nombre="cerrar" [tamano]="18" />
       </button>
     </header>
@@ -25,7 +25,9 @@
           @for (grupo of grupos; track grupo.grupo) {
             <optgroup [label]="grupo.grupo">
               @for (tipo of grupo.tipos; track tipo.id) {
-                <option [value]="tipo.id">{{ tipo.etiqueta }}</option>
+                <option [value]="tipo.id" [selected]="tipo.id === importacion.tipo().id">
+                  {{ tipo.etiqueta }}
+                </option>
               }
             </optgroup>
           }
@@ -42,15 +44,19 @@
           <p class="importar-columnas">
             @for (columna of ayudaColumnas(); track columna.rotulo) {
               <span>
-                {{ columna.rotulo }}@if (columna.obligatoria) {* }@if (columna.ayuda) {
+                {{ columna.rotulo }}
+                @if (columna.obligatoria) {
+                  *
+                }
+                @if (columna.ayuda) {
                   — {{ columna.ayuda }}
                 }
               </span>
             }
           </p>
           <p class="importar-limite">
-            Los títulos de columna se comparan sin tildes ni mayúsculas y admiten sinónimos.
-            Las columnas desconocidas se ignoran y se informan abajo. Tope por tanda:
+            Los títulos de columna se comparan sin tildes ni mayúsculas y admiten sinónimos. Las
+            columnas desconocidas se ignoran y se informan abajo. Tope por tanda:
             {{ importacion.limite }} filas.
           </p>
         </div>
@@ -120,9 +126,15 @@
       @if (importacion.validacion(); as validacion) {
         <div>
           <p class="importar-resumen">
-            <span>Filas leídas: <b>{{ validacion.totalFilas }}</b></span>
-            <span>Válidas: <b>{{ validacion.validas.length }}</b></span>
-            <span>Rechazadas: <b>{{ validacion.rechazos.length }}</b></span>
+            <span
+              >Filas leídas: <b>{{ validacion.totalFilas }}</b></span
+            >
+            <span
+              >Válidas: <b>{{ validacion.validas.length }}</b></span
+            >
+            <span
+              >Rechazadas: <b>{{ validacion.rechazos.length }}</b></span
+            >
           </p>
 
           @if (validacion.faltantes.length > 0) {
@@ -149,7 +161,9 @@
           @if (rechazos().length > 0) {
             <p class="importar-subtitulo">Filas rechazadas antes de enviar</p>
             <table class="tabla-importar">
-              <caption class="sr-only">Filas rechazadas en la previsualización</caption>
+              <caption class="sr-only">
+                Filas rechazadas en la previsualización
+              </caption>
               <thead>
                 <tr>
                   <th scope="col">Fila</th>
@@ -178,16 +192,24 @@
         <div>
           <p class="importar-resumen">
             @if (resultado.documento) {
-              <span>Documento: <b>{{ resultado.documento }}</b></span>
+              <span
+                >Documento: <b>{{ resultado.documento }}</b></span
+              >
             }
-            <span>Creados: <b>{{ resultado.creados }}</b></span>
-            <span>Rechazados por la API: <b>{{ resultado.fallidos }}</b></span>
+            <span
+              >Creados: <b>{{ resultado.creados }}</b></span
+            >
+            <span
+              >Rechazados por la API: <b>{{ resultado.fallidos }}</b></span
+            >
           </p>
 
           @if (errores().length > 0) {
             <p class="importar-subtitulo">Rechazos de la API</p>
             <table class="tabla-importar">
-              <caption class="sr-only">Filas rechazadas por la API</caption>
+              <caption class="sr-only">
+                Filas rechazadas por la API
+              </caption>
               <thead>
                 <tr>
                   <th scope="col">Fila</th>
@@ -215,7 +237,7 @@
       }
     </div>
 
-    <footer class="importar-pie">
+    <footer class="drawer-foot">
       <button type="button" class="button-secondary" (click)="cerrar()">Cerrar</button>
     </footer>
   </aside>

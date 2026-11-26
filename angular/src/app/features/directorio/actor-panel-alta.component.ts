@@ -277,6 +277,16 @@ export class ActorPanelAltaComponent {
   /** Naturaleza con la que se abre (`Nueva organización` la fuerza). */
   readonly naturalezaInicial = input<NaturalezaAlta>('persona');
 
+  /**
+   * Tipo de actor preseleccionado. El menú «Nuevo → Institución» la usa para
+   * abrir la ficha como organización pública sin que el usuario tenga que
+   * buscarlo en el catálogo.
+   */
+  readonly tipoInicial = input('');
+
+  /** Nivel de gobierno preseleccionado; sólo tiene sentido con `tipoInicial`. */
+  readonly nivelGobiernoInicial = input('');
+
   readonly cerrar = output<void>();
 
   /** Cierra con la animación de salida y luego avisa al contenedor. */
@@ -352,7 +362,13 @@ export class ActorPanelAltaComponent {
     typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null);
 
   constructor() {
-    effect(() => this.naturaleza.set(this.naturalezaInicial()));
+    effect(() => {
+      this.naturaleza.set(this.naturalezaInicial());
+      const tipo = this.tipoInicial();
+      if (tipo) this.tipo.set(tipo);
+      const nivel = this.nivelGobiernoInicial();
+      if (nivel) this.nivelGobierno.set(nivel);
+    });
 
     afterNextRender(() => this.modal()?.nativeElement.focus());
 

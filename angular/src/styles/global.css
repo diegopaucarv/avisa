@@ -767,63 +767,6 @@ select:focus-visible {
 .sidebar-version span {
   color: #cad0d5;
 }
-.sidebar-colapso {
-  width: 100%;
-  height: 30px;
-  margin-top: 4px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #e9edf0;
-  border-radius: 6px;
-  background: #fbfcfc;
-  color: #7d8b98;
-  cursor: pointer;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
-}
-.sidebar-colapso:hover {
-  background: #eef2f7;
-  color: #33465a;
-}
-.sidebar-colapso:focus-visible {
-  outline: 2px solid #9dbde3;
-  outline-offset: 1px;
-}
-@media (min-width: 761px) {
-  .sidebar-colapso {
-    display: flex;
-  }
-
-  /* Menú colapsado: sólo íconos, mismo lenguaje visual que el expandido. */
-  .avisa-sidebar.colapsado {
-    width: 68px;
-    padding-right: 9px;
-    padding-left: 9px;
-  }
-  .avisa-sidebar.colapsado .sidebar-label,
-  .avisa-sidebar.colapsado .sidebar-version,
-  .avisa-sidebar.colapsado .side-nav span {
-    display: none;
-  }
-  .avisa-sidebar.colapsado .sidebar-scroll {
-    margin: 0 -9px;
-    padding: 0 9px 6px;
-  }
-  .avisa-sidebar.colapsado .side-nav {
-    justify-content: center;
-    gap: 0;
-    padding: 0;
-  }
-  .avisa-sidebar.colapsado .nav-indicator {
-    left: -9px;
-  }
-  .avisa-sidebar.colapsado .sidebar-rule {
-    margin-right: 0;
-    margin-left: 0;
-  }
-}
 .sidebar-scroll {
   flex: 1;
   min-height: 0;
@@ -3264,6 +3207,55 @@ textarea {
   }
 }
 
+/* ── Menú lateral como riel desplegable (2026-11-24) ────────────────────────
+   En escritorio el menú es una franja de íconos que se despliega al pasar el
+   puntero (y al entrar con el teclado). No hay botón de colapso: el estado lo
+   decide el puntero, así que tampoco se guarda en localStorage.
+
+   El panel se pinta con `position: fixed` —igual que el cajón móvil— para
+   superponerse al contenido en vez de re-maquetarlo en cada entrada y salida
+   del puntero; el hueco de la franja lo reserva `.avisa-main` con un margen.
+   Dentro no se oculta nada: el recorte lo hace el `overflow: hidden` del
+   aside, de modo que al ensancharse el texto aparece sin saltos de altura.
+
+   Sólo se aplica a dispositivos con puntero fino: en táctil no existe hover y
+   el menú quedaría inutilizable. Allí se mantiene desplegado (o el cajón, por
+   debajo de 760 px). */
+@media (min-width: 761px) and (hover: hover) and (pointer: fine) {
+  .avisa-sidebar {
+    position: fixed;
+    z-index: 29;
+    top: 64px;
+    right: auto;
+    bottom: 0;
+    left: 0;
+    width: 68px;
+    height: auto;
+    transition:
+      width 0.16s ease,
+      box-shadow 0.16s ease;
+  }
+
+  .avisa-sidebar:hover,
+  .avisa-sidebar:focus-within {
+    width: 246px;
+    box-shadow: 10px 0 25px #122b4014;
+  }
+
+  .avisa-main {
+    margin-left: 68px;
+  }
+
+  /* Sin envolver: en la franja, cada rótulo se recorta en vez de partirse. */
+  .sidebar-label,
+  .side-nav span,
+  .sidebar-version,
+  .sidebar-context strong,
+  .sidebar-context small {
+    white-space: nowrap;
+  }
+}
+
 @media print {
   .avisa-header,
   .avisa-sidebar,
@@ -3277,6 +3269,7 @@ textarea {
   .app-layout,
   .avisa-main {
     display: block;
+    margin-left: 0;
     min-height: 0;
   }
   .workspace-content {

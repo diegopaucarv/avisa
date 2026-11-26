@@ -153,15 +153,6 @@ const LIMITE_VISIBLE = 40;
       white-space: nowrap;
     }
 
-    .importar-pie {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      padding: 12px 22px;
-      border-top: 1px solid #eef2f6;
-      background: #fbfcfd;
-    }
-
     /* Rótulo de tabla para lectores de pantalla, sin pintarse. */
     .sr-only {
       position: absolute;

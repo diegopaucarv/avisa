@@ -201,7 +201,7 @@ export class ImportacionService {
       `Importación parcial: ${creados} de ${creados + errores.length}`,
       `${errores.length} ${errores.length === 1 ? 'fila rechazada' : 'filas rechazadas'}. ` +
         'El detalle está en el panel.',
-      );
+    );
   }
 
   /** CSV con la cabecera del tipo, para llenarla fuera de la aplicación. */
@@ -254,13 +254,21 @@ export class ImportacionService {
         if (!codigo) {
           throw new Error('El caso se creó, pero la API no devolvió su código.');
         }
-        await firstValueFrom(
-          this.http.post<unknown>(urlApi('/v1/demandas'), {
-            descripcion: demanda,
-            tematica: fila.payload['tematica'],
-            casoCode: codigo,
-          }),
-        );
+        try {
+          await firstValueFrom(
+            this.http.post<unknown>(urlApi('/v1/demandas'), {
+              descripcion: demanda,
+              tematica: fila.payload['tematica'],
+              casoCode: codigo,
+            }),
+          );
+        } catch (fallo) {
+          const api = aErrorApi(fallo, 'La API rechazó la demanda.');
+          // El caso ya existe: se dice cuál para no duplicarlo al reintentar.
+          throw new Error(
+            `El caso ${codigo} se creó, pero la demanda «${demanda}» fue rechazada: ${api.message}`,
+          );
+        }
       }
       return;
     }
