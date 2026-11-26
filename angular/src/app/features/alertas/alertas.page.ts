@@ -243,8 +243,8 @@ function totalDe(bruto: unknown): number {
 
     /*
      * Caso vinculado: sólo el código, como enlace al expediente. El título vive
-     * en el `title` del enlace (aparece al pasar el puntero) para que la columna
-     * no reserve ancho para una segunda línea.
+     * en el atributo title del enlace (aparece al pasar el puntero) para que la
+     * columna no reserve ancho para una segunda línea.
      */
     .alerta-caso-enlace {
       display: block;
