@@ -5,28 +5,24 @@ Problema que resuelve
 ---------------------
 El matcher por embeddings confunde **descriptores colectivos** («Pescadores»,
 «Gremios de pescadores artesanales zona norte») con organizaciones concretas, y
-arrastra tipos equivocados (una OSPA clasificada como persona). Aquí se aplica
-un ruteo previo, con **reglas generales** (no una lista de los casos vistos) y
-apoyo de embeddings.
+arrastra tipos equivocados (una OSPA clasificada como persona).
 
-Reglas (no dependen de ningún texto concreto)
----------------------------------------------
-1. **Ancla propia.** Una frase es "anclada" si, después de la primera palabra,
-   contiene un nombre propio (token capitalizado de 3+ letras), una sigla en
-   mayúsculas de 4+ letras, o el nombre de una región/distrito que existe en la
-   base. Si no tiene ancla, es un **descriptor colectivo**, no una entidad.
-2. **Colectivo ⇒ OSPA.** Todo descriptor colectivo se tipifica como
-   `organizacion` (nunca persona) y se rutea contra las OSPA existentes. Si la
-   frase nombra un ámbito (p. ej. un distrito), se restringe a las OSPA de ese
-   ámbito; si hay una sola, se propone; si hay varias, queda dudoso; si no hay,
-   se propone crear una OSPA con ese ámbito.
-3. **Entidad pública.** Si la cabeza del nombre es municipalidad, procuraduría,
-   dirección, ministerio, instituto, oficina o autoridad, no es un colectivo ni
-   una OSPA: se rutea contra las unidades orgánicas.
-4. **Anclada.** Se conserva el veredicto del matcher, pero se corrige el tipo
+Reglas (generales, no listas de casos)
+-------------------------------------
+1. **Ancla propia.** Una frase está "anclada" si, después de la primera
+   palabra, tiene un nombre propio, una sigla en mayúsculas de 2+ letras
+   (`MTC`, `APN`, `PCM`) o el nombre de una región/distrito de la base. Sin
+   ancla es un **descriptor colectivo**, no una entidad.
+2. **Sin ancla ni ámbito** → `generico`: no se vincula ni se crea.
+3. **Colectivo del dominio pesquero** (pescadores, armadores, maricultores,
+   gremios, caletas, artes…) → se tipifica `organizacion` + `ospa` y se rutea
+   contra las OSPA del ámbito nombrado.
+4. **Entidad pública** (municipalidad, procuraduría, dirección, ministerio,
+   instituto, oficina) → se rutea contra las unidades orgánicas.
+5. **Anclada** → se conserva el veredicto del matcher, corrigiendo el tipo
    cuando el nombre delata una organización.
 
-Sólo lectura: no escribe en la base. Uso:
+Sólo lectura: no escribe en la base.
     python scripts/matriz/ruteo_colectivos.py
 """
 
@@ -61,6 +57,7 @@ HEADS_PUBLICAS = {
     "prefectura",
     "subprefectura",
 }
+
 MARCAS_ORGANIZACION = (
     "ospa",
     "gremio",
@@ -75,6 +72,39 @@ MARCAS_ORGANIZACION = (
     "consejo",
     "mesa",
 )
+
+# Vocabulario general del sector, no una lista de casos.
+DOMINIO_PESQUERO = (
+    "pescador",
+    "pescadores",
+    "armador",
+    "armadores",
+    "maricultor",
+    "maricultores",
+    "acuicultor",
+    "acuicultores",
+    "gremio",
+    "gremios",
+    "caleta",
+    "caletas",
+    "ospa",
+    "ospas",
+    "arte",
+    "artes",
+    "embarcacion",
+    "embarcaciones",
+    "cortinera",
+    "cortineras",
+    "boliche",
+    "cerco",
+    "anzuelo",
+    "red",
+    "redes",
+    "extractores",
+    "buzos",
+)
+
+STOP_MAYUSCULAS = {"de", "del", "la", "el", "los", "las", "y", "e", "en", "por"}
 
 
 def norm(texto: str | None) -> str:
@@ -97,51 +127,36 @@ def conectar():
 def cargar(conn):
     cur = conn.cursor()
     localidades: set[str] = set()
-    for tabla, columna in (
-        ("core.regiones", "nombre"),
-        ("core.distritos", "nombre"),
-    ):
-        cur.execute(f"select distinct {columna} from {tabla}")
+    for tabla in ("core.regiones", "core.distritos"):
+        cur.execute(f"select distinct nombre from {tabla}")
         for (valor,) in cur.fetchall():
             if valor:
                 localidades.update(norm(valor).split())
 
     cur.execute(
-        "select actor_uid::text, razon_social, abreviatura from core.organizaciones "
+        "select actor_uid::text, razon_social from core.organizaciones "
         "where razon_social is not null"
     )
     organizaciones = [
-        {"tabla": "core.organizaciones", "id": uid, "nombre": nombre, "siglas": abrev}
-        for uid, nombre, abrev in cur.fetchall()
+        {"tabla": "core.organizaciones", "id": uid, "nombre": nombre}
+        for uid, nombre in cur.fetchall()
     ]
 
     cur.execute(
-        "select actor_uid::text, nombre_actual, abreviatura, naturaleza, tipo_actor_id "
-        "from core.actores where nombre_actual is not null"
+        "select actor_uid::text, nombre_actual, naturaleza from core.actores "
+        "where nombre_actual is not null"
     )
     actores = [
-        {
-            "tabla": "core.actores",
-            "id": uid,
-            "nombre": nombre,
-            "siglas": abrev,
-            "naturaleza": nat,
-            "tipo_actor_id": tipo,
-        }
-        for uid, nombre, abrev, nat, tipo in cur.fetchall()
+        {"tabla": "core.actores", "id": uid, "nombre": nombre, "naturaleza": nat}
+        for uid, nombre, nat in cur.fetchall()
     ]
 
     cur.execute(
         "select id::text, siglas, nombre_completo from core.cat_unidades_organicas"
     )
     unidades = [
-        {
-            "tabla": "core.cat_unidades_organicas",
-            "id": uid,
-            "nombre": nombre,
-            "siglas": siglas,
-        }
-        for uid, siglas, nombre in cur.fetchall()
+        {"tabla": "core.cat_unidades_organicas", "id": uid, "nombre": nombre}
+        for uid, _siglas, nombre in cur.fetchall()
     ]
     return localidades, organizaciones, actores, unidades
 
@@ -151,32 +166,49 @@ def localidades_de(texto: str, localidades: set[str]) -> set[str]:
 
 
 def analizar_ancla(crudo: str, localidades: set[str]):
-    """Devuelve (tiene_ancla_propia, localidades_nombradas)."""
+    """(tiene_ancla_propia, localidades_nombradas)."""
     palabras = [p for p in crudo.split() if p]
     propias = [
         p
         for p in palabras[1:]
-        if p[:1].isupper() and len(re.sub(r"[^A-Za-zÁÉÍÓÚÑáéíóúñ]", "", p)) >= 3
+        if p[:1].isupper()
+        and len(re.sub(r"[^A-Za-zÁÉÍÓÚÑáéíóúñ]", "", p)) >= 3
+        and re.sub(r"[^A-Za-zÁÉÍÓÚÑáéíóúñ]", "", p).lower() not in STOP_MAYUSCULAS
     ]
-    siglas = re.findall(r"\b[A-ZÁÉÍÓÚÑ0-9]{4,}\b", crudo)
+    siglas = [
+        t
+        for t in re.findall(r"\b[A-ZÁÉÍÓÚÑ0-9]{2,}\b", crudo)
+        if t.lower() not in STOP_MAYUSCULAS
+    ]
     locs = localidades_de(crudo, localidades)
     return bool(propias or siglas or locs), locs
 
 
 def es_ospa(nombre: str) -> bool:
-    return "ospa" in norm(nombre).split()
+    return any(t.startswith("ospa") for t in norm(nombre).split())
 
 
-def clasificar(
-    crudo: str, tipo_matcher: str, localidades: set[str]
-) -> tuple[str, set[str]]:
-    """Etapa de reglas: decide la familia antes de mirar embeddings."""
+def es_dominio_pesquero(crudo: str) -> bool:
+    texto = norm(crudo)
+    return any(raiz in texto for raiz in DOMINIO_PESQUERO)
+
+
+def clasificar(crudo: str, tipo_matcher: str, localidades: set[str]):
     texto = norm(crudo)
     cabeza = texto.split()[0] if texto.split() else ""
     if cabeza in HEADS_PUBLICAS:
         return "entidad_publica", set()
+
     ancla, locs = analizar_ancla(crudo, localidades)
-    if es_ospa(crudo) or not ancla:
+    if not ancla:
+        if not locs:
+            return "generico", locs
+        return (
+            ("colectivo_ospa", locs)
+            if es_dominio_pesquero(crudo)
+            else ("colectivo", locs)
+        )
+    if es_ospa(crudo):
         return "colectivo_ospa", locs
     if tipo_matcher == "persona" and any(m in texto for m in MARCAS_ORGANIZACION):
         return "organizacion", locs
@@ -269,15 +301,20 @@ def main() -> None:
                     "ruteo_unidad_sin_candidato",
                     None,
                 )
+        elif familia in ("generico", "colectivo"):
+            veredicto, rama, destino = "generico_sin_registro", "ruteo_generico", None
 
+        tipo_final = (
+            fila["tipo"]
+            if familia == "anclado"
+            else ("entidad_publica" if familia == "entidad_publica" else "organizacion")
+        )
         salida.append(
             {
                 **fila,
                 "familia": familia,
                 "localidades": sorted(locs),
-                "tipo_final": "organizacion"
-                if familia in ("colectivo_ospa", "anclado")
-                else "entidad_publica",
+                "tipo_final": tipo_final,
                 "subtipo": "ospa" if familia == "colectivo_ospa" else None,
                 "veredicto_final": veredicto,
                 "rama_final": rama,
@@ -303,14 +340,14 @@ def main() -> None:
     )
 
     print("\nRESUMEN:", json.dumps(resumen, ensure_ascii=False, indent=2))
-    print("\n== ruteo de colectivos / OSPA ==")
+    print("\n== colectivos / OSPA ==")
     for f in salida:
-        if f["familia"] != "colectivo_ospa":
+        if f["familia"] not in ("colectivo_ospa", "colectivo", "generico"):
             continue
         destino = (f["destino_final"] or {}).get("nombre")
         print(
-            f"  {str(f['crudo'])[:62]:64} {f['veredicto_final']:14} "
-            f"cos={f['coseno_final']}  {str(destino)[:44]}"
+            f"  {str(f['crudo'])[:58]:60} {f['familia']:14} {f['veredicto_final']:20} "
+            f"cos={f['coseno_final']}  {str(destino)[:38]}"
         )
     print(f"\nEscrito {SALIDA} (sin escribir en la base)")
 

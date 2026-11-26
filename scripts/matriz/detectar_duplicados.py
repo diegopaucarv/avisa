@@ -163,10 +163,13 @@ GENERICOS_SIGLAS = {
     "MARICULTORES",
     "PRODUCTORES",
     "AGRICULTORES",
+    "DUDOSO",
+    "DUDOSA",
 }
 
+PALABRAS_VACIAS = {"de", "del", "la", "el", "los", "las", "y", "en", "a"}
+
 ORDEN_MOTIVO = {"exacto": 0, "tipo": 1, "siglas": 2, "similitud": 3}
-ETIQUETA_TABLA = {"core.actores": "actores", "core.organizaciones": "organizaciones"}
 
 
 # --------------------------------------------------------------------------
@@ -480,8 +483,30 @@ def main() -> None:
         fila["norm"] = normalizar(fila["nombre"])
         fila["siglas"] = extraer_siglas(fila["nombre"], fila["abreviatura"])
 
-    con_nombre = [f for f in filas if f["norm"]]
-    indice = {(f["tabla"], f["uid"]): f for f in filas}
+    # Cada organización tiene una fila espejo en `core.actores` (mismo
+    # actor_uid y mismo nombre). Se analiza una sola vez y se anota el espejo.
+    actores_por_uid = {a["uid"]: a for a in actores}
+    espejos: set[tuple[str, str]] = set()
+    for org in organizaciones:
+        actor = actores_por_uid.get(org["uid"])
+        if not actor or actor["naturaleza"] != "organizacion":
+            continue
+        if org["norm"] != actor["norm"]:
+            continue
+        abrev_org = sorted(
+            s["compacta"] for s in org["siglas"] if s["fuente"] == "abreviatura"
+        )
+        abrev_actor = sorted(
+            s["compacta"] for s in actor["siglas"] if s["fuente"] == "abreviatura"
+        )
+        if abrev_org != abrev_actor:
+            continue
+        espejos.add((org["tabla"], org["uid"]))
+        actor["espejo_en"] = "core.organizaciones"
+
+    analizables = [
+        f for f in filas if f["norm"] and (f["tabla"], f["uid"]) not in espejos
+    ]
 
     inconsistencias: list[dict] = []
 
@@ -534,7 +559,7 @@ def main() -> None:
             )
 
     siglas_en_nombre = 0
-    for fila in filas:
+    for fila in analizables:
         if fila["abreviatura"] or not fila["nombre"]:
             continue
         visibles = [s for s in fila["siglas"] if s["fuente"] != "abreviatura"]
@@ -564,6 +589,8 @@ def main() -> None:
             "naturaleza": fila["naturaleza"],
             "tipo_actor": fila["tipo_actor"],
         }
+        if fila.get("espejo_en"):
+            dato["espejo_en"] = fila["espejo_en"]
         if extra:
             dato.update(extra)
         return dato
@@ -582,7 +609,7 @@ def main() -> None:
         return len(set(bases)) == 1
 
     por_norm: dict[str, list[dict]] = defaultdict(list)
-    for fila in con_nombre:
+    for fila in analizables:
         por_norm[fila["norm"]].append(fila)
 
     uids_actor = {a["uid"] for a in actores}
@@ -638,7 +665,7 @@ def main() -> None:
     # ---------------- 2. Duplicados por siglas
     por_sigla: dict[str, list[dict]] = defaultdict(list)
     fuentes_sigla: dict[tuple[str, str, str], set[str]] = defaultdict(set)
-    for fila in con_nombre:
+    for fila in analizables:
         for sigla in fila["siglas"]:
             compacta = sigla["compacta"]
             if len(compacta) < 3 or compacta in GENERICOS_SIGLAS:
@@ -665,7 +692,7 @@ def main() -> None:
         if fuzz_simple is not None:
             textos = [f["nombre"] or f["norm"] for f in miembros_filas]
             puntaje = max(
-                fuzz_simple.token_set_ratio(textos[a], textos[b]) / 100.0
+                fuzz_simple.token_sort_ratio(textos[a], textos[b]) / 100.0
                 for a in range(len(textos))
                 for b in range(a + 1, len(textos))
             )
@@ -673,7 +700,11 @@ def main() -> None:
         if es_variante_regional(miembros_filas):
             recomendacion = "ninguna"
             nota = "misma sigla pero denominación por región; no son duplicados"
-        elif len(tablas) == 1 and naturalezas != {"persona"} and (puntaje or 0) >= 0.95:
+        elif (
+            len(tablas) == 1
+            and naturalezas == {"organizacion"}
+            and (puntaje or 0) >= 0.95
+        ):
             recomendacion = "fusionar"
             nota = "sigla y denominación casi idénticas; confirmar antes de fusionar"
         else:
@@ -705,7 +736,7 @@ def main() -> None:
         )
 
     # ---------------- 3. Duplicados por similitud
-    nodos = con_nombre
+    nodos = analizables
     n = len(nodos)
     m_fuzzy = m_embeddings = None
     embeddings_estado = {
@@ -723,7 +754,7 @@ def main() -> None:
         print(f"Comparando {n} nombres con rapidfuzz…", flush=True)
         m_ratio = process.cdist(textos, textos, scorer=fuzz.ratio, workers=-1) / 100.0
         m_token = (
-            process.cdist(textos, textos, scorer=fuzz.token_set_ratio, workers=-1)
+            process.cdist(textos, textos, scorer=fuzz.token_sort_ratio, workers=-1)
             / 100.0
         )
         m_fuzzy = np.maximum(m_ratio, m_token)
@@ -779,6 +810,13 @@ def main() -> None:
                 valor = max(valor, float(m_embeddings[a, b]))
             return valor
 
+        def compatible(a: int, b: int) -> bool:
+            # Un buen coseno no basta: los nombres deben compartir texto.
+            # Evita que cadenas de nombres propios se agrupen sólo por embeddings.
+            if float(m_fuzzy[a, b]) < 0.80:
+                return False
+            return puntaje_par(a, b) >= UMBRAL_COMPATIBILIDAD
+
         pares: list[tuple[float, int, int, float, float]] = []
         for i, j in zip(indices_i.tolist(), indices_j.tolist()):
             fi, fj = nodos[i], nodos[j]
@@ -807,12 +845,10 @@ def main() -> None:
             conjunto_a, conjunto_b = conjuntos[ra], conjuntos[rb]
             if len(conjunto_a) + len(conjunto_b) > MAX_MIEMBROS_GRUPO:
                 continue
-            compatible = all(
-                puntaje_par(a, b) >= UMBRAL_COMPATIBILIDAD
-                for a in conjunto_a
-                for b in conjunto_b
+            es_compatible = all(
+                compatible(a, b) for a in conjunto_a for b in conjunto_b
             )
-            if not compatible:
+            if not es_compatible:
                 continue
             uf.union(ra, rb)  # deja a `ra` como raíz
             conjuntos[ra] = conjunto_a | conjunto_b
@@ -829,11 +865,8 @@ def main() -> None:
                 continue
             filas_grupo = [nodos[i] for i in indices]
             filas_grupo.sort(key=lambda x: (x["tabla"], x["nombre"]))
-            puntaje_max = max(
-                (puntaje_par(a, b) for a in indices for b in indices if a < b),
-                default=0.0,
-            )
-            puntajes = puntajes_por_raiz.get(raiz) or [puntaje_max]
+            puntajes = puntajes_por_raiz.get(raiz) or []
+            puntaje_max = max(puntajes) if puntajes else 0.0
             tablas = {f["tabla"] for f in filas_grupo}
             naturalezas = {f["naturaleza"] for f in filas_grupo}
 
@@ -843,7 +876,18 @@ def main() -> None:
             elif len(tablas) > 1 or len(naturalezas) > 1:
                 recomendacion = "revisar"
                 nota = "similitud cruzada entre actores y organizaciones; probable error de tipo"
-            elif puntaje_max >= 0.97:
+            elif any(
+                tokens_a < tokens_b or tokens_b < tokens_a
+                for tokens_a in (
+                    set(f["norm"].split()) - PALABRAS_VACIAS for f in filas_grupo
+                )
+                for tokens_b in (
+                    set(f["norm"].split()) - PALABRAS_VACIAS for f in filas_grupo
+                )
+            ):
+                recomendacion = "revisar"
+                nota = "un nombre contiene al otro; puede faltar el calificativo (región, alcance)"
+            elif puntaje_max >= 0.97 and naturalezas == {"organizacion"}:
                 recomendacion = "fusionar"
                 nota = "nombres casi idénticos; confirmar antes de fusionar"
             else:
@@ -929,6 +973,8 @@ def main() -> None:
                 1 for o in organizaciones if o["nombre"]
             ),
             "filas_analizadas": len(filas),
+            "filas_analizables": len(analizables),
+            "filas_espejo_excluidas": len(espejos),
         },
         "grupos": {
             "total": len(grupos),
