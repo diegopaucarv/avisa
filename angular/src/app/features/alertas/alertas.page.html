@@ -255,19 +255,17 @@
 
     <ng-template appCeldaTabla="caso" let-fila>
       @if (fila.casoCodigo) {
-      <div class="alerta-caso">
-        <a
-          class="table-link alerta-caso-enlace"
-          [routerLink]="['/casos', fila.casoCodigo]"
-          [attr.title]="fila.casoTitulo || null"
-          [attr.aria-label]="
-            fila.casoTitulo ? fila.casoCodigo + ', ' + fila.casoTitulo : 'Abrir el caso ' + fila.casoCodigo
-          "
-          (click)="$event.stopPropagation()"
-        >
-          {{ fila.casoCodigo }}
-        </a>
-      </div>
+      <a
+        class="table-link alerta-caso-enlace"
+        [routerLink]="['/casos', fila.casoCodigo]"
+        [attr.title]="fila.casoTitulo || null"
+        [attr.aria-label]="
+          fila.casoTitulo ? fila.casoCodigo + ', ' + fila.casoTitulo : 'Abrir el caso ' + fila.casoCodigo
+        "
+        (click)="$event.stopPropagation()"
+      >
+        {{ fila.casoCodigo }}
+      </a>
       } @else {
       <span class="sin-caso">Sin caso</span>
       }
