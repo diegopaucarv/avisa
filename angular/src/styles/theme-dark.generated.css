@@ -1847,3 +1847,12 @@ html[data-theme='dark'] .leaflet-popup-tip {
   background: #191e25;
   color: #dbe3ec;
 }
+
+html[data-theme="dark"] .button-light {
+    border-color: #3b4652;
+    background: #212a34;
+    color: #d5dee8;
+}
+html[data-theme="dark"] .button-light:hover {
+    background: #2b3540;
+}
