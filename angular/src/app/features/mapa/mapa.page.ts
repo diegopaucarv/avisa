@@ -605,13 +605,9 @@ function compararInicio(a: string | null, b: string | null): number {
     .casos-drawer-scrim {
       position: fixed;
       inset: 0;
-      z-index: 90;
       display: flex;
       justify-content: flex-start;
       overflow: hidden;
-      background: rgba(17, 32, 45, 0.42);
-      -webkit-backdrop-filter: blur(3px);
-      backdrop-filter: blur(3px);
     }
 
     .casos-drawer {
@@ -623,16 +619,6 @@ function compararInicio(a: string | null, b: string | null): number {
       background: #fff;
       box-shadow: 18px 0 44px rgba(17, 32, 45, 0.2);
       outline: none;
-      animation: casos-drawer-entrada 0.2s ease;
-    }
-
-    @keyframes casos-drawer-entrada {
-      from {
-        transform: translateX(-100%);
-      }
-      to {
-        transform: none;
-      }
     }
 
     .casos-drawer-cabeza {
@@ -750,12 +736,6 @@ function compararInicio(a: string | null, b: string | null): number {
 
     .casos-drawer-pie a {
       text-decoration: none;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .casos-drawer {
-        animation: none;
-      }
     }
 
     @media (max-width: 760px) {

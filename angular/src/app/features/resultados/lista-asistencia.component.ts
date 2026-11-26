@@ -11,11 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 
-import {
-  MAX_ADJUNTO_BYTES,
-  AdjuntosService,
-  type Adjunto,
-} from '../../core/http/adjuntos.service';
+import { MAX_ADJUNTO_BYTES, AdjuntosService, type Adjunto } from '../../core/http/adjuntos.service';
 import { aErrorApi } from '../../core/http/errores';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
@@ -26,20 +22,11 @@ import {
   type ReunionResumen,
   type Vinculacion,
 } from './resultados.mapeo';
-import {
-  ResultadosService,
-  type AsistenteEnvio,
-  type NaturalezaActor,
-} from './resultados.service';
+import { ResultadosService, type AsistenteEnvio, type NaturalezaActor } from './resultados.service';
 
 type Paso = 'captura' | 'revision';
 
-type EstadoFila =
-  | 'pendiente'
-  | 'vinculado'
-  | 'creado'
-  | 'omitido'
-  | 'error';
+type EstadoFila = 'pendiente' | 'vinculado' | 'creado' | 'omitido' | 'error';
 
 type OrigenFila = 'manual' | 'extraido' | 'directorio' | 'alta';
 
@@ -222,7 +209,9 @@ type Fila = {
                       [disabled]="!reunion() || subiendo() || extrayendo()"
                       (click)="usarFoto()"
                     >
-                      {{ subiendo() ? 'Guardando…' : extrayendo() ? 'Procesando…' : 'Usar esta foto' }}
+                      {{
+                        subiendo() ? 'Guardando…' : extrayendo() ? 'Procesando…' : 'Usar esta foto'
+                      }}
                     </button>
                   </div>
                 } @else {
@@ -255,8 +244,8 @@ type Fila = {
                   <div class="la-nota la-nota--amber">
                     <app-icono nombre="alerta" [tamano]="18" />
                     <span>
-                      <strong>Sin motor de OCR:</strong> no se reconoce el texto de la foto. La lista
-                      arranca vacía; escríbela y revísala a mano. {{ ex.nota }}
+                      <strong>Sin motor de OCR:</strong> no se reconoce el texto de la foto. La
+                      lista arranca vacía; escríbela y revísala a mano. {{ ex.nota }}
                     </span>
                   </div>
                 }
@@ -265,8 +254,9 @@ type Fila = {
               @if (adjunto(); as a) {
                 <p class="la-adjunto">
                   <app-icono nombre="check" [tamano]="15" />
-                  Foto guardada como adjunto: <strong>{{ a.nombre }}</strong>
-                  ({{ formatearTamano(a.tamanoBytes) }})
+                  Foto guardada como adjunto: <strong>{{ a.nombre }}</strong> ({{
+                    formatearTamano(a.tamanoBytes)
+                  }})
                 </p>
               } @else {
                 <p class="la-adjunto la-adjunto--vacio">
@@ -327,7 +317,9 @@ type Fila = {
                       }
                     </div>
                     <div class="la-estado-col">
-                      <span [class]="'la-estado ' + claseEstado(fila)">{{ etiquetaEstado(fila) }}</span>
+                      <span [class]="'la-estado ' + claseEstado(fila)">{{
+                        etiquetaEstado(fila)
+                      }}</span>
                     </div>
                     <div class="la-fila-acciones">
                       <button
@@ -420,8 +412,14 @@ type Fila = {
                           </label>
                           <label class="la-alta-campo">
                             <span>Naturaleza</span>
-                            <select class="form-select" (change)="alCambiarNaturaleza(fila.id, $event)">
-                              <option value="persona" [selected]="fila.altaNaturaleza === 'persona'">
+                            <select
+                              class="form-select"
+                              (change)="alCambiarNaturaleza(fila.id, $event)"
+                            >
+                              <option
+                                value="persona"
+                                [selected]="fila.altaNaturaleza === 'persona'"
+                              >
                                 Persona
                               </option>
                               <option
@@ -442,7 +440,11 @@ type Fila = {
                           >
                             {{ fila.creando ? 'Creando…' : 'Crear y vincular' }}
                           </button>
-                          <button type="button" class="button-secondary" (click)="cerrarAlta(fila.id)">
+                          <button
+                            type="button"
+                            class="button-secondary"
+                            (click)="cerrarAlta(fila.id)"
+                          >
                             Cancelar
                           </button>
                         </div>
@@ -465,7 +467,8 @@ type Fila = {
                 <div class="la-nota la-nota--ok">
                   <app-icono nombre="check" [tamano]="18" />
                   <span>
-                    Listo: {{ res.resumen.vinculados }} vinculados · {{ res.resumen.omitidos }} omitidos
+                    Listo: {{ res.resumen.vinculados }} vinculados ·
+                    {{ res.resumen.omitidos }} omitidos
                     @if (res.resumen.errores) {
                       · {{ res.resumen.errores }} con error
                     }
@@ -490,7 +493,9 @@ type Fila = {
             <div class="la-foot-botones">
               @if (paso() === 'revision' && !resultado()) {
                 <button type="button" class="la-link" (click)="vaciar()">Vaciar lista</button>
-                <button type="button" class="button-secondary" (click)="cerrarModal()">Cancelar</button>
+                <button type="button" class="button-secondary" (click)="cerrarModal()">
+                  Cancelar
+                </button>
                 <button
                   type="button"
                   class="button-primary"
@@ -518,13 +523,11 @@ type Fila = {
     .la-scrim {
       position: fixed;
       inset: 0;
-      z-index: 90;
       display: flex;
       align-items: flex-start;
       justify-content: center;
       padding: 24px 12px;
       overflow-y: auto;
-      background: rgba(17, 32, 45, 0.46);
     }
 
     .la {
@@ -538,18 +541,6 @@ type Fila = {
       border-radius: 12px;
       box-shadow: 0 24px 60px rgba(17, 32, 45, 0.28);
       outline: none;
-      animation: la-in 0.16s ease;
-    }
-
-    @keyframes la-in {
-      from {
-        transform: translateY(8px);
-        opacity: 0.4;
-      }
-      to {
-        transform: none;
-        opacity: 1;
-      }
     }
 
     .la-head {

@@ -35,6 +35,22 @@
   --search-ancho-min: 210px;
   --search-ancho-max: 440px;
   --search-ancho-compacto: 300px;
+
+  /*
+   * Movimiento de modales: una sola duración y una sola curva para las siete
+   * familias (drawer lateral, diálogo centrado, cajón del mapa, lista de
+   * asistencia, fusión, alta y <dialog> nativo). Sólo se animan `transform` y
+   * `opacity`: son propiedades de composición y no fuerzan recálculo de layout.
+   */
+  --modal-duracion: 180ms;
+  --modal-duracion-scrim: 150ms;
+  --modal-curva: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Velo único de todas las capas modales. */
+  --modal-velo: rgba(17, 32, 45, 0.45);
+
+  /* Apilado de modales: dos niveles y nada más. */
+  --modal-z-lateral: 80;
+  --modal-z-centro: 120;
 }
 * {
   box-sizing: border-box;
@@ -3815,12 +3831,9 @@ textarea {
 .drawer-scrim {
   position: fixed;
   inset: 0;
-  z-index: 80;
   display: flex;
   justify-content: flex-end;
   overflow: hidden;
-  background: rgba(17, 32, 45, 0.44);
-  animation: drawer-scrim-in 180ms ease-out both;
 }
 .drawer {
   width: min(600px, 100%);
@@ -3830,28 +3843,81 @@ textarea {
   background: #fff;
   border-left: 1px solid #e2e8ee;
   box-shadow: -22px 0 48px rgba(17, 32, 45, 0.18);
-  animation: drawer-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-@keyframes drawer-scrim-in {
+
+/* ── Movimiento unificado de modales ─────────────────────────────────────────
+ *
+ * Las siete familias de modal comparten duración, curva y propiedades:
+ * sólo se animan `transform` y `opacity`, que resuelve el compositor.
+ *
+ * `animation-fill-mode: backwards` (y no `both`) es deliberado: al terminar, la
+ * animación no deja un `transform` aplicado. Un `transform` permanente convierte
+ * al panel en bloque contenedor de sus descendientes `position: fixed` y estorba
+ * al gesto de arrastre (que escribe `translate` en línea).
+ *
+ * La salida sigue siendo instantánea: desmontar con animación exige retrasar el
+ * `@if` de cada contenedor y no se hace aquí.
+ */
+.drawer-scrim,
+.casos-drawer-scrim {
+  z-index: var(--modal-z-lateral);
+}
+.modal-scrim,
+.la-scrim,
+.fusion-scrim,
+.alta-scrim {
+  z-index: var(--modal-z-centro);
+}
+.drawer-scrim,
+.modal-scrim,
+.casos-drawer-scrim,
+.la-scrim,
+.fusion-scrim,
+.alta-scrim {
+  background: var(--modal-velo);
+  animation: modal-scrim-entra var(--modal-duracion-scrim) linear backwards;
+}
+
+.drawer {
+  animation: modal-panel-derecha var(--modal-duracion) var(--modal-curva) backwards;
+}
+.casos-drawer {
+  animation: modal-panel-izquierda var(--modal-duracion) var(--modal-curva) backwards;
+}
+.modal,
+.la,
+.fusion-modal,
+.alta-modal {
+  animation: modal-panel-centro var(--modal-duracion) var(--modal-curva) backwards;
+}
+
+/* Diálogo nativo: no lo monta Angular, así que se anima con `[open]`. */
+dialog.padron-dialogo[open] {
+  animation: modal-panel-centro var(--modal-duracion) var(--modal-curva) backwards;
+}
+dialog.padron-dialogo[open]::backdrop {
+  animation: modal-scrim-entra var(--modal-duracion-scrim) linear backwards;
+}
+
+@keyframes modal-scrim-entra {
   from {
     opacity: 0;
   }
-  to {
-    opacity: 1;
-  }
 }
-@keyframes drawer-in {
+@keyframes modal-panel-derecha {
   from {
     transform: translate3d(100%, 0, 0);
   }
-  to {
-    transform: translate3d(0, 0, 0);
+}
+@keyframes modal-panel-izquierda {
+  from {
+    transform: translate3d(-100%, 0, 0);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .drawer-scrim,
-  .drawer {
-    animation-duration: 1ms;
+@keyframes modal-panel-centro {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) scale(0.98);
   }
 }
 .drawer-head {

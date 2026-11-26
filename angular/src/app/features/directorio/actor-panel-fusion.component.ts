@@ -59,11 +59,9 @@ export type ResultadoFusion = {
     .fusion-scrim {
       position: fixed;
       inset: 0;
-      z-index: 60;
       display: grid;
       place-items: center;
       padding: 24px;
-      background: rgba(17, 32, 46, 0.45);
       box-sizing: border-box;
     }
 

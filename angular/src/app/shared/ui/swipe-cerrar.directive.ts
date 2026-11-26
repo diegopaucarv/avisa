@@ -37,15 +37,15 @@ export class SwipeCerrarDirective {
     }
 
     const scrim = handle.closest<HTMLElement>(
-      '.drawer-scrim, .modal-scrim, .casos-drawer-scrim, .fusion-scrim, .alta-scrim',
+      '.drawer-scrim, .modal-scrim, .casos-drawer-scrim, .la-scrim, .fusion-scrim, .alta-scrim',
     );
     const panel = handle.closest<HTMLElement>(
-      '.drawer, .modal, .fusion-modal, .alta-modal, [role="dialog"]',
+      '.drawer, .modal, .casos-drawer, .la, .fusion-modal, .alta-modal, [role="dialog"]',
     );
     if (!scrim || !panel || scrim.getAttribute('aria-hidden') === 'true') return;
 
     this.gesture = {
-      axis: panel.matches('.modal, .fusion-modal, .alta-modal') ? 'y' : 'x',
+      axis: panel.matches('.modal, .la, .fusion-modal, .alta-modal') ? 'y' : 'x',
       panel,
       scrim,
       pointerId: event.pointerId,

@@ -477,8 +477,7 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
     }
 
     .padron-dialogo::backdrop {
-      background: rgb(12 20 29 / 62%);
-      backdrop-filter: blur(3px);
+      background: var(--modal-velo);
     }
 
     .padron-form {

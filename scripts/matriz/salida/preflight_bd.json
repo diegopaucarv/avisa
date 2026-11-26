@@ -1,0 +1,1635 @@
+{
+  "meta": {
+    "script": "scripts/matriz/analizar_bd_matriz.py",
+    "generado_en": "2026-11-26T16:37:45+00:00",
+    "solo_lectura": true,
+    "autocommit": true,
+    "escritura_en_bd": false,
+    "ddl_ejecutado": false,
+    "borrado_ejecutado": false,
+    "insumo_nombres": {
+      "ruta": "C:\\Users\\Julia\\Downloads\\avisa\\scripts\\matriz\\salida\\matriz_2026.json",
+      "existe": false
+    }
+  },
+  "base": {
+    "rol": "neondb_owner",
+    "database": "avisa",
+    "version": "PostgreSQL 18.7 (3190d2f)",
+    "rls_bypass": true
+  },
+  "conteos_actuales": {
+    "core.casos": {
+      "total": 35,
+      "vigentes": 34,
+      "anulados": 1,
+      "por_estado": [
+        {
+          "estado": "Abierto",
+          "casos": 34
+        },
+        {
+          "estado": "Archivado",
+          "casos": 1
+        }
+      ],
+      "anulados_detalle": [
+        {
+          "codigo_caso": "CS-MI-ITE-2026-02",
+          "nombre_caso": "Descontento de MYPES por retrasos y presuntos actos de corrupción en Compras a MYPErú",
+          "motivo_anulacion": "Baja por registro incompleto: caso sin ciclo de intervencion asignado y sin datos de seguimiento validados.",
+          "anulado_en": "2026-11-22T09:07:00.776253+00:00"
+        }
+      ]
+    },
+    "core.demandas": {
+      "total": 326,
+      "vigentes": 307,
+      "anulados": 19
+    },
+    "core.compromisos": {
+      "total": 8,
+      "vigentes": 8,
+      "anulados": 0
+    },
+    "core.hitos_compromiso": {
+      "total": 12,
+      "vigentes": 11,
+      "anulados": 1
+    },
+    "resumen": {
+      "casos": 35,
+      "casos_anulados": 1,
+      "demandas": 326,
+      "demandas_anuladas": 19,
+      "compromisos": 8,
+      "compromisos_anulados": 0,
+      "hitos": 12,
+      "hitos_anulados": 1,
+      "nota": "Conteos actuales antes de la recarga 2026. No equivalen a los 37/23/56/111 del Excel."
+    }
+  },
+  "preflight_borrado_por_nombre": {
+    "insumo": {
+      "ruta": "C:\\Users\\Julia\\Downloads\\avisa\\scripts\\matriz\\salida\\matriz_2026.json",
+      "existe": false,
+      "total_entradas": 0,
+      "entradas_sin_nombre": 0,
+      "nombres": [],
+      "motivo": "No existe el insumo; el preflight por nombre queda preparado y sin ejecutar. El resto de mediciones sí se ejecuta.",
+      "error": null
+    },
+    "ejecutado": false,
+    "motivo_no_ejecutado": "No existe el insumo; el preflight por nombre queda preparado y sin ejecutar. El resto de mediciones sí se ejecuta.",
+    "umbral_similitud": 0.72,
+    "emparejamiento": null,
+    "mapa_matriz_excel": {
+      "existe": true,
+      "filas": 34,
+      "codigos": 28,
+      "casos": 33,
+      "detalle": [
+        {
+          "bloque_fila": 3,
+          "codigo_excel": "CS-PA-REG-2024-01",
+          "caso_id": "25c62486-8629-4763-81d5-94d3e49851c8",
+          "codigo_caso": "CS-PA-OAT-2024-02",
+          "nombre_caso": "Uso de red de cortina de fondo en Cabo Blanco y Los Órganos",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 16,
+          "codigo_excel": "CS-PA-INF-2025-02",
+          "caso_id": "b52f1a9c-7cee-4685-bf12-34e1c6fd39f9",
+          "codigo_caso": "CS-PA-INF-2024-01",
+          "nombre_caso": "Rehabilitación del Desembarcadero Pesquero Artesanal de Los Órganos",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 21,
+          "codigo_excel": "CS-PA-REG-2025-04",
+          "caso_id": "4b23bf41-a361-445d-ba58-5a713524428a",
+          "codigo_caso": "CS-PA-INF-2012-01",
+          "nombre_caso": "Reubicación de embarcaciones del Muelle 5E - Terminal Norte Multipropósito del Callao",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 22,
+          "codigo_excel": "CS-PA-INF-2025-05",
+          "caso_id": "781a2eab-79b3-4b60-85a8-9598ec25a81f",
+          "codigo_caso": "CS-PA-INF-2024-02",
+          "nombre_caso": "Disputa por la administración de la Infraestructura Pesquera Artesanal de Chorrillos",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 25,
+          "codigo_excel": "CS-PA-REG-2020-06",
+          "caso_id": "1ddf5690-f24f-47e0-9c3a-e7990ef956bd",
+          "codigo_caso": "CS-PA-ITE-2026-04",
+          "nombre_caso": "Extracción de erizo rojo y alga palo en San Juan de Marcona",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 27,
+          "codigo_excel": "CS-PA-REG-2025-07",
+          "caso_id": "21b43ede-6348-4330-baa4-a1166c00e1f0",
+          "codigo_caso": "CS-PA-NOR-2025-01",
+          "nombre_caso": "Implementación de la Ley N.° 31749 de pesca artesanal y tradicional",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 31,
+          "codigo_excel": "CS-PA-REG-2024-08",
+          "caso_id": "9373ad12-ded1-4484-b33f-05228422f24d",
+          "codigo_caso": "CS-PA-OAT-2026-01",
+          "nombre_caso": "Ordenamiento de la pesquería del calamar gigante (pota)",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 37,
+          "codigo_excel": "CS-PA-REG-2026-09",
+          "caso_id": "1662b8ea-7ee9-445d-95cc-0ad57dc394d0",
+          "codigo_caso": "CS-PA-ITE-2026-01",
+          "nombre_caso": "Afectación a la pesca artesanal por dragado en la Isla San Lorenzo - Callao",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 38,
+          "codigo_excel": "CS-PA-REG-2025-10",
+          "caso_id": "88431141-f918-4f78-9775-11555aef32ec",
+          "codigo_caso": "CS-PA-GOB-2026-01",
+          "nombre_caso": "Seguridad y fiscalización pesquera en el litoral de Tumbes",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 39,
+          "codigo_excel": "CS-PA-REG-2021-11",
+          "caso_id": "654f5056-022b-4316-93c8-083d3d562ed9",
+          "codigo_caso": "CS-PA-DBE-2025-01",
+          "nombre_caso": "Habilitación de áreas acuáticas y fortalecimiento de la maricultura en Sechura",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 42,
+          "codigo_excel": "CS-PA-SOC-2016-12",
+          "caso_id": "faf74217-945e-425d-9dc8-6691985edbd1",
+          "codigo_caso": "CS-PA-GOB-2026-02",
+          "nombre_caso": "Ampliación del proceso de formalización pesquera en Piura y Lambayeque",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 47,
+          "codigo_excel": "CS-PA-SOC-2023-14",
+          "caso_id": "492b5f31-233f-410d-9b52-3e8365144fd0",
+          "codigo_caso": "CS-PA-OAT-2024-01",
+          "nombre_caso": "Rechazo al proyecto de exploración de hidrocarburos de ANADARKO (lotes Z-61, Z-62, Z-63)",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 48,
+          "codigo_excel": "CS-PA-REG-2022-15",
+          "caso_id": "75f1de99-b8fa-49f5-bf48-3330c444993f",
+          "codigo_caso": "CS-PA-OAT-2026-03",
+          "nombre_caso": "Continuidad de la pesquería de tiburón y emisión de DENP y permisos CITES",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 50,
+          "codigo_excel": "CS-PA-REG-2019-17",
+          "caso_id": "34cea09c-6fdf-4da2-8732-1f40ed51fa26",
+          "codigo_caso": "CS-PA-INF-2025-02",
+          "nombre_caso": "Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de Chimbote",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 54,
+          "codigo_excel": "CS-PA-INF-2023-18",
+          "caso_id": "6e53ff24-4513-4469-b469-008c945ec7a7",
+          "codigo_caso": "CS-PA-ITE-2022-01",
+          "nombre_caso": "Atención a pescadores artesanales afectados por el derrame de petróleo de la Refinería La Pampilla",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 60,
+          "codigo_excel": "CS-PA-SOC-2022-19",
+          "caso_id": "86040c3a-e81e-46ba-a564-f5d7e351c78c",
+          "codigo_caso": "CS-MI-INF-2025-01",
+          "nombre_caso": "Ocupación informal de terreno del Parque Industrial de Ancón (AAMEC)",
+          "estado": "Archivado",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 64,
+          "codigo_excel": "CS-MI-REG-2019-20",
+          "caso_id": "7c81ab23-62f4-4799-9cd1-9d3cabe2ef0d",
+          "codigo_caso": "CS-MI-ITE-2026-02",
+          "nombre_caso": "Descontento de MYPES por retrasos y presuntos actos de corrupción en Compras a MYPErú",
+          "estado": "Abierto",
+          "anulado_en": "2026-11-22T09:07:00.776253+00:00",
+          "motivo_anulacion": "Baja por registro incompleto: caso sin ciclo de intervencion asignado y sin datos de seguimiento validados.",
+          "anulado": true
+        },
+        {
+          "bloque_fila": 74,
+          "codigo_excel": "CS-MI-REG-2019-21",
+          "caso_id": "d6971147-329e-46ad-9c20-144924e41593",
+          "codigo_caso": "CS-PA-INF-2025-04",
+          "nombre_caso": "Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de Huacho",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 79,
+          "codigo_excel": "CS-MI-REG-2020-22",
+          "caso_id": "8676ce35-2456-4754-b37b-01ab44427886",
+          "codigo_caso": "CS-PA-INF-2017-01",
+          "nombre_caso": "Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de Supe",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 85,
+          "codigo_excel": "CS-PA-REG-2019-23",
+          "caso_id": "e81d2df8-bcd0-4efa-8b3c-416b168f7598",
+          "codigo_caso": "CS-PA-INF-2025-05",
+          "nombre_caso": "Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de San Juan de Marcona",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 88,
+          "codigo_excel": "CS-PA-REG-2019-24",
+          "caso_id": "29e86bcf-e3ed-4657-99ea-2be454aaa611",
+          "codigo_caso": "CS-PA-OAT-2026-02",
+          "nombre_caso": "Medidas de ordenamiento del recurso bonito y demandas de pescadores artesanales",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 93,
+          "codigo_excel": "CS-PA-REG-2019-25",
+          "caso_id": "7d30cb36-46aa-4b78-90ac-0ac79b013f9e",
+          "codigo_caso": "CS-PA-OAT-2024-03",
+          "nombre_caso": "Disconformidad de OSPAS de artes pasivas por cuotas de jurel y caballa asignadas a la flota de cerco",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 95,
+          "codigo_excel": "CS-PA-INF-2017-26",
+          "caso_id": "1c498c8a-ee79-48c6-9f9e-e4475e6f8c2e",
+          "codigo_caso": "CS-PA-INF-2025-03",
+          "nombre_caso": "Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal Faro Matarani",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 100,
+          "codigo_excel": "CS-PA-SOC-2019-27",
+          "caso_id": "bd4ff4cb-7151-4dfa-9024-2984359f3625",
+          "codigo_caso": "CS-PA-INF-2025-06",
+          "nombre_caso": "Culminación de infraestructura del Desembarcadero Pesquero Artesanal de Atico",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 106,
+          "codigo_excel": "CS-PA-SOC-2019-28",
+          "caso_id": "710f2bb1-374b-4603-869d-dd65f225e930",
+          "codigo_caso": "CS-PA-INF-2025-01",
+          "nombre_caso": "Mejoramiento integral del Desembarcadero Pesquero Artesanal La Punchana",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 110,
+          "codigo_excel": "CS-PA-INF-2017-29",
+          "caso_id": "43629500-8c6d-4521-b448-84636150067c",
+          "codigo_caso": "CS-MI-ITE-2025-01",
+          "nombre_caso": "Culminación del Gran Mercado de Belén - Iquitos",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 113,
+          "codigo_excel": "CS-MI-REG-2025-30",
+          "caso_id": "0abe46a6-1402-4f38-8e0a-6e25ed5437a7",
+          "codigo_caso": "CS-PA-INF-2026-01",
+          "nombre_caso": "Convocatoria de nuevo administrador para el DPA San José (Lambayeque)",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 114,
+          "codigo_excel": "CS-PA-REG-2020-31",
+          "caso_id": "0875694e-68e8-4bb2-a972-dd101e3543cc",
+          "codigo_caso": "CS-MI-ITE-2025-02",
+          "nombre_caso": "Presunta contaminación por plomo de la empresa Baterías ETNA (Mi Perú, Callao)",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 118,
+          "codigo_excel": null,
+          "caso_id": "5230ec2a-debf-4dab-a856-a3a0e0a9281d",
+          "codigo_caso": "CS-PA-OAT-2026-04",
+          "nombre_caso": "Demanda de cancelación de la temporada de pesca de anchoveta por captura juvenil",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 122,
+          "codigo_excel": null,
+          "caso_id": "3e04445f-cde6-4f6a-a353-7219079d0f46",
+          "codigo_caso": "CS-MI-ITE-2026-01",
+          "nombre_caso": "Oposición al proyecto de planta de cal de CALCESUR (AA.HH. Márquez, Callao)",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 124,
+          "codigo_excel": null,
+          "caso_id": "2d2b362d-b10d-4617-a9d5-99fd756cd558",
+          "codigo_caso": "CS-PA-INF-2026-02",
+          "nombre_caso": "Rehabilitación del Muelle N.° 2 del Desembarcadero Pesquero Artesanal de Ilo",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 127,
+          "codigo_excel": null,
+          "caso_id": "1156293b-8158-42f8-b804-5c607cf6527e",
+          "codigo_caso": "CS-MI-ITE-2026-03",
+          "nombre_caso": "Participación ciudadana en el EIA-d del proyecto Aceros Americanos (Chilca)",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 128,
+          "codigo_excel": null,
+          "caso_id": "75f1de99-b8fa-49f5-bf48-3330c444993f",
+          "codigo_caso": "CS-PA-OAT-2026-03",
+          "nombre_caso": "Continuidad de la pesquería de tiburón y emisión de DENP y permisos CITES",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        },
+        {
+          "bloque_fila": 132,
+          "codigo_excel": null,
+          "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd",
+          "codigo_caso": "CS-PA-ITE-2026-03",
+          "nombre_caso": "Mortandad masiva de truchas en piscigranjas de Pariahuanca (Junín)",
+          "estado": "Abierto",
+          "anulado_en": null,
+          "motivo_anulacion": null,
+          "anulado": false
+        }
+      ],
+      "nota": "core.mapa_matriz_excel es el vínculo que usa el importador; el código del Excel no tiene por qué coincidir con core.casos.codigo_caso.",
+      "coincidencias_json": [],
+      "casos_mapeados": [],
+      "casos_solo_por_mapa": []
+    },
+    "casos_emparejados": [],
+    "casos_solo_por_codigo": [],
+    "advertencias": [],
+    "cascada_por_tabla": {},
+    "total_filas_cascada": 0,
+    "total_incluyendo_casos": 0,
+    "caso_ejemplo": null,
+    "caso_ejemplo_demostrativo": {
+      "demostrativo": true,
+      "motivo": "No hay insumo de nombres. Se mide el caso con más dependencias para mostrar el costo real de un borrado.",
+      "caso": {
+        "id": "9373ad12-ded1-4484-b33f-05228422f24d",
+        "codigo_caso": "CS-PA-OAT-2026-01",
+        "nombre_caso": "Ordenamiento de la pesquería del calamar gigante (pota)",
+        "estado_id": 1,
+        "estado": "Abierto",
+        "estado_actualizacion": null,
+        "anulado": false,
+        "anulado_en": null,
+        "motivo_anulacion": null
+      },
+      "cascada_por_tabla": {
+        "core.alerta_especies": 2,
+        "core.alertas_actores": 25,
+        "core.alertas_tempranas": 6,
+        "core.caso_cronologia": 31,
+        "core.caso_estado_historial": 1,
+        "core.caso_regiones": 11,
+        "core.casos": 1,
+        "core.cronologia_vinculos": 2,
+        "core.demandas": 81,
+        "core.demandas_actores": 69,
+        "core.demandas_evidencias": 64,
+        "core.proceso_instancia": 1
+      },
+      "filas_cascada": 293,
+      "filas_incluyendo_caso": 294,
+      "bloqueos_por_tabla": {
+        "core.documentos": 20,
+        "core.mapa_matriz_excel": 1,
+        "core.proceso_instancia": 12,
+        "kag.aristas": 59
+      },
+      "bloqueos_detalle": [
+        {
+          "constraint": "documentos_caso_id_fkey",
+          "tabla_hija": "core.documentos",
+          "accion": "NO ACTION",
+          "bloquea": true,
+          "filas": 20
+        },
+        {
+          "constraint": "mapa_matriz_excel_caso_id_fkey",
+          "tabla_hija": "core.mapa_matriz_excel",
+          "accion": "RESTRICT",
+          "bloquea": true,
+          "filas": 1
+        },
+        {
+          "constraint": "proceso_instancia_alerta_id_fkey",
+          "tabla_hija": "core.proceso_instancia",
+          "accion": "NO ACTION",
+          "bloquea": true,
+          "filas": 12
+        },
+        {
+          "constraint": "aristas_caso_id_fkey",
+          "tabla_hija": "kag.aristas",
+          "accion": "NO ACTION",
+          "bloquea": true,
+          "filas": 59
+        }
+      ]
+    },
+    "bloqueos": {
+      "detalle": [
+        {
+          "constraint": "documentos_caso_id_fkey",
+          "tabla_padre": "core.casos",
+          "tabla_hija": "core.documentos",
+          "columna_hija": "caso_id",
+          "accion": "NO ACTION",
+          "efecto": "bloquea",
+          "bloquea": true,
+          "filas": 20,
+          "ejemplo": [
+            {
+              "id": "0a6a6de7-1f4d-4cde-83e9-1e79a470f0e0",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "e5a05511-98f9-4410-a864-4595a5fd5ac3",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "90b6d19c-38d4-44c3-be5e-0d70af32c446",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "786c6aec-58cb-4d1b-9fba-30d76a975a98",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "4f00b824-0f1e-4926-bf2c-ced97d0c9663",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            }
+          ]
+        },
+        {
+          "constraint": "mapa_matriz_excel_caso_id_fkey",
+          "tabla_padre": "core.casos",
+          "tabla_hija": "core.mapa_matriz_excel",
+          "columna_hija": "caso_id",
+          "accion": "RESTRICT",
+          "efecto": "bloquea",
+          "bloquea": true,
+          "filas": 1,
+          "ejemplo": [
+            {
+              "id": 7,
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            }
+          ]
+        },
+        {
+          "constraint": "proceso_instancia_alerta_id_fkey",
+          "tabla_padre": "core.alertas_tempranas",
+          "tabla_hija": "core.proceso_instancia",
+          "columna_hija": "alerta_id",
+          "accion": "NO ACTION",
+          "efecto": "bloquea",
+          "bloquea": true,
+          "filas": 12,
+          "ejemplo": [
+            {
+              "id": "b9c52a8a-e182-45ca-a2ba-5463c58db705",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "3d7b5d7c-f69a-43a1-9f8d-9f4cd8520da7",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "639c54a1-fa5b-4cf5-8f39-d02e22fffb34",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "92504986-318c-4638-aa5d-184384b39070",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "83e21cf5-8588-4873-8b59-f54de6d6bce0",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            }
+          ]
+        },
+        {
+          "constraint": "aristas_caso_id_fkey",
+          "tabla_padre": "core.casos",
+          "tabla_hija": "kag.aristas",
+          "columna_hija": "caso_id",
+          "accion": "NO ACTION",
+          "efecto": "bloquea",
+          "bloquea": true,
+          "filas": 59,
+          "ejemplo": [
+            {
+              "id": "a14c5d5e-94c3-4a5c-aa37-b7a2a5204379",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "0e539ff3-7786-4673-b4e7-d47b89105564",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "281e8d5c-bd43-479f-b5ae-db27c11724e5",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "0016fb01-6e8e-4cb6-a649-8959439560c1",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            },
+            {
+              "id": "e316f5ff-d5bb-47b2-9c2d-1b5d0a821b62",
+              "casos_raiz": [
+                "9373ad12-ded1-4484-b33f-05228422f24d"
+              ]
+            }
+          ]
+        }
+      ],
+      "por_caso_tabla": {
+        "9373ad12-ded1-4484-b33f-05228422f24d": {
+          "core.documentos": 20,
+          "core.mapa_matriz_excel": 1,
+          "core.proceso_instancia": 12,
+          "kag.aristas": 59
+        }
+      },
+      "por_caso_constraint": {
+        "9373ad12-ded1-4484-b33f-05228422f24d": {
+          "aristas_caso_id_fkey@kag.aristas": 59,
+          "documentos_caso_id_fkey@core.documentos": 20,
+          "mapa_matriz_excel_caso_id_fkey@core.mapa_matriz_excel": 1,
+          "proceso_instancia_alerta_id_fkey@core.proceso_instancia": 12
+        }
+      },
+      "resumen_por_tabla": {
+        "core.documentos": {
+          "filas_bloqueantes": 20,
+          "filas_set_null": 0,
+          "bloquea": true
+        },
+        "core.mapa_matriz_excel": {
+          "filas_bloqueantes": 1,
+          "filas_set_null": 0,
+          "bloquea": true
+        },
+        "core.proceso_instancia": {
+          "filas_bloqueantes": 12,
+          "filas_set_null": 0,
+          "bloquea": true
+        },
+        "kag.aristas": {
+          "filas_bloqueantes": 59,
+          "filas_set_null": 0,
+          "bloquea": true
+        }
+      },
+      "total_filas_bloqueantes": 92,
+      "total_filas_set_null": 0,
+      "nota": "filas_bloqueantes cuenta filas que NO se borrarían y que, con NO ACTION o RESTRICT, harían fallar el DELETE. set_null no bloquea, pero modifica esas filas."
+    }
+  },
+  "mapa_fk_dominio": {
+    "por_padre": {
+      "core.casos": {
+        "cascada": [
+          {
+            "constraint": "alertas_tempranas_caso_id_fkey",
+            "tabla_hija": "core.alertas_tempranas",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "caso_cronologia_caso_id_fkey",
+            "tabla_hija": "core.caso_cronologia",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "caso_distritos_caso_id_fkey",
+            "tabla_hija": "core.caso_distritos",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "caso_duplicado_descartado_caso_a_id_fkey",
+            "tabla_hija": "core.caso_duplicado_descartado",
+            "columna_hija": "caso_a_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "caso_duplicado_descartado_caso_b_id_fkey",
+            "tabla_hija": "core.caso_duplicado_descartado",
+            "columna_hija": "caso_b_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "caso_estado_historial_caso_id_fkey",
+            "tabla_hija": "core.caso_estado_historial",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "caso_factores_caso_id_fkey",
+            "tabla_hija": "core.caso_factores",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "caso_lugares_caso_id_fkey",
+            "tabla_hija": "core.caso_lugares",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "caso_regiones_caso_id_fkey",
+            "tabla_hija": "core.caso_regiones",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "casos_actores_caso_id_fkey",
+            "tabla_hija": "core.casos_actores",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "compromisos_caso_id_fkey",
+            "tabla_hija": "core.compromisos",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "demandas_caso_id_fkey",
+            "tabla_hija": "core.demandas",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "proceso_instancia_caso_id_fkey",
+            "tabla_hija": "core.proceso_instancia",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "objetivo_caso_id_fkey",
+            "tabla_hija": "kag.objetivo",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          }
+        ],
+        "no_cascada": [
+          {
+            "constraint": "synthetic_test_cases_caso_semilla_id_fkey",
+            "tabla_hija": "agent.synthetic_test_cases",
+            "columna_hija": "caso_semilla_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "plan_caso_id_fkey",
+            "tabla_hija": "analisis.plan",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "raw_ingest_caso_id_fkey",
+            "tabla_hija": "avisa.raw_ingest",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "raw_ingest_caso_id_fkey",
+            "tabla_hija": "avisa.raw_ingest_202611",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "raw_ingest_caso_id_fkey",
+            "tabla_hija": "avisa.raw_ingest_202612",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "raw_ingest_caso_id_fkey",
+            "tabla_hija": "avisa.raw_ingest_202701",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "raw_ingest_caso_id_fkey",
+            "tabla_hija": "avisa.raw_ingest_202702",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "raw_ingest_caso_id_fkey",
+            "tabla_hija": "avisa.raw_ingest_202703",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "raw_ingest_caso_id_fkey",
+            "tabla_hija": "avisa.raw_ingest_default",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "repositorio_caso_id_fkey",
+            "tabla_hija": "chat.repositorio",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "procesos_caso_id_fkey",
+            "tabla_hija": "consultation.procesos",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "actores_caso_ancla_id_fkey",
+            "tabla_hija": "core.actores",
+            "columna_hija": "caso_ancla_id",
+            "columna_padre": "id",
+            "accion": "SET NULL",
+            "bloquea": false,
+            "efecto": "set_null"
+          },
+          {
+            "constraint": "acuerdo_ospa_sni_caso_id_fkey",
+            "tabla_hija": "core.acuerdo_ospa_sni",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "caso_nudo_critico_caso_id_fkey",
+            "tabla_hija": "core.caso_nudo_critico",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "consulta_reniec_caso_id_fkey",
+            "tabla_hija": "core.consulta_reniec",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "documentos_caso_id_fkey",
+            "tabla_hija": "core.documentos",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "mapa_matriz_excel_caso_id_fkey",
+            "tabla_hija": "core.mapa_matriz_excel",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "RESTRICT",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "output_contracts_caso_id_fkey",
+            "tabla_hija": "core.output_contracts",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "reuniones_dialogo_caso_id_fkey",
+            "tabla_hija": "core.reuniones_dialogo",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "sugerencia_caso_id_fkey",
+            "tabla_hija": "core.sugerencia",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "snapshot_caso_id_fkey",
+            "tabla_hija": "ctx.snapshot",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "artefacto_caso_id_fkey",
+            "tabla_hija": "domain.artefacto",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "counterfactual_analysis_caso_resuelto_id_fkey",
+            "tabla_hija": "economic.counterfactual_analysis",
+            "columna_hija": "caso_resuelto_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "impact_scenarios_caso_id_fkey",
+            "tabla_hija": "economic.impact_scenarios",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "analisis_recurrencia_caso_recurrente_id_fkey",
+            "tabla_hija": "impact.analisis_recurrencia",
+            "columna_hija": "caso_recurrente_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "analisis_recurrencia_caso_resuelto_id_fkey",
+            "tabla_hija": "impact.analisis_recurrencia",
+            "columna_hija": "caso_resuelto_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "encuestas_post_resolucion_caso_id_fkey",
+            "tabla_hija": "impact.encuestas_post_resolucion",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "indicadores_bienestar_caso_id_fkey",
+            "tabla_hija": "impact.indicadores_bienestar",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "lecciones_aprendidas_automaticas_caso_id_fkey",
+            "tabla_hija": "impact.lecciones_aprendidas_automaticas",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "seleccion_caso_id_fkey",
+            "tabla_hija": "ind.seleccion",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "anomalia_contextual_caso_id_fkey",
+            "tabla_hija": "kag.anomalia_contextual",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "aristas_caso_id_fkey",
+            "tabla_hija": "kag.aristas",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "contraste_caso_id_fkey",
+            "tabla_hija": "kag.contraste",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "hipotesis_caso_id_fkey",
+            "tabla_hija": "kag.hipotesis",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "saturacion_caso_id_fkey",
+            "tabla_hija": "kag.saturacion",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "validacion_hallazgo_caso_id_fkey",
+            "tabla_hija": "kag.validacion_hallazgo",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "registro_parametrico_caso_id_fkey",
+            "tabla_hija": "proteccion.registro_parametrico",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "impacto_conflicto_planta_caso_id_fkey",
+            "tabla_hija": "territorio.impacto_conflicto_planta",
+            "columna_hija": "caso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          }
+        ]
+      },
+      "core.demandas": {
+        "cascada": [
+          {
+            "constraint": "demandas_actores_demanda_id_fkey",
+            "tabla_hija": "core.demandas_actores",
+            "columna_hija": "demanda_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "demandas_evidencias_demanda_id_fkey",
+            "tabla_hija": "core.demandas_evidencias",
+            "columna_hija": "demanda_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          }
+        ],
+        "no_cascada": [
+          {
+            "constraint": "compromisos_demanda_id_fkey",
+            "tabla_hija": "core.compromisos",
+            "columna_hija": "demanda_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          }
+        ]
+      },
+      "core.compromisos": {
+        "cascada": [
+          {
+            "constraint": "compromiso_colaboradores_compromiso_id_fkey",
+            "tabla_hija": "core.compromiso_colaboradores",
+            "columna_hija": "compromiso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "compromiso_distritos_compromiso_id_fkey",
+            "tabla_hija": "core.compromiso_distritos",
+            "columna_hija": "compromiso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "compromiso_evento_compromiso_id_fkey",
+            "tabla_hija": "core.compromiso_evento",
+            "columna_hija": "compromiso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "compromiso_pip_compromiso_id_fkey",
+            "tabla_hija": "core.compromiso_pip",
+            "columna_hija": "compromiso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          },
+          {
+            "constraint": "hitos_compromiso_compromiso_id_fkey",
+            "tabla_hija": "core.hitos_compromiso",
+            "columna_hija": "compromiso_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          }
+        ],
+        "no_cascada": [
+          {
+            "constraint": "caso_nudo_critico_compromiso_id_fkey",
+            "tabla_hija": "core.caso_nudo_critico",
+            "columna_hija": "compromiso_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          },
+          {
+            "constraint": "compromisos_redefinido_de_id_fkey",
+            "tabla_hija": "core.compromisos",
+            "columna_hija": "redefinido_de_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          }
+        ]
+      },
+      "core.hitos_compromiso": {
+        "cascada": [
+          {
+            "constraint": "hitos_compromiso_estado_historico_hito_id_fkey",
+            "tabla_hija": "core.hitos_compromiso_estado_historico",
+            "columna_hija": "hito_id",
+            "columna_padre": "id",
+            "accion": "CASCADE"
+          }
+        ],
+        "no_cascada": [
+          {
+            "constraint": "caso_nudo_critico_hito_id_fkey",
+            "tabla_hija": "core.caso_nudo_critico",
+            "columna_hija": "hito_id",
+            "columna_padre": "id",
+            "accion": "NO ACTION",
+            "bloquea": true,
+            "efecto": "bloquea"
+          }
+        ]
+      }
+    },
+    "resumen": {
+      "fks_dominio": 64,
+      "cascada": 22,
+      "no_cascada": 42,
+      "tablas_bloqueantes": [
+        "agent.synthetic_test_cases",
+        "analisis.plan",
+        "avisa.raw_ingest",
+        "avisa.raw_ingest_202611",
+        "avisa.raw_ingest_202612",
+        "avisa.raw_ingest_202701",
+        "avisa.raw_ingest_202702",
+        "avisa.raw_ingest_202703",
+        "avisa.raw_ingest_default",
+        "chat.repositorio",
+        "consultation.procesos",
+        "core.acuerdo_ospa_sni",
+        "core.caso_nudo_critico",
+        "core.compromisos",
+        "core.consulta_reniec",
+        "core.documentos",
+        "core.mapa_matriz_excel",
+        "core.output_contracts",
+        "core.reuniones_dialogo",
+        "core.sugerencia",
+        "ctx.snapshot",
+        "domain.artefacto",
+        "economic.counterfactual_analysis",
+        "economic.impact_scenarios",
+        "impact.analisis_recurrencia",
+        "impact.encuestas_post_resolucion",
+        "impact.indicadores_bienestar",
+        "impact.lecciones_aprendidas_automaticas",
+        "ind.seleccion",
+        "kag.anomalia_contextual",
+        "kag.aristas",
+        "kag.contraste",
+        "kag.hipotesis",
+        "kag.saturacion",
+        "kag.validacion_hallazgo",
+        "proteccion.registro_parametrico",
+        "territorio.impacto_conflicto_planta"
+      ],
+      "nota": "La cascada del mapa es directa. El preflight recorre también las cascadas de segundo nivel (p. ej. caso -> compromiso -> hito)."
+    }
+  },
+  "evaluacion_modelo": {
+    "supuestos_excel": {
+      "casos": 37,
+      "demandas": 23,
+      "compromisos": 56,
+      "textos_compromiso": 54,
+      "hitos": 111,
+      "compromisos_con_3_demandas": 4,
+      "demandas_por_compromiso_m_n": 3,
+      "compromisos_en_2_casos": 2,
+      "casos_por_compromiso_m_n": 2,
+      "casos_sin_demandas": 32,
+      "compromisos_sin_hitos": 11,
+      "fuente": "Datos verificados del Excel entregados en el encargo. No se miden en esta base: la matriz 2026 todavía no está cargada."
+    },
+    "evidencia_esquema": {
+      "compromisos.caso_id": "NOT NULL (una fila = un caso)",
+      "compromisos.demanda_id": "uuid NULL (una sola demanda por fila)",
+      "demandas.caso_id": "uuid NULL (una demanda puede no tener caso)",
+      "hitos_compromiso": "sólo compromiso_id; no existe caso_id ni demanda_id en el hito",
+      "codigo_compromiso": "UNIQUE global y CHECK '_COMP[0-9]{3}$'; el importador lo deriva de codigo_caso",
+      "codigo_hito": "UNIQUE global; también lo deriva el importador",
+      "fk_compromisos_demanda": "NO ACTION",
+      "fk_hitos_compromiso": "CASCADE desde compromisos",
+      "columnas_medidas": {
+        "core.compromisos.caso_id": {
+          "tipo": "uuid",
+          "nullable": false
+        },
+        "core.compromisos.codigo_compromiso": {
+          "tipo": "character varying",
+          "nullable": false
+        },
+        "core.compromisos.demanda_id": {
+          "tipo": "uuid",
+          "nullable": true
+        },
+        "core.demandas.caso_id": {
+          "tipo": "uuid",
+          "nullable": true
+        },
+        "core.hitos_compromiso.codigo_hito": {
+          "tipo": "character varying",
+          "nullable": false
+        },
+        "core.hitos_compromiso.compromiso_id": {
+          "tipo": "uuid",
+          "nullable": false
+        }
+      },
+      "indices_unicos": [
+        {
+          "tabla": "core.casos",
+          "indice": "casos_codigo_caso_key",
+          "definicion": "CREATE UNIQUE INDEX casos_codigo_caso_key ON core.casos USING btree (codigo_caso)"
+        },
+        {
+          "tabla": "core.casos",
+          "indice": "casos_codigo_legado_key",
+          "definicion": "CREATE UNIQUE INDEX casos_codigo_legado_key ON core.casos USING btree (codigo_legado)"
+        },
+        {
+          "tabla": "core.casos",
+          "indice": "casos_pkey",
+          "definicion": "CREATE UNIQUE INDEX casos_pkey ON core.casos USING btree (id)"
+        },
+        {
+          "tabla": "core.compromisos",
+          "indice": "compromisos_codigo_compromiso_key",
+          "definicion": "CREATE UNIQUE INDEX compromisos_codigo_compromiso_key ON core.compromisos USING btree (codigo_compromiso)"
+        },
+        {
+          "tabla": "core.compromisos",
+          "indice": "compromisos_pkey",
+          "definicion": "CREATE UNIQUE INDEX compromisos_pkey ON core.compromisos USING btree (id)"
+        },
+        {
+          "tabla": "core.compromisos",
+          "indice": "compromisos_redefinido_de_id_key",
+          "definicion": "CREATE UNIQUE INDEX compromisos_redefinido_de_id_key ON core.compromisos USING btree (redefinido_de_id)"
+        },
+        {
+          "tabla": "core.demandas",
+          "indice": "demandas_codigo_legado_key",
+          "definicion": "CREATE UNIQUE INDEX demandas_codigo_legado_key ON core.demandas USING btree (codigo_legado)"
+        },
+        {
+          "tabla": "core.demandas",
+          "indice": "demandas_pkey",
+          "definicion": "CREATE UNIQUE INDEX demandas_pkey ON core.demandas USING btree (id)"
+        },
+        {
+          "tabla": "core.hitos_compromiso",
+          "indice": "hitos_compromiso_codigo_hito_key",
+          "definicion": "CREATE UNIQUE INDEX hitos_compromiso_codigo_hito_key ON core.hitos_compromiso USING btree (codigo_hito)"
+        },
+        {
+          "tabla": "core.hitos_compromiso",
+          "indice": "hitos_compromiso_pkey",
+          "definicion": "CREATE UNIQUE INDEX hitos_compromiso_pkey ON core.hitos_compromiso USING btree (id)"
+        }
+      ],
+      "fk_clave": {
+        "compromisos_caso_id_fkey": "CASCADE",
+        "compromisos_demanda_id_fkey": "NO ACTION",
+        "hitos_compromiso_compromiso_id_fkey": "CASCADE"
+      }
+    },
+    "medido_en_bd": {
+      "compromisos_vigentes": 8,
+      "compromisos_con_demanda": 0,
+      "compromisos_sin_demanda": 8,
+      "compromisos_sin_hitos": 2,
+      "compromisos_que_apuntan_a_demanda_de_otro_caso": 0,
+      "textos_de_compromiso_repetidos_en_varios_casos": 0,
+      "demandas_vigentes": 307,
+      "demandas_vigentes_sin_caso": 107,
+      "casos_vigentes": 34,
+      "casos_vigentes_sin_demandas": 17,
+      "hitos_vigentes": 11
+    },
+    "puente_demandas": {
+      "necesario": true,
+      "motivo": "4 compromisos x 3 demandas = 12 vínculos. compromisos.demanda_id admite un único uuid, así que sin puente se pierden 8 vínculos o se duplican 8 filas.",
+      "si_se_usa_puente": {
+        "filas_compromiso": 56,
+        "vinculos_en_puente": 64,
+        "codigos_compromiso": 56,
+        "hitos": 111,
+        "efecto_hitos": "los hitos siguen colgando de un único compromiso; no se duplican y conservan su codigo_hito"
+      },
+      "si_se_duplica_por_demanda": {
+        "filas_compromiso": 64,
+        "delta_filas": 8,
+        "codigos_compromiso": 64,
+        "efecto_hitos": "los hitos del compromiso se duplican por cada demanda (o se asignan a una sola copia y las otras pierden seguimiento); el total de 111 hitos deja de ser 111",
+        "problemas": [
+          "codigo_compromiso es UNIQUE global: cada copia necesita un código nuevo",
+          "codigo_hito es UNIQUE global: los hitos copiados también necesitan código nuevo",
+          "Anexo 14 (una fila por hito) mostraría filas repetidas",
+          "los KPIs de compromisos e hitos se inflan",
+          "caso_nudo_critico y las integraciones apuntan a un id: ¿a qué copia?"
+        ]
+      },
+      "recomendacion": "Crear core.compromiso_demandas y conservar compromisos.demanda_id como demanda principal mientras la API y la interfaz migran a una lista.",
+      "advertencia_compatibilidad": "El puente por sí solo no elimina el bloqueo de compromisos_demanda_id_fkey (NO ACTION). Mientras demanda_id esté poblado, borrar esa demanda sigue bloqueado; el importe debe dejarlo NULL en los compromisos multi-demanda y usar el puente.",
+      "ddl": "-- 1) Puente compromiso <-> demanda (m:n real).\n--    NO EJECUTAR: este script sólo lo propone.\n--    LIMITACIÓN: compromisos.demanda_id sigue siendo NO ACTION. Mientras esté\n--    poblado, borrar esa demanda seguirá bloqueado. Para los compromisos con\n--    varias demandas, el importe debe dejar demanda_id NULL y usar el puente.\ncreate table core.compromiso_demandas (\n    compromiso_id uuid        not null\n        references core.compromisos(id) on delete cascade,\n    demanda_id    uuid        not null\n        references core.demandas(id) on delete cascade,\n    es_principal  boolean     not null default false,\n    orden         smallint    not null default 1,\n    created_at    timestamptz not null default now(),\n    primary key (compromiso_id, demanda_id)\n);\n\ncreate unique index uq_compromiso_demandas_principal\n    on core.compromiso_demandas (compromiso_id)\n    where es_principal;\n\ncreate index ix_compromiso_demandas_demanda\n    on core.compromiso_demandas (demanda_id);\n\ncomment on table core.compromiso_demandas is\n    'Vínculo m:n entre compromisos y demandas. compromisos.demanda_id queda como demanda principal por compatibilidad.';\n\n-- 2) Relleno desde la columna única existente (hoy 0 filas con demanda_id).\ninsert into core.compromiso_demandas (compromiso_id, demanda_id, es_principal)\nselect id, demanda_id, true\n  from core.compromisos\n where demanda_id is not null\non conflict (compromiso_id, demanda_id) do nothing;\n"
+    },
+    "puente_casos": {
+      "necesario": "condicional",
+      "motivo": "2 compromisos aparecen en 2 casos. Si son el mismo compromiso (mismo texto y mismos hitos), hace falta puente para no duplicar identidad ni seguimiento. Si son compromisos independientes que casualmente comparten redacción, el modelo actual ya los duplica por caso y eso es semánticamente válido.",
+      "evidencia": "compromisos.caso_id es NOT NULL y el importador es idempotente por (caso_id, normalizar(accion)): el mismo texto en dos casos produce dos filas. Los 56 compromisos vs 54 textos son compatibles con 2 textos repetidos.",
+      "si_se_usa_puente": {
+        "filas_compromiso": 56,
+        "vinculos_en_puente": 58,
+        "codigos_compromiso": 56,
+        "hitos": 111,
+        "efecto_hitos": "un solo juego de hitos compartido por los dos casos"
+      },
+      "si_se_duplica_por_caso": {
+        "filas_compromiso": 58,
+        "delta_filas": 2,
+        "codigos_compromiso": 58,
+        "efecto_hitos": "si se copian los hitos, se duplican; si no se copian, uno de los casos queda sin seguimiento",
+        "problemas": [
+          "el mismo commitment se cuenta dos veces en los KPIs",
+          "los códigos de compromiso e hito cambian por caso",
+          "Anexo 14 y la matriz por caso lo muestran dos veces"
+        ]
+      },
+      "recomendacion": "Usar core.compromiso_casos sólo si los dos compromisos son el mismo compromiso. Si son independientes, mantener la duplicación por caso y aceptar el doble conteo, o deduplicar por texto antes de cargar.",
+      "advertencia_compatibilidad": "Con compromisos.caso_id NOT NULL y ON DELETE CASCADE, el puente NO basta para compartir de verdad: si se borra el caso principal, el compromiso se borra para todos los casos. Las opciones reales son (a) duplicar la fila por caso —modelo actual— o (b) una fase 2 que haga caso_id nullable y cambie la FK a RESTRICT/SET NULL, con cambios en las consultas.",
+      "ddl": "-- 3) Puente compromiso <-> caso, sólo si el mismo compromiso pertenece a\n--    varios casos y debe conservar un solo código y un solo juego de hitos.\n--    NO EJECUTAR: este script sólo lo propone.\n--    LIMITACIÓN: este DDL NO relaja compromisos.caso_id (NOT NULL, ON DELETE\n--    CASCADE). Si se borra el caso principal, el compromiso se borra para\n--    todos los casos. Para compartición real hace falta una fase 2: caso_id\n--    nullable + FK ON DELETE RESTRICT/SET NULL, o tratar el puente como\n--    fuente de verdad y actualizar las consultas.\ncreate table core.compromiso_casos (\n    compromiso_id uuid        not null\n        references core.compromisos(id) on delete cascade,\n    caso_id       uuid        not null\n        references core.casos(id) on delete cascade,\n    es_principal  boolean     not null default false,\n    created_at    timestamptz not null default now(),\n    primary key (compromiso_id, caso_id)\n);\n\ncreate unique index uq_compromiso_casos_principal\n    on core.compromiso_casos (compromiso_id)\n    where es_principal;\n\ncreate index ix_compromiso_casos_caso\n    on core.compromiso_casos (caso_id);\n\ncomment on table core.compromiso_casos is\n    'Vínculo m:n entre compromisos y casos. compromisos.caso_id queda como caso principal; el puente añade casos adicionales.';\n\n-- 4) Relleno desde caso_id (NOT NULL en el esquema actual).\ninsert into core.compromiso_casos (compromiso_id, caso_id, es_principal)\nselect id, caso_id, true\n  from core.compromisos\non conflict (compromiso_id, caso_id) do nothing;\n"
+    },
+    "calculos": {
+      "compromisos": 56,
+      "textos_compromiso": 54,
+      "vinculos_demanda_si_puente": 64,
+      "filas_compromiso_si_duplicar_demanda": 64,
+      "delta_filas_duplicar_demanda": 8,
+      "vinculos_caso_si_puente": 58,
+      "filas_compromiso_si_duplicar_caso": 58,
+      "delta_filas_duplicar_caso": 2,
+      "filas_compromiso_si_duplicar_ambos_sin_solape": 66,
+      "hitos_si_puente": 111,
+      "hitos_si_duplicar_demanda": "111 + 2 * (hitos de los 4 compromisos m:n); no se puede dar un total exacto sin el detalle de hitos del Excel",
+      "hitos_si_duplicar_caso": "111 + 1 * (hitos de los 2 compromisos compartidos); no se puede dar un total exacto sin el detalle de hitos del Excel",
+      "nota_solape": "Si los 4 compromisos m:n y los 2 compartidos entre casos se solapan, el delta combinado es menor que 8 + 2."
+    },
+    "casos_sin_demandas": {
+      "excel": "32 de 37",
+      "medido_bd": "17 de 34 casos vigentes",
+      "lectura": "No se resuelve con un puente: demandas.caso_id ya es 1:N. Es un problema de cobertura (casos sin demandas), no de cardinalidad. La matriz debe tolerar filas de demanda vacías."
+    },
+    "compromisos_sin_hitos": {
+      "excel": "11 de 56",
+      "medido_bd": "2 de 8 compromisos vigentes",
+      "lectura": "No requiere puente. Los exportes deben usar LEFT JOIN con hitos para no perder compromisos sin seguimiento."
+    },
+    "ddl_propuesto": [
+      {
+        "orden": 1,
+        "objeto": "core.compromiso_demandas",
+        "ejecutado": false,
+        "sql": "-- 1) Puente compromiso <-> demanda (m:n real).\n--    NO EJECUTAR: este script sólo lo propone.\n--    LIMITACIÓN: compromisos.demanda_id sigue siendo NO ACTION. Mientras esté\n--    poblado, borrar esa demanda seguirá bloqueado. Para los compromisos con\n--    varias demandas, el importe debe dejar demanda_id NULL y usar el puente.\ncreate table core.compromiso_demandas (\n    compromiso_id uuid        not null\n        references core.compromisos(id) on delete cascade,\n    demanda_id    uuid        not null\n        references core.demandas(id) on delete cascade,\n    es_principal  boolean     not null default false,\n    orden         smallint    not null default 1,\n    created_at    timestamptz not null default now(),\n    primary key (compromiso_id, demanda_id)\n);\n\ncreate unique index uq_compromiso_demandas_principal\n    on core.compromiso_demandas (compromiso_id)\n    where es_principal;\n\ncreate index ix_compromiso_demandas_demanda\n    on core.compromiso_demandas (demanda_id);\n\ncomment on table core.compromiso_demandas is\n    'Vínculo m:n entre compromisos y demandas. compromisos.demanda_id queda como demanda principal por compatibilidad.';\n\n-- 2) Relleno desde la columna única existente (hoy 0 filas con demanda_id).\ninsert into core.compromiso_demandas (compromiso_id, demanda_id, es_principal)\nselect id, demanda_id, true\n  from core.compromisos\n where demanda_id is not null\non conflict (compromiso_id, demanda_id) do nothing;\n",
+        "nota": "Puente m:n. Mantiene compromisos.demanda_id como demanda principal; no lo elimina."
+      },
+      {
+        "orden": 2,
+        "objeto": "core.compromiso_casos",
+        "ejecutado": false,
+        "sql": "-- 3) Puente compromiso <-> caso, sólo si el mismo compromiso pertenece a\n--    varios casos y debe conservar un solo código y un solo juego de hitos.\n--    NO EJECUTAR: este script sólo lo propone.\n--    LIMITACIÓN: este DDL NO relaja compromisos.caso_id (NOT NULL, ON DELETE\n--    CASCADE). Si se borra el caso principal, el compromiso se borra para\n--    todos los casos. Para compartición real hace falta una fase 2: caso_id\n--    nullable + FK ON DELETE RESTRICT/SET NULL, o tratar el puente como\n--    fuente de verdad y actualizar las consultas.\ncreate table core.compromiso_casos (\n    compromiso_id uuid        not null\n        references core.compromisos(id) on delete cascade,\n    caso_id       uuid        not null\n        references core.casos(id) on delete cascade,\n    es_principal  boolean     not null default false,\n    created_at    timestamptz not null default now(),\n    primary key (compromiso_id, caso_id)\n);\n\ncreate unique index uq_compromiso_casos_principal\n    on core.compromiso_casos (compromiso_id)\n    where es_principal;\n\ncreate index ix_compromiso_casos_caso\n    on core.compromiso_casos (caso_id);\n\ncomment on table core.compromiso_casos is\n    'Vínculo m:n entre compromisos y casos. compromisos.caso_id queda como caso principal; el puente añade casos adicionales.';\n\n-- 4) Relleno desde caso_id (NOT NULL en el esquema actual).\ninsert into core.compromiso_casos (compromiso_id, caso_id, es_principal)\nselect id, caso_id, true\n  from core.compromisos\non conflict (compromiso_id, caso_id) do nothing;\n",
+        "nota": "Puente m:n condicional. Mantiene compromisos.caso_id como caso principal; no relaja el NOT NULL."
+      }
+    ],
+    "exportes_vistas_afectados": [
+      {
+        "objeto": "analytics.vw_anexo_14_seguimiento_compromisos",
+        "tipo": "vista",
+        "impacto": "Usa core.compromisos.caso_id y LEFT JOIN hitos. Un compromiso compartido aparece sólo bajo el caso principal; si se duplica, aparece repetido y duplica filas de hitos.",
+        "requiere_cambio": true
+      },
+      {
+        "objeto": "analytics.mv_compromisos_inter_ministeriales",
+        "tipo": "vista materializada",
+        "impacto": "JOIN core.compromisos.caso_id. Duplicar compromisos por caso duplica la fila de integración externa.",
+        "requiere_cambio": true
+      },
+      {
+        "objeto": "analytics.mv_dashboard_alta_direccion",
+        "tipo": "vista materializada",
+        "impacto": "Cuenta hitos vencidos vía compromisos.caso_id. Duplicar hitos o compromisos infla el KPI de vencidos.",
+        "requiere_cambio": true
+      },
+      {
+        "objeto": "analytics.vw_anexo_15_matriz_conflictividad",
+        "tipo": "vista",
+        "impacto": "Es de nivel caso y no usa demandas ni compromisos; sin impacto directo mientras no se dupliquen casos.",
+        "requiere_cambio": false
+      },
+      {
+        "objeto": "lib/db/repos/cases.ts · matrizDemandasIntervenciones",
+        "tipo": "consulta de API",
+        "impacto": "Agrupa por core.compromisos.demanda_id. El puente exige un JOIN con compromiso_demandas y decidir si un compromiso con 3 demandas cuenta en las 3; duplicar infla totales y sumas.",
+        "requiere_cambio": true
+      },
+      {
+        "objeto": "lib/db/repos/commitments.ts",
+        "tipo": "consulta de API",
+        "impacto": "COMMITMENT_COLUMNS expone un único demanda_id y hace LEFT JOIN core.demandas por esa columna. El puente exige agregar una lista o mantener la demanda principal.",
+        "requiere_cambio": true
+      },
+      {
+        "objeto": "app/api/v1/export/anexo-14/route.ts",
+        "tipo": "exporte",
+        "impacto": "Consume la vista de Anexo 14; hereda su impacto (filas repetidas si se duplican compromisos/hitos).",
+        "requiere_cambio": true
+      },
+      {
+        "objeto": "app/api/v1/cases/[code]/matriz/route.ts",
+        "tipo": "exporte/API",
+        "impacto": "Consume matrizDemandasIntervenciones; hereda el impacto del agrupamiento por demanda_id.",
+        "requiere_cambio": true
+      },
+      {
+        "objeto": "angular · compromiso-panel.component.ts",
+        "tipo": "interfaz",
+        "impacto": "El formulario tiene un select único de demanda. El puente exige multiselección o principal + lista.",
+        "requiere_cambio": true
+      },
+      {
+        "objeto": "angular · caso-detalle.page.ts",
+        "tipo": "interfaz",
+        "impacto": "compromisosPorDemanda asume un demandaId por compromiso; el puente exige recorrer una lista.",
+        "requiere_cambio": true
+      },
+      {
+        "objeto": "angular · nudos-matriz.mapeo.ts",
+        "tipo": "interfaz",
+        "impacto": "La matriz por demanda asume un vínculo único; el puente multiplica los vínculos y hay que decidir la semántica.",
+        "requiere_cambio": true
+      }
+    ],
+    "hallazgos": [
+      "compromisos.demanda_id es un único uuid: no puede representar 3 demandas por compromiso. El puente es la única forma de conservar 56 compromisos y 111 hitos sin duplicar.",
+      "compromisos.caso_id es NOT NULL y codigo_compromiso es UNIQUE global: duplicar por caso obliga a inventar códigos nuevos y rompe la identidad estable del compromiso.",
+      "hitos_compromiso sólo cuelga de compromiso_id; si se duplica el compromiso, los hitos se duplican o se pierden para una copia.",
+      "compromisos_demanda_id_fkey es NO ACTION. Al recargar demandas hay que desvincular primero los compromisos que las referencien. Hoy hay 0 compromisos que apuntan a una demanda de otro caso.",
+      "Hoy 0 de 8 compromisos vigentes tienen demanda_id: la columna está sin uso y el puente no migra datos existentes.",
+      "32 de 37 casos sin demandas no se arregla con un puente: es cobertura, no cardinalidad.",
+      "11 de 56 compromisos sin hitos no requieren puente; requieren LEFT JOIN en los exportes.",
+      "El nombre no es una llave segura para borrar: core.mapa_matriz_excel es el vínculo que usa el importador y el código del Excel no coincide necesariamente con core.casos.codigo_caso. No borrar sólo por nombre; usar el mapa o una lista explícita."
+    ]
+  }
+}
