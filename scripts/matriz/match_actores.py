@@ -547,9 +547,13 @@ def cargar_catalogo(cur) -> list[Candidato]:
         textos = [nombre]
         if actor and actor[1] and norm_texto(actor[1]) != norm_texto(nombre):
             textos.append(actor[1])
-        siglas = parse_siglas(abrev) | siglas_del_nombre(nombre)
+        siglas = {
+            s
+            for s in (parse_siglas(abrev) | siglas_del_nombre(nombre))
+            if s not in SIGLAS_GENERICAS
+        }
         if actor:
-            siglas |= parse_siglas(actor[2])
+            siglas |= {s for s in parse_siglas(actor[2]) if s not in SIGLAS_GENERICAS}
         candidatos.append(
             Candidato(
                 uid, "core.organizaciones", nombre, "organizacion", textos, siglas
@@ -571,7 +575,11 @@ def cargar_catalogo(cur) -> list[Candidato]:
                 nombre,
                 tipo,
                 [nombre],
-                parse_siglas(abrev) | siglas_del_nombre(nombre),
+                {
+                    s
+                    for s in (parse_siglas(abrev) | siglas_del_nombre(nombre))
+                    if s not in SIGLAS_GENERICAS
+                },
             )
         )
 

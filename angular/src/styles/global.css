@@ -3216,8 +3216,11 @@ textarea {
    accidente al cruzar la franja de camino a otra parte de la pantalla. Al
    salir del menú se contrae al instante (el retardo sólo se declara en el
    estado `:hover`, y la transición de vuelta usa la regla base). Con el
-   teclado no se espera: `:focus-within` despliega en el acto, porque los
-   rótulos hacen falta para navegar.
+   teclado no se espera: llega con `:has(:focus-visible)` y se despliega en el
+   acto, porque los rótulos hacen falta para navegar. Se usa
+   `:has(:focus-visible)` y **no** `:focus-within`: un clic del ratón también
+   deja el foco en el enlace, y con `:focus-within` el menú se quedaba abierto
+   para siempre al salir con el puntero.
 
    El panel se pinta con `position: fixed` —igual que el cajón móvil— para
    superponerse al contenido en vez de re-maquetarlo cada vez que se despliega;
@@ -3250,7 +3253,8 @@ textarea {
     transition-delay: 1s;
   }
 
-  .avisa-sidebar:focus-within {
+  /* Sólo el foco de teclado despliega: ver el comentario de cabecera. */
+  .avisa-sidebar:has(:focus-visible) {
     width: 246px;
     box-shadow: 10px 0 25px #122b4014;
     transition-delay: 0s;
@@ -3264,10 +3268,8 @@ textarea {
    * En la franja sólo se ven los íconos. Los rótulos se apagan con `opacity` y
    * no con `display: none` porque el `overflow: hidden` del aside recorta en el
    * borde del relleno: a 68 px se asomaban las primeras letras. Con `opacity`
-   * dejan de pintarse pero conservan su sitio, así que desplegar no cambia la
-   * altura ni la posición de los íconos. `nowrap` evita que se partan.
+   * dejan de pintarse pero conservan su sitio. `nowrap` evita que se partan.
    */
-  .sidebar-label,
   .side-nav span,
   .sidebar-version,
   .sidebar-context strong,
@@ -3277,27 +3279,22 @@ textarea {
   }
 
   /*
-   * En la franja los encabezados de grupo no dejan hueco: se reducen a una
-   * línea de 1 px que sigue separando los bloques de íconos (antes eran ~50 px
-   * de vacío por grupo, porque el rótulo seguía ocupando su altura). El primero
-   * no la necesita porque ya está el borde superior del menú.
+   * Los encabezados de grupo (`.sidebar-label`) no se pintan en ningún estado:
+   * si sólo se ocultaran en la franja, al desplegarse recuperarían su altura y
+   * empujarían los ítems hacia abajo —el ícono que había bajo el puntero pasaba
+   * a ser otro—. Sin ellos, el menú conserva exactamente la misma geometría
+   * vertical colapsado y desplegado, y el grupo se sigue viendo por la línea
+   * que abre cada bloque. El nombre del grupo no se pierde para lectores de
+   * pantalla: cada `<nav>` ya lleva `aria-label`.
    */
   .sidebar-label {
-    height: 1px;
-    margin: 10px 6px 8px;
-    padding: 0;
-    overflow: hidden;
-    border-top: 1px solid #edf0f2;
+    display: none;
   }
 
-  .sidebar-label.section-nav-label {
-    margin-top: 14px;
-  }
-
-  .sidebar-scroll > .sidebar-label:first-child {
-    height: 0;
-    margin: 0;
-    border-top: 0;
+  /* Separador de grupo: 1 px, sin huecos. El primer bloque no lo lleva. */
+  .sidebar-scroll > nav:not(:first-of-type) {
+    margin-top: 6px;
+    border-top: 1px solid #eef2f6;
   }
 
   /* Sin esto, el texto `nowrap` de la franja deja una barra de desplazamiento
@@ -3306,7 +3303,6 @@ textarea {
     overflow-x: clip;
   }
 
-  .avisa-sidebar:hover .sidebar-label,
   .avisa-sidebar:hover .side-nav span,
   .avisa-sidebar:hover .sidebar-version,
   .avisa-sidebar:hover .sidebar-context strong,
@@ -3317,33 +3313,12 @@ textarea {
   }
 
   /* Con el teclado no hay espera: el foco despliega y muestra rótulos ya. */
-  .avisa-sidebar:focus-within .sidebar-label,
-  .avisa-sidebar:focus-within .side-nav span,
-  .avisa-sidebar:focus-within .sidebar-version,
-  .avisa-sidebar:focus-within .sidebar-context strong,
-  .avisa-sidebar:focus-within .sidebar-context small {
+  .avisa-sidebar:has(:focus-visible) .side-nav span,
+  .avisa-sidebar:has(:focus-visible) .sidebar-version,
+  .avisa-sidebar:has(:focus-visible) .sidebar-context strong,
+  .avisa-sidebar:has(:focus-visible) .sidebar-context small {
     opacity: 1;
     transition-delay: 0s;
-  }
-
-  /* Desplegado, cada encabezado recupera su altura y su rótulo. */
-  .avisa-sidebar:hover .sidebar-label,
-  .avisa-sidebar:focus-within .sidebar-label {
-    height: auto;
-    margin: 0 0 7px;
-    overflow: visible;
-    border-top: 0;
-  }
-
-  .avisa-sidebar:hover .sidebar-label.section-nav-label,
-  .avisa-sidebar:focus-within .sidebar-label.section-nav-label {
-    margin-top: 24px;
-  }
-
-  .avisa-sidebar:hover .sidebar-scroll > .sidebar-label:first-child,
-  .avisa-sidebar:focus-within .sidebar-scroll > .sidebar-label:first-child {
-    height: auto;
-    margin: 0 0 7px;
   }
 }
 

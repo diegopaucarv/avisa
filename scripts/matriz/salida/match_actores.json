@@ -1,7 +1,7 @@
 {
   "meta": {
     "script": "scripts/matriz/match_actores.py",
-    "generado_en": "2026-11-26T17:59:10+00:00",
+    "generado_en": "2026-11-26T20:47:09+00:00",
     "entrada": "scripts/matriz/salida/matriz_2026.json",
     "solo_lectura": true,
     "autocommit": true,
@@ -18,35 +18,35 @@
     "tipo_de_regla": "cascada if/else (no votos)"
   },
   "resumen": {
-    "fragmentos_entrada": 404,
-    "fragmentos_unicos": 162,
+    "fragmentos_entrada": 452,
+    "fragmentos_unicos": 191,
     "candidatos_catalogo": 1256,
     "candidatos_por_tipo": {
       "organizacion": 290,
       "persona": 966
     },
     "auto": {
-      "persona": 3,
-      "organizacion": 32,
-      "total": 35
+      "persona": 4,
+      "organizacion": 41,
+      "total": 45
     },
     "dudoso": {
       "persona": 1,
-      "organizacion": 11,
-      "total": 12
+      "organizacion": 16,
+      "total": 17
     },
     "nuevo": {
-      "persona": 35,
-      "organizacion": 80,
-      "total": 115
+      "persona": 43,
+      "organizacion": 86,
+      "total": 129
     },
     "por_rama": {
-      "6_nuevo": 115,
-      "1_siglas_exactas": 26,
-      "4_embedding": 7,
-      "2_nombre_exacto": 2,
-      "5_lexico": 3,
-      "5_embedding": 9
+      "6_nuevo": 129,
+      "1_siglas_exactas": 31,
+      "4_embedding": 11,
+      "2_nombre_exacto": 3,
+      "5_lexico": 5,
+      "5_embedding": 12
     }
   },
   "filas": [
@@ -114,7 +114,7 @@
       "veredicto": "nuevo",
       "rama": "6_nuevo",
       "motivo": "sin acierto suficiente (embedding 0.689, léxico 0.500)",
-      "ocurrencias": 13,
+      "ocurrencias": 15,
       "fuentes": [
         "caso 1:actores",
         "caso 3:actores",
@@ -163,7 +163,7 @@
       "veredicto": "auto",
       "rama": "1_siglas_exactas",
       "motivo": "siglas exactas normalizadas",
-      "ocurrencias": 14,
+      "ocurrencias": 15,
       "fuentes": [
         "caso 1:actores",
         "caso 8:actores",
@@ -310,7 +310,7 @@
       "veredicto": "auto",
       "rama": "1_siglas_exactas",
       "motivo": "siglas exactas normalizadas",
-      "ocurrencias": 16,
+      "ocurrencias": 17,
       "fuentes": [
         "caso 1:area_responsable",
         "caso 1:responsable",
@@ -536,7 +536,7 @@
       "veredicto": "nuevo",
       "rama": "6_nuevo",
       "motivo": "sin acierto suficiente (embedding 0.807, léxico 0.471)",
-      "ocurrencias": 6,
+      "ocurrencias": 8,
       "fuentes": [
         "caso 2:actores",
         "caso 2:responsable",
@@ -556,7 +556,7 @@
       "veredicto": "nuevo",
       "rama": "6_nuevo",
       "motivo": "sin acierto suficiente (embedding 0.480, léxico 0.500)",
-      "ocurrencias": 4,
+      "ocurrencias": 5,
       "fuentes": [
         "caso 2:actores",
         "caso 4:actores",
@@ -602,7 +602,7 @@
       "veredicto": "auto",
       "rama": "1_siglas_exactas",
       "motivo": "siglas exactas normalizadas",
-      "ocurrencias": 54,
+      "ocurrencias": 55,
       "fuentes": [
         "caso 2:area_responsable",
         "caso 3:actores",
@@ -714,10 +714,11 @@
       "veredicto": "nuevo",
       "rama": "6_nuevo",
       "motivo": "sin acierto suficiente (embedding 0.823, léxico 0.600)",
-      "ocurrencias": 2,
+      "ocurrencias": 3,
       "fuentes": [
         "caso 4:actores",
-        "caso 5:actores"
+        "caso 5:actores",
+        "caso 9:actores"
       ],
       "variantes": [
         "APN"
@@ -733,7 +734,7 @@
       "veredicto": "nuevo",
       "rama": "6_nuevo",
       "motivo": "sin acierto suficiente (embedding 0.476, léxico 0.500)",
-      "ocurrencias": 8,
+      "ocurrencias": 9,
       "fuentes": [
         "caso 4:actores",
         "caso 5:actores",
@@ -1081,31 +1082,51 @@
       "veredicto": "nuevo",
       "rama": "6_nuevo",
       "motivo": "sin acierto suficiente (embedding 0.713, léxico 0.566)",
-      "ocurrencias": 2,
+      "ocurrencias": 3,
       "fuentes": [
         "caso 7:actores",
-        "caso 16:actores"
+        "caso 16:actores",
+        "caso 19:actores"
       ],
       "variantes": [
         "Congreso de la República"
       ]
     },
     {
-      "crudo": "DICAPI, MTC, PRODUCE, OSPAS, Congresista Edwin Martínez",
+      "crudo": "OSPAS",
       "tipo": "organizacion",
-      "coseno": 0.5578,
-      "lexico": 0.5116,
+      "coseno": 0.7842,
+      "lexico": 0.6667,
       "siglas_exactas": false,
       "destino": null,
       "veredicto": "nuevo",
       "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.558, léxico 0.512)",
+      "motivo": "sin acierto suficiente (embedding 0.784, léxico 0.667)",
+      "ocurrencias": 2,
+      "fuentes": [
+        "caso 7:actores",
+        "caso 28:actores"
+      ],
+      "variantes": [
+        "OSPAS"
+      ]
+    },
+    {
+      "crudo": "Congresista Edwin Martínez",
+      "tipo": "organizacion",
+      "coseno": 0.4759,
+      "lexico": 0.5106,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.476, léxico 0.511)",
       "ocurrencias": 1,
       "fuentes": [
         "caso 7:actores"
       ],
       "variantes": [
-        "DICAPI, MTC, PRODUCE, OSPAS, Congresista Edwin Martínez"
+        "Congresista Edwin Martínez"
       ]
     },
     {
@@ -1270,21 +1291,66 @@
       ]
     },
     {
-      "crudo": "MTC, APN, DICAPI, PRODUCE (IMARPE) , MINAM, Congresista Patricia Chirinos",
+      "crudo": "PRODUCE (IMARPE)",
       "tipo": "organizacion",
-      "coseno": 0.494,
-      "lexico": 0.4706,
-      "siglas_exactas": false,
-      "destino": null,
-      "veredicto": "nuevo",
-      "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.494, léxico 0.471)",
+      "coseno": 0.2712,
+      "lexico": 0.45,
+      "siglas_exactas": true,
+      "destino": {
+        "id": "44",
+        "tabla": "core.cat_unidades_organicas",
+        "nombre": "INSTITUTO DEL MAR DEL PERÚ",
+        "tipo": "organizacion",
+        "siglas": [
+          "IMARPE"
+        ]
+      },
+      "veredicto": "auto",
+      "rama": "1_siglas_exactas",
+      "motivo": "siglas exactas normalizadas",
       "ocurrencias": 1,
       "fuentes": [
         "caso 9:actores"
       ],
       "variantes": [
-        "MTC, APN, DICAPI, PRODUCE (IMARPE) , MINAM, Congresista Patricia Chirinos"
+        "PRODUCE (IMARPE)"
+      ]
+    },
+    {
+      "crudo": "MINAM",
+      "tipo": "organizacion",
+      "coseno": 0.6929,
+      "lexico": 0.4286,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.693, léxico 0.429)",
+      "ocurrencias": 2,
+      "fuentes": [
+        "caso 9:actores",
+        "caso 18:actores"
+      ],
+      "variantes": [
+        "MINAM"
+      ]
+    },
+    {
+      "crudo": "Congresista Patricia Chirinos",
+      "tipo": "organizacion",
+      "coseno": 0.471,
+      "lexico": 0.5217,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.471, léxico 0.522)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 9:actores"
+      ],
+      "variantes": [
+        "Congresista Patricia Chirinos"
       ]
     },
     {
@@ -1751,21 +1817,135 @@
       ]
     },
     {
-      "crudo": "Gremios de pescadores artesanales de La Libertad y Lambayeque, ANADARKO, GORE La Libertad, GORE Lambayeque, SENACE, IMARPE, Petro Perú, Chevron, Westlawn Perú S.A.C., Congresista Hector Acuña",
+      "crudo": "Gremios de pescadores artesanales de La Libertad y Lambayeque",
       "tipo": "organizacion",
-      "coseno": 0.6676,
-      "lexico": 0.5097,
+      "coseno": 0.8391,
+      "lexico": 0.7304,
       "siglas_exactas": false,
-      "destino": null,
-      "veredicto": "nuevo",
-      "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.668, léxico 0.510)",
+      "destino": {
+        "id": "ad491cec-c656-417d-b84d-200a9e65ae40",
+        "tabla": "core.organizaciones",
+        "nombre": "Asociación de Pescadores Artesanales de la Caleta Grau",
+        "tipo": "organizacion",
+        "siglas": []
+      },
+      "veredicto": "dudoso",
+      "rama": "5_embedding",
+      "motivo": "embedding 0.839 entre umbrales",
       "ocurrencias": 1,
       "fuentes": [
         "caso 14:actores"
       ],
       "variantes": [
-        "Gremios de pescadores artesanales de La Libertad y Lambayeque, ANADARKO, GORE La Libertad, GORE Lambayeque, SENACE, IMARPE, Petro Perú, Chevron, Westlawn Perú S.A.C., Congresista Hector Acuña"
+        "Gremios de pescadores artesanales de La Libertad y Lambayeque"
+      ]
+    },
+    {
+      "crudo": "ANADARKO",
+      "tipo": "organizacion",
+      "coseno": 0.9274,
+      "lexico": 0.5714,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.927, léxico 0.571)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 14:actores"
+      ],
+      "variantes": [
+        "ANADARKO"
+      ]
+    },
+    {
+      "crudo": "SENACE",
+      "tipo": "organizacion",
+      "coseno": 0.8857,
+      "lexico": 0.5,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.886, léxico 0.500)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 14:actores"
+      ],
+      "variantes": [
+        "SENACE"
+      ]
+    },
+    {
+      "crudo": "Petro Perú",
+      "tipo": "persona",
+      "coseno": 0.6881,
+      "lexico": 0.6087,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.688, léxico 0.609)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 14:actores"
+      ],
+      "variantes": [
+        "Petro Perú"
+      ]
+    },
+    {
+      "crudo": "Chevron",
+      "tipo": "persona",
+      "coseno": 0.4615,
+      "lexico": 0.4545,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.461, léxico 0.455)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 14:actores"
+      ],
+      "variantes": [
+        "Chevron"
+      ]
+    },
+    {
+      "crudo": "Westlawn Perú S.A.C.",
+      "tipo": "organizacion",
+      "coseno": 0.7661,
+      "lexico": 0.5333,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.766, léxico 0.533)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 14:actores"
+      ],
+      "variantes": [
+        "Westlawn Perú S.A.C."
+      ]
+    },
+    {
+      "crudo": "Congresista Hector Acuña",
+      "tipo": "organizacion",
+      "coseno": 0.525,
+      "lexico": 0.5283,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.525, léxico 0.528)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 14:actores"
+      ],
+      "variantes": [
+        "Congresista Hector Acuña"
       ]
     },
     {
@@ -1895,10 +2075,10 @@
       ]
     },
     {
-      "crudo": "Gremios de pescadores artesanales de Callao, Piura, Lambayeque",
+      "crudo": "Gremios de pescadores artesanales de Callao",
       "tipo": "organizacion",
-      "coseno": 0.8524,
-      "lexico": 0.6061,
+      "coseno": 0.8766,
+      "lexico": 0.6957,
       "siglas_exactas": false,
       "destino": {
         "id": "c1abe465-05f9-45f7-964b-7057cac9e952",
@@ -1907,15 +2087,51 @@
         "tipo": "organizacion",
         "siglas": []
       },
-      "veredicto": "dudoso",
-      "rama": "5_embedding",
-      "motivo": "embedding 0.852 entre umbrales",
+      "veredicto": "auto",
+      "rama": "4_embedding",
+      "motivo": "embedding 0.877",
       "ocurrencias": 2,
       "fuentes": [
         "caso 15:actores"
       ],
       "variantes": [
-        "Gremios de pescadores artesanales de Callao, Piura, Lambayeque"
+        "Gremios de pescadores artesanales de Callao"
+      ]
+    },
+    {
+      "crudo": "Piura",
+      "tipo": "persona",
+      "coseno": 0.7438,
+      "lexico": 0.4348,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.744, léxico 0.435)",
+      "ocurrencias": 2,
+      "fuentes": [
+        "caso 15:actores"
+      ],
+      "variantes": [
+        "Piura"
+      ]
+    },
+    {
+      "crudo": "Lambayeque",
+      "tipo": "persona",
+      "coseno": 0.596,
+      "lexico": 0.5517,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.596, léxico 0.552)",
+      "ocurrencias": 2,
+      "fuentes": [
+        "caso 15:actores"
+      ],
+      "variantes": [
+        "Lambayeque"
       ]
     },
     {
@@ -2152,21 +2368,105 @@
       ]
     },
     {
-      "crudo": "Gilmer Yauri Gestor Social de FONDEPES 966019954, Pescadores del DPA Chimbote, Asociación de Buzos Artesanales Isla Blanca, GORE Ancash, DIREPRO Ancash, OPP, DICAPI, Congresista Elías Varas Meléndez",
+      "crudo": "Gilmer Yauri Gestor Social de FONDEPES 966019954",
       "tipo": "organizacion",
-      "coseno": 0.6566,
-      "lexico": 0.4817,
+      "coseno": 0.5749,
+      "lexico": 0.4235,
       "siglas_exactas": false,
       "destino": null,
       "veredicto": "nuevo",
       "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.657, léxico 0.482)",
+      "motivo": "sin acierto suficiente (embedding 0.575, léxico 0.424)",
       "ocurrencias": 1,
       "fuentes": [
         "caso 17:actores"
       ],
       "variantes": [
-        "Gilmer Yauri Gestor Social de FONDEPES 966019954, Pescadores del DPA Chimbote, Asociación de Buzos Artesanales Isla Blanca, GORE Ancash, DIREPRO Ancash, OPP, DICAPI, Congresista Elías Varas Meléndez"
+        "Gilmer Yauri Gestor Social de FONDEPES 966019954"
+      ]
+    },
+    {
+      "crudo": "Pescadores del DPA Chimbote",
+      "tipo": "organizacion",
+      "coseno": 0.8041,
+      "lexico": 0.6197,
+      "siglas_exactas": false,
+      "destino": {
+        "id": "318f7260-ced2-4b0d-bbb9-a0e7f0480f93",
+        "tabla": "core.organizaciones",
+        "nombre": "Sindicato de Pescadores de Chimbote y Anexos",
+        "tipo": "organizacion",
+        "siglas": []
+      },
+      "veredicto": "dudoso",
+      "rama": "5_embedding",
+      "motivo": "embedding 0.804 entre umbrales",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 17:actores"
+      ],
+      "variantes": [
+        "Pescadores del DPA Chimbote"
+      ]
+    },
+    {
+      "crudo": "Asociación de Buzos Artesanales Isla Blanca",
+      "tipo": "organizacion",
+      "coseno": 0.5181,
+      "lexico": 0.7529,
+      "siglas_exactas": false,
+      "destino": {
+        "id": "e06cc224-2b05-4e23-bf47-c9674a5b9375",
+        "tabla": "core.organizaciones",
+        "nombre": "ASOCIACION DE ARMADORES ARTESANALES YACILA",
+        "tipo": "organizacion",
+        "siglas": []
+      },
+      "veredicto": "dudoso",
+      "rama": "5_lexico",
+      "motivo": "léxico 0.753 sin respaldo semántico",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 17:actores"
+      ],
+      "variantes": [
+        "Asociación de Buzos Artesanales Isla Blanca"
+      ]
+    },
+    {
+      "crudo": "OPP",
+      "tipo": "organizacion",
+      "coseno": 0.6885,
+      "lexico": 0.4444,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.689, léxico 0.444)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 17:actores"
+      ],
+      "variantes": [
+        "OPP"
+      ]
+    },
+    {
+      "crudo": "Congresista Elías Varas Meléndez",
+      "tipo": "organizacion",
+      "coseno": 0.619,
+      "lexico": 0.4906,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.619, léxico 0.491)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 17:actores"
+      ],
+      "variantes": [
+        "Congresista Elías Varas Meléndez"
       ]
     },
     {
@@ -2203,24 +2503,6 @@
       ],
       "variantes": [
         "PCM (SSGD)"
-      ]
-    },
-    {
-      "crudo": "MINAM",
-      "tipo": "organizacion",
-      "coseno": 0.6929,
-      "lexico": 0.4286,
-      "siglas_exactas": false,
-      "destino": null,
-      "veredicto": "nuevo",
-      "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.693, léxico 0.429)",
-      "ocurrencias": 1,
-      "fuentes": [
-        "caso 18:actores"
-      ],
-      "variantes": [
-        "MINAM"
       ]
     },
     {
@@ -2281,21 +2563,21 @@
       ]
     },
     {
-      "crudo": "SSGD-PCM, MINAM, PRODUCE",
-      "tipo": "organizacion",
-      "coseno": 0.4302,
-      "lexico": 0.4528,
+      "crudo": "SSGD-PCM",
+      "tipo": "persona",
+      "coseno": 0.3438,
+      "lexico": 0.4348,
       "siglas_exactas": false,
       "destino": null,
       "veredicto": "nuevo",
       "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.430, léxico 0.453)",
+      "motivo": "sin acierto suficiente (embedding 0.344, léxico 0.435)",
       "ocurrencias": 1,
       "fuentes": [
         "caso 18:actores"
       ],
       "variantes": [
-        "SSGD-PCM, MINAM, PRODUCE"
+        "SSGD-PCM"
       ]
     },
     {
@@ -2317,21 +2599,63 @@
       ]
     },
     {
-      "crudo": "Luis Díaz, presidente: 922 780 961\n Mercedes Yovera, vicepresidenta 921 546 736",
-      "tipo": "organizacion",
-      "coseno": 0.458,
-      "lexico": 0.3947,
+      "crudo": "Luis Díaz",
+      "tipo": "persona",
+      "coseno": 1.0,
+      "lexico": 1.0,
       "siglas_exactas": false,
-      "destino": null,
-      "veredicto": "nuevo",
-      "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.458, léxico 0.395)",
+      "destino": {
+        "id": "e107d3ba-7534-41ef-bd03-5fa6611e0bdf",
+        "tabla": "core.actores",
+        "nombre": "Luis Díaz",
+        "tipo": "persona",
+        "siglas": []
+      },
+      "veredicto": "auto",
+      "rama": "2_nombre_exacto",
+      "motivo": "nombre exacto normalizado",
       "ocurrencias": 1,
       "fuentes": [
         "caso 18:actores"
       ],
       "variantes": [
-        "Luis Díaz, presidente: 922 780 961\n Mercedes Yovera, vicepresidenta 921 546 736"
+        "Luis Díaz"
+      ]
+    },
+    {
+      "crudo": "presidente: 922 780 961\n Mercedes Yovera",
+      "tipo": "organizacion",
+      "coseno": 0.4591,
+      "lexico": 0.3256,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.459, léxico 0.326)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 18:actores"
+      ],
+      "variantes": [
+        "presidente: 922 780 961\n Mercedes Yovera"
+      ]
+    },
+    {
+      "crudo": "vicepresidenta 921 546 736",
+      "tipo": "organizacion",
+      "coseno": 0.6282,
+      "lexico": 0.3733,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.628, léxico 0.373)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 18:actores"
+      ],
+      "variantes": [
+        "vicepresidenta 921 546 736"
       ]
     },
     {
@@ -2460,24 +2784,6 @@
       ]
     },
     {
-      "crudo": "PNDP, PROINVERSIÓN, SBN, MINDEF, Asociación Agrupación de Micro Empresarios Confraternidad (AAMEC), Congreso de la República",
-      "tipo": "organizacion",
-      "coseno": 0.6302,
-      "lexico": 0.5128,
-      "siglas_exactas": false,
-      "destino": null,
-      "veredicto": "nuevo",
-      "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.630, léxico 0.513)",
-      "ocurrencias": 1,
-      "fuentes": [
-        "caso 19:actores"
-      ],
-      "variantes": [
-        "PNDP, PROINVERSIÓN, SBN, MINDEF, Asociación Agrupación de Micro Empresarios Confraternidad (AAMEC), Congreso de la República"
-      ]
-    },
-    {
       "crudo": "PNDP",
       "tipo": "organizacion",
       "coseno": 0.3946,
@@ -2497,12 +2803,30 @@
       "motivo": "siglas exactas normalizadas",
       "ocurrencias": 10,
       "fuentes": [
+        "caso 19:actores",
         "caso 19:area_responsable",
-        "caso 19:responsable",
-        "caso 29:actores"
+        "caso 19:responsable"
       ],
       "variantes": [
         "PNDP"
+      ]
+    },
+    {
+      "crudo": "Asociación Agrupación de Micro Empresarios Confraternidad (AAMEC)",
+      "tipo": "organizacion",
+      "coseno": 0.844,
+      "lexico": 0.6087,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.844, léxico 0.609)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 19:actores"
+      ],
+      "variantes": [
+        "Asociación Agrupación de Micro Empresarios Confraternidad (AAMEC)"
       ]
     },
     {
@@ -2667,7 +2991,7 @@
       "veredicto": "nuevo",
       "rama": "6_nuevo",
       "motivo": "sin acierto suficiente (embedding 0.794, léxico 0.583)",
-      "ocurrencias": 9,
+      "ocurrencias": 10,
       "fuentes": [
         "caso 20:responsable"
       ],
@@ -2695,21 +3019,114 @@
       ]
     },
     {
-      "crudo": "Rafael Rodriguez Gestor Social de FONDEPES 979326720, Pescadores del DPA Huacho, Sindicato de Pescadores Artesanales del Puerto de Huacho, Asociación de Pescadores Artesanales del Puerto de Huacho, ADARPESCA, DGPA",
+      "crudo": "Rafael Rodriguez Gestor Social de FONDEPES 979326720",
       "tipo": "organizacion",
-      "coseno": 0.7753,
-      "lexico": 0.5043,
+      "coseno": 0.677,
+      "lexico": 0.4381,
       "siglas_exactas": false,
       "destino": null,
       "veredicto": "nuevo",
       "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.775, léxico 0.504)",
+      "motivo": "sin acierto suficiente (embedding 0.677, léxico 0.438)",
+      "ocurrencias": 2,
+      "fuentes": [
+        "caso 21:actores",
+        "caso 22:actores"
+      ],
+      "variantes": [
+        "Rafael Rodriguez Gestor Social de FONDEPES 979326720"
+      ]
+    },
+    {
+      "crudo": "Pescadores del DPA Huacho",
+      "tipo": "organizacion",
+      "coseno": 0.7419,
+      "lexico": 0.6087,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.742, léxico 0.609)",
       "ocurrencias": 1,
       "fuentes": [
         "caso 21:actores"
       ],
       "variantes": [
-        "Rafael Rodriguez Gestor Social de FONDEPES 979326720, Pescadores del DPA Huacho, Sindicato de Pescadores Artesanales del Puerto de Huacho, Asociación de Pescadores Artesanales del Puerto de Huacho, ADARPESCA, DGPA"
+        "Pescadores del DPA Huacho"
+      ]
+    },
+    {
+      "crudo": "Sindicato de Pescadores Artesanales del Puerto de Huacho",
+      "tipo": "organizacion",
+      "coseno": 0.8819,
+      "lexico": 0.7287,
+      "siglas_exactas": false,
+      "destino": {
+        "id": "d995a105-d967-4834-8bd7-c479ae619a15",
+        "tabla": "core.organizaciones",
+        "nombre": "Asociación Unificada de Pescadores Artesanales de la Provincia de Sechura",
+        "tipo": "organizacion",
+        "siglas": []
+      },
+      "veredicto": "auto",
+      "rama": "4_embedding",
+      "motivo": "embedding 0.882",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 21:actores"
+      ],
+      "variantes": [
+        "Sindicato de Pescadores Artesanales del Puerto de Huacho"
+      ]
+    },
+    {
+      "crudo": "Asociación de Pescadores Artesanales del Puerto de Huacho",
+      "tipo": "organizacion",
+      "coseno": 0.8841,
+      "lexico": 0.7846,
+      "siglas_exactas": false,
+      "destino": {
+        "id": "d995a105-d967-4834-8bd7-c479ae619a15",
+        "tabla": "core.organizaciones",
+        "nombre": "Asociación Unificada de Pescadores Artesanales de la Provincia de Sechura",
+        "tipo": "organizacion",
+        "siglas": []
+      },
+      "veredicto": "auto",
+      "rama": "4_embedding",
+      "motivo": "embedding 0.884",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 21:actores"
+      ],
+      "variantes": [
+        "Asociación de Pescadores Artesanales del Puerto de Huacho"
+      ]
+    },
+    {
+      "crudo": "ADARPESCA",
+      "tipo": "organizacion",
+      "coseno": 0.6064,
+      "lexico": 0.75,
+      "siglas_exactas": false,
+      "destino": {
+        "id": "97c245e6-1006-4505-b546-72b231d347e5",
+        "tabla": "core.organizaciones",
+        "nombre": "APESCAN",
+        "tipo": "organizacion",
+        "siglas": [
+          "APESCAN"
+        ]
+      },
+      "veredicto": "dudoso",
+      "rama": "5_lexico",
+      "motivo": "léxico 0.750 sin respaldo semántico",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 21:actores"
+      ],
+      "variantes": [
+        "ADARPESCA"
       ]
     },
     {
@@ -2731,75 +3148,152 @@
       ]
     },
     {
-      "crudo": "Rafael Rodriguez Gestor Social de FONDEPES 979326720, Pescadores del DPA Supe, OSPAS de la zona, Municipalidad Distrital de Supe, SEMAPA SUPE PUERTO",
+      "crudo": "Pescadores del DPA Supe",
       "tipo": "organizacion",
-      "coseno": 0.7084,
-      "lexico": 0.4558,
+      "coseno": 0.8066,
+      "lexico": 0.5,
       "siglas_exactas": false,
-      "destino": null,
-      "veredicto": "nuevo",
-      "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.708, léxico 0.456)",
+      "destino": {
+        "id": "1b5f1743-b5c2-42c4-a6cd-f2111fb84081",
+        "tabla": "core.organizaciones",
+        "nombre": "Asociación Pescadores Sechura",
+        "tipo": "organizacion",
+        "siglas": []
+      },
+      "veredicto": "dudoso",
+      "rama": "5_embedding",
+      "motivo": "embedding 0.807 entre umbrales",
       "ocurrencias": 1,
       "fuentes": [
         "caso 22:actores"
       ],
       "variantes": [
-        "Rafael Rodriguez Gestor Social de FONDEPES 979326720, Pescadores del DPA Supe, OSPAS de la zona, Municipalidad Distrital de Supe, SEMAPA SUPE PUERTO"
+        "Pescadores del DPA Supe"
       ]
     },
     {
-      "crudo": "GORE ICA, MUNICIPALIDAD DISTRITAL DE MARCONA",
-      "tipo": "organizacion",
-      "coseno": 0.7398,
-      "lexico": 0.5275,
-      "siglas_exactas": false,
-      "destino": null,
-      "veredicto": "nuevo",
-      "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.740, léxico 0.527)",
-      "ocurrencias": 1,
-      "fuentes": [
-        "caso 23:actores"
-      ],
-      "variantes": [
-        "GORE ICA, MUNICIPALIDAD DISTRITAL DE MARCONA"
-      ]
-    },
-    {
-      "crudo": "FONDEPES, PCM",
+      "crudo": "OSPAS de la zona",
       "tipo": "persona",
-      "coseno": 0.4552,
-      "lexico": 0.4375,
+      "coseno": 0.8019,
+      "lexico": 0.5946,
       "siglas_exactas": false,
       "destino": null,
       "veredicto": "nuevo",
       "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.455, léxico 0.438)",
-      "ocurrencias": 1,
+      "motivo": "sin acierto suficiente (embedding 0.802, léxico 0.595)",
+      "ocurrencias": 2,
       "fuentes": [
-        "caso 23:actores"
+        "caso 22:actores",
+        "caso 27:actores"
       ],
       "variantes": [
-        "FONDEPES, PCM"
+        "OSPAS de la zona"
       ]
     },
     {
-      "crudo": "Pescadores del DPA San Juan de Marcona, OSPA Asociación de Bolichitos de Marcona",
+      "crudo": "Municipalidad Distrital de Supe",
       "tipo": "organizacion",
-      "coseno": 0.7887,
-      "lexico": 0.52,
+      "coseno": 0.6105,
+      "lexico": 0.5316,
       "siglas_exactas": false,
       "destino": null,
       "veredicto": "nuevo",
       "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.789, léxico 0.520)",
+      "motivo": "sin acierto suficiente (embedding 0.611, léxico 0.532)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 22:actores"
+      ],
+      "variantes": [
+        "Municipalidad Distrital de Supe"
+      ]
+    },
+    {
+      "crudo": "GORE ICA",
+      "tipo": "persona",
+      "coseno": 0.6739,
+      "lexico": 0.5833,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.674, léxico 0.583)",
       "ocurrencias": 1,
       "fuentes": [
         "caso 23:actores"
       ],
       "variantes": [
-        "Pescadores del DPA San Juan de Marcona, OSPA Asociación de Bolichitos de Marcona"
+        "GORE ICA"
+      ]
+    },
+    {
+      "crudo": "MUNICIPALIDAD DISTRITAL DE MARCONA",
+      "tipo": "organizacion",
+      "coseno": 0.7561,
+      "lexico": 0.5205,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.756, léxico 0.521)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 23:actores"
+      ],
+      "variantes": [
+        "MUNICIPALIDAD DISTRITAL DE MARCONA"
+      ]
+    },
+    {
+      "crudo": "Pescadores del DPA San Juan de Marcona",
+      "tipo": "organizacion",
+      "coseno": 0.8081,
+      "lexico": 0.6067,
+      "siglas_exactas": false,
+      "destino": {
+        "id": "1a1ece0c-4d19-45c5-91fb-02eae6becbd5",
+        "tabla": "core.organizaciones",
+        "nombre": "Gremio de pescadores artesanales San Lucas de Colan",
+        "tipo": "organizacion",
+        "siglas": [
+          "GPSLC"
+        ]
+      },
+      "veredicto": "dudoso",
+      "rama": "5_embedding",
+      "motivo": "embedding 0.808 entre umbrales",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 23:actores"
+      ],
+      "variantes": [
+        "Pescadores del DPA San Juan de Marcona"
+      ]
+    },
+    {
+      "crudo": "OSPA Asociación de Bolichitos de Marcona",
+      "tipo": "organizacion",
+      "coseno": 0.6791,
+      "lexico": 0.4231,
+      "siglas_exactas": true,
+      "destino": {
+        "id": "81b8e418-6d54-40f4-bbc1-25b4b1ecf158",
+        "tabla": "core.organizaciones",
+        "nombre": "OSPA Mancora",
+        "tipo": "organizacion",
+        "siglas": [
+          "OSPA"
+        ]
+      },
+      "veredicto": "auto",
+      "rama": "1_siglas_exactas",
+      "motivo": "siglas exactas normalizadas",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 23:actores"
+      ],
+      "variantes": [
+        "OSPA Asociación de Bolichitos de Marcona"
       ]
     },
     {
@@ -2979,21 +3473,57 @@
       ]
     },
     {
-      "crudo": "Willy Vidal Gestor Social de FONDEPES 945686509 Pescadores del DPA Faro Matarani, actores portuarios, órgano de control interno, GORE Arequipa",
+      "crudo": "Willy Vidal Gestor Social de FONDEPES 945686509 Pescadores del DPA Faro Matarani",
       "tipo": "organizacion",
-      "coseno": 0.7163,
-      "lexico": 0.4914,
+      "coseno": 0.6952,
+      "lexico": 0.5116,
       "siglas_exactas": false,
       "destino": null,
       "veredicto": "nuevo",
       "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.716, léxico 0.491)",
+      "motivo": "sin acierto suficiente (embedding 0.695, léxico 0.512)",
       "ocurrencias": 1,
       "fuentes": [
         "caso 26:actores"
       ],
       "variantes": [
-        "Willy Vidal Gestor Social de FONDEPES 945686509 Pescadores del DPA Faro Matarani, actores portuarios, órgano de control interno, GORE Arequipa"
+        "Willy Vidal Gestor Social de FONDEPES 945686509 Pescadores del DPA Faro Matarani"
+      ]
+    },
+    {
+      "crudo": "actores portuarios",
+      "tipo": "persona",
+      "coseno": 0.5654,
+      "lexico": 0.5946,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.565, léxico 0.595)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 26:actores"
+      ],
+      "variantes": [
+        "actores portuarios"
+      ]
+    },
+    {
+      "crudo": "órgano de control interno",
+      "tipo": "persona",
+      "coseno": 0.424,
+      "lexico": 0.5581,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.424, léxico 0.558)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 26:actores"
+      ],
+      "variantes": [
+        "órgano de control interno"
       ]
     },
     {
@@ -3024,21 +3554,93 @@
       ]
     },
     {
-      "crudo": "Willy Vidal Gestor Social de FONDEPES 945686509, Pescadores del DPA Atico, OSPAS de la zona, GORE Arequipa, Municipalidad de Atico, OEFA-MINAM",
+      "crudo": "Willy Vidal Gestor Social de FONDEPES 945686509",
       "tipo": "organizacion",
-      "coseno": 0.7053,
-      "lexico": 0.478,
+      "coseno": 0.6157,
+      "lexico": 0.42,
       "siglas_exactas": false,
       "destino": null,
       "veredicto": "nuevo",
       "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.705, léxico 0.478)",
+      "motivo": "sin acierto suficiente (embedding 0.616, léxico 0.420)",
       "ocurrencias": 1,
       "fuentes": [
         "caso 27:actores"
       ],
       "variantes": [
-        "Willy Vidal Gestor Social de FONDEPES 945686509, Pescadores del DPA Atico, OSPAS de la zona, GORE Arequipa, Municipalidad de Atico, OEFA-MINAM"
+        "Willy Vidal Gestor Social de FONDEPES 945686509"
+      ]
+    },
+    {
+      "crudo": "Pescadores del DPA Atico",
+      "tipo": "organizacion",
+      "coseno": 0.5551,
+      "lexico": 0.2857,
+      "siglas_exactas": true,
+      "destino": {
+        "id": "af19d388-0c48-4354-8172-3d04b8bb1f18",
+        "tabla": "core.organizaciones",
+        "nombre": "APERPARH-ATICO (Asociación Propietarios de Embarcaciones Pesqueras Artesanales Extractoras de Recursos Hidrobiológicos del Puerto de Ático)",
+        "tipo": "organizacion",
+        "siglas": [
+          "APERPARH",
+          "ATICO"
+        ]
+      },
+      "veredicto": "auto",
+      "rama": "1_siglas_exactas",
+      "motivo": "siglas exactas normalizadas",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 27:actores"
+      ],
+      "variantes": [
+        "Pescadores del DPA Atico"
+      ]
+    },
+    {
+      "crudo": "Municipalidad de Atico",
+      "tipo": "organizacion",
+      "coseno": 0.4094,
+      "lexico": 0.239,
+      "siglas_exactas": true,
+      "destino": {
+        "id": "af19d388-0c48-4354-8172-3d04b8bb1f18",
+        "tabla": "core.organizaciones",
+        "nombre": "APERPARH-ATICO (Asociación Propietarios de Embarcaciones Pesqueras Artesanales Extractoras de Recursos Hidrobiológicos del Puerto de Ático)",
+        "tipo": "organizacion",
+        "siglas": [
+          "APERPARH",
+          "ATICO"
+        ]
+      },
+      "veredicto": "auto",
+      "rama": "1_siglas_exactas",
+      "motivo": "siglas exactas normalizadas",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 27:actores"
+      ],
+      "variantes": [
+        "Municipalidad de Atico"
+      ]
+    },
+    {
+      "crudo": "OEFA-MINAM",
+      "tipo": "persona",
+      "coseno": 0.5855,
+      "lexico": 0.64,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.586, léxico 0.640)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 27:actores"
+      ],
+      "variantes": [
+        "OEFA-MINAM"
       ]
     },
     {
@@ -3076,24 +3678,6 @@
       ],
       "variantes": [
         "DIREPRO Loreto"
-      ]
-    },
-    {
-      "crudo": "OSPAS, FONDEPES, MEF",
-      "tipo": "persona",
-      "coseno": 0.6714,
-      "lexico": 0.6667,
-      "siglas_exactas": false,
-      "destino": null,
-      "veredicto": "nuevo",
-      "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.671, léxico 0.667)",
-      "ocurrencias": 1,
-      "fuentes": [
-        "caso 28:actores"
-      ],
-      "variantes": [
-        "OSPAS, FONDEPES, MEF"
       ]
     },
     {
@@ -3199,21 +3783,47 @@
       ]
     },
     {
-      "crudo": "Municipalidad de Mi Perú, Municipalidad de Ventanilla",
+      "crudo": "Municipalidad de Mi Perú",
       "tipo": "organizacion",
-      "coseno": 0.7664,
-      "lexico": 0.5055,
+      "coseno": 0.8797,
+      "lexico": 0.48,
       "siglas_exactas": false,
-      "destino": null,
-      "veredicto": "nuevo",
-      "rama": "6_nuevo",
-      "motivo": "sin acierto suficiente (embedding 0.766, léxico 0.505)",
+      "destino": {
+        "id": "44",
+        "tabla": "core.cat_unidades_organicas",
+        "nombre": "INSTITUTO DEL MAR DEL PERÚ",
+        "tipo": "organizacion",
+        "siglas": [
+          "IMARPE"
+        ]
+      },
+      "veredicto": "auto",
+      "rama": "4_embedding",
+      "motivo": "embedding 0.880",
       "ocurrencias": 1,
       "fuentes": [
         "caso 31:actores"
       ],
       "variantes": [
-        "Municipalidad de Mi Perú, Municipalidad de Ventanilla"
+        "Municipalidad de Mi Perú"
+      ]
+    },
+    {
+      "crudo": "Municipalidad de Ventanilla",
+      "tipo": "organizacion",
+      "coseno": 0.664,
+      "lexico": 0.5152,
+      "siglas_exactas": false,
+      "destino": null,
+      "veredicto": "nuevo",
+      "rama": "6_nuevo",
+      "motivo": "sin acierto suficiente (embedding 0.664, léxico 0.515)",
+      "ocurrencias": 1,
+      "fuentes": [
+        "caso 31:actores"
+      ],
+      "variantes": [
+        "Municipalidad de Ventanilla"
       ]
     },
     {
@@ -3269,6 +3879,32 @@
       ],
       "variantes": [
         "DGAAMI"
+      ]
+    },
+    {
+      "crudo": "DEAM",
+      "tipo": "organizacion",
+      "coseno": 0.4844,
+      "lexico": 0.2162,
+      "siglas_exactas": true,
+      "destino": {
+        "id": "10",
+        "tabla": "core.cat_unidades_organicas",
+        "nombre": "DIRECCIÓN DE EVALUACIÓN AMBIENTAL",
+        "tipo": "organizacion",
+        "siglas": [
+          "DEAM"
+        ]
+      },
+      "veredicto": "auto",
+      "rama": "1_siglas_exactas",
+      "motivo": "siglas exactas normalizadas",
+      "ocurrencias": 2,
+      "fuentes": [
+        "caso 33:responsable"
+      ],
+      "variantes": [
+        "DEAM"
       ]
     },
     {
@@ -3400,7 +4036,7 @@
         "veredicto": "auto",
         "rama": "1_siglas_exactas",
         "motivo": "siglas exactas normalizadas",
-        "ocurrencias": 14,
+        "ocurrencias": 15,
         "fuentes": [
           "caso 1:actores",
           "caso 8:actores",
@@ -3411,63 +4047,36 @@
         ]
       },
       {
-        "crudo": "Gremio de Pescadores Artesanales de Los Órganos\n Juan Carlos Chulle\n ex presidente del gremio de pescadores \n 957 826 270",
+        "crudo": "DIPFORPA",
         "tipo": "organizacion",
-        "coseno": 0.9381,
-        "lexico": 0.7129,
-        "siglas_exactas": false,
-        "destino": {
-          "id": "ad491cec-c656-417d-b84d-200a9e65ae40",
-          "tabla": "core.organizaciones",
-          "nombre": "Asociación de Pescadores Artesanales de la Caleta Grau",
-          "tipo": "organizacion",
-          "siglas": []
-        },
-        "veredicto": "auto",
-        "rama": "4_embedding",
-        "motivo": "embedding 0.938",
-        "ocurrencias": 2,
-        "fuentes": [
-          "caso 1:actores",
-          "caso 2:actores"
-        ],
-        "variantes": [
-          "Gremio de Pescadores Artesanales de Los Órganos\n Juan Carlos Chulle\n ex presidente del gremio de pescadores \n 957 826 270"
-        ]
-      },
-      {
-        "crudo": "DGPARPA",
-        "tipo": "organizacion",
-        "coseno": 0.3788,
-        "lexico": 0.1687,
+        "coseno": 0.3343,
+        "lexico": 0.2462,
         "siglas_exactas": true,
         "destino": {
-          "id": "40",
+          "id": "24",
           "tabla": "core.cat_unidades_organicas",
-          "nombre": "DIRECCIÓN GENERAL DE POLÍTICAS Y ANÁLISIS REGULATORIO DE PESCA Y ACUICULTURA",
+          "nombre": "DIRECCIÓN DE PROMOCIÓN Y FORMALIZACIÓN PESQUERA ARTESANAL",
           "tipo": "organizacion",
           "siglas": [
-            "DGPARPA"
+            "DIPFORPA"
           ]
         },
         "veredicto": "auto",
         "rama": "1_siglas_exactas",
         "motivo": "siglas exactas normalizadas",
-        "ocurrencias": 9,
+        "ocurrencias": 1,
         "fuentes": [
-          "caso 1:responsable",
-          "caso 8:area_responsable",
-          "caso 8:responsable"
+          "caso 1:area_responsable"
         ],
         "variantes": [
-          "DGPARPA"
+          "DIPFORPA"
         ]
       },
       {
-        "crudo": "FONDEPES-DIREPRO",
+        "crudo": "FONDEPES",
         "tipo": "organizacion",
-        "coseno": 0.4651,
-        "lexico": 0.4151,
+        "coseno": 0.5863,
+        "lexico": 0.3556,
         "siglas_exactas": true,
         "destino": {
           "id": "43",
@@ -3481,12 +4090,14 @@
         "veredicto": "auto",
         "rama": "1_siglas_exactas",
         "motivo": "siglas exactas normalizadas",
-        "ocurrencias": 1,
+        "ocurrencias": 55,
         "fuentes": [
-          "caso 2:responsable"
+          "caso 2:area_responsable",
+          "caso 3:actores",
+          "caso 4:actores"
         ],
         "variantes": [
-          "FONDEPES-DIREPRO"
+          "FONDEPES"
         ]
       },
       {
@@ -3516,45 +4127,42 @@
         ]
       },
       {
-        "crudo": "PRODUCE (DVPA, DGPA, DGSFS-PA)",
+        "crudo": "Pescadores artesanales del litoral norte, centro y sur",
         "tipo": "organizacion",
-        "coseno": 0.398,
-        "lexico": 0.3175,
-        "siglas_exactas": true,
+        "coseno": 0.8754,
+        "lexico": 0.4742,
+        "siglas_exactas": false,
         "destino": {
-          "id": "66",
-          "tabla": "core.cat_unidades_organicas",
-          "nombre": "VICEMINISTERIO DE PESCA Y ACUICULTURA",
+          "id": "69c23e48-cc0b-43fc-94a9-7c61fb0b0937",
+          "tabla": "core.organizaciones",
+          "nombre": "Asociación de Pescadores Cortineros de Pisco",
           "tipo": "organizacion",
-          "siglas": [
-            "DVPA"
-          ]
+          "siglas": []
         },
         "veredicto": "auto",
-        "rama": "1_siglas_exactas",
-        "motivo": "siglas exactas normalizadas",
-        "ocurrencias": 2,
+        "rama": "4_embedding",
+        "motivo": "embedding 0.875",
+        "ocurrencias": 1,
         "fuentes": [
-          "caso 8:actores",
-          "caso 24:actores"
+          "caso 8:actores"
         ],
         "variantes": [
-          "PRODUCE (DVPA, DGPA, DGSFS-PA)"
+          "Pescadores artesanales del litoral norte, centro y sur"
         ]
       },
       {
-        "crudo": "PRODUCE (DGA, DGPA)",
+        "crudo": "SANIPES",
         "tipo": "organizacion",
-        "coseno": 0.3974,
-        "lexico": 0.3462,
+        "coseno": 0.4535,
+        "lexico": 0.1972,
         "siglas_exactas": true,
         "destino": {
-          "id": "37",
+          "id": "2",
           "tabla": "core.cat_unidades_organicas",
-          "nombre": "DIRECCIÓN GENERAL DE PESCA ARTESANAL",
+          "nombre": "AUTORIDAD NACIONAL DE SANIDAD E INOCUIDAD EN PESCA Y ACUICULTURA",
           "tipo": "organizacion",
           "siglas": [
-            "DGPA"
+            "SANIPES"
           ]
         },
         "veredicto": "auto",
@@ -3563,41 +4171,17 @@
         "ocurrencias": 2,
         "fuentes": [
           "caso 11:actores",
-          "caso 12:actores"
+          "caso None:actores"
         ],
         "variantes": [
-          "PRODUCE (DGA, DGPA)"
+          "SANIPES"
         ]
       },
       {
-        "crudo": "Asociación de Pescadores Artesanales del caserío Dos Palos",
+        "crudo": "PRODUCE (DGPCHDI, DGSFS-PA)",
         "tipo": "organizacion",
-        "coseno": 0.8881,
-        "lexico": 0.7869,
-        "siglas_exactas": false,
-        "destino": {
-          "id": "3674ca49-5ec2-4c29-9f49-8c2480ea6b9d",
-          "tabla": "core.organizaciones",
-          "nombre": "Asociación Pescadores Artesanales de la Caleta Morro Sama [dudoso]",
-          "tipo": "organizacion",
-          "siglas": []
-        },
-        "veredicto": "auto",
-        "rama": "4_embedding",
-        "motivo": "embedding 0.888",
-        "ocurrencias": 1,
-        "fuentes": [
-          "caso 13:actores"
-        ],
-        "variantes": [
-          "Asociación de Pescadores Artesanales del caserío Dos Palos"
-        ]
-      },
-      {
-        "crudo": "PRODUCE (DGPA, DGPCHDI, DPO)",
-        "tipo": "organizacion",
-        "coseno": 0.382,
-        "lexico": 0.3516,
+        "coseno": 0.292,
+        "lexico": 0.2637,
         "siglas_exactas": true,
         "destino": {
           "id": "38",
@@ -3611,27 +4195,79 @@
         "veredicto": "auto",
         "rama": "1_siglas_exactas",
         "motivo": "siglas exactas normalizadas",
+        "ocurrencias": 2,
+        "fuentes": [
+          "caso 15:actores"
+        ],
+        "variantes": [
+          "PRODUCE (DGPCHDI, DGSFS-PA)"
+        ]
+      },
+      {
+        "crudo": "Pescadores de Los Órganos (Piura)",
+        "tipo": "organizacion",
+        "coseno": 0.8947,
+        "lexico": 0.4545,
+        "siglas_exactas": false,
+        "destino": {
+          "id": "978c4ec7-60cd-45c3-a0bc-87c60f36c48e",
+          "tabla": "core.organizaciones",
+          "nombre": "As. Pescadores",
+          "tipo": "organizacion",
+          "siglas": []
+        },
+        "veredicto": "auto",
+        "rama": "4_embedding",
+        "motivo": "embedding 0.895",
         "ocurrencias": 1,
         "fuentes": [
           "caso 16:actores"
         ],
         "variantes": [
-          "PRODUCE (DGPA, DGPCHDI, DPO)"
+          "Pescadores de Los Órganos (Piura)"
         ]
       },
       {
-        "crudo": "PRODUCE (DGPA, SANIPES)",
+        "crudo": "PNDP",
         "tipo": "organizacion",
-        "coseno": 0.4592,
-        "lexico": 0.3929,
+        "coseno": 0.3946,
+        "lexico": 0.16,
         "siglas_exactas": true,
         "destino": {
-          "id": "37",
+          "id": "60",
           "tabla": "core.cat_unidades_organicas",
-          "nombre": "DIRECCIÓN GENERAL DE PESCA ARTESANAL",
+          "nombre": "PROGRAMA NACIONAL DE DIVERSIFICACIÓN PROUCTIVA",
           "tipo": "organizacion",
           "siglas": [
-            "DGPA"
+            "PNDP"
+          ]
+        },
+        "veredicto": "auto",
+        "rama": "1_siglas_exactas",
+        "motivo": "siglas exactas normalizadas",
+        "ocurrencias": 10,
+        "fuentes": [
+          "caso 19:actores",
+          "caso 19:area_responsable",
+          "caso 19:responsable"
+        ],
+        "variantes": [
+          "PNDP"
+        ]
+      },
+      {
+        "crudo": "OSPA Asociación de Bolichitos de Marcona",
+        "tipo": "organizacion",
+        "coseno": 0.6791,
+        "lexico": 0.4231,
+        "siglas_exactas": true,
+        "destino": {
+          "id": "81b8e418-6d54-40f4-bbc1-25b4b1ecf158",
+          "tabla": "core.organizaciones",
+          "nombre": "OSPA Mancora",
+          "tipo": "organizacion",
+          "siglas": [
+            "OSPA"
           ]
         },
         "veredicto": "auto",
@@ -3639,17 +4275,17 @@
         "motivo": "siglas exactas normalizadas",
         "ocurrencias": 1,
         "fuentes": [
-          "caso 17:actores"
+          "caso 23:actores"
         ],
         "variantes": [
-          "PRODUCE (DGPA, SANIPES)"
+          "OSPA Asociación de Bolichitos de Marcona"
         ]
       }
     ],
     "ids_inexistentes": [],
     "ids_inexistentes_n": 0,
     "fragiles_umbral_090": {
-      "n": 5,
+      "n": 9,
       "ejemplos": [
         {
           "crudo": "Pescadores artesanales del litoral norte, centro y sur",
@@ -3674,6 +4310,19 @@
             "siglas": []
           },
           "coseno": 0.8881,
+          "veredicto_con_0.90": "dudoso",
+          "rama_con_0.90": "5_embedding"
+        },
+        {
+          "crudo": "Gremios de pescadores artesanales de Callao",
+          "destino": {
+            "id": "c1abe465-05f9-45f7-964b-7057cac9e952",
+            "tabla": "core.organizaciones",
+            "nombre": "Asociación Regional Unión de Pescadores Artesanales y Conexos del Callao",
+            "tipo": "organizacion",
+            "siglas": []
+          },
+          "coseno": 0.8766,
           "veredicto_con_0.90": "dudoso",
           "rama_con_0.90": "5_embedding"
         },
@@ -3704,6 +4353,32 @@
           "rama_con_0.90": "5_embedding"
         },
         {
+          "crudo": "Sindicato de Pescadores Artesanales del Puerto de Huacho",
+          "destino": {
+            "id": "d995a105-d967-4834-8bd7-c479ae619a15",
+            "tabla": "core.organizaciones",
+            "nombre": "Asociación Unificada de Pescadores Artesanales de la Provincia de Sechura",
+            "tipo": "organizacion",
+            "siglas": []
+          },
+          "coseno": 0.8819,
+          "veredicto_con_0.90": "dudoso",
+          "rama_con_0.90": "5_embedding"
+        },
+        {
+          "crudo": "Asociación de Pescadores Artesanales del Puerto de Huacho",
+          "destino": {
+            "id": "d995a105-d967-4834-8bd7-c479ae619a15",
+            "tabla": "core.organizaciones",
+            "nombre": "Asociación Unificada de Pescadores Artesanales de la Provincia de Sechura",
+            "tipo": "organizacion",
+            "siglas": []
+          },
+          "coseno": 0.8841,
+          "veredicto_con_0.90": "dudoso",
+          "rama_con_0.90": "5_embedding"
+        },
+        {
           "crudo": "Pescadores artesanales con EP de cerco y artes pasivas del sur",
           "destino": {
             "id": "ad491cec-c656-417d-b84d-200a9e65ae40",
@@ -3715,11 +4390,26 @@
           "coseno": 0.8893,
           "veredicto_con_0.90": "dudoso",
           "rama_con_0.90": "5_embedding"
+        },
+        {
+          "crudo": "Municipalidad de Mi Perú",
+          "destino": {
+            "id": "44",
+            "tabla": "core.cat_unidades_organicas",
+            "nombre": "INSTITUTO DEL MAR DEL PERÚ",
+            "tipo": "organizacion",
+            "siglas": [
+              "IMARPE"
+            ]
+          },
+          "coseno": 0.8797,
+          "veredicto_con_0.90": "dudoso",
+          "rama_con_0.90": "5_embedding"
         }
       ]
     },
     "descartes_por_tipo": {
-      "n": 2,
+      "n": 3,
       "ejemplos": [
         {
           "crudo": "GORE La Libertad",
@@ -3732,6 +4422,19 @@
             "siglas": []
           },
           "coseno": 0.8948,
+          "motivo": "tipo incompatible"
+        },
+        {
+          "crudo": "Petro Perú",
+          "tipo_crudo": "persona",
+          "descartado": {
+            "id": "25edc73b-f1ed-4ed8-97ea-aa3e805c0be8",
+            "tabla": "core.organizaciones",
+            "nombre": "Elamar Perú",
+            "tipo": "organizacion",
+            "siglas": []
+          },
+          "coseno": 0.8829,
           "motivo": "tipo incompatible"
         },
         {
