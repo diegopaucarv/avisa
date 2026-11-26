@@ -481,7 +481,7 @@ export class CasoPanelComponent {
     typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null);
 
   constructor() {
-    afterNextRender(() => this.panel()?.nativeElement.focus());
+    afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
     // El panel sólo se cierra con Cancelar o Guardar: Escape no lo descarta.
     this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());

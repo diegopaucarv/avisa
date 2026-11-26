@@ -1,0 +1,63 @@
+{
+  "caso_ids": 33,
+  "demandas": 215,
+  "compromisos": 8,
+  "hitos": 12,
+  "total_bloqueantes": 481,
+  "detalle": [
+    {
+      "hijo": "core.cronologia_vinculos",
+      "columna": "alerta_id",
+      "padre": "core.alertas_tempranas",
+      "accion": "a",
+      "nullable": "YES",
+      "filas": 3,
+      "constraint": "cronologia_vinculos_alerta_id_fkey"
+    },
+    {
+      "hijo": "core.demandas",
+      "columna": "alerta_id",
+      "padre": "core.alertas_tempranas",
+      "accion": "a",
+      "nullable": "YES",
+      "filas": 133,
+      "constraint": "demandas_alerta_id_fkey"
+    },
+    {
+      "hijo": "core.documentos",
+      "columna": "caso_id",
+      "padre": "core.casos",
+      "accion": "a",
+      "nullable": "YES",
+      "filas": 78,
+      "constraint": "documentos_caso_id_fkey"
+    },
+    {
+      "hijo": "core.mapa_matriz_excel",
+      "columna": "caso_id",
+      "padre": "core.casos",
+      "accion": "r",
+      "nullable": "NO",
+      "filas": 34,
+      "constraint": "mapa_matriz_excel_caso_id_fkey"
+    },
+    {
+      "hijo": "core.proceso_instancia",
+      "columna": "alerta_id",
+      "padre": "core.alertas_tempranas",
+      "accion": "a",
+      "nullable": "YES",
+      "filas": 83,
+      "constraint": "proceso_instancia_alerta_id_fkey"
+    },
+    {
+      "hijo": "kag.aristas",
+      "columna": "caso_id",
+      "padre": "core.casos",
+      "accion": "a",
+      "nullable": "YES",
+      "filas": 150,
+      "constraint": "aristas_caso_id_fkey"
+    }
+  ]
+}

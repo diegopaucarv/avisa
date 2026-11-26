@@ -293,7 +293,7 @@ export class SugerenciaFormComponent {
   );
 
   constructor() {
-    afterNextRender(() => this.panel()?.nativeElement.focus());
+    afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
     // El formulario se rellena cuando cambia la sugerencia de entrada (alta o
     // edición). No se lee `formulario()` aquí para no reabrir el ciclo.

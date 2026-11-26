@@ -689,7 +689,7 @@ export class CompromisoPanelComponent {
   });
 
   constructor() {
-    afterNextRender(() => this.panel()?.nativeElement.focus());
+    afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
     // Al cambiar de compromiso se cierran los paneles de adjuntos por hito y se
     // limpia el borrador de evento; el recurso de historial ya se refresca por

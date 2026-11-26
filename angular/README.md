@@ -38,11 +38,25 @@ This will compile your project and store the build artifacts in the `dist/` dire
 
 ## Running unit tests
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Los specs corren con el runner [Vitest](https://vitest.dev/) que trae `@angular/build:unit-test`
+(entorno Node + `jsdom`, sin navegador). La configuración está explícita en
+`angular.json` → `test.options`.
 
 ```bash
-ng test
+npm test          # ng test, en modo vigilancia
+npm run test:ci   # una pasada, sin watch (CI)
 ```
+
+Para correr un solo archivo:
+
+```bash
+ng test --watch=false --include='src/app/features/importacion/**'
+```
+
+Convención: la lógica que se puede probar sin Angular (mapeos, parsers,
+validadores, formatos) va en funciones puras y se prueba directamente, sin
+`TestBed`. Los pocos specs que importan APIs de Angular necesitan este runner:
+vistar `npx vitest` a secas no resuelve los puntos de entrada del framework.
 
 ## Running end-to-end tests
 

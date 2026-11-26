@@ -1,0 +1,206 @@
+[
+  {
+    "caso_id": "25c62486-8629-4763-81d5-94d3e49851c8",
+    "codigo_excel": "CS-PA-REG-2024-01",
+    "bloque_fila": 3,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "b52f1a9c-7cee-4685-bf12-34e1c6fd39f9",
+    "codigo_excel": "CS-PA-INF-2025-02",
+    "bloque_fila": 16,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "4b23bf41-a361-445d-ba58-5a713524428a",
+    "codigo_excel": "CS-PA-REG-2025-04",
+    "bloque_fila": 21,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "781a2eab-79b3-4b60-85a8-9598ec25a81f",
+    "codigo_excel": "CS-PA-INF-2025-05",
+    "bloque_fila": 22,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "1ddf5690-f24f-47e0-9c3a-e7990ef956bd",
+    "codigo_excel": "CS-PA-REG-2020-06",
+    "bloque_fila": 25,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "21b43ede-6348-4330-baa4-a1166c00e1f0",
+    "codigo_excel": "CS-PA-REG-2025-07",
+    "bloque_fila": 27,
+    "confianza": "media"
+  },
+  {
+    "caso_id": "9373ad12-ded1-4484-b33f-05228422f24d",
+    "codigo_excel": "CS-PA-REG-2024-08",
+    "bloque_fila": 31,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "1662b8ea-7ee9-445d-95cc-0ad57dc394d0",
+    "codigo_excel": "CS-PA-REG-2026-09",
+    "bloque_fila": 37,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "88431141-f918-4f78-9775-11555aef32ec",
+    "codigo_excel": "CS-PA-REG-2025-10",
+    "bloque_fila": 38,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "654f5056-022b-4316-93c8-083d3d562ed9",
+    "codigo_excel": "CS-PA-REG-2021-11",
+    "bloque_fila": 39,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "faf74217-945e-425d-9dc8-6691985edbd1",
+    "codigo_excel": "CS-PA-SOC-2016-12",
+    "bloque_fila": 42,
+    "confianza": "media"
+  },
+  {
+    "caso_id": "492b5f31-233f-410d-9b52-3e8365144fd0",
+    "codigo_excel": "CS-PA-SOC-2023-14",
+    "bloque_fila": 47,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "75f1de99-b8fa-49f5-bf48-3330c444993f",
+    "codigo_excel": "CS-PA-REG-2022-15",
+    "bloque_fila": 48,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "34cea09c-6fdf-4da2-8732-1f40ed51fa26",
+    "codigo_excel": "CS-PA-REG-2019-17",
+    "bloque_fila": 50,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "6e53ff24-4513-4469-b469-008c945ec7a7",
+    "codigo_excel": "CS-PA-INF-2023-18",
+    "bloque_fila": 54,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "86040c3a-e81e-46ba-a564-f5d7e351c78c",
+    "codigo_excel": "CS-PA-SOC-2022-19",
+    "bloque_fila": 60,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "7c81ab23-62f4-4799-9cd1-9d3cabe2ef0d",
+    "codigo_excel": "CS-MI-REG-2019-20",
+    "bloque_fila": 64,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "d6971147-329e-46ad-9c20-144924e41593",
+    "codigo_excel": "CS-MI-REG-2019-21",
+    "bloque_fila": 74,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "8676ce35-2456-4754-b37b-01ab44427886",
+    "codigo_excel": "CS-MI-REG-2020-22",
+    "bloque_fila": 79,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "e81d2df8-bcd0-4efa-8b3c-416b168f7598",
+    "codigo_excel": "CS-PA-REG-2019-23",
+    "bloque_fila": 85,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "29e86bcf-e3ed-4657-99ea-2be454aaa611",
+    "codigo_excel": "CS-PA-REG-2019-24",
+    "bloque_fila": 88,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "7d30cb36-46aa-4b78-90ac-0ac79b013f9e",
+    "codigo_excel": "CS-PA-REG-2019-25",
+    "bloque_fila": 93,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "1c498c8a-ee79-48c6-9f9e-e4475e6f8c2e",
+    "codigo_excel": "CS-PA-INF-2017-26",
+    "bloque_fila": 95,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "bd4ff4cb-7151-4dfa-9024-2984359f3625",
+    "codigo_excel": "CS-PA-SOC-2019-27",
+    "bloque_fila": 100,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "710f2bb1-374b-4603-869d-dd65f225e930",
+    "codigo_excel": "CS-PA-SOC-2019-28",
+    "bloque_fila": 106,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "43629500-8c6d-4521-b448-84636150067c",
+    "codigo_excel": "CS-PA-INF-2017-29",
+    "bloque_fila": 110,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "0abe46a6-1402-4f38-8e0a-6e25ed5437a7",
+    "codigo_excel": "CS-MI-REG-2025-30",
+    "bloque_fila": 113,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "0875694e-68e8-4bb2-a972-dd101e3543cc",
+    "codigo_excel": "CS-PA-REG-2020-31",
+    "bloque_fila": 114,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "5230ec2a-debf-4dab-a856-a3a0e0a9281d",
+    "codigo_excel": null,
+    "bloque_fila": 118,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "3e04445f-cde6-4f6a-a353-7219079d0f46",
+    "codigo_excel": null,
+    "bloque_fila": 122,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "2d2b362d-b10d-4617-a9d5-99fd756cd558",
+    "codigo_excel": null,
+    "bloque_fila": 124,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "1156293b-8158-42f8-b804-5c607cf6527e",
+    "codigo_excel": null,
+    "bloque_fila": 127,
+    "confianza": "alta"
+  },
+  {
+    "caso_id": "75f1de99-b8fa-49f5-bf48-3330c444993f",
+    "codigo_excel": null,
+    "bloque_fila": 128,
+    "confianza": "media"
+  },
+  {
+    "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd",
+    "codigo_excel": null,
+    "bloque_fila": 132,
+    "confianza": "alta"
+  }
+]

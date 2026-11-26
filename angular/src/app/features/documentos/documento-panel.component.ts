@@ -814,7 +814,7 @@ export class DocumentoPanelComponent {
   private idAnterior: string | null = null;
 
   constructor() {
-    afterNextRender(() => this.panel()?.nativeElement.focus());
+    afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
     if (typeof document !== 'undefined') {
       // Escape cierra el panel aunque el foco se haya ido a un bloque de texto.

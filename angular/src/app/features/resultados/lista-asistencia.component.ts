@@ -1166,7 +1166,7 @@ export class ListaAsistenciaComponent {
 
   constructor() {
     this.cargarReuniones('');
-    afterNextRender(() => this.dialogo()?.nativeElement.focus());
+    afterNextRender(() => this.dialogo()?.nativeElement.focus({ preventScroll: true }));
 
     this.destruir.onDestroy(() => {
       if (this.timerReunion) clearTimeout(this.timerReunion);

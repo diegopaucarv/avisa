@@ -30,6 +30,7 @@ import {
   errorDeRuc,
   errorDeTelefono,
   TIPOS_ACTOR,
+  TIPO_ACTOR_PUBLICO,
   type ActorDirectorio,
   type CatalogosDirectorio,
 } from './directorio.mapeo';
@@ -330,6 +331,16 @@ export class ActorPanelAltaComponent {
 
   readonly esOrganizacion = computed(() => this.naturaleza() === 'organizacion');
 
+  /**
+   * Rótulo de la cabecera. «Institución» es la palabra de la interfaz para una
+   * organización con tipo «Actor público» (ver `TIPOS_ACTOR`): no es otra
+   * naturaleza ni otra ficha.
+   */
+  readonly tituloAlta = computed(() => {
+    if (!this.esOrganizacion()) return 'Nuevo actor';
+    return this.tipo() === TIPO_ACTOR_PUBLICO ? 'Nueva institución' : 'Nueva organización';
+  });
+
   readonly nivelesGobierno = NIVELES_GOBIERNO;
   readonly tiposActor = TIPOS_ACTOR;
 
@@ -370,7 +381,7 @@ export class ActorPanelAltaComponent {
       if (nivel) this.nivelGobierno.set(nivel);
     });
 
-    afterNextRender(() => this.modal()?.nativeElement.focus());
+    afterNextRender(() => this.modal()?.nativeElement.focus({ preventScroll: true }));
 
     this.destruccion.onDestroy(() => {
       clearTimeout(this.temporizadorDuplicados);

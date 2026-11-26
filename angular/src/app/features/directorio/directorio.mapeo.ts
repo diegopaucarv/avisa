@@ -27,7 +27,16 @@ import { formatearFechaCompacta } from '../../shared/formato-fecha';
 /** `core.cat_tipos_actor.nombre`. Los tres valores del catálogo, congelados. */
 export const TIPO_ACTOR_PUBLICO = 'Actor público';
 
-export const TIPOS_ACTOR = ['Actor público', 'Actor social', 'Actor privado'] as const;
+/**
+ * Vocabulario del directorio, en un solo sitio.
+ *
+ * - **Organización**: `core.actores` con naturaleza `organizacion`.
+ * - **Institución**: una organización con tipo `Actor público`. No es una
+ *   entidad, una tabla ni una página distinta: es la misma ficha con ese tipo
+ *   y su nivel de gobierno (Nacional/Regional/Local). El menú «Nuevo» y el
+ *   importador ofrecen «Institución» como atajo a esa combinación.
+ */
+export const TIPOS_ACTOR = [TIPO_ACTOR_PUBLICO, 'Actor social', 'Actor privado'] as const;
 
 /** `core.cat_roles_actor.nombre` según la Guía §7.4.2. */
 export const FUNCIONES_ACTOR = [

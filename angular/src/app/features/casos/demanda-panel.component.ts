@@ -222,7 +222,7 @@ export class DemandaPanelComponent {
     typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null);
 
   constructor() {
-    afterNextRender(() => this.panel()?.nativeElement.focus());
+    afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
     // El panel sólo se cierra con Cancelar o Registrar: Escape no lo descarta.
     this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());

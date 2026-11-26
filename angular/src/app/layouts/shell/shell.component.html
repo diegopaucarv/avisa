@@ -369,8 +369,7 @@
   @if (altaActor(); as naturaleza) {
     <app-actor-panel-alta
       naturalezaInicial="organizacion"
-      [tipoInicial]="naturaleza === 'institucion' ? 'Actor público' : ''"
-      [nivelGobiernoInicial]="naturaleza === 'institucion' ? 'Nacional' : ''"
+      [tipoInicial]="naturaleza === 'institucion' ? tipoActorPublico : ''"
       (cerrar)="altaActor.set(null)"
       (creado)="alCrearActorDesdeShell()"
     />

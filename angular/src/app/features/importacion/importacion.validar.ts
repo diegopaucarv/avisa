@@ -14,6 +14,7 @@
 
 import { limpiarCelda, normalizarEncabezado, type TablaLeida } from './importacion.csv';
 import type { TipoImportacion, TipoImportacionId } from './importacion.tipos';
+import { TIPO_ACTOR_PUBLICO } from '../directorio/directorio.mapeo';
 
 export const LIMITE_FILAS = 400;
 
@@ -68,9 +69,10 @@ function fechaValida(anio: number, mes: number, dia: number): string | null {
     fecha.getUTCMonth() === mes - 1 &&
     fecha.getUTCDate() === dia;
   if (!real) return null;
-  return `${String(anio).padStart(4, '0')}-${String(mes).padStart(2, '0')}-${String(
-    dia,
-  ).padStart(2, '0')}`;
+  return `${String(anio).padStart(4, '0')}-${String(mes).padStart(2, '0')}-${String(dia).padStart(
+    2,
+    '0',
+  )}`;
 }
 
 const NIVELES_GOBIERNO: Record<string, string> = {
@@ -343,8 +345,7 @@ function filaDeActor(
     naturaleza: esPersona ? 'persona' : 'organizacion',
     nombre,
     cargo: valores['cargo'] || undefined,
-    tipo:
-      tipo === 'actores-instituciones' ? 'Actor público' : valores['tipo'] || undefined,
+    tipo: tipo === 'actores-instituciones' ? TIPO_ACTOR_PUBLICO : valores['tipo'] || undefined,
     funcion: valores['funcion'] || undefined,
     posicionamiento: valores['posicionamiento'] || undefined,
     region: valores['region'] || undefined,

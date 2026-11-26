@@ -235,7 +235,7 @@ export class CasoVistaPreviaComponent {
   constructor() {
     afterNextRender(() => {
       this.focoPrevio = document.activeElement as HTMLElement | null;
-      this.panel()?.nativeElement.focus();
+      this.panel()?.nativeElement.focus({ preventScroll: true });
     });
 
     this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());

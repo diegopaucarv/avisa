@@ -192,7 +192,7 @@ export class AlertaModificacionComponent {
   readonly valido = computed(() => this.motivo().trim().length > 0);
 
   constructor() {
-    afterNextRender(() => this.dialogo()?.nativeElement.focus());
+    afterNextRender(() => this.dialogo()?.nativeElement.focus({ preventScroll: true }));
   }
 
   campo(evento: Event): void {

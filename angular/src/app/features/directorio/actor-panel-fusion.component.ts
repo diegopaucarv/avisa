@@ -344,7 +344,7 @@ export class ActorPanelFusionComponent {
     typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null);
 
   constructor() {
-    afterNextRender(() => this.modal()?.nativeElement.focus());
+    afterNextRender(() => this.modal()?.nativeElement.focus({ preventScroll: true }));
 
     const alEscape = (evento: KeyboardEvent): void => {
       if (evento.key !== 'Escape') return;

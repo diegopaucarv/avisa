@@ -3208,15 +3208,22 @@ textarea {
 }
 
 /* ── Menú lateral como riel desplegable (2026-11-24) ────────────────────────
-   En escritorio el menú es una franja de íconos que se despliega al pasar el
-   puntero (y al entrar con el teclado). No hay botón de colapso: el estado lo
-   decide el puntero, así que tampoco se guarda en localStorage.
+   En escritorio el menú es una franja de 68 px con sólo íconos. No hay botón
+   de colapso: el estado lo decide el puntero, así que tampoco se guarda en
+   localStorage.
+
+   El despliegue espera **2 segundos**: sin esa espera el riel se abría por
+   accidente al cruzar la franja de camino a otra parte de la pantalla. Al
+   salir del menú se contrae al instante (el retardo sólo se declara en el
+   estado `:hover`, y la transición de vuelta usa la regla base). Con el
+   teclado no se espera: `:focus-within` despliega en el acto, porque los
+   rótulos hacen falta para navegar.
 
    El panel se pinta con `position: fixed` —igual que el cajón móvil— para
-   superponerse al contenido en vez de re-maquetarlo en cada entrada y salida
-   del puntero; el hueco de la franja lo reserva `.avisa-main` con un margen.
-   Dentro no se oculta nada: el recorte lo hace el `overflow: hidden` del
-   aside, de modo que al ensancharse el texto aparece sin saltos de altura.
+   superponerse al contenido en vez de re-maquetarlo cada vez que se despliega;
+   el hueco de la franja lo reserva `.avisa-main` con un margen. Los rótulos se
+   apagan con `opacity` (no con `display: none`) para que sigan ocupando su
+   sitio: así desplegar no cambia la altura ni la posición de los íconos.
 
    Sólo se aplica a dispositivos con puntero fino: en táctil no existe hover y
    el menú quedaría inutilizable. Allí se mantiene desplegado (o el cajón, por
@@ -3236,23 +3243,57 @@ textarea {
       box-shadow 0.16s ease;
   }
 
-  .avisa-sidebar:hover,
+  .avisa-sidebar:hover {
+    width: 246px;
+    box-shadow: 10px 0 25px #122b4014;
+    /* El retardo vive aquí, no en la regla base: al salir se contrae ya. */
+    transition-delay: 2s;
+  }
+
   .avisa-sidebar:focus-within {
     width: 246px;
     box-shadow: 10px 0 25px #122b4014;
+    transition-delay: 0s;
   }
 
   .avisa-main {
     margin-left: 68px;
   }
 
-  /* Sin envolver: en la franja, cada rótulo se recorta en vez de partirse. */
+  /*
+   * En la franja sólo se ven los íconos. Los rótulos se apagan con `opacity` y
+   * no con `display: none` porque el `overflow: hidden` del aside recorta en el
+   * borde del relleno: a 68 px se asomaban las primeras letras. Con `opacity`
+   * dejan de pintarse pero conservan su sitio, así que desplegar no cambia la
+   * altura ni la posición de los íconos. `nowrap` evita que se partan.
+   */
   .sidebar-label,
   .side-nav span,
   .sidebar-version,
   .sidebar-context strong,
   .sidebar-context small {
     white-space: nowrap;
+    opacity: 0;
+  }
+
+  .avisa-sidebar:hover .sidebar-label,
+  .avisa-sidebar:hover .side-nav span,
+  .avisa-sidebar:hover .sidebar-version,
+  .avisa-sidebar:hover .sidebar-context strong,
+  .avisa-sidebar:hover .sidebar-context small {
+    opacity: 1;
+    /* Aparecen cuando el panel ya terminó de ensancharse: 2 s de espera + 0,16 s. */
+    transition-delay: 2.16s;
+  }
+
+  /* Con el teclado no hay espera: el foco despliega y muestra rótulos ya. */
+  .avisa-sidebar:focus-within .sidebar-label,
+  .avisa-sidebar:focus-within .side-nav span,
+  .avisa-sidebar:focus-within .sidebar-version,
+  .avisa-sidebar:focus-within .sidebar-context strong,
+  .avisa-sidebar:focus-within .sidebar-context small {
+    opacity: 1;
+    transition-delay: 0s;
   }
 }
 
@@ -3829,7 +3870,13 @@ textarea {
   inset: 0;
   display: flex;
   justify-content: flex-end;
-  overflow: hidden;
+  /*
+   * `clip` y no `hidden`: oculto no crea contenedor de scroll, así que el
+   * `focus()` del panel recién montado no puede desplazarlo por dentro (con
+   * `hidden` el navegador hacía `scrollLeft` para “revelar” el panel enfocado y
+   * eso peleaba con la animación de entrada).
+   */
+  overflow: clip;
 }
 .drawer {
   width: min(600px, 100%);
@@ -3840,7 +3887,6 @@ textarea {
   border-left: 1px solid #e2e8ee;
   box-shadow: -22px 0 48px rgba(17, 32, 45, 0.18);
 }
-
 /* ── Movimiento unificado de modales ─────────────────────────────────────────
  *
  * Las siete familias de modal comparten duración, curva y propiedades:
@@ -3851,8 +3897,7 @@ textarea {
  * al panel en bloque contenedor de sus descendientes `position: fixed` y estorba
  * al gesto de arrastre (que escribe `translate` en línea).
  *
- * La salida sigue siendo instantánea: desmontar con animación exige retrasar el
- * `@if` de cada contenedor y no se hace aquí.
+ * La salida espera en el componente (`shared/ui/modal-salida.ts`), no aquí.
  */
 .drawer-scrim,
 .casos-drawer-scrim {
@@ -3874,22 +3919,32 @@ textarea {
   animation: modal-scrim-entra var(--modal-duracion-scrim) linear backwards;
 }
 
-.drawer {
-  animation: modal-panel-derecha var(--modal-duracion) var(--modal-curva) backwards;
+.drawer-scrim,
+.modal-scrim,
+.casos-drawer-scrim,
+.fusion-scrim,
+.alta-scrim {
+  /* Ninguno debe poder desplazarse por dentro: ver `.drawer-scrim`. */
+  overflow: clip;
 }
-.casos-drawer {
-  animation: modal-panel-izquierda var(--modal-duracion) var(--modal-curva) backwards;
+/* La lista de asistencia sí necesita scroll vertical (diálogos altos). */
+.la-scrim {
+  overflow-x: clip;
+  overflow-y: auto;
 }
+
+.drawer,
+.casos-drawer,
 .modal,
 .la,
 .fusion-modal,
 .alta-modal {
-  animation: modal-panel-centro var(--modal-duracion) var(--modal-curva) backwards;
+  animation: modal-panel-entra var(--modal-duracion) var(--modal-curva) backwards;
 }
 
 /* Diálogo nativo: no lo monta Angular, así que se anima con `[open]`. */
 dialog.padron-dialogo[open] {
-  animation: modal-panel-centro var(--modal-duracion) var(--modal-curva) backwards;
+  animation: modal-panel-entra var(--modal-duracion) var(--modal-curva) backwards;
 }
 dialog.padron-dialogo[open]::backdrop {
   animation: modal-scrim-entra var(--modal-duracion-scrim) linear backwards;
@@ -3900,20 +3955,23 @@ dialog.padron-dialogo[open]::backdrop {
     opacity: 0;
   }
 }
-@keyframes modal-panel-derecha {
+/*
+ * Una sola entrada para todos los modales: barrido de derecha a izquierda con
+ * una distancia **fija respecto de la ventana**, no respecto del ancho del panel.
+ *
+ * `calc(50vw + 50%)` es la distancia exacta que deja el panel justo fuera del
+ * borde derecho en los dos casos:
+ *
+ *   · panel pegado a la derecha → su borde izquierdo queda en `1,5W - 0,5w`;
+ *   · panel centrado → su borde izquierdo queda exactamente en `W`.
+ *
+ * Así todos recorren ~medio ancho de ventana en los mismos 180 ms: la velocidad
+ * deja de depender de si el panel mide 380 o 620 px, y ningún modal arranca a la
+ * vista (con `translate3d(100%)` los centrados sí lo hacían).
+ */
+@keyframes modal-panel-entra {
   from {
-    transform: translate3d(100%, 0, 0);
-  }
-}
-@keyframes modal-panel-izquierda {
-  from {
-    transform: translate3d(-100%, 0, 0);
-  }
-}
-@keyframes modal-panel-centro {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 6px, 0) scale(0.98);
+    transform: translate3d(calc(50vw + 50%), 0, 0);
   }
 }
 
@@ -3932,17 +3990,13 @@ dialog.padron-dialogo[open]::backdrop {
   pointer-events: none;
   animation: modal-scrim-sale var(--modal-salida) linear forwards;
 }
-.drawer.is-cerrando {
-  animation: modal-panel-derecha-sale var(--modal-salida) var(--modal-curva-salida) forwards;
-}
-.casos-drawer.is-cerrando {
-  animation: modal-panel-izquierda-sale var(--modal-salida) var(--modal-curva-salida) forwards;
-}
+.drawer.is-cerrando,
+.casos-drawer.is-cerrando,
 .modal.is-cerrando,
 .la.is-cerrando,
 .fusion-modal.is-cerrando,
 .alta-modal.is-cerrando {
-  animation: modal-panel-centro-sale var(--modal-salida) var(--modal-curva-salida) forwards;
+  animation: modal-panel-sale var(--modal-salida) var(--modal-curva-salida) forwards;
 }
 
 @keyframes modal-scrim-sale {
@@ -3950,20 +4004,14 @@ dialog.padron-dialogo[open]::backdrop {
     opacity: 0;
   }
 }
-@keyframes modal-panel-derecha-sale {
+@keyframes modal-panel-sale {
   to {
-    transform: translate3d(100%, 0, 0);
-  }
-}
-@keyframes modal-panel-izquierda-sale {
-  to {
-    transform: translate3d(-100%, 0, 0);
-  }
-}
-@keyframes modal-panel-centro-sale {
-  to {
-    opacity: 0;
-    transform: translate3d(0, 6px, 0) scale(0.98);
+    /*
+     * La misma distancia que la entrada: el panel queda completamente fuera del
+     * borde derecho antes de desmontarse, así que no “corta” a mitad de camino
+     * ni en los paneles anchos ni en los centrados.
+     */
+    transform: translate3d(calc(50vw + 50%), 0, 0);
   }
 }
 

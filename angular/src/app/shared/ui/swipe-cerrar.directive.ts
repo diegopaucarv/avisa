@@ -45,7 +45,8 @@ export class SwipeCerrarDirective {
     if (!scrim || !panel || scrim.getAttribute('aria-hidden') === 'true') return;
 
     this.gesture = {
-      axis: panel.matches('.modal, .la, .fusion-modal, .alta-modal') ? 'y' : 'x',
+      // Todos los modales entran con barrido horizontal: el arrastre también.
+      axis: 'x',
       panel,
       scrim,
       pointerId: event.pointerId,

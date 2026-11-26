@@ -173,8 +173,11 @@ export const routes: Routes = [
           import('./features/directorio/organizaciones.page').then((m) => m.OrganizacionesPage),
       },
       {
-        // Alias heredado: el directorio de organizaciones absorbió a las
-        // antiguas «instituciones» (vocabulario que ya no se usa en la UI).
+        // Alias heredado. «Institución» ya no es una entidad aparte ni tiene
+        // tabla propia: es una **organización con tipo «Actor público»** (ver
+        // `TIPO_ACTOR_PUBLICO` en directorio.mapeo). La ruta se conserva para no
+        // romper enlaces antiguos y lleva al directorio de organizaciones, que
+        // es donde se filtran por tipo.
         path: 'directorio/instituciones',
         redirectTo: '/directorio/organizaciones',
         pathMatch: 'full',

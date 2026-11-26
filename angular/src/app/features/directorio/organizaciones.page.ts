@@ -500,7 +500,7 @@ export class OrganizacionesPage {
     }
 
     this.seleccionado.set(organizacion);
-    afterNextRender(() => this.panel()?.nativeElement.focus(), {
+    afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }), {
       injector: this.injector,
     });
   }

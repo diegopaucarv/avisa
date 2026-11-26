@@ -603,12 +603,16 @@ function compararInicio(a: string | null, b: string | null): number {
     }
 
     /* Cajón «Ver casos» (item 109): entra de izquierda a derecha. */
+    /*
+     * Cajón «Ver casos»: entra desde el borde derecho como el resto de modales
+     * (antes venía de la izquierda y era el único que iba al revés).
+     */
     .casos-drawer-scrim {
       position: fixed;
       inset: 0;
       display: flex;
-      justify-content: flex-start;
-      overflow: hidden;
+      justify-content: flex-end;
+      overflow: clip;
     }
 
     .casos-drawer {
@@ -616,9 +620,9 @@ function compararInicio(a: string | null, b: string | null): number {
       flex-direction: column;
       width: min(52%, 620px);
       height: 100%;
-      border-right: 1px solid #dbe3ea;
+      border-left: 1px solid #dbe3ea;
       background: #fff;
-      box-shadow: 18px 0 44px rgba(17, 32, 45, 0.2);
+      box-shadow: -18px 0 44px rgba(17, 32, 45, 0.2);
       outline: none;
     }
 

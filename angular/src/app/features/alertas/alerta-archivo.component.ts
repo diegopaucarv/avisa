@@ -190,7 +190,7 @@ export class AlertaArchivoComponent {
   readonly valido = computed(() => !this.esArchivar() || this.longitud() >= MINIMO_MOTIVO);
 
   constructor() {
-    afterNextRender(() => this.dialogo()?.nativeElement.focus());
+    afterNextRender(() => this.dialogo()?.nativeElement.focus({ preventScroll: true }));
 
     const alEscape = (evento: KeyboardEvent): void => {
       if (evento.key !== 'Escape') return;

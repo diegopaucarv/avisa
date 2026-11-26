@@ -741,7 +741,7 @@ export class LocalesPage {
     }
 
     this.seleccionado.set(local);
-    afterNextRender(() => this.panel()?.nativeElement.focus(), {
+    afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }), {
       injector: this.injector,
     });
   }
@@ -821,7 +821,7 @@ export class LocalesPage {
     this.avisoCopia.set(null);
     this.mensajeWhatsapp.set(this.mensajeDeWhatsapp(local));
     this.whatsappLocal.set(local);
-    afterNextRender(() => this.whatsappDialogo()?.nativeElement.focus(), {
+    afterNextRender(() => this.whatsappDialogo()?.nativeElement.focus({ preventScroll: true }), {
       injector: this.injector,
     });
   }

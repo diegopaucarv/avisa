@@ -571,7 +571,7 @@ export class AlertaPanelComponent {
   private turnoActor = 0;
 
   constructor() {
-    afterNextRender(() => this.panel()?.nativeElement.focus());
+    afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
     this.destruccion.onDestroy(() => {
       this.focoPrevio?.focus?.();

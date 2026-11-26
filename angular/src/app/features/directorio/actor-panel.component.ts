@@ -633,7 +633,7 @@ export class ActorPanelComponent {
   private edicionForzadaAplicada = false;
 
   constructor() {
-    afterNextRender(() => this.panel()?.nativeElement.focus());
+    afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
     // Al cambiar de fila se descarta cualquier PII del actor anterior: la ficha
     // no debe arrastrar datos de una selección previa.

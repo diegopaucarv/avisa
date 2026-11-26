@@ -190,7 +190,7 @@ export class AlertaWhatsappComponent {
   );
 
   constructor() {
-    afterNextRender(() => this.dialogo()?.nativeElement.focus());
+    afterNextRender(() => this.dialogo()?.nativeElement.focus({ preventScroll: true }));
 
     // Sólo se resiembra cuando el mensaje de entrada cambia de verdad: el
     // cuerpo es de sólo lectura y la confirmación de copia caduca con el texto.

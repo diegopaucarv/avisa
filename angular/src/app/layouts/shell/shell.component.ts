@@ -22,6 +22,7 @@ import { NotificacionesService } from '../../core/http/notificaciones.service';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { ALCANCES } from '../../dominio/mapeo';
 import { ActorPanelAltaComponent } from '../../features/directorio/actor-panel-alta.component';
+import { TIPO_ACTOR_PUBLICO } from '../../features/directorio/directorio.mapeo';
 import { ImportacionService } from '../../features/importacion/importacion.service';
 import { ImportarPanelComponent } from '../../features/importacion/importar-panel.component';
 import {
@@ -602,6 +603,9 @@ export class ShellComponent {
   /** Servicio de importación; el panel lee su estado, el shell sólo lo abre. */
   readonly importacion = inject(ImportacionService);
   private readonly avisos = inject(AvisosService);
+
+  /** Variante del alta que ofrece el menú «Nuevo»; el tipo sale del catálogo. */
+  readonly tipoActorPublico = TIPO_ACTOR_PUBLICO;
 
   /** Tipos de importación agrupados por vista, para el menú «Importar». */
   readonly gruposImportacion = tiposPorGrupo();
