@@ -28,6 +28,7 @@ import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
 import {
   ACEPTADOS_DOCUMENTO,
@@ -820,7 +821,7 @@ export class DocumentoPanelComponent {
       const alEscape = (evento: KeyboardEvent): void => {
         if (evento.key !== 'Escape') return;
         evento.preventDefault();
-        this.cerrado.emit();
+        this.cerrarConSalida();
       };
       document.addEventListener('keydown', alEscape);
       this.destruccion.onDestroy(() => {
@@ -1143,7 +1144,12 @@ export class DocumentoPanelComponent {
   }
 
   alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrado.emit();
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
+  }
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.panel()?.nativeElement, () => this.cerrado.emit());
   }
 
   alTecla(evento: KeyboardEvent): void {

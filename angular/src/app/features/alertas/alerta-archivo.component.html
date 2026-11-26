@@ -22,7 +22,7 @@
         type="button"
         class="icon-button"
         aria-label="Cerrar la ventana de archivo"
-        (click)="cerrar.emit()"
+        (click)="cerrarConSalida()"
       >
         <app-icono nombre="cerrar" [tamano]="18" />
       </button>
@@ -48,7 +48,9 @@
             rows="4"
             [attr.maxlength]="maximo"
             [value]="motivo()"
-            [attr.aria-describedby]="errorMotivo() ? 'archivo-contador archivo-error' : 'archivo-contador'"
+            [attr.aria-describedby]="
+              errorMotivo() ? 'archivo-contador archivo-error' : 'archivo-contador'
+            "
             (input)="campo($event)"
           ></textarea>
           <span id="archivo-contador" class="contador">
@@ -74,7 +76,12 @@
     </div>
 
     <footer class="modal-foot">
-      <button type="button" class="button-secondary" [disabled]="enviando()" (click)="cerrar.emit()">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="enviando()"
+        (click)="cerrarConSalida()"
+      >
         Cancelar
       </button>
       <button

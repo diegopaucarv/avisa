@@ -29,6 +29,7 @@ import { aCaso, aDetalleCaso, type DemandaCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import {
@@ -718,7 +719,9 @@ export class CompromisoPanelComponent {
   }
 
   cerrar(): void {
-    this.cerrado.emit();
+    // El panel se desmonta en el acto: la animación de salida se espera aquí,
+    // mientras los datos siguen intactos.
+    salirModal(this.panel()?.nativeElement, () => this.cerrado.emit());
   }
 
   /** En el alta cancela el panel; en edición sólo descarta el formulario. */

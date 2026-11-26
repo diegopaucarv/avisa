@@ -18,6 +18,7 @@ import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
 import { esRegistro, leer, lista, texto } from '../../dominio/mapeo';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
@@ -404,6 +405,11 @@ export class CasoPanelComponent {
   readonly errorDuplicados = input<string | null>(null);
 
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.panel()?.nativeElement, () => this.cerrar.emit());
+  }
   readonly guardar = output<CuerpoCasoAlta>();
   /** Pide registrar que el candidato (por código) no es un duplicado. */
   readonly descartar = output<string>();

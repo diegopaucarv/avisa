@@ -40,7 +40,7 @@
         type="button"
         class="icon-button"
         aria-label="Cerrar la ficha de la alerta"
-        (click)="cerrar.emit()"
+        (click)="cerrarConSalida()"
       >
         <app-icono nombre="cerrar" [tamano]="18" />
       </button>
@@ -566,7 +566,7 @@
 
     <footer class="drawer-foot">
       @if (esAlta()) {
-        <button type="button" class="button-secondary" (click)="cerrar.emit()">Cancelar</button>
+        <button type="button" class="button-secondary" (click)="cerrarConSalida()">Cancelar</button>
         <button
           type="button"
           class="button-primary"
@@ -586,7 +586,7 @@
           {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
         </button>
       } @else {
-        <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+        <button type="button" class="button-secondary" (click)="cerrarConSalida()">Cerrar</button>
       }
     </footer>
   </aside>

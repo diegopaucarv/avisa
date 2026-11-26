@@ -16,6 +16,7 @@ import { RouterLink } from '@angular/router';
 import { formatearFecha } from '../../shared/formato-fecha';
 import type { Caso } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 
 /**
  * Vista previa del caso (item 101).
@@ -209,6 +210,11 @@ export class CasoVistaPreviaComponent {
   readonly caso = input.required<Caso>();
   readonly puedeEditar = input(false);
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.panel()?.nativeElement, () => this.cerrar.emit());
+  }
   /** URL del tablero de Canva que el contenedor persiste con `PATCH`. */
   readonly guardarEnlace = output<string>();
 

@@ -22,7 +22,7 @@
         type="button"
         class="icon-button"
         aria-label="Cerrar la ventana de mensajería instantánea"
-        (click)="cerrar.emit()"
+        (click)="cerrarConSalida()"
       >
         <app-icono nombre="cerrar" [tamano]="18" />
       </button>
@@ -54,7 +54,7 @@
         <app-icono nombre="copiar" [tamano]="14" />
         {{ copiado() ? 'Copiado ✓' : 'Copiar mensaje' }}
       </button>
-      <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+      <button type="button" class="button-secondary" (click)="cerrarConSalida()">Cerrar</button>
     </footer>
   </section>
 </div>

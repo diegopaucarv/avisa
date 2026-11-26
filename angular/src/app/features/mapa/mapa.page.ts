@@ -22,6 +22,7 @@ import type { DistritoGeo, PoblacionRegion } from '../../core/territorio/territo
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import { formatearFechaCorta } from '../../dominio/mapeo';
@@ -894,6 +895,8 @@ export class MapaPage {
 
   /** Cajón lateral «Ver casos» (item 109). */
   readonly cajonAbierto = signal(false);
+  private cerrandoFicha = false;
+  private cerrandoCajon = false;
   private focoCajonPrevio: HTMLElement | null = null;
 
   /**
@@ -1288,12 +1291,17 @@ export class MapaPage {
   }
 
   cerrarFichaDistrito(): void {
-    if (!this.distritoActivo()) return;
-    this.distritoActivo.set(null);
-    this.distritoSeleccionadoUbigeo = null;
-    this.refrescarDistritos(this.casosPorUbigeo());
-    this.focoFichaPrevio?.focus?.();
-    this.focoFichaPrevio = null;
+    if (!this.distritoActivo() || this.cerrandoFicha) return;
+    this.cerrandoFicha = true;
+    // La ficha se desmonta en el acto: se espera la salida con los datos vivos.
+    salirModal(this.ficha()?.nativeElement, () => {
+      this.cerrandoFicha = false;
+      this.distritoActivo.set(null);
+      this.distritoSeleccionadoUbigeo = null;
+      this.refrescarDistritos(this.casosPorUbigeo());
+      this.focoFichaPrevio?.focus?.();
+      this.focoFichaPrevio = null;
+    });
   }
 
   alFondoFicha(evento: MouseEvent): void {
@@ -1315,10 +1323,14 @@ export class MapaPage {
   }
 
   cerrarCajon(): void {
-    if (!this.cajonAbierto()) return;
-    this.cajonAbierto.set(false);
-    this.focoCajonPrevio?.focus?.();
-    this.focoCajonPrevio = null;
+    if (!this.cajonAbierto() || this.cerrandoCajon) return;
+    this.cerrandoCajon = true;
+    salirModal(this.cajon()?.nativeElement, () => {
+      this.cerrandoCajon = false;
+      this.cajonAbierto.set(false);
+      this.focoCajonPrevio?.focus?.();
+      this.focoCajonPrevio = null;
+    });
   }
 
   alFondoCajon(evento: MouseEvent): void {

@@ -169,7 +169,7 @@
 </section>
 
 @if (demandaElegida(); as demandaActual) {
-<div class="drawer-scrim" (click)="cerrarVinculo()">
+<div class="drawer-scrim" #vinculoScrim (click)="cerrarVinculo()">
   <aside
     class="drawer drawer-narrow"
     role="dialog"

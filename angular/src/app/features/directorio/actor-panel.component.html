@@ -43,7 +43,7 @@
           type="button"
           class="icon-button"
           aria-label="Cerrar la ficha del actor"
-          (click)="cerrar.emit()"
+          (click)="cerrarConSalida()"
         >
           <app-icono nombre="cerrar" [tamano]="18" />
         </button>
@@ -557,7 +557,9 @@
                 </button>
               }
             }
-            <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+            <button type="button" class="button-secondary" (click)="cerrarConSalida()">
+              Cerrar
+            </button>
             @if (puedeEditar()) {
               <button type="button" class="button-primary" (click)="iniciarEdicion()">
                 Editar

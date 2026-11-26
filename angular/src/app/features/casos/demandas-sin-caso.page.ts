@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -28,6 +30,7 @@ import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.compone
 
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
@@ -343,6 +346,7 @@ export class DemandasSinCasoPage {
 
   private temporizador?: ReturnType<typeof setTimeout>;
   private temporizadorCaso?: ReturnType<typeof setTimeout>;
+  private readonly vinculoScrim = viewChild<ElementRef<HTMLElement>>('vinculoScrim');
 
   constructor() {
     this.destruccion.onDestroy(() => {
@@ -413,10 +417,14 @@ export class DemandasSinCasoPage {
   }
 
   cerrarVinculo(): void {
-    clearTimeout(this.temporizadorCaso);
-    this.demandaElegida.set(null);
-    this.paginaCasos.set(1);
-    this.errorVinculo.set(null);
+    // La animación de salida se espera aquí; los datos siguen intactos.
+    const scrim = this.vinculoScrim()?.nativeElement;
+    salirModal(scrim, () => {
+      clearTimeout(this.temporizadorCaso);
+      this.demandaElegida.set(null);
+      this.paginaCasos.set(1);
+      this.errorVinculo.set(null);
+    });
   }
 
   buscarCaso(evento: Event): void {

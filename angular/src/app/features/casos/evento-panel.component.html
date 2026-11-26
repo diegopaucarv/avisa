@@ -21,7 +21,7 @@
         type="button"
         class="icon-button"
         aria-label="Cerrar el panel del hecho"
-        (click)="cerrar.emit()"
+        (click)="cerrarConSalida()"
       >
         <app-icono nombre="cerrar" [tamano]="18" />
       </button>
@@ -122,7 +122,7 @@
             type="button"
             class="button-secondary"
             [disabled]="guardando()"
-            (click)="cerrar.emit()"
+            (click)="cerrarConSalida()"
           >
             Cancelar
           </button>

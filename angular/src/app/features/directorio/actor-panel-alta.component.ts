@@ -20,6 +20,7 @@ import { normalizarColeccion, urlConParametros } from '../../core/http/coleccion
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import {
   aActorDirectorio,
   aCatalogosDirectorio,
@@ -277,6 +278,11 @@ export class ActorPanelAltaComponent {
   readonly naturalezaInicial = input<NaturalezaAlta>('persona');
 
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.modal()?.nativeElement, () => this.cerrar.emit());
+  }
   readonly creado = output<ActorDirectorio>();
 
   private readonly http = inject(HttpClient);

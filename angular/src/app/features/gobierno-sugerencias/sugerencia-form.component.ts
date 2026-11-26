@@ -24,6 +24,7 @@ import {
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 
 import {
   ORIGENES_SUGERENCIA,
@@ -320,7 +321,8 @@ export class SugerenciaFormComponent {
   }
 
   cerrar(): void {
-    this.cerrado.emit();
+    // La animación de salida se espera aquí, mientras los datos siguen intactos.
+    salirModal(this.panel()?.nativeElement, () => this.cerrado.emit());
   }
 
   actualizar(campo: keyof FormularioSugerencia, evento: Event): void {

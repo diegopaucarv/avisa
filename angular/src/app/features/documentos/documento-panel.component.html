@@ -17,7 +17,7 @@
           type="button"
           class="icon-button"
           aria-label="Cerrar el panel del documento"
-          (click)="cerrado.emit()"
+          (click)="cerrarConSalida()"
         >
           <app-icono nombre="cerrar" [tamano]="18" />
         </button>
@@ -188,7 +188,7 @@
               type="button"
               class="button-secondary"
               [disabled]="guardando()"
-              (click)="cerrado.emit()"
+              (click)="cerrarConSalida()"
             >
               Cancelar
             </button>
@@ -224,7 +224,7 @@
           type="button"
           class="icon-button"
           aria-label="Cerrar el panel del documento"
-          (click)="cerrado.emit()"
+          (click)="cerrarConSalida()"
         >
           <app-icono nombre="cerrar" [tamano]="18" />
         </button>

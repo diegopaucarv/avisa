@@ -1,0 +1,222 @@
+<div class="drawer-scrim">
+  <aside
+    class="drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="importar-titulo"
+  >
+    <header class="drawer-head">
+      <div>
+        <h2 id="importar-titulo">Importar</h2>
+        <p>
+          Lea una hoja (CSV, TSV o celdas pegadas de Excel), revísela y confirme. Nada se
+          escribe en la base hasta que pulse el botón de importar.
+        </p>
+      </div>
+      <button type="button" class="icon-button" aria-label="Cerrar la importación" (click)="cerrar()">
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body importar-cuerpo">
+      <div class="importar-tipo">
+        <label class="form-label" for="importar-tipo">Tipo de importación</label>
+        <select id="importar-tipo" [value]="importacion.tipo().id" (change)="alElegirTipo($event)">
+          @for (grupo of grupos; track grupo.grupo) {
+            <optgroup [label]="grupo.grupo">
+              @for (tipo of grupo.tipos; track tipo.id) {
+                <option [value]="tipo.id">{{ tipo.etiqueta }}</option>
+              }
+            </optgroup>
+          }
+        </select>
+        <p class="importar-descripcion">{{ importacion.tipo().descripcion }}</p>
+        @if (importacion.tipo().nota; as nota) {
+          <p class="importar-nota">{{ nota }}</p>
+        }
+      </div>
+
+      @if (importacion.tipo().columnas.length > 0) {
+        <div>
+          <p class="importar-subtitulo">Columnas que reconoce</p>
+          <p class="importar-columnas">
+            @for (columna of ayudaColumnas(); track columna.rotulo) {
+              <span>
+                {{ columna.rotulo }}@if (columna.obligatoria) {* }@if (columna.ayuda) {
+                  — {{ columna.ayuda }}
+                }
+              </span>
+            }
+          </p>
+          <p class="importar-limite">
+            Los títulos de columna se comparan sin tildes ni mayúsculas y admiten sinónimos.
+            Las columnas desconocidas se ignoran y se informan abajo. Tope por tanda:
+            {{ importacion.limite }} filas.
+          </p>
+        </div>
+      }
+
+      <div class="importar-archivo">
+        <input
+          type="file"
+          accept=".csv,.tsv,.txt,.xlsx,.xls,.xlsm"
+          aria-label="Archivo de la hoja"
+          (change)="alElegirArchivo($event)"
+        />
+        @if (importacion.nombreArchivo(); as nombre) {
+          <span>{{ nombre }}</span>
+        }
+        @if (importacion.tipo().columnas.length > 0) {
+          <button type="button" class="button-secondary" (click)="importacion.descargarPlantilla()">
+            Descargar plantilla
+          </button>
+        }
+      </div>
+
+      @if (importacion.tipo().estrategia === 'delegar') {
+        <p class="importar-nota">
+          La matriz se revisa en su vista, con el plan fila a fila. Este panel no la aplica.
+        </p>
+      } @else {
+        <label class="form-label" for="importar-pegado">
+          O pegue las celdas (Excel → Ctrl+C → aquí)
+        </label>
+        <textarea
+          id="importar-pegado"
+          class="importar-pegado"
+          spellcheck="false"
+          placeholder="Título&#9;Región&#9;Temática…"
+          [value]="importacion.texto()"
+          (input)="alEscribir($event)"
+        ></textarea>
+      }
+
+      @if (importacion.errorArchivo(); as error) {
+        <p class="form-error" role="alert">{{ error }}</p>
+      }
+
+      <div class="importar-acciones">
+        @if (importacion.tipo().estrategia !== 'delegar') {
+          <button type="button" class="button-primary" (click)="importacion.previsualizar()">
+            Previsualizar
+          </button>
+        }
+        <button
+          type="button"
+          class="button-primary"
+          [disabled]="!importacion.puedeAplicar()"
+          (click)="importacion.aplicar()"
+        >
+          {{ etiquetaAccion() }}
+        </button>
+      </div>
+
+      @if (importacion.aplicando()) {
+        <p class="avance" role="status">
+          Procesando {{ importacion.progreso().hechos }} de {{ importacion.progreso().total }}…
+        </p>
+      }
+
+      @if (importacion.validacion(); as validacion) {
+        <div>
+          <p class="importar-resumen">
+            <span>Filas leídas: <b>{{ validacion.totalFilas }}</b></span>
+            <span>Válidas: <b>{{ validacion.validas.length }}</b></span>
+            <span>Rechazadas: <b>{{ validacion.rechazos.length }}</b></span>
+          </p>
+
+          @if (validacion.faltantes.length > 0) {
+            <p class="form-error" role="alert">
+              Faltan columnas obligatorias en la cabecera:
+              {{ validacion.faltantes.join(', ') }}. Revise la plantilla.
+            </p>
+          }
+
+          <p class="importar-columnas">
+            Reconocidas: {{ validacion.columnasReconocidas.join(' · ') || 'ninguna' }}
+            @if (validacion.columnasIgnoradas.length > 0) {
+              <br />Ignoradas: {{ validacion.columnasIgnoradas.join(' · ') }}
+            }
+          </p>
+
+          @if (validacion.truncada) {
+            <p class="importar-limite">
+              El archivo supera el tope: se procesan las primeras
+              {{ importacion.limite }} filas.
+            </p>
+          }
+
+          @if (rechazos().length > 0) {
+            <p class="importar-subtitulo">Filas rechazadas antes de enviar</p>
+            <table class="tabla-importar">
+              <caption class="sr-only">Filas rechazadas en la previsualización</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Fila</th>
+                  <th scope="col">Código</th>
+                  <th scope="col">Motivo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (rechazo of rechazos(); track rechazo.fila + rechazo.codigo) {
+                  <tr>
+                    <td>{{ rechazo.fila }}</td>
+                    <td class="codigo">{{ rechazo.codigo }}</td>
+                    <td>{{ rechazo.motivo }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            @if (rechazosRestantes() > 0) {
+              <p class="importar-limite">y {{ rechazosRestantes() }} más.</p>
+            }
+          }
+        </div>
+      }
+
+      @if (importacion.resultado(); as resultado) {
+        <div>
+          <p class="importar-resumen">
+            @if (resultado.documento) {
+              <span>Documento: <b>{{ resultado.documento }}</b></span>
+            }
+            <span>Creados: <b>{{ resultado.creados }}</b></span>
+            <span>Rechazados por la API: <b>{{ resultado.fallidos }}</b></span>
+          </p>
+
+          @if (errores().length > 0) {
+            <p class="importar-subtitulo">Rechazos de la API</p>
+            <table class="tabla-importar">
+              <caption class="sr-only">Filas rechazadas por la API</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Fila</th>
+                  <th scope="col">Registro</th>
+                  <th scope="col">Código</th>
+                  <th scope="col">Motivo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (error of errores(); track error.fila + error.codigo) {
+                  <tr>
+                    <td>{{ error.fila }}</td>
+                    <td>{{ error.etiqueta }}</td>
+                    <td class="codigo">{{ error.codigo }}</td>
+                    <td>{{ error.mensaje }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            @if (erroresRestantes() > 0) {
+              <p class="importar-limite">y {{ erroresRestantes() }} más.</p>
+            }
+          }
+        </div>
+      }
+    </div>
+
+    <footer class="importar-pie">
+      <button type="button" class="button-secondary" (click)="cerrar()">Cerrar</button>
+    </footer>
+  </aside>
+</div>

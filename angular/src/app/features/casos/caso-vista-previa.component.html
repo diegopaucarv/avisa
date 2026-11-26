@@ -22,7 +22,7 @@
         type="button"
         class="icon-button"
         aria-label="Cerrar la vista previa del caso"
-        (click)="cerrar.emit()"
+        (click)="cerrarConSalida()"
       >
         <app-icono nombre="cerrar" [tamano]="18" />
       </button>
@@ -131,7 +131,7 @@
     </div>
 
     <footer class="drawer-foot">
-      <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+      <button type="button" class="button-secondary" (click)="cerrarConSalida()">Cerrar</button>
       <a class="button-primary" [routerLink]="['/casos', caso().codigo]">
         Abrir expediente completo
       </a>

@@ -21,7 +21,7 @@
         type="button"
         class="icon-button"
         aria-label="Cerrar el panel del registro anulado"
-        (click)="cerrado.emit()"
+        (click)="cerrarConSalida()"
       >
         <app-icono nombre="cerrar" [tamano]="18" />
       </button>
@@ -92,7 +92,7 @@
           type="button"
           class="button-secondary"
           [disabled]="enviando()"
-          (click)="cerrado.emit()"
+          (click)="cerrarConSalida()"
         >
           Cerrar
         </button>

@@ -18,6 +18,7 @@ import { urlApi } from '../../core/config/entorno';
 import { normalizarColeccion, urlConParametros } from '../../core/http/coleccion';
 import { aErrorApi } from '../../core/http/errores';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import {
   aActorDirectorio,
   MASCARA_CORREO,
@@ -286,6 +287,11 @@ export class ActorPanelFusionComponent {
   readonly origen = input.required<ActorDirectorio>();
 
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.modal()?.nativeElement, () => this.cerrar.emit());
+  }
   readonly fusionado = output<ResultadoFusion>();
 
   private readonly http = inject(HttpClient);
@@ -343,7 +349,7 @@ export class ActorPanelFusionComponent {
     const alEscape = (evento: KeyboardEvent): void => {
       if (evento.key !== 'Escape') return;
       evento.preventDefault();
-      this.cerrar.emit();
+      this.cerrarConSalida();
     };
     document.addEventListener('keydown', alEscape);
 
@@ -445,7 +451,7 @@ export class ActorPanelFusionComponent {
   }
 
   alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
   }
 
   alTecla(evento: KeyboardEvent): void {

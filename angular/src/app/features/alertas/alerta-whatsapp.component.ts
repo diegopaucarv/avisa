@@ -13,6 +13,7 @@ import {
 
 import type { Riesgo } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import { copiarAlPortapapeles } from './portapapeles';
 
 /**
@@ -171,6 +172,11 @@ export class AlertaWhatsappComponent {
   readonly mensaje = input('');
 
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.dialogo()?.nativeElement, () => this.cerrar.emit());
+  }
 
   private readonly dialogo = viewChild<ElementRef<HTMLElement>>('dialogo');
 

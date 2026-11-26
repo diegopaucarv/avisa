@@ -16,6 +16,7 @@ import {
 
 import type { DemandaCaso } from '../../dominio/mapeo';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import { ESTADOS_DEMANDA } from './demanda-sin-caso.mapeo';
 
 /** Opción del catálogo de temáticas. El `id` es lo que viaja como `tematicaId`. */
@@ -165,6 +166,11 @@ export class DemandaPanelComponent {
   readonly errorGuardado = input<string | null>(null);
 
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.panel()?.nativeElement, () => this.cerrar.emit());
+  }
   readonly guardar = output<CuerpoDemanda>();
 
   readonly borrador = signal<BorradorDemanda>({

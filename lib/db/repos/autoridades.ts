@@ -116,6 +116,8 @@ export type AutoridadCriterio = typeof CRITERIO_AUTORIDADES;
  * Cargos que cuentan como autoridad. La expresión es la misma que se probó
  * contra la base: 102 autoridades y 27 agentes al corte del 2026-11-25
  * (los 21 cargos «Extensionista» del padrón de PRODUCE caen en «agente»).
+ * Desde la migración 64 se suman los 9 sectoristas activos de la OAIPCS con
+ * `cargo_actual = 'Sectorista'`, que también caen en «agente».
  */
 const PATRON_AUTORIDAD =
   "%(director|directora|jefe|jefa|president|secretari|procurador|titular|coordinador|ejecutor|viceministro)%";

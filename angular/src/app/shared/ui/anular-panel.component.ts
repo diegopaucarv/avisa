@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 
 import { IconoComponent } from './icono.component';
+import { salirModal } from './modal-salida';
 
 /** `anular` escribe el borrado lógico; `restaurar` lo revierte. */
 export type ModoAnulacion = 'anular' | 'restaurar';
@@ -135,6 +136,11 @@ export class AnularPanelComponent {
   readonly bloqueo = input<string | null>(null);
 
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.panel()?.nativeElement, () => this.cerrar.emit());
+  }
   readonly hecho = output<ResultadoAnulacion>();
 
   readonly esAnular = computed(() => this.modo() === 'anular');

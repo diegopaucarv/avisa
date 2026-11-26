@@ -22,6 +22,7 @@ import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aFoto, esFotoPintable, fotoPrincipal, type Foto } from '../../dominio/medios';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import {
   aActorDirectorio,
   aDatosPersonales,
@@ -483,6 +484,11 @@ export class ActorPanelComponent {
   readonly enLista = input(false);
 
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.panel()?.nativeElement, () => this.cerrar.emit());
+  }
   readonly actualizado = output<ActorDirectorio>();
   readonly alternarLista = output<void>();
   /** El contenedor abre el panel de baja lógica con el motivo. */

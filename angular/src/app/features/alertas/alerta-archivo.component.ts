@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 
 const MAXIMO_MOTIVO = 500;
 const MINIMO_MOTIVO = 10;
@@ -194,7 +195,7 @@ export class AlertaArchivoComponent {
     const alEscape = (evento: KeyboardEvent): void => {
       if (evento.key !== 'Escape') return;
       evento.preventDefault();
-      this.cerrar.emit();
+      this.cerrarConSalida();
     };
     document.addEventListener('keydown', alEscape);
     this.destruccion.onDestroy(() => document.removeEventListener('keydown', alEscape));
@@ -206,7 +207,12 @@ export class AlertaArchivoComponent {
   }
 
   alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
+  }
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.dialogo()?.nativeElement, () => this.cerrar.emit());
   }
 
   alConfirmar(): void {

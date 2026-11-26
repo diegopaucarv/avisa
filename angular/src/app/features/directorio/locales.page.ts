@@ -34,6 +34,7 @@ import {
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
@@ -748,7 +749,8 @@ export class LocalesPage {
   cerrarPanel(): void {
     if (this.seleccionado() === null) return;
 
-    this.cerrarWhatsapp();
+    // El panel se desmonta en el acto: el mensaje no debe esperar animación.
+    this.cerrarWhatsappAhora();
     this.seleccionado.set(null);
     const previo = this.focoPrevio;
     this.focoPrevio = null;
@@ -824,7 +826,13 @@ export class LocalesPage {
     });
   }
 
+  /** Cierra la ventana de WhatsApp con la animación de salida. */
   cerrarWhatsapp(): void {
+    if (this.whatsappLocal() === null) return;
+    salirModal(this.whatsappDialogo()?.nativeElement, () => this.cerrarWhatsappAhora());
+  }
+
+  private cerrarWhatsappAhora(): void {
     if (this.whatsappLocal() === null) return;
 
     this.whatsappLocal.set(null);

@@ -13,6 +13,7 @@ import {
 
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import type { FilaArchivo } from './archivo.tipos';
 
 /**
@@ -200,7 +201,7 @@ export class ArchivoPanelComponent {
       const alEscape = (evento: KeyboardEvent): void => {
         if (evento.key !== 'Escape') return;
         evento.preventDefault();
-        this.cerrado.emit();
+        this.cerrarConSalida();
       };
       document.addEventListener('keydown', alEscape);
       this.destruccion.onDestroy(() => {
@@ -215,7 +216,12 @@ export class ArchivoPanelComponent {
   }
 
   alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrado.emit();
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
+  }
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.panel()?.nativeElement, () => this.cerrado.emit());
   }
 
   alTecla(evento: KeyboardEvent): void {

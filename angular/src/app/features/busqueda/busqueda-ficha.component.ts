@@ -13,6 +13,7 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import type { ResultadoEnlazado } from './busqueda.mapeo';
 
 /**
@@ -62,7 +63,7 @@ import type { ResultadoEnlazado } from './busqueda.mapeo';
             type="button"
             class="icon-button"
             aria-label="Cerrar la ficha del resultado"
-            (click)="cerrar.emit()"
+            (click)="cerrarConSalida()"
           >
             <app-icono nombre="cerrar" [tamano]="18" />
           </button>
@@ -126,7 +127,9 @@ import type { ResultadoEnlazado } from './busqueda.mapeo';
             >
               {{ fila().abreFicha ? 'Abrir ficha' : 'Ver en el listado' }}
             </a>
-            <button type="button" class="button-secondary" (click)="cerrar.emit()">Cerrar</button>
+            <button type="button" class="button-secondary" (click)="cerrarConSalida()">
+              Cerrar
+            </button>
           </div>
         </div>
       </aside>
@@ -252,6 +255,11 @@ export class BusquedaFichaComponent {
   readonly fila = input.required<ResultadoEnlazado>();
   readonly cerrar = output<void>();
 
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.panel()?.nativeElement, () => this.cerrar.emit());
+  }
+
   readonly tieneTerritorio = computed(() => {
     const fila = this.fila();
     return Boolean(fila.region || fila.provincia || fila.distrito || fila.ubigeo);
@@ -271,7 +279,7 @@ export class BusquedaFichaComponent {
       const alEscape = (evento: KeyboardEvent): void => {
         if (evento.key !== 'Escape') return;
         evento.preventDefault();
-        this.cerrar.emit();
+        this.cerrarConSalida();
       };
       document.addEventListener('keydown', alEscape);
       this.destruccion.onDestroy(() => {
@@ -282,7 +290,7 @@ export class BusquedaFichaComponent {
   }
 
   alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar.emit();
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
   }
 
   alTecla(evento: KeyboardEvent): void {

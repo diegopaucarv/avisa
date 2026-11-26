@@ -15,6 +15,7 @@ import {
 
 import { type EventoCaso, esRegistro, leer, lista, texto } from '../../dominio/mapeo';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 
 /** Opción del catálogo `core.cat_tipos_hecho` tal como la expone `/api/v1/catalogs`. */
 export type OpcionTipoHecho = {
@@ -142,6 +143,11 @@ export class EventoPanelComponent {
   readonly errorGuardado = input<string | null>(null);
 
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.panel()?.nativeElement, () => this.cerrar.emit());
+  }
   readonly guardar = output<CuerpoEvento>();
 
   readonly borrador = signal<BorradorEvento>({

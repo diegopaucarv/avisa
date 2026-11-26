@@ -15,6 +15,7 @@ import { MAX_ADJUNTO_BYTES, AdjuntosService, type Adjunto } from '../../core/htt
 import { aErrorApi } from '../../core/http/errores';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import { formatearFecha } from '../documentos/documento.mapeo';
 import {
   type ActorOpcion,
@@ -520,25 +521,31 @@ type Fila = {
       display: contents;
     }
 
+    /*
+     * Misma geometría que un diálogo modal centrado (la clase modal global):
+     * velo único, 14 px de radio, la misma sombra y margin auto para centrarse cuando
+     * cabe y no recortarse cuando es más alto que la ventana.
+     */
     .la-scrim {
       position: fixed;
       inset: 0;
       display: flex;
       align-items: flex-start;
       justify-content: center;
-      padding: 24px 12px;
+      padding: 20px;
       overflow-y: auto;
     }
 
     .la {
       width: min(760px, 100%);
-      max-height: calc(100vh - 48px);
+      max-height: calc(100vh - 40px);
       display: flex;
       flex-direction: column;
       margin: auto;
+      overflow: hidden;
       background: var(--paper, #fff);
       border: 1px solid var(--line, #e6ebef);
-      border-radius: 12px;
+      border-radius: 14px;
       box-shadow: 0 24px 60px rgba(17, 32, 45, 0.28);
       outline: none;
     }
@@ -1639,8 +1646,11 @@ export class ListaAsistenciaComponent {
     if (evento.target === evento.currentTarget) this.cerrarModal();
   }
 
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
   cerrarModal(): void {
-    this.descartarPreview();
-    this.cerrar.emit();
+    salirModal(this.dialogo()?.nativeElement, () => {
+      this.descartarPreview();
+      this.cerrar.emit();
+    });
   }
 }

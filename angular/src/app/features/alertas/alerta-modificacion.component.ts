@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 
 const MAXIMO_MOTIVO = 500;
 
@@ -175,6 +176,11 @@ export class AlertaModificacionComponent {
   readonly errorEnvio = input<string | null>(null);
 
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.dialogo()?.nativeElement, () => this.cerrar.emit());
+  }
   readonly enviar = output<string>();
 
   readonly maximo = MAXIMO_MOTIVO;

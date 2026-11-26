@@ -45,6 +45,9 @@
   --modal-duracion: 180ms;
   --modal-duracion-scrim: 150ms;
   --modal-curva: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Salida: algo más corta y con curva de entrada, para que cerrar sea seco. */
+  --modal-salida: 140ms;
+  --modal-curva-salida: cubic-bezier(0.4, 0, 1, 1);
   /* Velo único de todas las capas modales. */
   --modal-velo: rgba(17, 32, 45, 0.45);
 
@@ -3918,6 +3921,75 @@ dialog.padron-dialogo[open]::backdrop {
   from {
     opacity: 0;
     transform: translate3d(0, 6px, 0) scale(0.98);
+  }
+}
+
+/* ── Salida animada ──────────────────────────────────────────────────────────
+ *
+ * La clase `is-cerrando` la pone `shared/ui/modal-salida.ts` en el panel y en su
+ * scrim, y se retira justo antes de desmontar. `forwards` mantiene el último
+ * fotograma durante esa espera; sin él el panel reaparecería un instante.
+ */
+.drawer-scrim.is-cerrando,
+.modal-scrim.is-cerrando,
+.casos-drawer-scrim.is-cerrando,
+.la-scrim.is-cerrando,
+.fusion-scrim.is-cerrando,
+.alta-scrim.is-cerrando {
+  pointer-events: none;
+  animation: modal-scrim-sale var(--modal-salida) linear forwards;
+}
+.drawer.is-cerrando {
+  animation: modal-panel-derecha-sale var(--modal-salida) var(--modal-curva-salida) forwards;
+}
+.casos-drawer.is-cerrando {
+  animation: modal-panel-izquierda-sale var(--modal-salida) var(--modal-curva-salida) forwards;
+}
+.modal.is-cerrando,
+.la.is-cerrando,
+.fusion-modal.is-cerrando,
+.alta-modal.is-cerrando {
+  animation: modal-panel-centro-sale var(--modal-salida) var(--modal-curva-salida) forwards;
+}
+
+@keyframes modal-scrim-sale {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes modal-panel-derecha-sale {
+  to {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+@keyframes modal-panel-izquierda-sale {
+  to {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+@keyframes modal-panel-centro-sale {
+  to {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) scale(0.98);
+  }
+}
+
+/* ── Popovers y menús ────────────────────────────────────────────────────────
+ *
+ * Misma familia visual que los modales pero más cortos: un menú debe sentirse
+ * inmediato. Sólo entran; se cierran al desmontar, que es lo que espera
+ * cualquiera al pulsar fuera.
+ */
+.profile-menu,
+.registrar-panel,
+.ambito-panel,
+.menu-acciones {
+  animation: popover-entra 120ms var(--modal-curva) backwards;
+}
+@keyframes popover-entra {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0) scale(0.985);
   }
 }
 .drawer-head {

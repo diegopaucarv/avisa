@@ -20,6 +20,7 @@ import { RIESGOS, formatearFechaCorta } from '../../dominio/mapeo';
 import type { Riesgo } from '../../dominio/modelos';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
@@ -519,6 +520,11 @@ export class AlertaPanelComponent {
   readonly casos = input<readonly CasoOpcion[]>([]);
 
   readonly cerrar = output<void>();
+
+  /** Cierra con la animación de salida y luego avisa al contenedor. */
+  cerrarConSalida(): void {
+    salirModal(this.panel()?.nativeElement, () => this.cerrar.emit());
+  }
   readonly reintentar = output<void>();
   readonly guardar = output<PatchAlerta>();
   readonly registrar = output<AltaAlerta>();
