@@ -229,6 +229,10 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
       display: block;
     }
 
+    .surface.panel {
+      padding: 17px;
+    }
+
     .sin-dato {
       color: var(--muted);
       font-style: italic;

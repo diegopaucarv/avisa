@@ -199,10 +199,21 @@ type Aviso = { tipo: 'exito' | 'error'; texto: string };
       display: block;
     }
 
+    .surface.panel {
+      padding: 17px;
+    }
+
     .compositor {
       display: grid;
       gap: 12px;
       max-width: 640px;
+    }
+
+    .empty-state p {
+      max-width: 620px;
+      margin: 8px auto 0;
+      color: var(--muted);
+      line-height: 1.6;
     }
 
     .campo {
