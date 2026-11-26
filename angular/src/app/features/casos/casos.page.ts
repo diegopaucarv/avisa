@@ -45,6 +45,7 @@ import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import { CasoPanelComponent, type CuerpoCasoAlta } from './caso-panel.component';
 import { CasoVistaPreviaComponent } from './caso-vista-previa.component';
+import { ESTADO_ARCHIVADO, ESTADO_RESUELTO } from './caso-edicion.mapeo';
 import { aDuplicados, type DuplicadoCandidatoFila } from './duplicados.mapeo';
 import { aNudosSemana, type NudosSemanaTablero } from './nudos-matriz.mapeo';
 
@@ -71,7 +72,6 @@ type FiltrosCasos = {
   nivel: string;
   /** Código de `core.cat_niveles_riesgo`; eje distinto de la conflictividad. */
   riesgo: string;
-  prioridad: string;
   alcance: string;
   /** Nombre canónico de `core.regiones`; la API lo normaliza y lo valida. */
   region: string;
@@ -81,12 +81,6 @@ type FiltrosCasos = {
    * sola lista desplegable.
    */
   sinRegion: boolean;
-  /**
-   * Naturaleza declarada (`Territorial` / `Nacional o sectorial`) o el literal
-   * «Sin declarar», que la API traduce a `naturaleza_id is null`.
-   */
-  naturaleza: string;
-  unidad: string;
   pagina: number;
   tamano: number;
   orden: string;
@@ -96,15 +90,12 @@ type FiltrosCasos = {
 const FILTROS_INICIALES: FiltrosCasos = {
   q: '',
   estado: '',
-  abiertos: false,
+  abiertos: true,
   nivel: '',
   riesgo: '',
-  prioridad: '',
   alcance: '',
   region: '',
   sinRegion: false,
-  naturaleza: '',
-  unidad: '',
   pagina: 1,
   tamano: TAMANO_PAGINA,
   orden: 'recent',
@@ -150,11 +141,8 @@ type OpcionFiltro = {
 type CatalogosCasos = {
   conflictividades: OpcionFiltro[];
   riesgos: OpcionFiltro[];
-  prioridades: OpcionFiltro[];
   alcances: OpcionFiltro[];
   regiones: OpcionFiltro[];
-  naturalezas: OpcionFiltro[];
-  unidades: OpcionFiltro[];
 };
 
 function opcionesDe(catalogo: Record<string, unknown>, clave: string): OpcionFiltro[] {
@@ -175,10 +163,9 @@ function opcionesDe(catalogo: Record<string, unknown>, clave: string): OpcionFil
  * `GET /api/v1/catalogs` reducido a los selects del listado.
  *
  * No se codifican etiquetas en el cliente: el mismo valor que ofrece el
- * catálogo es el que valida la API (`unidad` por siglas). El estado ya no
- * sale del catálogo: la barra usa cuatro chips
- * operativos (`Todos`, `Abiertos`, `Resueltos`, `Archivados`), y `Abiertos`
- * viaja como `abiertos=true` porque el estado se define por `es_activo`.
+ * catálogo es el que valida la API. El estado ya no sale del catálogo: la
+ * barra usa un interruptor `Abiertos`/`Archivados`, donde `Abiertos` viaja
+ * como `abiertos=true` (el estado se define por `es_activo`).
  */
 function aCatalogosCasos(bruto: unknown): CatalogosCasos {
   const registro = esRegistro(bruto) ? bruto : {};
@@ -188,11 +175,8 @@ function aCatalogosCasos(bruto: unknown): CatalogosCasos {
   return {
     conflictividades: opcionesDe(catalogo, 'nivelesConflicto'),
     riesgos: opcionesDe(catalogo, 'nivelesRiesgo'),
-    prioridades: opcionesDe(catalogo, 'prioridadesAtencion'),
     alcances: opcionesDe(catalogo, 'alcances'),
     regiones: opcionesDe(catalogo, 'regiones'),
-    naturalezas: opcionesDe(catalogo, 'naturalezasCaso'),
-    unidades: opcionesDe(catalogo, 'unidades'),
   };
 }
 
@@ -231,8 +215,8 @@ function aConteos(bruto: unknown): ConteosCasos {
 /**
  * Casos: listado con paginación y filtros de servidor.
  *
- * Todos los filtros viajan a `GET /api/v1/cases` (`estado`/`abiertos`,
- * `prioridad`, `alcance`, `tematica`, `unidad`) y viven en la URL para que el
+ * Todos los filtros viajan a `GET /api/v1/cases` (`estado`/`abiertos`, `riesgo`,
+ * `nivel`, `alcance`, `region`/`sinregion`, `sort`) y viven en la URL para que el
  * enlace se pueda compartir. Cambiar cualquiera de ellos reinicia a la página 1;
  * nunca se filtra sobre las filas ya cargadas.
  */
@@ -262,9 +246,87 @@ function aConteos(bruto: unknown): ConteosCasos {
       flex: 0 1 300px;
     }
 
-    /* Estado cierra la fila de filtros, alineado a la derecha. */
-    .estado-final {
-      margin-left: auto;
+    /* Chips de riesgo y «Resueltos»: son tab-bar/tab-button, sin el margen
+       vertical que usan las pestañas de sección. */
+    .chips-en-linea {
+      margin: 0;
+    }
+
+    .chips-en-linea .tab-button {
+      padding: 6px 10px;
+    }
+
+    /*
+     * Interruptor Abiertos/Archivados. Replica la lengua visual del
+     * edit-switch de la ficha (que es encapsulado y no aplica aquí), con
+     * variables de tema para no depender de literales en modo noche.
+     */
+    .edit-switch {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font: 600 13px var(--font-sans);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .edit-switch input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .edit-switch-track {
+      position: relative;
+      display: inline-block;
+      flex: none;
+      width: 38px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--line);
+      transition: background 0.15s ease;
+    }
+
+    .edit-switch-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: transform 0.15s ease;
+    }
+
+    .edit-switch.activo .edit-switch-track {
+      background: var(--blue);
+    }
+
+    .edit-switch.activo .edit-switch-thumb {
+      transform: translateX(16px);
+      background: var(--paper);
+    }
+
+    .edit-switch span.activo {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .edit-switch input:focus-visible + .edit-switch-track {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    /* Enlace discreto de búsqueda avanzada, más pequeño que los filtros. */
+    .avanzado-enlace {
+      white-space: nowrap;
     }
 
     /*
@@ -313,10 +375,6 @@ function aConteos(bruto: unknown): ConteosCasos {
         min-width: 0;
         max-width: none;
       }
-
-      .barra-filtros-casos > .estado-final {
-        margin-left: 0;
-      }
     }
 
     @media (max-width: 1100px) {
@@ -353,27 +411,6 @@ function aConteos(bruto: unknown): ConteosCasos {
 
     .vista-previa-aviso {
       margin: 0 0 10px;
-    }
-
-    /* Chip de naturaleza declarada. «Sin declarar» se distingue a la vista
-       (borde discontinuo y color apagado): es un hueco, no un valor. */
-    .case-naturaleza {
-      display: inline-block;
-      margin: 8px 0 0;
-      padding: 2px 7px;
-      border: 1px solid #dbe3ea;
-      border-radius: 10px;
-      color: #47566a;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
-      line-height: 1.6;
-    }
-
-    .case-naturaleza.sin-declarar {
-      border-style: dashed;
-      color: #8a98a5;
-      font-weight: 500;
     }
 
     /* Indicador operativo de la semana: tira de cifras con la jerarquía del
@@ -488,9 +525,9 @@ export class CasosPage {
   readonly modo = signal<ModoVista>('tarjetas');
 
   /**
-   * Filtros secundarios (prioridad, región, temática, unidad, orden). Se
-   * despliegan con «Búsqueda avanzada» para que la barra de entrada quede en tres
-   * controles: búsqueda, estado y conflictividad (item 100).
+   * Filtros secundarios: nivel de conflictividad, resueltos, alcance y orden. Se
+   * despliegan con «Búsqueda avanzada» para que la barra de entrada quede corta:
+   * búsqueda, riesgo, región e interruptor Abiertos/Archivados.
    */
   readonly avanzado = signal(false);
 
@@ -522,26 +559,31 @@ export class CasosPage {
     this.ruta.queryParamMap.pipe(
       map((params) => {
         const alcance = params.get('alcance');
+        const ver: VerRegistros = params.get('ver') === 'anulados' ? 'anulados' : 'activos';
+        const estado = params.get('estado') ?? '';
+        const abiertosParam = params.get('abiertos');
         return {
           q: params.get('q') ?? '',
-          estado: params.get('estado') ?? '',
-          abiertos: params.get('abiertos') === 'true',
+          estado,
+          // El interruptor Abiertos/Archivados sustituye al desplegable de
+          // estado: sin estado explícito la lista se abre en «Abiertos». En la
+          // papelera no se aplica, porque `anulados` ya define el conjunto.
+          abiertos:
+            ver === 'activos' &&
+            (abiertosParam === 'true' || (!estado && abiertosParam !== 'false')),
           nivel: params.get('nivel') ?? '',
           riesgo: params.get('riesgo') ?? '',
-          prioridad: params.get('prioridad') ?? '',
           // Sin `alcance` rige Preferencias; `todos` es la limpieza explícita.
           alcance: alcance === null ? alcancePreferido() : alcance === 'todos' ? '' : alcance,
           region: params.get('region') ?? '',
           sinRegion: params.get('sinregion') === 'true',
-          naturaleza: params.get('naturaleza') ?? '',
-          unidad: params.get('unidad') ?? '',
           pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
           tamano: Math.max(
             1,
             Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA,
           ),
           orden: params.get('orden') ?? 'recent',
-          ver: params.get('ver') === 'anulados' ? 'anulados' : 'activos',
+          ver,
         };
       }),
     ),
@@ -551,15 +593,14 @@ export class CasosPage {
   readonly filtros = computed(() => this.parametros());
 
   /**
-   * Valor del desplegable de estado. Codifica en un solo control lo que antes
-   * eran cuatro chips: `todos`, `abiertos` (por `es_activo`) o el código
-   * canónico del estado.
+   * Interruptor Abiertos/Archivados. «Abiertos» viaja como `abiertos=true`
+   * (por `es_activo` del catálogo) y «Archivados» como `estado=Archivado`.
+   * «Resueltos» dejó la barra principal: se filtra desde la búsqueda avanzada.
    */
-  readonly estadoSeleccionado = computed(() => {
-    const filtros = this.filtros();
-    if (filtros.abiertos) return 'abiertos';
-    return filtros.estado || 'todos';
-  });
+  readonly archivados = computed(() => this.filtros().estado === ESTADO_ARCHIVADO);
+
+  /** Chip «Resueltos» de la búsqueda avanzada. */
+  readonly resueltosActivo = computed(() => this.filtros().estado === ESTADO_RESUELTO);
 
   /**
    * ¿Hay algún filtro secundario puesto? El ámbito no cuenta: llega de
@@ -568,13 +609,7 @@ export class CasosPage {
   readonly filtrosAvanzadosActivos = computed(() => {
     const filtros = this.filtros();
     return Boolean(
-      filtros.riesgo ||
-      filtros.prioridad ||
-      filtros.region ||
-      filtros.sinRegion ||
-      filtros.naturaleza ||
-      filtros.unidad ||
-      filtros.orden !== 'recent',
+      filtros.nivel || filtros.estado === ESTADO_RESUELTO || filtros.orden !== 'recent',
     );
   });
 
@@ -591,12 +626,9 @@ export class CasosPage {
       abiertos: filtros.abiertos ? 'true' : '',
       nivel: filtros.nivel,
       riesgo: filtros.riesgo,
-      prioridad: filtros.prioridad,
       alcance: filtros.alcance,
       region: filtros.region,
       sinregion: filtros.sinRegion ? 'true' : '',
-      naturaleza: filtros.naturaleza,
-      unidad: filtros.unidad,
       sort: filtros.orden,
     });
   });
@@ -620,13 +652,10 @@ export class CasosPage {
     esquema: aCatalogosCasos,
   });
 
-  readonly prioridades = computed(() => this.catalogoRecurso.valor()?.prioridades ?? []);
   readonly riesgos = computed(() => this.catalogoRecurso.valor()?.riesgos ?? []);
   readonly conflictividades = computed(() => this.catalogoRecurso.valor()?.conflictividades ?? []);
   readonly alcances = computed(() => this.catalogoRecurso.valor()?.alcances ?? []);
   readonly regiones = computed(() => this.catalogoRecurso.valor()?.regiones ?? []);
-  readonly naturalezas = computed(() => this.catalogoRecurso.valor()?.naturalezas ?? []);
-  readonly unidades = computed(() => this.catalogoRecurso.valor()?.unidades ?? []);
 
   private readonly recurso = consulta<Coleccion<Caso> & { conteos: ConteosCasos }>({
     fuente: () => {
@@ -635,15 +664,12 @@ export class CasosPage {
         ...paramsDePagina({ pagina: filtros.pagina, tamano: filtros.tamano }),
         q: filtros.q,
         estado: filtros.estado,
-        abiertos: filtros.abiertos ? 'true' : '',
+        abiertos: filtros.abiertos && filtros.ver !== 'anulados' ? 'true' : '',
         nivel: filtros.nivel,
         riesgo: filtros.riesgo,
-        prioridad: filtros.prioridad,
         alcance: filtros.alcance,
         region: filtros.region,
         sinregion: filtros.sinRegion ? 'true' : '',
-        naturaleza: filtros.naturaleza,
-        unidad: filtros.unidad,
         sort: filtros.orden,
         anulados: filtros.ver === 'anulados' ? 'true' : '',
         conteos: 'true',
@@ -710,7 +736,6 @@ export class CasosPage {
     estado: (caso) => caso.estado,
     prioridad: (caso) => caso.prioridad,
     riesgo: (caso) => caso.riesgo,
-    unidad: (caso) => caso.unidadResponsable,
     etapa: (caso) => caso.etapa,
     inicio: (caso) => caso.inicio,
   };
@@ -745,17 +770,17 @@ export class CasosPage {
   }
 
   /**
-   * Estado desde el desplegable único (item 100). `abiertos` viaja como
-   * `abiertos=true` porque el estado abierto se define por `es_activo`, no por
-   * una etiqueta.
+   * Interruptor Abiertos/Archivados. «Abiertos» viaja como `abiertos=true`
+   * porque el estado abierto se define por `es_activo`, no por etiqueta;
+   * «Archivados» viaja como `estado=Archivado`.
    */
-  cambiarEstado(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value;
-    if (valor === 'abiertos') {
-      void this.actualizar({ estado: '', abiertos: true, pagina: 1 });
-      return;
-    }
-    void this.actualizar({ estado: valor === 'todos' ? '' : valor, abiertos: false, pagina: 1 });
+  cambiarArchivados(evento: Event): void {
+    const archivados = (evento.target as HTMLInputElement).checked;
+    this.actualizar({
+      estado: archivados ? ESTADO_ARCHIVADO : '',
+      abiertos: !archivados,
+      pagina: 1,
+    });
   }
 
   /**
@@ -763,6 +788,12 @@ export class CasosPage {
    * el repositorio contra `core.cat_niveles_conflicto`: no se filtra en cliente,
    * así los conteos y la paginación siguen siendo ciertos.
    */
+  /** «Resueltos» vive en la búsqueda avanzada como chip de estado. */
+  alternarResueltos(): void {
+    const activo = this.filtros().estado === ESTADO_RESUELTO;
+    this.actualizar({ estado: activo ? '' : ESTADO_RESUELTO, abiertos: activo, pagina: 1 });
+  }
+
   cambiarNivel(evento: Event): void {
     const valor = (evento.target as HTMLSelectElement).value;
     void this.actualizar({ nivel: valor, pagina: 1 });
@@ -787,14 +818,9 @@ export class CasosPage {
     return formatearFechaCorta(valor);
   }
 
-  cambiarRiesgo(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value;
-    void this.actualizar({ riesgo: valor, pagina: 1 });
-  }
-
-  cambiarPrioridad(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value;
-    void this.actualizar({ prioridad: valor, pagina: 1 });
+  /** Chips de nivel de riesgo: no abren la búsqueda avanzada. */
+  seleccionarRiesgo(valor: string): void {
+    this.actualizar({ riesgo: valor, pagina: 1 });
   }
 
   cambiarAlcance(evento: Event): void {
@@ -818,22 +844,6 @@ export class CasosPage {
       return;
     }
     void this.actualizar({ region: valor, sinRegion: false, pagina: 1 });
-  }
-
-  /**
-   * Naturaleza declarada. Es un eje propio del caso, no el alcance geográfico:
-   * «Sin declarar» no es un valor del catálogo sino la ausencia de valor, y sólo
-   * el servidor puede resolverlo (`naturaleza_id is null`), así que nunca se
-   * filtra en cliente.
-   */
-  cambiarNaturaleza(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value;
-    void this.actualizar({ naturaleza: valor, pagina: 1 });
-  }
-
-  cambiarUnidad(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value;
-    void this.actualizar({ unidad: valor, pagina: 1 });
   }
 
   cambiarOrden(evento: Event): void {
@@ -860,6 +870,22 @@ export class CasosPage {
 
   fechaTexto(valor: string | null | undefined): string {
     return formatearFechaCaso(valor);
+  }
+
+  /** Un caso archivado ya no tiene riesgo operativo: se muestra «Inactivo». */
+  estaArchivado(caso: Caso): boolean {
+    return caso.estado === ESTADO_ARCHIVADO;
+  }
+
+  riesgoMostrado(caso: Caso): string {
+    return caso.estado === ESTADO_ARCHIVADO ? 'Inactivo' : caso.riesgo;
+  }
+
+  /** Clase del badge de riesgo: sin color de nivel cuando está archivado. */
+  claseRiesgo(caso: Caso): string {
+    return caso.estado === ESTADO_ARCHIVADO
+      ? 'status-badge'
+      : 'status-badge risk-' + caso.riesgo.toLowerCase();
   }
 
   fechaHoraTexto(valor: string | null | undefined): string {
@@ -1106,12 +1132,9 @@ export class CasosPage {
         abiertos: siguiente.abiertos ? 'true' : null,
         nivel: siguiente.nivel || null,
         riesgo: siguiente.riesgo || null,
-        prioridad: siguiente.prioridad || null,
         alcance,
         region: siguiente.region || null,
         sinregion: siguiente.sinRegion ? 'true' : null,
-        naturaleza: siguiente.naturaleza || null,
-        unidad: siguiente.unidad || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
         orden: siguiente.orden !== 'recent' ? siguiente.orden : null,

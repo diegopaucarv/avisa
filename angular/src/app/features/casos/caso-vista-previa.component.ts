@@ -4,6 +4,7 @@ import {
   DestroyRef,
   ElementRef,
   afterNextRender,
+  computed,
   inject,
   input,
   output,
@@ -210,6 +211,16 @@ export class CasoVistaPreviaComponent {
   readonly cerrar = output<void>();
   /** URL del tablero de Canva que el contenedor persiste con `PATCH`. */
   readonly guardarEnlace = output<string>();
+
+  /** Un caso archivado ya no tiene riesgo operativo: se muestra «Inactivo». */
+  readonly estaArchivado = computed(() => this.caso().estado === 'Archivado');
+
+  readonly riesgoVisible = computed(() => (this.estaArchivado() ? 'Inactivo' : this.caso().riesgo));
+
+  /** Sin color de nivel cuando está archivado: el badge queda neutro. */
+  readonly claseRiesgo = computed(() =>
+    this.estaArchivado() ? 'status-badge' : 'status-badge risk-' + this.caso().riesgo.toLowerCase(),
+  );
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
   private readonly destruccion = inject(DestroyRef);

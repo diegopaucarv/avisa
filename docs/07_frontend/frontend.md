@@ -117,33 +117,35 @@ su ruta, sólo dejaron de dibujarse. El shell —cabecera, menú lateral y el bo
 
 ## Resumen de pendientes
 
-Sólo las pantallas con algo pendiente. Lo más importante va primero.
+Sólo las pantallas con algo pendiente. Lo más importante va primero. Los conteos incluyen el
+encargo del **2026-11-25** (paridad con la matriz de conflictividad del equipo), cuyo detalle
+está en `frontend_detalle.md`.
 
-| Pantalla                | Pendientes | Lo más importante                                                          |
-| ----------------------- | ---------: | -------------------------------------------------------------------------- |
-| Ficha del caso          |          9 | Riesgo recalculable, contacto de actores y pestañas de reuniones/productos |
-| Transversal (todas)     |          9 | Recorte por región en servidor, rango de fechas compartido y auditoría     |
-| Panorama territorial    |          5 | Agrupar puntos, leyenda y tasa regional                                    |
-| Perfil territorial      |          6 | Catálogo de artes de pesca; no tiene ruta todavía                          |
-| ETL de tres pestañas    |          6 | Ejecución real, fuentes e historial                                        |
-| Casos                   |          3 | Vincular duplicados y exportación XLSX de la matriz                        |
-| Compromisos             |          3 | Recordatorios, nudos propios y aviso sin vencimiento                       |
-| Documentos              |          3 | Validación por fragmento, versiones y lista blanca por fuente              |
-| Reuniones               |          2 | Registro real de reuniones y banderas                                      |
-| Alertas tempranas       |          2 | Motivo de descarte y envío real por WhatsApp                               |
-| Resumen operativo       |          2 | Panel de operación OAIPCS y sincronización global                          |
-| Bandeja de trabajo      |          2 | Mapa y resumen de casos; indicador de completitud                          |
-| Clima social            |          1 | Región y carga desde la pantalla                                           |
-| Auditorios              |          1 | Editar el distrito desde la pantalla                                       |
-| Dashboard               |          1 | Aging / antigüedad de los casos                                            |
-| RED-RADAR               |          1 | Conector de señales y «convertir en alerta»                                |
-| Autoridades             |          1 | Universo fuera de PRODUCE y agenda                                         |
-| Archivo de sugerencias |          1 | Registro automático en `agent.run_log` / `lessons_learned`                 |
-| Envíos y auditoría      |          1 | Vista de envíos con acuse y auditoría consultable (sin ruta)               |
-| Acceso                  |          1 | Segundo factor                                                             |
-| Búsqueda                |          1 | Fichas propias de alertas, compromisos, documentos y actores               |
-| Preferencias            |          1 | Tamaño de página efectivo y ámbito/avisos en servidor                      |
-| Shell                   |          1 | Registrar sin cambiar de pantalla                                          |
+| Pantalla               | Pendientes | Lo más importante                                                           |
+| ---------------------- | ---------: | --------------------------------------------------------------------------- |
+| Ficha del caso         |          9 | Riesgo recalculable, contacto de actores y pestañas de reuniones/productos  |
+| Transversal (todas)    |          9 | Recorte por región en servidor, rango de fechas compartido y auditoría      |
+| Panorama territorial   |          5 | Agrupar puntos, leyenda y tasa regional                                     |
+| Perfil territorial     |          6 | Catálogo de artes de pesca; no tiene ruta todavía                           |
+| ETL de tres pestañas   |          6 | Ejecución real, fuentes e historial                                         |
+| Casos                  |          7 | Sectorista por API, temática obligatoria por demanda y compromiso → demanda |
+| Compromisos            |          8 | Punto focal, fecha real, validación y recarga de la matriz                  |
+| Documentos             |          3 | Validación por fragmento, versiones y lista blanca por fuente               |
+| Reuniones              |          2 | Registro real de reuniones y banderas                                       |
+| Alertas tempranas      |          2 | Motivo de descarte y envío real por WhatsApp                                |
+| Resumen operativo      |          2 | Panel de operación OAIPCS y sincronización global                           |
+| Bandeja de trabajo     |          2 | Mapa y resumen de casos; indicador de completitud                           |
+| Clima social           |          1 | Región y carga desde la pantalla                                            |
+| Auditorios             |          1 | Editar el distrito desde la pantalla                                        |
+| Dashboard              |          1 | Aging / antigüedad de los casos                                             |
+| RED-RADAR              |          1 | Conector de señales y «convertir en alerta»                                 |
+| Autoridades            |          1 | Universo fuera de PRODUCE y agenda                                          |
+| Archivo de sugerencias |          1 | Registro automático en `agent.run_log` / `lessons_learned`                  |
+| Envíos y auditoría     |          1 | Vista de envíos con acuse y auditoría consultable (sin ruta)                |
+| Acceso                 |          1 | Segundo factor                                                              |
+| Búsqueda               |          1 | Fichas propias de alertas, compromisos, documentos y actores                |
+| Preferencias           |          1 | Tamaño de página efectivo y ámbito/avisos en servidor                       |
+| Shell                  |          1 | Registrar sin cambiar de pantalla                                           |
 
 **Sin pendientes de interfaz:** `/casos/sin-caso`, `/reportes`, `/archivo`,
 `/directorio`, `/directorio/actores`, `/directorio/organizaciones`,
@@ -260,11 +262,13 @@ calcula el plan; la aplicación definitiva la ejecuta
 (`Casos`, `Compromisos`, `Nudos`, `Sin datos`) sigue decidido y **no** implementado:
 `app/api/v1/matriz/csv.ts` declara que no hay parser XLSX.
 
-**Import: bloqueante estructural.** El importador exige `tematica_equipo` en casos y
-compromisos, y la migración 41 dice expresamente que no se añade; mientras eso no se
-resuelva, `--apply` se niega a escribir. Las migraciones 41→42→43 existen en el repositorio;
-la 42 está marcada como **propuesta** en su encabezado. El estado de cada base se consulta
-en su `core.migracion_log`, no se supone.
+**Import: bloqueante estructural, con salida decidida.** El importador exigía `tematica_equipo`
+en casos y compromisos, y la migración 41 dice expresamente que no se añade; por eso `--apply`
+se negaba a escribir. El encargo del **2026-11-25** resuelve la contradicción sin crear esa
+columna: en el Excel la columna M es **por fila, y en esa hoja cada fila con demanda es una
+demanda**, así que su temática va a `core.demandas.tematica_id` (normalizando la errata
+«Ordenanamiento»). La temática del compromiso se **hereda de su demanda** (`compromisos.tematica_id`).
+El cambio de código sigue pendiente. **No hace falta ningún cambio de esquema**: la columna ya existe y el importador puede escribir en ella.
 
 **Lo que el export no puede rellenar es contenido.** El Excel del equipo trae 23 demandas,
 56 compromisos y 111 hitos; AVISA tiene **325 demandas** (de otra fuente, `DEM-2026-XXXX`),
@@ -272,9 +276,30 @@ en su `core.migracion_log`, no se supone.
 `core.demandas` y **no** en el Excel; las **capacidades 1–5** y la postura por actor siguen
 sin columna.
 
-**Naturaleza del caso.** `casos.naturaleza_id` (migración 40) existe, se siembra, se filtra
-en el listado y se elige en el alta. La ficha la oculta a propósito (`CAMPOS_OCULTOS`) y no
-hay chip en las tarjetas: es una pieza de presentación pendiente, no de dato.
+**Naturaleza del caso.** `casos.naturaleza_id` (migración 40) existe y se siembra, pero desde
+el 2026-11-26 **no se filtra ni se muestra en el listado**: el control y la columna se
+retiraron. Sigue siendo un campo del modelo y del formulario de alta.
+
+**Encargo del 2026-11-25 · paridad con la matriz del equipo.** No requiere cambios de esquema: todo se resuelve con columnas que ya existen. Lo decidido y cerrado:
+
+| Decisión                                                | Efecto en la pantalla                                                                                                                                                                                             |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| «Unidad responsable» pasa a **«Sectorista»**            | Se mostrará desde `casos.punto_focal_usuario_id`, que ya guarda a los sectoristas. `unidad_responsable_id` es una **unidad orgánica** (`cat_unidades_organicas`) y deja de competir con la persona en el listado. |
+| **No se usa «Prioridad de atención»**                   | Sólo el **Nivel de riesgo** (Bajo/Medio/Alto). `casos.prioridad_id` queda en desuso, sin borrarse.                                                                                                                |
+| **Descripción del riesgo actual** + **Nivel de riesgo** | Textarea y select en la misma fila, en alta, edición y expediente.                                                                                                                                                |
+| **Temática obligatoria por demanda**                    | Select en alta y edición de demanda; la API responde `422` sin ella; columna «Temática» en el expediente; las antiguas se leen como «Sin temática».                                                               |
+| **Compromiso → demanda**                                | Select «Demanda que atiende» obligatorio en registros nuevos; columna «Compromisos» en la tabla de demandas del expediente.                                                                                       |
+
+**Entregado el 2026-11-26 (solo interfaz, sin tocar la base).** La barra quedó en **Buscar
+palabra clave · Nivel de riesgo (chips) · Región · switch Abiertos/Archivados · Búsqueda
+avanzada** (esta última discreta). «Nivel de conflictividad» y «Resueltos» pasaron a la
+búsqueda avanzada; se retiraron «Prioridad de atención», «Naturaleza» y «Unidad responsable»
+(columna y filtro). El caso archivado muestra **Riesgo: Inactivo**. El alta de caso ganó
+**Descripción del riesgo actual** junto al **Nivel de riesgo**, con los campos sin recuadro.
+
+**Pendiente de API.** «Sectorista» (columna, filtro y tarjeta), el orden por riesgo con
+archivados al fondo (`sort` del servidor) y la franja de hitos en la tarjeta. El importador
+todavía no carga las columnas C, D, I ni M.
 
 **Nota de diseño.** `/matriz-conflictividad` **no** es esta matriz: es el listado del
 Anexo 15 con detalle lateral, hoja imprimible y CSV.
@@ -292,25 +317,38 @@ actores** (`POST` / `DELETE /v1/cases/{codigo}/actores`, item 40); la pestaña
 **Historial / Auditoría**; el enlace de **análisis de caso** (Canva) separado de los
 documentos; y la **exportación de actores** en CSV y «Copiar para WhatsApp» (items 98/99).
 
-| Item      | Qué falta                                                                                                                                                                                                  | Por qué no está | Mockup                                     |
-| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------------ |
-| 11        | Acción para recalcular el nivel de riesgo desde la ficha                                                                                                                                                   | `API`           | —                                          |
-| 12        | **Apellidos** y **nombres** separados (la API devuelve `null`) y teléfono del actor en la ficha                                                                                                            | `Dato`          | —                                          |
-| 15        | Categoría **AT / RR / PAR** en las alertas vinculadas (no existe columna)                                                                                                                                  | `Dato`          | —                                          |
-| 16        | Que la sección Compromisos traiga la **clasificación** (progresivo/parcial, operativo o condicionado): el esquema y la columna existen, pero `GET /v1/cases` no la selecciona y hoy muestra «Sin declarar» | `API`           | `ficha-pestanas.html`                      |
-| 41        | Pestañas **Reuniones** y **Productos/Envíos**; en Reuniones, las 4 marcas y las reuniones sin caso (Historial ya está)                                                                                     | `API`           | `ficha-pestanas.html`                      |
-| 97        | Autor en los documentos del caso (`documentos.autor_texto` existe y el export lo usa; la ficha no lo trae)                                                                                                 | `API`           | `ficha-pestanas.html`                      |
-| 98, 99    | Exportación **PDF** de actores y que organización y teléfono lleguen por API (CSV y WhatsApp ya están)                                                                                                     | `Dato`          | `ficha-pestanas.html`                      |
-| 103       | Bloques **Reportes de monitoreo** y **Documentos del caso** (PRODUCE y normativa)                                                                                                                          | `Diseño`        | `ficha-reportes-monitoreo-documentos.html` |
-| — (nuevo) | Bloque **Nudos de la semana**: la sección existe pero está **comentada** en la plantilla y `core.caso_nudo_critico` tiene 0 filas                                                                          | `Implementar`   | —                                          |
+| Item   | Qué falta                                                                                                                                                                                                  | Por qué no está | Mockup                                     |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------------------------------------------ |
+| 11     | Acción para recalcular el nivel de riesgo desde la ficha                                                                                                                                                   | `API`           | —                                          |
+| 12     | **Apellidos** y **nombres** separados (la API devuelve `null`) y teléfono del actor en la ficha                                                                                                            | `Dato`          | —                                          |
+| 15     | Categoría **AT / RR / PAR** en las alertas vinculadas (no existe columna)                                                                                                                                  | `Dato`          | —                                          |
+| 16     | Que la sección Compromisos traiga la **clasificación** (progresivo/parcial, operativo o condicionado): el esquema y la columna existen, pero `GET /v1/cases` no la selecciona y hoy muestra «Sin declarar» | `API`           | `ficha-pestanas.html`                      |
+| 41     | Pestañas **Reuniones** y **Productos/Envíos**; en Reuniones, las 4 marcas y las reuniones sin caso (Historial ya está)                                                                                     | `API`           | `ficha-pestanas.html`                      |
+| 97     | Autor en los documentos del caso (`documentos.autor_texto` existe y el export lo usa; la ficha no lo trae)                                                                                                 | `API`           | `ficha-pestanas.html`                      |
+| 98, 99 | Exportación **PDF** de actores y que organización y teléfono lleguen por API (CSV y WhatsApp ya están)                                                                                                     | `Dato`          | `ficha-pestanas.html`                      |
+| 103    | Bloques **Reportes de monitoreo** y **Documentos del caso** (PRODUCE y normativa)                                                                                                                          | `Diseño`        | `ficha-reportes-monitoreo-documentos.html` |
+
+**Cambios del 2026-11-26 (interfaz).** El interruptor «Activar la edición» pasó a un botón
+visible **«Modificar»**, con el mismo control de permisos. El caso **archivado** muestra
+`Nivel de riesgo: Inactivo`. La desvinculación de un actor ya no pide motivo: es una
+confirmación directa, y los actores desvinculados se ocultan del expediente. Se añadió la
+**Descripción del riesgo actual** junto al **Nivel de riesgo** en datos generales.
+
+**Se retiraron del expediente** «Nudos de la semana», «Matriz demandas – intervenciones» y el
+bloque «Hitos del caso»: los hitos siguen viviendo donde corresponde, en **Compromisos**.
+
+**Pendiente de API.** Que el servidor acepte el `DELETE` **sin `motivo`** (hoy responde
+`400 MOTIVO_REQUERIDO`, así que la desvinculación falla hasta que se haga opcional en
+`app/api/v1/cases/[code]/actores/[actorId]`) y que el detalle no envíe actores desvinculados
+(hoy se filtran en el cliente).
 
 **Lo que ya está y no se toca.** La ventana emergente de la tarjeta, el mapa de actores
 como tabla, la exportación local, el alta/desvinculación de actores y el historial
 funcionan.
 
-**Nudos.** El backend está hecho (`GET /v1/cases/{codigo}/nudos`, campos semana,
-descripción, seguimiento, estado y autor) y el mapeo tiene pruebas; lo que falta es
-descomentar el bloque y tener filas.
+**Nudos.** El backend sigue existiendo (`GET /v1/cases/{codigo}/nudos`, con semana,
+descripción, seguimiento, estado y autor) y las tablas tienen 0 filas, pero la **sección se
+retiró de la ficha el 2026-11-26** por decisión de producto. No se borró el endpoint.
 
 ---
 
@@ -405,6 +443,37 @@ el Señor Ministro»** separada de la unidad responsable (item 123).
 | 24        | Recordatorios y el **aviso cuando no hay hito**: `avisoSinVencimiento` se calcula y no se renderiza | `Implementar`   | —      |
 | 39        | Recordatorios por compromiso (el historial ya está)                                                 | `API`           | —      |
 | — (nuevo) | Historial de **nudos críticos** del compromiso: hoy los nudos viven en la ficha del caso, no aquí   | `Implementar`   | —      |
+
+**Encargo del 2026-11-25 · verificación e hitos.** No requiere cambios de esquema: punto focal,
+vencimiento y fecha real ya tienen columna. Sólo la validación del punto focal carece de
+dónde guardarse y queda **fuera de esta entrega**. Lo decidido y cerrado:
+
+| Decisión                                            | Efecto en la pantalla                                                                                                                                     |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Punto focal**                                     | Campo que sugiere usuarios y acepta texto libre; visible en tabla y panel. Ya existía en el esquema, no se usaba.                                         |
+| **Fecha real del hito**                             | Campo nuevo en «Nuevo hito»; obligatorio al pasar el hito a **Cumplido** (por defecto, hoy).                                                              |
+| **Validación del punto focal**                      | Botón «Marcar validado por el punto focal» y filtro **Sin validar**. Columnas nuevas en `compromisos`, `medios` y `adjunto`.                              |
+| **Medios de verificación**                          | Etiqueta «Medios de verificación» (no «Evidencia (URI)»); se cargan del Excel como evidencia del compromiso.                                              |
+| **Vencimiento calculado**                           | Si no hay vencimiento manual, se usa la fecha planificada del último hito abierto, con el semáforo que ya calcula la vista de las migraciones 44 y 45.    |
+| **Términos técnicos ocultos**                       | Se retiran «Origen del dato: AVISA_HISTORICO», «Clasificación: 2», «Criterios SMART (JSON)», «Evidencia (URI)», «lista blanca de la API» y «baja lógica». |
+| **Franja de hitos y una sola línea de indicadores** | Un punto de color por hito, en orden de fecha, repetido en cada fila; los indicadores pasan de tres tarjetas a una línea que filtra la tabla.             |
+
+**Sobre el contador «En proceso».** El cliente envía el valor correcto (`En proceso`, con
+espacio) y la API lo resuelve con `core.normalizar_ref`, que elimina espacios y guiones bajos:
+`En proceso` y `En_proceso` producen la misma clave. El catálogo vivo usa `En proceso` (id 2).
+El «—» solo aparece si la consulta falla o mientras carga; ya no se pinta como si fuera un
+valor sin dato.
+
+**Entregado el 2026-11-26 (solo interfaz, sin tocar la base).** Los indicadores pasaron a
+**una sola línea** con cifras pulsables (compromisos, cumplidos, en proceso, vencidos); la
+tabla lleva la **franja de hitos** con color por estado y anillo rojo si están vencidos; el
+vencimiento usa la fecha efectiva calculada con su semáforo; la etiqueta es **«Medios de
+verificación»**; se ocultaron los términos técnicos y los criterios SMART se leen como
+`clave: valor`; y «Registrar compromiso» quedó sin recuadros por campo.
+
+**Pendiente de API.** «Sin hitos» y «Sin validar» no se muestran porque no hay filtro ni
+agregado en el servidor (no se inventó un cero). Punto focal, fecha real en el alta de hito y
+validación del punto focal siguen sin API.
 
 **Nota de dato.** El calendario se pinta vacío porque los 8 compromisos no tienen
 `fecha_vencimiento` y el único hito con fecha está cumplido. Es un hueco de carga, no de
@@ -602,9 +671,18 @@ Ruta real (item 114, parcial): listado paginado con facetas por tipo, instituci�
 criterio autoridad vs. agente; panel con casos vinculados y PII bajo demanda con motivo
 auditado (`GET /v1/autoridades[/{id}[/pii]]`).
 
-| Item | Qué falta                                                                                                                                             | Por qué no está | Mockup          |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | --------------- |
-| 114  | El universo real: prefectos, subprefectos, sectoristas PCM, extensionistas, alcaldes y direpros —hoy sólo hay «Actor público» de PRODUCE— y su agenda | `Dato`          | — (por dibujar) |
+| Item | Qué falta                                                                                                      | Por qué no está | Mockup          |
+| ---- | -------------------------------------------------------------------------------------------------------------- | --------------- | --------------- |
+| 114  | Prefectos, subprefectos, sectoristas PCM, alcaldes y direpros —fuera de PRODUCE— y la agenda de cada autoridad | `Dato`          | — (por dibujar) |
+
+**Nota de dato.** El padrón de extensionistas ya está cargado
+(`migration/63_autoridades_extensionistas_2026_11_25.sql`): **21 personas** —20 por
+jurisdicción y la Coordinación Nacional— con `region_id` derivado de la jurisdicción,
+`nivel_gobierno = 'Nacional'`, el detalle de provincias en `perfil_descripcion` y el
+teléfono cifrado en `core.actor_datos_personales` (se lee con motivo auditado desde la
+ficha). El universo «Actor público»/persona pasa de **108 a 129** filas: 102 autoridades y
+27 agentes. Las 20 filas de jurisdicción llevan cargo «Extensionista» y aparecen como
+agente; la Coordinación Nacional lleva «Coordinador Nacional» y aparece como autoridad.
 
 ---
 

@@ -49,6 +49,7 @@ import {
   etiquetaNivelGobierno,
   formatearFecha,
   resolverVencimiento,
+  situacionDe,
   type CatalogosCompromiso,
   type Compromiso,
   type DetalleCompromiso,
@@ -58,6 +59,7 @@ import {
   type HistorialCompromiso,
   type OpcionCatalogo,
   type ResolucionVencimiento,
+  type Situacion,
 } from './compromiso.mapeo';
 
 type FormularioCompromiso = {
@@ -87,6 +89,9 @@ type FormularioHito = {
 };
 
 type ResultadoCriterios = { ok: true; valor: unknown } | { ok: false };
+
+/** Un criterio SMART legible: rótulo deducido de la clave y valor en texto. */
+type CriterioLegible = { clave: string; valor: string };
 
 function formularioVacio(): FormularioCompromiso {
   return {
@@ -198,16 +203,63 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       font-size: 12.5px;
       line-height: 1.45;
     }
-    .criterios {
+    .criterios-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
       margin: 4px 0 0;
-      padding: 8px;
-      border: 1px solid #e6ecf1;
-      border-radius: 6px;
-      background: #fbfcfd;
-      color: #52677a;
+    }
+    .criterios-lista > div {
+      display: grid;
+      grid-template-columns: minmax(110px, max-content) minmax(0, 1fr);
+      gap: 8px;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .criterios-lista dt {
+      color: var(--muted);
       font-size: 12px;
-      white-space: pre-wrap;
-      overflow-x: auto;
+      font-weight: 700;
+    }
+    .criterios-lista dd {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 12.5px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+    /*
+     * C3: el alta se lee sin recuadros. Cada campo es rótulo tenue y valor,
+     * separados por espacio; los colores salen de variables de tema.
+     */
+    .form-campo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .detail-section.form-alta .form-field {
+      gap: 6px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+    .detail-section.form-alta .form-field > .form-label {
+      text-align: left;
+    }
+    .detail-section.form-alta .form-grid {
+      gap: 18px 16px;
+    }
+    .detail-section.form-alta .form-grid .form-input,
+    .detail-section.form-alta .form-grid .form-select,
+    .detail-section.form-alta .form-grid .form-textarea {
+      padding-left: 0;
+      padding-right: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--ink);
     }
     .panel-hito-form {
       display: flex;
@@ -478,6 +530,9 @@ export class CompromisoPanelComponent {
     resolverVencimiento(this.cabecera()),
   );
 
+  /** Semáforo del vencimiento efectivo (manual o derivado del próximo hito). */
+  readonly situacion = computed<Situacion>(() => situacionDe(this.cabecera()));
+
   readonly puedeModificar = computed(() =>
     this.modoAlta()
       ? this.capacidades.puedeEditar()
@@ -489,14 +544,28 @@ export class CompromisoPanelComponent {
     () => !this.modoAlta() && this.capacidades.puedeEliminar() && this.puedeModificar(),
   );
 
-  readonly criteriosJson = computed<string | null>(() => {
+  /**
+   * Lectura legible de los criterios SMART: sólo se muestran cuando el dato es
+   * un objeto plano de valores simples. Un objeto anidado o una lista no se
+   * puede leer sin jerga, así que se oculta en vez de mostrar JSON crudo.
+   */
+  readonly criteriosLegibles = computed<readonly CriterioLegible[] | null>(() => {
     const valor = this.cabecera().criteriosSmart;
-    if (valor === null || valor === undefined) return null;
-    try {
-      return JSON.stringify(valor, null, 2);
-    } catch {
-      return null;
+    if (valor === null || valor === undefined || typeof valor !== 'object') return null;
+    if (Array.isArray(valor)) return null;
+
+    const entradas = Object.entries(valor as Record<string, unknown>);
+    if (entradas.length === 0) return null;
+
+    const criterios: CriterioLegible[] = [];
+    for (const [clave, dato] of entradas) {
+      if (dato === null || dato === undefined || typeof dato === 'object') return null;
+      criterios.push({
+        clave: this.etiquetaCriterio(clave),
+        valor: typeof dato === 'boolean' ? (dato ? 'Sí' : 'No') : String(dato),
+      });
     }
+    return criterios;
   });
 
   /**
@@ -1077,6 +1146,16 @@ export class CompromisoPanelComponent {
 
   private esEstadoHito(valor: string): valor is EstadoHito {
     return (ESTADOS_HITO as readonly string[]).includes(valor);
+  }
+
+  /** `plazo_entrega` / `plazoEntrega` → «Plazo entrega», sin jerga en la ficha. */
+  private etiquetaCriterio(clave: string): string {
+    const conEspacios = clave
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])/g, '$1 $2')
+      .trim();
+    if (!conEspacios) return clave;
+    return conEspacios.charAt(0).toUpperCase() + conEspacios.slice(1);
   }
 
   private parsearCriterios(textoCrudo: string): ResultadoCriterios {

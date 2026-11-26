@@ -29,28 +29,39 @@
   } @if (avisoCreacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   } @if (!verPapelera() && !vistaMatriz()) {
-  <div class="executive-kpis">
-    <div class="stat-card">
-      <span class="stat-icon"><app-icono nombre="compromisos" [tamano]="16" /></span>
-      <span class="stat-copy">
-        <span>Compromisos</span>
-        <strong>{{ total() }}</strong>
-      </span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-icon green"><app-icono nombre="check" [tamano]="16" /></span>
-      <span class="stat-copy">
-        <span>Cumplidos</span>
-        <strong>{{ cumplidos() ?? '—' }}</strong>
-      </span>
-    </div>
-    <div class="stat-card">
-      <span class="stat-icon amber"><app-icono nombre="reloj" [tamano]="16" /></span>
-      <span class="stat-copy">
-        <span>En proceso</span>
-        <strong>{{ enProceso() ?? '—' }}</strong>
-      </span>
-    </div>
+  <div class="reality-strip" role="group" aria-label="Indicadores del listado de compromisos">
+    <button
+      type="button"
+      [attr.aria-pressed]="indicadorActivo() === 'todos'"
+      (click)="filtrarIndicador('todos')"
+    >
+      <b>{{ cifraCompromisos() }}</b>
+      <span>compromisos</span>
+    </button>
+    <button
+      type="button"
+      [attr.aria-pressed]="indicadorActivo() === 'cumplido'"
+      (click)="filtrarIndicador('cumplido')"
+    >
+      <b>{{ cifraCumplidos() }}</b>
+      <span>cumplidos</span>
+    </button>
+    <button
+      type="button"
+      [attr.aria-pressed]="indicadorActivo() === 'enProceso'"
+      (click)="filtrarIndicador('enProceso')"
+    >
+      <b>{{ cifraEnProceso() }}</b>
+      <span>en proceso</span>
+    </button>
+    <button
+      type="button"
+      [attr.aria-pressed]="indicadorActivo() === 'vencidos'"
+      (click)="filtrarIndicador('vencidos')"
+    >
+      <b>{{ cifraVencidos() }}</b>
+      <span>vencidos</span>
+    </button>
   </div>
   } @if (!vistaMatriz()) {
   <div class="filter-bar">
@@ -315,6 +326,18 @@
           {{ fila.codigo }}
         </button>
         <span class="compromiso-accion">{{ fila.accion }}</span>
+        @if (fila.hitos.length > 0) {
+        <span
+          class="hitos-franja"
+          role="img"
+          [attr.title]="resumenHitos(fila)"
+          [attr.aria-label]="resumenHitos(fila)"
+        >
+          @for (hito of hitosOrdenados(fila); track hito.id) {
+          <span [class]="clasesHito(hito)"></span>
+          }
+        </span>
+        }
       </div>
     </ng-template>
 
@@ -335,6 +358,7 @@
     <ng-template appCeldaTabla="vencimiento" let-fila>
       <div class="celda-vencimiento">
         @if (vencimiento(fila).fecha; as fechaVenc) { {{ fechaTexto(fechaVenc) }}
+        <span [class]="'due-state ' + situacion(fila).clase">{{ situacion(fila).etiqueta }}</span>
         <small>{{ origenTexto(vencimiento(fila).origen) }}</small>
         } @else {
         <span class="due-state due-sin-fecha">Sin fecha</span>

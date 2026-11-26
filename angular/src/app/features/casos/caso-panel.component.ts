@@ -35,6 +35,8 @@ export type CuerpoCasoAlta = {
   tematica?: string;
   subsector?: string;
   riesgo?: string;
+  /** Texto libre: qué riesgo se observa hoy en el caso. */
+  descripcionRiesgo?: string;
   unidadResponsable?: string;
   resumen?: string;
   fechaInicio?: string;
@@ -82,6 +84,7 @@ type BorradorCaso = {
   naturaleza: string;
   subsector: string;
   riesgo: string;
+  descripcionRiesgo: string;
   unidadResponsable: string;
   resumen: string;
   fechaInicio: string;
@@ -207,6 +210,54 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
     /* Rótulos del modal en mayúsculas (ajuste del 22 nov). */
     .form-label {
       text-transform: uppercase;
+    }
+
+    /*
+     * Campos del alta sin recuadro: sólo rótulo tenue y valor, separados por
+     * espacio del flujo del formulario. Los colores salen de variables de tema
+     * para no romper el modo noche.
+     */
+    .form-campo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .form-campo > span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /*
+     * Descripción del riesgo y nivel en la misma fila: el texto ocupa el ancho
+     * disponible y el nivel queda a su derecha, como pide el diseño.
+     */
+    .fila-riesgo {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 190px;
+      gap: 12px;
+      align-items: start;
+    }
+
+    @media (max-width: 640px) {
+      .fila-riesgo {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .caso-formulario .form-input,
+    .caso-formulario .form-select,
+    .caso-formulario .form-textarea {
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      padding-left: 0;
+      padding-right: 0;
+      color: var(--ink);
     }
 
     .caso-regiones {
@@ -364,6 +415,7 @@ export class CasoPanelComponent {
     naturaleza: '',
     subsector: '',
     riesgo: '',
+    descripcionRiesgo: '',
     unidadResponsable: '',
     resumen: '',
     fechaInicio: '',
@@ -503,6 +555,9 @@ export class CasoPanelComponent {
     if (borrador.naturaleza) cuerpo.naturaleza = borrador.naturaleza;
     if (borrador.subsector) cuerpo.subsector = borrador.subsector;
     if (borrador.riesgo) cuerpo.riesgo = borrador.riesgo;
+    if (borrador.descripcionRiesgo.trim()) {
+      cuerpo.descripcionRiesgo = borrador.descripcionRiesgo.trim();
+    }
     if (borrador.unidadResponsable) cuerpo.unidadResponsable = borrador.unidadResponsable;
     if (borrador.resumen.trim()) cuerpo.resumen = borrador.resumen.trim();
     if (borrador.fechaInicio) cuerpo.fechaInicio = borrador.fechaInicio;

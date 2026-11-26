@@ -103,7 +103,7 @@ export const CRITERIO_AUTORIDADES = {
   institucion:
     "La institución se deriva del dominio del correo de contacto (por ejemplo, produce.gob.pe → PRODUCE). No es un campo del modelo.",
   territorio:
-    "La base no registra región, distrito ni nivel de gobierno para este universo; la columna se muestra como «sin dato».",
+    "La región se toma de la jurisdicción declarada en el padrón de actores cuando existe (extensionistas de PRODUCE, migración 63); el distrito y las provincias no se registran en el modelo, así que la columna se muestra como «sin dato» en el resto del universo.",
   casos:
     "Los casos vinculados se leen de core.casos_actores; cuando no hay vínculos se indica «sin casos vinculados».",
 } as const;
@@ -112,7 +112,8 @@ export type AutoridadCriterio = typeof CRITERIO_AUTORIDADES;
 
 /**
  * Cargos que cuentan como autoridad. La expresión es la misma que se probó
- * contra la base: 101 autoridades y 7 agentes («Servidor / Integrante»).
+ * contra la base: 102 autoridades y 27 agentes al corte del 2026-11-25
+ * (los 21 cargos «Extensionista» del padrón de PRODUCE caen en «agente»).
  */
 const PATRON_AUTORIDAD =
   "%(director|directora|jefe|jefa|president|secretari|procurador|titular|coordinador|ejecutor|viceministro)%";
@@ -356,7 +357,8 @@ async function listFacets(client: PoolClient): Promise<AutoridadFacets> {
   const facetasInstitucion: AutoridadFaceta[] = [...instituciones.entries()]
     .map(([valor, conteo]) => ({ valor, etiqueta: valor, conteo }))
     .sort(
-      (a, b) => b.conteo - a.conteo || a.etiqueta.localeCompare(b.etiqueta, "es"),
+      (a, b) =>
+        b.conteo - a.conteo || a.etiqueta.localeCompare(b.etiqueta, "es"),
     );
   if (sinInstitucion > 0) {
     facetasInstitucion.push({
@@ -369,7 +371,8 @@ async function listFacets(client: PoolClient): Promise<AutoridadFacets> {
   const facetasRegion: AutoridadFaceta[] = [...regiones.entries()]
     .map(([valor, conteo]) => ({ valor, etiqueta: valor, conteo }))
     .sort(
-      (a, b) => b.conteo - a.conteo || a.etiqueta.localeCompare(b.etiqueta, "es"),
+      (a, b) =>
+        b.conteo - a.conteo || a.etiqueta.localeCompare(b.etiqueta, "es"),
     );
   if (sinRegion > 0) {
     facetasRegion.push({

@@ -33,9 +33,9 @@
         <span class="status-badge"
           >Nivel de conflictividad: {{ caso().nivelConflicto || 'Sin declarar' }}</span
         >
-        <span class="status-badge" [class]="'status-badge risk-' + caso().riesgo.toLowerCase()">
+        <span [class]="claseRiesgo()">
           <span class="status-dot"></span>
-          Nivel de riesgo: {{ caso().riesgo }}
+          Nivel de riesgo: {{ riesgoVisible() }}
         </span>
         <span class="status-badge">📍 Región: {{ caso().region || 'Sin región' }}</span>
         <span class="status-badge">Estado: {{ caso().estado }}</span>

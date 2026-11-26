@@ -82,13 +82,7 @@ import {
   type CasoActorFila,
   type CasoActoresCaso,
   type CuerpoVincularActor,
-  type MatrizCaso,
-  type MatrizCelda,
-  type MatrizFila,
-  type NudosCaso,
   aCasoActores,
-  aMatrizCaso,
-  aNudosCaso,
   etiquetaPosicion,
 } from './nudos-matriz.mapeo';
 import { VincularActorComponent } from './vincular-actor.component';
@@ -115,9 +109,19 @@ type CompromisoCasoEnFicha = Omit<CompromisoCasoConCaracteristicas, 'hitos'> & {
   hitos: HitoDetalle[];
 };
 
+/**
+ * Caso del detalle con la descripción de riesgo. `aCaso` no la conserva porque
+ * el listado no la necesita, pero `GET /api/v1/cases/{codigo}` la entrega y la
+ * ficha la muestra en los datos generales. Se añade aquí, sin tocar `dominio/`.
+ */
+type CasoConDescripcionRiesgo = DetalleCasoConCierre['caso'] & {
+  descripcionRiesgo: string | null;
+};
+
 /** Detalle del caso con las columnas nuevas de compromisos e hitos. */
-type DetalleCasoConCompromisos = Omit<DetalleCasoConCierre, 'compromisos'> & {
+type DetalleCasoConCompromisos = Omit<DetalleCasoConCierre, 'compromisos' | 'caso'> & {
   compromisos: CompromisoCasoEnFicha[];
+  caso: CasoConDescripcionRiesgo;
 };
 
 /**
@@ -292,12 +296,16 @@ type ActorCasoConContacto = ActorCaso & {
  */
 export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompromisos {
   const detalle = aDetalleCasoConCierre(bruto);
+  const registro = esRegistro(bruto) ? bruto : {};
+  const casoBruto = registro['caso'] ?? registro['case'];
+  const filaCaso = esRegistro(casoBruto) ? casoBruto : {};
+  const descripcionRiesgo = textoDe(filaCaso, 'descripcionRiesgo', 'descripcion_riesgo');
   const datos = datosHitosCrudos(bruto);
   const compromisos = aCompromisosCaso(bruto, detalle.compromisos).map((compromiso) => ({
     ...compromiso,
     hitos: compromiso.hitos.map((hito) => ({ ...hito, ...(datos.get(hito.id) ?? SIN_DATOS_HITO) })),
   }));
-  return { ...detalle, compromisos };
+  return { ...detalle, caso: { ...detalle.caso, descripcionRiesgo }, compromisos };
 }
 
 @Component({
@@ -334,37 +342,6 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       justify-content: flex-end;
     }
 
-    /* Tira de cifras de la matriz, con la jerarquía del mockup:
-       cifra grande y leyenda corta debajo. */
-    .reality-strip {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 1px;
-      margin-bottom: 12px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--line);
-      overflow: hidden;
-    }
-
-    .reality-strip div {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding: 10px 12px;
-      background: var(--canvas);
-    }
-
-    .reality-strip b {
-      font-size: 18px;
-      line-height: 1.2;
-    }
-
-    .reality-strip span {
-      font-size: 12.5px;
-      color: var(--muted);
-    }
-
     .baja-inline {
       display: flex;
       flex-wrap: wrap;
@@ -372,8 +349,9 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       gap: 8px;
     }
 
-    .baja-inline .form-campo {
+    .baja-inline .baja-pregunta {
       flex: 1 1 260px;
+      margin: 0;
     }
 
     .detail-hint {
@@ -543,6 +521,19 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       margin-top: 4px;
     }
 
+    /* Descripción del riesgo y nivel contiguo, en la misma celda del detalle. */
+    .campo-riesgo dd {
+      text-align: left;
+    }
+
+    .campo-riesgo .campo-valor {
+      white-space: pre-line;
+    }
+
+    .campo-riesgo .status-badge {
+      margin-top: 6px;
+    }
+
     /* Item 37: confirmación de estado en línea, dentro de la cabecera. */
     .archivo-confirmacion {
       margin: 10px 0 0;
@@ -672,73 +663,6 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       gap: 6px;
     }
 
-    /* Interruptor de edición: apagado, la ficha se lee; encendido, se edita. */
-    .edit-switch {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-      font: 600 13px var(--font-body);
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .edit-switch input {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      margin: -1px;
-      padding: 0;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .edit-switch-track {
-      position: relative;
-      display: inline-block;
-      width: 38px;
-      height: 22px;
-      border-radius: 999px;
-      background: #c9d5e0;
-      transition: background 0.15s ease;
-    }
-
-    .edit-switch-thumb {
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #fff;
-      box-shadow: 0 1px 2px rgb(26 43 62 / 25%);
-      transition: transform 0.15s ease;
-    }
-
-    .edit-switch.activo {
-      color: var(--ink);
-    }
-
-    .edit-switch.activo .edit-switch-track {
-      background: var(--blue, #1a4f8b);
-    }
-
-    .edit-switch.activo .edit-switch-thumb {
-      transform: translateX(16px);
-    }
-
-    .edit-switch input:focus-visible + .edit-switch-track {
-      outline: 2px solid var(--blue, #1a4f8b);
-      outline-offset: 2px;
-    }
-
-    .edit-switch.deshabilitado {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-
     /* Se anida para ganar al white-space: nowrap de las celdas de la tabla. */
     .data-table td.celda-larga {
       min-width: 220px;
@@ -770,7 +694,6 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
      */
     @media print {
       .view-actions button,
-      .view-actions .edit-switch,
       .view-actions app-exportar-menu,
       .view-actions app-glosario,
       .detail-section-title button,
@@ -849,38 +772,12 @@ export class CasoDetallePage {
   readonly error = this.recurso.error;
 
   /* ----------------------------------------------------------------------- *
-   * Soportes de la ficha (2026-11-24)
+   * Soporte de la ficha (2026-11-24)
    *
-   * `GET /cases/{codigo}` se mapea con `aDetalleCasoConCierre`, que no conoce
-   * nudos, matriz ni vínculo de actores. Cada soporte se pide aparte, con su
-   * propia `consulta`, para no tocar el mapeo compartido del dominio.
+   * `GET /cases/{codigo}` se mapea con `aDetalleCasoConCierre`, que no conoce el
+   * vínculo de actores. Ese soporte se pide aparte, con su propia `consulta`,
+   * para no tocar el mapeo compartido del dominio.
    * --------------------------------------------------------------------- */
-
-  private readonly nudosRecurso = consulta<NudosCaso>({
-    fuente: () => {
-      const codigo = this.codigo();
-      if (!codigo) return null;
-      return urlApi(`/v1/cases/${encodeURIComponent(codigo)}/nudos`);
-    },
-    esquema: aNudosCaso,
-  });
-
-  readonly nudos = this.nudosRecurso.valor;
-  readonly estadoNudos = this.nudosRecurso.estado;
-  readonly errorNudos = this.nudosRecurso.error;
-
-  private readonly matrizRecurso = consulta<MatrizCaso>({
-    fuente: () => {
-      const codigo = this.codigo();
-      if (!codigo) return null;
-      return urlApi(`/v1/cases/${encodeURIComponent(codigo)}/matriz`);
-    },
-    esquema: aMatrizCaso,
-  });
-
-  readonly matriz = this.matrizRecurso.valor;
-  readonly estadoMatriz = this.matrizRecurso.estado;
-  readonly errorMatriz = this.matrizRecurso.error;
 
   private readonly actoresRecurso = consulta<CasoActoresCaso>({
     fuente: () => {
@@ -903,11 +800,6 @@ export class CasoDetallePage {
     }
     return mapa;
   });
-
-  readonly semanasNudos = computed(() => this.nudos()?.semanas ?? []);
-  readonly coberturaNudos = computed(() => this.nudos()?.cobertura ?? null);
-  readonly columnasMatriz = computed(() => this.matriz()?.columnas ?? []);
-  readonly filasMatriz = computed(() => this.matriz()?.filas ?? []);
 
   /** Ids de los actores con vínculo vigente; el panel no los vuelve a ofrecer. */
   readonly idsActoresVinculados = computed<readonly string[]>(() =>
@@ -943,6 +835,16 @@ export class CasoDetallePage {
   };
   readonly filasActores = computed(() =>
     this.ordenActores.ordenar(this.ficha()?.actores ?? [], this.accesoresActores),
+  );
+
+  /**
+   * Actores con vínculo vigente. `GET /cases/{codigo}` devuelve también los
+   * desvinculados (su consulta no filtra `anulado_en`); la vigencia llega en
+   * `/actores`, así que se descartan con ese mapa. Si el soporte no está
+   * disponible, `estaVigente()` responde «true» y no se puede filtrar aquí.
+   */
+  readonly actoresVigentes = computed(() =>
+    this.filasActores().filter((actor) => this.estaVigente(actor.id)),
   );
 
   readonly ordenDemandas = new OrdenTabla<DemandaCaso>();
@@ -1073,6 +975,13 @@ export class CasoDetallePage {
     if (!caso) return false;
     return this.anulado() || caso.estado !== 'Abierto';
   });
+
+  /**
+   * Sólo el caso **archivado** muestra el riesgo como «Inactivo». Un caso
+   * resuelto conserva su nivel (la insignia sí pierde el color, por
+   * `riesgoInactivo`).
+   */
+  readonly estaArchivado = computed(() => this.caso()?.estado === 'Archivado');
 
   /**
    * Riel del expediente (items 67 y 97). El expediente se reduce a cuatro
@@ -1317,8 +1226,6 @@ export class CasoDetallePage {
   recargar(): void {
     this.detalleActualizado.set(null);
     this.recurso.recargar();
-    this.nudosRecurso.recargar();
-    this.matrizRecurso.recargar();
     this.actoresRecurso.recargar();
   }
 
@@ -1360,16 +1267,16 @@ export class CasoDetallePage {
   }
 
   /**
-   * Interruptor de edición. Al apagarlo se cancela cualquier recuadro abierto:
-   * la ficha vuelve a modo lectura.
+   * Edición de la ficha: apagada, la ficha se lee; encendida, aparecen las
+   * acciones de edición. Al apagarla se cancela cualquier recuadro abierto.
    */
-  alternarModoEdicion(evento: Event): void {
-    const activo = (evento.target as HTMLInputElement).checked;
-    if (!activo || !this.puedeModificar()) {
+  alternarModoEdicion(): void {
+    if (this.modoEdicion()) {
       this.modoEdicion.set(false);
       this.cancelarEdicion();
       return;
     }
+    if (!this.puedeModificar()) return;
     this.modoEdicion.set(true);
   }
 
@@ -1777,7 +1684,6 @@ export class CasoDetallePage {
   readonly errorVinculo = signal<string | null>(null);
 
   readonly actorADesvincular = signal<string | null>(null);
-  readonly motivoBaja = signal('');
   readonly enviandoBaja = signal(false);
   readonly errorBaja = signal<string | null>(null);
   readonly avisoBaja = signal<string | null>(null);
@@ -1841,7 +1747,6 @@ export class CasoDetallePage {
   pedirDesvincular(actorId: string): void {
     if (!this.puedeModificar()) return;
     this.actorADesvincular.set(actorId);
-    this.motivoBaja.set('');
     this.errorBaja.set(null);
     this.avisoBaja.set(null);
     this.avisoActores.set(null);
@@ -1849,26 +1754,22 @@ export class CasoDetallePage {
 
   cancelarDesvincular(): void {
     this.actorADesvincular.set(null);
-    this.motivoBaja.set('');
     this.errorBaja.set(null);
   }
 
-  alCambiarMotivoBaja(evento: Event): void {
-    this.motivoBaja.set((evento.target as HTMLInputElement).value);
-  }
-
+  /**
+   * Baja lógica sin motivo. El contrato actual de
+   * `DELETE /v1/cases/{codigo}/actores/{actorId}` todavía lo exige
+   * (`leerMotivo` en `lib/db/http.ts`), así que la petición recibirá
+   * `400 MOTIVO_REQUERIDO` hasta que la API relaje el requisito.
+   */
   confirmarDesvincular(): void {
     const actorId = this.actorADesvincular();
     const codigo = this.codigo();
-    const motivo = this.motivoBaja().trim();
-    if (!actorId || !codigo) return;
-    if (!motivo) {
-      this.errorBaja.set('El motivo de la desvinculación es obligatorio.');
-      return;
-    }
+    if (!actorId || !codigo || this.enviandoBaja()) return;
 
     const url = urlApi(
-      `/v1/cases/${encodeURIComponent(codigo)}/actores/${encodeURIComponent(actorId)}?motivo=${encodeURIComponent(motivo)}`,
+      `/v1/cases/${encodeURIComponent(codigo)}/actores/${encodeURIComponent(actorId)}`,
     );
     this.enviandoBaja.set(true);
     this.errorBaja.set(null);
@@ -1877,8 +1778,8 @@ export class CasoDetallePage {
       next: () => {
         this.enviandoBaja.set(false);
         this.actorADesvincular.set(null);
-        this.motivoBaja.set('');
         this.actoresRecurso.recargar();
+        this.recurso.recargar();
         this.avisoActores.set('Actor desvinculado del caso. El histórico se conserva.');
       },
       error: (fallo: unknown) => {
@@ -1896,31 +1797,6 @@ export class CasoDetallePage {
     // El mensaje de `503 MIGRACION_PENDIENTE` se muestra tal cual: explica qué
     // migración falta y evita que el usuario crea que el fallo es suyo.
     return error.message;
-  }
-
-  /* ----------------------------------------------------------------------- *
-   * Matriz demandas — intervenciones
-   * --------------------------------------------------------------------- */
-
-  celdaMatriz(fila: MatrizFila, clave: string): MatrizCelda {
-    return fila.celdas[clave] ?? { total: null, declaracion: 'Sin vínculo declarado' };
-  }
-
-  totalCelda(fila: MatrizFila, clave: string): string {
-    const celda = this.celdaMatriz(fila, clave);
-    return celda.total === null ? '—' : String(celda.total);
-  }
-
-  descargarMatrizCsv(): void {
-    const codigo = this.codigo();
-    if (!codigo) return;
-    if (!isPlatformBrowser(this.plataforma)) return;
-
-    const url = urlApi(`/v1/cases/${encodeURIComponent(codigo)}/matriz/csv`);
-    const enlace = document.createElement('a');
-    enlace.href = url;
-    enlace.rel = 'noopener';
-    enlace.click();
   }
 
   /** Impresión de la ficha (item 42): usa la hoja `@media print` del componente. */

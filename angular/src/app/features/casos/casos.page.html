@@ -64,35 +64,28 @@
       />
     </label>
 
-    <label class="select-filter">
-      Nivel de riesgo
-      <select
-        aria-label="Filtrar casos por nivel de riesgo"
-        [value]="filtros().riesgo"
-        (change)="cambiarRiesgo($event)"
+    <div class="tab-bar chips-en-linea" role="group" aria-label="Filtrar casos por nivel de riesgo">
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="filtros().riesgo === ''"
+        [attr.aria-pressed]="filtros().riesgo === ''"
+        (click)="seleccionarRiesgo('')"
       >
-        <option value="">Todos</option>
-        @for (opcion of riesgos(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().riesgo === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
-        }
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Nivel de conflictividad
-      <select
-        aria-label="Filtrar casos por nivel de conflictividad"
-        [value]="filtros().nivel"
-        (change)="cambiarNivel($event)"
+        Todos
+      </button>
+      @for (opcion of riesgos(); track opcion.valor) {
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="filtros().riesgo === opcion.valor"
+        [attr.aria-pressed]="filtros().riesgo === opcion.valor"
+        (click)="seleccionarRiesgo(opcion.valor)"
       >
-        <option value="">Todos</option>
-        @for (opcion of conflictividades(); track opcion.valor) {
-        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-        }
-      </select>
-    </label>
+        {{ opcion.etiqueta }}
+      </button>
+      }
+    </div>
 
     <label class="select-filter">
       Región
@@ -109,22 +102,24 @@
       </select>
     </label>
 
-    <label class="select-filter estado-final">
-      Estado
-      <select
-        aria-label="Filtrar casos por estado"
-        [value]="estadoSeleccionado()"
-        (change)="cambiarEstado($event)"
-      >
-        <option value="todos">Todos ({{ conteos().todos }})</option>
-        <option value="abiertos">Abiertos ({{ conteos().abiertos }})</option>
-        <option value="Resuelto">Resueltos ({{ conteos().resueltos }})</option>
-        <option value="Archivado">Archivados ({{ conteos().archivados }})</option>
-      </select>
+    <label class="edit-switch" [class.activo]="archivados()">
+      <span [class.activo]="!archivados()">Abiertos</span>
+      <input
+        type="checkbox"
+        role="switch"
+        [checked]="archivados()"
+        aria-label="Ver casos archivados en lugar de abiertos"
+        (change)="cambiarArchivados($event)"
+      />
+      <span class="edit-switch-track" aria-hidden="true">
+        <span class="edit-switch-thumb"></span>
+      </span>
+      <span [class.activo]="archivados()">Archivados</span>
     </label>
+
     <button
       type="button"
-      class="button-secondary"
+      class="link-button avanzado-enlace"
       [attr.aria-expanded]="avanzado()"
       aria-controls="filtros-avanzados"
       (click)="alternarAvanzado()"
@@ -136,19 +131,30 @@
   @if (avanzado() || filtrosAvanzadosActivos()) {
   <div class="filter-bar filter-bar-wrap" id="filtros-avanzados">
     <label class="select-filter">
-      Prioridad de atención
+      Nivel de conflictividad
       <select
-        aria-label="Filtrar casos por prioridad de atención"
-        (change)="cambiarPrioridad($event)"
+        aria-label="Filtrar casos por nivel de conflictividad"
+        [value]="filtros().nivel"
+        (change)="cambiarNivel($event)"
       >
-        <option value="" [selected]="filtros().prioridad === ''">Todas</option>
-        @for (opcion of prioridades(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().prioridad === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
+        <option value="">Todos</option>
+        @for (opcion of conflictividades(); track opcion.valor) {
+        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
         }
       </select>
     </label>
+
+    <div class="tab-bar chips-en-linea" role="group" aria-label="Filtrar casos resueltos">
+      <button
+        type="button"
+        class="tab-button"
+        [class.active]="resueltosActivo()"
+        [attr.aria-pressed]="resueltosActivo()"
+        (click)="alternarResueltos()"
+      >
+        Resueltos ({{ conteos().resueltos }})
+      </button>
+    </div>
 
     <label class="select-filter">
       Alcance
@@ -157,43 +163,6 @@
         @for (opcion of alcances(); track opcion.valor) {
         <option [value]="opcion.valor" [selected]="filtros().alcance === opcion.valor">
           {{ opcion.etiqueta }}
-        </option>
-        }
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Naturaleza
-      <select
-        aria-label="Filtrar casos por naturaleza: territorial o nacional o sectorial"
-        (change)="cambiarNaturaleza($event)"
-      >
-        <option value="" [selected]="filtros().naturaleza === ''">Todas</option>
-        @for (opcion of naturalezas(); track opcion.valor) {
-        <option [value]="opcion.valor" [selected]="filtros().naturaleza === opcion.valor">
-          {{ opcion.etiqueta }}
-        </option>
-        }
-        <option value="Sin declarar" [selected]="filtros().naturaleza === 'Sin declarar'">
-          Sin declarar
-        </option>
-      </select>
-    </label>
-
-    <label class="select-filter">
-      Unidad responsable
-      <select
-        aria-label="Filtrar casos por unidad orgánica responsable"
-        (change)="cambiarUnidad($event)"
-      >
-        <option value="" [selected]="filtros().unidad === ''">Todas</option>
-        @for (opcion of unidades(); track opcion.valor) {
-        <option
-          [value]="opcion.valor"
-          [selected]="filtros().unidad === opcion.valor"
-          [title]="opcion.etiqueta"
-        >
-          {{ opcion.valor }}
         </option>
         }
       </select>
@@ -348,9 +317,9 @@
       <p class="case-summary">{{ caso.resumen || 'Sin resumen registrado.' }}</p>
 
       <div class="case-card-bottom">
-        <span class="status-badge" [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
+        <span [class]="claseRiesgo(caso)">
           <span class="status-dot"></span>
-          R: {{ caso.riesgo }}
+          R: {{ riesgoMostrado(caso) }}
         </span>
         <span
           title="Fecha de última actualización del registro; en los casos del legado es la fecha en que se cargaron."
@@ -378,9 +347,7 @@
           <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Caso</th>
           <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
           <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
-          <th scope="col" [appThOrden]="'prioridad'" [orden]="orden">Prioridad</th>
           <th scope="col" [appThOrden]="'riesgo'" [orden]="orden">Riesgo</th>
-          <th scope="col" [appThOrden]="'unidad'" [orden]="orden">Unidad</th>
           <th scope="col" [appThOrden]="'etapa'" [orden]="orden">Etapa</th>
           <th scope="col" [appThOrden]="'inicio'" [orden]="orden">Inicio</th>
         </tr>
@@ -402,9 +369,7 @@
           </td>
           <td>{{ caso.region || '—' }}</td>
           <td>{{ caso.estado }}</td>
-          <td>{{ caso.prioridad }}</td>
-          <td>{{ caso.riesgo }}</td>
-          <td>{{ caso.unidadResponsable || '—' }}</td>
+          <td>{{ riesgoMostrado(caso) }}</td>
           <td>{{ caso.etapa }}</td>
           <td [attr.title]="caso.inicio ? null : 'Sin fecha de inicio registrada'">
             {{ caso.inicio ? fechaTexto(caso.inicio) : '—' }}
