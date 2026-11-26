@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 
+import { filtroTexto } from "../busqueda";
 import { ApiError } from "../errors";
 import type { DbSession } from "../tenant";
 
@@ -102,16 +103,21 @@ export async function listarReuniones(
   const params: unknown[] = [];
   const where: string[] = [];
 
-  if (termino) {
-    params.push(`%${termino}%`);
-    where.push(`(
-      core.normalizar_ref(coalesce(r.codigo_reunion, '')) like core.normalizar_ref($${params.length})
-      or core.normalizar_ref(coalesce(r.titulo, '')) like core.normalizar_ref($${params.length})
-      or core.normalizar_ref(coalesce(r.lugar, '')) like core.normalizar_ref($${params.length})
-      or core.normalizar_ref(coalesce(c.codigo_caso, '')) like core.normalizar_ref($${params.length})
-      or core.normalizar_ref(coalesce(c.nombre_caso, '')) like core.normalizar_ref($${params.length})
-    )`);
-  }
+  const porTexto = filtroTexto(
+    [
+      "coalesce(r.codigo_reunion, '')",
+      "coalesce(r.titulo, '')",
+      "coalesce(r.lugar, '')",
+      "coalesce(c.codigo_caso, '')",
+      "coalesce(c.nombre_caso, '')",
+    ],
+    termino,
+    (valor) => {
+      params.push(valor);
+      return `$${params.length}`;
+    },
+  );
+  if (porTexto) where.push(porTexto);
 
   const filtro = where.length ? `where ${where.join(" and ")}` : "";
 

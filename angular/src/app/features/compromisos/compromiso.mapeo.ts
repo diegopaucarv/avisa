@@ -117,6 +117,10 @@ export type Compromiso = {
   casoId: string | null;
   casoCodigo: string | null;
   casoTitulo: string | null;
+  /** Demanda que atiende el compromiso; `null` cuando no se vinculó ninguna. */
+  demandaId: string | null;
+  demandaCodigo: string | null;
+  demandaTexto: string | null;
   tipo: TipoCompromiso;
   clasificacionAlcance: ClasificacionAlcance | null;
   formalVerbal: FormalVerbal | null;
@@ -135,6 +139,12 @@ export type Compromiso = {
   alcance: string | null;
   tematica: string | null;
   atiendeGenero: boolean;
+  /** Usuario del punto focal cuando la API lo resuelve a una cuenta. */
+  puntoFocalUsuarioId: string | null;
+  /** Nombre declarado sin cuenta asociada; convive con `puntoFocalUsuarioId` nulo. */
+  puntoFocalTexto: string | null;
+  /** Nombre resuelto por el servidor o, si no lo hay, el texto libre. */
+  puntoFocal: string | null;
   evidenciaUri: string | null;
   criteriosSmart: unknown;
   documentoOrigenId: string | null;
@@ -338,6 +348,9 @@ export function aCompromiso(bruto: unknown): Compromiso {
     casoId: texto(registro, ['casoId', 'caso_id']),
     casoCodigo: texto(registro, ['casoCode', 'caso_code']),
     casoTitulo: texto(registro, ['casoTitulo', 'caso_titulo']),
+    demandaId: texto(registro, ['demandaId', 'demanda_id']),
+    demandaCodigo: texto(registro, ['demandaCodigo', 'demanda_codigo']),
+    demandaTexto: texto(registro, ['demandaTexto', 'demanda_texto']),
     tipo: tipoDe(texto(registro, ['tipo'])),
     ...atributosCompromisoDe(registro),
     nivelGobierno: nivelGobiernoDe(texto(registro, ['nivelGobierno'])),
@@ -357,6 +370,9 @@ export function aCompromiso(bruto: unknown): Compromiso {
     alcance: texto(registro, ['alcance']),
     tematica: texto(registro, ['tematica']),
     atiendeGenero: booleano(registro, ['atiendeGenero', 'atiende_genero']),
+    puntoFocalUsuarioId: texto(registro, ['puntoFocalUsuarioId', 'punto_focal_usuario_id']),
+    puntoFocalTexto: texto(registro, ['puntoFocalTexto', 'punto_focal_texto']),
+    puntoFocal: texto(registro, ['puntoFocal', 'punto_focal']),
     evidenciaUri: texto(registro, ['evidenciaUri', 'evidencia_uri']),
     criteriosSmart: leer(registro, ['criteriosSmart', 'criterios_smart']) ?? null,
     documentoOrigenId: texto(registro, ['documentoOrigenId', 'documento_origen_id']),
@@ -373,6 +389,43 @@ export function aCompromiso(bruto: unknown): Compromiso {
     proximoHito: aProximoHito(leer(registro, ['proximoHito', 'proximo_hito'])),
     vencido: booleano(registro, ['vencido']),
   };
+}
+
+/**
+ * Texto visible de la demanda vinculada: código y texto si llegan ambos, o el
+ * que exista. Sin vínculo no se estima nada: se declara «Sin demanda».
+ */
+export function etiquetaDemandaVinculada(
+  compromiso: Pick<Compromiso, 'demandaCodigo' | 'demandaTexto'>,
+): string {
+  const codigo = compromiso.demandaCodigo;
+  const textoDemanda = compromiso.demandaTexto;
+  if (codigo && textoDemanda) return `${codigo} · ${textoDemanda}`;
+  return codigo ?? textoDemanda ?? 'Sin demanda';
+}
+
+/**
+ * Nombre visible del punto focal: el resuelto por el servidor manda; después el
+ * texto libre. Sin ninguno de los dos se declara «Sin punto focal».
+ */
+export function etiquetaPuntoFocal(
+  compromiso: Pick<Compromiso, 'puntoFocal' | 'puntoFocalTexto'>,
+): string {
+  return compromiso.puntoFocal ?? compromiso.puntoFocalTexto ?? 'Sin punto focal';
+}
+
+/** Usuario sugerido para el punto focal, tal como lo entrega el directorio. */
+export type SugerenciaUsuario = { id: string; nombre: string };
+
+/**
+ * Fila del directorio de usuarios reducida a lo que necesita el sugeridor.
+ * Devuelve `null` cuando falta el id o el nombre: no se inventan cuentas.
+ */
+export function aSugerenciaUsuario(bruto: unknown): SugerenciaUsuario | null {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const id = texto(registro, ['id', 'usuarioId', 'usuario_id']);
+  const nombre = texto(registro, ['nombre', 'name']);
+  return id && nombre ? { id, nombre } : null;
 }
 
 /** `GET /api/v1/commitments/:id` envuelve compromiso, caso y documento. */

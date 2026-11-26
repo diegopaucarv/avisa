@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 
+import { filtroTexto } from "../busqueda";
 import { ApiError } from "../errors";
 
 /**
@@ -433,15 +434,12 @@ function construirWhere(
     );
   }
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(`(
-      core.normalizar_ref(v15.codigo_caso) like core.normalizar_ref(${like})
-      or core.normalizar_ref(v15.nombre_caso) like core.normalizar_ref(${like})
-      or core.normalizar_ref(mapa.codigo_excel) like core.normalizar_ref(${like})
-    )`);
-  }
+  const porTexto = filtroTexto(
+    ["v15.codigo_caso", "v15.nombre_caso", "mapa.codigo_excel"],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
 
   return where;
 }

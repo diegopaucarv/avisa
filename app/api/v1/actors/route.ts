@@ -17,7 +17,14 @@ import { withSession } from "@/lib/db/tenant";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const FILTERS = ["q", "naturaleza", "tipo", "region", "sort"] as const;
+const FILTERS = [
+  "q",
+  "naturaleza",
+  "tipo",
+  "region",
+  "organizacion",
+  "sort",
+] as const;
 
 export async function GET(request: Request) {
   try {

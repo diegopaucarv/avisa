@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 import { ApiError } from "../errors";
+import { filtroTexto } from "../busqueda";
 import { auditChange } from "../audit";
 import {
   NIVEL_PII,
@@ -92,6 +93,8 @@ export type ActorListQuery = {
   naturaleza?: string;
   tipo?: string;
   region?: string;
+  /** `actor_uid` (o `codigo_legado`) de la organización cuyos miembros se listan. */
+  organizacion?: string;
   page?: number;
   pageSize?: number;
   sort?: string;
@@ -1608,16 +1611,35 @@ export async function listActors(
     return `$${params.length}`;
   };
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(
-      `(core.normalizar_ref(a.nombre_actual) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(a.abreviatura, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(a.cargo_actual, '')) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    [
+      "a.nombre_actual",
+      "coalesce(a.abreviatura, '')",
+      "coalesce(a.cargo_actual, '')",
+    ],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
   if (query.naturaleza) where.push(`a.naturaleza = ${bind(query.naturaleza)}`);
   if (query.tipo) where.push(`ta.nombre = ${bind(query.tipo)}`);
   if (query.region) where.push(`rg.nombre = ${bind(query.region)}`);
+
+  const organizacion = query.organizacion?.trim();
+  if (organizacion) {
+    const org = bind(organizacion);
+    where.push(
+      `exists (
+         select 1
+           from core.actor_membresia mf
+           join core.actores fo on fo.actor_uid = mf.organizacion_uid
+          where mf.persona_uid = a.actor_uid
+            and (mf.organizacion_uid::text = ${org} or fo.codigo_legado = ${org})
+            and (mf.valid_from is null or mf.valid_from <= current_date)
+            and (mf.valid_to   is null or mf.valid_to   >= current_date)
+       )`,
+    );
+  }
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));
   const pageSize = Math.min(100, Math.max(1, Math.trunc(query.pageSize ?? 25)));
@@ -1644,6 +1666,49 @@ export async function listActors(
   };
 }
 
+/**
+ * Membresías vigentes de un lote de personas.
+ *
+ * La tabla del directorio pide la página entera en una sola llamada, igual que
+ * las fotos con `/v1/media`. Sólo se devuelven los vínculos vigentes hoy: los
+ * cerrados son historia, no pertenencia. Un actor sin vínculo no aparece y la
+ * interfaz declara el dato ausente.
+ */
+export async function listMembresiasDeActores(
+  client: PoolClient,
+  actorIds: readonly string[],
+): Promise<ActorMembresiaItem[]> {
+  const ids = actorIds.map((id) => id.trim()).filter(Boolean);
+  if (ids.length === 0) return [];
+
+  const result = await client.query(
+    `select m.persona_uid::text as actor_id,
+            org.actor_uid::text as organizacion_id,
+            org.nombre_actual as nombre,
+            m.cargo,
+            to_char(m.valid_from, 'YYYY-MM-DD') as desde,
+            to_char(m.valid_to, 'YYYY-MM-DD') as hasta
+       from core.actor_membresia m
+       join core.actores org on org.actor_uid = m.organizacion_uid
+      where m.persona_uid::text = any($1::text[])
+        and (m.valid_from is null or m.valid_from <= current_date)
+        and (m.valid_to   is null or m.valid_to   >= current_date)
+      order by m.persona_uid::text,
+               m.valid_from desc nulls last,
+               org.nombre_actual asc`,
+    [ids],
+  );
+
+  return result.rows.map((row) => ({
+    actorId: row.actor_id as string,
+    organizacionId: row.organizacion_id as string,
+    nombre: row.nombre as string,
+    cargo: (row.cargo as string | null) ?? null,
+    desde: fechaISO(row.desde),
+    hasta: fechaISO(row.hasta),
+  }));
+}
+
 /* ------------------------------------------------------------------ */
 /* Detalle                                                            */
 /* ------------------------------------------------------------------ */
@@ -1659,6 +1724,16 @@ export type ActorCase = {
 export type ActorOrganization = {
   id: string;
   nombre: string;
+};
+
+/** Pertenencia vigente de una persona a una organización (`core.actor_membresia`). */
+export type ActorMembresiaItem = {
+  actorId: string;
+  organizacionId: string;
+  nombre: string;
+  cargo: string | null;
+  desde: string | null;
+  hasta: string | null;
 };
 
 /**

@@ -413,3 +413,12 @@ html[data-theme='dark'] .empty-state {
 html[data-theme='dark'] .empty-state p {
   color: #aebbc8 !important;
 }
+
+/* ── Barra de búsqueda: foco visible ────────────────────────────────────────
+   El generador sólo traduce `border-color` (#233148 sobre #191e25 es
+   prácticamente invisible). Se recupera un anillo equivalente al
+   `input:focus-visible` global y se aclara el borde. */
+html[data-theme='dark'] .search-field:focus-within {
+  border-color: #6f8db5;
+  box-shadow: 0 0 0 3px #223040;
+}

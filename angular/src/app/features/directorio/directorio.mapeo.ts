@@ -89,6 +89,19 @@ export type ActorDirectorio = {
   ruc?: string | null;
 };
 
+/** Pertenencia vigente de una persona a una organización. */
+export type MembresiaActor = {
+  /** `core.actor_membresia.persona_uid`. */
+  actorId: string;
+  /** `core.actor_membresia.organizacion_uid`. */
+  organizacionId: string;
+  nombre: string;
+  cargo: string | null;
+  /** Fechas ISO `YYYY-MM-DD` del vínculo; `null` si no están declaradas. */
+  desde: string | null;
+  hasta: string | null;
+};
+
 /** `GET /api/v1/catalogs` reducido a lo que necesita el filtro de tipo. */
 export type OpcionCatalogo = {
   valor: string;
@@ -184,6 +197,24 @@ export function aActorDirectorio(bruto: unknown): ActorDirectorio {
     vigenciaDesde: fechaIso(texto(registro, ['vigenciaDesde', 'vigencia_desde'])),
     vigenciaHasta: fechaIso(texto(registro, ['vigenciaHasta', 'vigencia_hasta'])),
     ruc: texto(registro, ['ruc']),
+  };
+}
+
+/** Registro de `GET /api/v1/actors/membresias` → membresía del directorio. */
+export function aMembresiaActor(bruto: unknown): MembresiaActor | null {
+  if (!esRegistro(bruto)) return null;
+  const actorId = texto(bruto, ['actorId', 'actor_id']);
+  const organizacionId = texto(bruto, ['organizacionId', 'organizacion_id']);
+  const nombre = texto(bruto, ['nombre']);
+  if (!actorId || !organizacionId || !nombre) return null;
+
+  return {
+    actorId,
+    organizacionId,
+    nombre,
+    cargo: texto(bruto, ['cargo']),
+    desde: fechaIso(texto(bruto, ['desde'])),
+    hasta: fechaIso(texto(bruto, ['hasta'])),
   };
 }
 

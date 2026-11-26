@@ -1,11 +1,129 @@
 {
-  "fuente": "docs/01_requisitos/23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (1).xlsx",
+  "fuente": "docs/05_datos/23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (2) (1).xlsx",
   "generado_por": "scripts/matriz/parse_matriz.py",
-  "regla_bloques": "Bloque = fila con 'Nombre de Caso' (E) no vacía; los campos A..K se rellenan hacia abajo.",
+  "regla_bloques": "Bloque = fila con 'Nombre de Caso' no vacía (columna resuelta por encabezado); los campos de caso se rellenan hacia abajo.",
+  "columna_d": {
+    "encabezado": "Riesgo",
+    "columna_resuelta": "H",
+    "encabezado_aceptado": true,
+    "encabezados_validos": [
+      "Prioridad de Atención",
+      "Nivel de riesgo",
+      "Riesgo"
+    ],
+    "interpretacion": "nivel de riesgo del caso (A2)",
+    "mapa": {
+      "Urgente": "Alto",
+      "Moderado": "Medio",
+      "Bajo": "Bajo",
+      "Alto": "Alto",
+      "Medio": "Medio"
+    },
+    "destino": "core.casos.nivel_riesgo_id (prioridad_id no se toca)"
+  },
+  "columnas_resueltas": {
+    "n": {
+      "letra": "A",
+      "columna": 1
+    },
+    "departamento": {
+      "letra": "B",
+      "columna": 2
+    },
+    "sectorista": {
+      "letra": "C",
+      "columna": 3
+    },
+    "nivel_riesgo": {
+      "letra": "H",
+      "columna": 8
+    },
+    "nombre": {
+      "letra": "D",
+      "columna": 4
+    },
+    "narrativa": {
+      "letra": "E",
+      "columna": 5
+    },
+    "analisis": {
+      "letra": "F",
+      "columna": 6
+    },
+    "timestamp": {
+      "letra": "Q",
+      "columna": 17
+    },
+    "descripcion_riesgo": {
+      "letra": "G",
+      "columna": 7
+    },
+    "actores_estado": {
+      "letra": "I",
+      "columna": 9
+    },
+    "actores_sociedad": {
+      "letra": "J",
+      "columna": 10
+    },
+    "demanda": {
+      "letra": "K",
+      "columna": 11
+    },
+    "tematica": {
+      "letra": "L",
+      "columna": 12
+    },
+    "accion": {
+      "letra": "M",
+      "columna": 13
+    },
+    "medios": {
+      "letra": "X",
+      "columna": 24
+    },
+    "area": {
+      "letra": "O",
+      "columna": 15
+    },
+    "punto_focal": {
+      "letra": "P",
+      "columna": 16
+    },
+    "documentos": {
+      "letra": "Y",
+      "columna": 25
+    },
+    "hito": {
+      "letra": "R",
+      "columna": 18
+    },
+    "descripcion_hito": {
+      "letra": "S",
+      "columna": 19
+    },
+    "responsable_hito": {
+      "letra": "T",
+      "columna": 20
+    },
+    "fecha_planificada": {
+      "letra": "U",
+      "columna": 21
+    },
+    "fecha_real": {
+      "letra": "V",
+      "columna": 22
+    },
+    "estado_hito": {
+      "letra": "W",
+      "columna": 23
+    }
+  },
+  "columnas_por_defecto": [],
   "dimensiones_hoja": {
-    "filas": 1003,
-    "columnas": 28,
-    "merges": 408
+    "filas": 1000,
+    "columnas": 27,
+    "merges": 405
   },
   "conteos": {
     "casos": 37,
@@ -111,7 +229,7 @@
       "destino": null
     },
     {
-      "elemento": "Análisis de Caso (Canva), columna G",
+      "elemento": "Análisis de Caso (Canva)",
       "detalle": "32 hipervínculos a carpetas de Google Drive; es un enlace, no texto, y no existe columna de destino",
       "enlaces_duplicados": [
         "https://drive.google.com/drive/folders/1vtvQ0LcamPV4u6do_pkybTGo8GjCCTI8?usp=drive_link"
@@ -119,32 +237,27 @@
       "destino": "core.casos.link_reporte_pdf (discutible) / sin columna propia"
     },
     {
-      "elemento": "Responsable del Hito, columna U",
-      "detalle": "100 hitos traen responsable; core.hitos_compromiso no tiene columna de responsable",
-      "destino": null
-    },
-    {
-      "elemento": "Medios de Verificaciones, columna O",
-      "detalle": "es una instrucción ('Acción 1: Adjuntar'), no un adjunto ni una URI",
+      "elemento": "Medios de verificación",
+      "detalle": "es una instrucción/etiqueta ('Acción 1: Adjuntar'), no un adjunto ni una URI",
       "destino": "core.hitos_compromiso.descripcion_evidencia / link_evidencia (previo adjuntar)"
     },
     {
-      "elemento": "Documentos / Archivos / Otros, columna R",
+      "elemento": "Documentos / Archivos / Otros",
       "detalle": "etiqueta ('Documentos'), no un archivo",
       "destino": "core.documentos (previo alta del archivo)"
     },
     {
-      "elemento": "Timestamp de última actualización, columna H",
+      "elemento": "Estado/timestamp de última actualización",
       "detalle": "contiene estados ('No aplica', 'Pendiente', 'Actualizado'), no fechas",
       "destino": "core.casos.fecha_ultima_actualizacion (no aplicable)"
     },
     {
-      "elemento": "Temática de la demanda, columna M",
+      "elemento": "Temática de la demanda",
       "detalle": "7 demandas sin temática; no se hereda de la fila anterior",
       "destino": "core.demandas.tematica_id"
     },
     {
-      "elemento": "Estado Actual del hito, columna X",
+      "elemento": "Estado Actual del hito",
       "detalle": "43 hitos con 'No Cumplido', valor ausente de core.cat_estados_hito",
       "destino": "core.hitos_compromiso.estado_id"
     },
@@ -385,14 +498,9 @@
       "destino": null
     },
     {
-      "elemento": "Sectorista, columna C",
-      "detalle": "es un nombre; core.usuarios.nombre existe y la FK es punto_focal_usuario_id",
+      "elemento": "Sectorista",
+      "detalle": "es un nombre; el importador lo resuelve contra core.usuarios y, si no hay coincidencia inequívoca, deja NULL y lo declara (A1)",
       "destino": "core.usuarios + core.casos.punto_focal_usuario_id"
-    },
-    {
-      "elemento": "Prioridad de Atención vs Nivel de Riesgo, columna D",
-      "detalle": "D sólo trae Urgente/Moderado/Bajo (prioridad); el riesgo vive en otra hoja y con otra escala",
-      "destino": "core.casos.prioridad_id"
     }
   ],
   "advertencias_globales": [

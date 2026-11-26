@@ -53,6 +53,16 @@
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (filtros().organizacion) {
+  <div class="filtro-organizacion" role="status">
+    <span>
+      Actores de
+      <strong>{{ filtros().organizacionNombre || 'la organización seleccionada' }}</strong>
+    </span>
+    <button type="button" class="button-secondary" (click)="quitarFiltroOrganizacion()">
+      Quitar filtro
+    </button>
+  </div>
   }
 
   <div class="filter-bar filter-bar-wrap">
@@ -302,10 +312,20 @@
             }
           </td>
           <td class="actor-organizacion">
-            @if (actor.organizacionAncla || actor.abreviatura) {
+            @if (membresiasDe(actor).length > 0) {
+            <ul class="actor-organizaciones">
+              @for (membresia of membresiasDe(actor); track membresia.organizacionId) {
+              <li>
+                <strong>{{ membresia.nombre }}</strong>
+                @if (membresia.cargo) { <small>{{ membresia.cargo }}</small> }
+              </li>
+              }
+            </ul>
+            } @else if (actor.organizacionAncla || actor.abreviatura) {
             <strong>{{ actor.organizacionAncla || actor.abreviatura }}</strong>
-            } @if (actor.cargo) { <small>{{ actor.cargo }}</small> } @if (!actor.organizacionAncla
-            && !actor.abreviatura && !actor.cargo) { {{ sinDato }} }
+            @if (actor.cargo) { <small>{{ actor.cargo }}</small> } } @else if (actor.cargo) {
+            <small>{{ actor.cargo }}</small>
+            } @else { {{ sinDato }} }
           </td>
           <td>{{ actor.region || sinDato }}</td>
           <td class="col-acciones" (click)="$event.stopPropagation()">
@@ -375,6 +395,7 @@
   } @if (seleccionado(); as actorAbierto) {
   <app-actor-panel
     [actor]="actorAbierto"
+    [membresias]="membresiasDe(actorAbierto)"
     [editarInicial]="editarAlAbrir()"
     [enLista]="estaEnLista(actorAbierto)"
     (cerrar)="cerrarPanel()"

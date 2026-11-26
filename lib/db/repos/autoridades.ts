@@ -1,5 +1,7 @@
 import type { PoolClient } from "pg";
 
+import { filtroTexto } from "../busqueda";
+
 /**
  * Directorio · «Autoridades y agentes» (solo lectura).
  *
@@ -411,15 +413,12 @@ export async function listAutoridades(
     return `$${params.length}`;
   };
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(
-      `(core.normalizar_ref(c.nombre) like core.normalizar_ref(${like})
-        or core.normalizar_ref(coalesce(c.cargo, '')) like core.normalizar_ref(${like})
-        or core.normalizar_ref(coalesce(c.email, '')) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    ["c.nombre", "coalesce(c.cargo, '')", "coalesce(c.email, '')"],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
 
   const tipo = normalizarTipo(query.tipo);
   if (tipo) where.push(`c.tipo = ${bind(tipo)}`);

@@ -73,9 +73,14 @@ export class AtajosService {
     );
   }
 
-  /** Primer `input[type="search"]` visible o, en su defecto, `.search-field input`. */
+  /** Primer `input[type="search"]` visible o, en su defecto, la barra global. */
   private buscadorDeLaLista(): HTMLInputElement | null {
-    return this.primerVisible('input[type="search"]') ?? this.primerVisible('.search-field input');
+    return (
+      this.primerVisible('input[type="search"]') ??
+      this.primerVisible('.search-field input') ??
+      // Buscador de territorio: es un `combobox` de texto, no `type="search"`.
+      this.primerVisible('input[role="combobox"]')
+    );
   }
 
   private primerVisible(selector: string): HTMLInputElement | null {
@@ -90,12 +95,16 @@ export class AtajosService {
     if (!this.router.url.startsWith('/busqueda')) {
       await this.router.navigateByUrl('/busqueda');
     }
-    // El componente es lazy y el <input> aparece tras el primer render.
-    setTimeout(() => {
+    // El componente es lazy: un único `setTimeout` fijo fallaba si el chunk
+    // tardaba más en cargar. Se reintenta durante ~1 s hasta encontrarlo.
+    for (let intento = 0; intento < 20; intento += 1) {
       const campo = this.primerVisible('input[type="search"]');
-      if (!campo) return;
-      campo.focus();
-      campo.select();
-    }, 60);
+      if (campo) {
+        campo.focus();
+        campo.select();
+        return;
+      }
+      await new Promise((listo) => setTimeout(listo, 50));
+    }
   }
 }

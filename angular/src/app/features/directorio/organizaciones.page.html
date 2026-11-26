@@ -124,6 +124,18 @@
     <ng-template appCeldaTabla="ruc" let-fila>
       <span class="org-razon">{{ rucRazon(fila) }}</span>
     </ng-template>
+
+    <ng-template appCeldaTabla="actores" let-fila>
+      <button
+        type="button"
+        class="button-secondary boton-ver-actores"
+        [attr.aria-label]="'Ver los actores de ' + fila.nombre"
+        [attr.title]="'Ver los actores de ' + fila.nombre"
+        (click)="verActores(fila, $event)"
+      >
+        Ver actores
+      </button>
+    </ng-template>
   </app-tabla>
   } @if (total() > 0 && estado() !== "error") {
   <app-paginacion
@@ -239,6 +251,17 @@
               <dd>{{ fecha(org.fechaConstitucion) }}</dd>
             </div>
           </dl>
+        </section>
+
+        <section class="ficha-seccion" aria-labelledby="organizacion-panel-actores">
+          <h3 id="organizacion-panel-actores">Actores</h3>
+          <p class="ficha-vacio">
+            Personas del directorio con pertenencia vigente a esta organización.
+          </p>
+          <button type="button" class="button-secondary" (click)="verActores(org)">
+            <app-icono nombre="actores" [tamano]="14" />
+            Ver la lista de actores
+          </button>
         </section>
 
         <section class="ficha-seccion" aria-labelledby="organizacion-panel-vigencia">

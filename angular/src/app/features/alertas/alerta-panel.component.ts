@@ -356,12 +356,18 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
     .actor-buscador-input {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 8px;
-      border: 1px solid #dde5ec;
-      border-radius: 7px;
-      background: #f9fbfd;
-      color: #8b97a1;
+      gap: 8px;
+      height: var(--search-alto);
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--paper);
+      color: var(--muted);
+    }
+
+    .actor-buscador-input:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 22%, transparent);
     }
 
     .actor-buscador-input input {
@@ -369,8 +375,9 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
       min-width: 0;
       border: 0;
       background: transparent;
-      color: #17283a;
+      color: var(--ink);
       font: inherit;
+      font-size: 13px;
       outline: none;
     }
 

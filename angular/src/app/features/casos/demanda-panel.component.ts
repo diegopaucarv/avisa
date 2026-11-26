@@ -10,6 +10,7 @@ import {
   input,
   output,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 
@@ -17,17 +18,45 @@ import type { DemandaCaso } from '../../dominio/mapeo';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { ESTADOS_DEMANDA } from './demanda-sin-caso.mapeo';
 
+/** Opción del catálogo de temáticas. El `id` es lo que viaja como `tematicaId`. */
+export type OpcionTematicaDemanda = {
+  id: number;
+  nombre: string;
+};
+
+/** Demanda con su temática ya resuelta por la API (`A4`). */
+export type DemandaConTematica = DemandaCaso & {
+  tematica: string | null;
+  tematicaId: number | null;
+};
+
 /**
  * Cuerpo parcial de `POST /api/v1/demandas` (alta) y
  * `PATCH /api/v1/demandas/:id` (edición). Las demandas se registran como un
  * único texto (`descripcion`) desde el ajuste del 22 nov: las 3P se retiraron
  * de la interfaz y ya no viajan en el cuerpo.
+ *
+ * `tematicaId` es obligatorio en el contrato nuevo (la API responde 422 sin
+ * temática). `tematica` viaja con el nombre porque el repositorio anterior
+ * resolvía la temática por id o por nombre; enviar ambos mantiene la escritura
+ * correcta durante el despliegue en paralelo de la API.
  */
 export type CuerpoDemanda = {
   casoCode?: string;
   descripcion?: string | null;
   estado?: string;
+  tematicaId?: number | null;
+  tematica?: string | null;
 };
+
+/** Compara nombres de temática sin tildes ni mayúsculas. */
+function normalizarTematica(valor: string): string {
+  return valor
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+}
 
 type BorradorDemanda = {
   demanda: string;
@@ -125,9 +154,12 @@ type CampoBorrador = keyof BorradorDemanda;
   `,
 })
 export class DemandaPanelComponent {
-  readonly demanda = input<DemandaCaso | null>(null);
+  readonly demanda = input<DemandaConTematica | null>(null);
   readonly codigoCaso = input<string>('');
   readonly organizaciones = input<readonly string[]>([]);
+  /** Catálogo de temáticas (`id` + nombre) que resuelve el contenedor. */
+  readonly tematicas = input<readonly OpcionTematicaDemanda[]>([]);
+  readonly cargandoTematicas = input(false);
   readonly puedeModificar = input(true);
   readonly guardando = input(false);
   readonly errorGuardado = input<string | null>(null);
@@ -140,6 +172,28 @@ export class DemandaPanelComponent {
     estado: 'Pendiente',
   });
   readonly mensajeLocal = signal<string | null>(null);
+
+  /** Temática elegida; `null` hasta que el usuario o la carga inicial la fijen. */
+  readonly tematicaId = signal<number | null>(null);
+
+  /** Nombre de la temática elegida; acompaña al id en el cuerpo. */
+  private readonly tematicaNombre = computed(() => {
+    const id = this.tematicaId();
+    if (id === null) return null;
+    return this.tematicas().find((opcion) => opcion.id === id)?.nombre ?? null;
+  });
+
+  /**
+   * Temática con la que abre la edición. Prefiere el `tematicaId` que ya trae
+   * la demanda y, si el contrato sólo trae el nombre, lo resuelve contra el
+   * catálogo en cuanto termina de cargar.
+   */
+  private readonly tematicaInicial = computed<number | null>(() => {
+    const demanda = this.demanda();
+    if (!demanda) return null;
+    if (typeof demanda.tematicaId === 'number') return demanda.tematicaId;
+    return this.idDeTematica(demanda.tematica);
+  });
 
   /**
    * Valores admitidos por `ESTADOS_ATENCION` en `lib/db/repos/demandas.ts`
@@ -177,6 +231,29 @@ export class DemandaPanelComponent {
         estado: demanda?.estado?.trim() || 'Pendiente',
       });
     });
+
+    // La temática inicial se resuelve con el catálogo ya cargado, sin pisar una
+    // elección explícita del usuario (si `tematicaId` ya tiene valor, no se toca).
+    effect(() => {
+      const inicial = this.tematicaInicial();
+      if (untracked(() => this.tematicaId()) !== null) return;
+      if (inicial !== null) this.tematicaId.set(inicial);
+    });
+  }
+
+  /** Id del catálogo que corresponde a un nombre de temática; `null` si no hay. */
+  private idDeTematica(nombre: string | null | undefined): number | null {
+    const buscado = normalizarTematica(nombre ?? '');
+    if (!buscado) return null;
+    const opcion = this.tematicas().find(
+      (candidata) => normalizarTematica(candidata.nombre) === buscado,
+    );
+    return opcion?.id ?? null;
+  }
+
+  elegirTematica(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    this.tematicaId.set(valor ? Number(valor) : null);
   }
 
   campo(clave: CampoBorrador, evento: Event): void {
@@ -203,6 +280,15 @@ export class DemandaPanelComponent {
       return;
     }
 
+    // La temática es obligatoria en el contrato nuevo: se comprueba antes de
+    // enviar para no depender del 422 de la API.
+    const tematicaId = this.tematicaId();
+    if (tematicaId === null) {
+      this.mensajeLocal.set('La temática es obligatoria.');
+      return;
+    }
+    const tematica = this.tematicaNombre();
+
     if (!actual) {
       const casoCode = this.codigoCaso().trim();
       if (!casoCode) {
@@ -210,11 +296,13 @@ export class DemandaPanelComponent {
         return;
       }
 
-      // Alta: `POST /api/v1/demandas` exige `descripcion` no vacía.
+      // Alta: `POST /api/v1/demandas` exige `descripcion` no vacía y temática.
       const cambios: CuerpoDemanda = {
         casoCode,
         descripcion: texto,
         estado: estado || 'Pendiente',
+        tematicaId,
+        ...(tematica ? { tematica } : {}),
       };
 
       this.mensajeLocal.set(null);
@@ -222,17 +310,25 @@ export class DemandaPanelComponent {
       return;
     }
 
-    // Edición: sólo los campos que cambian. La descripción es el texto de la
-    // demanda y no se vacía: el cuerpo del `PATCH` la exige.
+    // Edición: sólo los campos que cambian, salvo la temática, que viaja
+    // siempre porque el contrato nuevo la exige también al editar. La
+    // descripción no se vacía: el cuerpo del `PATCH` la exige.
     const anterior = (actual.descripcion ?? actual.problema ?? '').trim();
-    const cambios: CuerpoDemanda = {};
-    if (texto !== anterior) cambios.descripcion = texto;
-    if (estado && estado !== (actual.estado ?? '')) cambios.estado = estado;
+    const cambiaDemanda = texto !== anterior;
+    const cambiaEstado = Boolean(estado) && estado !== (actual.estado ?? '');
+    const cambiaTematica = tematicaId !== this.tematicaInicial();
 
-    if (Object.keys(cambios).length === 0) {
+    if (!cambiaDemanda && !cambiaEstado && !cambiaTematica) {
       this.mensajeLocal.set('No hay cambios que guardar.');
       return;
     }
+
+    const cambios: CuerpoDemanda = {
+      tematicaId,
+      ...(tematica ? { tematica } : {}),
+    };
+    if (cambiaDemanda) cambios.descripcion = texto;
+    if (cambiaEstado) cambios.estado = estado;
 
     this.mensajeLocal.set(null);
     this.guardar.emit(cambios);

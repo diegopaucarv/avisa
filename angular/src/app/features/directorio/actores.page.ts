@@ -50,9 +50,11 @@ import { crearCsvPadronAsistencia } from './padron-asistencia';
 import {
   aActorDirectorio,
   aCatalogosDirectorio,
+  aMembresiaActor,
   SIN_DATO,
   type ActorDirectorio,
   type CatalogosDirectorio,
+  type MembresiaActor,
 } from './directorio.mapeo';
 import { HttpClient } from '@angular/common/http';
 
@@ -61,6 +63,8 @@ type FiltrosActores = {
   naturaleza: string;
   tipo: string;
   region: string;
+  organizacion: string;
+  organizacionNombre: string;
   pagina: number;
   tamano: number;
 };
@@ -70,9 +74,14 @@ const FILTROS_INICIALES: FiltrosActores = {
   naturaleza: '',
   tipo: '',
   region: '',
+  organizacion: '',
+  organizacionNombre: '',
   pagina: 1,
   tamano: TAMANO_PAGINA,
 };
+
+/** Referencia estable para «sin membresías»; evita arrays nuevos en cada lectura. */
+const SIN_MEMBRESIAS: MembresiaActor[] = [];
 
 /**
  * Directorio · Actores.
@@ -227,6 +236,34 @@ const FILTROS_INICIALES: FiltrosActores = {
       color: inherit;
       font-size: 12px;
       font-weight: 400;
+    }
+
+    .actor-organizaciones {
+      display: grid;
+      gap: 3px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .actor-organizaciones li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .filtro-organizacion {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 12px;
+      padding: 8px 12px;
+      border: 1px solid #e8edf1;
+      border-radius: 8px;
+      background: #f7fafc;
+      font-size: 13px;
     }
 
     .col-foto {
@@ -528,6 +565,8 @@ export class ActoresPage {
         q: params.get('q') ?? '',
         tipo: params.get('tipo') ?? '',
         region: params.get('region') ?? '',
+        organizacion: params.get('organizacion') ?? '',
+        organizacionNombre: params.get('organizacionNombre') ?? '',
         pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
         tamano: Math.min(
           100,
@@ -560,6 +599,7 @@ export class ActoresPage {
         naturaleza: filtros.naturaleza,
         tipo: filtros.tipo,
         region: filtros.region,
+        organizacion: filtros.organizacion,
       });
     },
     esquema: (bruto) => {
@@ -580,7 +620,8 @@ export class ActoresPage {
   private readonly accesores: Record<string, (actor: ActorDirectorio) => unknown> = {
     nombre: (actor) => actor.nombre,
     region: (actor) => actor.region,
-    organizacion: (actor) => actor.organizacionAncla ?? actor.cargo,
+    organizacion: (actor) =>
+      this.membresiasDe(actor)[0]?.nombre ?? actor.organizacionAncla ?? actor.cargo,
   };
 
   readonly filasVisibles = computed(() => this.orden.ordenar(this.actores(), this.accesores));
@@ -617,6 +658,43 @@ export class ActoresPage {
   fotoDe(actorId: string): Foto | null {
     return fotoPrincipal(this.fotosPorActor().get(actorId) ?? []);
   }
+
+  /**
+   * Membresías vigentes de la página visible en una sola petición (`actorIds`),
+   * igual que las fotos. Si falla, la columna cae al ancla del listado y la
+   * tabla sigue funcionando.
+   */
+  private readonly membresiasPagina = consulta<Map<string, MembresiaActor[]>>({
+    fuente: () => {
+      const ids = this.idsVisibles();
+      if (ids.length === 0) return null;
+      return urlConParametros(urlApi('/v1/actors/membresias'), {
+        actorIds: ids.join(','),
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      const mapa = new Map<string, MembresiaActor[]>();
+      for (const item of coleccion.elementos) {
+        const membresia = aMembresiaActor(item);
+        if (!membresia) continue;
+        const actuales = mapa.get(membresia.actorId) ?? [];
+        actuales.push(membresia);
+        mapa.set(membresia.actorId, actuales);
+      }
+      return mapa;
+    },
+  });
+
+  readonly membresiasPorActor = computed<ReadonlyMap<string, MembresiaActor[]>>(
+    () => this.membresiasPagina.valor() ?? new Map<string, MembresiaActor[]>(),
+  );
+
+  /** Organizaciones vigentes del actor; `[]` cuando no declara ninguna. */
+  membresiasDe(actor: ActorDirectorio): MembresiaActor[] {
+    return this.membresiasPorActor().get(actor.id) ?? SIN_MEMBRESIAS;
+  }
+
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
 
@@ -862,6 +940,16 @@ export class ActoresPage {
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {},
+    });
+  }
+
+  /** Quita sólo el filtro por organización y conserva el resto de filtros. */
+  quitarFiltroOrganizacion(): void {
+    void this.router.navigate([], {
+      relativeTo: this.ruta,
+      queryParams: { organizacion: null, organizacionNombre: null, pagina: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 

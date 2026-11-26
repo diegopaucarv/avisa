@@ -4,8 +4,11 @@ import type { CompromisoCaso } from '../../dominio/mapeo';
 import {
   aCompromiso,
   aCompromisosCaso,
+  aSugerenciaUsuario,
   etiquetaClasificacionAlcance,
+  etiquetaDemandaVinculada,
   etiquetaFormalVerbal,
+  etiquetaPuntoFocal,
   formatearFecha,
   resolverVencimiento,
   situacionDe,
@@ -23,6 +26,9 @@ function compromiso(parcial: Partial<Compromiso> = {}): Compromiso {
     casoId: null,
     casoCodigo: null,
     casoTitulo: null,
+    demandaId: null,
+    demandaCodigo: null,
+    demandaTexto: null,
     tipo: 'Actividad',
     clasificacionAlcance: null,
     formalVerbal: null,
@@ -39,6 +45,9 @@ function compromiso(parcial: Partial<Compromiso> = {}): Compromiso {
     alcance: null,
     tematica: null,
     atiendeGenero: false,
+    puntoFocalUsuarioId: null,
+    puntoFocalTexto: null,
+    puntoFocal: null,
     evidenciaUri: null,
     criteriosSmart: null,
     documentoOrigenId: null,
@@ -258,6 +267,98 @@ describe('columnas nuevas del compromiso', () => {
     expect(leido.hitos[1].responsableTexto).toBe('FONDEPES');
     expect(leido.hitos[1].fechaTexto).toBe('02.01.2026');
     expect(leido.hitos[1].fechaRealTexto).toBe('03.01.2026');
+  });
+});
+
+describe('demanda y punto focal del compromiso', () => {
+  it('lee la demanda y el punto focal en camelCase', () => {
+    const leido = aCompromiso({
+      id: 'comp-20',
+      demandaId: 'demanda-1',
+      demandaCodigo: 'DEM-001',
+      demandaTexto: 'Acceso al agua para el centro poblado',
+      puntoFocalUsuarioId: 'usuario-7',
+      puntoFocalTexto: null,
+      puntoFocal: 'Ana Quispe',
+    });
+
+    expect(leido.demandaId).toBe('demanda-1');
+    expect(leido.demandaCodigo).toBe('DEM-001');
+    expect(leido.demandaTexto).toBe('Acceso al agua para el centro poblado');
+    expect(leido.puntoFocalUsuarioId).toBe('usuario-7');
+    expect(leido.puntoFocal).toBe('Ana Quispe');
+  });
+
+  it('lee las grafas snake_case de la misma fila', () => {
+    const leido = aCompromiso({
+      id: 'comp-21',
+      demanda_id: 'demanda-2',
+      demanda_codigo: 'DEM-002',
+      demanda_texto: 'Mejora del servicio de saneamiento',
+      punto_focal_usuario_id: 'usuario-9',
+      punto_focal_texto: 'Equipo técnico del GORE',
+      punto_focal: 'Luis Ramos',
+    });
+
+    expect(leido.demandaId).toBe('demanda-2');
+    expect(leido.demandaCodigo).toBe('DEM-002');
+    expect(leido.demandaTexto).toBe('Mejora del servicio de saneamiento');
+    expect(leido.puntoFocalUsuarioId).toBe('usuario-9');
+    expect(leido.puntoFocalTexto).toBe('Equipo técnico del GORE');
+    expect(leido.puntoFocal).toBe('Luis Ramos');
+  });
+
+  it('deja null los campos nuevos cuando la fila no los trae', () => {
+    const leido = aCompromiso({ id: 'comp-22' });
+
+    expect(leido.demandaId).toBeNull();
+    expect(leido.demandaCodigo).toBeNull();
+    expect(leido.demandaTexto).toBeNull();
+    expect(leido.puntoFocalUsuarioId).toBeNull();
+    expect(leido.puntoFocalTexto).toBeNull();
+    expect(leido.puntoFocal).toBeNull();
+    expect(etiquetaDemandaVinculada(leido)).toBe('Sin demanda');
+    expect(etiquetaPuntoFocal(leido)).toBe('Sin punto focal');
+  });
+
+  it('compone código y texto de la demanda, y acepta sólo una de las dos partes', () => {
+    expect(
+      etiquetaDemandaVinculada({ demandaCodigo: 'DEM-003', demandaTexto: 'Título de la demanda' }),
+    ).toBe('DEM-003 · Título de la demanda');
+    expect(etiquetaDemandaVinculada({ demandaCodigo: 'DEM-004', demandaTexto: null })).toBe(
+      'DEM-004',
+    );
+    expect(etiquetaDemandaVinculada({ demandaCodigo: null, demandaTexto: 'Sólo texto' })).toBe(
+      'Sólo texto',
+    );
+  });
+
+  it('prefiere el nombre resuelto del punto focal sobre el texto libre', () => {
+    expect(etiquetaPuntoFocal({ puntoFocal: 'Ana Quispe', puntoFocalTexto: 'Ana' })).toBe(
+      'Ana Quispe',
+    );
+    expect(etiquetaPuntoFocal({ puntoFocal: null, puntoFocalTexto: 'Equipo técnico' })).toBe(
+      'Equipo técnico',
+    );
+  });
+});
+
+describe('aSugerenciaUsuario', () => {
+  it('lee id y nombre de una fila del directorio', () => {
+    expect(aSugerenciaUsuario({ id: 'usuario-1', nombre: 'Ana Quispe' })).toEqual({
+      id: 'usuario-1',
+      nombre: 'Ana Quispe',
+    });
+    expect(aSugerenciaUsuario({ usuario_id: 'usuario-2', name: 'Luis Ramos' })).toEqual({
+      id: 'usuario-2',
+      nombre: 'Luis Ramos',
+    });
+  });
+
+  it('descarta una fila sin id o sin nombre', () => {
+    expect(aSugerenciaUsuario({ nombre: 'Sin id' })).toBeNull();
+    expect(aSugerenciaUsuario({ id: 'usuario-3' })).toBeNull();
+    expect(aSugerenciaUsuario(null)).toBeNull();
   });
 });
 

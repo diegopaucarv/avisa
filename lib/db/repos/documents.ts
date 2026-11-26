@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
+import { filtroTexto } from "../busqueda";
 import { nextSequentialCode } from "../codes";
 import { ApiError } from "../errors";
 import { anularRegistro, restaurarRegistro } from "./anulacion";
@@ -248,13 +249,12 @@ function filtrosDocumento(
 ): string[] {
   const where: string[] = [];
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(
-      `(core.normalizar_ref(d.codigo) like core.normalizar_ref(${like}) or core.normalizar_ref(d.titulo) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(d.resumen_ejecutivo, '')) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    ["d.codigo", "d.titulo", "coalesce(d.resumen_ejecutivo, '')"],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);
   if (query.tipo) where.push(`td.codigo = ${bind(query.tipo)}`);
   if (query.estado === "sin_estado") {
@@ -287,13 +287,12 @@ function busquedaTexto(
   q: string | undefined,
   bind: (value: unknown) => string,
 ): string[] {
-  const search = q?.trim();
-  if (!search) return [];
-
-  const like = bind(`%${search}%`);
-  return [
-    `(core.normalizar_ref(${alias}.codigo) like core.normalizar_ref(${like}) or core.normalizar_ref(${alias}.titulo) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(${columnaResumen}, '')) like core.normalizar_ref(${like}))`,
-  ];
+  const porTexto = filtroTexto(
+    [`${alias}.codigo`, `${alias}.titulo`, `coalesce(${columnaResumen}, '')`],
+    q,
+    bind,
+  );
+  return porTexto ? [porTexto] : [];
 }
 
 function mapNormativa(row: Record<string, unknown>): NormativaListItem {

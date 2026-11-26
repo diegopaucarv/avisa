@@ -1,5 +1,7 @@
 import type { PoolClient } from "pg";
 
+import { palabrasDe } from "../busqueda";
+
 /**
  * Buscador territorial del alta: distritos del catálogo INEI y **lugares
  * operativos** que no son distrito.
@@ -103,7 +105,9 @@ export async function buscarTerritorio(
   // vez de `null`: un parámetro nulo sin tipo deja a Postgres sin poder
   // inferirlo y la consulta falla en el parseo.
   const porUbigeo = /^\d{1,6}$/.test(crudo) ? `${crudo}%` : "";
-  const contiene = `%${crudo}%`;
+  // Una palabra por patrón: «san juan» encuentra «San Juan de Lurigancho»
+  // (con `%san juan%` no aparecía porque el texto lleva «de» en medio).
+  const patrones = palabrasDe(crudo).map((palabra) => `%${palabra}%`);
   const empieza = `${crudo}%`;
 
   const distritos = await client.query<{
@@ -121,15 +125,17 @@ export async function buscarTerritorio(
        from core.distritos d
        join core.provincias p on p.id = d.provincia_id
        join core.regiones r on r.id = p.region_id
-      where core.normalizar_ref(d.nombre) like core.normalizar_ref($1)
-         or core.normalizar_ref(p.nombre) like core.normalizar_ref($1)
-         or core.normalizar_ref(r.nombre) like core.normalizar_ref($1)
+      where coalesce((select bool_and(
+                        core.normalizar_ref(d.nombre) like core.normalizar_ref(pal)
+                     or core.normalizar_ref(p.nombre) like core.normalizar_ref(pal)
+                     or core.normalizar_ref(r.nombre) like core.normalizar_ref(pal))
+                    from unnest($1::text[]) as t(pal)), true)
          or d.ubigeo like $2
       order by (core.normalizar_ref(d.nombre) like core.normalizar_ref($3)) desc,
                d.nombre asc,
                p.nombre asc
       limit $4`,
-    [contiene, porUbigeo, empieza, limite],
+    [patrones, porUbigeo, empieza, limite],
   );
 
   const lugares = await client.query<{
@@ -152,14 +158,16 @@ export async function buscarTerritorio(
        join core.provincias p on p.id = d.provincia_id
        join core.regiones r on r.id = p.region_id
       where l.operativo
-        and (core.normalizar_ref(l.nombre) like core.normalizar_ref($1)
-             or core.normalizar_ref(d.nombre) like core.normalizar_ref($1)
-             or core.normalizar_ref(p.nombre) like core.normalizar_ref($1)
-             or core.normalizar_ref(r.nombre) like core.normalizar_ref($1))
+        and coalesce((select bool_and(
+                        core.normalizar_ref(l.nombre) like core.normalizar_ref(pal)
+                     or core.normalizar_ref(d.nombre) like core.normalizar_ref(pal)
+                     or core.normalizar_ref(p.nombre) like core.normalizar_ref(pal)
+                     or core.normalizar_ref(r.nombre) like core.normalizar_ref(pal))
+                    from unnest($1::text[]) as t(pal)), true)
       order by (core.normalizar_ref(l.nombre) like core.normalizar_ref($2)) desc,
                l.nombre asc
       limit $3`,
-    [contiene, empieza, limite],
+    [patrones, empieza, limite],
   );
 
   return {

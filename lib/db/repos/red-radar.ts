@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 
 import { auditChange } from "../audit";
+import { filtroTexto } from "../busqueda";
 import { ApiError } from "../errors";
 import type { WriteSession } from "./alerts";
 
@@ -192,15 +193,12 @@ function filtrosSql(filtros: ColaFiltros, conEstado: boolean) {
   const hasta = fechaValida(filtros.hasta);
   if (hasta) where.push(`a.fecha_reporte <= ${bind(hasta)}::date`);
 
-  const busqueda = filtros.q?.trim();
-  if (busqueda) {
-    const like = bind(`%${busqueda}%`);
-    where.push(
-      `(core.normalizar_ref(a.codigo_alerta) like core.normalizar_ref(${like})
-        or core.normalizar_ref(a.titulo) like core.normalizar_ref(${like})
-        or core.normalizar_ref(coalesce(a.situacion_actual, '')) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    ["a.codigo_alerta", "a.titulo", "coalesce(a.situacion_actual, '')"],
+    filtros.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
 
   return { where, params, bind };
 }

@@ -2,15 +2,15 @@
   "meta": {
     "modo": "dry-run",
     "fuente": "MATRIZ_OAIPCS_2026",
-    "mapa_origen": "semilla_41",
+    "mapa_origen": "bd",
     "mapa_bloques": 34,
     "casos_json": 37,
-    "operables": 32,
+    "operables": 31,
     "estados": {
-      "operable": 32,
+      "operable": 31,
       "sin_destino": 3,
-      "anulado": 1,
-      "duplicado": 1
+      "duplicado": 2,
+      "anulado": 1
     },
     "insumos": {
       "casos": "C:\\Users\\Julia\\Downloads\\avisa\\scripts\\matriz\\salida\\casos.json",
@@ -31,26 +31,25 @@
     "casos": {
       "cifras": {
         "insertados": 0,
-        "actualizados": 28,
-        "omitidos": 9,
+        "actualizados": 31,
+        "omitidos": 6,
         "rechazados": 0,
         "total": 37
       },
       "motivos": {
         "omitidos": {
           "sin_destino": 3,
-          "caso_anulado": 1,
-          "sin_cambios": 4,
-          "duplicado_bloque_128": 1
+          "duplicado_bloque_128": 2,
+          "caso_anulado": 1
         },
         "rechazados": {}
       },
       "rechazos": [],
       "advertencias": [
         {
-          "codigo": "resumen_ejecutivo_error_excel",
-          "detalle": "resumen_ejecutivo con error de Excel; no se carga.",
-          "ocurrencias": 27,
+          "codigo": "estado_actualizacion_vacio",
+          "detalle": "casos.estado_actualizacion: estado/timestamp vacío, no se toca.",
+          "ocurrencias": 31,
           "filas": [
             3,
             16,
@@ -64,7 +63,6 @@
             39,
             42,
             47,
-            48,
             50,
             54,
             60,
@@ -76,17 +74,58 @@
             95,
             100,
             106,
+            110,
+            113
+          ]
+        },
+        {
+          "codigo": "resumen_ejecutivo_error_excel",
+          "detalle": "resumen_ejecutivo con error de Excel; no se carga.",
+          "ocurrencias": 26,
+          "filas": [
+            3,
+            16,
+            21,
+            22,
+            25,
+            27,
+            31,
+            37,
+            38,
+            39,
+            42,
+            47,
+            50,
+            54,
+            60,
+            74,
+            79,
+            85,
+            88,
+            93,
+            95,
+            100,
+            106,
+            110,
+            113
+          ]
+        },
+        {
+          "codigo": "sectorista_sin_usuario",
+          "detalle": "Sectorista sin usuario en core.usuarios: no se asigna (queda NULL si estaba vacío). texto='Daniel Vela'",
+          "ocurrencias": 3,
+          "filas": [
+            50,
+            106,
             110
           ]
         },
         {
-          "codigo": "estado_actualizacion_vacio",
-          "detalle": "casos.estado_actualizacion: timestamp vacío, no se toca.",
-          "ocurrencias": 4,
+          "codigo": "nivel_riesgo_sin_equivalencia",
+          "detalle": "nivel de riesgo sin equivalencia en el catálogo: 'Archivado'",
+          "ocurrencias": 2,
           "filas": [
             118,
-            122,
-            127,
             132
           ]
         }
@@ -109,8 +148,8 @@
       "rechazos": [],
       "advertencias": [
         {
-          "codigo": "demanda_tematica_sin_equivalencia",
-          "detalle": "Temática de demanda sin coincidencia exacta en cat_tematicas: se deja NULL (texto: 'Ordenanamiento y acceso territorial').",
+          "codigo": "demanda_tematica_errata_corregida",
+          "detalle": "Errata «Ordenanamiento» corregida a «Ordenamiento y acceso territorial» antes de buscar en cat_tematicas.",
           "ocurrencias": 5,
           "filas": [
             31,
@@ -124,16 +163,14 @@
     },
     "compromisos": {
       "cifras": {
-        "insertados": 41,
-        "actualizados": 0,
-        "omitidos": 4,
+        "insertados": 40,
+        "actualizados": 4,
+        "omitidos": 0,
         "rechazados": 4,
-        "total": 49
+        "total": 48
       },
       "motivos": {
-        "omitidos": {
-          "ya_existe": 4
-        },
+        "omitidos": {},
         "rechazados": {
           "sin_fecha_inicio": 4
         }
@@ -175,6 +212,38 @@
           ]
         },
         {
+          "codigo": "compromiso_sin_demanda",
+          "detalle": "Acciones cuya fila no trae demanda: compromisos.demanda_id queda NULL («Sin demanda»).",
+          "ocurrencias": 38,
+          "filas": [
+            21,
+            22,
+            25,
+            26,
+            27,
+            28,
+            30,
+            37,
+            38,
+            42,
+            47,
+            50,
+            51,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            78,
+            79,
+            85,
+            88
+          ]
+        },
+        {
           "codigo": "compromiso_sin_fecha_inicio",
           "detalle": "Compromisos rechazados por no tener fecha de inicio demostrable.",
           "ocurrencias": 4,
@@ -189,15 +258,15 @@
     },
     "hitos": {
       "cifras": {
-        "insertados": 87,
-        "actualizados": 0,
-        "omitidos": 7,
+        "insertados": 86,
+        "actualizados": 1,
+        "omitidos": 6,
         "rechazados": 1,
-        "total": 95
+        "total": 94
       },
       "motivos": {
         "omitidos": {
-          "ya_existe": 3,
+          "ya_existe": 2,
           "compromiso_rechazado": 4
         },
         "rechazados": {
@@ -216,9 +285,12 @@
         {
           "codigo": "usuario_no_resuelto",
           "detalle": "Nombres de usuario sin coincidencia en core.usuarios: se guarda el texto.",
-          "ocurrencias": 84,
+          "ocurrencias": 87,
           "filas": [
+            3,
             4,
+            5,
+            6,
             7,
             8,
             9,
@@ -239,10 +311,15 @@
             27,
             28,
             29,
-            30,
-            31,
-            32,
-            33
+            30
+          ]
+        },
+        {
+          "codigo": "hito_fecha_real_actualizada",
+          "detalle": "Hitos existentes con Fecha Real válida en el Excel: se completa fecha_real (B2).",
+          "ocurrencias": 1,
+          "filas": [
+            3
           ]
         },
         {
@@ -310,9 +387,9 @@
     },
     "nudos": {
       "cifras": {
-        "insertados": 146,
+        "insertados": 145,
         "actualizados": 0,
-        "omitidos": 36,
+        "omitidos": 37,
         "rechazados": 2,
         "total": 184
       },
@@ -321,6 +398,7 @@
           "repetido_identico": 24,
           "caso_sin_destino": 4,
           "compromiso_rechazado": 4,
+          "duplicado_bloque_128": 1,
           "caso_anulado": 4
         },
         "rechazados": {
@@ -345,7 +423,7 @@
         {
           "codigo": "nudo_vinculo_posicional",
           "detalle": "Nudos vinculados por posición en el bloque del reporte (la fila del nudo no coincide con la del hito).",
-          "ocurrencias": 134,
+          "ocurrencias": 133,
           "filas": [
             2,
             14,
@@ -430,8 +508,9 @@
         {
           "codigo": "nudo_caso_no_operable",
           "detalle": "Nudos de casos anulados, duplicados o sin mapeo: se omiten.",
-          "ocurrencias": 4,
+          "ocurrencias": 5,
           "filas": [
+            43,
             59,
             60,
             61,
@@ -615,11 +694,11 @@
     }
   },
   "total": {
-    "insertados": 419,
-    "actualizados": 28,
-    "omitidos": 75,
+    "insertados": 416,
+    "actualizados": 36,
+    "omitidos": 68,
     "rechazados": 9,
-    "total": 531
+    "total": 529
   },
   "decisiones_pendientes": [
     {
@@ -670,12 +749,12 @@
     {
       "id": "D10",
       "titulo": "Vínculo nudo -> compromiso por posición",
-      "detalle": "El nudo se vincula al compromiso cuyo hito tiene la misma fila; si la acción no tiene hitos, a la acción con esa fila. Cuando esa coincidencia falla se aplica el respaldo posicional dentro del bloque del reporte (134 nudos). Es un vínculo por posición, no una clave del Excel: debe revisarse."
+      "detalle": "El nudo se vincula al compromiso cuyo hito tiene la misma fila; si la acción no tiene hitos, a la acción con esa fila. Cuando esa coincidencia falla se aplica el respaldo posicional dentro del bloque del reporte (133 nudos). Es un vínculo por posición, no una clave del Excel: debe revisarse."
     },
     {
       "id": "D11",
       "titulo": "Temáticas fuera del catálogo",
-      "detalle": "8 demandas quedan con tematica_id NULL. El vocabulario del equipo (Recursos y Regulación, Socio-Ambiental, Ordenamiento...) se guarda como texto libre en los campos *_equipo; cat_tematicas no se modifica."
+      "detalle": "3 demandas quedan con tematica_id NULL. La temática se normaliza (minúsculas, sin tildes, errata «Ordenanamiento» corregida; 5 filas corregidas) y sólo se asigna si coincide con cat_tematicas; no se modifica el catálogo ni se usan campos *_equipo (migration/41 prohíbe añadirlos)."
     },
     {
       "id": "D12",
@@ -684,13 +763,33 @@
     },
     {
       "id": "D13",
-      "titulo": "Demandas sin vínculo a compromiso",
-      "detalle": "compromisos.demanda_id queda NULL: el Excel no relaciona cada acción con una demanda concreta."
+      "titulo": "Acciones sin demanda en su fila",
+      "detalle": "compromisos.demanda_id se vincula por fila (la demanda y la acción comparten fila). 38 acciones no traen demanda en su fila: quedan NULL y se marcan «Sin demanda» en el informe."
     },
     {
-      "id": "D14",
-      "titulo": "Migraciones 41/42 pendientes",
-      "detalle": "El esquema actual no tiene todo lo que el plan necesita; ver bloqueantes_apply. Mientras no se apliquen las migraciones, el plan es auditable pero no aplicable."
+      "id": "D17",
+      "titulo": "Nivel de riesgo desde la columna del caso (A2)",
+      "detalle": "Urgente/Alto→Alto(3), Moderado/Medio→Medio(2), Bajo→Bajo(1). 2 valores sin equivalencia (p. ej. «Archivado») no se asignan (NULL si no había valor) y se declaran. No se toca casos.prioridad_id."
+    },
+    {
+      "id": "D18",
+      "titulo": "Sectorista sin usuario (A1)",
+      "detalle": "3 casos tienen sectorista sin coincidencia inequívoca en core.usuarios: no se asigna (queda NULL si estaba vacío)."
+    },
+    {
+      "id": "D19",
+      "titulo": "Descripción del riesgo (A3)",
+      "detalle": "La descripción del riesgo de la hoja principal se carga en core.casos.descripcion_riesgo."
+    },
+    {
+      "id": "D20",
+      "titulo": "Fecha real de hitos (B2)",
+      "detalle": "1 hitos ya existentes reciben fecha_real cuando el Excel trae una fecha válida. Las fechas no ISO se conservan sólo como texto y se advierten."
+    },
+    {
+      "id": "D21",
+      "titulo": "Medios de verificación y documentos (B4/B3)",
+      "detalle": "Medios de verificación y Documentos se declaran como no persistibles (no hay tabla/columna adecuada). validacion_hito_raw no se escribe en ninguna columna (B3 no se implementa)."
     },
     {
       "id": "D15",
@@ -706,13 +805,13 @@
   "datos_sin_destino": [
     {
       "campo": "acciones[].medios_verificacion_raw",
-      "ocurrencias": 50,
-      "nota": "Es una instrucción ('Acción 1: Adjuntar'), no un adjunto ni una URI."
+      "ocurrencias": 31,
+      "nota": "Etiqueta de producto «Medios de verificación». Es una instrucción/etiqueta, no un adjunto ni una URI: core.medios no admite entidad_tipo 'compromiso' ni 'hito' y hitos_compromiso.descripcion_evidencia / link_evidencia son por hito y esperan evidencia. Se declara (B4)."
     },
     {
       "campo": "acciones[].documentos_raw",
-      "ocurrencias": 31,
-      "nota": "Etiqueta de columna del Excel; no identifica archivos."
+      "ocurrencias": 0,
+      "nota": "Etiqueta de columna del Excel; no identifica archivos y no se crea core.documentos (B4)."
     },
     {
       "campo": "acciones[].valores_extra_en_span",
@@ -725,19 +824,19 @@
       "nota": "Texto largo sin columna en core.casos."
     },
     {
-      "campo": "casos[].descripcion_riesgo",
-      "ocurrencias": 27,
-      "nota": "core.casos no tiene descripcion_riesgo; sólo alertas_tempranas."
+      "campo": "casos[].sectorista_metadatos_raw",
+      "ocurrencias": 37,
+      "nota": "Segundo nombre de sectorista en METADATOS CASOS; A1 usa la columna Sectorista de la hoja principal."
+    },
+    {
+      "campo": "reporte_avance.validacion_hito_raw",
+      "ocurrencias": 29,
+      "nota": "B3 no se implementa: se muestra en el informe como dato no persistible, no se escribe en ninguna columna."
     },
     {
       "campo": "casos[].actores_estado_raw / actores_sociedad_raw",
       "ocurrencias": 68,
       "nota": "Texto libre de actores; core.actores no tiene columna equivalente."
-    },
-    {
-      "campo": "casos[].prioridad",
-      "ocurrencias": 37,
-      "nota": "Columna D del Excel (Urgente/Moderado/Bajo); no se actualiza core.casos.prioridad_id."
     },
     {
       "campo": "casos[].nombre_oficial_metadatos",
@@ -765,16 +864,1482 @@
       "nota": "La mayoría son nulos o #REF!; sólo se carga el texto válido de casos.json."
     }
   ],
-  "bloqueantes_apply": [
-    {
-      "codigo": "migracion_41",
-      "detalle": "Falta ejecutar migration/41_matriz_equipo.sql: core.mapa_matriz_excel no existe. El plan del --dry-run usa la SEMILLA de la migración (34 bloques) y NO es aplicable."
+  "informe_por_caso": {
+    "casos": [
+      {
+        "bloque": 3,
+        "caso_codigo": "CS-PA-OAT-2024-02",
+        "codigo_excel": "CS-PA-REG-2024-01",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Uso de red de cortina de fondo en Cabo Blanco y Los Órganos",
+        "excel": {
+          "acciones": 5,
+          "hitos": 13,
+          "hitos_cumplido": 9,
+          "hitos_cumplido_con_fecha_real": 4,
+          "demandas": 7
+        },
+        "avisa": {
+          "compromisos": 4,
+          "hitos": 8,
+          "compromisos_avisa_historico": 4,
+          "hitos_avisa_historico": 8,
+          "hitos_cumplido": 6,
+          "hitos_con_fecha_real": 5
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 4,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 1,
+            "omit": 2,
+            "reject": 0
+          }
+        },
+        "duplicados": [
+          {
+            "tipo": "hito",
+            "excel_fila": 4,
+            "excel_codigo": "Hito 2",
+            "excel_texto": "Ejecución de evaluación in situ y recolección de datos",
+            "avisa_codigo": "CS-PA-OAT-2024-02_COMP001",
+            "avisa_texto": "Ejecución de evaluación in situ y recolección de datos, de los 5 entregables de dicha consultoría, según la información la consultoría el 31.08.2026, a presentado el 4 entregable.",
+            "similitud": 0.688,
+            "exacto": false,
+            "origen_dato": "AVISA_HISTORICO"
+          },
+          {
+            "tipo": "hito",
+            "excel_fila": 7,
+            "excel_codigo": "Hito 2",
+            "excel_texto": "Emisión de resolución ratificatoria",
+            "avisa_codigo": "CS-PA-OAT-2024-02_COMP002",
+            "avisa_texto": "Emisión y publicación de resolución ratificatoria",
+            "similitud": 0.875,
+            "exacto": false,
+            "origen_dato": "AVISA_HISTORICO"
+          }
+        ]
+      },
+      {
+        "bloque": 16,
+        "caso_codigo": "CS-PA-INF-2024-01",
+        "codigo_excel": "CS-PA-INF-2025-02",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Rehabilitación del Desembarcadero Pesquero Artesanal de Los Órganos",
+        "excel": {
+          "acciones": 1,
+          "hitos": 4,
+          "hitos_cumplido": 4,
+          "hitos_cumplido_con_fecha_real": 2,
+          "demandas": 3
+        },
+        "avisa": {
+          "compromisos": 3,
+          "hitos": 3,
+          "compromisos_avisa_historico": 3,
+          "hitos_avisa_historico": 3,
+          "hitos_cumplido": 3,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": [
+          {
+            "tipo": "accion",
+            "excel_fila": 16,
+            "excel_texto": "Reapertura de DPA de los órganos",
+            "avisa_codigo": "CS-PA-INF-2024-01_COMP001",
+            "avisa_texto": "Seguimiento de reapertura de DPA Los Órganos por DICAPI",
+            "similitud": 0.8,
+            "exacto": false,
+            "origen_dato": "AVISA_HISTORICO"
+          },
+          {
+            "tipo": "hito",
+            "excel_fila": 17,
+            "excel_codigo": "Hito 2",
+            "excel_texto": "Coordinación FONDEPES - DIREPRO para remodelación del DPA",
+            "avisa_codigo": "CS-PA-INF-2024-01_COMP002",
+            "avisa_texto": "Coordinación FONDEPES - DIREPRO para remodelación del DPA Los Órganos",
+            "similitud": 0.917,
+            "exacto": false,
+            "origen_dato": "AVISA_HISTORICO"
+          },
+          {
+            "tipo": "hito",
+            "excel_fila": 18,
+            "excel_codigo": "Hito 3",
+            "excel_texto": "Saneamiento físico legal",
+            "avisa_codigo": "CS-PA-INF-2024-01_COMP003",
+            "avisa_texto": "Seguimiento de habilitación de saneamiento físico legal del DPA Los Órganos",
+            "similitud": 0.714,
+            "exacto": false,
+            "origen_dato": "AVISA_HISTORICO"
+          },
+          {
+            "tipo": "hito",
+            "excel_fila": 19,
+            "excel_codigo": "Hito 4",
+            "excel_texto": "Seguimiento de firma de Convenio sobre DPA de los Órganos por el GORE Piura.",
+            "avisa_codigo": "CS-PA-INF-2024-01_COMP003",
+            "avisa_texto": "Seguimiento a suscripción de firma del Convenio de Gestión del DPA de los Órganos por el GORE Piura.",
+            "similitud": 0.889,
+            "exacto": false,
+            "origen_dato": "AVISA_HISTORICO"
+          }
+        ]
+      },
+      {
+        "bloque": 20,
+        "caso_codigo": "CS-PA-INF-2020-03",
+        "codigo_excel": "CS-PA-INF-2020-03",
+        "estado": "sin_destino",
+        "motivo": "sin_destino"
+      },
+      {
+        "bloque": 21,
+        "caso_codigo": "CS-PA-INF-2012-01",
+        "codigo_excel": "CS-PA-REG-2025-04",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Reubicación de embarcaciones del Muelle 5E - Terminal Norte Multipropósito del Callao",
+        "excel": {
+          "acciones": 1,
+          "hitos": 1,
+          "hitos_cumplido": 1,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 1,
+          "hitos": 0,
+          "compromisos_avisa_historico": 1,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 22,
+        "caso_codigo": "CS-PA-INF-2024-02",
+        "codigo_excel": "CS-PA-INF-2025-05",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Disputa por la administración de la Infraestructura Pesquera Artesanal de Chorrillos",
+        "excel": {
+          "acciones": 1,
+          "hitos": 3,
+          "hitos_cumplido": 1,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 25,
+        "caso_codigo": "CS-PA-ITE-2026-04",
+        "codigo_excel": "CS-PA-REG-2020-06",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Extracción de erizo rojo y alga palo en San Juan de Marcona",
+        "excel": {
+          "acciones": 2,
+          "hitos": 2,
+          "hitos_cumplido": 1,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 2
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 2,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 27,
+        "caso_codigo": "CS-PA-NOR-2025-01",
+        "codigo_excel": "CS-PA-REG-2025-07",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Implementación de la Ley N.° 31749 de pesca artesanal y tradicional",
+        "excel": {
+          "acciones": 3,
+          "hitos": 4,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 3,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 31,
+        "caso_codigo": "CS-PA-OAT-2026-01",
+        "codigo_excel": "CS-PA-REG-2024-08",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Ordenamiento de la pesquería del calamar gigante (pota)",
+        "excel": {
+          "acciones": 2,
+          "hitos": 6,
+          "hitos_cumplido": 6,
+          "hitos_cumplido_con_fecha_real": 2,
+          "demandas": 6
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 2,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 37,
+        "caso_codigo": "CS-PA-ITE-2026-01",
+        "codigo_excel": "CS-PA-REG-2026-09",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Afectación a la pesca artesanal por dragado en la Isla San Lorenzo - Callao",
+        "excel": {
+          "acciones": 1,
+          "hitos": 1,
+          "hitos_cumplido": 1,
+          "hitos_cumplido_con_fecha_real": 1,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 38,
+        "caso_codigo": "CS-PA-GOB-2026-01",
+        "codigo_excel": "CS-PA-REG-2025-10",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Seguridad y fiscalización pesquera en el litoral de Tumbes",
+        "excel": {
+          "acciones": 1,
+          "hitos": 1,
+          "hitos_cumplido": 1,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 1
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 1,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 39,
+        "caso_codigo": "CS-PA-DBE-2025-01",
+        "codigo_excel": "CS-PA-REG-2021-11",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Habilitación de áreas acuáticas y fortalecimiento de la maricultura en Sechura",
+        "excel": {
+          "acciones": 2,
+          "hitos": 1,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 3
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 2,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 42,
+        "caso_codigo": "CS-PA-GOB-2026-02",
+        "codigo_excel": "CS-PA-SOC-2016-12",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Ampliación del proceso de formalización pesquera en Piura y Lambayeque",
+        "excel": {
+          "acciones": 1,
+          "hitos": 1,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 1
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 1,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 43,
+        "caso_codigo": "CS-PA-REG-2019-13",
+        "codigo_excel": "CS-PA-REG-2019-13",
+        "estado": "sin_destino",
+        "motivo": "sin_destino"
+      },
+      {
+        "bloque": 47,
+        "caso_codigo": "CS-PA-OAT-2024-01",
+        "codigo_excel": "CS-PA-SOC-2023-14",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Rechazo al proyecto de exploración de hidrocarburos de ANADARKO (lotes Z-61, Z-62, Z-63)",
+        "excel": {
+          "acciones": 1,
+          "hitos": 1,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 1
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 48,
+        "caso_codigo": "CS-PA-REG-2022-15",
+        "codigo_excel": "CS-PA-REG-2022-15",
+        "estado": "duplicado",
+        "motivo": "duplicado_bloque_128"
+      },
+      {
+        "bloque": 49,
+        "caso_codigo": "CS-PA-REG-2024-16",
+        "codigo_excel": "CS-PA-REG-2024-16",
+        "estado": "sin_destino",
+        "motivo": "sin_destino"
+      },
+      {
+        "bloque": 50,
+        "caso_codigo": "CS-PA-INF-2025-02",
+        "codigo_excel": "CS-PA-REG-2019-17",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de Chimbote",
+        "excel": {
+          "acciones": 2,
+          "hitos": 4,
+          "hitos_cumplido": 1,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 2,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 54,
+        "caso_codigo": "CS-PA-ITE-2022-01",
+        "codigo_excel": "CS-PA-INF-2023-18",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Atención a pescadores artesanales afectados por el derrame de petróleo de la Refinería La Pampilla",
+        "excel": {
+          "acciones": 6,
+          "hitos": 2,
+          "hitos_cumplido": 2,
+          "hitos_cumplido_con_fecha_real": 1,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 6,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 60,
+        "caso_codigo": "CS-MI-INF-2025-01",
+        "codigo_excel": "CS-PA-SOC-2022-19",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Ocupación informal de terreno del Parque Industrial de Ancón (AAMEC)",
+        "excel": {
+          "acciones": 2,
+          "hitos": 4,
+          "hitos_cumplido": 3,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 2,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 64,
+        "caso_codigo": "CS-MI-ITE-2026-02",
+        "codigo_excel": "CS-MI-REG-2019-20",
+        "estado": "anulado",
+        "motivo": "caso_anulado",
+        "caso_nombre": "Descontento de MYPES por retrasos y presuntos actos de corrupción en Compras a MYPErú",
+        "excel": {
+          "acciones": 3,
+          "hitos": 9,
+          "hitos_cumplido": 7,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 74,
+        "caso_codigo": "CS-PA-INF-2025-04",
+        "codigo_excel": "CS-MI-REG-2019-21",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de Huacho",
+        "excel": {
+          "acciones": 1,
+          "hitos": 5,
+          "hitos_cumplido": 4,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 79,
+        "caso_codigo": "CS-PA-INF-2017-01",
+        "codigo_excel": "CS-MI-REG-2020-22",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de Supe",
+        "excel": {
+          "acciones": 1,
+          "hitos": 6,
+          "hitos_cumplido": 3,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 85,
+        "caso_codigo": "CS-PA-INF-2025-05",
+        "codigo_excel": "CS-PA-REG-2019-23",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal de San Juan de Marcona",
+        "excel": {
+          "acciones": 1,
+          "hitos": 3,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 88,
+        "caso_codigo": "CS-PA-OAT-2026-02",
+        "codigo_excel": "CS-PA-REG-2019-24",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Medidas de ordenamiento del recurso bonito y demandas de pescadores artesanales",
+        "excel": {
+          "acciones": 1,
+          "hitos": 5,
+          "hitos_cumplido": 4,
+          "hitos_cumplido_con_fecha_real": 2,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 93,
+        "caso_codigo": "CS-PA-OAT-2024-03",
+        "codigo_excel": "CS-PA-REG-2019-25",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Disconformidad de OSPAS de artes pasivas por cuotas de jurel y caballa asignadas a la flota de cerco",
+        "excel": {
+          "acciones": 1,
+          "hitos": 2,
+          "hitos_cumplido": 2,
+          "hitos_cumplido_con_fecha_real": 2,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 95,
+        "caso_codigo": "CS-PA-INF-2025-03",
+        "codigo_excel": "CS-PA-INF-2017-26",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Mejoramiento de infraestructura del Desembarcadero Pesquero Artesanal Faro Matarani",
+        "excel": {
+          "acciones": 1,
+          "hitos": 5,
+          "hitos_cumplido": 3,
+          "hitos_cumplido_con_fecha_real": 2,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 100,
+        "caso_codigo": "CS-PA-INF-2025-06",
+        "codigo_excel": "CS-PA-SOC-2019-27",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Culminación de infraestructura del Desembarcadero Pesquero Artesanal de Atico",
+        "excel": {
+          "acciones": 2,
+          "hitos": 6,
+          "hitos_cumplido": 1,
+          "hitos_cumplido_con_fecha_real": 1,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 2,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 106,
+        "caso_codigo": "CS-PA-INF-2025-01",
+        "codigo_excel": "CS-PA-SOC-2019-28",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Mejoramiento integral del Desembarcadero Pesquero Artesanal La Punchana",
+        "excel": {
+          "acciones": 1,
+          "hitos": 4,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 110,
+        "caso_codigo": "CS-MI-ITE-2025-01",
+        "codigo_excel": "CS-PA-INF-2017-29",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Culminación del Gran Mercado de Belén - Iquitos",
+        "excel": {
+          "acciones": 1,
+          "hitos": 3,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 113,
+        "caso_codigo": "CS-PA-INF-2026-01",
+        "codigo_excel": "CS-MI-REG-2025-30",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Convocatoria de nuevo administrador para el DPA San José (Lambayeque)",
+        "excel": {
+          "acciones": 1,
+          "hitos": 0,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 114,
+        "caso_codigo": "CS-MI-ITE-2025-02",
+        "codigo_excel": "CS-PA-REG-2020-31",
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Presunta contaminación por plomo de la empresa Baterías ETNA (Mi Perú, Callao)",
+        "excel": {
+          "acciones": 1,
+          "hitos": 4,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 118,
+        "caso_codigo": "CS-PA-OAT-2026-04",
+        "codigo_excel": null,
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Demanda de cancelación de la temporada de pesca de anchoveta por captura juvenil",
+        "excel": {
+          "acciones": 2,
+          "hitos": 0,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 2,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 122,
+        "caso_codigo": "CS-MI-ITE-2026-01",
+        "codigo_excel": null,
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Oposición al proyecto de planta de cal de CALCESUR (AA.HH. Márquez, Callao)",
+        "excel": {
+          "acciones": 1,
+          "hitos": 0,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 124,
+        "caso_codigo": "CS-PA-INF-2026-02",
+        "codigo_excel": null,
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Rehabilitación del Muelle N.° 2 del Desembarcadero Pesquero Artesanal de Ilo",
+        "excel": {
+          "acciones": 1,
+          "hitos": 3,
+          "hitos_cumplido": 1,
+          "hitos_cumplido_con_fecha_real": 1,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 127,
+        "caso_codigo": "CS-MI-ITE-2026-03",
+        "codigo_excel": null,
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Participación ciudadana en el EIA-d del proyecto Aceros Americanos (Chilca)",
+        "excel": {
+          "acciones": 0,
+          "hitos": 0,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      },
+      {
+        "bloque": 128,
+        "caso_codigo": null,
+        "codigo_excel": null,
+        "estado": "duplicado",
+        "motivo": "duplicado_bloque_128"
+      },
+      {
+        "bloque": 132,
+        "caso_codigo": "CS-PA-ITE-2026-03",
+        "codigo_excel": null,
+        "estado": "operable",
+        "motivo": null,
+        "caso_nombre": "Mortandad masiva de truchas en piscigranjas de Pariahuanca (Junín)",
+        "excel": {
+          "acciones": 1,
+          "hitos": 0,
+          "hitos_cumplido": 0,
+          "hitos_cumplido_con_fecha_real": 0,
+          "demandas": 0
+        },
+        "avisa": {
+          "compromisos": 0,
+          "hitos": 0,
+          "compromisos_avisa_historico": 0,
+          "hitos_avisa_historico": 0,
+          "hitos_cumplido": 0,
+          "hitos_con_fecha_real": 0
+        },
+        "plan": {
+          "compromisos": {
+            "insert": 1,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          },
+          "hitos": {
+            "insert": 0,
+            "update": 0,
+            "omit": 0,
+            "reject": 0
+          }
+        },
+        "duplicados": []
+      }
+    ],
+    "resumen": {
+      "casos": 37,
+      "operables": 31,
+      "no_operables": 6,
+      "duplicados_probables": 6,
+      "acciones_duplicadas": 1,
+      "hitos_duplicados": 5
     },
-    {
-      "codigo": "esquema_incompleto",
-      "detalle": "Esquema incompleto para --apply: faltan core.mapa_matriz_excel (tabla ausente), core.caso_nudo_critico (tabla ausente), core.casos.estado_actualizacion, core.casos.nivel_riesgo_inicial_id, core.casos.tematica_equipo, core.casos.link_analisis_caso, core.compromisos.demanda_id, core.compromisos.punto_focal_usuario_id, core.compromisos.punto_focal_texto, core.compromisos.tematica_equipo, core.hitos_compromiso.responsable_usuario_id, core.hitos_compromiso.responsable_texto, core.hitos_compromiso.fecha_vencimiento_texto, core.hitos_compromiso.fecha_real_texto, core.reuniones_dialogo.codigo_legado, core.reuniones_dialogo.region_texto, core.reuniones_dialogo.asistencia_registrada, core.reuniones_dialogo.acta_am, core.reuniones_dialogo.relatoria_registrada, core.reuniones_dialogo.publicacion_registrada."
+    "duplicados_avisa_historico": [
+      {
+        "tipo": "hito",
+        "excel_fila": 4,
+        "excel_codigo": "Hito 2",
+        "excel_texto": "Ejecución de evaluación in situ y recolección de datos",
+        "avisa_codigo": "CS-PA-OAT-2024-02_COMP001",
+        "avisa_texto": "Ejecución de evaluación in situ y recolección de datos, de los 5 entregables de dicha consultoría, según la información la consultoría el 31.08.2026, a presentado el 4 entregable.",
+        "similitud": 0.688,
+        "exacto": false,
+        "origen_dato": "AVISA_HISTORICO",
+        "caso": "CS-PA-OAT-2024-02",
+        "caso_nombre": "Uso de red de cortina de fondo en Cabo Blanco y Los Órganos"
+      },
+      {
+        "tipo": "hito",
+        "excel_fila": 7,
+        "excel_codigo": "Hito 2",
+        "excel_texto": "Emisión de resolución ratificatoria",
+        "avisa_codigo": "CS-PA-OAT-2024-02_COMP002",
+        "avisa_texto": "Emisión y publicación de resolución ratificatoria",
+        "similitud": 0.875,
+        "exacto": false,
+        "origen_dato": "AVISA_HISTORICO",
+        "caso": "CS-PA-OAT-2024-02",
+        "caso_nombre": "Uso de red de cortina de fondo en Cabo Blanco y Los Órganos"
+      },
+      {
+        "tipo": "accion",
+        "excel_fila": 16,
+        "excel_texto": "Reapertura de DPA de los órganos",
+        "avisa_codigo": "CS-PA-INF-2024-01_COMP001",
+        "avisa_texto": "Seguimiento de reapertura de DPA Los Órganos por DICAPI",
+        "similitud": 0.8,
+        "exacto": false,
+        "origen_dato": "AVISA_HISTORICO",
+        "caso": "CS-PA-INF-2024-01",
+        "caso_nombre": "Rehabilitación del Desembarcadero Pesquero Artesanal de Los Órganos"
+      },
+      {
+        "tipo": "hito",
+        "excel_fila": 17,
+        "excel_codigo": "Hito 2",
+        "excel_texto": "Coordinación FONDEPES - DIREPRO para remodelación del DPA",
+        "avisa_codigo": "CS-PA-INF-2024-01_COMP002",
+        "avisa_texto": "Coordinación FONDEPES - DIREPRO para remodelación del DPA Los Órganos",
+        "similitud": 0.917,
+        "exacto": false,
+        "origen_dato": "AVISA_HISTORICO",
+        "caso": "CS-PA-INF-2024-01",
+        "caso_nombre": "Rehabilitación del Desembarcadero Pesquero Artesanal de Los Órganos"
+      },
+      {
+        "tipo": "hito",
+        "excel_fila": 18,
+        "excel_codigo": "Hito 3",
+        "excel_texto": "Saneamiento físico legal",
+        "avisa_codigo": "CS-PA-INF-2024-01_COMP003",
+        "avisa_texto": "Seguimiento de habilitación de saneamiento físico legal del DPA Los Órganos",
+        "similitud": 0.714,
+        "exacto": false,
+        "origen_dato": "AVISA_HISTORICO",
+        "caso": "CS-PA-INF-2024-01",
+        "caso_nombre": "Rehabilitación del Desembarcadero Pesquero Artesanal de Los Órganos"
+      },
+      {
+        "tipo": "hito",
+        "excel_fila": 19,
+        "excel_codigo": "Hito 4",
+        "excel_texto": "Seguimiento de firma de Convenio sobre DPA de los Órganos por el GORE Piura.",
+        "avisa_codigo": "CS-PA-INF-2024-01_COMP003",
+        "avisa_texto": "Seguimiento a suscripción de firma del Convenio de Gestión del DPA de los Órganos por el GORE Piura.",
+        "similitud": 0.889,
+        "exacto": false,
+        "origen_dato": "AVISA_HISTORICO",
+        "caso": "CS-PA-INF-2024-01",
+        "caso_nombre": "Rehabilitación del Desembarcadero Pesquero Artesanal de Los Órganos"
+      }
+    ],
+    "testigo": {
+      "caso_codigo": "CS-PA-INF-2024-01",
+      "compromiso_testigo": "CS-PA-INF-2024-01_COMP001",
+      "excel": {
+        "hitos": 4,
+        "hitos_cumplido": 4,
+        "hitos_con_fecha_real": 2,
+        "detalle_hitos": [
+          {
+            "fila": 16,
+            "codigo": "Hito 1",
+            "descripcion": "Evaluación Técnica y autorización de reapertura condicionada por DICAPI",
+            "estado": "Cumplido",
+            "fecha_real": "2025-07-08"
+          },
+          {
+            "fila": 17,
+            "codigo": "Hito 2",
+            "descripcion": "Coordinación FONDEPES - DIREPRO para remodelación del DPA",
+            "estado": "Cumplido",
+            "fecha_real": "2025-07-08"
+          },
+          {
+            "fila": 18,
+            "codigo": "Hito 3",
+            "descripcion": "Saneamiento físico legal",
+            "estado": "Cumplido",
+            "fecha_real": null
+          },
+          {
+            "fila": 19,
+            "codigo": "Hito 4",
+            "descripcion": "Seguimiento de firma de Convenio sobre DPA de los Órganos por el GORE Piura.",
+            "estado": "Cumplido",
+            "fecha_real": null
+          }
+        ]
+      },
+      "avisa": {
+        "compromiso_estado_id": 2,
+        "compromiso_estado": "En proceso",
+        "hitos_comp001": 0,
+        "detalle_hitos_comp001": [],
+        "compromisos_caso": [
+          {
+            "codigo": "CS-PA-INF-2024-01_COMP002",
+            "estado": "En proceso",
+            "origen_dato": "AVISA_HISTORICO",
+            "hitos": 1
+          },
+          {
+            "codigo": "CS-PA-INF-2024-01_COMP003",
+            "estado": "En proceso",
+            "origen_dato": "AVISA_HISTORICO",
+            "hitos": 2
+          },
+          {
+            "codigo": "CS-PA-INF-2024-01_COMP001",
+            "estado": "En proceso",
+            "origen_dato": "AVISA_HISTORICO",
+            "hitos": 0
+          }
+        ]
+      },
+      "nota_premisa": "El Excel trae 4 hitos, 4 Cumplido y 2 con fecha_real válida; los hitos sin fecha no se estiman. En AVISA, CS-PA-INF-2024-01_COMP001 está en «En proceso» con 0 hito(s) activo(s); el caso completo tiene 3 compromisos y 3 hitos activos. Coincide con la premisa «sin hitos» si se cuentan sólo los hitos activos; los anulados no se incluyen."
     }
-  ],
+  },
+  "bloqueantes_apply": [],
   "coherente": true,
   "codigo_salida": 0,
   "fatal": []

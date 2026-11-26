@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   signal,
@@ -47,6 +48,7 @@ import {
   TIPOS_COMPROMISO,
   aCompromiso,
   etiquetaNivelGobierno,
+  etiquetaPuntoFocal,
   formatearFecha,
   formatearFechaHora,
   resolverVencimiento,
@@ -361,6 +363,13 @@ function totalDe(bruto: unknown): number {
     .celda-vencimiento .due-state {
       margin-left: 4px;
     }
+    .celda-punto-focal {
+      display: block;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .aviso-fecha {
       color: var(--amber);
     }
@@ -624,6 +633,7 @@ export class CompromisosPage {
     compromiso: (compromiso) => compromiso.accion,
     caso: (compromiso) => compromiso.casoCodigo,
     unidad: (compromiso) => compromiso.unidad,
+    puntoFocal: (compromiso) => etiquetaPuntoFocal(compromiso),
     estado: (compromiso) => compromiso.estado,
     vencimiento: (compromiso) => compromiso.fechaVencimiento,
     anulado: (compromiso) => compromiso.anuladoEn,
@@ -674,6 +684,7 @@ export class CompromisosPage {
     { clave: 'compromiso', titulo: 'Compromiso', ordenable: true },
     { clave: 'caso', titulo: 'Caso', ordenable: true },
     { clave: 'unidad', titulo: 'Unidad responsable', ordenable: true },
+    { clave: 'puntoFocal', titulo: 'Punto focal', ordenable: true },
     { clave: 'estado', titulo: 'Estado', ordenable: true },
     { clave: 'vencimiento', titulo: 'Vencimiento', ordenable: true },
   ];
@@ -1227,6 +1238,9 @@ export class CompromisosPage {
   }
 
   constructor() {
+    // Una navegación de filtro pendiente no debe ejecutarse tras salir.
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.temporizador));
+
     effect(() => {
       if (this.registroSolicitado() !== 'compromiso') return;
       this.abrirAlta();
@@ -1454,6 +1468,11 @@ export class CompromisosPage {
 
   fechaTexto(valor: string | null | undefined): string {
     return formatearFecha(valor);
+  }
+
+  /** Texto visible del punto focal en la tabla: nombre resuelto o texto libre. */
+  puntoFocalTexto(compromiso: Compromiso): string {
+    return etiquetaPuntoFocal(compromiso);
   }
 
   fechaHoraTexto(valor: string | null | undefined): string {

@@ -1,27 +1,41 @@
 #!/usr/bin/env python
 """Parser de la matriz de conflictos del equipo (Excel) -> JSON.
 
-Lee `docs/01_requisitos/23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (1).xlsx`
-y emite `scripts/matriz/salida/casos.json` + `resumen_validacion.json`.
+Lee la matriz de conflictos del equipo (Excel) y emite
+`scripts/matriz/salida/casos.json` + `resumen_validacion.json`.
+
+La fuente se busca en `docs/05_datos/` y, como respaldo, en
+`docs/01_requisitos/` (la matriz se movió y cambió de disposición durante el
+trabajo de nov-2026). Las columnas de la hoja principal se resuelven **por
+encabezado** (ver `resolver_columnas`), no por letra: la versión nueva quitó la
+columna de prioridad y desplazó el resto, y la antigua la tenía en D.
 
 No escribe en la base de datos. Es sólo lectura sobre el XLSX.
 
 Regla de parseo (verificada, no asumida)
 ----------------------------------------
-1. Un caso empieza en toda fila donde la columna E ("Nombre de Caso") tiene
+1. Un caso empieza en toda fila donde la columna «Nombre de Caso» tiene
    valor. En el Excel las celdas del bloque están fusionadas, así que sólo la
    fila superior del bloque tiene valor: eso delimita el bloque.
    (El enunciado proponía usar la columna A "N°"; se comprueba que A falla:
    deja 34 bloques y engulle 3 casos que no llevan número. Ver
    `bloques_por_a` en la validación.)
 2. Dentro del bloque conviven tres listas 1:N sobre el mismo eje de filas:
-   - Demandas: cada fila con L no vacía es una demanda; M de esa fila es su
-     temática (no se hereda).
-   - Acciones: cada fila con N no vacía inicia una acción; N..R se rellenan
-     hacia abajo hasta la siguiente acción.
-   - Hitos: cada fila con S no vacía es un hito; se asigna a la acción cuyo
+   - Demandas: cada fila con Demanda no vacía es una demanda; Temática de esa
+     fila es su temática (no se hereda).
+   - Acciones: cada fila con Acción no vacía inicia una acción; sus columnas
+     de apoyo se rellenan hacia abajo hasta la siguiente acción.
+   - Hitos: cada fila con Hito no vacía es un hito; se asigna a la acción cuyo
      inicio es la fila más reciente <= fila del hito.
-3. Los campos de caso A..K se rellenan hacia abajo desde el inicio del bloque.
+3. Los campos de caso se rellenan hacia abajo desde el inicio del bloque.
+4. La columna de nivel de riesgo (D en la matriz antigua, H en la nueva) es el
+   **nivel de riesgo** del caso (A2), no la prioridad de atención. Se aceptan
+   los encabezados «Prioridad de Atención», «Nivel de riesgo» y «Riesgo»;
+   los valores se traducen siempre al catálogo `core.cat_niveles_riesgo`:
+   `Urgente→Alto`, `Moderado→Medio`, `Bajo→Bajo`, `Alto→Alto`, `Medio→Medio`.
+   El resultado se emite como `nivel_riesgo`; `prioridad` ya no se emite y el
+   importador no toca `core.casos.prioridad_id`. Un valor sin equivalencia
+   (p. ej. «Archivado») queda con `id` NULL y se declara.
 
 Salida
 ------
@@ -40,6 +54,7 @@ import os
 import re
 import sys
 import unicodedata
+from string import ascii_uppercase
 from typing import Any
 
 from openpyxl import load_workbook
@@ -49,12 +64,24 @@ from openpyxl import load_workbook
 # ---------------------------------------------------------------------------
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
-XLSX = os.path.join(
-    REPO,
-    "docs",
-    "01_requisitos",
-    "23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (1).xlsx",
+# La matriz ha cambiado de carpeta y de disposición de columnas durante el
+# trabajo (nov-2026). Se buscan las copias conocidas y se resuelven las
+# columnas por encabezado; si ninguna existe, se declara la ruta esperada.
+CANDIDATOS_XLSX = (
+    os.path.join(
+        REPO,
+        "docs",
+        "05_datos",
+        "23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (2) (1).xlsx",
+    ),
+    os.path.join(
+        REPO,
+        "docs",
+        "01_requisitos",
+        "23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (1).xlsx",
+    ),
 )
+XLSX = next((p for p in CANDIDATOS_XLSX if os.path.exists(p)), CANDIDATOS_XLSX[0])
 OUT_DIR = os.path.join(HERE, "salida")
 
 HOJA = "CASOS OAIPCS - OPERATIVO"
@@ -69,7 +96,7 @@ HOJA_DVMYPE = "DVMYPE-I"
 C_N = 1
 C_DEPTO = 2
 C_SECTORISTA = 3
-C_PRIORIDAD = 4
+C_NIVEL_RIESGO = 4  # antes leída como «Prioridad de Atención» (ver A2)
 C_NOMBRE = 5
 C_NARRATIVA = 6
 C_ANALISIS = 7
@@ -116,7 +143,20 @@ R_SEMANA_FIN = 37
 R_RIESGO_ACTUAL = 38
 
 # Catálogos (fuente: core.cat_* en Neon, leídos en modo sólo lectura)
-PRIORIDAD_ID = {"urgente": 1, "moderado": 2, "bajo": 3}
+# Columnas D de la matriz -> core.cat_niveles_riesgo (Bajo=1, Medio=2, Alto=3).
+# El encabezado puede ser el viejo («Prioridad de Atención») o el nuevo.
+NIVEL_RIESGO_ID = {
+    "urgente": 3,  # Alto
+    "alto": 3,
+    "moderado": 2,  # Medio
+    "medio": 2,
+    "bajo": 1,
+}
+ENCABEZADOS_NIVEL_RIESGO = {
+    "prioridad de atencion": "Prioridad de Atención",
+    "nivel de riesgo": "Nivel de riesgo",
+    "riesgo": "Riesgo",  # encabezado de la matriz nov-2026
+}
 TEMATICA_ID = {
     "infraestructura": 1,
     "ordenamiento y acceso territorial": 2,
@@ -135,6 +175,107 @@ ESTADO_HITO_ID = {
     # "no cumplido" no existe en core.cat_estados_hito
     "no cumplido": None,
 }
+
+# Columnas lógicas de la hoja principal y sus alias de encabezado. La matriz
+# antigua ponía la prioridad en D y la nueva pone el riesgo en H; los datos
+# posteriores también se desplazaron. Se resuelven por encabezado para no
+# depender de la letra. Los valores `COLUMNAS_POR_DEFECTO` son la disposición
+# antigua y actúan como respaldo si un encabezado no aparece.
+COLUMNAS_POR_DEFECTO = {
+    "n": C_N,
+    "departamento": C_DEPTO,
+    "sectorista": C_SECTORISTA,
+    "nivel_riesgo": C_NIVEL_RIESGO,
+    "nombre": C_NOMBRE,
+    "narrativa": C_NARRATIVA,
+    "analisis": C_ANALISIS,
+    "timestamp": C_TIMESTAMP,
+    "descripcion_riesgo": C_RIESGO,
+    "actores_estado": C_ACTORES_ESTADO,
+    "actores_sociedad": C_ACTORES_SOCIEDAD,
+    "demanda": C_DEMANDA,
+    "tematica": C_TEMATICA,
+    "accion": C_ACCION,
+    "medios": C_MEDIOS,
+    "area": C_AREA,
+    "punto_focal": C_PUNTO_FOCAL,
+    "documentos": C_DOCUMENTOS,
+    "hito": C_HITO,
+    "descripcion_hito": C_DESC_HITO,
+    "responsable_hito": C_RESP_HITO,
+    "fecha_planificada": C_FECHA_PLAN,
+    "fecha_real": C_FECHA_REAL,
+    "estado_hito": C_ESTADO,
+}
+
+ALIAS_COLUMNAS = {
+    "n": ("n", "n°", "nº"),
+    "departamento": ("departamento", "region"),
+    "sectorista": ("sectorista",),
+    "nivel_riesgo": ("prioridad de atencion", "nivel de riesgo", "riesgo"),
+    "nombre": ("nombre de caso",),
+    "narrativa": ("narracion cronologica*", "linea de tiempo"),
+    "analisis": ("analisis de caso*",),
+    "timestamp": ("timestamp*", "status"),
+    "descripcion_riesgo": ("descripcion del riesgo*",),
+    "actores_estado": ("actores del estado*",),
+    "actores_sociedad": ("actores sociedad civil*",),
+    "demanda": ("demandas",),
+    "tematica": ("tematica",),
+    "accion": ("acciones/compromisos*",),
+    "medios": ("medios de verificacion*",),
+    "area": ("area responsable*",),
+    "punto_focal": ("punto focal monitoreo*",),
+    "documentos": ("documentos*",),
+    "hito": ("hito",),
+    "descripcion_hito": ("descripcion del hito*",),
+    "responsable_hito": ("responsable del hito*",),
+    "fecha_planificada": ("fecha planificada*",),
+    "fecha_real": ("fecha real*",),
+    "estado_hito": ("estado actual*",),
+}
+
+
+def _coincide_encabezado(encabezado: Any, alias: tuple[str, ...]) -> bool:
+    h = norm(encabezado)
+    if not h:
+        return False
+    for patron in alias:
+        if patron.endswith("*"):
+            if h.startswith(patron[:-1]):
+                return True
+        elif h == patron:
+            return True
+    return False
+
+
+def resolver_columnas(ws) -> tuple[dict[str, int], list[str]]:
+    """Resuelve las columnas lógicas de la hoja principal por encabezado.
+
+    Devuelve (mapa, faltantes). Si un encabezado no se reconoce se usa la
+    posición antigua y se declara en `faltantes` para el informe.
+    """
+    encabezados = {c: ws.cell(2, c).value for c in range(1, ws.max_column + 1)}
+    columnas: dict[str, int] = {}
+    faltantes: list[str] = []
+    for logico, alias in ALIAS_COLUMNAS.items():
+        encontrada = next(
+            (
+                c
+                for c in range(1, ws.max_column + 1)
+                if _coincide_encabezado(encabezados.get(c), alias)
+            ),
+            None,
+        )
+        if encontrada is None:
+            encontrada = COLUMNAS_POR_DEFECTO[logico]
+            faltantes.append(logico)
+        columnas[logico] = encontrada
+    return columnas, faltantes
+
+
+def _letra(col: int) -> str:
+    return ascii_uppercase[col - 1] if 1 <= col <= 26 else str(col)
 
 
 # ---------------------------------------------------------------------------
@@ -219,10 +360,15 @@ def parse_fecha(v: Any) -> dict:
     return {"raw": s, "iso": None, "estado": "no_reconocida"}
 
 
+def norm_tematica(raw: Any) -> str:
+    """Normaliza la temática y corrige la errata «Ordenanamiento»."""
+    return norm(raw).replace("ordenanamiento", "ordenamiento")
+
+
 def mapear_tematica(raw: Any) -> dict:
     if raw is None:
         return {"raw": None, "id": None, "estado": "sin_dato"}
-    k = norm(raw)
+    k = norm_tematica(raw)
     if k in TEMATICA_ID:
         if TEMATICA_ID[k] is None:
             return {"raw": raw, "id": None, "estado": "sin_catalogo"}
@@ -230,13 +376,20 @@ def mapear_tematica(raw: Any) -> dict:
     return {"raw": raw, "id": None, "estado": "desconocida"}
 
 
-def mapear_prioridad(raw: Any) -> dict:
+def mapear_nivel_riesgo(raw: Any) -> dict:
+    """Columna D -> `core.cat_niveles_riesgo` (Bajo=1, Medio=2, Alto=3)."""
     if raw is None:
         return {"raw": None, "id": None, "estado": "sin_dato"}
     k = norm(raw)
-    if k in PRIORIDAD_ID:
-        return {"raw": limpiar(raw), "id": PRIORIDAD_ID[k], "estado": "mapeada"}
+    if k in NIVEL_RIESGO_ID:
+        return {"raw": limpiar(raw), "id": NIVEL_RIESGO_ID[k], "estado": "mapeada"}
     return {"raw": limpiar(raw), "id": None, "estado": "desconocida"}
+
+
+def leer_encabezado_d(ws, cols: dict[str, int] | None = None) -> str | None:
+    """Encabezado real de la columna de nivel de riesgo (fila 2)."""
+    col = (cols or COLUMNAS_POR_DEFECTO)["nivel_riesgo"]
+    return limpiar(ws.cell(2, col).value)
 
 
 def mapear_estado_hito(raw: Any) -> dict:
@@ -281,12 +434,13 @@ def primer_no_vacio(
 # ---------------------------------------------------------------------------
 # Lectura de bloques
 # ---------------------------------------------------------------------------
-def detectar_bloques(ws) -> list[tuple[int, int]]:
-    """Bloques por E (Nombre de Caso). Incluye casos sin número."""
+def detectar_bloques(ws, cols: dict[str, int] | None = None) -> list[tuple[int, int]]:
+    """Bloques por «Nombre de Caso». Incluye casos sin número."""
+    col_nombre = (cols or COLUMNAS_POR_DEFECTO)["nombre"]
     starts = [
         r
         for r in range(3, ws.max_row + 1)
-        if limpiar(ws.cell(r, C_NOMBRE).value) is not None
+        if limpiar(ws.cell(r, col_nombre).value) is not None
     ]
     bloques = []
     for i, r0 in enumerate(starts):
@@ -295,11 +449,12 @@ def detectar_bloques(ws) -> list[tuple[int, int]]:
     return bloques
 
 
-def detectar_bloques_por_a(ws) -> list[int]:
+def detectar_bloques_por_a(ws, cols: dict[str, int] | None = None) -> list[int]:
+    col_n = (cols or COLUMNAS_POR_DEFECTO)["n"]
     return [
         r
         for r in range(3, ws.max_row + 1)
-        if numero_entero(ws.cell(r, C_N).value) is not None
+        if numero_entero(ws.cell(r, col_n).value) is not None
     ]
 
 
@@ -382,11 +537,13 @@ def construir_caso(
     reporte: dict | None,
     adv_globales: list,
     merges: dict,
+    cols: dict[str, int] | None = None,
 ) -> dict:
+    cols = cols or COLUMNAS_POR_DEFECTO
     advertencias: list[str] = []
 
-    n = numero_entero(ws.cell(r0, C_N).value)
-    nombre = limpiar(ws.cell(r0, C_NOMBRE).value)
+    n = numero_entero(ws.cell(r0, cols["n"]).value)
+    nombre = limpiar(ws.cell(r0, cols["nombre"]).value)
 
     def eff(r: int, col: int) -> Any:
         """Valor crudo o, si está fusionada, el valor de la fusión."""
@@ -404,22 +561,23 @@ def construir_caso(
     analisis_celda = None
     analisis_url = None
     for r in range(r0, r1 + 1):
-        c = ws.cell(r, C_ANALISIS)
+        c = ws.cell(r, cols["analisis"])
         if limpiar(c.value) is not None or (c.hyperlink is not None):
             analisis_celda = limpiar(c.value)
             if c.hyperlink is not None and c.hyperlink.target:
                 analisis_url = c.hyperlink.target
             break
 
-    prioridad = mapear_prioridad(campo(C_PRIORIDAD))
+    # Nivel de riesgo del caso (A2). No es la prioridad de atención.
+    nivel_riesgo = mapear_nivel_riesgo(campo(cols["nivel_riesgo"]))
 
-    # ---- Demandas (L) -----------------------------------------------------
+    # ---- Demandas --------------------------------------------------------
     demandas = []
     for r in range(r0, r1 + 1):
-        texto = limpiar(ws.cell(r, C_DEMANDA).value)
+        texto = limpiar(ws.cell(r, cols["demanda"]).value)
         if texto is None:
             continue
-        tem = mapear_tematica(ws.cell(r, C_TEMATICA).value)
+        tem = mapear_tematica(ws.cell(r, cols["tematica"]).value)
         demandas.append(
             {
                 "fila": r,
@@ -434,15 +592,22 @@ def construir_caso(
                 f"Demanda de la fila {r} sin Temática (M vacía); no se hereda."
             )
 
-    # ---- Acciones (N) y su span ------------------------------------------
+    # ---- Acciones y su span ----------------------------------------------
     inicios_accion = [
-        r for r in range(r0, r1 + 1) if limpiar(ws.cell(r, C_ACCION).value) is not None
+        r
+        for r in range(r0, r1 + 1)
+        if limpiar(ws.cell(r, cols["accion"]).value) is not None
     ]
     acciones = []
     for i, ra in enumerate(inicios_accion):
         rfin = (inicios_accion[i + 1] - 1) if i + 1 < len(inicios_accion) else r1
         accidentales = []
-        for c in (C_MEDIOS, C_AREA, C_PUNTO_FOCAL, C_DOCUMENTOS):
+        for c in (
+            cols["medios"],
+            cols["area"],
+            cols["punto_focal"],
+            cols["documentos"],
+        ):
             if eff(ra, c) is None:
                 extra = primer_no_vacio(ws, ra + 1, rfin, c, merges)
                 if extra is not None:
@@ -457,23 +622,29 @@ def construir_caso(
             {
                 "fila": ra,
                 "fila_fin": rfin,
-                "accion": eff(ra, C_ACCION),
+                "accion": eff(ra, cols["accion"]),
                 "medios_verificacion_raw": primer_no_vacio(
-                    ws, ra, rfin, C_MEDIOS, merges
+                    ws, ra, rfin, cols["medios"], merges
                 ),
-                "area_responsable_raw": primer_no_vacio(ws, ra, rfin, C_AREA, merges),
-                "punto_focal_raw": primer_no_vacio(ws, ra, rfin, C_PUNTO_FOCAL, merges),
-                "documentos_raw": primer_no_vacio(ws, ra, rfin, C_DOCUMENTOS, merges),
+                "area_responsable_raw": primer_no_vacio(
+                    ws, ra, rfin, cols["area"], merges
+                ),
+                "punto_focal_raw": primer_no_vacio(
+                    ws, ra, rfin, cols["punto_focal"], merges
+                ),
+                "documentos_raw": primer_no_vacio(
+                    ws, ra, rfin, cols["documentos"], merges
+                ),
                 "hitos": [],
                 "valores_extra_en_span": accidentales,
             }
         )
 
-    # ---- Hitos (S) -------------------------------------------------------
+    # ---- Hitos -----------------------------------------------------------
     hitos = []
     hitos_sin_accion = []
     for r in range(r0, r1 + 1):
-        etiqueta = limpiar(ws.cell(r, C_HITO).value)
+        etiqueta = limpiar(ws.cell(r, cols["hito"]).value)
         if etiqueta is None:
             continue
         accion_destino = None
@@ -492,11 +663,11 @@ def construir_caso(
         hito = {
             "fila": r,
             "codigo_hito": str(etiqueta),
-            "descripcion_hito": eff(r, C_DESC_HITO),
-            "responsable_raw": eff(r, C_RESP_HITO),
-            "fecha_planificada": parse_fecha(eff(r, C_FECHA_PLAN)),
-            "fecha_real": parse_fecha(eff(r, C_FECHA_REAL)),
-            "estado": mapear_estado_hito(eff(r, C_ESTADO)),
+            "descripcion_hito": eff(r, cols["descripcion_hito"]),
+            "responsable_raw": eff(r, cols["responsable_hito"]),
+            "fecha_planificada": parse_fecha(eff(r, cols["fecha_planificada"])),
+            "fecha_real": parse_fecha(eff(r, cols["fecha_real"])),
+            "estado": mapear_estado_hito(eff(r, cols["estado_hito"])),
             "destino": {
                 "codigo_hito": "core.hitos_compromiso.codigo_hito",
                 "descripcion_hito": "core.hitos_compromiso.descripcion_hito",
@@ -547,11 +718,11 @@ def construir_caso(
     # Descripciones de hito sin etiqueta S
     for r in range(r0, r1 + 1):
         if (
-            limpiar(ws.cell(r, C_DESC_HITO).value) is not None
-            and limpiar(ws.cell(r, C_HITO).value) is None
+            limpiar(ws.cell(r, cols["descripcion_hito"]).value) is not None
+            and limpiar(ws.cell(r, cols["hito"]).value) is None
         ):
             advertencias.append(
-                f"Fila {r}: hay 'Descripción del Hito' ({str(limpiar(ws.cell(r, C_DESC_HITO).value))[:50]!r}) sin etiqueta en S; no cuenta como hito."
+                f"Fila {r}: hay 'Descripción del Hito' ({str(limpiar(ws.cell(r, cols['descripcion_hito']).value))[:50]!r}) sin etiqueta en Hito; no cuenta como hito."
             )
 
     meta = meta or {}
@@ -561,10 +732,22 @@ def construir_caso(
             "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave)."
         )
 
-    timestamp = limpiar(campo(C_TIMESTAMP))
+    sectorista_main = campo(cols["sectorista"])
+    sectorista_meta = meta.get("sectorista")
+    if (
+        sectorista_main
+        and sectorista_meta
+        and norm(sectorista_main) != norm(sectorista_meta)
+    ):
+        advertencias.append(
+            f"Sectorista de la hoja principal ({sectorista_main!r}) difiere del de "
+            f"METADATOS ({sectorista_meta!r}); A1 usa el de la hoja principal."
+        )
+
+    timestamp = limpiar(campo(cols["timestamp"]))
     if timestamp is not None and timestamp.lower() not in ("actualizado",):
         advertencias.append(
-            f"Columna H = {timestamp!r}: es un estado, no una marca de tiempo."
+            f"Columna de estado/timestamp = {timestamp!r}: es un estado, no una marca de tiempo."
         )
 
     caso = {
@@ -576,19 +759,22 @@ def construir_caso(
         "fecha_registro": meta.get(
             "fecha_registro", {"raw": None, "iso": None, "estado": "sin_dato"}
         ),
-        "departamento_raw": meta.get("departamento") or campo(C_DEPTO),
-        "sectorista_raw": meta.get("sectorista") or campo(C_SECTORISTA),
-        "prioridad": prioridad,
-        "narrativa_cronologica": campo(C_NARRATIVA),
+        "departamento_raw": meta.get("departamento") or campo(cols["departamento"]),
+        # A1: la columna Sectorista manda; el valor de METADATOS se conserva
+        # aparte para declarar la discrepancia cuando difiera.
+        "sectorista_raw": sectorista_main,
+        "sectorista_metadatos_raw": sectorista_meta,
+        "nivel_riesgo": nivel_riesgo,
+        "narrativa_cronologica": campo(cols["narrativa"]),
         "analisis_canva": {
             "etiqueta": analisis_celda,
             "url": analisis_url,
             "destino": None,
         },
         "timestamp_estado": timestamp,
-        "descripcion_riesgo": campo(C_RIESGO),
-        "actores_estado_raw": campo(C_ACTORES_ESTADO),
-        "actores_sociedad_raw": campo(C_ACTORES_SOCIEDAD),
+        "descripcion_riesgo": campo(cols["descripcion_riesgo"]),
+        "actores_estado_raw": campo(cols["actores_estado"]),
+        "actores_sociedad_raw": campo(cols["actores_sociedad"]),
         "fila_inicio": r0,
         "fila_fin": r1,
         "demandas": demandas,
@@ -732,11 +918,26 @@ def main() -> int:
     meta = leer_metadatos(wb)
     reporte = leer_reporte(wb)
 
-    bloques = detectar_bloques(ws)
-    bloques_a = detectar_bloques_por_a(ws)
+    cols, cols_faltantes = resolver_columnas(ws)
+    bloques = detectar_bloques(ws, cols)
+    bloques_a = detectar_bloques_por_a(ws, cols)
     merges = mapa_merges(ws)
 
     adv_globales: list[str] = []
+    if cols_faltantes:
+        adv_globales.append(
+            "Columnas no reconocidas por encabezado; se usó la posición antigua: "
+            + ", ".join(cols_faltantes)
+        )
+    encabezado_d = leer_encabezado_d(ws, cols)
+    encabezado_d_norm = norm(encabezado_d)
+    encabezado_d_ok = encabezado_d_norm in ENCABEZADOS_NIVEL_RIESGO
+    if not encabezado_d_ok:
+        adv_globales.append(
+            f"Columna D con encabezado {encabezado_d!r}: no es 'Prioridad de Atención' "
+            "ni 'Nivel de riesgo'. Se aplica igual el mapa de nivel de riesgo y se "
+            "declara aquí."
+        )
     casos = []
     for idx, (r0, r1) in enumerate(bloques, start=1):
         m = meta.get(r0 - 1)
@@ -744,9 +945,9 @@ def main() -> int:
             adv_globales.append(
                 f"Fila {r0}: no hay metadatos alineados en METADATOS CASOS fila {r0 - 1}."
             )
-        n = numero_entero(ws.cell(r0, C_N).value)
+        n = numero_entero(ws.cell(r0, cols["n"]).value)
         rep = reporte.get(n) if n is not None and n in reporte else None
-        caso = construir_caso(ws, r0, r1, m, rep, adv_globales, merges)
+        caso = construir_caso(ws, r0, r1, m, rep, adv_globales, merges, cols)
         caso["orden"] = idx
         casos.append(caso)
 
@@ -761,7 +962,7 @@ def main() -> int:
     hitos_filas = sum(
         1
         for r in range(3, ws.max_row + 1)
-        if limpiar(ws.cell(r, C_HITO).value) is not None
+        if limpiar(ws.cell(r, cols["hito"]).value) is not None
     )
 
     b1 = casos[0]
@@ -828,13 +1029,6 @@ def main() -> int:
         for campo in ("fecha_planificada", "fecha_real")
         if h[campo]["estado"] not in ("fecha", "sin_dato")
     ]
-    hitos_con_responsable = sum(
-        1
-        for c in casos
-        for a in c["acciones"]
-        for h in a["hitos"]
-        if h["responsable_raw"] is not None
-    )
     canva_urls = [
         c["analisis_canva"]["url"] for c in casos if c["analisis_canva"]["url"]
     ]
@@ -855,38 +1049,33 @@ def main() -> int:
             "destino": None,
         },
         {
-            "elemento": "Análisis de Caso (Canva), columna G",
+            "elemento": "Análisis de Caso (Canva)",
             "detalle": f"{len(canva_urls)} hipervínculos a carpetas de Google Drive; es un enlace, no texto, y no existe columna de destino",
             "enlaces_duplicados": canva_duplicadas,
             "destino": "core.casos.link_reporte_pdf (discutible) / sin columna propia",
         },
         {
-            "elemento": "Responsable del Hito, columna U",
-            "detalle": f"{hitos_con_responsable} hitos traen responsable; core.hitos_compromiso no tiene columna de responsable",
-            "destino": None,
-        },
-        {
-            "elemento": "Medios de Verificaciones, columna O",
-            "detalle": "es una instrucción ('Acción 1: Adjuntar'), no un adjunto ni una URI",
+            "elemento": "Medios de verificación",
+            "detalle": "es una instrucción/etiqueta ('Acción 1: Adjuntar'), no un adjunto ni una URI",
             "destino": "core.hitos_compromiso.descripcion_evidencia / link_evidencia (previo adjuntar)",
         },
         {
-            "elemento": "Documentos / Archivos / Otros, columna R",
+            "elemento": "Documentos / Archivos / Otros",
             "detalle": "etiqueta ('Documentos'), no un archivo",
             "destino": "core.documentos (previo alta del archivo)",
         },
         {
-            "elemento": "Timestamp de última actualización, columna H",
+            "elemento": "Estado/timestamp de última actualización",
             "detalle": "contiene estados ('No aplica', 'Pendiente', 'Actualizado'), no fechas",
             "destino": "core.casos.fecha_ultima_actualizacion (no aplicable)",
         },
         {
-            "elemento": "Temática de la demanda, columna M",
+            "elemento": "Temática de la demanda",
             "detalle": f"{len(demandas_sin_tematica)} demandas sin temática; no se hereda de la fila anterior",
             "destino": "core.demandas.tematica_id",
         },
         {
-            "elemento": "Estado Actual del hito, columna X",
+            "elemento": "Estado Actual del hito",
             "detalle": f"{len(estados_sin_catalogo)} hitos con 'No Cumplido', valor ausente de core.cat_estados_hito",
             "destino": "core.hitos_compromiso.estado_id",
         },
@@ -923,21 +1112,37 @@ def main() -> int:
             "destino": None,
         },
         {
-            "elemento": "Sectorista, columna C",
-            "detalle": "es un nombre; core.usuarios.nombre existe y la FK es punto_focal_usuario_id",
+            "elemento": "Sectorista",
+            "detalle": "es un nombre; el importador lo resuelve contra core.usuarios y, si no "
+            "hay coincidencia inequívoca, deja NULL y lo declara (A1)",
             "destino": "core.usuarios + core.casos.punto_focal_usuario_id",
-        },
-        {
-            "elemento": "Prioridad de Atención vs Nivel de Riesgo, columna D",
-            "detalle": "D sólo trae Urgente/Moderado/Bajo (prioridad); el riesgo vive en otra hoja y con otra escala",
-            "destino": "core.casos.prioridad_id",
         },
     ]
 
     resumen = {
         "fuente": os.path.relpath(XLSX, REPO).replace("\\", "/"),
         "generado_por": "scripts/matriz/parse_matriz.py",
-        "regla_bloques": "Bloque = fila con 'Nombre de Caso' (E) no vacía; los campos A..K se rellenan hacia abajo.",
+        "regla_bloques": "Bloque = fila con 'Nombre de Caso' no vacía (columna resuelta por encabezado); los campos de caso se rellenan hacia abajo.",
+        "columna_d": {
+            "encabezado": encabezado_d,
+            "columna_resuelta": _letra(cols["nivel_riesgo"]),
+            "encabezado_aceptado": encabezado_d_ok,
+            "encabezados_validos": list(ENCABEZADOS_NIVEL_RIESGO.values()),
+            "interpretacion": "nivel de riesgo del caso (A2)",
+            "mapa": {
+                "Urgente": "Alto",
+                "Moderado": "Medio",
+                "Bajo": "Bajo",
+                "Alto": "Alto",
+                "Medio": "Medio",
+            },
+            "destino": "core.casos.nivel_riesgo_id (prioridad_id no se toca)",
+        },
+        "columnas_resueltas": {
+            logico: {"letra": _letra(col), "columna": col}
+            for logico, col in cols.items()
+        },
+        "columnas_por_defecto": cols_faltantes,
         "dimensiones_hoja": {
             "filas": ws.max_row,
             "columnas": ws.max_column,
@@ -1033,6 +1238,10 @@ def main() -> int:
         f"Hoja: {HOJA} ({ws.max_row}x{ws.max_column}, {len(ws.merged_cells.ranges)} merges)"
     )
     print(f"Bloques por A: {len(bloques_a)}   Casos por E: {len(bloques)}")
+    print(
+        f"Columna D: {encabezado_d!r} -> nivel de riesgo "
+        f"(encabezado {'aceptado' if encabezado_d_ok else 'NO reconocido'})"
+    )
     print("-" * 78)
     print(f"{'#':>3} {'código':<22} {'N°':>3} {'dem':>4} {'acc':>4} {'hit':>4}  nombre")
     for c in casos:

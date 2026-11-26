@@ -1,5 +1,7 @@
 import type { PoolClient } from "pg";
 
+import { filtroTexto } from "../busqueda";
+
 /**
  * Organizaciones sociales del directorio (`core.organizaciones`).
  *
@@ -156,13 +158,17 @@ export async function listOrganizaciones(
     return `$${params.length}`;
   };
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(
-      `(core.normalizar_ref(a.nombre_actual) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(a.codigo_legado, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(o.razon_social, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(o.abreviatura, '')) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    [
+      "a.nombre_actual",
+      "coalesce(a.codigo_legado, '')",
+      "coalesce(o.razon_social, '')",
+      "coalesce(o.abreviatura, '')",
+    ],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
 
   const tipo = query.tipo?.trim();
   if (tipo) {

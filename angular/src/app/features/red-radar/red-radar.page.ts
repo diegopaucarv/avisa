@@ -358,8 +358,8 @@ function tamanoParam(valor: string | null): number {
     }
 
     .buscador {
-      flex: 1 1 180px;
-      min-width: 170px;
+      flex: 1 1 var(--search-ancho-min);
+      min-width: var(--search-ancho-min);
     }
 
     .buscador-caja {
@@ -375,9 +375,19 @@ function tamanoParam(valor: string | null): number {
       pointer-events: none;
     }
 
+    /* Mismo alto y radio que la barra global: la caja es propia porque el
+       icono va en absoluto, pero comparte el token. */
     .buscador-caja input {
       width: 100%;
+      height: var(--search-alto);
       padding-left: 30px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .buscador-caja input:focus-visible {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 22%, transparent);
     }
 
     .btn {
@@ -1203,7 +1213,8 @@ export class RedRadarPage {
     if (this.temporizadorBusqueda) clearTimeout(this.temporizadorBusqueda);
     this.temporizadorBusqueda = setTimeout(() => {
       this.temporizadorBusqueda = null;
-      this.navegar({ q: valor.trim() || null, pagina: null });
+      // Sin `trim`: el valor se refleja en el `<input>`; el repositorio recorta.
+      this.navegar({ q: valor || null, pagina: null });
     }, 350);
   }
 

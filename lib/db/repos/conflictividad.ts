@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 
+import { filtroTexto } from "../busqueda";
 import { ApiError } from "../errors";
 
 /**
@@ -365,15 +366,12 @@ function construirWhere(
     where.push(`b.fecha_inicio <= ${bind(validarFecha(hasta, "hasta"))}::date`);
   }
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(`(
-      core.normalizar_ref(b.codigo_caso) like core.normalizar_ref(${like})
-      or core.normalizar_ref(b.nombre_caso) like core.normalizar_ref(${like})
-      or core.normalizar_ref(b.region) like core.normalizar_ref(${like})
-    )`);
-  }
+  const porTexto = filtroTexto(
+    ["b.codigo_caso", "b.nombre_caso", "b.region"],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
 
   return where;
 }

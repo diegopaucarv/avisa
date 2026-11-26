@@ -68,6 +68,31 @@
         </div>
 
         <div class="form-field">
+          <label class="form-label" for="demanda-campo-tematica">Temática</label>
+          <select
+            id="demanda-campo-tematica"
+            class="form-select"
+            required
+            aria-required="true"
+            [disabled]="cargandoTematicas() || tematicas().length === 0"
+            [value]="tematicaId() === null ? '' : tematicaId()"
+            (change)="elegirTematica($event)"
+          >
+            <option value="" disabled [selected]="tematicaId() === null">Seleccione…</option>
+            @for (tematica of tematicas(); track tematica.id) {
+              <option [value]="tematica.id">{{ tematica.nombre }}</option>
+            }
+          </select>
+          @if (cargandoTematicas()) {
+            <p class="form-hint" role="status">Cargando temáticas…</p>
+          } @else if (tematicas().length === 0) {
+            <p class="form-hint">No se pudo cargar el catálogo de temáticas.</p>
+          } @else {
+            <p class="form-hint">Obligatoria: la API rechaza las demandas sin temática.</p>
+          }
+        </div>
+
+        <div class="form-field">
           <label class="form-label" for="demanda-campo-estado">Estado de atención</label>
           <select
             id="demanda-campo-estado"

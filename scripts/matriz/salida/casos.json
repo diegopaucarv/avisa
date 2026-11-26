@@ -1,12 +1,130 @@
 {
   "meta": {
-    "fuente": "docs/01_requisitos/23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (1).xlsx",
+    "fuente": "docs/05_datos/23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (2) (1).xlsx",
     "generado_por": "scripts/matriz/parse_matriz.py",
-    "regla_bloques": "Bloque = fila con 'Nombre de Caso' (E) no vacía; los campos A..K se rellenan hacia abajo.",
+    "regla_bloques": "Bloque = fila con 'Nombre de Caso' no vacía (columna resuelta por encabezado); los campos de caso se rellenan hacia abajo.",
+    "columna_d": {
+      "encabezado": "Riesgo",
+      "columna_resuelta": "H",
+      "encabezado_aceptado": true,
+      "encabezados_validos": [
+        "Prioridad de Atención",
+        "Nivel de riesgo",
+        "Riesgo"
+      ],
+      "interpretacion": "nivel de riesgo del caso (A2)",
+      "mapa": {
+        "Urgente": "Alto",
+        "Moderado": "Medio",
+        "Bajo": "Bajo",
+        "Alto": "Alto",
+        "Medio": "Medio"
+      },
+      "destino": "core.casos.nivel_riesgo_id (prioridad_id no se toca)"
+    },
+    "columnas_resueltas": {
+      "n": {
+        "letra": "A",
+        "columna": 1
+      },
+      "departamento": {
+        "letra": "B",
+        "columna": 2
+      },
+      "sectorista": {
+        "letra": "C",
+        "columna": 3
+      },
+      "nivel_riesgo": {
+        "letra": "H",
+        "columna": 8
+      },
+      "nombre": {
+        "letra": "D",
+        "columna": 4
+      },
+      "narrativa": {
+        "letra": "E",
+        "columna": 5
+      },
+      "analisis": {
+        "letra": "F",
+        "columna": 6
+      },
+      "timestamp": {
+        "letra": "Q",
+        "columna": 17
+      },
+      "descripcion_riesgo": {
+        "letra": "G",
+        "columna": 7
+      },
+      "actores_estado": {
+        "letra": "I",
+        "columna": 9
+      },
+      "actores_sociedad": {
+        "letra": "J",
+        "columna": 10
+      },
+      "demanda": {
+        "letra": "K",
+        "columna": 11
+      },
+      "tematica": {
+        "letra": "L",
+        "columna": 12
+      },
+      "accion": {
+        "letra": "M",
+        "columna": 13
+      },
+      "medios": {
+        "letra": "X",
+        "columna": 24
+      },
+      "area": {
+        "letra": "O",
+        "columna": 15
+      },
+      "punto_focal": {
+        "letra": "P",
+        "columna": 16
+      },
+      "documentos": {
+        "letra": "Y",
+        "columna": 25
+      },
+      "hito": {
+        "letra": "R",
+        "columna": 18
+      },
+      "descripcion_hito": {
+        "letra": "S",
+        "columna": 19
+      },
+      "responsable_hito": {
+        "letra": "T",
+        "columna": 20
+      },
+      "fecha_planificada": {
+        "letra": "U",
+        "columna": 21
+      },
+      "fecha_real": {
+        "letra": "V",
+        "columna": 22
+      },
+      "estado_hito": {
+        "letra": "W",
+        "columna": 23
+      }
+    },
+    "columnas_por_defecto": [],
     "dimensiones_hoja": {
-      "filas": 1003,
-      "columnas": 28,
-      "merges": 408
+      "filas": 1000,
+      "columnas": 27,
+      "merges": 405
     },
     "conteos": {
       "casos": 37,
@@ -112,7 +230,7 @@
         "destino": null
       },
       {
-        "elemento": "Análisis de Caso (Canva), columna G",
+        "elemento": "Análisis de Caso (Canva)",
         "detalle": "32 hipervínculos a carpetas de Google Drive; es un enlace, no texto, y no existe columna de destino",
         "enlaces_duplicados": [
           "https://drive.google.com/drive/folders/1vtvQ0LcamPV4u6do_pkybTGo8GjCCTI8?usp=drive_link"
@@ -120,32 +238,27 @@
         "destino": "core.casos.link_reporte_pdf (discutible) / sin columna propia"
       },
       {
-        "elemento": "Responsable del Hito, columna U",
-        "detalle": "100 hitos traen responsable; core.hitos_compromiso no tiene columna de responsable",
-        "destino": null
-      },
-      {
-        "elemento": "Medios de Verificaciones, columna O",
-        "detalle": "es una instrucción ('Acción 1: Adjuntar'), no un adjunto ni una URI",
+        "elemento": "Medios de verificación",
+        "detalle": "es una instrucción/etiqueta ('Acción 1: Adjuntar'), no un adjunto ni una URI",
         "destino": "core.hitos_compromiso.descripcion_evidencia / link_evidencia (previo adjuntar)"
       },
       {
-        "elemento": "Documentos / Archivos / Otros, columna R",
+        "elemento": "Documentos / Archivos / Otros",
         "detalle": "etiqueta ('Documentos'), no un archivo",
         "destino": "core.documentos (previo alta del archivo)"
       },
       {
-        "elemento": "Timestamp de última actualización, columna H",
+        "elemento": "Estado/timestamp de última actualización",
         "detalle": "contiene estados ('No aplica', 'Pendiente', 'Actualizado'), no fechas",
         "destino": "core.casos.fecha_ultima_actualizacion (no aplicable)"
       },
       {
-        "elemento": "Temática de la demanda, columna M",
+        "elemento": "Temática de la demanda",
         "detalle": "7 demandas sin temática; no se hereda de la fila anterior",
         "destino": "core.demandas.tematica_id"
       },
       {
-        "elemento": "Estado Actual del hito, columna X",
+        "elemento": "Estado Actual del hito",
         "detalle": "43 hitos con 'No Cumplido', valor ausente de core.cat_estados_hito",
         "destino": "core.hitos_compromiso.estado_id"
       },
@@ -386,14 +499,9 @@
         "destino": null
       },
       {
-        "elemento": "Sectorista, columna C",
-        "detalle": "es un nombre; core.usuarios.nombre existe y la FK es punto_focal_usuario_id",
+        "elemento": "Sectorista",
+        "detalle": "es un nombre; el importador lo resuelve contra core.usuarios y, si no hay coincidencia inequívoca, deja NULL y lo declara (A1)",
         "destino": "core.usuarios + core.casos.punto_focal_usuario_id"
-      },
-      {
-        "elemento": "Prioridad de Atención vs Nivel de Riesgo, columna D",
-        "detalle": "D sólo trae Urgente/Moderado/Bajo (prioridad); el riesgo vive en otra hoja y con otra escala",
-        "destino": "core.casos.prioridad_id"
       }
     ],
     "advertencias_globales": [
@@ -465,17 +573,18 @@
       "numero_excel": 1,
       "codigo_caso": "CS-PA-REG-2024-01",
       "nombre_oficial_metadatos": "Zonificación del área de pesca en Cabo Blanco, órganos y Ñuro.",
-      "nombre_caso_excel": "Pescadores de Cabo Blanco denuncian que pescadores de Los Órganos extraen recursos hidrobiológicos dentro de sus áreas de reserva empleando red cortina de fondo de hasta 50 paños, práctica que vendría deteriorando los bancos de pesca y el fondo marino.",
+      "nombre_caso_excel": "Conflicto intergremial por el uso de redes de enmalle de fondo y la delimitación de zonas de pesca en Cabo Blanco y Los Órganos",
       "fecha_registro": {
         "raw": "2024-10-15 00:00:00",
         "iso": "2024-10-15",
         "estado": "fecha"
       },
       "departamento_raw": "Piura",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Urgente",
-        "id": 1,
+      "sectorista_raw": "Ivan Ascurra Santillán",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Medio",
+        "id": 2,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026\n - 25.02.2026, Marcial Quispe responde sobre el 2do Producto de Consultoría Redes. Señala que las condiciones de pesca no permiten un análisis consistente de Selectividad ni pesca comparativa. Indica que se esperarán mejores condiciones o se realizará una prueba no programada en Mancora. Informa que los sensores NKE llegarán el 6 de marzo desde Francia. Estima que las pruebas con participación de pescadores podrían realizarse desde el 15 de marzo. Solicita aclaración sobre penalidades y comunica que, como contratante, se alinea a las disposiciones del contrato para no continuar lo programado si así conviene.\n - 23.02.2026, SERNANP, solicita por correo a Marcial Quispe (Consultor) información sobre el 2do Producto del contrato (Evaluación operativa, selectividad e interacción con hábitats). Menciona que se ha considerado prolongar el periodo de pruebas por bajo ambiente de pesca. Recuerda que los plazos han vencido y advierte sobre la penalidad por mora del 1% del monto del producto por cada día de atraso a partir del día 10, y la terminación de contrato por incumplimiento tras 15 días de atraso.\n - 23.02.2026, la OAIPCS, solicita a SERNANP información respecto a los cronogramas de recojo de muestras, y entregables de evaluación.\n - 19.02.2026, la OAIPCS, solicita a la DSF-PA proporcionar información de las acciones de supervisión y fiscalización ejecutadas en las caletas de Cabo Blanco, El Ñuro y Los Órganos durante el 03 de diciembre al 09 de febrero de 2026, que fue alcanzada la misma fecha.\n - 19.02.2026, la OAIPCS, solicita a DGPA remitir la Ayuda Memoria o documento equivalente correspondiente a la referida reunión del 5 de febrero de 2026, que fue alcanzada la misma fecha.\n - 10.02.2026, la DGSFS, informa que Inspectores se encuentran permanentemente realizando acciones de supervisión y fiscalización en los puntos de desembarques, se han efectuado 4 operativos, evidenciandose la comisión de presuntas infracciones, las cuales será materia de evaluación respecto al inicio del PAS y se han aprobado puntos de desembarque de recursos hidrobioogicos, con fechas 31,12,2025, 02, 03 y 05.01.2026.\n - 05.02.2026, la DGPA con representantes del SERNANP, DIREPRO Piura, IMARPE, consultor y respresentantes de los Gremios de Pescadores de Talara, Lobitos, Cabo Blanco, el Ñuro, Los Órganos y Mancora, sostuvieron una reunión donde se brindó Información de los avances del estudio que está realizando una consultoría asesorada por el IMARPE, referente a “Evaluación y monitoreo de los efectos de la pesquería artesanal de la merluza peruana con redes de enmalle de fondo en la zona norte del Perú”. Producto de dicha reunión, representante de SERNANP, indicó que luego de evaluar los puntos determinados por los pescadores, meidante comunicado se establecerá cronograma de muestreo.SERNANP remitirá a la Consultoría y al IMARPE, todo lo coordinado para que inicien el trabajo.\n - 21.01.2026 – DGPA: Acordó promover el embarque de pescadores de las OSPAs de Cabo Blanco, El Ñuro, Los Órganos y Máncora, y fortalecer la socialización del estudio.\n - 21.01.2026 – DGPA: Sostuvo reunión de coordinación con SERNANP, IMARPE y la consultora para definir acciones orientadas a la reanudación del estudio.\n \n 2025\n - 18.12.2025 – SERNANP: Informó a la DGPA la suspensión temporal del estudio debido a enfrentamientos entre pescadores de Los Órganos y El Ñuro, por razones de seguridad.\n - 10.12.2025 – DIREPRO Piura: Brindó asistencia técnica a los pescadores sobre los alcances y disposiciones de la RDR N.° 1042-2025.\n - 05.12.2025 – DIREPRO Piura: Ratificó la RDR N.° 366-2018 y dispuso su ampliación a Talara, Cabo Blanco y Lobitos mediante la RDR N.° 1042-2025-GRP-DRP-DR.\n - 03.12.2025 – DGSFS-PA: Acordó medidas para fortalecer el control y la fiscalización, incluyendo inspectores permanentes, operativos conjuntos y vigilancia marítima.\n - 03.12.2025 – DIREPRO Piura: Asumió el compromiso de ratificar la RDR N.° 366-2018 e incorporar a las caletas de Cabo Blanco, Talara y Lobitos.\n - 02.12.2025 – PRODUCE / DIREPRO Piura: Sostuvieron reunión técnica con pescadores de Cabo Blanco, precisando que la red de cortina se encontraba autorizada y acordando medidas de corto plazo de fiscalización y control mientras culminaba el estudio.\n - 01.12.2025 – SERNANP: Comunicó la presentación del primer entregable del estudio por parte de la consultora, conforme a los términos de referencia.\n - 28.11.2025 – PRODUCE: Informó que se encontraba elaborando el informe técnico para sustentar una futura Resolución Ministerial sobre el uso de la red de cortina.\n - 28.11.2025 – SERNANP: Precisó que la restricción del uso de la red de cortina constituía una medida precautoria hasta la culminación del estudio en curso.\n - 28.11.2025 – PRODUCE / SERNANP / DIREPRO Piura: Participaron en reunión ampliada en Talara con gremios de pescadores, donde se demandó la actualización de la RDR N.° 366-2018 y se generaron situaciones de alta tensión social por restricciones al uso de la red de cortina.\n - 06.11.2025 – SERNANP: Inició, a través de una consultora especializada, el estudio de evaluación del impacto biológico, pesquero y ecosistémico de la pesquería artesanal de merluza.\n - 17.10.2025 – IMARPE: Informó que el plan de estudio había sido observado, requiriendo ajustes en los plazos y precisó una duración estimada de doce meses para su ejecución y análisis.\n - 17.10.2025 – DGPA: Convocó a IMARPE y SERNANP a reunión técnica para conocer las razones del no inicio del estudio sobre la pesquería artesanal de merluza con redes de enmalle de fondo.",
@@ -484,7 +593,7 @@
         "url": "https://drive.google.com/drive/folders/1D6DZNLmWJP9ghuFt_fzUKsLTRLoxdvsv?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "Actualizado",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Riesgo de conflicto intergremial y deterioro de la sostenibilidad de los recursos marinos por presunta invasión de áreas de reserva y uso de artes de pesca cuestionadas. De no resolverse, el conflicto podría reactivarse con protestas y bloqueos de carretera.",
       "actores_estado_raw": "Ing. Segundo Alzamora \nCel: 920706904\nDirector de la DIREPRO\n\nMartín Salazar Cespedes\nCel: 957594168\nIMARPE SEDE PIURA\n\n\nAnthony F. Llapapasca Núñez\nCel: 962702471\nSERNANP SEDE PIURA\n\nPRODUCE \n(DGPA, DGSFS-PA, DGPARPA) / \n\nSERNANP / \n\nIMARPE",
       "actores_sociedad_raw": "Pescadores de Cabo Blanco, Órganos, Ñuro, lóbitos,Talara, DIREPRO\n \n Carlos Jacinto Tume\n Presidente - Gremios de Pescadores Artesanales de Cabo Blanco\n 957 194 901\n \n Carlos Chapilliquen\n Ex presidente\n 939 773 280\n \n Gremio de Pescadores Artesanales de Los Órganos\n Juan Carlos Chulle\n ex presidente del gremio de pescadores \n 957 826 270",
@@ -574,10 +683,10 @@
           "fila": 3,
           "fila_fin": 5,
           "accion": "Desarrollar estudio denominado “Evaluación y monitoreo de los efectos de la pesquería artesanal de la merluza peruana con redes de enmalle de fondo en la zona norte del Perú”.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DIPFORPA / DGPA",
           "punto_focal_raw": "Juan Salinas Casana",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 3,
@@ -673,7 +782,7 @@
           "fila": 6,
           "fila_fin": 8,
           "accion": "Ratificación de la Resolución Directoral Regional N* 366-2018-GOBIERNO REGIONAL PIURA-DRP-DR con la incorporación de nuevas zonas.",
-          "medios_verificacion_raw": "Acción 2: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGPA / DIREPRO PIURA",
           "punto_focal_raw": "Juan Carlos Cordova Calle",
           "documentos_raw": null,
@@ -772,7 +881,7 @@
           "fila": 9,
           "fila_fin": 11,
           "accion": "Conformación y acreditación de los COREVIPA (Comités de Vigilancia y Control Pesquero Artesanal)",
-          "medios_verificacion_raw": "Acción 3",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGPA / DIREPRO PIURA",
           "punto_focal_raw": "Juan Carlos Cordova Calle",
           "documentos_raw": null,
@@ -871,7 +980,7 @@
           "fila": 12,
           "fila_fin": 14,
           "accion": "Aplicar medidas de corto plazo: fiscalización reforzada, registro obligatorio y control de desembarques.",
-          "medios_verificacion_raw": "Acción 4: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGSFS-PA",
           "punto_focal_raw": "Milagros Regina Huachua Quintana",
           "documentos_raw": null,
@@ -1027,7 +1136,8 @@
         "Hito fila 4: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 5: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 14: Fecha Planificada = '31.12.2025, 02, 03 y 05.01.2026' -> fecha_multiple (no se convierte a fecha).",
-        "Hito fila 14: Fecha Real = '31.12.2025, 02, 03 y 05.01.2026' -> fecha_multiple (no se convierte a fecha)."
+        "Hito fila 14: Fecha Real = '31.12.2025, 02, 03 y 05.01.2026' -> fecha_multiple (no se convierte a fecha).",
+        "Sectorista de la hoja principal ('Ivan Ascurra Santillán') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -1035,16 +1145,17 @@
       "numero_excel": 2,
       "codigo_caso": "CS-PA-INF-2025-02",
       "nombre_oficial_metadatos": "Clausura de DPA \"Los Organos\", por riesgo a la vida humana.",
-      "nombre_caso_excel": "Pescadores artesanales del DPA Los Órganos demandan la rehabilitación de la infraestructura del desembarcadero, tras la clausura temporal del muelle por riesgo a la vida humana.",
+      "nombre_caso_excel": "Demanda de rehabilitación y mejoramiento de la infraestructura del DPA Los Órganos por riesgos a la seguridad y continuidad de las actividades pesqueras",
       "fecha_registro": {
         "raw": "2025-03-17 00:00:00",
         "iso": "2025-03-17",
         "estado": "fecha"
       },
       "departamento_raw": "Piura",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Ivan Ascurra Santillán",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -1054,7 +1165,7 @@
         "url": "https://drive.google.com/drive/folders/1hu4mhHto4uJlKbZr67ODLDr-Tl3zfFZo?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Riesgo de paralización de la actividad pesquera y afectación económica del sector artesanal debido a daños en la infraestructura del DPA por eventos oceanográficos extremos. Reactivar nueva movilización por los pescadores que ya realizaron una movilización contra el GORE.",
       "actores_estado_raw": "DIREPRO Piura / GORE Piura / Municipalidad Distrital de Los Órganos\n\nPRODUCE (DGPA, FONDEPES) / DICAPI / MTC",
       "actores_sociedad_raw": "OSPA de los Organos\n \n Gremio de Pescadores Artesanales de Los Órganos\n Juan Carlos Chulle\n ex presidente del gremio de pescadores \n 957 826 270",
@@ -1100,10 +1211,10 @@
           "fila": 16,
           "fila_fin": 19,
           "accion": "Reapertura de DPA de los órganos",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "FONDEPES",
           "punto_focal_raw": "Carlos Escobar Medina",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 16,
@@ -1241,7 +1352,7 @@
         "semanas_con_dato": 4
       },
       "advertencias": [
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Ivan Ascurra Santillán') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -1249,7 +1360,7 @@
       "numero_excel": 3,
       "codigo_caso": "CS-PA-INF-2020-03",
       "nombre_oficial_metadatos": "Brechas en la gestión e infraestructura del DPA Callao",
-      "nombre_caso_excel": "Deficiencias en la infraestructura, las condiciones sanitarias y la seguridad del Desembarcadero Pesquero Artesanal (DPA) del Callao, que generaron una demanda sostenida de las organizaciones sociales de pescadores artesanales (OSPAS) por la mejora integral de la infraestructura o la construcción de un nuevo desembarcadero.",
+      "nombre_caso_excel": "Brechas en la gestión e infraestructura del DPA Callao",
       "fecha_registro": {
         "raw": 2020.0,
         "iso": null,
@@ -1257,9 +1368,10 @@
       },
       "departamento_raw": "Callao",
       "sectorista_raw": "Peggy Contreras Montes",
-      "prioridad": {
+      "sectorista_metadatos_raw": "Peggy Contreras Montes",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026 (post transferencia DPA) \n22.09.2026: Medios locales reportan la denuncia de un comerciante por presuntas irregularidades en el funcionamiento del DPA Callao, relacionadas con cobros por el uso de cámaras de almacenamiento y el ingreso de vehículos, señalando que no se entregarían comprobantes oficiales. El denunciante solicitó a las autoridades verificar los mecanismos de recaudación y las condiciones de funcionamiento del desembarcadero.\n28.08.2026: El GORE Callao aprobó la apertura de una cuenta bancaria destinada exclusivamente a la recaudación de los ingresos provenientes del tarifario del DPA Callao, evidenciando avances en la gestión administrativa y financiera del desembarcadero\n30.03.2026: PRODUCE transfiere al GORE Callao los recursos recaudados por el DPA durante el año 2025. A la fecha, el DPA cuenta con administrador; sin embargo, se mantienen pendientes la suscripción del acta de bienes patrimoniales y de infraestructura, lo que evidencia brechas en el cierre del proceso de transferencia.\n27.01.2026: PRODUCE (DGPA, OA, OAIPCS) y el GORE Callao sostienen reunión para coordinar la transferencia de recursos y la suscripción de actas pendientes; se deja constancia de limitaciones en la participación de funcionarios del GORE.\n\n2025\n22.12.2025: PRODUCE remite al GORE Callao documentación vinculada a las acciones administrativas de transferencia, en el marco del cierre del proceso.\n03.12.2025: FONDEPES coordina con las OSPAS la evaluación de alternativas para un nuevo DPA; el tema queda en pausa por factores normativos (DU 004-2025).\n02.12.2025: En reunión entre PRODUCE, FONDEPES, congresistas y organizaciones de pescadores (OSPAS), se aborda la problemática del DPA y la necesidad de evaluar la construcción de un nuevo desembarcadero, acordándose la conformación de una mesa de trabajo.\n28.11.2025: PRODUCE notifica al GORE Callao la resolución de transferencia de bienes muebles, quedando pendiente la suscripción del acta correspondiente.\n05.11.2025: PRODUCE, a través de la DGPA, culmina la ejecución de servicios de mantenimiento básico en el DPA:  limpieza de unidades de desagüe, cambio de rejillas, bitas y muelle marginal, electrobombas.\n10.10.2025: Mediante DS N.° 021-2025-PRODUCE, PRODUCE aprueba la transferencia del DPA Callao al Gobierno Regional del Callao, que asume la titularidad y las funciones administrativas y operativas del desembarcadero.",
@@ -1268,7 +1380,7 @@
         "url": "https://drive.google.com/drive/folders/15oZ5edOD0D5xx8EGkJG7ARamEuYw2IDu?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Escalada por expectativa no atendida referente a una mejora en la gestión e infraestructura del DPA",
       "actores_estado_raw": "GOBIERNO REGIONAL DEL CALLAO\n\nPRODUCE / FONDEPES",
       "actores_sociedad_raw": "OSPAS DEL CALLAO",
@@ -1280,10 +1392,10 @@
           "fila": 20,
           "fila_fin": 20,
           "accion": "Transferencia del DPA Callao al Gobierno Regional.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "OAIPCS",
           "punto_focal_raw": "Javier Juan Alegre Paredes",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 20,
@@ -1333,16 +1445,14 @@
         "resumen_ejecutivo": "#REF!",
         "semanas_con_dato": 2
       },
-      "advertencias": [
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
-      ]
+      "advertencias": []
     },
     {
       "orden": 4,
       "numero_excel": 4,
       "codigo_caso": "CS-PA-REG-2025-04",
       "nombre_oficial_metadatos": "Reubicación de embarcaciones pesqueras del Callao fondeadas en zona concesionada a la empresa APM Terminals.",
-      "nombre_caso_excel": "Demanda de los pescadores artesanales del Callao por una solución integral al proceso de reubicación temporal de las embarcaciones fondeadas en el Muelle 5E del Terminal Norte Multipropósito del Callao, debido a la concesión de dicha área a la empresa APM Terminals. Los pescadores solicitan una compensación económica justa, un lugar seguro para el fondeo de sus embarcaciones y el mejoramiento integral o la construcción de un nuevo Desembarcadero Pesquero Artesanal (DPA).",
+      "nombre_caso_excel": "Reubicación de embarcaciones pesqueras del Callao fondeadas en zona concesionada a la empresa APM Terminals.",
       "fecha_registro": {
         "raw": 2025.0,
         "iso": null,
@@ -1350,9 +1460,10 @@
       },
       "departamento_raw": "Callao",
       "sectorista_raw": "Peggy Contreras Montes",
-      "prioridad": {
-        "raw": "Urgente",
-        "id": 1,
+      "sectorista_metadatos_raw": "Peggy Contreras Montes",
+      "nivel_riesgo": {
+        "raw": "Alto",
+        "id": 3,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026\n22.09.2026: Se mantiene el estado reportado en agosto 2026. \n30.08.2026: A la fecha no se registran avances respecto al caso, no se han convocado nuevas reuniones por parte del MTC o PCM.\n27.05.2026: Se realizó una visita técnica intersectorial en el Callao para evaluar las áreas propuestas para un nuevo DPA y un fondeadero temporal. Asimismo, FONDEPES y DICAPI acordaron fortalecer las coordinaciones técnicas para subsanar observaciones y continuar con la viabilidad de los trámites vinculados al nuevo DPA.\n8 y 9.04.2026: PCM y MTC convocaron a reuniones a los sectores del Ejecutivo involucrados en la problemática, con el fin de revisar la propuesta de normativa del PDU. \n16.03.2026: MTC convocó a reunión a PRODUCE para presentar proyecto de DU, el cual contempla un incentivo excepcional para la transferencia de embarcaciones pesqueras artesanales para su posterior disposición final (desguace). PRODUCE emitió comentarios a la propuesta de normativa. \n09.02.2026: Reunión entre PCM, APN, MTC, PRODUCE, FONDEPES y APM TERMINAL, se evaluaron alternativas para la reubicación temporal de EP artesanales del Callao; sin embargo, DICAPI descartó técnicamente las dos zonas propuestas por MTC por estar vinculadas a áreas de defensa y maniobra naval.\n- DICAPI planteó trasladar el DPA fuera de la rada interior (zona norte–Ventanilla), mientras PRODUCE advirtió impactos sociales y que un nuevo DPA es una solución de mediano a largo plazo.\n21.01.2026: La PCM lideró una reunión multisectorial con MTC, PRODUCE, FONDEPES, APN, la congresista Patricia Chirinos y representantes de los pescadores artesanales del Callao, a fin de informar sobre los avances del proceso de reubicación de embarcaciones. El MTC anunció la elaboración de un estudio económico-legal para sustentar compensaciones y la evaluación de una eventual inversión de APM Terminals; PRODUCE garantizó la continuidad de la actividad pesquera; y FONDEPES presentó alternativas para un nuevo DPA, siendo cuestionada la opción del área N.° 3. Los pescadores expresaron su desacuerdo con la reubicación, la transferencia del DPA al GORE Callao y solicitaron una mejora integral en la infraestructura actual, así como la ampliación de los mecanismos de compensación, identificándose riesgos asociados a desacuerdos persistentes y expectativas no definidas.\n \n2025\n31.12.2025 (hito normativo): Culmina la vigencia del DU 004-2025, el cual no logró implementarse, limitando la ejecución de la reubicación de embarcaciones.\n03.12.2025: FONDEPES tomó contacto con las OSPAS para realizar visitas conjuntas a posibles espacios para construcción de un nuevo DPA; sin embargo, las OSPAS señalaron que, por el momento, el tema quedaría en espera hasta que se termine de ver lo referente al DU 004-2025, cuya vigencia se extiende hasta el 31.12.2025.\n21.11.2025: En reunión con DICAPI, MTC, PRODUCE y OSPAS, los pescadores reiteraron su pedido de derogar el DU por considerarlo insuficiente y solicitaron una mesa de trabajo para elaborar una nueva normativa que recoja sus demandas.\n19.11.2025: La PCM convocó a los equipos sociales del MTC y PRODUCE para coordinar un plan de relacionamiento con los pescadores del Callao.\n19.09.2025: MTC concluyó la etapa de suscripción de actas con baja participación, ya que solo 18 de 162 propietarios firmaron, por lo que dieron por finalizadas las reuniones del DU y anunciaron que enviarán un informe a las entidades involucradas.\nJunio – septiembre: MTC convoca reuniones intersectoriales con PRODUCE, APN y otros actores, a fin de abordar la problemática del fondeo en zonas vinculadas a la concesión portuaria. FONDEPES presenta alternativas preliminares de reubicación del DPA. \nAbri: Mediante DU 004-2025 (25.04.2025) se establecen medidas extraordinarias para optimizar las actividades portuarias en el Puerto del Callao, incluyendo la desocupación del área acuática de los Amarraderos D y E del Muelle 5 del Terminal Norte Multipropósito del Puerto del Callao, ocupada por embarcaciones de pescadores artesanales. \n\n2024\nDiciembre: El 17.12.2024, el Centro Internacional de Arreglo de Diferencias Relativas a Inversiones (CIADI) emitió el laudo arbitral en el caso entre APM Terminals Callao S.A. y el Estado peruano, estableciendo, la obligación de reubicar las EP artesanales fuera del área de maniobras del Terminal Norte Multipropósito, a fin de garantizar la libre disponibilidad del área concesionada. Este hito marca el punto de inflexión en la gestión del conflicto, al generar un mandato de cumplimiento obligatorio que condiciona las acciones adoptadas por el Estado a partir del año 2025.",
@@ -1361,7 +1472,7 @@
         "url": "https://drive.google.com/drive/folders/1MpIM4wQqz_PWMua8_Pl_szh0BeG1QfRb?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "Pendiente",
+      "timestamp_estado": null,
       "descripcion_riesgo": "1. Escalamiento del conflicto social debido a la falta de implementación de soluciones tras la culminación del DU 004-2025, generando desconfianza en los pescadores y rechazo a nuevas propuestas de reubicación.\n2. Mayor presión política y mediática por cuestionamientos de autoridades y actores involucrados.\n3. Riesgo de una nueva demanda arbitral de APM Terminals Callao S.A. ante el CIADI, por el incumplimiento del plazo de reubicación de las embarcaciones pesqueras, establecido en el laudo arbitral de diciembre de 2024 y vencido el 28 de febrero de 2025",
       "actores_estado_raw": "GOBIERNO REGIONAL DEL CALLAO\n\nMTC / APN / PRODUCE / FONDEPES / PCM / DICAPI",
       "actores_sociedad_raw": "OSPAS DEL CALLAO",
@@ -1373,10 +1484,10 @@
           "fila": 21,
           "fila_fin": 21,
           "accion": "Participar activamente de las reuniones convocadas por PCM e informar sobre el desarrollo de las mismas.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DVPA",
           "punto_focal_raw": "Karina Flores",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 21,
@@ -1428,8 +1539,7 @@
       },
       "advertencias": [
         "Hito fila 21: Fecha Planificada = 'No aplica' -> no_aplica (no se convierte a fecha).",
-        "Hito fila 21: Fecha Real = 'No aplica' -> no_aplica (no se convierte a fecha).",
-        "Columna H = 'Pendiente': es un estado, no una marca de tiempo."
+        "Hito fila 21: Fecha Real = 'No aplica' -> no_aplica (no se convierte a fecha)."
       ]
     },
     {
@@ -1444,19 +1554,20 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Lima Metropolitana",
-      "sectorista_raw": "Ivan Ascurra Santillán",
-      "prioridad": {
+      "sectorista_raw": "Karen Benito",
+      "sectorista_metadatos_raw": "Ivan Ascurra Santillán",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
-      "narrativa_cronologica": "2026\n - 27.02.2026 La OSPA José Olaya Balandra, se reunión con DGPA, FONDEPES, SM solicitando PRODUCE coordine con MININTER y la PNP.\n2025\n22.12.2025: Pescadores artesanales que administran el IPA Chorrillos realizaron declaraciones ante medios de comunicación nacionales, específicamente en el programa “Paren Todo” de Panamericana Televisión, señalando que esperaban que el alcalde Richard Córtez dispusiera el derribo de los muros instalados en el marco del Proyecto de Renovación Integral de Infraestructura en Playa Pescadores. Según los pescadores, esta acción permitiría habilitar espacios para la carga de productos hidrobiológicos en camiones refrigerados, demanda que evidencia la persistencia del conflicto por el uso del espacio público y la infraestructura costera.\n 15.12.2025: No se registraron declaraciones oficiales del alcalde Richard Córtez manteniendo la postura crítica frente a la regulación y recuperación del espacio público que había sostenido anteriormente cuando ejercía el cargo de Teniente Alcalde, lo que evidenció un cambio de discurso y posicionamiento político frente a la problemática.\n 11 y 12.12.2025: PRODUCE participó en reuniones convocadas por la Presidencia del Consejo de Ministros (PCM), en las cuales se continuó avanzando en la propuesta conjunta de solución a la problemática vinculada al Muelle 5, el DPA Callao y el IPA Chorrillos. Como resultado de estas reuniones, PRODUCE remitió a la PCM un proyecto de cronograma de actividades, orientado a articular acciones entre el MTC, DICAPI, APN y otras entidades competentes, quedando dicho documento en evaluación por la PCM.\n 08.12.2025: Alcalde distrital de Chorrillos, Richard Córtez, participó en una actividad social, cívica y religiosa organizada por la Asociación de Pescadores José Olaya Balandra, evidenciando una actitud de cercanía y confraternidad con el gremio pesquero artesanal, lo cual fue interpretado por los pescadores como una señal de respaldo político y social a sus demandas.\n 17.11.2025: El 17 de noviembre de 2025, el Comisario de Chorrillos emitió un informe respecto a hechos vinculados a la situación en el entorno del IPA Chorrillos y Playa Pescadores, el cual fue puesto en conocimiento de la Alta Dirección del sector mediante el Memorando N.° 00001716-2025, remitido el 4 de diciembre de 2025 por el Procurador Público Adjunto, Jhony Francisco Zamora Limo. Dicho documento permitió alertar formalmente sobre el contexto social y los riesgos asociados al uso del espacio público y a las tensiones existentes entre autoridades locales y pescadores artesanales.",
+      "narrativa_cronologica": "2026\n - 27.02.2026 La OSPA José Olaya Balandra, se reunión con DGPA, FONDEPES, SM solicitando PRODUCE coordine con MININTER y la PNP.\n2025 \n22.12.2025: Pescadores artesanales que administran el IPA Chorrillos realizaron declaraciones ante medios de comunicación nacionales, específicamente en el programa “Paren Todo” de Panamericana Televisión, señalando que esperaban que el alcalde Richard Córtez dispusiera el derribo de los muros instalados en el marco del Proyecto de Renovación Integral de Infraestructura en Playa Pescadores. Según los pescadores, esta acción permitiría habilitar espacios para la carga de productos hidrobiológicos en camiones refrigerados, demanda que evidencia la persistencia del conflicto por el uso del espacio público y la infraestructura costera.\n 15.12.2025: No se registraron declaraciones oficiales del alcalde Richard Córtez manteniendo la postura crítica frente a la regulación y recuperación del espacio público que había sostenido anteriormente cuando ejercía el cargo de Teniente Alcalde, lo que evidenció un cambio de discurso y posicionamiento político frente a la problemática.\n 11 y 12.12.2025: PRODUCE participó en reuniones convocadas por la Presidencia del Consejo de Ministros (PCM), en las cuales se continuó avanzando en la propuesta conjunta de solución a la problemática vinculada al Muelle 5, el DPA Callao y el IPA Chorrillos. Como resultado de estas reuniones, PRODUCE remitió a la PCM un proyecto de cronograma de actividades, orientado a articular acciones entre el MTC, DICAPI, APN y otras entidades competentes, quedando dicho documento en evaluación por la PCM.\n 08.12.2025: Alcalde distrital de Chorrillos, Richard Córtez, participó en una actividad social, cívica y religiosa organizada por la Asociación de Pescadores José Olaya Balandra, evidenciando una actitud de cercanía y confraternidad con el gremio pesquero artesanal, lo cual fue interpretado por los pescadores como una señal de respaldo político y social a sus demandas.\n 17.11.2025: El 17 de noviembre de 2025, el Comisario de Chorrillos emitió un informe respecto a hechos vinculados a la situación en el entorno del IPA Chorrillos y Playa Pescadores, el cual fue puesto en conocimiento de la Alta Dirección del sector mediante el Memorando N.° 00001716-2025, remitido el 4 de diciembre de 2025 por el Procurador Público Adjunto, Jhony Francisco Zamora Limo. Dicho documento permitió alertar formalmente sobre el contexto social y los riesgos asociados al uso del espacio público y a las tensiones existentes entre autoridades locales y pescadores artesanales.",
       "analisis_canva": {
         "etiqueta": "Análisis del Caso- Canva",
         "url": "https://drive.google.com/drive/folders/19poIX-JMZc0eQxwm4ojGl--qr_UWX0gk?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Riesgo de conflicto institucional y judicialización, así como de afectación a la gobernanza y operatividad del IPA de Chorrillos, por la negativa a entregar la administración y la ocupación irregular de la infraestructura. Riesgo de alteración del orden público, con resultados lamentables.",
       "actores_estado_raw": "GORE Lima / DIREPRO Lima Metropolitana\n\nPCM / PRODUCE (FONDEPES) / APN / MTC / DICAPI",
       "actores_sociedad_raw": "OSPA José Olaya Balandra\n OSPA Gremio Pescadores Artesanales San Pedro de Chorrillos",
@@ -1468,10 +1579,10 @@
           "fila": 22,
           "fila_fin": 24,
           "accion": "Desocupar instalaciones del IPA por la OSPA José Olaya.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGPA",
           "punto_focal_raw": "Juan Carlos Cordova Calle",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 22,
@@ -1582,7 +1693,7 @@
       "advertencias": [
         "Hito fila 23: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 24: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Karen Benito') difiere del de METADATOS ('Ivan Ascurra Santillán'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -1590,7 +1701,7 @@
       "numero_excel": 6,
       "codigo_caso": "CS-PA-REG-2020-06",
       "nombre_oficial_metadatos": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
-      "nombre_caso_excel": "La Comunidad Pesquera Artesanal de San Juan de Marcona (COPMAR) denuncia la extracción ilegal de “erizo rojo” por parte de embarcaciones de Lomas (Arequipa) y solicita la autorización para la extracción de “erizo rojo” y “sargazo palo” en el distrito.",
+      "nombre_caso_excel": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
       "fecha_registro": {
         "raw": 2020.0,
         "iso": null,
@@ -1598,8 +1709,9 @@
       },
       "departamento_raw": "Ica y Arequipa",
       "sectorista_raw": "Peggy Contreras Montes",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_metadatos_raw": "Peggy Contreras Montes",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -1609,7 +1721,7 @@
         "url": "https://drive.google.com/drive/folders/1xMICfoZ-XLLJmcvtvxJB5LnzvtOrEYzH?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "Pendiente",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Eventual incremento de la visibilidad del tema a través de pronunciamientos públicos o gestiones ante actores políticos y mediáticos, como parte de la búsqueda de atención a sus demandas.",
       "actores_estado_raw": "GOBIERNO REGIONAL DE ICA \n GOBIERNO REGIONAL DE AREQUIPA\n\nPRODUCE",
       "actores_sociedad_raw": "OSPAS DE MARCONA / OSPAS DE LOMAS",
@@ -1621,10 +1733,10 @@
           "fila": 25,
           "fila_fin": 25,
           "accion": "Instalación de Mesas Técnicas en el marco de las RM 343 y 344-2025-PRODUCE.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGPA",
           "punto_focal_raw": "Juan Carlos Cordova Calle",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 25,
@@ -1662,10 +1774,10 @@
           "fila": 26,
           "fila_fin": 26,
           "accion": "Permanencia de operativos de fiscalización por parte de PRODUCE de manera conjunta con DICAPI.",
-          "medios_verificacion_raw": "Acción 2: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGSFS-PA",
           "punto_focal_raw": "Milagros Regina Huachua Quintana",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 26,
@@ -1718,8 +1830,7 @@
       "advertencias": [
         "Hito fila 26: Fecha Planificada = 'Constante' -> texto_no_fecha (no se convierte a fecha).",
         "Hito fila 26: Fecha Real = 'Constante' -> texto_no_fecha (no se convierte a fecha).",
-        "Acción fila 26: su primer hito es 'Hito 2', no 'Hito 1'.",
-        "Columna H = 'Pendiente': es un estado, no una marca de tiempo."
+        "Acción fila 26: su primer hito es 'Hito 2', no 'Hito 1'."
       ]
     },
     {
@@ -1727,17 +1838,18 @@
       "numero_excel": 7,
       "codigo_caso": "CS-PA-REG-2025-07",
       "nombre_oficial_metadatos": "División y disconformidad, entre las OSPAS por DS N° 002-2025-PRODUCE que modifica Ley N° 31749",
-      "nombre_caso_excel": "Posiciones contrapuestas entre organizaciones de pescadores artesanales respecto de la implementación de la Ley N.° 31749 y del Decreto Supremo N.° 002-2025-PRODUCE. Mientras los gremios de pesca artesanal tradicional respaldan la reforma, las asociaciones de armadores y pescadores de cerco mecanizado (bolicheros) se oponen al considerar que restringe sus actividades extractivas.",
+      "nombre_caso_excel": "Conflictividad intergremial por la implementación de la Ley N.° 31749 y el DS N.° 002-2025-PRODUCE y sus efectos en la actividad pesquera artesanal",
       "fecha_registro": {
         "raw": 2025.0,
         "iso": null,
         "estado": "solo_anio"
       },
       "departamento_raw": "Piura / Tumbes / Lambayeque / La Libertad / Áncash / Lima / Callao / Ica / Arequipa / Moquegua / Tacna",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Urgente",
-        "id": 1,
+      "sectorista_raw": "Esteban Vidal Saldarriaga",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Alto",
+        "id": 3,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2025 \n - Durante el periodo comprendido entre mayo y setiembre de 2025, la DGPA desplegó un proceso sostenido de difusión y asistencia técnica a la pesca artesanal, realizando 382 intervenciones entre mayo y agosto, y 452 intervenciones entre mayo y setiembre, orientadas a informar a los agentes del sector sobre la normatividad pesquera vigente, incluyendo las disposiciones establecidas en el Decreto Supremo N.° 002-2025-PRODUCE.\n  - En ese contexto, conforme a lo señalado en el Informe N.° 715-2025-PRODUCE/DPO, de fecha 7 de agosto de 2025, la Dirección de Políticas y Ordenamiento (DPO) informó que la Dirección General de Pesca para Consumo Humano Directo e Indirecto (DGPCHDI) se encontraba en proceso de recopilación de información para la elaboración y socialización de las disposiciones necesarias para dar cumplimiento a la Primera Disposición Complementaria Final del DS N.° 002-2025-PRODUCE, quedando pendiente la emisión formal de dichas disposiciones.\n  - El 5 de agosto de 2025, la DGPCHDI sostuvo una reunión de trabajo con exportadores del sector, en la que participaron representantes de la DECHDI, abordándose temas vinculados a los procedimientos CITES, como parte del proceso de articulación técnica con los actores involucrados en la cadena productiva.\n  - Posteriormente, el 12 de agosto de 2025, mediante el Oficio N.° 00000129-2025-PRODUCE/DGPCHDI, la DGPCHDI remitió al MINAM la información consolidada proporcionada por la DGSFS-PA y el IMARPE, con la finalidad de continuar con la elaboración del DENP, avanzando así en el componente técnico-ambiental del proceso normativo.\n  - En una etapa posterior, la DGPCHDI remitió, vía correo electrónico, a la DGPARPA y a la DGPA el proyecto de adecuación normativa, solicitando comentarios y aportes técnicos para su mejora; no obstante, a la fecha no se cuenta con información precisa respecto a la fecha exacta de dicho envío, manteniéndose este hito en condición de “por informar”.\n  - El 24 de octubre de 2025, representantes de la DGPARPA, la DGSFS-PA y la OAIPCS sostuvieron una reunión con representantes de las OSPAs de Marcona y Lomas, con el objetivo de instalar las Mesas Técnicas de los recursos hidrobiológicos erizo rojo (Loxechinus albus) y palo o sargazo (Lessonia trabeculata). Si bien la reunión se llevó a cabo conforme a lo programado, las discrepancias entre las organizaciones de pescadores impidieron alcanzar consensos que permitieran avanzar en el proceso de concertación técnica.\n  - El 26 de noviembre de 2025, se publicó la Resolución Ministerial N.° 407-2025-PRODUCE, mediante la cual se otorgó un plazo de 60 días hábiles para la recepción de comentarios, aportes u opiniones de entidades públicas, privadas y de la ciudadanía en general. Dicho plazo culmina el 24 de febrero de 2026, encontrándose el proceso actualmente en etapa de espera para la consolidación de aportes. No obstante, las discrepancias persistentes entre las OSPAs de Marcona y Lomas continuaron limitando el avance del proceso de concertación técnica previsto inicialmente en las RM N.° 343 y 344-2025-PRODUCE, impidiendo hasta la fecha la publicación de la relación oficial de embarcaciones y pescadores habilitados para la actividad extractiva.\n  - El 2 de diciembre de 2025, con la participación del Viceministro de Pesca y Acuicultura, la DGPARPA y la DGPA, se realizó una jornada de socialización de la RM N.° 407-2025-PRODUCE, durante la cual se recogieron aportes y observaciones formuladas por los pescadores artesanales asistentes, como parte del proceso participativo establecido en la citada resolución.\n  - Finalmente, la DGPA informó que, una vez emitidas las disposiciones finales correspondientes, coadyuvará a su difusión y socialización a través del SEPA, compromiso que se mantiene en proceso, condicionado a la culminación del plazo de consulta pública que vence el 24 de febrero de 2026.",
@@ -1746,7 +1858,7 @@
         "url": "https://drive.google.com/drive/folders/1To9kX7HSNrK4PIk89MDn7WxcGA1V1NYU?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "Pendiente",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Riesgo de incremento de la conflictividad social e informalidad por la reclasificación de la flota y las restricciones de acceso a las 5 millas, percibidas como carentes de sustento técnico y generadoras de inseguridad jurídica para la pesca artesanal. Gremios de Sechura y Paita han anunciado marchas y medidas de fuerza argumentando que el decreto perjudica al 95% de su flota artesanal.",
       "actores_estado_raw": "DIREPRO Piura / DIREPRO Ica / DIREPRO Arequipa / DIREPRO La Libertad / DIREPRO Áncash\n\nPRODUCE (DGPA, DGPCHDI, DGSFS-PA, DPO) / DICAPI / MTC / PCM / Congreso de la República",
       "actores_sociedad_raw": "DICAPI, MTC, PRODUCE, OSPAS, Congresista Edwin Martínez",
@@ -1758,10 +1870,10 @@
           "fila": 27,
           "fila_fin": 27,
           "accion": "Consolidación de aportes, comentarios a la RM 407-2025-PRODUCE, en un plazo para recepcionar los aportes es de 60 días hábiles.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGPCHDI",
           "punto_focal_raw": "Jaime Antonio De la Torre Obregon",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 27,
@@ -1799,7 +1911,7 @@
           "fila": 28,
           "fila_fin": 29,
           "accion": "Establecimientos de lineamientos para que los armadores de embarcaciones artesanales y de menor escala se adapten a las modificaciones introducidas por el Decreto Supremo N° 002-2025-PRODUCE.",
-          "medios_verificacion_raw": "Acción 2: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGPCHDI",
           "punto_focal_raw": "Jaime Antonio De la Torre Obregon",
           "documentos_raw": null,
@@ -1869,7 +1981,7 @@
           "fila": 30,
           "fila_fin": 30,
           "accion": "Socialización a las OSPAS (norte, centro y sur) sobre la normativa próxima a implementarse.",
-          "medios_verificacion_raw": "Acción 3: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGPA",
           "punto_focal_raw": "Juan Carlos Cordova Calle",
           "documentos_raw": null,
@@ -1927,7 +2039,7 @@
         "Hito fila 28: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 29: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 30: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'Pendiente': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Esteban Vidal Saldarriaga') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -1935,16 +2047,17 @@
       "numero_excel": 8,
       "codigo_caso": "CS-PA-REG-2024-08",
       "nombre_oficial_metadatos": "Ordenamiento del recurso calamar gigante (pota)",
-      "nombre_caso_excel": "OSPAS demandan modificaciones a las medidas de ordenamiento y acceso a la pesquería del recurso calamar gigante (pota).",
+      "nombre_caso_excel": "Conflictividad social por la asignación de cuotas de captura y las medidas de ordenamiento pesquero del recurso pota",
       "fecha_registro": {
         "raw": 2024.0,
         "iso": null,
         "estado": "solo_anio"
       },
       "departamento_raw": "Piura / Tumbes / Lambayeque / La Libertad / Áncash / Lima / Callao / Ica / Arequipa / Moquegua / Tacna",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Ivan Ascurra Santillán",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -1954,7 +2067,7 @@
         "url": "https://drive.google.com/drive/folders/1INzynTvk0iNjW_LA7EZXSyVeY_S-rG86?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "Pendiente",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Riesgo de escalamiento de la conflictividad social y sobreexplotación del calamar gigante, ante la persistente escasez del recurso, la presión de flotas extranjeras y la percepción de insuficiencia o desajuste en las medidas de control y gestión adoptadas por el Estado.",
       "actores_estado_raw": "DIREPRO Piura / DIREPRO Ica / DIREPRO Arequipa / DIREPRO Tacna / DIREPRO La Libertad / DIREPRO Lima\n\nPRODUCE (DVPA, DGPA, DGSFS-PA) / IMARPE / PCM",
       "actores_sociedad_raw": "Pescadores artesanales del litoral norte, centro y sur / OSPAS de Paita y Piura / Pescadores de la Macro Sur (Ica, Arequipa, Moquegua, Tacna)",
@@ -2033,10 +2146,10 @@
           "fila": 31,
           "fila_fin": 33,
           "accion": "Recojo de muestras del recurso pota en las zonas centro y sur y elaboración de informe técnico correspondiente.",
-          "medios_verificacion_raw": "Acción1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "IMARPE",
           "punto_focal_raw": "Betsy del Carmen Buitrón Díaz",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 31,
@@ -2132,7 +2245,7 @@
           "fila": 34,
           "fila_fin": 36,
           "accion": "Emisión de una RM de ordenamiento para la extracción del recurso.",
-          "medios_verificacion_raw": "Acción 2: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGPARPA",
           "punto_focal_raw": "Yuliana Katherin Mora Espinoza",
           "documentos_raw": null,
@@ -2244,7 +2357,7 @@
         "semanas_con_dato": 25
       },
       "advertencias": [
-        "Columna H = 'Pendiente': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Ivan Ascurra Santillán') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -2252,7 +2365,7 @@
       "numero_excel": 9,
       "codigo_caso": "CS-PA-REG-2026-09",
       "nombre_oficial_metadatos": "Presunta contaminación por dragado en la Bahía del Callao",
-      "nombre_caso_excel": "OSPAs del Callao denunciaron una presunta afectación a la actividad pesquera artesanal por las operaciones de dragado ejecutadas por la Autoridad Portuaria Nacional (APN) en la zona del Cabezo Norte de la isla San Lorenzo, dentro de las cinco millas marinas, por un presunto impacto ambiental en un área reservada para la pesca artesanal.",
+      "nombre_caso_excel": "Presunta contaminación por dragado en la Bahía del Callao",
       "fecha_registro": {
         "raw": 2026.0,
         "iso": null,
@@ -2260,9 +2373,10 @@
       },
       "departamento_raw": "Callao",
       "sectorista_raw": "Peggy Contreras Montes",
-      "prioridad": {
+      "sectorista_metadatos_raw": "Peggy Contreras Montes",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026\n- MTC señaló que la actividad del dragado culminó el 26.01.2026. \n- 09.02.2026. IMARPE emitió informe técnico complementario sobre el Informe de Evaluación Ambiental en la zona del Cabezo Norte de la Isla San Lorenzo mediante OFICIO N° 0197-2026-IMARPE/PE (09.02.2026)\n - El 20 de enero, IMARPE remitió mediante Oficio 0061-2026-IMPARE/PE información sobre monitoreos hidro biológicos y ambientales de la zona denominada \"cabezo norte\" en el Callao.\n - El 13 de enero de 2026, DVPA convocó a la tercera reunión con presencia de OSPAS del Callao, Congresista Patricia Chirinos, MTC, APN, DICAPI, MINAM y PROUCE. Se acordó que DICAPI adecuará y supervisará el área de vertimiento conforme al MEIA, verificando el cumplimiento del plan de dragado y uso de una sola draga por parte de APN.\n Asimismo, el MTC (vía DGAAM) comunicará las resoluciones y actas de supervisión, y solicitará información hidro-oceanográfica a DICAPI e IMARPE, informando a las entidades y pescadores involucrados.\n - El 05 de enero de 2026, se desarrolló una reunión convocada por el VMPA ante la denuncia formulada por OSPAS del Callao por presunta contaminación marina asociada a las operaciones de dragado, ejecutadas bajo responsabilidad de la APN.",
@@ -2271,7 +2385,7 @@
         "url": "https://drive.google.com/drive/folders/1pXOlQjJHEn4t_MK3LZvM56VnazNCkHuU?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Eventual incremento de la visibilidad del tema a través de pronunciamientos públicos o gestiones ante actores políticos y mediáticos, como parte de la búsqueda de atención a sus demandas.",
       "actores_estado_raw": "MTC, APN, DICAPI, PRODUCE (IMARPE) , MINAM, Congresista Patricia Chirinos",
       "actores_sociedad_raw": "OSPAS DEL CALLAO (ARAEMM, ARUPACC, ARAAPESCA, ENTRE OTRAS)",
@@ -2283,10 +2397,10 @@
           "fila": 37,
           "fila_fin": 37,
           "accion": "IMARPE remitirá a MTC información sobre monitoreos hidro biológicos y/o ambientales de la zona conocida como \"cabezo norte\" de la Isla San Lorenzo.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "IMARPE",
           "punto_focal_raw": "Betsy del Carmen Buitrón Díaz",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 37,
@@ -2336,25 +2450,24 @@
         "resumen_ejecutivo": "#REF!",
         "semanas_con_dato": 2
       },
-      "advertencias": [
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
-      ]
+      "advertencias": []
     },
     {
       "orden": 10,
       "numero_excel": 10,
       "codigo_caso": "CS-PA-REG-2025-10",
       "nombre_oficial_metadatos": "Seguridad y fiscalización en las 5 millas de Tumbes",
-      "nombre_caso_excel": "Pescadores artesanales de Tumbes solicitan mayor control, fiscalización y seguridad para la actividad pesquera dentro de las 5 millas, por supuesta depredación de recursos por parte de armadores de arrastre y cerco de boliche; y por la amenaza de extorsión por parte de bandas nacionales y extranjeras, tanto en altamar como en tierra.",
+      "nombre_caso_excel": "Demandas de mayor seguridad y control de la actividad pesquera dentro de las cinco millas en Tumbes ante la pesca presuntamente ilegal",
       "fecha_registro": {
         "raw": 2019.0,
         "iso": null,
         "estado": "solo_anio"
       },
       "departamento_raw": "Tumbes",
-      "sectorista_raw": "Peggy Contreras Montes",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Ivan Ascurra Santillán",
+      "sectorista_metadatos_raw": "Peggy Contreras Montes",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -2364,7 +2477,7 @@
         "url": "https://drive.google.com/drive/folders/1srqeGgS9fM5xhXE18r1XTUrR70QjT9fW?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Eventual incremento de la visibilidad del tema a través de pronunciamientos públicos o gestiones ante actores políticos y mediáticos, como parte de la búsqueda de atención a sus demandas.",
       "actores_estado_raw": "DIREPRO TUMBES\n\nPRODUCE (DGSF-PA) / DICAPI",
       "actores_sociedad_raw": "OSPAS DE TUMBES",
@@ -2376,10 +2489,10 @@
           "fila": 38,
           "fila_fin": 38,
           "accion": "Permanencia de operativos de fiscalización por parte de PRODUCE de manera conjunta con DICAPI.",
-          "medios_verificacion_raw": "Acción1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGSFS-PA",
           "punto_focal_raw": "Milagros Regina Huachua Quintana",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 38,
@@ -2431,7 +2544,7 @@
       },
       "advertencias": [
         "Hito fila 38: Fecha Planificada = '12, 20, 21, 25 y 27,02,2026' -> texto_no_fecha (no se convierte a fecha).",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Ivan Ascurra Santillán') difiere del de METADATOS ('Peggy Contreras Montes'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -2446,9 +2559,10 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Piura",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Ivan Ascurra Santillán",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -2458,7 +2572,7 @@
         "url": "https://drive.google.com/drive/folders/1G36cKnkW5KTWfF4ITjfVzijrTmqmGuYz?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Enfrentamientos violentos entre maricultores por posesión de áreas y sanciones internacionales por falta de trazabilidad sanitaria de la concha de abanico.",
       "actores_estado_raw": "DIREPRO Piura / GORE Piura\n\nPRODUCE (DGA, DGPA) / SANIPES",
       "actores_sociedad_raw": "Gremios de maricultores de Sechura / Asociaciones de productores de concha de abanico de Sechura / Municipalidad de Sechura",
@@ -2515,10 +2629,10 @@
           "fila": 41,
           "fila_fin": 41,
           "accion": "Concretar reunión y/o visita a zona de amricultura de SECHURA (Parachique)",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGA",
           "punto_focal_raw": "Evelyn Tovalino León",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 41,
@@ -2574,7 +2688,7 @@
         "Demanda de la fila 41 sin Temática (M vacía); no se hereda.",
         "Hito fila 41: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Acción de la fila 39 sin ningún hito (S vacía en su span).",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Ivan Ascurra Santillán') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -2589,9 +2703,10 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Piura - Lambayeque",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Ivan Ascurra Santillán",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -2601,7 +2716,7 @@
         "url": "https://drive.google.com/drive/folders/1yMIMKwAaLzu5Yupqu1639zBvdosyeh-X?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Cientos de embarcaciones quedarían en la ilegalidad, perdiendo acceso a mercados formales y siendo sujetos de decomisos y multas elevadas",
       "actores_estado_raw": "DIREPRO Piura / DIREPRO Lambayeque / GORE Piura / GORE Lambayeque\n\nPRODUCE (DGA, DGPA) / PCM",
       "actores_sociedad_raw": "Pescadores/Armadores artesanales de Piura y Lambayeque no inscritos en DS 006-2016 / Gremios de pescadores artesanales zona norte",
@@ -2613,10 +2728,10 @@
           "fila": 42,
           "fila_fin": 42,
           "accion": "1. Culminación del proceso de formalización de las cooperativas de Piura (RM. 00395-2024-PRODUCE )”.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGPA",
           "punto_focal_raw": "Juan Carlos Cordova Calle",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 42,
@@ -2668,7 +2783,7 @@
       },
       "advertencias": [
         "Hito fila 42: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Ivan Ascurra Santillán') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -2676,16 +2791,17 @@
       "numero_excel": 13,
       "codigo_caso": "CS-PA-REG-2019-13",
       "nombre_oficial_metadatos": "Crecimiento de la maricultura en su localidad con apoyo y asistencia tecnica del sector",
-      "nombre_caso_excel": "Crecimiento de la maricultura en su localidad con apoyo y asistencia tecnica del sector",
+      "nombre_caso_excel": "Demandas de apoyo técnico, normativo y financiero para el desarrollo del cultivo de concha de abanico y el aprovechamiento de recursos hidrobiológicos en Lambayeque",
       "fecha_registro": {
         "raw": 2019.0,
         "iso": null,
         "estado": "solo_anio"
       },
       "departamento_raw": "Lambayeque",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Ivan Ascurra Santillán",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -2695,7 +2811,7 @@
         "url": "https://drive.google.com/drive/folders/1TPc4S7sIVYTfDMbRXRd5_2og2P5Xl9oT?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": null,
       "actores_estado_raw": "DIREPRO Lambayeque / GORE Lambayeque\n\nPRODUCE (DGA) / FONDEPES / IMARPE",
       "actores_sociedad_raw": "Asociación de Pescadores Artesanales del caserío Dos Palos / Pescadores artesanales de Chérrepe / Municipalidad distrital",
@@ -2707,10 +2823,10 @@
           "fila": 43,
           "fila_fin": 46,
           "accion": "Realizar el asesoramiento de actualización del PRA y fortalecimeinto del desarrollo acuicola.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGA",
           "punto_focal_raw": "Evelyn Tovalino León",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 43,
@@ -2851,7 +2967,7 @@
         "Hito fila 43: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 45: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 46: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Ivan Ascurra Santillán') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -2859,16 +2975,17 @@
       "numero_excel": 14,
       "codigo_caso": "CS-PA-SOC-2023-14",
       "nombre_oficial_metadatos": "Exploración de hidrocarburos en las costas de dichas regiones, específicamente en Salaverry (La Libertad), Santa Rosa y San José (Lambayeque).",
-      "nombre_caso_excel": "Rechazo de OSPAS de Lambayeque y La Libertad al proyecto de exploración y eventual explotación de hidrocarburos en los lotes Z-61, Z-62 y Z-63 a cargo de la empresa ANADARKO, por el presunto impacto sobre los recursos hidrobiológicos y la actividad pesquera artesanal.",
+      "nombre_caso_excel": "Rechazo de OSPAS de Lambayeque y La Libertad a los proyectos de exploración de hidrocarburos en los lotes Z-61, Z-62 y Z-63 por el posible impacto sobre los recursos hidrobiológicos y la actividad pesquera artesanal.",
       "fecha_registro": {
         "raw": 2023.0,
         "iso": null,
         "estado": "solo_anio"
       },
       "departamento_raw": "Lambayeque",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Ivan Ascurra Santillán",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -2878,7 +2995,7 @@
         "url": "https://drive.google.com/drive/folders/1PBVQHkD-S79C9Y1BYq3uxb1J0ynwkEex?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": null,
       "actores_estado_raw": "GORE La Libertad / GORE Lambayeque / DIREPRO La Libertad / DIREPRO Lambayeque\n\nMINEM (DGAAH) / PRODUCE / MINAM (SENACE) / PCM",
       "actores_sociedad_raw": "Gremios de pescadores artesanales de La Libertad y Lambayeque, ANADARKO, GORE La Libertad, GORE Lambayeque, SENACE, IMARPE, Petro Perú, Chevron, Westlawn Perú S.A.C., Congresista Hector Acuña",
@@ -2890,10 +3007,10 @@
           "fila": 47,
           "fila_fin": 47,
           "accion": "1. Realizar seguimiento a las posiciones de los representantes de los gremios y opositores a las actividades de extracción y explotación de hidrocarburos",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGAAMPA",
           "punto_focal_raw": "Jocabed Canchari Soto",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 47,
@@ -2944,7 +3061,7 @@
         "semanas_con_dato": 0
       },
       "advertencias": [
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Ivan Ascurra Santillán') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -2952,17 +3069,18 @@
       "numero_excel": 15,
       "codigo_caso": "CS-PA-REG-2022-15",
       "nombre_oficial_metadatos": "Regulación para comercialización y exportación de aletas de tiburón.",
-      "nombre_caso_excel": "Regulación para comercialización y exportación de aletas de tiburón.",
+      "nombre_caso_excel": "Demandas de las OSPAS de la Macrorregión Sur (Arequipa, Moquegua y Tacna) sobre la regulación, fiscalización y comercialización de aletas de tiburón",
       "fecha_registro": {
         "raw": 2022.0,
         "iso": null,
         "estado": "solo_anio"
       },
       "departamento_raw": "Piura / Lambayeque / La Libertad / Callao / Ica / Arequipa / Moquegua",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
+      "sectorista_raw": "Esteban Vidal Saldarriaga",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026\n - 24.04.2026: El 7 de abril de 2026, la Macrosur acordó convocar una mesa de trabajo para el 24 de abril (aún sin oficializar por carta), con la presencia del ministro. Se abordarán: problemática de bentónicos, sector pinta y pesca de cortina, acuicultura y maricultura, aletas de tiburón, plantas desalinizadoras, y otros puntos.\n \n Infromación general: \n • El 11.03.2025:PRODUCE, por recomendación del MINAM, emitió la RD N° 00201-2025, donde indican que solo se puede exportar recursos los cuales hayan sido capturados en el mismo año.\n • El 01.04.2025, se emitió el DS N° 004-2025-PRODUCE, el cual dispone complementariamente la modificación de la gestión de procesos administrativos del TUPA hasta 60 días hábiles.\n Situación actual:\n • El 30.06.25, DGPCHI y DGAAMPA realizaron el envío del informe sobre CITES de los años 2022, 2023 y 2024 a MINAM, quienes como autoridad científica tendrán que evaluar y emitir DENP extraordinario si corresponde.\n • 11–19.11.2025 – Se registraron incautaciones de entre 9 y 12 toneladas de aletas en operativos del Callao y otros puertos. Las acciones se realizaron con apoyo internacional, evidenciando la existencia de tráfico organizado.\n • Noviembre 2025 – PRODUCE publicó varias resoluciones directorales (como 810, 811, 849, 855-2025) autorizando exportaciones de cientos o miles de kilos de aletas secas. Esto muestra un incremento significativo en la tramitación de permisos ese mes.\n • Noviembre–diciembre 2025 – Fiscalización y presión mediática\n Medios como Mongabay y OjoPúblico difundieron reportes sobre desembarcos irregulares y debilidades de control.\n \n 2026 - SEGUIMIENTO:\n • Ene-Feb 2026, DGPCHDI: Solicitó al MINAM a través de DGAAMPA la emisión de los Dictámenes de Extracción No Perjudicial (DENP) para el año 2026 de las principales especies cuyas partes o derivados se comercializan internacionalmente bajo CITES.\n [REDES SOCIALES - 2026]: Organizaciones ambientalistas internacionales (Oceana, WWF) y medios digitales (Mongabay, OjoPúblico) continúan la presión en redes sociales sobre el tráfico de aletas de tiburón en Perú, con denuncias y publicaciones que generan presión mediática sobre PRODUCE y MINAM para reforzar controles.\n \n ── SEGUIMIENTO 2026 (Nudos Críticos / Avances) ──\n • [Seguimiento 01-09 feb 2026]: La DGPCHDI solicitó al MINAM a través de DGAAMPA la emisión de los Dictámenes de Extracción No Perjudicial (DENP) para el año 2026 de las principales especies cuyas partes o derivados se comercializan internacionalmente bajo CITES.",
@@ -2971,7 +3089,7 @@
         "url": "https://drive.google.com/drive/folders/1vtvQ0LcamPV4u6do_pkybTGo8GjCCTI8?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": null,
       "actores_estado_raw": "DIREPRO Callao / DIREPRO Piura / DIREPRO Lambayeque / GORE Callao\n\nPRODUCE (DGPCHDI, DGSFS-PA) / MINAM (DGAAMPA) / SERNANP / Ministerio de Relaciones Exteriores",
       "actores_sociedad_raw": "Gremios de pescadores artesanales de Callao, Piura, Lambayeque / Asociaciones de buzos y extractores",
@@ -2983,10 +3101,10 @@
           "fila": 48,
           "fila_fin": 48,
           "accion": "1. La DGPCHDI debe de realizar el seguimiento a los avances del MINAM, con respecto al DENP.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGPCHDI",
           "punto_focal_raw": "Jaime Antonio De la Torre Obregon",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 48,
@@ -3037,7 +3155,7 @@
         "semanas_con_dato": 1
       },
       "advertencias": [
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Esteban Vidal Saldarriaga') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -3052,9 +3170,10 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Tumbes / Piura / Lambayeque / La Libertad / Áncash / Lima / Callao / Ica / Arequipa / Moquegua / Tacna",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Esteban Vidal Saldarriaga",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -3064,7 +3183,7 @@
         "url": "https://drive.google.com/drive/folders/13X6bgTZBvY06MPEdGyRrUuOVy9syWYbL?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": null,
       "actores_estado_raw": "DIREPRO de todas las regiones costeras / GORE costeros (Piura, Lambayeque, La Libertad, Áncash, Lima, Ica, Arequipa, Moquegua, Tacna)\n\nPRODUCE (DGPA, DGPCHDI, DPO) / PCM / Poder Judicial / Congreso de la República",
       "actores_sociedad_raw": "OSPAS del litoral nacional / Pescadores artesanales tradicionales y ancestrales (a favor) / Pescadores con artes de cerco de boliche (en contra) / Pescadores de Los Órganos (Piura)",
@@ -3076,10 +3195,10 @@
           "fila": 49,
           "fila_fin": 49,
           "accion": "1) Ampliar vigencia del DS 002-2025 PRODUCE. (80 días) \n  2) Socializar las prepublicaciones en relación al DS 002-2025-produce, sobre la adecuación de las EP.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGPA",
           "punto_focal_raw": "Juan Salinas Casana",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 49,
@@ -3130,7 +3249,7 @@
         "semanas_con_dato": 0
       },
       "advertencias": [
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Esteban Vidal Saldarriaga') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -3145,10 +3264,11 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Ancash",
-      "sectorista_raw": "Ivan Ascurra Santillán",
-      "prioridad": {
+      "sectorista_raw": "Daniel Vela",
+      "sectorista_metadatos_raw": "Ivan Ascurra Santillán",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "Información general\n El DPA de Chimbote fue transferido al GORE Ancash en el 2012. El DPA cuenta con servicio de agua potable y desagüe, energía eléctrica. Asimismo, cuenta con permisos del ModPAMA (vigente), DUAA- DPA (caducado), DUAA- Boya (Pendiente), licencia de Uso de Agua Superficial P-16 (pendiente), de vertimentos residuales tratados P- 21 (pendiente). FONDEPES informó que, tiene contemplado realizar 04 proyectos y vienen gestionando a través del IOARR \"Remodelación de Losa de concreto y muelle; reparación del emirsor; en el Desembarcadero Pesquero Artesanal de Chimbote, distrito de Chimbote, provincia de Santa, departamento Ancash\" con costo de inversión aprox. S/. 2 millones para mejoras en el DPA que incluya el Emisor Submarino, Área de Fileteo, Defensas en el muelle, Área de Tratamiento Previo. La OSPA encargada de la administración del DPA de Chimbote es la Asociación de Buzos Artesanales Isla Blanca, su presidente es José Ignacio Jiménez Silva.\n 2025\n 06.12.2025 los dirigentes de otras OSPAS del DPA Chimbote no reclaman sobre la administración de la Asociación de Buzos Artesanales Isla Blanca, como son Ulises Antorio Moya Chiclayo relacionado a la Asociación de Gremio de Extractores Hidrobiológicos de Buceo Zona I Chimbote y Johnny Venegas de la Asociación Isla Blanca de 0 a 4. Asimismo, las obras mencionadas en denuncia periodística del 01.11.2025 están paralizadas, indicando que el Emisor de Aguas Hervidas no se construye por observación de la OEFA - MINAM que hasta el momento no se levanta. También reportó que la empresa que dispone los residuos de la zona de fileteros y otras más no puede operar por disposición de PRODUCE por requisitos no cumplidos, perdiéndose una oportunidad de ingreso en favor del DPA Chimbote porque estos residuos pueden reaprovecharse\n 01.11.2025 diariodechimbote.com denuncia que la Asociación de Buzos Artesanales Isla Blanca sigue administrando el DPA Chimbote pese a la resolución del contrato realizado en julio del 2025. También denuncia que estas paralizadas dos obras: la construcción del emisor de las aguas hervidas y la losa principal hasta el muelle.\n 07.10.2025 El Gobierno Regional de Áncash informa que la modernización pesquera, incluyendo obras en el DPA Chimbote, es prioridad en su agenda; se reafirma el compromiso de mejorar infraestructura y condiciones laborales de pescadores artesanales.\n 31.08.2025, hasta esta fecha PRODUCE viene esperando la respuesta del MEF sobre la vigencia de la capacidad presupuestal, es por ello que aún no hay un avance significativo para poder realizar el avance del expediente técnico\n 01.07.2025, Reunión entre FONDEPES, SANIPES, GORE Ancah, congresista Darwin Espinoza, representantes de OSPA donde se ratificó el compromiso por parte de FONDEPES para actualizar expediente técnico del emisor submarino con fecha prevista para fines de julio del 2025. Asimismo, se reiteró al GORE-ANCASH que sea responsables de la ejecución del proyecto del emisor submarino. Se acordó una siguiente reunión el 08.07.2025 para determinar lo indicado por FONDEPES.\n 26.06.2025, FONDEPES informó que se ha coordinado una reunión para el 01.07.2025 a fin de tratar los temas del DUAA del DPA de Chimbote y avances del proyecto del Emisor Submarino.\n 25.06.2025, El congresista Elías Varas Meléndez realizó una visita de fiscalización al DPA, a fin de constatar el estado actual de la infraestructura y los servicios que se brindan a los pescadores artesanales. El congresista recibió las denuncias de los pescadores sobre el abandono de la PTAR y que habían pedido al GORE Ancash para que solicite el uso de Área Acuática y puedan obtener el certificado de SANIPES, pero a la fecha no hay respuesta.\n 29.05.2025, FONDEPES informó que se están realizando las coordinaciones para llevar a cabo una reunión a pedido del Congresista Darwin Espinoza, donde participarán la Jefa del FONDEPES, el Gobernador Regional de Ancash , DIREPRO, representantes de SANIPES, con el fin de tratar los temas sobre el DUAA del DPA y el Emisor Submarino. Estiman que la fecha sería la última semana de junio.\n 12.05.2025, FONDEPES informó que se reunió con la DIREPRO Ancash . Los acuerdos fueron: 1) GORE se comprometió a realizar los trámitres para obtener el nuevo DUUA del DPA. 2) FONDEPES continuará brindando asesoramiento técnico.\n 04.04.2025, FONDEPES informó que tuvieron reunión con la DICAPI con el fin de autorizar y coordinar acciones en la actualización del expediente técnico del emisor submarino en el DPA. Asimismo, indicaron que cuentan con los TDR para la actualización del expediente técnico del emisor submarino.\n 19.03.2025, Fondepes informó que en la reunión convocada por el DVPA, a fin de abordar la problemática del DPA Chimbote. Participaron el Congresista Darwin Espinoza y representantes de OSPAS de Chimbote. Los acuerdos: 1.FONDEPES convocaria a una reunión el día 21.03.2025 con el Comandante de DICAPI Chimbote para coordinar los trabajos e incluirlos en la actualización del expediente técnico del emisor submarino y el DUAA vigente; 2. FONDEPES enviaría en marzo a un ingeniero sanitario y un Ingeniero eléctrico para que realicen un informe sobre lo que requiere para actualizar el expediente técnico. \n 26.02.2025, FONDEPES informó de la reunión de trabajo con DIREPRO Ancash, DICAPI, OSPA Isla Blanca (administra DPA) y representantes de CHD, a fin de abordar el avance y actualización del DUAA. Loa acuerdos: 1) FONDEPES procederá con la actualización del expediente y del estudio Hidro Oceanográfico. 2) PRODUCE se encargará de la certificación ambiental y 3) DICAPI se encargará del E-02, documento clave para la autorización de la operación\n 31.01.2025, FONDEPES informó que están gestionando la organización de una mesa técnica, a fin de asesorar a la DIREPRO Ancash para la obtención del Derecho de Uso de Área Acuática (DUAA) expedido por DICAPI. La reunión estaría programada para el 05.02.2025, participarían DIREPRO, FONDEPES y la OSPA Isla Blanca (responsable de la administración del DPA).\n \n 2026 - SEGUIMIENTO:\n • 06.02.2026, FONDEPES: Informó a OAIPCS la disposición para brindar asistencia técnica a la DIREPRO Áncash para tramitar renovación del DUAA.\n • Feb 2026 (nudo crítico): DIREPRO Áncash no ha solicitado la asistencia técnica a FONDEPES. FONDEPES ha remitido oficios al Gobernador Regional de Áncash para abordar problemática del DPA Chimbote, sin respuesta por parte del GORE Áncash.\n \n \n \n ── SEGUIMIENTO 2026 (Nudos Críticos / Avances) ──\n • [Nudos Críticos 01-09 feb 2026]: DIREPRO Áncash no ha solicitado la asistencia técnica a FONDEPES. FONDEPES ha remitido oficios al Gobernador Regional para abordar la problemática del DPA Chimbote, sin respuesta por parte del GORE Áncash.\n • [Seguimiento 01-09 feb 2026]: 06.02.2026 – FONDEPES informó a OAIPCS la disposición para brindar asistencia técnica a la DIREPRO Áncash para tramitar la renovación del DUAA.",
@@ -3157,7 +3277,7 @@
         "url": "https://drive.google.com/drive/folders/1w1FnXLvMIW5i59UUAiba1-KtmsyuKHj4?usp=sharing",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Probabilidad de acciones colectivas (protestas, bloqueos, toma del DPA o paralización de desembarques) como mecanismo de presión.",
       "actores_estado_raw": "GORE Áncash / DIREPRO Áncash\n\nFONDEPES / PRODUCE (DGPA, SANIPES)",
       "actores_sociedad_raw": "Gilmer Yauri Gestor Social de FONDEPES 966019954, Pescadores del DPA Chimbote, Asociación de Buzos Artesanales Isla Blanca, GORE Ancash, DIREPRO Ancash, OPP, DICAPI, Congresista Elías Varas Meléndez",
@@ -3169,10 +3289,10 @@
           "fila": 50,
           "fila_fin": 50,
           "accion": "DIREPRO Ancash debe gestionar la renovación del Derecho de Uso de Área Acuática (DUAA) del DPA Chimbote",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "FONDEPES",
           "punto_focal_raw": "Carlos Escobar Medina",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 50,
@@ -3210,7 +3330,7 @@
           "fila": 51,
           "fila_fin": 53,
           "accion": "DIREPRO Áncash debe ejecutar 04 IOARR para mejorar infraestructura del DPA: i) Emisor Submarino, ii) Cobertura en área de fileteo, iii) Defensa en el muelle y iv) cobertura en área de tratamiento previo",
-          "medios_verificacion_raw": "Acción 2: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "FONDEPES",
           "punto_focal_raw": "Carlos Escobar Medina",
           "documentos_raw": null,
@@ -3327,7 +3447,7 @@
         "Hito fila 51: Fecha Real = 2025.0 -> solo_anio (no se convierte a fecha).",
         "Hito fila 52: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 53: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Daniel Vela') difiere del de METADATOS ('Ivan Ascurra Santillán'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -3342,9 +3462,10 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Lima Metropolitana",
-      "sectorista_raw": "Ivan Ascurra Santillán",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Peggy Contreras Montes",
+      "sectorista_metadatos_raw": "Ivan Ascurra Santillán",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -3354,7 +3475,7 @@
         "url": "https://drive.google.com/drive/folders/1CouT-fn3bBi88ZqMVsN4fkKEjJVmHCwd?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Probabilidad de acciones colectivas (protesta, bloqueo, etc) como mecanismo de presión\n \n PCM mantiene diálogo con Federación de pescadores",
       "actores_estado_raw": "GORE Lima / GORE Áncash / DIREPRO Lima\n\nPCM (SSGD) / MINAM / MINEM/ MEF / PRODUCE (DGPA, DGAAMPA, OAIPCS, FONDEPES, IMARPE, SANIPES)",
       "actores_sociedad_raw": "SSGD-PCM, MINAM, PRODUCE\n \n Federación pescadores Artesanales, Ancestrales y Tradicionales de los distritos de Ventanilla, Santa Rosa, Aucallama, Ancón y Chancay\n \n Luis Díaz, presidente: 922 780 961\n Mercedes Yovera, vicepresidenta 921 546 736",
@@ -3366,10 +3487,10 @@
           "fila": 54,
           "fila_fin": 54,
           "accion": "Plan Multisectorial para la Zona Marina Costera 2026\n Fortalecimiento de capacidades en los cursos técnico productivo, seguridad y de formalización pesquera artesanal \"",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGAAMPA",
           "punto_focal_raw": "Jocabed Canchari Soto",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [],
           "valores_extra_en_span": []
         },
@@ -3377,7 +3498,7 @@
           "fila": 55,
           "fila_fin": 55,
           "accion": "Plan de Reactivación Económica de la Zona Merina Costera 2026:\n Promoción de crédito para mejorar embarcaciones o artes de pesca afectados",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGAAMPA",
           "punto_focal_raw": "Jocabed Canchari Soto",
           "documentos_raw": null,
@@ -3418,7 +3539,7 @@
           "fila": 56,
           "fila_fin": 56,
           "accion": "Plan de Reactivación Económica de la Zona Merina Costera 2026\n Evaluación de la Zona afectada por el derrame de hidrocarburos",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGAAMPA",
           "punto_focal_raw": "Jocabed Canchari Soto",
           "documentos_raw": null,
@@ -3429,7 +3550,7 @@
           "fila": 57,
           "fila_fin": 57,
           "accion": "Plan de Reactivación Económica de la Zona Merina Costera 2026\nFortalecimiento de capacidades en comercializadores en terminales pesqueros a fin de garantizar inocuidad durate la coercialización",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGAAMPA",
           "punto_focal_raw": "Jocabed Canchari Soto",
           "documentos_raw": null,
@@ -3440,7 +3561,7 @@
           "fila": 58,
           "fila_fin": 58,
           "accion": "Plan de Reactivación Económica de la Zona Merina Costera 2026:\n Fortalecimiento de capacidades técnico productivo, seguridad y de formalización pesquera artesanal",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGAAMPA",
           "punto_focal_raw": "Jocabed Canchari Soto",
           "documentos_raw": null,
@@ -3481,7 +3602,7 @@
           "fila": 59,
           "fila_fin": 59,
           "accion": "Plan de Reactivación Económica de la Zona Merina Costera 2026:\n Fortalecimiento de capacidades en gestión empresarial y formalización empresarial para las MYPE dirigido a través de las estrategias POTENCIA TU EMPRESA y DESPEGA TU EMPRESA",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGAAMPA",
           "punto_focal_raw": "Jocabed Canchari Soto",
           "documentos_raw": null,
@@ -3509,7 +3630,7 @@
         "Acción de la fila 56 sin ningún hito (S vacía en su span).",
         "Acción de la fila 57 sin ningún hito (S vacía en su span).",
         "Acción de la fila 59 sin ningún hito (S vacía en su span).",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Peggy Contreras Montes') difiere del de METADATOS ('Ivan Ascurra Santillán'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -3524,9 +3645,10 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Lima Metropolitana",
-      "sectorista_raw": "Ivan Ascurra Santillán",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Karen Benito",
+      "sectorista_metadatos_raw": "Ivan Ascurra Santillán",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -3536,8 +3658,8 @@
         "url": "https://drive.google.com/drive/folders/1CLM0yeXJ1TBY_EI8agpPxaCzu79u6FW_?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
-      "descripcion_riesgo": null,
+      "timestamp_estado": null,
+      "descripcion_riesgo": "Ninguno, AAMEC fue desalojado por la policía y el desarrollador tomo control del predio.",
       "actores_estado_raw": "GORE Lima / Municipalidad de Lima\n\nPRODUCE (PNDP, OAIPCS) / MINDEF / SBN / PROINVERSIÓN / PCM / Procuraduría PRODUCE",
       "actores_sociedad_raw": "PNDP, PROINVERSIÓN, SBN, MINDEF, Asociación Agrupación de Micro Empresarios Confraternidad (AAMEC), Congreso de la República",
       "fila_inicio": 60,
@@ -3548,10 +3670,10 @@
           "fila": 60,
           "fila_fin": 60,
           "accion": "Suscripción de contrato entre PRODUCE y el Consorcio chino Junefield Ancon Industrial Park para ejecución del Parque industrial Ancón",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "PNDP",
           "punto_focal_raw": "Ivan Vassallo Olano",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 60,
@@ -3589,7 +3711,7 @@
           "fila": 61,
           "fila_fin": 63,
           "accion": "PNDP y OGA Produce, realizan acciones para salvaguardar predio destinado al Parque industrial Ancón",
-          "medios_verificacion_raw": "Acción 2: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "PNDP",
           "punto_focal_raw": "Ivan Vassallo Olano",
           "documentos_raw": null,
@@ -3702,7 +3824,7 @@
       },
       "advertencias": [
         "Hito fila 60: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Karen Benito') difiere del de METADATOS ('Ivan Ascurra Santillán'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -3717,10 +3839,11 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Lima Metropolitana",
-      "sectorista_raw": "Ivan Ascurra Santillán",
-      "prioridad": {
-        "raw": "Urgente",
-        "id": 1,
+      "sectorista_raw": "Karen Benito",
+      "sectorista_metadatos_raw": "Ivan Ascurra Santillán",
+      "nivel_riesgo": {
+        "raw": "Alto",
+        "id": 3,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026\n 26.01.2026\n La Asociación Empresarial de Gamarra Perú conjuntamente con FREDEMYPE invitaron al señor Ministro (SM) y al Viceministro de MYPE e Industria (VM) al II Congreso Nacional de las Mypes para el 28/01/2025 para que expongan lo que el Ministerio tiene para las Mypes. Pero ante el riesgo de una eventual votación de un paro, la OAIPCS recomendó la participación de representantes del SM y VM, así como la participación de representantes del PN Compras MYPErú.\n 21.01.2026\n Dirección Ejecutiva (DE) del PN Compras MYPErú alertó de un posible paro nacional el cual sería sometido a aprobación en la asamblea nacional de 28/01/2026 en la que demadan i) que las entidades públicas destinen el 40% de sus adquisiciones mediante Núcleos Ejecutores y ii) denuncian presuntos actos de corrupción referido a sobrevaloraciones de compras\n \n 2025\n 04.12.2025: A la fecha, tenemos en el presente mes el escenario de la campaña navideña como una circunstancia que ralentiza la organización para la ejecución de manifestaciones, sin embargo, se debe actuar preventivamente informado sobre la demora de los expedientes técnicos por parte de las entidades requirentes a Compras a MYPErú. \n 21.11.2025: Mypes Unidas del Perú participaron en la mesa de trabajo con la Minstra de Economía y Finanzas, Denisse Miralles, presentando propuestas para fortalecer Compras a MYPErú, atender deudas del Estado y mejorar las contrataciones públicas. Se muestran a favor del Programa Nacional Compras a MYPErú.\n 15.11.2025 El Frente de Defensa de la MYPE (FREDEMYPE) se ha pronunciado de forma amenazante hacia el Presidente Jerí, Ministro Quispe y NEC por una supuesta ineficacia y falta de transparencia en los procesos de contratación a tráves del Programa Compras a MYPErú, este pronunciamiento circuló por las redes sociales.\n 31.08.2025 Luego de la reuniones técnicas sostenidas con el MINDEF, el PN Compras a MYPErú, informa que viene elaborando fichas técnicas para atender los requerimientos Ejército, Marina de Guerra y Fuerza Aérea. Cabe resaltar que dichas fichas permitirán estandarizar las características de los bienes manufacturados que serán producidos por las MYPE de los sectores de textil-confecciones, cuero y calzado, metalmecánica, así como madera y plásticos, de acuerdo con las necesidades del MINDEF\n 28.07.2025 Se anunció en el discurso presidencial que, el sector a través del Programa Nacional Compras a MYPErú, ha destinado más de S/ 471 millones para adquirir bienes producidos por más de 3800 MYPEs, a fin de fortalecer las MYPEs y la generación de más de 84 mil empleos.\n 18.06.2025, PN Compras a MYPErú sostuvo una reunión técnica con representantes del MINDEF (Ejército, Marina de Guerra y Fuerza Aérea), con el objetivo de evaluar la demanda actual y coordinar la programación de los requerimientos de bienes manufacturados para el año 2026, a fin de ser incluidos en el presupuesto público 2026 \n 30.05.2025, el PN Compras MYPErú realizó una reunión informativa con las MYPE proveedoras y participantes a los NEC para socializar los costos de insumos principales, secundarios y complementarios incluidos en la estructura de precios de las contrataciones públicas. Asimismo informó que próximamente las bases incluirán un resumen ejecutivo de la estructura de costos para las MYPE.\n 01.2025, el NEC de Cuero y Calzado lanzó convocatorias de MYPEs y proveedores, a fin de atender las demandas del MINEDU (mochilas escolares) y el MINSA (uniforme institucional). El NEC Muebles Madera y Plástico lanzó la tercera convocatoria para la adquisición definitivo de bienes de kit escolar para la atención de la demanda del Ministerio de Educación en el marco de lo dispuesto en el DL N° 1414\n 2024:\n El Decreto Legilslativo N.º 1414, dispone que todas las entidades públicas están obligadas a adquirir bienes manufacturados a través del Proceso Especial de Compras, destinando al menos el 40% de sus adquisiciones en los sectores estratégicos a MYPE manufactureras debidamente registradas.\n •El 14.02.2024, mediante RM N° 00045-2024-PRODUCE se aprobó la propuesta preliminar del Plan para Mejorar la Competitividad de la Micro y Pequeña Empresa 2024-2026, el cual contempla, en su acción estratégica 1.2.1, ampliar la cobertura de compras estatales a través del programa Compras a MYPERU por un monto aproximado de 2.4 millones de soles durante el periodo 2024-2026, con la finalidad de beneficiar a alrededor de 1500 MYPE por año.\n •En fecha 23.02.2024 se emitió el DU N° 003-2024, el cual establece medidas extraordinarias en materia económica y financiera para la reactivación económica local. Así, el Gobierno autorizó la transferencia de S/290 175 391 a favor del Ministerio de la Producción, a fin de ser transferidos a los Núcleos Ejecutores de Compras (NEC) del Programa Nacional (PN) COMPRAS MYPERÚ, para financiar la gestión administrativa, adquisición y distribución de bienes manufacturados por las MYPE (kits escolares, conformados por cuadernos, mochila escolar, buzo y polos), a requerimiento del sector.\n •08.05.2024, mediante Resolución Ministerial N° 188-2024-PRODUCE , autorizan transferencia a favor del Nucleo Ejecutor de Compras para el sector Productivo de Cuero y Calzado.\n \n 2026 - SEGUIMIENTO:\n • 26.01.2026: Asociación Empresarial de Gamarra Perú y FREDEMYPE invitaron al Ministro y Viceministro de MYPE e Industria al II Congreso Nacional de las MYPES (28/01/2026). Ante riesgo de paro, OAIPCS recomendó participación del SM y VM y representantes del PN Compras MYPErú.\n • 21.01.2026: Dirección Ejecutiva del PN Compras MYPErú alertó de posible paro nacional sometido a aprobación en asamblea gremial.\n • Feb 2026: Se ha cursado 106 oficios a todas las entidades públicas. Se han tenido 10 reuniones con 10 posibles entidades demandantes. Proceso en seguimiento activo.\n [REDES SOCIALES - 2026]: Pronunciamientos de MYPES viralizados en Facebook y Twitter/X denunciando presuntos actos de corrupción en compras MYPErú con sobrevaloraciones.\n \n \n \n ── SEGUIMIENTO 2026 (Nudos Críticos / Avances) ──\n • [Seguimiento 01-09 feb 2026]: Se ha cursado 106 oficios a todas las entidades públicas: Ministerios, Instituciones Adscritas y Gobiernos Regionales. Se han realizado 10 reuniones con 10 posibles entidades demandantes.\n • [Nudos Críticos 10-16 feb 2026]: Pendiente informar última actualización de avance.",
@@ -3729,7 +3852,7 @@
         "url": "https://drive.google.com/drive/folders/1qzcaBkXy65s3DMcv2svJi29EPRIzh7U2?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Riesgo de protestas gremiales y presión para implementar salvaguardas comerciales que podrían generar conflictos con otras regiones productoras.",
       "actores_estado_raw": "Gobiernos Regionales demandantes de compras\n\nPRODUCE (VMYPE e Industria) / PN Compras MYPErú / MINDEF / Ministerios demandantes",
       "actores_sociedad_raw": "FREDEMYPE",
@@ -3741,10 +3864,10 @@
           "fila": 64,
           "fila_fin": 67,
           "accion": "Realizar el lanzamiento oportuno de las convocatorias correspondientes, en función de las demandas formalmente remitidas por las entidades públicas, a fin de que las MYPE accedan al proceso especial de compras para la provisión de bienes manufacturados especializados, conforme al marco normativo vigente.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "PNCMP",
           "punto_focal_raw": "Angela Torecilla Ampuero",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 64,
@@ -3869,7 +3992,7 @@
           "fila": 68,
           "fila_fin": 68,
           "accion": "Produce tiene el compromiso de fortalecer el Programa Compras a MYPErú, realizando los ajustes normativos necesarios para mejorar el modelo actual",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "PNCMP",
           "punto_focal_raw": "Angela Torecilla Ampuero",
           "documentos_raw": null,
@@ -3880,7 +4003,7 @@
           "fila": 69,
           "fila_fin": 73,
           "accion": "Evaluación sobre continuidad de las personas denunciadas",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "PNCMP",
           "punto_focal_raw": "Angela Torecilla Ampuero",
           "documentos_raw": null,
@@ -4052,8 +4175,8 @@
       "advertencias": [
         "Hito fila 67: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Acción de la fila 68 sin ningún hito (S vacía en su span).",
-        "Fila 68: hay 'Descripción del Hito' ('Pendiente, construir con PNCM') sin etiqueta en S; no cuenta como hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Fila 68: hay 'Descripción del Hito' ('Pendiente, construir con PNCM') sin etiqueta en Hito; no cuenta como hito.",
+        "Sectorista de la hoja principal ('Karen Benito') difiere del de METADATOS ('Ivan Ascurra Santillán'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -4068,9 +4191,10 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Lima Provincias",
-      "sectorista_raw": "Ivan Ascurra Santillán",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Peggy Contreras Montes",
+      "sectorista_metadatos_raw": "Ivan Ascurra Santillán",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -4080,7 +4204,7 @@
         "url": "https://drive.google.com/drive/folders/1wfVQuoPgZFy4DzwCallcTwVmDg8fuj6V?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Probabilidad de acciones colectivas (protestas, bloqueos, toma del DPA o paralización de desembarques) como mecanismo de presión.",
       "actores_estado_raw": "GORE Lima / DIREPRO Lima Provincias\n\nFONDEPES / PRODUCE",
       "actores_sociedad_raw": "Rafael Rodriguez Gestor Social de FONDEPES 979326720, Pescadores del DPA Huacho, Sindicato de Pescadores Artesanales del Puerto de Huacho, Asociación de Pescadores Artesanales del Puerto de Huacho, ADARPESCA, DGPA",
@@ -4092,7 +4216,7 @@
           "fila": 78,
           "fila_fin": 78,
           "accion": "Conformación de mesa de trabajo para definir tarifario",
-          "medios_verificacion_raw": "Acción 2: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGPA",
           "punto_focal_raw": "Juan Carlos Cordova Calle",
           "documentos_raw": null,
@@ -4267,7 +4391,7 @@
         "Hito 'Hito 3' de la fila 76 precede a la primera acción (fila 78); se asigna a esa primera acción.",
         "Hito 'Hito 4' de la fila 77 precede a la primera acción (fila 78); se asigna a esa primera acción.",
         "Hito fila 77: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Peggy Contreras Montes') difiere del de METADATOS ('Ivan Ascurra Santillán'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -4282,9 +4406,10 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Lima Provincias",
-      "sectorista_raw": "Ivan Ascurra Santillán",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Peggy Contreras Montes",
+      "sectorista_metadatos_raw": "Ivan Ascurra Santillán",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -4294,7 +4419,7 @@
         "url": "https://drive.google.com/drive/folders/1uXGCHOPjIf_fWZ_UKeApAf0_cTGhbUl7?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Probabilidad de acciones colectivas (protestas, bloqueos, toma del DPA o paralización de desembarques) como mecanismo de presión.",
       "actores_estado_raw": "GORE Lima / DIREPRO Lima Provincias / SEMAPA Supe Puerto\n\nFONDEPES / PRODUCE",
       "actores_sociedad_raw": "Rafael Rodriguez Gestor Social de FONDEPES 979326720, Pescadores del DPA Supe, OSPAS de la zona, Municipalidad Distrital de Supe, SEMAPA SUPE PUERTO",
@@ -4306,10 +4431,10 @@
           "fila": 79,
           "fila_fin": 84,
           "accion": "Ejecutar la obra de mejoramiento del Desembarcadero Pesquero Artesanal (DPA) de Supe de Lima Provincias",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "FONDEPES",
           "punto_focal_raw": "Carlos Escobar Medina",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 79,
@@ -4509,7 +4634,7 @@
         "Hito fila 83: Fecha Planificada = 'Depende de entrega de obra' -> texto_no_fecha (no se convierte a fecha).",
         "Hito fila 83: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 84: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Peggy Contreras Montes') difiere del de METADATOS ('Ivan Ascurra Santillán'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -4525,8 +4650,9 @@
       },
       "departamento_raw": "Ica",
       "sectorista_raw": "Peggy Contreras Montes",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_metadatos_raw": "Peggy Contreras Montes",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -4536,7 +4662,7 @@
         "url": "https://drive.google.com/drive/folders/1Iz6JeSkubEJRCJLM0EwPDdNUgxcfbnFU?usp=sharing",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "La demora en la culminación de la infraestructura pesquera artesanal del DPA San Juan de Marcona podría generar, de manera gradual, preocupaciones entre los pescadores, si no se mantienen informados sobre los avances del saldo de obra N°3.",
       "actores_estado_raw": "GORE ICA, MUNICIPALIDAD DISTRITAL DE MARCONA\n\nFONDEPES, PCM",
       "actores_sociedad_raw": "Pescadores del DPA San Juan de Marcona, OSPA Asociación de Bolichitos de Marcona",
@@ -4548,10 +4674,10 @@
           "fila": 85,
           "fila_fin": 87,
           "accion": "Culminación del saldo de obra N°3 del Proyecto de Inversión: \"Mejoramiento de los servicios del DPA San Juan de Marcona\".",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "FONDEPES",
           "punto_focal_raw": "Jorge Luis Pérez",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 85,
@@ -4662,8 +4788,7 @@
       "advertencias": [
         "Hito fila 85: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 86: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Hito fila 87: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Hito fila 87: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito."
       ]
     },
     {
@@ -4678,10 +4803,11 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Lima / Callao / Ica / Arequipa / Moquegua / Tacna / Piura / Lambayeque",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Urgente",
-        "id": 1,
+      "sectorista_raw": "Esteban Vidal Saldarriaga",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Alto",
+        "id": 3,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026\n14.03.2026 – Resolución Ministerial N.° 070-2026-PRODUCE, que establece el límite de captura del recurso bonito para el periodo enero–junio 2026, fijado en 68,367 toneladas. Deroga la R.M. N.° 438-2025-PRODUCE y la R.M. N.° 058-2026-PRODUCE.\n14.03.2026 – Comunicado N.° 009-2026-PRODUCE/DGSFS-PA, reiterando las disposiciones obligatorias para la actividad extractiva del recurso bonito en el marco de la R.M. N.° 070-2026-PRODUCE.\n10.03.2026 - Reunión técnica con DGPA, DGPARPA, DGSFS-PA, IMARPE y Viceministro de Pesca Artesanal y Acuicultura y dirigentes de gremios y asociaciones de pescadores artesanales y armadores pesqueros de Moquegua, Arequipa, Piura, Lambayeque, Huacho, Pucusana y el Callao, para recoger sus aportes y abordar la situación de la pesquería del bonito., según acordado en la reunión  de fecha 9 de marzo de 2026.\n09.03.2026 - Reunión con SM, Viceministro de Pesca Artesanal y Acuicultura y dirigentes de gremios y asociaciones de pescadores artesanales y armadores pesqueros de Moquegua, Arequipa, Piura, Lambayeque, Huacho, Pucusana y el Callao.\n02.03.2026 – DGPA, DGPARPA, DGSFS y la FIUPAP se reunieron para atender preocupaciones del gremio respecto a la normativa reciente sobre el recurso bonito, en particular la R.M. N.° 053-2026-PRODUCE.\n27.02.2026 – Se emitió la Resolución Ministerial N.° 053-2026-PRODUCE, que establece medidas de ordenamiento para la extracción del recurso bonito en el periodo marzo-abril 2026, incluyendo disposiciones sobre número de faenas para embarcaciones de cerco.\n25.02.2026 – El Viceministerio de Pesca Artesanal, DGPA, DGSFS-PA, DGPARPA y representantes de organizaciones pesqueras artesanales se reunieron para presentar el estado de ejecución de la cuota de bonito para el periodo enero-abril 2026.\n\n2025\n31.12.2025 – Mediante Resolución Ministerial N.° 438-2025-PRODUCE, se establece el límite de captura del recurso bonito para el periodo enero–abril de 2026, fijado en 40,779 toneladas.\n16.12.2025 – El IMARPE, mediante Oficio N.° 2128-2025-IMARPE/PE, remitió el informe técnico sobre la pesquería de bonito durante el 2025 y perspectivas para el 2026.\n13.11.2025 – Reunión del gremio FIUPAP con el Ministro de la Producción y su equipo técnico.\n29.09.2025 – Reunión del gremio FIUPAP con el Viceministro de Pesca y Acuicultura y representantes de OSPAS.\n09.01.2025 – Mediante Resolución Ministerial N.° 000006-2025-PRODUCE, se modificó la R.M. N.° 000510-2024-PRODUCE, que establecía el límite de captura del recurso bonito para el periodo enero-abril 2025.\n\n2024\n30.12.2024 – La FIUPAP realizó una movilización frente al PRODUCE, solicitando reunión con el Viceministro de Pesca y Acuicultura.",
@@ -4690,7 +4816,7 @@
         "url": "https://drive.google.com/drive/folders/1Q9ZQ0DOeaViCXQELPmt9Io5CjS7DltZS?usp=sharing",
         "destino": null
       },
-      "timestamp_estado": "Pendiente",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Si se reinstalan cuotas de bonito sin suficientes mecanismos de participación y diferenciación de las OSPAS de artes pasivas, existe un riesgo elevado de que estos grupos realicen movilizaciones y bloqueos de carreteras, como los protestados en otras pesquerías cuando no se atendieron reclamos por distribución de cuotas.",
       "actores_estado_raw": "DIREPRO Lima / DIREPRO Callao / DIREPRO Ica / DIREPRO Arequipa / DIREPRO Moquegua / DIREPRO Tacna\n\nPRODUCE (DVPA, DGPA, DGSFS-PA) / IMARPE",
       "actores_sociedad_raw": "FIUPAP / OSPAS de artes pasivas del litoral centro y sur / Pescadores artesanales con EP cerco de bolsillo",
@@ -4702,10 +4828,10 @@
           "fila": 88,
           "fila_fin": 92,
           "accion": "Emitir normativa sobre medida de conservación del recurso bonito",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGPARPA",
           "punto_focal_raw": "Yuliana Katherin Mora Espinoza",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 88,
@@ -4873,7 +4999,7 @@
       },
       "advertencias": [
         "Hito fila 92: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'Pendiente': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Esteban Vidal Saldarriaga') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -4888,9 +5014,10 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Nacional",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Esteban Vidal Saldarriaga",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -4900,7 +5027,7 @@
         "url": "https://drive.google.com/drive/folders/1xhg42NBxJT-2Urfwwz8yL318YMSLVfEi?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "Pendiente",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Si se reinstalan cuotas de jurel y caballa sin suficientes mecanismos de participación y diferenciación de las OSPAS de artes pasivas, existe un riesgo elevado de que estos grupos realicen movilizaciones y bloqueos de carreteras, como los protestados en otras pesquerías cuando no se atendieron reclamos por distribución de cuotas.",
       "actores_estado_raw": "DIREPRO Ica / DIREPRO Arequipa / DIREPRO Moquegua / DIREPRO Tacna\n\nPRODUCE (DVPA, DGPA) / IMARPE",
       "actores_sociedad_raw": "FIUPAP / OSPAS del litoral sur / Pescadores artesanales con EP de cerco y artes pasivas del sur",
@@ -4912,7 +5039,7 @@
           "fila": 93,
           "fila_fin": 94,
           "accion": "Cuotas del Recurso Jurel y Caballa",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "DGPARPA",
           "punto_focal_raw": "Yuliana Katherin Mora Espinoza",
           "documentos_raw": null,
@@ -4995,7 +5122,7 @@
         "semanas_con_dato": 15
       },
       "advertencias": [
-        "Columna H = 'Pendiente': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Esteban Vidal Saldarriaga') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -5011,9 +5138,10 @@
       },
       "departamento_raw": "Arequipa",
       "sectorista_raw": "Esteban Vidal Saldarriaga",
-      "prioridad": {
+      "sectorista_metadatos_raw": "Esteban Vidal Saldarriaga",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026\n - Junio – julio de 2026: La obra registró avances conforme a la programación establecida, sin evidenciar nudos críticos ni situaciones de conflictividad social que afecten su desarrollo, manteniéndose dentro del curso regular de ejecución.\n - 04.05.2026: En el DPA Faro Matarani, se viene dando correcto cumplimiento del cronograma de obras hasta la fecha. Se actualizó recientemente el DUE incorporando la modificación del muelle de contingencia de madera a concreto, lo que permitirá iniciar su ejecución en las próximas semanas, con una duración estimada de 50 días, habilitando un espacio operativo que separará la actividad pesquera de la obra y facilitará una ejecución más fluida y sin interferencias hacia el mes de julio.\n - 09.02.2026 - FONDEPES informa que luego de las actividades pesqueras por temporada alta y gestiones con los representantes, se ha reiniciado las actividades de ejecución de la obra.\n - 05.02.2026 - Representante de SPAEMIM. afiliados a FIUPAP, sostuvieron reunión con FONDEPES con la finalidad de gestionar el reinicio de las obras del DPA.\n - Febrero de 2026 – FONDEPES: Informó que, pese a los cuestionamientos técnicos y a la paralización temporal solicitada por los usuarios, no se registran indicios de conflictividad social ni protestas fuera de los canales de diálogo establecidos.\n - Primera quincena de febrero de 2026 – FONDEPES / Gremio Espademí: Programaron una reunión de coordinación, previéndose el reinicio de los trabajos de obra durante dicha quincena.\n \n 2025\n - 30.12.2025 – Comunidad pesquera de Islay: Solicitó formalmente la paralización de la obra del DPA El Faro Matarani debido al inicio de la temporada alta de pesca (potencia, jurel, perico y ovas), periodo clave para sus ingresos económicos.\n - Posterior a octubre de 2025 – FONDEPES: Gestionó un adicional contractual para modificar el diseño y ampliar el patio de maniobras, utilizando terreno cedido por ENAPU, a fin de absolver observaciones técnicas, constituyendo un trámite técnico-administrativo en curso.\n - Octubre de 2025 – OCI FONDEPES: Identificó observaciones técnicas al expediente del proyecto, referidas a la reducción del patio de maniobras por la ubicación de la PTAR, la ausencia de un certificado vigente de factibilidad eléctrica en media tensión y inconsistencias entre planos, especificaciones y presupuesto, encontrándose dichas observaciones en proceso de absolución.\n - 29.08.2025 – FONDEPES: Inició la ejecución del “saldo de obra” del DPA El Faro Matarani por un monto de S/ 39 592 015,20, con un plazo de ejecución de 450 días calendario.\n \n 2026 - SEGUIMIENTO:\n • 05.01.2026, RM N° 444-2025-PRODUCE: Establece el límite de captura del recurso jurel para 2026 en 86,683 toneladas.\n • 13.08.2025, FONDEPES: Se otorgó el Contrato N° 12-2025-FONDEPES al Consorcio del Sur (Proyectos Industriales SAC y ADALMC SAC) para ejecutar el saldo de obra del DPA Faro Matarani.\n • Feb 10-16, 2026: No se presentaron nudos críticos en el periodo de seguimiento.\n \n \n \n ── SEGUIMIENTO 2026 (Nudos Críticos / Avances) ──\n • [Nudos Críticos 10-16 feb 2026]: No se presentaron nudos críticos en el periodo.\n • [Seguimiento 10-16 feb 2026]: 05.01.2026 – RM N° 444-2025-PRODUCE establece límite de captura del recurso jurel para 2026 en 86,683 toneladas para EP artesanales con permiso vigente.",
@@ -5022,7 +5150,7 @@
         "url": "https://drive.google.com/drive/folders/1KjvdwHvohKXacncAcDuoZVAWCK9r2d-g?usp=sharing",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Probabilidad de acciones colectivas (protestas, bloqueos, toma del DPA o paralización de desembarques) como mecanismo de presión.",
       "actores_estado_raw": "GORE Arequipa / DIREPRO Arequipa\n\nFONDEPES / PRODUCE",
       "actores_sociedad_raw": "Willy Vidal Gestor Social de FONDEPES 945686509 Pescadores del DPA Faro Matarani, actores portuarios, órgano de control interno, GORE Arequipa",
@@ -5034,10 +5162,10 @@
           "fila": 95,
           "fila_fin": 99,
           "accion": "Ejecutar la obra de mejoramiento del DPA Faro Matarani\n Resolución N°24-2024-FONDEPES/DIGENIPAA, Expediente Técnico de Saldo de Obra del proyecto: MEJORAMIENTO Y ADECUACIÓN A LA NORMA SANITARIA DE LA INFRAESTRUCTURA PESQUERA PARA CONSUMO HUMANO DIRECTO DE EL FARO MATARANI\n CUI: N°2172690",
-          "medios_verificacion_raw": "Acción 1",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "FONDEPES",
           "punto_focal_raw": null,
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 95,
@@ -5205,8 +5333,7 @@
       },
       "advertencias": [
         "Hito fila 98: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Hito fila 99: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Hito fila 99: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito."
       ]
     },
     {
@@ -5222,9 +5349,10 @@
       },
       "departamento_raw": "Arequipa",
       "sectorista_raw": "Esteban Vidal Saldarriaga",
-      "prioridad": {
+      "sectorista_metadatos_raw": "Esteban Vidal Saldarriaga",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026\n\n - Junio – julio de 2026: El proyecto continuó con el desarrollo de las acciones técnicas previstas. Si bien se mantienen aspectos administrativos y técnicos pendientes, no se registran riesgos sociales visibles ni eventos de conflictividad que afecten la continuidad del proceso.\n - 04.05.2026: En el DPA Atico, se mantiene el retraso en la elaboración del expediente de media tensión a cargo de un ingeniero específico, persiste la falta de asignación presupuestal para la ejecución de los expedientes de rompeolas y emisor submarino, y se viene gestionando un convenio con la Municipalidad para brindar asistencia técnica en la obtención del DUE del muelle municipal, el cual, pese a encontrarse en buenas condiciones físicas, no cuenta con habilitación ni permisos.\n - 03.02.2026 - En la primera semana de febrero, FONDEPES, OSPAS locales y el GORE Arequipa ejecutaron la limpieza del acceso marítimo al DPA, garantizando un acceso temporal, como medida frente a una obra anterior de rompeolas abandonada por la empresa ejecutora y deteriorada por acción del oleaje.\n \n 2025\n \n - Diciembre de 2025 – FONDEPES: Culminó y aprobó el segundo expediente técnico principal del proyecto integral, quedando listos ambos expedientes correspondientes al rompeolas y al emisor submarino (cada uno con su expediente técnico).\n - Octubre de 2025 – FONDEPES: Aprobó uno de los dos expedientes técnicos principales (rompeolas o emisor submarino) que conforman el “saldo de obra” del proyecto integral.\n - Septiembre de 2025 – FONDEPES / Gerencia Regional de la Producción: Desarrollaron una mesa de trabajo interinstitucional orientada a asegurar la viabilidad administrativa del expediente técnico.\n - 08.09.2025 – FONDEPES / GORE: Sostuvieron una reunión de emergencia tras un nuevo evento de oleaje que generó desprendimiento de rocas y aumentó el nivel de riesgo en el DPA.\n - 03.09.2025 – FONDEPES / GORE: Iniciaron coordinaciones para acciones de mitigación y contingencia luego de que oleajes destruyeran el rompeolas del DPA.\n - Junio de 2025 – FONDEPES: Sostuvo una reunión estratégica para establecer las bases técnicas del proyecto de mejoramiento integral.\n \n 2016\n \n - 2016 – DPA: Registró la inoperatividad de la sala de proceso construida ese año debido a fallas en el emisor submarino, el suministro de energía y el abastecimiento de agua.\n \n 2026 - SEGUIMIENTO:\n • Dic 2025–Ene 2026, FONDEPES: Culminó y aprobó el segundo expediente técnico principal del proyecto integral (rompeolas y emisor submarino). Ambos expedientes quedan listos.\n • Feb 10-16, 2026: Demoras en la presentación del Adicional de Obra por parte del contratista.\n • Feb 10-23, 2026: El contratista viene realizando el Adicional de Obra para reubicación de la PTAR, ampliando el Patio de Maniobras, levantando observaciones de OCI.\n • Feb 24-Mar 2, 2026: El contratista remitió propuesta arquitectónica de reubicación del bloque de la PTAR para solucionar problema de giro en patio de maniobra. Equipo técnico de FONDEPES viene evaluando la propuesta.\n \n \n \n ── SEGUIMIENTO 2026 (Nudos Críticos / Avances) ──\n • [Nudos Críticos 10-16 feb 2026]: Demoras en la presentación del Adicional de Obra.\n • [Seguimiento 10-16 feb 2026]: El contratista viene realizando el Adicional de Obra para la reubicación de la PTAR, ampliando el Patio de Maniobras, levantando observaciones de OCI.\n • [Seguimiento 24 feb-02 mar 2026]: El contratista remitió propuesta arquitectónica de reubicación del bloque de la PTAR para solucionar el problema de giro en el patio de maniobra. El equipo técnico de FONDEPES viene evaluando la propuesta.",
@@ -5233,7 +5361,7 @@
         "url": "https://drive.google.com/drive/folders/1AYJ9oIl5tCWSkPMxnvOfhWt7rec_Zn3q?usp=sharing",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Probabilidad de acciones colectivas (protestas, bloqueos, toma del DPA o paralización de desembarques) como mecanismo de presión.",
       "actores_estado_raw": "GORE Arequipa / DIREPRO Arequipa / Municipalidad Distrital de Atico\n\nFONDEPES / PRODUCE",
       "actores_sociedad_raw": "Willy Vidal Gestor Social de FONDEPES 945686509, Pescadores del DPA Atico, OSPAS de la zona, GORE Arequipa, Municipalidad de Atico, OEFA-MINAM",
@@ -5245,10 +5373,10 @@
           "fila": 100,
           "fila_fin": 103,
           "accion": "Ejecución del proyecto: MEJORAMIENTO DE LOS SERVICIOS DEL DPA ATICO (PROYECTO DE INVERSIÓN 2234385)",
-          "medios_verificacion_raw": "Acción 1",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "FONDEPES",
           "punto_focal_raw": null,
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 100,
@@ -5373,7 +5501,7 @@
           "fila": 104,
           "fila_fin": 105,
           "accion": "Elaboración de expediente técnico y habilitación de media tensión para el DPA Atico",
-          "medios_verificacion_raw": "Acción 2",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "FONDEPES",
           "punto_focal_raw": null,
           "documentos_raw": null,
@@ -5465,8 +5593,7 @@
         "Hito fila 104: Fecha Planificada = 'Indefinido' -> texto_no_fecha (no se convierte a fecha).",
         "Hito fila 104: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 105: Fecha Planificada = 'Indefinido' -> texto_no_fecha (no se convierte a fecha).",
-        "Hito fila 105: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Hito fila 105: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito."
       ]
     },
     {
@@ -5481,9 +5608,10 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Loreto",
-      "sectorista_raw": "Peggy Contreras Montes",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Daniel Vela",
+      "sectorista_metadatos_raw": "Peggy Contreras Montes",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -5493,7 +5621,7 @@
         "url": "https://drive.google.com/drive/folders/1pWGOfTj4WuUi1DTxK6KjcIqcoYirLUGj?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "La demora en la culminación de la infraestructura pesquera artesanal del DPA La Punchana podría generar, de manera gradual, preocupaciones entre los pescadores, si no se mantienen informados sobre los avances de la ejecución de la obra.",
       "actores_estado_raw": "GORE Loreto / DIREPRO Loreto\n\nFONDEPES / PRODUCE/ MEF",
       "actores_sociedad_raw": "OSPAS, FONDEPES, MEF",
@@ -5505,10 +5633,10 @@
           "fila": 106,
           "fila_fin": 109,
           "accion": "Culminación del Proyecto de Inversión: \"Mejoramiento integral del muelle pesquero del DPA La Punchana - Loreto\".",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "FONDEPES",
           "punto_focal_raw": "Frank Llordy Escalante Cardenas",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 106,
@@ -5651,7 +5779,7 @@
         "Hito fila 107: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 108: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 109: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Daniel Vela') difiere del de METADATOS ('Peggy Contreras Montes'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -5666,9 +5794,10 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Loreto",
-      "sectorista_raw": "Peggy Contreras Montes",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_raw": "Daniel Vela",
+      "sectorista_metadatos_raw": "Peggy Contreras Montes",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -5678,7 +5807,7 @@
         "url": "https://drive.google.com/drive/folders/1vwRb36HFmUYbbp5CPp7V_gpmkNibIWbM?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Eventual incremento de la visibilidad del tema a través de pronunciamientos públicos, como parte de la búsqueda de atención a sus demandas.",
       "actores_estado_raw": "GORE Loreto / Municipalidad Provincial de Loreto-Nauta \n\nPNDP / PRODUCE / MEF",
       "actores_sociedad_raw": "PNDP / Federación de Comerciantes Autónomos del Mercado y Afines de Villa Belén (FECAMAVIB)",
@@ -5690,10 +5819,10 @@
           "fila": 110,
           "fila_fin": 112,
           "accion": "Culminación del Proyecto: “Mejoramiento del servicio de comercialización del Gran Mercado de Belén-Iquitos, provincia de Maynas, departamento de Loreto”.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "PNDP",
           "punto_focal_raw": "Ivan Vassallo Olano",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 110,
@@ -5806,7 +5935,7 @@
         "Hito fila 111: Fecha Real = 'Julio 2026 - Noviembre 2026' -> texto_no_fecha (no se convierte a fecha).",
         "Hito fila 112: Fecha Planificada = 'Diciembre 2026 - Junio 2027' -> texto_no_fecha (no se convierte a fecha).",
         "Hito fila 112: Fecha Real = 'Diciembre 2026 - Junio 2027' -> texto_no_fecha (no se convierte a fecha).",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Daniel Vela') difiere del de METADATOS ('Peggy Contreras Montes'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -5821,10 +5950,11 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Lambayeque",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
+      "sectorista_raw": "Ivan Ascurra Santillán",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "Información general:\n - Deja admnistración de DPA San José",
@@ -5833,7 +5963,7 @@
         "url": "https://drive.google.com/drive/folders/1QA-0U0pnkKaoLAb1u3pWvpHDjU_mZTpm?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": null,
       "actores_estado_raw": "GORE Lambayeque / DIREPRO Lambayeque\n\nFONDEPES / PRODUCE",
       "actores_sociedad_raw": "Pescadores artesanales DPA San José / OSPAS de San José / Municipalidad de San José",
@@ -5845,10 +5975,10 @@
           "fila": 113,
           "fila_fin": 113,
           "accion": "DPA San José en Lambayeque",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGPA",
           "punto_focal_raw": "Juan Carlos Cordova Calle",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [],
           "valores_extra_en_span": []
         }
@@ -5870,8 +6000,8 @@
       },
       "advertencias": [
         "Acción de la fila 113 sin ningún hito (S vacía en su span).",
-        "Fila 113: hay 'Descripción del Hito' ('Proceso de convocatoria de DPA') sin etiqueta en S; no cuenta como hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Fila 113: hay 'Descripción del Hito' ('Proceso de convocatoria de DPA') sin etiqueta en Hito; no cuenta como hito.",
+        "Sectorista de la hoja principal ('Ivan Ascurra Santillán') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -5887,8 +6017,9 @@
       },
       "departamento_raw": "Callao",
       "sectorista_raw": "Peggy Contreras Montes",
-      "prioridad": {
-        "raw": "Moderado",
+      "sectorista_metadatos_raw": "Peggy Contreras Montes",
+      "nivel_riesgo": {
+        "raw": "Medio",
         "id": 2,
         "estado": "mapeada"
       },
@@ -5898,7 +6029,7 @@
         "url": "https://drive.google.com/drive/folders/1VNbAE0M0za9gpW1mLkvL5Sx_fmHblXUR?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Probabilidad de acciones colectivas (protestas, bloqueos) como mecanismo de presión.",
       "actores_estado_raw": "Municipalidad de Mi Perú, Municipalidad de Ventanilla\n\nPRODUCE (DGAAMI)",
       "actores_sociedad_raw": "Pobladores del distrito de Mi Perú,",
@@ -5910,10 +6041,10 @@
           "fila": 114,
           "fila_fin": 117,
           "accion": "Pronunciamiento final de PRODUCE respecto a aprobación o desaprobación de actualización de IGA presentado por la empresa Baterías ETNA.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGAAMI",
           "punto_focal_raw": "Jorge Alva Pasapera",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 114,
@@ -6038,7 +6169,7 @@
       "hitos_sin_accion": [],
       "reporte_avance": {
         "fila_inicio": 104,
-        "fila_fin": 1005,
+        "fila_fin": 306,
         "alcance_geografico_raw": "Centro",
         "subsector_raw": null,
         "tematica_raw": null,
@@ -6054,8 +6185,7 @@
         "Hito fila 114: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 115: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 116: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Hito fila 117: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito.",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Hito fila 117: Estado Actual = 'No Cumplido' no existe en core.cat_estados_hito."
       ]
     },
     {
@@ -6070,11 +6200,12 @@
         "estado": "sin_dato"
       },
       "departamento_raw": "Lima Metropolitana",
-      "sectorista_raw": "Ivan Ascurra Santillán",
-      "prioridad": {
-        "raw": "Moderado",
-        "id": 2,
-        "estado": "mapeada"
+      "sectorista_raw": "Karen Benito",
+      "sectorista_metadatos_raw": "Ivan Ascurra Santillán",
+      "nivel_riesgo": {
+        "raw": "Archivado",
+        "id": null,
+        "estado": "desconocida"
       },
       "narrativa_cronologica": null,
       "analisis_canva": {
@@ -6118,11 +6249,12 @@
       "advertencias": [
         "Acción de la fila 118 sin ningún hito (S vacía en su span).",
         "Acción de la fila 120 sin ningún hito (S vacía en su span).",
-        "Fila 118: hay 'Descripción del Hito' ('Presentación de informe por parte de IMARPE sobre ') sin etiqueta en S; no cuenta como hito.",
-        "Fila 119: hay 'Descripción del Hito' ('Analisis de la evaluación para la elaboración de d') sin etiqueta en S; no cuenta como hito.",
-        "Fila 120: hay 'Descripción del Hito' ('Elaboración del informe técnico e interactivo que ') sin etiqueta en S; no cuenta como hito.",
-        "Fila 121: hay 'Descripción del Hito' ('Jornada de socialización del informe interactivo c') sin etiqueta en S; no cuenta como hito.",
-        "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave)."
+        "Fila 118: hay 'Descripción del Hito' ('Presentación de informe por parte de IMARPE sobre ') sin etiqueta en Hito; no cuenta como hito.",
+        "Fila 119: hay 'Descripción del Hito' ('Analisis de la evaluación para la elaboración de d') sin etiqueta en Hito; no cuenta como hito.",
+        "Fila 120: hay 'Descripción del Hito' ('Elaboración del informe técnico e interactivo que ') sin etiqueta en Hito; no cuenta como hito.",
+        "Fila 121: hay 'Descripción del Hito' ('Jornada de socialización del informe interactivo c') sin etiqueta en Hito; no cuenta como hito.",
+        "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave).",
+        "Sectorista de la hoja principal ('Karen Benito') difiere del de METADATOS ('Ivan Ascurra Santillán'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -6138,9 +6270,10 @@
       },
       "departamento_raw": "Callao",
       "sectorista_raw": "Peggy Contreras Montes",
-      "prioridad": {
+      "sectorista_metadatos_raw": "Peggy Contreras Montes",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026\n22.09.2026\n- Al no haberse interpuesto recurso de apelación dentro del plazo establecido, la resolución quedó consentida. No obstante, el caso permanece en\nseguimiento debido a que la empresa podría presentar una nueva solicitud de evaluación de la Declaración de Impacto Ambiental (DIA) del proyecto, conforme al marco normativo vigente.\n01.07.2026\n- El 19.06.2026 DGAAMI dio respuesta a la empresa CALCESUR, declarando infundado su pedido de reconsideración. La empresa cuenta con 15 días hábiles en caso considere presentar recurso de apelación (vence 13.07).   \n05.2026\n- Empresa CALCESUR presentó recurso de reconsideración ante DGAAMI, la cual tiene plazo hasta la segunda semana de junio para dar respuesta. \n- Mediante RD 228-2026-DGAAMI (29.04), se resuelve desaprobar la DIA del proyecto denominado “Planta de Cal de 2000 TMPD”. \n28.04.2026 \n- DEAM informa que han remitido proyecto de informe a DVMYPE. El día de hoy la dirección sostendrá una reunión con DVMYPE para abordar el tema. \n15.04.2026\n- Reunión entre PRODUCE y representantes del AAHH Márquez y la Comisión No a CALCESUR. PRODUCE precisó que la DIA aún se encuentra en evaluación sin decisión final. La población reiteró su rechazo al proyecto.",
@@ -6173,8 +6306,8 @@
       "reporte_avance": null,
       "advertencias": [
         "Acción de la fila 122 sin ningún hito (S vacía en su span).",
-        "Fila 122: hay 'Descripción del Hito' ('Atención y desarrollo de reunión con Junta Directi') sin etiqueta en S; no cuenta como hito.",
-        "Fila 123: hay 'Descripción del Hito' ('Emisión de pronunciamiento y Resolución respecto a') sin etiqueta en S; no cuenta como hito.",
+        "Fila 122: hay 'Descripción del Hito' ('Atención y desarrollo de reunión con Junta Directi') sin etiqueta en Hito; no cuenta como hito.",
+        "Fila 123: hay 'Descripción del Hito' ('Emisión de pronunciamiento y Resolución respecto a') sin etiqueta en Hito; no cuenta como hito.",
         "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave)."
       ]
     },
@@ -6191,9 +6324,10 @@
       },
       "departamento_raw": "Moquegua",
       "sectorista_raw": "Esteban Vidal Saldarriaga",
-      "prioridad": {
+      "sectorista_metadatos_raw": "Esteban Vidal Saldarriaga",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "2026\n\n- Julio de 2026 – FONDEPES / GORE Moquegua: A solicitud de FONDEPES, el GORE Moquegua remitió el 8 de julio de 2026 el oficio mediante el cual solicita la conformidad para continuar con la implementación del convenio. Con la atención de dicho requerimiento por parte de FONDEPES se podrá iniciar la elaboración del expediente técnico para la rehabilitación del Muelle N.° 2 del DPA Ilo.\n- Quincena de mayo de 2026 – FONDEPES / GORE Moquegua: Se suscribió el Convenio de Cooperación Interinstitucional entre FONDEPES y el Gobierno Regional de Moquegua para la rehabilitación del Muelle N.° 2 del DPA Ilo, hito que habilita el inicio de la elaboración del expediente técnico y, posteriormente, la ejecución de la obra.\n14.04.2026 – FONDEPES / GORE Moquegua: Sostienen reunión técnica-legal donde se consolida la versión final del convenio interinstitucional, validando su viabilidad técnica y jurídica.\nAbril 2026 – FONDEPES / GORE Moquegua: Subsanan observaciones del convenio, redefiniendo la cláusula quinta y estableciendo que el GORE Moquegua es responsable de la elaboración del expediente técnico, en concordancia con el marco normativo vigente.\n2025 – FONDEPES / GORE Moquegua: identifican que el Muelle N°2 fue construido sin expediente técnico ni respaldo formal, encontrándose en deterioro y con riesgo de colapso, lo que motiva su intervención. Se formulan observaciones al proyecto de convenio, debido a la asignación inicial incorrecta de responsabilidades (FONDEPES como elaborador del expediente técnico) y se plantea la suscripción de un Convenio de Cooperación Interinstitucional para la demolición y reposición del Muelle N°2, definiendo esquema de intervención con GORE como unidad ejecutora y FONDEPES como asistencia técnica.",
@@ -6202,7 +6336,7 @@
         "url": null,
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": "Probabilidad de acciones colectivas (protestas, bloqueos, toma del DPA o paralización de desembarques) como mecanismo de presión en caso no se generen avances previstos en los plazos previstos.",
       "actores_estado_raw": "GORE Moquegua / DIREPRO Moquegua\n\nFONDEPES / PRODUCE",
       "actores_sociedad_raw": "Pescadores del DPA Ilo (SUPABCPI), actores portuarios, órgano de control interno",
@@ -6214,7 +6348,7 @@
           "fila": 124,
           "fila_fin": 126,
           "accion": "Elaboración del Expediente Técnico y Ejecución de la Obra: \"Rehabilitación del Muelle N°2 del Desembarcadero Pesquero Artesanal Ilo por Riesgo de Colapso\"",
-          "medios_verificacion_raw": "Acción 1",
+          "medios_verificacion_raw": null,
           "area_responsable_raw": "FONDEPES",
           "punto_focal_raw": null,
           "documentos_raw": null,
@@ -6316,8 +6450,7 @@
         "Hito fila 125: Estado Actual = 'No cumplido' no existe en core.cat_estados_hito.",
         "Hito fila 126: Fecha Planificada = 'Noviembre - Diciembre 2026' -> texto_no_fecha (no se convierte a fecha).",
         "Hito fila 126: Estado Actual = 'No cumplido' no existe en core.cat_estados_hito.",
-        "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave).",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave)."
       ]
     },
     {
@@ -6332,10 +6465,11 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Lima Provincias",
-      "sectorista_raw": "Ivan Ascurra Santillán",
-      "prioridad": {
+      "sectorista_raw": "Peggy Contreras Montes",
+      "sectorista_metadatos_raw": "Ivan Ascurra Santillán",
+      "nivel_riesgo": {
         "raw": "Bajo",
-        "id": 3,
+        "id": 1,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "- 05.06.2026 — Se realizó una reunión con los representantes de Aceros Americanos, se acordó que la OAIPCS participará de la intervención del día 13 de junio de 2026, en el marco de la participación ciudadana del EIA-d.\n\n- 29.05.2026 — En PRODUCE, se da una reunión con la Asociación de Emprendedores de Chilca y vecinos sobre el Estudio de Impacto Ambiental detallado (EIA-d) de Aceros Americanos, respecto a los mecanismos de participación ciudadana y el acceso a información pública\n\n- Inicios de 2026 — La empresa Aceros Americanos programa Audiencias públicas en el marco del EIA-d, sin embargo los vecinos del AH 15 de Enero solicitan su anulación debido a que consideran inoportunos los horarios planteados (días de semana durante horario laboral)",
@@ -6355,7 +6489,8 @@
       "hitos_sin_accion": [],
       "reporte_avance": null,
       "advertencias": [
-        "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave)."
+        "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave).",
+        "Sectorista de la hoja principal ('Peggy Contreras Montes') difiere del de METADATOS ('Ivan Ascurra Santillán'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -6370,10 +6505,11 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Piura / Lambayeque / La Libertad / Callao / Ica / Arequipa / Moquegua",
-      "sectorista_raw": "André Jiménez Agapito",
-      "prioridad": {
-        "raw": "Urgente",
-        "id": 1,
+      "sectorista_raw": "Ivan Ascurra Santillán",
+      "sectorista_metadatos_raw": "André Jiménez Agapito",
+      "nivel_riesgo": {
+        "raw": "Alto",
+        "id": 3,
         "estado": "mapeada"
       },
       "narrativa_cronologica": "* 23-29MAR2026 — COP15 de la CMS en Brasil incorpora al Apéndice I tres especies de tiburón zorro (Alopias pelagicus, A. superciliosus, A. vulpinus), el tiburón martillo festoneado (Sphyrna lewini) y el tiburón martillo gigante (Sphyrna mokarran). Resultado de la votación: 49 a favor, 1 en contra (Perú), 6 abstenciones.\n* 01ABR2026 — MINAM remite a PRODUCE el Oficio N° D000085-2026-MINAM-VMDERN-DGDB comunicando los resultados de la COP15 y la entrada en vigor de las obligaciones el 27JUN2026.\n* 25ABR2026 — Pescadores artesanales de Máncora (Talara, Piura) se concentran en el Desembarcadero Pesquero Artesanal para protestar contra la prohibición. Raúl Querevalú (AGREPESAR) convoca a toda la cadena productiva local.\n* 30ABR2026 — Reunión sectorial con el Ministro de la Producción. Representantes de la Macrorregión Sur plantean: (i) demoras en certificados CITES superiores a un año; (ii) solidaridad con gremios del norte; (iii) inquietud por una eventual extensión de la prohibición a tiburón azul, diamante y marrajo sardinero. \n* 04MAY2026 — Armadores artesanales de Santa Rosa (Chiclayo, Lambayeque), liderados por Santos Marchena Marchena, celebran asamblea macrorregional. Exigen mesa de diálogo técnico con PRODUCE y dan plazo de 20 días al Ministro.\n* 04MAY2026 — Familiares de pescadores (Leslie Lizana Choquehuanca, tesorera) y sector gastronómico (José Fernando, restaurantero) advierten movilizaciones si no hay respuesta.",
@@ -6382,7 +6518,7 @@
         "url": "https://drive.google.com/drive/folders/1vtvQ0LcamPV4u6do_pkybTGo8GjCCTI8?usp=drive_link",
         "destino": null
       },
-      "timestamp_estado": "No aplica",
+      "timestamp_estado": null,
       "descripcion_riesgo": null,
       "actores_estado_raw": "DIREPRO Callao / DIREPRO Piura / DIREPRO Lambayeque / GORE Callao\n\nPRODUCE (DGPCHDI, DGSFS-PA) / MINAM (DGAAMPA) / SERNANP / Ministerio de Relaciones Exteriores",
       "actores_sociedad_raw": "Gremios de pescadores artesanales de Callao, Piura, Lambayeque / Asociaciones de buzos y extractores",
@@ -6439,10 +6575,10 @@
           "fila": 128,
           "fila_fin": 131,
           "accion": "1. La DGPCHDI debe de realizar el seguimiento a los avances del MINAM, con respecto al DENP.",
-          "medios_verificacion_raw": "Acción 1: Adjuntar",
+          "medios_verificacion_raw": "Documentos",
           "area_responsable_raw": "DGPCHDI",
           "punto_focal_raw": "Jaime Antonio De la Torre Obregon",
-          "documentos_raw": "Documentos",
+          "documentos_raw": null,
           "hitos": [
             {
               "fila": 128,
@@ -6498,7 +6634,7 @@
         "Demanda de la fila 130 sin Temática (M vacía); no se hereda.",
         "Demanda de la fila 131 sin Temática (M vacía); no se hereda.",
         "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave).",
-        "Columna H = 'No aplica': es un estado, no una marca de tiempo."
+        "Sectorista de la hoja principal ('Ivan Ascurra Santillán') difiere del de METADATOS ('André Jiménez Agapito'); A1 usa el de la hoja principal."
       ]
     },
     {
@@ -6513,11 +6649,12 @@
         "estado": "solo_anio"
       },
       "departamento_raw": "Junín",
-      "sectorista_raw": "Ivan Ascurra Santillán",
-      "prioridad": {
-        "raw": "Moderado",
-        "id": 2,
-        "estado": "mapeada"
+      "sectorista_raw": "Peggy Contreras Montes",
+      "sectorista_metadatos_raw": "Ivan Ascurra Santillán",
+      "nivel_riesgo": {
+        "raw": "Archivado",
+        "id": null,
+        "estado": "desconocida"
       },
       "narrativa_cronologica": "* 18.JUN.2026 — Convocatoria a movilización hacia la ciudad de Huancayo\n* 03.JUN.2026 — Representante de piscicultores reporta incumplimiento del GORE Junín en entrega de alevinos. Asimismo, reportan denuncias a representantes por parte de la minera \"Oro Negro\".\n* 22.MAY.2026 — MINAM concluye que no corresponde declaratoria de emergencia ambiental, al calificar el evento como súbito.\n* 21.MAY.2026 — SANIPES emite informe indicando que muestras de 3 piscigranjas (no incluye ácido cianhídrico) y no representan riesgo para consumo humano.\n* 06.MAY.2026 — ANA emite informe concluyendo que muestras del río no superan los Estándares de Calidad Ambiental para metales pesados (no incluye ácido cianhídrico).\n* 05.MAY.2026 — PNP Junín emite informes que concluyen presencia de ácido cianhídrico en muestras de agua y truchas de 6 piscigranjas. \n* 27-28.ABR.2026 — Mortandad masiva de truchas en 7 piscigranjas del río Yuracyacu. La Municipalidad Distrital de Pariahuanca constata agua turbia con sedimentos. DIREPRO Junín acuerda implementar un Programa Productivo para familias afectadas, previa evaluación. PNP y ANA (27) y SANIPES (28) toman muestras.",
       "analisis_canva": {
@@ -6530,12 +6667,12 @@
       "actores_estado_raw": "DIREPRO JUNIN / SANIPES / FONDEPES / GORE JUNIN",
       "actores_sociedad_raw": "Comunidads campesinas de la margen derecha del Río Yuracyacu.",
       "fila_inicio": 132,
-      "fila_fin": 1003,
+      "fila_fin": 1000,
       "demandas": [],
       "acciones": [
         {
           "fila": 132,
-          "fila_fin": 1003,
+          "fila_fin": 1000,
           "accion": "1. FONDES dará asistencia técnica, previa viabilidad hidrológica dada por la autoirdad competente",
           "medios_verificacion_raw": null,
           "area_responsable_raw": "FONDEPES",
@@ -6549,7 +6686,8 @@
       "reporte_avance": null,
       "advertencias": [
         "Acción de la fila 132 sin ningún hito (S vacía en su span).",
-        "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave)."
+        "Caso sin Código de Caso en METADATOS CASOS (el N° del Excel no es clave).",
+        "Sectorista de la hoja principal ('Peggy Contreras Montes') difiere del de METADATOS ('Ivan Ascurra Santillán'); A1 usa el de la hoja principal."
       ]
     }
   ]

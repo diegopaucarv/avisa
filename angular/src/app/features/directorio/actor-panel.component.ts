@@ -40,6 +40,7 @@ import {
   TIPOS_ACTOR,
   type ActorDirectorio,
   type DatosPersonales,
+  type MembresiaActor,
 } from './directorio.mapeo';
 
 /**
@@ -314,6 +315,21 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       font-style: italic;
     }
 
+    .panel-organizaciones {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .panel-organizaciones li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px;
+    }
+
     /* Posicionamiento: un color por valor del catálogo. */
     .panel-posicionamiento {
       display: inline-flex;
@@ -459,6 +475,8 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
 })
 export class ActorPanelComponent {
   readonly actor = input<ActorDirectorio | null>(null);
+  /** Membresías vigentes de la persona, provistas por la tabla del directorio. */
+  readonly membresias = input<MembresiaActor[]>([]);
   /** Abre la ficha directamente en modo edición (acción «Editar» de la tabla). */
   readonly editarInicial = input(false);
   /** Indica si el actor ya está en la lista temporal, para alternar la etiqueta. */

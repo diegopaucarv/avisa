@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   signal,
@@ -63,6 +64,21 @@ function codigoDeCasoCreado(bruto: unknown): string | null {
 type ModoVista = 'tarjetas' | 'tabla';
 type VerRegistros = 'activos' | 'anulados';
 
+/**
+ * Item del listado con el sectorista asignado. La API ya entrega
+ * `sectoristaUsuarioId` y el `sectorista` resuelto, pero `dominio/mapeo.ts`
+ * todavía no conserva la columna: se suma aquí leyendo el bruto, con el mismo
+ * patrón que la ficha usa para `descripcionRiesgo`.
+ */
+type CasoConSectorista = Caso & {
+  sectorista: string | null;
+};
+
+function aCasoConSectorista(bruto: unknown): CasoConSectorista {
+  const fila = esRegistro(bruto) ? bruto : {};
+  return { ...aCaso(bruto), sectorista: texto(fila, ['sectorista', 'sectoristaNombre']) };
+}
+
 type FiltrosCasos = {
   q: string;
   estado: string;
@@ -75,6 +91,12 @@ type FiltrosCasos = {
   alcance: string;
   /** Nombre canónico de `core.regiones`; la API lo normaliza y lo valida. */
   region: string;
+  /**
+   * Texto libre que la API compara contra el nombre resuelto del sectorista
+   * asignado al caso. Viaja como `sectorista` y se filtra en el servidor: no se
+   * recorta la página ya cargada.
+   */
+  sectorista: string;
   /**
    * Complemento de `region`: casos sin región principal. Excluyentes entre sí
    * (`sinRegion` gana en el repositorio), por eso la barra los trata como una
@@ -95,18 +117,26 @@ const FILTROS_INICIALES: FiltrosCasos = {
   riesgo: '',
   alcance: '',
   region: '',
+  sectorista: '',
   sinRegion: false,
   pagina: 1,
   tamano: TAMANO_PAGINA,
-  orden: 'recent',
+  orden: 'risk',
   ver: 'activos',
 };
 
 const ORDENES = [
-  { valor: 'recent', etiqueta: 'Fecha (más reciente)' },
   { valor: 'risk', etiqueta: 'Riesgo (Alto → Bajo)' },
+  { valor: 'recent', etiqueta: 'Fecha (más reciente)' },
   { valor: 'priority', etiqueta: 'Prioridad (Urgente → Bajo)' },
 ] as const;
+
+/**
+ * Orden con el que abre el listado. `risk` deja el riesgo Alto primero y los
+ * archivados al final (los ordena el servidor). Es sólo el valor por defecto:
+ * `?orden=…` sigue mandando para que la URL compartida reproduzca la vista.
+ */
+const ORDEN_INICIAL = 'risk';
 
 /** Clave de `localStorage` que guarda el ámbito predeterminado (item 28). */
 const CLAVE_ALCANCE = 'avisa-alcance';
@@ -240,10 +270,18 @@ function aConteos(bruto: unknown): ConteosCasos {
       font-size: 13.5px;
     }
 
-    /* La búsqueda comparte fila con cuatro filtros: no debe estirarse. */
-    .search-field-angosta {
-      max-width: 300px;
-      flex: 0 1 300px;
+    /*
+     * La búsqueda comparte fila con cinco filtros: usa la variante estrecha
+     * global (search-field--compacta en global.css), no un ancho propio.
+     */
+
+    /* Sectorista en la tarjeta: línea propia bajo el resumen, con variables de
+       tema para que el modo noche conserve el contraste. */
+    .case-sectorista {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12.5px;
     }
 
     /* Chips de riesgo y «Resueltos»: son tab-bar/tab-button, sin el margen
@@ -332,11 +370,12 @@ function aConteos(bruto: unknown): ConteosCasos {
     /*
      * Barra principal de filtros (barra-filtros-casos).
      *
-     * Medido con el CSS real: los cinco controles con rótulo más el botón de
-     * búsqueda avanzada suman ~1.290 px, de modo que la fila solo cabe de una
-     * pieza a partir de ~1.500 px de ventana. Por debajo se reparte en una
-     * rejilla de columnas iguales (3, luego 2, luego 1) en vez de envolver en
-     * filas irregulares.
+     * Medido con el CSS real: los seis controles con rótulo más el botón de
+     * búsqueda avanzada suman ~1.490 px, de modo que la fila solo cabe de una
+     * pieza a partir de ~1.500 px de ventana; el campo de búsqueda puede
+     * encogerse hasta 140 px para absorber la diferencia. Por debajo se reparte
+     * en una rejilla de columnas iguales (3, luego 2, luego 1) en vez de
+     * envolver en filas irregulares.
      *
      * Estos estilos viven aquí, y no en la hoja global, porque los del
      * componente ganan por especificidad.
@@ -350,7 +389,7 @@ function aConteos(bruto: unknown): ConteosCasos {
         flex-wrap: nowrap;
       }
 
-      .barra-filtros-casos .search-field-angosta {
+      .barra-filtros-casos .search-field--compacta {
         flex: 1 1 200px;
         min-width: 140px;
       }
@@ -364,7 +403,7 @@ function aConteos(bruto: unknown): ConteosCasos {
         gap: 8px 10px;
       }
 
-      .barra-filtros-casos .search-field-angosta {
+      .barra-filtros-casos .search-field--compacta {
         width: 100%;
         max-width: none;
         flex: initial;
@@ -514,6 +553,7 @@ function aConteos(bruto: unknown): ConteosCasos {
 export class CasosPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destruccion = inject(DestroyRef);
   private readonly registroSolicitado = toSignal(
     this.ruta.queryParamMap.pipe(map((params) => params.get('registrar'))),
     { initialValue: null },
@@ -527,7 +567,7 @@ export class CasosPage {
   /**
    * Filtros secundarios: nivel de conflictividad, resueltos, alcance y orden. Se
    * despliegan con «Búsqueda avanzada» para que la barra de entrada quede corta:
-   * búsqueda, riesgo, región e interruptor Abiertos/Archivados.
+   * búsqueda, riesgo, región, sectorista e interruptor Abiertos/Archivados.
    */
   readonly avanzado = signal(false);
 
@@ -576,13 +616,14 @@ export class CasosPage {
           // Sin `alcance` rige Preferencias; `todos` es la limpieza explícita.
           alcance: alcance === null ? alcancePreferido() : alcance === 'todos' ? '' : alcance,
           region: params.get('region') ?? '',
+          sectorista: params.get('sectorista') ?? '',
           sinRegion: params.get('sinregion') === 'true',
           pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
           tamano: Math.max(
             1,
             Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA,
           ),
-          orden: params.get('orden') ?? 'recent',
+          orden: params.get('orden') ?? ORDEN_INICIAL,
           ver,
         };
       }),
@@ -609,7 +650,7 @@ export class CasosPage {
   readonly filtrosAvanzadosActivos = computed(() => {
     const filtros = this.filtros();
     return Boolean(
-      filtros.nivel || filtros.estado === ESTADO_RESUELTO || filtros.orden !== 'recent',
+      filtros.nivel || filtros.estado === ESTADO_RESUELTO || filtros.orden !== ORDEN_INICIAL,
     );
   });
 
@@ -628,6 +669,7 @@ export class CasosPage {
       riesgo: filtros.riesgo,
       alcance: filtros.alcance,
       region: filtros.region,
+      sectorista: filtros.sectorista,
       sinregion: filtros.sinRegion ? 'true' : '',
       sort: filtros.orden,
     });
@@ -657,7 +699,7 @@ export class CasosPage {
   readonly alcances = computed(() => this.catalogoRecurso.valor()?.alcances ?? []);
   readonly regiones = computed(() => this.catalogoRecurso.valor()?.regiones ?? []);
 
-  private readonly recurso = consulta<Coleccion<Caso> & { conteos: ConteosCasos }>({
+  private readonly recurso = consulta<Coleccion<CasoConSectorista> & { conteos: ConteosCasos }>({
     fuente: () => {
       const filtros = this.parametros();
       return urlConParametros(urlApi('/v1/cases'), {
@@ -669,6 +711,7 @@ export class CasosPage {
         riesgo: filtros.riesgo,
         alcance: filtros.alcance,
         region: filtros.region,
+        sectorista: filtros.sectorista,
         sinregion: filtros.sinRegion ? 'true' : '',
         sort: filtros.orden,
         anulados: filtros.ver === 'anulados' ? 'true' : '',
@@ -679,7 +722,7 @@ export class CasosPage {
       const coleccion = normalizarColeccion<unknown>(bruto);
       return {
         ...coleccion,
-        elementos: coleccion.elementos.map(aCaso),
+        elementos: coleccion.elementos.map(aCasoConSectorista),
         conteos: aConteos(bruto),
       };
     },
@@ -726,13 +769,14 @@ export class CasosPage {
   private turnoDuplicados = 0;
 
   /** Orden local de la página visible. */
-  readonly orden = new OrdenTabla<Caso>();
+  readonly orden = new OrdenTabla<CasoConSectorista>();
 
-  private readonly accesoresCaso: Record<string, (caso: Caso) => unknown> = {
+  private readonly accesoresCaso: Record<string, (caso: CasoConSectorista) => unknown> = {
     codigo: (caso) => caso.codigo,
     titulo: (caso) => caso.titulo,
     anulado: (caso) => caso.anuladoEn,
     region: (caso) => caso.region,
+    sectorista: (caso) => caso.sectorista,
     estado: (caso) => caso.estado,
     prioridad: (caso) => caso.prioridad,
     riesgo: (caso) => caso.riesgo,
@@ -743,6 +787,8 @@ export class CasosPage {
   readonly filasVisibles = computed(() => this.orden.ordenar(this.casos(), this.accesoresCaso));
 
   private temporizador?: ReturnType<typeof setTimeout>;
+  /** Turno propio del filtro por sectorista: no pisa la búsqueda por palabra. */
+  private temporizadorSectorista?: ReturnType<typeof setTimeout>;
 
   cambiarModo(modo: ModoVista): void {
     this.modo.set(modo);
@@ -766,6 +812,19 @@ export class CasosPage {
     clearTimeout(this.temporizador);
     this.temporizador = setTimeout(() => {
       void this.actualizar({ q: valor, pagina: 1 });
+    }, 300);
+  }
+
+  /**
+   * Filtro por sectorista asignado. Es texto libre y lo resuelve la API contra
+   * el nombre del usuario; espera el mismo retardo que la búsqueda por palabra
+   * para no navegar en cada tecla.
+   */
+  cambiarSectorista(evento: Event): void {
+    const valor = (evento.target as HTMLInputElement).value;
+    clearTimeout(this.temporizadorSectorista);
+    this.temporizadorSectorista = setTimeout(() => {
+      void this.actualizar({ sectorista: valor, pagina: 1 });
     }, 300);
   }
 
@@ -861,6 +920,7 @@ export class CasosPage {
 
   limpiar(): void {
     clearTimeout(this.temporizador);
+    clearTimeout(this.temporizadorSectorista);
     void this.router.navigate([], {
       relativeTo: this.ruta,
       // `ver` no es un filtro: se conserva la pestaña (vigentes o papelera).
@@ -946,6 +1006,12 @@ export class CasosPage {
   }
 
   constructor() {
+    // Una navegación de filtro pendiente no debe ejecutarse tras salir.
+    this.destruccion.onDestroy(() => {
+      clearTimeout(this.temporizador);
+      clearTimeout(this.temporizadorSectorista);
+    });
+
     effect(() => {
       if (this.registroSolicitado() !== 'caso') return;
       this.abrirAlta();
@@ -1134,10 +1200,11 @@ export class CasosPage {
         riesgo: siguiente.riesgo || null,
         alcance,
         region: siguiente.region || null,
+        sectorista: siguiente.sectorista || null,
         sinregion: siguiente.sinRegion ? 'true' : null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
-        orden: siguiente.orden !== 'recent' ? siguiente.orden : null,
+        orden: siguiente.orden !== ORDEN_INICIAL ? siguiente.orden : null,
         ver: siguiente.ver === 'anulados' ? 'anulados' : null,
       },
       queryParamsHandling: 'merge',

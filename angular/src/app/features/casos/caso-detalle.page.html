@@ -364,6 +364,12 @@
           </dd>
         </div>
         }
+        <div class="campo-editable">
+          <dt>Sectorista</dt>
+          <dd>
+            <span class="campo-valor">{{ d.caso.sectorista || 'sin dato' }}</span>
+          </dd>
+        </div>
       </dl>
 
       <section class="detail-section" aria-labelledby="actores-caso">
@@ -568,9 +574,11 @@
             <thead>
               <tr>
                 <th scope="col" [appThOrden]="'demanda'" [orden]="ordenDemandas">Demanda</th>
+                <th scope="col" [appThOrden]="'tematica'" [orden]="ordenDemandas">Temática</th>
                 <th scope="col" [appThOrden]="'estado'" [orden]="ordenDemandas">
                   Estado de atención
                 </th>
+                <th scope="col">Compromisos</th>
                 <th scope="col" [appThOrden]="'origen'" [orden]="ordenDemandas">Origen</th>
                 @if (puedeModificar() && modoEdicion()) {
                 <th scope="col">Acciones</th>
@@ -581,7 +589,22 @@
               @for (demanda of filasDemandas(); track demanda.id) {
               <tr>
                 <td class="celda-larga">{{ demanda.descripcion || demanda.problema || '—' }}</td>
+                <td>{{ demanda.tematica || 'Sin temática' }}</td>
                 <td>{{ demanda.estado || '—' }}</td>
+                <td class="celda-larga">
+                  @for (compromiso of compromisosDeDemanda(demanda.id); track compromiso.id) {
+                  <a
+                    class="table-link"
+                    [routerLink]="['/compromisos']"
+                    [queryParams]="{ q: compromiso.codigo }"
+                    [attr.title]="'Abrir ' + compromiso.codigo + ' en la lista de compromisos'"
+                  >
+                    {{ compromiso.codigo }}
+                  </a>
+                  @if (!$last) {<span aria-hidden="true">, </span>} } @empty {
+                  <span aria-hidden="true">—</span>
+                  }
+                </td>
                 <td class="celda-larga">
                   @if (demanda.documentoOrigenCodigo; as codigoOrigen) {
                   <a
@@ -859,6 +882,8 @@
     [demanda]="demandaEditada()"
     [codigoCaso]="d.caso.codigo"
     [organizaciones]="organizacionesDelCaso()"
+    [tematicas]="tematicasDemanda()"
+    [cargandoTematicas]="cargandoTematicasDemanda()"
     [puedeModificar]="puedeModificar()"
     [guardando]="guardandoDemanda()"
     [errorGuardado]="errorDemanda()"

@@ -1,5 +1,7 @@
 import type { PoolClient } from "pg";
 
+import { filtroTexto } from "../busqueda";
+
 /**
  * Locales y sedes de reunión (`core.locales`).
  *
@@ -166,13 +168,17 @@ export async function listLocales(
     return `$${params.length}`;
   };
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(
-      `(core.normalizar_ref(l.nombre) like core.normalizar_ref(${like}) or core.normalizar_ref(l.codigo) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(l.direccion, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(d.nombre, '')) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    [
+      "l.nombre",
+      "l.codigo",
+      "coalesce(l.direccion, '')",
+      "coalesce(d.nombre, '')",
+    ],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
 
   const activo = leerBooleano(query.activo);
   if (activo !== undefined) where.push(`l.activo = ${bind(activo)}`);

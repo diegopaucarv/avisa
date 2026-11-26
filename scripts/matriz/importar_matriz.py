@@ -22,6 +22,14 @@ Principios
 
 Notas de realidad de los insumos (corte 2026-11-24)
 --------------------------------------------------
+Notas de realidad de los insumos (corte 2026-11-24)
+--------------------------------------------------
+* La matriz de origen se movió y cambió de disposición durante el trabajo de
+  nov-2026. `parse_matriz.py` resuelve las columnas por encabezado; aquí sólo
+  se consumen los campos lógicos del JSON (`nivel_riesgo`, `sectorista_raw`,
+  `descripcion_riesgo`, `demandas[].tematica`, `acciones[].fecha_real`...).
+  Letras antiguas → nuevas: riesgo D→H, descripción de riesgo I→G, temática
+  M→L, fecha real W→V. El importador no depende de la letra.
 * Los `bloques_reporte` y los `nudos` usan la numeración de la hoja «Reporte de
   avance», que **no** coincide con la numeración de la hoja principal
   (`casos.json.fila_inicio`). El número de fila de un nudo no identifica por sí
@@ -33,12 +41,37 @@ Notas de realidad de los insumos (corte 2026-11-24)
       tiene hitos, por la propia acción. Es la única correspondencia estable
       que conservan los JSON. Cada vínculo por posición se declara en el
       informe y queda como decisión pendiente de verificación.
-* `casos.descripcion_riesgo`, `narrativa_cronologica`, `sectorista_raw`,
-  `prioridad`, `fecha_registro`, `alcance_geografico_raw`, `subsector_raw`,
-  `problematica_resumen`, `riesgo_descripcion`, `validacion_hito_raw`,
-  `medios_verificacion_raw`, `documentos_raw` y `reuniones.documentos` no se
-  importan en esta versión (no están en las reglas del encargo). Se declaran
-  como «datos sin destino» en el informe.
+* **A2** — El nivel de riesgo se toma de la columna D antigua / H nueva
+  («Riesgo») y se escribe en `core.casos.nivel_riesgo_id` (Bajo=1, Medio=2,
+  Alto=3). No se toca `core.casos.prioridad_id` ni la prioridad de alertas.
+  Un valor sin equivalencia (p. ej. «Archivado») deja NULL y se declara.
+* **A1** — El sectorista (columna C) se resuelve con `resolver_usuario()` y se
+  guarda en `core.casos.punto_focal_usuario_id`. Si no hay coincidencia
+  inequívoca se deja NULL y se emite «sectorista sin usuario».
+* **A3** — La descripción del riesgo (columna I antigua / G nueva) se guarda en
+  `core.casos.descripcion_riesgo`.
+* **A4** — La temática de cada demanda se resuelve por fila contra
+  `core.cat_tematicas` (normalizada y con la errata «Ordenanamiento»
+  corregida). Sin coincidencia: `tematica_id` NULL + advertencia.
+* **A4b** — Ya **no** se exige `tematica_equipo` en `casos` ni en
+  `compromisos`: `migration/41` prohíbe añadir esa columna. Su lugar lo ocupa
+  el mapeo de `tematica_id` (A4 para demandas y B5 para compromisos).
+* **A5** — La demanda y la acción comparten fila: se guarda
+  `compromisos.demanda_id`. Si la fila de la acción no trae demanda, queda
+  NULL y se marca «Sin demanda» en el informe.
+* **B1** — «Punto Focal Monitoreo» va a `compromisos.punto_focal_usuario_id`
+  (resuelto) o a `punto_focal_texto` si no resuelve (son excluyentes).
+* **B2** — La Fecha Real (columna W antigua / V nueva) se guarda como
+  `hitos_compromiso.fecha_real` cuando es válida; el texto crudo se conserva
+  sólo cuando no lo es.
+* **B3** — NO se implementa: `validacion_hito_raw` aparece en el informe como
+  dato no persistible, pero no se escribe en ninguna columna.
+* **B4** — `medios_verificacion_raw` y `documentos_raw` se declaran como no
+  persistibles: no hay tabla/columna adecuada (ver «Datos sin destino»).
+  Etiqueta de producto: «Medios de verificación».
+* **B6** — El informe compara, por caso, acciones e hitos del Excel con lo que
+  ya hay en AVISA y señala los duplicados entre `AVISA_HISTORICO` y la
+  importación (incluye el caso testigo `CS-PA-INF-2024-01_COMP001`).
 * `core.caso_nudo_critico` se carga con **una fila por celda no vacía** de la
   matriz: `descripcion` y `seguimiento` pueden faltar por separado
   (`descripcion` es NULLABLE desde `migration/43_nudos_criticos_fieles.sql`,
@@ -46,10 +79,9 @@ Notas de realidad de los insumos (corte 2026-11-24)
   únicos por semana**: varios nudos del mismo compromiso y semana coexisten. La
   identidad es `origen_ref = MATRIZ-N{fila:04d}-C{col_nudo:02d}`; el contenido
   literal idéntico se colapsa con motivo `repetido_identico`.
-* `core.cat_tematicas` NO se toca. El vocabulario del equipo se guarda como
-  texto libre en `casos.tematica_equipo` / `compromisos.tematica_equipo`.
-  `demandas.tematica_id` sólo se rellena cuando el texto normalizado coincide
-  exactamente con un `nombre` del catálogo.
+* `core.cat_tematicas` NO se toca. `demandas.tematica_id` y
+  `compromisos.tematica_id` se rellenan sólo cuando el texto normalizado
+  coincide con un `nombre` del catálogo.
 
 Uso
 ---
@@ -114,11 +146,43 @@ ESTADOS_HITO_TEXTO = {
 }
 ESTADO_HITO_POR_DEFECTO = 1  # Registrado
 
+# A2: columna de riesgo (D antigua / H nueva) -> core.cat_niveles_riesgo.
+NIVEL_RIESGO_COLUMNA = {
+    "urgente": 3,  # Alto
+    "alto": 3,
+    "moderado": 2,  # Medio
+    "medio": 2,
+    "bajo": 1,
+}
+
+# B6: umbral para señalar duplicados probables con AVISA_HISTORICO.
+UMBRAL_DUPLICADO = 0.70
+STOPWORDS_SIMILITUD = {
+    "de",
+    "la",
+    "el",
+    "los",
+    "las",
+    "del",
+    "por",
+    "para",
+    "y",
+    "en",
+    "a",
+    "con",
+    "un",
+    "una",
+    "al",
+    "sobre",
+    "sus",
+    "se",
+    "que",
+}
+
 TZ_LIMA = dt.timezone(dt.timedelta(hours=-5))
 MAX_TEXTO_FECHA = 120
 MAX_TEXTO_RESPONSABLE = 200
 MAX_TEXTO_PUNTO_FOCAL = 200
-MAX_TEMATICA_EQUIPO = 120
 MAX_LINK = 500
 MAX_REGION_TEXTO = 80
 
@@ -136,6 +200,11 @@ def normalizar(texto: object) -> str:
     s = "".join(c for c in s if not unicodedata.combining(c)).lower()
     s = re.sub(r"[^a-z0-9]+", " ", s)
     return " ".join(s.split())
+
+
+def normalizar_tematica(texto: object) -> str:
+    """Normaliza la temática y corrige la errata «Ordenanamiento»."""
+    return normalizar(texto).replace("ordenanamiento", "ordenamiento")
 
 
 def normalizar_siglas(texto: object) -> str:
@@ -218,6 +287,20 @@ def mapear_estado_hito(texto: object) -> tuple[int, str | None]:
         ESTADO_HITO_POR_DEFECTO,
         f"estado de hito sin equivalencia ({texto!r}); se usa Registrado (1)",
     )
+
+
+def mapear_nivel_riesgo_columna(texto: object) -> tuple[int | None, str | None]:
+    """A2: valor de la columna de riesgo -> id de `core.cat_niveles_riesgo`.
+
+    Urgente/Alto -> 3; Moderado/Medio -> 2; Bajo -> 1. Cualquier otro valor
+    (p. ej. «Archivado») devuelve `(None, motivo)` y no se estima.
+    """
+    n = normalizar(texto)
+    if not n:
+        return None, None
+    if n in NIVEL_RIESGO_COLUMNA:
+        return NIVEL_RIESGO_COLUMNA[n], None
+    return None, f"nivel de riesgo sin equivalencia en el catálogo: {texto!r}"
 
 
 # ---------------------------------------------------------------------------
@@ -412,9 +495,9 @@ class CasoBD:
     punto_focal_usuario_id: str | None
     nivel_riesgo_inicial_id: int | None = None
     estado_actualizacion: str | None = None
-    tematica_equipo: str | None = None
     link_analisis_caso: str | None = None
     resumen_ejecutivo: str | None = None
+    descripcion_riesgo: str | None = None
 
 
 @dataclass
@@ -424,6 +507,12 @@ class CompromisoBD:
     caso_id: str
     accion_compromiso: str
     normalizado: str
+    estado_id: int | None = None
+    demanda_id: str | None = None
+    tematica_id: int | None = None
+    punto_focal_usuario_id: str | None = None
+    punto_focal_texto: str | None = None
+    origen_dato: str | None = None
 
 
 @dataclass
@@ -433,6 +522,12 @@ class HitoBD:
     codigo_hito: str
     descripcion_hito: str
     normalizado: str
+    estado_id: int | None = None
+    fecha_vencimiento: dt.date | None = None
+    fecha_real: dt.date | None = None
+    responsable_usuario_id: str | None = None
+    responsable_texto: str | None = None
+    origen_dato: str | None = None
 
 
 @dataclass
@@ -479,6 +574,8 @@ class Contexto:
     migracion_41: bool
     migracion_42: bool
     mapa_origen: str = "bd"
+    estados_compromiso: dict[int, str] = field(default_factory=dict)
+    estados_hito: dict[int, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -572,6 +669,7 @@ class Plan:
     fatal: list[str] = field(default_factory=list)
     resumen_nudos: dict[str, Any] = field(default_factory=dict)
     meta: dict[str, Any] = field(default_factory=dict)
+    informe_casos: dict[str, Any] = field(default_factory=dict)
 
     def seccion(self, nombre: str) -> SeccionPlan:
         if nombre not in self.secciones:
@@ -663,6 +761,8 @@ def cargar_contexto(conn: Any, *, exigir_mapa: bool = False) -> Contexto:
         "usuarios",
         "cat_unidades_organicas",
         "cat_tematicas",
+        "cat_estados_compromiso",
+        "cat_estados_hito",
     }
     existentes = {t for t in tablas if _tabla_existe(cur, t)}
 
@@ -717,9 +817,9 @@ def cargar_contexto(conn: Any, *, exigir_mapa: bool = False) -> Contexto:
     extra_casos = [
         "nivel_riesgo_inicial_id",
         "estado_actualizacion",
-        "tematica_equipo",
         "link_analisis_caso",
         "resumen_ejecutivo",
+        "descripcion_riesgo",
     ]
     sel = [c for c in base_casos + extra_casos if c in columnas["casos"]]
     cur.execute(f"select {', '.join(sel)} from core.casos")
@@ -743,9 +843,9 @@ def cargar_contexto(conn: Any, *, exigir_mapa: bool = False) -> Contexto:
             ),
             nivel_riesgo_inicial_id=r.get("nivel_riesgo_inicial_id"),
             estado_actualizacion=r.get("estado_actualizacion"),
-            tematica_equipo=r.get("tematica_equipo"),
             link_analisis_caso=r.get("link_analisis_caso"),
             resumen_ejecutivo=r.get("resumen_ejecutivo"),
+            descripcion_riesgo=r.get("descripcion_riesgo"),
         )
         casos[c.id] = c
         casos_por_codigo[c.codigo_caso] = c
@@ -760,7 +860,18 @@ def cargar_contexto(conn: Any, *, exigir_mapa: bool = False) -> Contexto:
     unidades = [dict(r) for r in cur.fetchall()]
 
     cur.execute("select id, nombre from core.cat_tematicas order by id")
-    tematicas_norm = {normalizar(r["nombre"]): int(r["id"]) for r in cur.fetchall()}
+    tematicas_norm = {
+        normalizar_tematica(r["nombre"]): int(r["id"]) for r in cur.fetchall()
+    }
+
+    estados_compromiso: dict[int, str] = {}
+    if "cat_estados_compromiso" in existentes:
+        cur.execute("select id, codigo from core.cat_estados_compromiso")
+        estados_compromiso = {int(r["id"]): r["codigo"] for r in cur.fetchall()}
+    estados_hito: dict[int, str] = {}
+    if "cat_estados_hito" in existentes:
+        cur.execute("select id, codigo from core.cat_estados_hito")
+        estados_hito = {int(r["id"]): r["codigo"] for r in cur.fetchall()}
 
     # Distritos con región y provincia
     cur.execute(
@@ -799,7 +910,9 @@ def cargar_contexto(conn: Any, *, exigir_mapa: bool = False) -> Contexto:
     compromisos: dict[str, dict[str, CompromisoBD]] = defaultdict(dict)
     if "compromisos" in existentes:
         cur.execute(
-            """select id::text, codigo_compromiso, caso_id::text, accion_compromiso
+            """select id::text, codigo_compromiso, caso_id::text, accion_compromiso,
+                      estado_id, demanda_id::text, tematica_id,
+                      punto_focal_usuario_id::text, punto_focal_texto, origen_dato
                from core.compromisos
                where anulado_en is null"""
         )
@@ -810,13 +923,21 @@ def cargar_contexto(conn: Any, *, exigir_mapa: bool = False) -> Contexto:
                 caso_id=r["caso_id"],
                 accion_compromiso=r["accion_compromiso"] or "",
                 normalizado=normalizar(r["accion_compromiso"]),
+                estado_id=r.get("estado_id"),
+                demanda_id=r.get("demanda_id"),
+                tematica_id=r.get("tematica_id"),
+                punto_focal_usuario_id=r.get("punto_focal_usuario_id"),
+                punto_focal_texto=r.get("punto_focal_texto"),
+                origen_dato=r.get("origen_dato"),
             )
             compromisos[c.caso_id][c.normalizado] = c
 
     hitos: dict[str, dict[str, HitoBD]] = defaultdict(dict)
     if "hitos_compromiso" in existentes:
         cur.execute(
-            """select id::text, compromiso_id::text, codigo_hito, descripcion_hito
+            """select id::text, compromiso_id::text, codigo_hito, descripcion_hito,
+                      estado_id, fecha_vencimiento, fecha_real,
+                      responsable_usuario_id::text, responsable_texto, origen_dato
                from core.hitos_compromiso
                where anulado_en is null and compromiso_id is not null"""
         )
@@ -827,6 +948,12 @@ def cargar_contexto(conn: Any, *, exigir_mapa: bool = False) -> Contexto:
                 codigo_hito=r["codigo_hito"],
                 descripcion_hito=r["descripcion_hito"] or "",
                 normalizado=normalizar(r["descripcion_hito"]),
+                estado_id=r.get("estado_id"),
+                fecha_vencimiento=r.get("fecha_vencimiento"),
+                fecha_real=r.get("fecha_real"),
+                responsable_usuario_id=r.get("responsable_usuario_id"),
+                responsable_texto=r.get("responsable_texto"),
+                origen_dato=r.get("origen_dato"),
             )
             hitos[h.compromiso_id][h.normalizado] = h
 
@@ -876,12 +1003,10 @@ def cargar_contexto(conn: Any, *, exigir_mapa: bool = False) -> Contexto:
         and {
             "estado_actualizacion",
             "nivel_riesgo_inicial_id",
-            "tematica_equipo",
             "link_analisis_caso",
         }
         <= columnas["casos"]
-        and {"punto_focal_usuario_id", "punto_focal_texto", "tematica_equipo"}
-        <= columnas["compromisos"]
+        and {"punto_focal_usuario_id", "punto_focal_texto"} <= columnas["compromisos"]
         and {
             "responsable_usuario_id",
             "responsable_texto",
@@ -922,6 +1047,8 @@ def cargar_contexto(conn: Any, *, exigir_mapa: bool = False) -> Contexto:
         nudos_disponible=nudos_disponible,
         migracion_41=migracion_41,
         migracion_42=migracion_42,
+        estados_compromiso=estados_compromiso,
+        estados_hito=estados_hito,
     )
 
 
@@ -949,7 +1076,45 @@ def _actualizar_caso(
         _ = etiqueta
         deseados[columna] = valor
 
-    # Estado de actualización (columna H del Excel: no es una fecha)
+    # A1: sectorista (columna C) -> casos.punto_focal_usuario_id. Si el nombre
+    # no resuelve de forma inequívoca se deja NULL y se declara.
+    sectorista = limpiar(caso_json.get("sectorista_raw"))
+    if sectorista:
+        usuario_id, sin_resolver = resolver_usuario(sectorista, ctx.usuarios)
+        if usuario_id:
+            poner("punto_focal_usuario_id", usuario_id, "punto_focal_usuario_id")
+        else:
+            adv.add(
+                "sectorista_sin_usuario",
+                "Sectorista sin usuario en core.usuarios: no se asigna (queda NULL "
+                f"si estaba vacío). texto={sin_resolver!r}",
+                caso_json.get("fila_inicio"),
+            )
+    else:
+        adv.add(
+            "sectorista_vacio",
+            "Sectorista vacío en la hoja principal: no se toca el punto focal.",
+            caso_json.get("fila_inicio"),
+        )
+
+    # A2: nivel de riesgo (columna D antigua / H nueva) -> casos.nivel_riesgo_id.
+    riesgo_col = caso_json.get("nivel_riesgo") or {}
+    nivel_riesgo, error_riesgo = mapear_nivel_riesgo_columna(riesgo_col.get("raw"))
+    if nivel_riesgo is not None:
+        poner("nivel_riesgo_id", nivel_riesgo, "nivel_riesgo_id")
+    elif error_riesgo:
+        adv.add(
+            "nivel_riesgo_sin_equivalencia",
+            error_riesgo,
+            caso_json.get("fila_inicio"),
+        )
+
+    # A3: descripción del riesgo (columna I antigua / G nueva).
+    descripcion_riesgo = limpiar(caso_json.get("descripcion_riesgo"))
+    if descripcion_riesgo:
+        poner("descripcion_riesgo", descripcion_riesgo, "descripcion_riesgo")
+
+    # Estado de actualización (estado/timestamp del Excel: no es una fecha)
     estado = limpiar(caso_json.get("timestamp_estado"))
     if estado in ESTADOS_ACTUALIZACION:
         poner("estado_actualizacion", estado, "estado_actualizacion")
@@ -962,18 +1127,18 @@ def _actualizar_caso(
     else:
         adv.add(
             "estado_actualizacion_vacio",
-            "casos.estado_actualizacion: timestamp vacío, no se toca.",
+            "casos.estado_actualizacion: estado/timestamp vacío, no se toca.",
             caso_json.get("fila_inicio"),
         )
 
-    # Riesgo inicial
+    # Riesgo inicial (hoja «Reporte de avance»)
     nivel, error = mapear_nivel_riesgo(ra.get("riesgo_inicial_raw"))
     if nivel is not None:
         poner("nivel_riesgo_inicial_id", nivel, "nivel_riesgo_inicial_id")
     elif error:
         adv.add("riesgo_inicial_sin_equivalencia", error, caso_json.get("fila_inicio"))
 
-    # Riesgo actual: sólo con --actualizar-riesgo
+    # Riesgo actual: sólo con --actualizar-riesgo y tiene precedencia sobre A2.
     if opciones.actualizar_riesgo:
         nivel_actual, error_actual = mapear_nivel_riesgo(ra.get("riesgo_actual_raw"))
         if nivel_actual is not None:
@@ -996,13 +1161,6 @@ def _actualizar_caso(
     if url:
         poner("link_analisis_caso", truncar(url, MAX_LINK), "link_analisis_caso")
 
-    # Temática del equipo (texto libre)
-    tematica = limpiar(ra.get("tematica_raw"))
-    if tematica:
-        poner(
-            "tematica_equipo", truncar(tematica, MAX_TEMATICA_EQUIPO), "tematica_equipo"
-        )
-
     # Resumen ejecutivo: sólo si no es error de Excel
     resumen = caso_json_resumen(ra)
     if not es_error_excel(resumen):
@@ -1018,7 +1176,8 @@ def _actualizar_caso(
         "estado_actualizacion": caso_bd.estado_actualizacion,
         "nivel_riesgo_inicial_id": caso_bd.nivel_riesgo_inicial_id,
         "nivel_riesgo_id": caso_bd.nivel_riesgo_id,
-        "tematica_equipo": caso_bd.tematica_equipo,
+        "punto_focal_usuario_id": caso_bd.punto_focal_usuario_id,
+        "descripcion_riesgo": caso_bd.descripcion_riesgo,
         "link_analisis_caso": caso_bd.link_analisis_caso,
         "resumen_ejecutivo": caso_bd.resumen_ejecutivo,
     }
@@ -1152,7 +1311,7 @@ def _resolver_tematica(
     raw = limpiar(tematica.get("raw"))
     if not raw:
         return None, None
-    return ctx.tematicas_norm.get(normalizar(raw)), raw
+    return ctx.tematicas_norm.get(normalizar_tematica(raw)), raw
 
 
 def _plan_demandas(
@@ -1207,8 +1366,15 @@ def _plan_demandas(
             if tematica_raw and tematica_id is None:
                 seccion.advertencias.add(
                     "demanda_tematica_sin_equivalencia",
-                    "Temática de demanda sin coincidencia exacta en cat_tematicas: "
+                    "Temática de demanda sin coincidencia en cat_tematicas: "
                     f"se deja NULL (texto: {tematica_raw!r}).",
+                    fila,
+                )
+            elif tematica_raw and "ordenanamiento" in normalizar(tematica_raw):
+                seccion.advertencias.add(
+                    "demanda_tematica_errata_corregida",
+                    "Errata «Ordenanamiento» corregida a «Ordenamiento y acceso "
+                    "territorial» antes de buscar en cat_tematicas.",
                     fila,
                 )
 
@@ -1219,6 +1385,7 @@ def _plan_demandas(
                     clave=descripcion[:80],
                     fila=fila,
                     ref=caso_id,
+                    detalle={"caso_id": caso_id},
                     datos={
                         "caso_id": caso_id,
                         "descripcion_demanda": descripcion,
@@ -1275,6 +1442,64 @@ def _fecha_inicio_compromiso(
     return None, "sin_fecha_inicio"
 
 
+def _clave_demanda(caso_id: str, fila: Any) -> str:
+    """Clave de la demanda planificada: caso + fila (la demanda ocupa una fila)."""
+    return f"{caso_id}|f{fila}"
+
+
+def _enlace_demanda_plan(plan: Plan, caso_id: str, fila: Any) -> tuple[str, str] | None:
+    """A5: demanda de la misma fila que la acción.
+
+    Devuelve `("id", existente_id)` si la demanda ya existe o
+    `("ref", clave)` si se inserta en esta corrida. `None` => «Sin demanda».
+    """
+    for item in plan.seccion("demandas").items:
+        if item.fila != fila:
+            continue
+        if (item.detalle or {}).get("caso_id") != caso_id:
+            continue
+        if item.accion == "omit" and item.existente_id:
+            return "id", item.existente_id
+        if item.accion == "insert":
+            return "ref", _clave_demanda(caso_id, fila)
+    return None
+
+
+def _cambios_compromiso(
+    previo: CompromisoBD,
+    enlace: tuple[str, str] | None,
+    tematica_id: int | None,
+    focal_id: str | None,
+    focal_texto: str | None,
+) -> dict[str, Any]:
+    """A5/B1/B5: cambios deseados sobre un compromiso ya existente."""
+    cambios: dict[str, Any] = {}
+    if enlace is not None:
+        modo, valor = enlace
+        if modo == "id" and previo.demanda_id != valor:
+            cambios["demanda_id"] = valor
+        elif modo == "ref":
+            cambios["demanda_ref"] = valor
+    if tematica_id is not None and previo.tematica_id != tematica_id:
+        cambios["tematica_id"] = tematica_id
+    if focal_id:
+        if (
+            previo.punto_focal_usuario_id != focal_id
+            or previo.punto_focal_texto is not None
+        ):
+            cambios["punto_focal_usuario_id"] = focal_id
+            cambios["punto_focal_texto"] = None
+    elif focal_texto:
+        texto = truncar(focal_texto, MAX_TEXTO_PUNTO_FOCAL)
+        if (
+            previo.punto_focal_usuario_id is not None
+            or previo.punto_focal_texto != texto
+        ):
+            cambios["punto_focal_usuario_id"] = None
+            cambios["punto_focal_texto"] = texto
+    return cambios
+
+
 def _plan_compromisos(
     insumos: Insumos,
     ctx: Contexto,
@@ -1297,15 +1522,43 @@ def _plan_compromisos(
         contador = _siguiente_numero(
             (c.codigo_compromiso for c in existentes.values()), r"_COMP(\d+)$"
         )
-        tematica = limpiar(
-            (res.caso_json.get("reporte_avance") or {}).get("tematica_raw")
-        )
+        demandas_json = {
+            d.get("fila"): d
+            for d in (res.caso_json.get("demandas") or [])
+            if d.get("fila") is not None
+        }
         secuencia: list[RefCompromiso] = []
 
         for indice, accion in enumerate(res.caso_json.get("acciones") or []):
             fila = accion.get("fila")
             n_hitos = len(accion.get("hitos") or [])
             texto = limpiar(accion.get("accion"))
+
+            # A5: la demanda y la acción comparten fila.
+            enlace = _enlace_demanda_plan(plan, caso.id, fila)
+            sin_demanda = enlace is None
+            demanda_json = demandas_json.get(fila)
+            tematica_id = None
+            if demanda_json is not None:
+                tematica_id, _ = _resolver_tematica(demanda_json.get("tematica"), ctx)
+            if sin_demanda and texto:
+                seccion.advertencias.add(
+                    "compromiso_sin_demanda",
+                    "Acciones cuya fila no trae demanda: compromisos.demanda_id "
+                    "queda NULL («Sin demanda»).",
+                    fila,
+                )
+
+            # B1: Punto Focal Monitoreo (usuario o texto, excluyentes).
+            focal_id, focal_texto = resolver_usuario(
+                accion.get("punto_focal_raw"), ctx.usuarios
+            )
+            if focal_texto:
+                seccion.advertencias.add(
+                    "usuario_no_resuelto",
+                    "Nombres de usuario sin coincidencia en core.usuarios: se guarda el texto.",
+                    fila,
+                )
 
             if not texto:
                 ref = RefCompromiso(
@@ -1324,7 +1577,7 @@ def _plan_compromisos(
                         clave=f"accion_fila_{fila}",
                         fila=fila,
                         motivo="sin_accion",
-                        detalle={"caso_id": caso.id},
+                        detalle={"caso_id": caso.id, "sin_demanda": sin_demanda},
                     )
                 )
                 continue
@@ -1341,17 +1594,34 @@ def _plan_compromisos(
                 plan.refs_accion[(bloque, indice)] = ref
                 plan.ids_compromiso[previo.codigo_compromiso] = previo.id
                 secuencia.extend([ref] * max(1, n_hitos))
-                seccion.add(
-                    ItemPlan(
-                        entidad="compromiso",
-                        accion="omit",
-                        clave=previo.codigo_compromiso,
-                        fila=fila,
-                        motivo="ya_existe",
-                        detalle={"caso_id": caso.id},
-                        existente_id=previo.id,
-                    )
+                detalle = {"caso_id": caso.id, "sin_demanda": sin_demanda}
+                cambios = _cambios_compromiso(
+                    previo, enlace, tematica_id, focal_id, focal_texto
                 )
+                if cambios:
+                    seccion.add(
+                        ItemPlan(
+                            entidad="compromiso",
+                            accion="update",
+                            clave=previo.codigo_compromiso,
+                            fila=fila,
+                            detalle=detalle,
+                            datos=cambios,
+                            existente_id=previo.id,
+                        )
+                    )
+                else:
+                    seccion.add(
+                        ItemPlan(
+                            entidad="compromiso",
+                            accion="omit",
+                            clave=previo.codigo_compromiso,
+                            fila=fila,
+                            motivo="ya_existe",
+                            detalle=detalle,
+                            existente_id=previo.id,
+                        )
+                    )
                 continue
 
             fecha_inicio, motivo_fecha = _fecha_inicio_compromiso(res.caso_json, caso)
@@ -1375,6 +1645,7 @@ def _plan_compromisos(
                         motivo=motivo_fecha or "sin_fecha_inicio",
                         detalle={
                             "caso_id": caso.id,
+                            "sin_demanda": sin_demanda,
                             "detalle": "Sin fecha_inicio en el caso ni fecha_planificada ISO "
                             "en sus hitos.",
                         },
@@ -1405,16 +1676,6 @@ def _plan_compromisos(
                         fila,
                     )
 
-            focal_id, focal_texto = resolver_usuario(
-                accion.get("punto_focal_raw"), ctx.usuarios
-            )
-            if focal_texto:
-                seccion.advertencias.add(
-                    "usuario_no_resuelto",
-                    "Nombres de usuario sin coincidencia en core.usuarios: se guarda el texto.",
-                    fila,
-                )
-
             ref = RefCompromiso(
                 codigo=codigo,
                 caso_id=caso.id,
@@ -1424,6 +1685,24 @@ def _plan_compromisos(
             plan.refs_accion[(bloque, indice)] = ref
             plan.ids_compromiso[codigo] = ""
             secuencia.extend([ref] * max(1, n_hitos))
+            datos: dict[str, Any] = {
+                "codigo_compromiso": codigo,
+                "caso_id": caso.id,
+                "unidad_responsable_id": unidad_id,
+                "fecha_inicio": fecha_inicio,
+                "accion_compromiso": texto,
+                "tipo_compromiso": "Actividad",
+                "estado_id": 1,
+                "demanda_id": enlace[1]
+                if enlace is not None and enlace[0] == "id"
+                else None,
+                "tematica_id": tematica_id,
+                "punto_focal_usuario_id": focal_id,
+                "punto_focal_texto": truncar(focal_texto, MAX_TEXTO_PUNTO_FOCAL),
+                "origen_dato": "importacion",
+            }
+            if enlace is not None and enlace[0] == "ref":
+                datos["demanda_ref"] = enlace[1]
             seccion.add(
                 ItemPlan(
                     entidad="compromiso",
@@ -1431,22 +1710,8 @@ def _plan_compromisos(
                     clave=codigo,
                     fila=fila,
                     ref=caso.id,
-                    datos={
-                        "codigo_compromiso": codigo,
-                        "caso_id": caso.id,
-                        "unidad_responsable_id": unidad_id,
-                        "fecha_inicio": fecha_inicio,
-                        "accion_compromiso": texto,
-                        "tipo_compromiso": "Actividad",
-                        "estado_id": 1,
-                        "demanda_id": None,
-                        "punto_focal_usuario_id": focal_id,
-                        "punto_focal_texto": truncar(
-                            focal_texto, MAX_TEXTO_PUNTO_FOCAL
-                        ),
-                        "tematica_equipo": truncar(tematica, MAX_TEMATICA_EQUIPO),
-                        "origen_dato": "importacion",
-                    },
+                    detalle={"caso_id": caso.id, "sin_demanda": sin_demanda},
+                    datos=datos,
                 )
             )
 
@@ -1456,6 +1721,13 @@ def _plan_compromisos(
 # ---------------------------------------------------------------------------
 # Construcción del plan: hitos
 # ---------------------------------------------------------------------------
+def _cambios_hito(previo: HitoBD, fecha_real: dt.date | None) -> dict[str, Any]:
+    """B2: completa `fecha_real` en un hito ya existente, sin estimar nada."""
+    if fecha_real is not None and previo.fecha_real != fecha_real:
+        return {"fecha_real": fecha_real}
+    return {}
+
+
 def _plan_hitos(
     insumos: Insumos,
     ctx: Contexto,
@@ -1525,20 +1797,6 @@ def _plan_hitos(
                     continue
 
                 normalizado = normalizar(descripcion)
-                previo = existentes.get(normalizado)
-                if previo is not None:
-                    seccion.add(
-                        ItemPlan(
-                            entidad="hito",
-                            accion="omit",
-                            clave=descripcion[:80],
-                            fila=fila,
-                            motivo="ya_existe",
-                            detalle={"caso_id": caso.id, "compromiso": ref.codigo},
-                            existente_id=previo.id,
-                        )
-                    )
-                    continue
 
                 estado_raw = (hito.get("estado") or {}).get("raw")
                 estado_id, aviso_estado = mapear_estado_hito(estado_raw)
@@ -1600,6 +1858,42 @@ def _plan_hitos(
                         "guarda el texto.",
                         fila,
                     )
+
+                previo = existentes.get(normalizado)
+                if previo is not None:
+                    detalle = {"caso_id": caso.id, "compromiso": ref.codigo}
+                    cambios = _cambios_hito(previo, fecha_real)
+                    if cambios:
+                        seccion.add(
+                            ItemPlan(
+                                entidad="hito",
+                                accion="update",
+                                clave=previo.codigo_hito,
+                                fila=fila,
+                                detalle=detalle,
+                                datos=cambios,
+                                existente_id=previo.id,
+                            )
+                        )
+                        seccion.advertencias.add(
+                            "hito_fecha_real_actualizada",
+                            "Hitos existentes con Fecha Real válida en el Excel: se "
+                            "completa fecha_real (B2).",
+                            fila,
+                        )
+                    else:
+                        seccion.add(
+                            ItemPlan(
+                                entidad="hito",
+                                accion="omit",
+                                clave=previo.codigo_hito,
+                                fila=fila,
+                                motivo="ya_existe",
+                                detalle=detalle,
+                                existente_id=previo.id,
+                            )
+                        )
+                    continue
 
                 codigo_hito = f"{ref.codigo}_H{contador:03d}"
                 contador += 1
@@ -2330,7 +2624,6 @@ REQUERIDOS_MIGRACIONES: tuple[tuple[str, tuple[str, ...]], ...] = (
         (
             "estado_actualizacion",
             "nivel_riesgo_inicial_id",
-            "tematica_equipo",
             "link_analisis_caso",
         ),
     ),
@@ -2340,7 +2633,6 @@ REQUERIDOS_MIGRACIONES: tuple[tuple[str, tuple[str, ...]], ...] = (
             "demanda_id",
             "punto_focal_usuario_id",
             "punto_focal_texto",
-            "tematica_equipo",
         ),
     ),
     (
@@ -2444,6 +2736,7 @@ def construir_plan(insumos: Insumos, ctx: Contexto, opciones: Opciones) -> Plan:
     _verificar_bloqueantes(ctx, plan)
     _decisiones(plan, insumos, ctx, opciones)
     _datos_sin_destino(plan, insumos, ctx)
+    plan.informe_casos = _informe_por_caso(insumos, ctx, plan, resoluciones)
 
     plan.meta = {
         "modo": opciones.modo,
@@ -2464,6 +2757,317 @@ def construir_plan(insumos: Insumos, ctx: Contexto, opciones: Opciones) -> Plan:
 # ---------------------------------------------------------------------------
 # Decisiones pendientes y datos sin destino
 # ---------------------------------------------------------------------------
+def _tokens_similitud(texto: Any) -> set[str]:
+    return {
+        t
+        for t in normalizar(texto).split()
+        if len(t) > 1 and t not in STOPWORDS_SIMILITUD
+    }
+
+
+def _comparar_textos(a: Any, b: Any) -> tuple[float, int, float]:
+    """Similitud entre dos descripciones: media de Jaccard y contención."""
+    A = _tokens_similitud(a)
+    B = _tokens_similitud(b)
+    if len(A) < 2 or len(B) < 2:
+        return 0.0, 0, 0.0
+    inter = len(A & B)
+    if inter == 0:
+        return 0.0, 0, 0.0
+    jaccard = inter / len(A | B)
+    contencion = inter / min(len(A), len(B))
+    return round(0.5 * jaccard + 0.5 * contencion, 3), inter, round(contencion, 3)
+
+
+def _es_duplicado(score: float, inter: int, contencion: float) -> bool:
+    return score >= UMBRAL_DUPLICADO or (contencion >= 0.90 and inter >= 3)
+
+
+def _mejor_match(
+    texto: Any, candidatos: Sequence[Any]
+) -> tuple[Any | None, float, int, float]:
+    mejor = None
+    mejor_clave = (0.0, 0)
+    mejor_score, mejor_inter, mejor_cont = 0.0, 0, 0.0
+    for candidato in candidatos:
+        descripcion = getattr(candidato, "accion_compromiso", None) or getattr(
+            candidato, "descripcion_hito", ""
+        )
+        score, inter, contencion = _comparar_textos(texto, descripcion)
+        clave = (score, inter)
+        if clave > mejor_clave:
+            mejor_clave = clave
+            mejor = candidato
+            mejor_score, mejor_inter, mejor_cont = score, inter, contencion
+    return mejor, mejor_score, mejor_inter, mejor_cont
+
+
+def _cuenta_plan(items: Iterable[ItemPlan], caso_id: str) -> dict[str, int]:
+    c = Counter(
+        item.accion for item in items if (item.detalle or {}).get("caso_id") == caso_id
+    )
+    return {
+        "insert": c.get("insert", 0),
+        "update": c.get("update", 0),
+        "omit": c.get("omit", 0),
+        "reject": c.get("reject", 0),
+    }
+
+
+def _informe_caso(res: ResolucionCaso, ctx: Contexto, plan: Plan) -> dict[str, Any]:
+    """B6: una fila por caso con Excel vs AVISA y duplicados probables."""
+    base = {
+        "bloque": res.bloque,
+        "caso_codigo": res.caso_json.get("codigo_caso"),
+        "codigo_excel": res.caso_json.get("codigo_caso"),
+        "estado": res.estado,
+        "motivo": res.motivo,
+    }
+    caso = res.caso_bd
+    if caso is None:
+        return base
+    # El código del mapa (base) manda; el del Excel puede estar cruzado.
+    base["caso_codigo"] = caso.codigo_caso
+
+    acciones = res.caso_json.get("acciones") or []
+    hitos_excel = [h for a in acciones for h in (a.get("hitos") or [])]
+    cumplidos = [
+        h
+        for h in hitos_excel
+        if normalizar((h.get("estado") or {}).get("raw")) == "cumplido"
+    ]
+    cumplidos_con_fecha = [
+        h for h in cumplidos if (h.get("fecha_real") or {}).get("estado") == "fecha"
+    ]
+
+    compromisos = list(ctx.compromisos.get(caso.id, {}).values())
+    historicos = [
+        c for c in compromisos if (c.origen_dato or "").upper() == "AVISA_HISTORICO"
+    ]
+    hitos_avisa = {c.id: list(ctx.hitos.get(c.id, {}).values()) for c in compromisos}
+    hitos_historico = [h for c in historicos for h in hitos_avisa.get(c.id, [])]
+
+    duplicados: list[dict[str, Any]] = []
+    # Acciones que se insertarían y se parecen a un compromiso AVISA_HISTORICO.
+    for indice, accion in enumerate(acciones):
+        texto = limpiar(accion.get("accion"))
+        ref = plan.refs_accion.get((res.bloque, indice))
+        if not texto or ref is None or ref.estado != "planificado":
+            continue
+        mejor, score, inter, contencion = _mejor_match(texto, historicos)
+        if mejor is not None and _es_duplicado(score, inter, contencion):
+            duplicados.append(
+                {
+                    "tipo": "accion",
+                    "excel_fila": accion.get("fila"),
+                    "excel_texto": texto[:300],
+                    "avisa_codigo": mejor.codigo_compromiso,
+                    "avisa_texto": mejor.accion_compromiso[:300],
+                    "similitud": score,
+                    "exacto": normalizar(texto) == mejor.normalizado,
+                    "origen_dato": mejor.origen_dato,
+                }
+            )
+
+    # Hitos que se insertarían y se parecen a un hito AVISA_HISTORICO.
+    for indice, accion in enumerate(acciones):
+        ref = plan.refs_accion.get((res.bloque, indice))
+        if ref is None or ref.estado == "rechazado":
+            continue
+        existentes_padre = (
+            ctx.hitos.get(ref.existente_id, {}) if ref.existente_id else {}
+        )
+        for hito in accion.get("hitos") or []:
+            descripcion = limpiar(hito.get("descripcion_hito"))
+            if not descripcion or normalizar(descripcion) in existentes_padre:
+                continue
+            mejor, score, inter, contencion = _mejor_match(descripcion, hitos_historico)
+            if mejor is None or not _es_duplicado(score, inter, contencion):
+                continue
+            dueno = next(
+                (c for c in historicos if mejor in hitos_avisa.get(c.id, [])), None
+            )
+            duplicados.append(
+                {
+                    "tipo": "hito",
+                    "excel_fila": hito.get("fila"),
+                    "excel_codigo": hito.get("codigo_hito"),
+                    "excel_texto": descripcion[:300],
+                    "avisa_codigo": dueno.codigo_compromiso if dueno else None,
+                    "avisa_texto": mejor.descripcion_hito[:300],
+                    "similitud": score,
+                    "exacto": normalizar(descripcion) == mejor.normalizado,
+                    "origen_dato": mejor.origen_dato,
+                }
+            )
+
+    base.update(
+        {
+            "caso_nombre": caso.nombre_caso,
+            "excel": {
+                "acciones": len(acciones),
+                "hitos": len(hitos_excel),
+                "hitos_cumplido": len(cumplidos),
+                "hitos_cumplido_con_fecha_real": len(cumplidos_con_fecha),
+                "demandas": len(res.caso_json.get("demandas") or []),
+            },
+            "avisa": {
+                "compromisos": len(compromisos),
+                "hitos": sum(len(v) for v in hitos_avisa.values()),
+                "compromisos_avisa_historico": len(historicos),
+                "hitos_avisa_historico": len(hitos_historico),
+                "hitos_cumplido": sum(
+                    1 for v in hitos_avisa.values() for h in v if h.estado_id == 4
+                ),
+                "hitos_con_fecha_real": sum(
+                    1
+                    for v in hitos_avisa.values()
+                    for h in v
+                    if h.fecha_real is not None
+                ),
+            },
+            "plan": {
+                "compromisos": _cuenta_plan(plan.seccion("compromisos").items, caso.id),
+                "hitos": _cuenta_plan(plan.seccion("hitos").items, caso.id),
+            },
+            "duplicados": duplicados,
+        }
+    )
+    return base
+
+
+def _testigo_caso(
+    resoluciones: dict[int, ResolucionCaso], ctx: Contexto
+) -> dict[str, Any] | None:
+    """Detalle obligatorio del caso testigo CS-PA-INF-2024-01_COMP001."""
+    res = next(
+        (
+            r
+            for r in resoluciones.values()
+            if r.caso_bd is not None and r.caso_bd.codigo_caso == "CS-PA-INF-2024-01"
+        ),
+        None,
+    )
+    if res is None or res.caso_bd is None:
+        return None
+    caso = res.caso_bd
+    compromisos = list(ctx.compromisos.get(caso.id, {}).values())
+    comp001 = next(
+        (c for c in compromisos if c.codigo_compromiso.endswith("_COMP001")), None
+    )
+    hitos001 = list(ctx.hitos.get(comp001.id, {}).values()) if comp001 else []
+    hitos_excel = [
+        h for a in (res.caso_json.get("acciones") or []) for h in (a.get("hitos") or [])
+    ]
+    con_fecha = [
+        h for h in hitos_excel if (h.get("fecha_real") or {}).get("estado") == "fecha"
+    ]
+    estado001 = (
+        ctx.estados_compromiso.get(comp001.estado_id, str(comp001.estado_id))
+        if comp001 is not None and comp001.estado_id is not None
+        else None
+    )
+    estado_nombre = estado001 or "desconocido"
+    hitos_txt = f"{len(hitos001)} hito(s) activo(s)"
+    if len(hitos001) == 0:
+        premisa = (
+            "Coincide con la premisa «sin hitos» si se cuentan sólo los hitos "
+            "activos; los anulados no se incluyen."
+        )
+    else:
+        premisa = (
+            f"La premisa «sin hitos» no coincide: hay {len(hitos001)} hito(s) "
+            "activo(s)."
+        )
+    return {
+        "caso_codigo": caso.codigo_caso,
+        "compromiso_testigo": comp001.codigo_compromiso if comp001 else None,
+        "excel": {
+            "hitos": len(hitos_excel),
+            "hitos_cumplido": sum(
+                1
+                for h in hitos_excel
+                if normalizar((h.get("estado") or {}).get("raw")) == "cumplido"
+            ),
+            "hitos_con_fecha_real": len(con_fecha),
+            "detalle_hitos": [
+                {
+                    "fila": h.get("fila"),
+                    "codigo": h.get("codigo_hito"),
+                    "descripcion": h.get("descripcion_hito"),
+                    "estado": (h.get("estado") or {}).get("raw"),
+                    "fecha_real": (h.get("fecha_real") or {}).get("iso"),
+                }
+                for h in hitos_excel
+            ],
+        },
+        "avisa": {
+            "compromiso_estado_id": comp001.estado_id if comp001 else None,
+            "compromiso_estado": estado001,
+            "hitos_comp001": len(hitos001),
+            "detalle_hitos_comp001": [
+                {
+                    "codigo": h.codigo_hito,
+                    "descripcion": h.descripcion_hito,
+                    "estado": ctx.estados_hito.get(h.estado_id, str(h.estado_id)),
+                    "fecha_real": h.fecha_real.isoformat() if h.fecha_real else None,
+                    "origen_dato": h.origen_dato,
+                }
+                for h in hitos001
+            ],
+            "compromisos_caso": [
+                {
+                    "codigo": c.codigo_compromiso,
+                    "estado": ctx.estados_compromiso.get(c.estado_id, str(c.estado_id)),
+                    "origen_dato": c.origen_dato,
+                    "hitos": len(ctx.hitos.get(c.id, {})),
+                }
+                for c in compromisos
+            ],
+        },
+        "nota_premisa": (
+            f"El Excel trae {len(hitos_excel)} hitos, "
+            f"{sum(1 for h in hitos_excel if normalizar((h.get('estado') or {}).get('raw')) == 'cumplido')} "
+            f"Cumplido y {len(con_fecha)} con fecha_real válida; los hitos sin "
+            "fecha no se estiman. En AVISA, "
+            f"{comp001.codigo_compromiso if comp001 else 'COMP001'} está en "
+            f"«{estado_nombre}» con {hitos_txt}; el caso completo tiene "
+            f"{len(compromisos)} compromisos y "
+            f"{sum(len(ctx.hitos.get(c.id, {})) for c in compromisos)} hitos activos. "
+            + premisa
+        ),
+    }
+
+
+def _informe_por_caso(
+    insumos: Insumos,
+    ctx: Contexto,
+    plan: Plan,
+    resoluciones: dict[int, ResolucionCaso],
+) -> dict[str, Any]:
+    """B6: informe comparativo por caso + duplicados AVISA_HISTORICO."""
+    casos = [_informe_caso(res, ctx, plan) for res in resoluciones.values()]
+    operables = [c for c in casos if c.get("estado") == "operable"]
+    duplicados = [
+        {**dup, "caso": c.get("caso_codigo"), "caso_nombre": c.get("caso_nombre")}
+        for c in operables
+        for dup in c.get("duplicados") or []
+    ]
+    return {
+        "casos": casos,
+        "resumen": {
+            "casos": len(casos),
+            "operables": len(operables),
+            "no_operables": len(casos) - len(operables),
+            "duplicados_probables": len(duplicados),
+            "acciones_duplicadas": sum(1 for d in duplicados if d["tipo"] == "accion"),
+            "hitos_duplicados": sum(1 for d in duplicados if d["tipo"] == "hito"),
+        },
+        "duplicados_avisa_historico": duplicados,
+        "testigo": _testigo_caso(resoluciones, ctx),
+    }
+
+
 def _decisiones(
     plan: Plan, insumos: Insumos, ctx: Contexto, opciones: Opciones
 ) -> None:
@@ -2497,6 +3101,22 @@ def _decisiones(
     demandas_rechazadas_tematica = sum(
         1 for i in plan.seccion("demandas").items if i.motivo == "sin_tematica"
     )
+
+    def _occ(seccion: str, codigo: str) -> int:
+        return next(
+            (
+                g["ocurrencias"]
+                for g in plan.seccion(seccion).advertencias.lista()
+                if g["codigo"] == codigo
+            ),
+            0,
+        )
+
+    sin_demanda = _occ("compromisos", "compromiso_sin_demanda")
+    sectorista_sin_usuario = _occ("casos", "sectorista_sin_usuario")
+    riesgo_sin_equivalencia = _occ("casos", "nivel_riesgo_sin_equivalencia")
+    fecha_real_actualizada = _occ("hitos", "hito_fecha_real_actualizada")
+    tematica_errata = _occ("demandas", "demanda_tematica_errata_corregida")
 
     decisiones.append(
         {
@@ -2613,9 +3233,11 @@ def _decisiones(
                     if demandas_rechazadas_tematica
                     else ""
                 )
-                + ". El vocabulario del equipo (Recursos y Regulación, Socio-Ambiental, "
-                "Ordenamiento...) se guarda como texto libre en los campos *_equipo; "
-                "cat_tematicas no se modifica."
+                + ". La temática se normaliza (minúsculas, sin tildes, errata "
+                "«Ordenanamiento» corregida"
+                + (f"; {tematica_errata} filas corregidas" if tematica_errata else "")
+                + ") y sólo se asigna si coincide con cat_tematicas; no se modifica el "
+                "catálogo ni se usan campos *_equipo (migration/41 prohíbe añadirlos)."
             ),
         }
     )
@@ -2632,10 +3254,65 @@ def _decisiones(
     decisiones.append(
         {
             "id": "D13",
-            "titulo": "Demandas sin vínculo a compromiso",
+            "titulo": "Acciones sin demanda en su fila",
             "detalle": (
-                "compromisos.demanda_id queda NULL: el Excel no relaciona cada acción con "
-                "una demanda concreta."
+                "compromisos.demanda_id se vincula por fila (la demanda y la acción "
+                f"comparten fila). {sin_demanda} acciones no traen demanda en su fila: "
+                "quedan NULL y se marcan «Sin demanda» en el informe."
+            ),
+        }
+    )
+    decisiones.append(
+        {
+            "id": "D17",
+            "titulo": "Nivel de riesgo desde la columna del caso (A2)",
+            "detalle": (
+                "Urgente/Alto→Alto(3), Moderado/Medio→Medio(2), Bajo→Bajo(1). "
+                f"{riesgo_sin_equivalencia} valores sin equivalencia (p. ej. «Archivado») "
+                "no se asignan (NULL si no había valor) y se declaran. No se toca "
+                "casos.prioridad_id."
+            ),
+        }
+    )
+    decisiones.append(
+        {
+            "id": "D18",
+            "titulo": "Sectorista sin usuario (A1)",
+            "detalle": (
+                f"{sectorista_sin_usuario} casos tienen sectorista sin coincidencia "
+                "inequívoca en core.usuarios: no se asigna (queda NULL si estaba vacío)."
+            ),
+        }
+    )
+    decisiones.append(
+        {
+            "id": "D19",
+            "titulo": "Descripción del riesgo (A3)",
+            "detalle": (
+                "La descripción del riesgo de la hoja principal se carga en "
+                "core.casos.descripcion_riesgo."
+            ),
+        }
+    )
+    decisiones.append(
+        {
+            "id": "D20",
+            "titulo": "Fecha real de hitos (B2)",
+            "detalle": (
+                f"{fecha_real_actualizada} hitos ya existentes reciben fecha_real cuando "
+                "el Excel trae una fecha válida. Las fechas no ISO se conservan sólo "
+                "como texto y se advierten."
+            ),
+        }
+    )
+    decisiones.append(
+        {
+            "id": "D21",
+            "titulo": "Medios de verificación y documentos (B4/B3)",
+            "detalle": (
+                "Medios de verificación y Documentos se declaran como no persistibles "
+                "(no hay tabla/columna adecuada). validacion_hito_raw no se escribe en "
+                "ninguna columna (B3 no se implementa)."
             ),
         }
     )
@@ -2703,12 +3380,16 @@ def _datos_sin_destino(plan: Plan, insumos: Insumos, ctx: Contexto) -> None:
             "ocurrencias": _contar_no_vacios(
                 a.get("medios_verificacion_raw") for a in acciones
             ),
-            "nota": "Es una instrucción ('Acción 1: Adjuntar'), no un adjunto ni una URI.",
+            "nota": "Etiqueta de producto «Medios de verificación». Es una "
+            "instrucción/etiqueta, no un adjunto ni una URI: core.medios no admite "
+            "entidad_tipo 'compromiso' ni 'hito' y hitos_compromiso.descripcion_evidencia "
+            "/ link_evidencia son por hito y esperan evidencia. Se declara (B4).",
         },
         {
             "campo": "acciones[].documentos_raw",
             "ocurrencias": _contar_no_vacios(a.get("documentos_raw") for a in acciones),
-            "nota": "Etiqueta de columna del Excel; no identifica archivos.",
+            "nota": "Etiqueta de columna del Excel; no identifica archivos y no se "
+            "crea core.documentos (B4).",
         },
         {
             "campo": "acciones[].valores_extra_en_span",
@@ -2725,11 +3406,20 @@ def _datos_sin_destino(plan: Plan, insumos: Insumos, ctx: Contexto) -> None:
             "nota": "Texto largo sin columna en core.casos.",
         },
         {
-            "campo": "casos[].descripcion_riesgo",
+            "campo": "casos[].sectorista_metadatos_raw",
             "ocurrencias": _contar_no_vacios(
-                c.get("descripcion_riesgo") for c in insumos.casos
+                c.get("sectorista_metadatos_raw") for c in insumos.casos
             ),
-            "nota": "core.casos no tiene descripcion_riesgo; sólo alertas_tempranas.",
+            "nota": "Segundo nombre de sectorista en METADATOS CASOS; A1 usa la "
+            "columna Sectorista de la hoja principal.",
+        },
+        {
+            "campo": "reporte_avance.validacion_hito_raw",
+            "ocurrencias": _contar_no_vacios(
+                r.get("validacion_hito_raw") for r in reportes
+            ),
+            "nota": "B3 no se implementa: se muestra en el informe como dato no "
+            "persistible, no se escribe en ninguna columna.",
         },
         {
             "campo": "casos[].actores_estado_raw / actores_sociedad_raw",
@@ -2739,14 +3429,6 @@ def _datos_sin_destino(plan: Plan, insumos: Insumos, ctx: Contexto) -> None:
                 for c in insumos.casos
             ),
             "nota": "Texto libre de actores; core.actores no tiene columna equivalente.",
-        },
-        {
-            "campo": "casos[].prioridad",
-            "ocurrencias": _contar_no_vacios(
-                (c.get("prioridad") or {}).get("raw") for c in insumos.casos
-            ),
-            "nota": "Columna D del Excel (Urgente/Moderado/Bajo); no se actualiza "
-            "core.casos.prioridad_id.",
         },
         {
             "campo": "casos[].nombre_oficial_metadatos",
@@ -2892,6 +3574,7 @@ def construir_informe(
         "total": total,
         "decisiones_pendientes": plan.decisiones,
         "datos_sin_destino": plan.datos_sin_destino.get("campos", []),
+        "informe_por_caso": plan.informe_casos,
         "bloqueantes_apply": plan.bloqueantes,
         "coherente": coherente,
         "codigo_salida": codigo_salida,
@@ -2934,6 +3617,107 @@ def _advertencias_globales(informe: dict[str, Any]) -> list[dict[str, Any]]:
                     if len(actual["filas"]) < 25:
                         actual["filas"].append(fila)
     return sorted(grupos.values(), key=lambda g: (-g["ocurrencias"], g["codigo"]))
+
+
+def _markdown_informe_casos(informe: dict[str, Any], lineas: list[str]) -> None:
+    """B6: tabla por caso, duplicados AVISA_HISTORICO y caso testigo."""
+    datos = informe.get("informe_por_caso") or {}
+    casos = datos.get("casos") or []
+    if not casos:
+        return
+    resumen = datos.get("resumen") or {}
+    lineas.append("## Informe por caso (Excel vs AVISA)")
+    lineas.append("")
+    lineas.append(
+        f"Casos: {resumen.get('casos', 0)} · operables: "
+        f"{resumen.get('operables', 0)} · duplicados probables: "
+        f"{resumen.get('duplicados_probables', 0)} "
+        f"(acciones {resumen.get('acciones_duplicadas', 0)}, hitos "
+        f"{resumen.get('hitos_duplicados', 0)})"
+    )
+    lineas.append("")
+    lineas.append(
+        "| caso | estado | Excel acc/hit | AVISA comp/hit | plan comp i/u/o/re | duplicados |"
+    )
+    lineas.append("| --- | --- | ---: | ---: | ---: | ---: |")
+    for caso in casos:
+        if caso.get("estado") != "operable" or not caso.get("excel"):
+            continue
+        excel = caso["excel"]
+        avisa = caso["avisa"]
+        plan = caso["plan"]["compromisos"]
+        duplicados = len(caso.get("duplicados") or [])
+        lineas.append(
+            f"| {caso.get('caso_codigo') or 'bloque ' + str(caso.get('bloque'))} "
+            f"| ok | {excel['acciones']}/{excel['hitos']} "
+            f"| {avisa['compromisos']}/{avisa['hitos']} "
+            f"| {plan['insert']}/{plan['update']}/{plan['omit']}/{plan['reject']} "
+            f"| {duplicados} |"
+        )
+    lineas.append("")
+
+    no_operables = [c for c in casos if c.get("estado") != "operable"]
+    if no_operables:
+        lineas.append("Casos no operables (no se cruzan con AVISA):")
+        lineas.append("")
+        for caso in no_operables:
+            lineas.append(
+                f"- bloque {caso.get('bloque')} · "
+                f"{caso.get('caso_codigo') or '(sin código)'} · "
+                f"{caso.get('estado')} ({caso.get('motivo') or 'sin motivo'})"
+            )
+        lineas.append("")
+
+    duplicados = datos.get("duplicados_avisa_historico") or []
+    lineas.append("## Duplicados AVISA_HISTORICO ↔ importación")
+    lineas.append("")
+    if not duplicados:
+        lineas.append("No se detectaron duplicados probables.")
+    else:
+        for dup in duplicados[:60]:
+            exacto = " (texto exacto)" if dup.get("exacto") else ""
+            lineas.append(
+                f"- **{dup['tipo']}** · {dup.get('caso')} · fila "
+                f"{dup.get('excel_fila')} · similitud {dup.get('similitud')}"
+                f"{exacto} → {dup.get('avisa_codigo')}: "
+                f"`{str(dup.get('excel_texto'))[:90]}` ↔ "
+                f"`{str(dup.get('avisa_texto'))[:90]}`"
+            )
+        if len(duplicados) > 60:
+            lineas.append(f"- … y {len(duplicados) - 60} más (ver JSON).")
+    lineas.append("")
+
+    testigo = datos.get("testigo")
+    if testigo:
+        lineas.append(
+            f"### Caso testigo {testigo.get('compromiso_testigo') or '(no hallado)'}"
+        )
+        lineas.append("")
+        excel = testigo.get("excel") or {}
+        avisa = testigo.get("avisa") or {}
+        lineas.append(
+            f"- Excel: {excel.get('hitos')} hitos, {excel.get('hitos_cumplido')} "
+            f"Cumplido, {excel.get('hitos_con_fecha_real')} con fecha_real válida."
+        )
+        lineas.append(
+            f"- AVISA: compromiso en «{avisa.get('compromiso_estado')}» con "
+            f"{avisa.get('hitos_comp001')} hito(s) activo(s); el caso tiene "
+            f"{len(avisa.get('compromisos_caso') or [])} compromisos."
+        )
+        for hito in excel.get("detalle_hitos") or []:
+            lineas.append(
+                f"  - Excel {hito.get('codigo')} fila {hito.get('fila')}: "
+                f"{hito.get('estado')} · fecha_real={hito.get('fecha_real')} · "
+                f"{str(hito.get('descripcion'))[:70]}"
+            )
+        for hito in avisa.get("detalle_hitos_comp001") or []:
+            lineas.append(
+                f"  - AVISA {hito.get('codigo')}: {hito.get('estado')} · "
+                f"fecha_real={hito.get('fecha_real')} · "
+                f"{str(hito.get('descripcion'))[:70]}"
+            )
+        lineas.append(f"- {testigo.get('nota_premisa')}")
+        lineas.append("")
 
 
 def imprimir_markdown(
@@ -3016,6 +3800,8 @@ def imprimir_markdown(
     for dato in informe["datos_sin_destino"]:
         lineas.append(f"- `{dato['campo']}` ({dato['ocurrencias']}): {dato['nota']}")
     lineas.append("")
+
+    _markdown_informe_casos(informe, lineas)
 
     if informe["bloqueantes_apply"]:
         lineas.append("## Bloqueantes para --apply")
@@ -3105,6 +3891,7 @@ def ejecutar_plan(
     ids_compromisos: dict[str, str] = {
         codigo: valor for codigo, valor in plan.ids_compromiso.items() if valor
     }
+    ids_demanda: dict[str, str] = {}
     contadores = Counter()
     cur = conn.cursor()
     try:
@@ -3113,13 +3900,20 @@ def ejecutar_plan(
             for item in plan.seccion(nombre).items:
                 if item.accion == "update":
                     if item.existente_id:
-                        _actualizar(cur, ctx, tabla, item.existente_id, item.datos)
+                        datos = dict(item.datos)
+                        demanda_ref = datos.pop("demanda_ref", None)
+                        if demanda_ref:
+                            datos["demanda_id"] = ids_demanda.get(demanda_ref)
+                        _actualizar(cur, ctx, tabla, item.existente_id, datos)
                         contadores[f"{nombre}_actualizados"] += 1
                     continue
                 if item.accion != "insert":
                     continue
 
                 datos = dict(item.datos)
+                demanda_ref = datos.pop("demanda_ref", None)
+                if demanda_ref:
+                    datos["demanda_id"] = ids_demanda.get(demanda_ref)
                 ref = datos.pop("compromiso_ref", None)
                 if nombre in ("hitos", "nudos") and datos.get("compromiso_id") is None:
                     if ref:
@@ -3131,6 +3925,10 @@ def ejecutar_plan(
                     codigo = datos.get("codigo_compromiso")
                     if codigo and nuevo_id:
                         ids_compromisos[codigo] = nuevo_id
+                elif nombre == "demandas" and nuevo_id:
+                    ids_demanda[_clave_demanda(datos.get("caso_id"), item.fila)] = (
+                        nuevo_id
+                    )
     finally:
         cur.close()
     return dict(contadores)

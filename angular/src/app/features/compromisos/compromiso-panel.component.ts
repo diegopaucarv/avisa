@@ -25,7 +25,7 @@ import {
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
-import { aCaso } from '../../dominio/mapeo';
+import { aCaso, aDetalleCaso, type DemandaCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
@@ -44,9 +44,12 @@ import {
   aCompromiso,
   aDetalleCompromiso,
   aHistorialCompromiso,
+  aSugerenciaUsuario,
   etiquetaClasificacionAlcance,
+  etiquetaDemandaVinculada,
   etiquetaFormalVerbal,
   etiquetaNivelGobierno,
+  etiquetaPuntoFocal as etiquetaPuntoFocalDe,
   formatearFecha,
   resolverVencimiento,
   situacionDe,
@@ -60,6 +63,7 @@ import {
   type OpcionCatalogo,
   type ResolucionVencimiento,
   type Situacion,
+  type SugerenciaUsuario,
 } from './compromiso.mapeo';
 
 type FormularioCompromiso = {
@@ -77,6 +81,12 @@ type FormularioCompromiso = {
   atiendeGenero: boolean;
   criteriosSmart: string;
   evidenciaUri: string;
+  /** Demanda del caso elegido en el alta; obligatoria si el caso tiene demandas. */
+  demandaId: string;
+  /** Usuario del directorio elegido como punto focal; vacío si es texto libre. */
+  puntoFocalUsuarioId: string;
+  /** Nombre del punto focal: lo que se pinta y lo que viaja como texto libre. */
+  puntoFocalTexto: string;
 };
 
 type CampoTexto = Exclude<keyof FormularioCompromiso, 'atiendeGenero' | 'asumidoMinistro'>;
@@ -84,6 +94,7 @@ type CampoTexto = Exclude<keyof FormularioCompromiso, 'atiendeGenero' | 'asumido
 type FormularioHito = {
   descripcion: string;
   fecha: string;
+  fechaReal: string;
   estado: EstadoHito;
   responsableTexto: string;
 };
@@ -109,6 +120,9 @@ function formularioVacio(): FormularioCompromiso {
     atiendeGenero: false,
     criteriosSmart: '',
     evidenciaUri: '',
+    demandaId: '',
+    puntoFocalUsuarioId: '',
+    puntoFocalTexto: '',
   };
 }
 
@@ -137,7 +151,21 @@ function formularioDe(compromiso: Compromiso): FormularioCompromiso {
     atiendeGenero: compromiso.atiendeGenero,
     criteriosSmart: criterios,
     evidenciaUri: compromiso.evidenciaUri ?? '',
+    demandaId: compromiso.demandaId ?? '',
+    puntoFocalUsuarioId: compromiso.puntoFocalUsuarioId ?? '',
+    puntoFocalTexto:
+      compromiso.puntoFocalUsuarioId !== null
+        ? (compromiso.puntoFocal ?? '')
+        : (compromiso.puntoFocalTexto ?? compromiso.puntoFocal ?? ''),
   };
+}
+
+/** Fecha de hoy en ISO corto (`YYYY-MM-DD`), como la esperan los `<input type="date">`. */
+function hoyIso(): string {
+  const hoy = new Date();
+  const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dia = String(hoy.getDate()).padStart(2, '0');
+  return `${hoy.getFullYear()}-${mes}-${dia}`;
 }
 
 function leerValor(evento: Event): string {
@@ -337,6 +365,17 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
     .panel-campo-ancho {
       grid-column: 1 / -1;
     }
+    /* Punto focal: campo y «Quitar» en la misma línea, sin recuadros nuevos. */
+    .punto-focal-campo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .punto-focal-campo .form-input {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
     .panel-check {
       display: flex;
       align-items: center;
@@ -425,6 +464,9 @@ export class CompromisoPanelComponent {
   readonly clasificacionesAlcance = CLASIFICACIONES_ALCANCE;
   readonly formasVerbales = FORMAS_VERBALES;
   readonly etiquetaAsumidoMinistro = ETIQUETA_ASUMIDO_MINISTRO;
+  /** Lecturas legibles de los vínculos nuevos; las plantillas no repiten reglas. */
+  readonly etiquetaDemanda = etiquetaDemandaVinculada;
+  readonly etiquetaPuntoFocal = etiquetaPuntoFocalDe;
 
   readonly editando = signal(false);
   readonly guardando = signal(false);
@@ -446,6 +488,7 @@ export class CompromisoPanelComponent {
   readonly hitoNuevo = signal<FormularioHito>({
     descripcion: '',
     fecha: '',
+    fechaReal: '',
     estado: 'Registrado',
     responsableTexto: '',
   });
@@ -494,6 +537,57 @@ export class CompromisoPanelComponent {
   readonly casosEncontrados = computed(() => this.casosRecurso.valor()?.elementos ?? []);
   readonly estadoCasos = this.casosRecurso.estado;
   readonly errorCasos = this.casosRecurso.error;
+
+  /**
+   * Demandas del caso elegido en el alta. Se leen de `GET /v1/cases/{codigo}`,
+   * que ya las trae: no hay endpoint propio y el cliente no los inventa.
+   */
+  private readonly demandasRecurso = consulta<readonly DemandaCaso[]>({
+    fuente: () => {
+      const codigo = this.casoElegido()?.codigo;
+      if (!codigo || !this.modoAlta()) return null;
+      return urlApi(`/v1/cases/${encodeURIComponent(codigo)}`);
+    },
+    esquema: (bruto) => aDetalleCaso(bruto).demandas,
+  });
+
+  readonly demandasCaso = computed(() => this.demandasRecurso.valor() ?? []);
+  readonly estadoDemandas = this.demandasRecurso.estado;
+  readonly errorDemandas = this.demandasRecurso.error;
+
+  /** Texto con el que se consulta el directorio de usuarios del punto focal. */
+  readonly puntoFocalConsulta = signal('');
+  readonly puntoFocalAbierto = signal(false);
+  private temporizadorPuntoFocal?: ReturnType<typeof setTimeout>;
+
+  /**
+   * Sugerencias del punto focal. No existe todavía un directorio legible por
+   * todos los roles: `POST/PATCH /v1/commitments` acepta `puntoFocalUsuarioId`,
+   * pero la única búsqueda de usuarios (`/v1/admin/usuarios`) exige ADMIN. Con
+   * otro perfil el campo sigue siendo texto libre y no se lanza la petición.
+   */
+  private readonly usuariosRecurso = consulta<readonly SugerenciaUsuario[]>({
+    fuente: () => {
+      if (!this.formularioVisible() || !this.capacidades.esAdmin()) return null;
+      const termino = this.puntoFocalConsulta().trim();
+      if (termino.length < 2) return null;
+      return urlConParametros(urlApi('/v1/admin/usuarios'), {
+        q: termino,
+        ...paramsDePagina({ pagina: 1, tamano: 8 }),
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return coleccion.elementos
+        .map(aSugerenciaUsuario)
+        .filter((usuario): usuario is SugerenciaUsuario => usuario !== null);
+    },
+  });
+
+  readonly puntoFocalSugerencias = computed(() => this.usuariosRecurso.valor() ?? []);
+  readonly puntoFocalListaVisible = computed(
+    () => this.puntoFocalAbierto() && this.puntoFocalSugerencias().length > 0,
+  );
 
   readonly detalle = this.recurso.valor;
   readonly estadoCarga = this.recurso.estado;
@@ -618,6 +712,7 @@ export class CompromisoPanelComponent {
     this.destruccion.onDestroy(() => {
       document.removeEventListener('keydown', alEscape);
       clearTimeout(this.temporizadorCaso);
+      clearTimeout(this.temporizadorPuntoFocal);
       this.focoPrevio?.focus?.();
     });
   }
@@ -646,12 +741,65 @@ export class CompromisoPanelComponent {
     if (!caso.codigo) return;
     this.casoElegido.set(caso);
     this.busquedaCaso.set('');
+    // La demanda pertenece al caso: al cambiarlo, la anterior deja de valer.
+    this.formulario.update((actual) => ({ ...actual, demandaId: '' }));
     this.editError.set(null);
   }
 
   quitarCaso(): void {
     this.casoElegido.set(null);
     this.busquedaCaso.set('');
+    this.formulario.update((actual) => ({ ...actual, demandaId: '' }));
+  }
+
+  /** Sugiere usuarios mientras se escribe y vuelve a texto libre al teclear. */
+  alEscribirPuntoFocal(evento: Event): void {
+    const valor = leerValor(evento);
+    this.formulario.update((actual) => ({
+      ...actual,
+      puntoFocalUsuarioId: '',
+      puntoFocalTexto: valor,
+    }));
+    this.puntoFocalAbierto.set(true);
+    clearTimeout(this.temporizadorPuntoFocal);
+    this.temporizadorPuntoFocal = setTimeout(() => this.puntoFocalConsulta.set(valor), 250);
+  }
+
+  abrirSugerenciasPuntoFocal(): void {
+    if (this.formulario().puntoFocalTexto.trim().length >= 2) this.puntoFocalAbierto.set(true);
+  }
+
+  elegirPuntoFocal(usuario: SugerenciaUsuario): void {
+    this.formulario.update((actual) => ({
+      ...actual,
+      puntoFocalUsuarioId: usuario.id,
+      puntoFocalTexto: usuario.nombre,
+    }));
+    this.cerrarSugerenciasPuntoFocal();
+  }
+
+  quitarPuntoFocal(): void {
+    this.formulario.update((actual) => ({
+      ...actual,
+      puntoFocalUsuarioId: '',
+      puntoFocalTexto: '',
+    }));
+    this.cerrarSugerenciasPuntoFocal();
+  }
+
+  /** Cierra la lista y cancela la consulta pendiente (también al salir del campo). */
+  cerrarSugerenciasPuntoFocal(): void {
+    clearTimeout(this.temporizadorPuntoFocal);
+    this.temporizadorPuntoFocal = undefined;
+    this.puntoFocalConsulta.set('');
+    this.puntoFocalAbierto.set(false);
+  }
+
+  /** Texto corto de una demanda del caso para el selector del alta. */
+  etiquetaDemandaCaso(demanda: DemandaCaso): string {
+    const textoDemanda = demanda.descripcion ?? demanda.problema ?? demanda.pedido;
+    if (!textoDemanda) return 'Demanda sin descripción registrada';
+    return textoDemanda.length > 110 ? `${textoDemanda.slice(0, 107)}…` : textoDemanda;
   }
 
   recargarDetalle(): void {
@@ -778,7 +926,10 @@ export class CompromisoPanelComponent {
     );
   }
 
-  actualizarHito(campo: 'descripcion' | 'fecha' | 'responsableTexto', evento: Event): void {
+  actualizarHito(
+    campo: 'descripcion' | 'fecha' | 'fechaReal' | 'responsableTexto',
+    evento: Event,
+  ): void {
     const valor = leerValor(evento);
     if (campo === 'descripcion') {
       this.hitoNuevo.update((actual) => ({ ...actual, descripcion: valor }));
@@ -788,13 +939,25 @@ export class CompromisoPanelComponent {
       this.hitoNuevo.update((actual) => ({ ...actual, fecha: valor }));
       return;
     }
+    if (campo === 'fechaReal') {
+      this.hitoNuevo.update((actual) => ({ ...actual, fechaReal: valor }));
+      return;
+    }
     this.hitoNuevo.update((actual) => ({ ...actual, responsableTexto: valor }));
   }
 
+  /**
+   * `Cumplido` exige fecha real: se precarga la de hoy al elegir el estado y el
+   * usuario puede corregirla antes de guardar.
+   */
   actualizarEstadoHitoNuevo(evento: Event): void {
     const valor = leerValor(evento);
     if (!this.esEstadoHito(valor)) return;
-    this.hitoNuevo.update((actual) => ({ ...actual, estado: valor }));
+    this.hitoNuevo.update((actual) => ({
+      ...actual,
+      estado: valor,
+      fechaReal: valor === 'Cumplido' && !actual.fechaReal ? hoyIso() : actual.fechaReal,
+    }));
   }
 
   async guardar(): Promise<void> {
@@ -818,6 +981,17 @@ export class CompromisoPanelComponent {
       const caso = this.casoElegido();
       if (!caso?.codigo) {
         this.editError.set('Seleccione el caso al que pertenece el compromiso.');
+        return;
+      }
+
+      // La demanda es obligatoria cuando el caso tiene alguna. Si el recurso
+      // falla o el caso no registra demandas, no se bloquea el alta.
+      if (this.estadoDemandas() === 'cargando' || this.estadoDemandas() === 'inactivo') {
+        this.editError.set('Cargando las demandas del caso; vuelva a intentarlo en un instante.');
+        return;
+      }
+      if (this.demandasCaso().length > 0 && !form.demandaId) {
+        this.editError.set('Seleccione la demanda que atiende el compromiso.');
         return;
       }
     } else {
@@ -875,6 +1049,7 @@ export class CompromisoPanelComponent {
           criteriosSmart: criterios.valor,
           evidenciaUri: form.evidenciaUri.trim() || null,
           fechaVencimiento: form.fechaVencimiento.trim() || null,
+          ...this.camposPuntoFocal(form),
         };
 
         if (form.fechaInicio.trim()) {
@@ -915,6 +1090,8 @@ export class CompromisoPanelComponent {
       asumidoMinistro: form.asumidoMinistro,
     };
 
+    if (form.demandaId) cuerpo['demandaId'] = form.demandaId;
+
     const unidad = form.unidad.trim();
     if (unidad) cuerpo['unidad'] = unidad;
     if (form.clasificacionAlcance) cuerpo['clasificacionAlcance'] = form.clasificacionAlcance;
@@ -933,7 +1110,33 @@ export class CompromisoPanelComponent {
 
     if (criterios !== null) cuerpo['criteriosSmart'] = criterios;
 
+    // El punto focal viaja por una sola vía: cuenta o texto libre, nunca ambas.
+    const usuarioId = form.puntoFocalUsuarioId.trim();
+    const textoPuntoFocal = form.puntoFocalTexto.trim();
+    if (usuarioId) cuerpo['puntoFocalUsuarioId'] = usuarioId;
+    else if (textoPuntoFocal) cuerpo['puntoFocalTexto'] = textoPuntoFocal;
+
     return cuerpo;
+  }
+
+  /**
+   * Campos del punto focal para el `PATCH`: se envía la vía elegida y se limpia
+   * la contraria si el registro traía valor, para no dejar ambos poblados.
+   */
+  private camposPuntoFocal(form: FormularioCompromiso): Record<string, unknown> {
+    const usuarioId = form.puntoFocalUsuarioId.trim();
+    const textoLibre = form.puntoFocalTexto.trim();
+    const actual = this.cabecera();
+
+    if (usuarioId) {
+      const cambios: Record<string, unknown> = { puntoFocalUsuarioId: usuarioId };
+      if (actual.puntoFocalTexto) cambios['puntoFocalTexto'] = null;
+      return cambios;
+    }
+
+    const cambios: Record<string, unknown> = { puntoFocalTexto: textoLibre || null };
+    if (actual.puntoFocalUsuarioId) cambios['puntoFocalUsuarioId'] = null;
+    return cambios;
   }
 
   async anadirHito(): Promise<void> {
@@ -949,6 +1152,11 @@ export class CompromisoPanelComponent {
       return;
     }
 
+    if (form.estado === 'Cumplido' && !form.fechaReal.trim()) {
+      this.hitosError.set('La fecha real es obligatoria para un hito cumplido.');
+      return;
+    }
+
     const id = this.cabecera().id;
     if (!id) {
       this.hitosError.set('El compromiso no tiene identificador.');
@@ -960,6 +1168,7 @@ export class CompromisoPanelComponent {
       estado: form.estado,
     };
     if (form.fecha.trim()) cuerpo['fecha'] = form.fecha.trim();
+    if (form.fechaReal.trim()) cuerpo['fechaReal'] = form.fechaReal.trim();
     if (form.responsableTexto.trim()) {
       cuerpo['responsableTexto'] = form.responsableTexto.trim();
     }
@@ -974,6 +1183,7 @@ export class CompromisoPanelComponent {
       this.hitoNuevo.set({
         descripcion: '',
         fecha: '',
+        fechaReal: '',
         estado: 'Registrado',
         responsableTexto: '',
       });
@@ -981,7 +1191,7 @@ export class CompromisoPanelComponent {
       this.historialRecurso.recargar();
       this.actualizado.emit();
     } catch (fallo) {
-      this.hitosError.set(this.mensajeDeError(fallo));
+      this.hitosError.set(this.mensajeDeError(fallo, 'Revise la fecha real del hito.'));
     } finally {
       this.hitoGuardando.set(false);
     }
@@ -1173,13 +1383,16 @@ export class CompromisoPanelComponent {
     }
   }
 
-  private mensajeDeError(fallo: unknown): string {
+  private mensajeDeError(
+    fallo: unknown,
+    pista = 'Revise la unidad, el alcance y las fechas.',
+  ): string {
     const error = aErrorApi(fallo);
     if (error.esProhibido) {
       return 'No tiene permisos para modificar este compromiso (403).';
     }
     if (error.estado === 422) {
-      return `El servidor rechazó los datos (422): ${error.message} Revise la unidad, el alcance y las fechas.`;
+      return `El servidor rechazó los datos (422): ${error.message} ${pista}`;
     }
     if (error.estado === 404) {
       return 'El compromiso ya no existe; actualice el listado.';

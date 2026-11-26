@@ -345,6 +345,16 @@
       <span [attr.title]="fila.casoTitulo">{{ fila.casoCodigo || '—' }}</span>
     </ng-template>
 
+    <ng-template appCeldaTabla="puntoFocal" let-fila>
+      @if (fila.puntoFocal || fila.puntoFocalTexto) {
+      <span class="celda-punto-focal" [attr.title]="puntoFocalTexto(fila)">
+        {{ puntoFocalTexto(fila) }}
+      </span>
+      } @else {
+      <span aria-hidden="true">—</span>
+      }
+    </ng-template>
+
     <ng-template appCeldaTabla="estado" let-fila>
       <span
         class="commit-status"

@@ -165,6 +165,12 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
       font-style: italic;
     }
 
+    .boton-ver-actores {
+      padding: 4px 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
     .drawer {
       width: min(560px, 100%);
     }
@@ -361,6 +367,7 @@ export class OrganizacionesPage {
       formato: (_valor, fila) => this.periodoVigencia(fila as unknown as OrganizacionDirectorio),
     },
     { clave: 'estadoOspa', titulo: 'Estado OSPA', ordenable: true },
+    { clave: 'actores', titulo: 'Actores', ancho: '116px' },
   ];
 
   /** Orden que pinta `app-tabla`; la página ordena con `OrdenTabla`. */
@@ -401,6 +408,26 @@ export class OrganizacionesPage {
 
   alClicFila(evento: ClicFila): void {
     this.abrir(evento.fila as unknown as OrganizacionDirectorio);
+  }
+
+  /**
+   * Lleva al directorio de personas filtrado por esta organización. El nombre
+   * viaja sólo como etiqueta de pantalla; el filtro real es el `id`.
+   */
+  verActores(organizacion: unknown, evento?: Event): void {
+    evento?.stopPropagation();
+    if (!organizacion || typeof organizacion !== 'object') return;
+
+    const fila = organizacion as Partial<OrganizacionDirectorio>;
+    const id = fila.id;
+    if (!id) return;
+
+    void this.router.navigate(['/directorio/personas'], {
+      queryParams: {
+        organizacion: id,
+        organizacionNombre: fila.nombre || null,
+      },
+    });
   }
 
   idsVisibles(): string[] {

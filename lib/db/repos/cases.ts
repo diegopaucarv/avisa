@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
+import { filtroTexto } from "../busqueda";
 import { ApiError } from "../errors";
 import { normalizarMotivo } from "./anulacion";
 
@@ -36,7 +37,11 @@ const CASE_SELECT = `
   c.motivo_anulacion as motivo_anulacion,
   c.anulado_por as anulado_por,
   ua.nombre as anulado_por_nombre,
-  c.anulacion_id as anulacion_id
+  c.anulacion_id as anulacion_id,
+  -- El sectorista del caso es quien ocupa «punto_focal_usuario_id»; no existe
+  -- una columna «sectorista_usuario_id».
+  c.punto_focal_usuario_id as sectorista_usuario_id,
+  sector.nombre as sectorista
 `;
 
 const CASE_FROM = `
@@ -53,6 +58,7 @@ const CASE_FROM = `
   left join core.cat_unidades_organicas uo on uo.id = c.unidad_responsable_id
   left join core.regiones rp on rp.id = c.region_principal_id
   left join core.usuarios ua on ua.id = c.anulado_por
+  left join core.usuarios sector on sector.id = c.punto_focal_usuario_id
   -- El distrito principal viaja con el caso para que la coropleta distrital
   -- una por ubigeo y no por nombre. «dp.id» es PK: el join no duplica filas.
   left join core.distritos dp on dp.id = c.distrito_principal_id
@@ -82,6 +88,10 @@ export type CaseListQuery = {
   naturaleza?: string;
   unidad?: string;
   region?: string;
+  /** Texto a buscar (`ilike`) en el nombre del usuario sectorista del caso. */
+  sectorista?: string;
+  /** UUID del usuario sectorista (`core.casos.punto_focal_usuario_id`). */
+  sectoristaId?: string;
   /**
    * `true` deja sólo los casos sin región principal: es el complemento de
    * `region` y alimenta la fila «Sin región» del panorama territorial.
@@ -147,6 +157,13 @@ export type CaseListItem = {
   naturaleza: string | null;
   subsector: string | null;
   unidadResponsable: string | null;
+  /**
+   * Usuario sectorista del caso: `core.casos.punto_focal_usuario_id`. No existe
+   * una columna `sectorista_usuario_id`; el nombre se resuelve con `core.usuarios`.
+   */
+  sectoristaUsuarioId: string | null;
+  /** Nombre para mostrar del sectorista (`core.usuarios.nombre`). */
+  sectorista: string | null;
   origen: string | null;
   clasificacion: number;
   /** Fecha real del caso (la del legado), no la de carga. */
@@ -230,15 +247,14 @@ async function construirWhere(
     return `$${params.length}`;
   };
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    // Se normaliza la columna y el patrón para que la búsqueda ignore tildes
-    // («produccion» encuentra «Producción»); `normalizar_ref` conserva los `%`.
-    where.push(
-      `(core.normalizar_ref(c.codigo_caso) like core.normalizar_ref(${like}) or core.normalizar_ref(c.nombre_caso) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(c.resumen_ejecutivo, '')) like core.normalizar_ref(${like}))`,
-    );
-  }
+  // Se exige que aparezcan todas las palabras del término: un único `like` con
+  // el término completo sólo encontraba las palabras contiguas y en ese orden.
+  const porTexto = filtroTexto(
+    ["c.codigo_caso", "c.nombre_caso", "coalesce(c.resumen_ejecutivo, '')"],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
 
   // La RLS de `core.casos` ya oculta las filas anuladas; el filtro explícito sólo
   // se añade al abrir la papelera (`anulados=true`).
@@ -354,6 +370,24 @@ async function construirWhere(
     );
   }
 
+  // Sectorista: por id (UUID) o por texto sobre el nombre del usuario. Se usa
+  // `ilike` con el valor atado para que el patrón no llegue interpolado al SQL.
+  if (query.sectoristaId) {
+    const id = query.sectoristaId.trim();
+    if (!UUID_RE.test(id)) {
+      throw new ApiError(
+        422,
+        "El filtro sectoristaId debe ser un identificador UUID.",
+        "FILTRO_INVALIDO",
+      );
+    }
+    where.push(`c.punto_focal_usuario_id = ${bind(id)}::uuid`);
+  }
+  const sectoristaTexto = query.sectorista?.trim();
+  if (sectoristaTexto) {
+    where.push(`sector.nombre ilike ${bind(`%${sectoristaTexto}%`)}`);
+  }
+
   return { where, params };
 }
 
@@ -394,7 +428,11 @@ export async function listCases(
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));
   const pageSize = Math.min(100, Math.max(1, Math.trunc(query.pageSize ?? 25)));
-  const order = SORTS[query.sort ?? "recent"] ?? SORTS.recent;
+  const baseOrder = SORTS[query.sort ?? "recent"] ?? SORTS.recent;
+  // Los archivados van al final en todos los órdenes. El prefijo booleano se
+  // resuelve por fila y no toca `count(*) over()`, así que la paginación y el
+  // `total` no cambian. `coalesce` evita que un estado nulo se cuele como «sí».
+  const order = `coalesce(ec.codigo = 'Archivado', false), ${baseOrder}`;
 
   const limit = `$${params.length + 1}`;
   const offset = `$${params.length + 2}`;
@@ -438,6 +476,8 @@ export async function listCases(
     naturaleza: row.naturaleza,
     subsector: row.subsector,
     unidadResponsable: row.unidad_responsable,
+    sectoristaUsuarioId: row.sectorista_usuario_id ?? null,
+    sectorista: row.sectorista ?? null,
     origen: row.origen,
     clasificacion: row.clasificacion,
     fechaInicio: row.fecha_inicio,
@@ -548,6 +588,10 @@ export type CaseDemanda = {
   descripcion: string | null;
   estado: string;
   motivo: string | null;
+  /** Id del catálogo `core.cat_tematicas` (integer); puede ser nulo en el legado. */
+  tematicaId: number | null;
+  /** Nombre de la temática (`core.cat_tematicas.nombre`). */
+  tematica: string | null;
   documento_origen_id: string | null;
   documento_origen_codigo: string | null;
   documento_origen_titulo: string | null;
@@ -661,6 +705,9 @@ export async function getCaseByCode(
          left join core.cat_roles_actor ra on ra.id = a.rol_actor_id
          left join core.cat_perfiles_actor pf on pf.id = a.perfil_id
         where ca.caso_id = $1
+          -- El servidor excluye los vínculos dados de baja lógica; el cliente ya
+          -- no tiene que filtrarlos.
+          and ca.anulado_en is null
         order by a.nombre_actual`,
       [row.id],
     ),
@@ -689,11 +736,14 @@ export async function getCaseByCode(
               d.descripcion_demanda as descripcion,
               replace(d.estado_atencion, '_', ' ') as estado,
               d.motivo_no_atencion as motivo,
+              d.tematica_id as "tematicaId",
+              te.nombre as "tematica",
               d.documento_origen_id as documento_origen_id,
               doc.codigo as documento_origen_codigo,
               doc.titulo as documento_origen_titulo
          from core.demandas d
          left join core.documentos doc on doc.id = d.documento_origen_id
+         left join core.cat_tematicas te on te.id = d.tematica_id
         where d.caso_id = $1
         order by d.fecha_registro desc nulls last`,
       [row.id],
@@ -864,6 +914,8 @@ export async function getCaseByCode(
     naturaleza: row.naturaleza,
     subsector: row.subsector,
     unidadResponsable: row.unidad_responsable,
+    sectoristaUsuarioId: row.sectorista_usuario_id ?? null,
+    sectorista: row.sectorista ?? null,
     origen: row.origen,
     clasificacion: row.clasificacion,
     fechaInicio: row.fecha_inicio,
@@ -3644,7 +3696,7 @@ export async function desvincularActorCaso(
       "INVALID_INPUT",
     );
   }
-  const motivo = normalizarMotivo(motivoRaw);
+  const motivo = motivoRaw?.trim() ? motivoRaw.trim() : null;
 
   const result = await client.query(
     `update core.casos_actores

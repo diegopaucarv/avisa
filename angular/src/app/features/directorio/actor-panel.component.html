@@ -495,6 +495,28 @@
             </section>
           }
 
+          @if (!esOrganizacion() && membresias().length > 0) {
+            <section class="panel-seccion" aria-labelledby="actor-panel-organizaciones">
+              <h3 id="actor-panel-organizaciones">Organizaciones a las que pertenece</h3>
+              <ul class="panel-organizaciones">
+                @for (membresia of membresias(); track membresia.organizacionId) {
+                  <li>
+                    <span class="panel-valor">{{ membresia.nombre }}</span>
+                    @if (membresia.cargo) {
+                      <span class="panel-pista">{{ membresia.cargo }}</span>
+                    }
+                    @if (membresia.desde || membresia.hasta) {
+                      <span class="panel-pista">
+                        {{ fechaDe(membresia.desde) || sinDato }} —
+                        {{ fechaDe(membresia.hasta) || sinDato }}
+                      </span>
+                    }
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+
           <!--
             El botón «Ver datos personales» se retiró (ver 67). La lectura de DNI
             y teléfono (Ley 29733) ya no se ofrece en modo ver: la PII se pide

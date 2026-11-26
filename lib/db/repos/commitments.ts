@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
+import { filtroTexto } from "../busqueda";
 import { nextSequentialCode } from "../codes";
 import { ApiError } from "../errors";
 import { anularRegistro, restaurarRegistro } from "./anulacion";
@@ -28,6 +29,12 @@ const COMMITMENT_COLUMNS = `
   uo.siglas as unidad,
   ag.codigo as alcance,
   te.nombre as tematica,
+  -- Vínculo a la demanda y punto focal del compromiso (migración 41).
+  cmp.demanda_id as demanda_id,
+  dm.codigo_legado as demanda_codigo,
+  cmp.punto_focal_usuario_id as punto_focal_usuario_id,
+  cmp.punto_focal_texto as punto_focal_texto,
+  pf.nombre as punto_focal_usuario_nombre,
   cmp.atiende_brecha_genero as atiende_genero,
   cmp.clasificacion_alcance as clasificacion_alcance,
   cmp.formal_verbal as formal_verbal,
@@ -54,6 +61,8 @@ const COMMITMENT_FROM = `
   left join core.cat_unidades_organicas uo on uo.id = cmp.unidad_responsable_id
   left join core.cat_alcances_geograficos ag on ag.id = cmp.alcance_id
   left join core.cat_tematicas te on te.id = cmp.tematica_id
+  left join core.demandas dm on dm.id = cmp.demanda_id
+  left join core.usuarios pf on pf.id = cmp.punto_focal_usuario_id
   left join core.usuarios ua on ua.id = cmp.anulado_por
 `;
 
@@ -202,6 +211,16 @@ export type CommitmentListItem = {
   unidad: string | null;
   alcance: string | null;
   tematica: string | null;
+  /** Demanda del caso que este compromiso atiende (`core.compromisos.demanda_id`). */
+  demandaId: string | null;
+  /** Código legado de la demanda (`core.demandas.codigo_legado`, p. ej. DEM-2026-0003). */
+  demandaCodigo: string | null;
+  /** Usuario punto focal resuelto; excluyente con `puntoFocalTexto`. */
+  puntoFocalUsuarioId: string | null;
+  /** Punto focal en texto libre; excluyente con `puntoFocalUsuarioId`. */
+  puntoFocalTexto: string | null;
+  /** Nombre del punto focal: usuario resuelto o, si no hay, el texto libre. */
+  puntoFocal: string | null;
   atiendeGenero: boolean | null;
   evidenciaUri: string | null;
   criteriosSmart: unknown;
@@ -333,6 +352,11 @@ function mapItem(row: CommitmentRow): CommitmentListItem {
     unidad: row.unidad,
     alcance: row.alcance,
     tematica: row.tematica,
+    demandaId: row.demanda_id ?? null,
+    demandaCodigo: row.demanda_codigo ?? null,
+    puntoFocalUsuarioId: row.punto_focal_usuario_id ?? null,
+    puntoFocalTexto: row.punto_focal_texto ?? null,
+    puntoFocal: row.punto_focal_usuario_nombre ?? row.punto_focal_texto ?? null,
     atiendeGenero: row.atiende_genero,
     evidenciaUri: row.evidencia_uri,
     criteriosSmart: row.criterios_smart,
@@ -366,13 +390,12 @@ export async function listCommitments(
     return `$${params.length}`;
   };
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(
-      `(core.normalizar_ref(cmp.codigo_compromiso) like core.normalizar_ref(${like}) or core.normalizar_ref(cmp.accion_compromiso) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    ["cmp.codigo_compromiso", "cmp.accion_compromiso"],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);
   if (query.estado) {
     where.push(
@@ -584,6 +607,24 @@ function optionalText(
   if (!has(body, key)) return undefined;
   const value = body[key];
   if (value === null) return null;
+  if (typeof value !== "string") invalid();
+  const trimmed = value.trim();
+  if (!trimmed) invalid();
+  return trimmed;
+}
+
+/**
+ * Referencia a catálogo: acepta el id numérico o un texto (id o nombre). Se
+ * normaliza a texto para `resolveTematica`.
+ */
+function optionalRef(
+  body: Record<string, unknown>,
+  key: string,
+): string | null | undefined {
+  if (!has(body, key)) return undefined;
+  const value = body[key];
+  if (value === null) return null;
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
   if (typeof value !== "string") invalid();
   const trimmed = value.trim();
   if (!trimmed) invalid();
@@ -802,6 +843,63 @@ async function resolveTematica(
   return row.id;
 }
 
+/**
+ * Resuelve una demanda por id o por su código legado (`DEM-2026-0003`).
+ * Devuelve también su `tematica_id` para poder heredarla (B5) cuando el
+ * compromiso no declara temática propia.
+ */
+async function resolveDemanda(
+  client: PoolClient,
+  ref: string,
+): Promise<{ id: string; tematicaId: number | null }> {
+  const result = await client.query<{
+    id: string;
+    tematica_id: number | null;
+  }>(
+    `select id, tematica_id from core.demandas
+      where id::text = $1 or codigo_legado = $1
+      limit 1`,
+    [ref],
+  );
+  const row = result.rows[0];
+  if (!row) invalid();
+  return { id: row.id, tematicaId: row.tematica_id ?? null };
+}
+
+/** Resuelve un usuario de AVISA por id; si no existe, 422. */
+async function resolveUsuario(
+  client: PoolClient,
+  ref: string,
+): Promise<string> {
+  const result = await client.query<{ id: string }>(
+    `select id from core.usuarios where id::text = $1 limit 1`,
+    [ref],
+  );
+  const row = result.rows[0];
+  if (!row) invalid();
+  return row.id;
+}
+
+/**
+ * `punto_focal_usuario_id` y `punto_focal_texto` son excluyentes, igual que
+ * `responsable_usuario_id` / `responsable_texto` en `core.hitos_compromiso`.
+ * Ambos nulos o uno solo son válidos; los dos con valor responden 422.
+ */
+function validarPuntoFocalExcluyente(
+  usuarioId: string | null | undefined,
+  texto: string | null | undefined,
+): void {
+  const tieneUsuario = usuarioId !== undefined && usuarioId !== null;
+  const tieneTexto = texto !== undefined && texto !== null;
+  if (tieneUsuario && tieneTexto) {
+    throw new ApiError(
+      422,
+      "«puntoFocalUsuarioId» y «puntoFocalTexto» son excluyentes: envía sólo uno.",
+      "PUNTO_FOCAL_EXCLUYENTE",
+    );
+  }
+}
+
 function mapCommitmentTipo(value: string): string {
   const normalized = value.trim().toLowerCase();
   if (normalized === "actividad") return "Actividad";
@@ -867,10 +965,34 @@ export async function createCommitment(
     ? await resolveAlcance(client, alcanceCodigo)
     : null;
 
-  const tematicaRef = optionalText(input, "tematica");
-  const tematicaId = tematicaRef
+  const tematicaIdRef = optionalRef(input, "tematicaId");
+  const tematicaNombreRef = optionalText(input, "tematica");
+  const tematicaRef =
+    tematicaIdRef !== undefined ? tematicaIdRef : tematicaNombreRef;
+  let tematicaId = tematicaRef
     ? await resolveTematica(client, tematicaRef)
     : null;
+
+  // Demanda vinculada y punto focal (usuario/texto son excluyentes).
+  const demandaRef = optionalText(input, "demandaId");
+  const demanda = demandaRef ? await resolveDemanda(client, demandaRef) : null;
+  const demandaId = demanda?.id ?? null;
+
+  const puntoFocalUsuarioRef = optionalUuid(input, "puntoFocalUsuarioId");
+  const puntoFocalTexto = optionalText(input, "puntoFocalTexto");
+  validarPuntoFocalExcluyente(puntoFocalUsuarioRef, puntoFocalTexto);
+  const puntoFocalUsuarioId = puntoFocalUsuarioRef
+    ? await resolveUsuario(client, puntoFocalUsuarioRef)
+    : null;
+  // Con usuario resuelto se guarda sólo el id; con texto, sólo el texto.
+  const puntoFocalTextoFinal = puntoFocalUsuarioId
+    ? null
+    : (puntoFocalTexto ?? null);
+
+  // B5: si llega demanda y no se declara temática, se hereda la de la demanda.
+  if (tematicaRef === undefined && demanda) {
+    tematicaId = demanda.tematicaId;
+  }
 
   const atiendeGenero = optionalBoolean(input, "atiendeGenero") ?? false;
   const criteriosSmart = optionalJson(input, "criteriosSmart");
@@ -887,10 +1009,11 @@ export async function createCommitment(
        alcance_id, tematica_id, fecha_inicio, fecha_vencimiento,
        accion_compromiso, tipo_compromiso, nivel_gobierno, estado_id,
        evidencia_cumplimiento_uri, atiende_brecha_genero, criterios_smart,
-       origen_dato, clasificacion_alcance, formal_verbal, asumido_ministro)
+       origen_dato, clasificacion_alcance, formal_verbal, asumido_ministro,
+       demanda_id, punto_focal_usuario_id, punto_focal_texto)
     values ($1, $2, $3, $4, $5, $6, coalesce($7::date, current_date), $8::date,
             $9, $10, $11, $12, $13, $14, $15::jsonb, 'MANUAL',
-            $16, $17, $18)
+            $16, $17, $18, $19, $20, $21)
     returning *
   `;
 
@@ -921,6 +1044,9 @@ export async function createCommitment(
       clasificacionAlcance,
       formalVerbal,
       asumidoMinistro,
+      demandaId,
+      puntoFocalUsuarioId,
+      puntoFocalTextoFinal,
     ]);
     return result.rows[0] as Record<string, any>;
   });
@@ -1008,12 +1134,53 @@ export async function updateCommitment(
     );
   }
 
-  const tematicaRef = optionalText(input, "tematica");
+  // Vínculo a demanda: si llega y no se declara temática, se hereda (B5).
+  if (has(input, "demandaId")) {
+    const demandaRef = optionalText(input, "demandaId");
+    const demanda = demandaRef
+      ? await resolveDemanda(client, demandaRef)
+      : null;
+    add("demanda_id", demanda?.id ?? null);
+    if (demanda && !has(input, "tematicaId") && !has(input, "tematica")) {
+      add("tematica_id", demanda.tematicaId);
+    }
+  }
+
+  const tematicaIdRef = optionalRef(input, "tematicaId");
+  const tematicaNombreRef = optionalText(input, "tematica");
+  const tematicaRef =
+    tematicaIdRef !== undefined ? tematicaIdRef : tematicaNombreRef;
   if (tematicaRef !== undefined) {
     add(
       "tematica_id",
       tematicaRef === null ? null : await resolveTematica(client, tematicaRef),
     );
+  }
+
+  // Punto focal: usuario / texto son excluyentes. Declarar uno limpia el otro,
+  // sin emitir dos asignaciones a la misma columna en el mismo UPDATE.
+  const puntoFocalUsuarioRef = optionalUuid(input, "puntoFocalUsuarioId");
+  const puntoFocalTexto = optionalText(input, "puntoFocalTexto");
+  validarPuntoFocalExcluyente(puntoFocalUsuarioRef, puntoFocalTexto);
+  const usuarioConValor =
+    puntoFocalUsuarioRef !== undefined && puntoFocalUsuarioRef !== null;
+  const textoConValor =
+    puntoFocalTexto !== undefined && puntoFocalTexto !== null;
+  if (puntoFocalUsuarioRef !== undefined && !textoConValor) {
+    add(
+      "punto_focal_usuario_id",
+      usuarioConValor
+        ? await resolveUsuario(client, puntoFocalUsuarioRef as string)
+        : null,
+    );
+    // Si el texto no viene en el cuerpo, declarar usuario lo retira.
+    if (usuarioConValor && puntoFocalTexto === undefined) {
+      add("punto_focal_texto", null);
+    }
+  }
+  if (puntoFocalTexto !== undefined) {
+    add("punto_focal_texto", puntoFocalTexto);
+    if (textoConValor) add("punto_focal_usuario_id", null);
   }
 
   const clasificacionAlcance = optionalClasificacionAlcance(
@@ -1223,14 +1390,30 @@ export async function createHito(
   const descripcion = requiredText(input, "descripcion");
   const fecha = optionalDate(input, "fecha");
   const estadoCodigo = optionalText(input, "estado");
-  const estadoId = await resolveEstadoHito(
-    client,
-    estadoCodigo ?? "Registrado",
-  );
+  const estadoFinal = estadoCodigo ?? "Registrado";
+  const estadoId = await resolveEstadoHito(client, estadoFinal);
   const evidencia = optionalText(input, "evidencia");
   const responsableTexto = optionalText(input, "responsableTexto");
   const fechaTexto = optionalText(input, "fechaTexto");
+  const fechaReal = optionalDate(input, "fechaReal");
   const fechaRealTexto = optionalText(input, "fechaRealTexto");
+
+  // Un hito «Cumplido» exige la fecha real: sin ella no hay evidencia temporal
+  // de que se cumplió.
+  const esCumplido = await client.query<{ es: boolean }>(
+    `select core.normalizar_ref($1) = core.normalizar_ref('Cumplido') as es`,
+    [estadoFinal],
+  );
+  if (
+    esCumplido.rows[0]?.es &&
+    (fechaReal === undefined || fechaReal === null)
+  ) {
+    throw new ApiError(
+      422,
+      "Un hito en estado «Cumplido» exige `fechaReal` (fecha real de cumplimiento).",
+      "FECHA_REAL_REQUERIDA",
+    );
+  }
 
   const inserted = await retryUnique(client, async () => {
     const codigo = await nextSequentialCode(
@@ -1243,15 +1426,16 @@ export async function createHito(
     const result = await client.query(
       `insert into core.hitos_compromiso
          (compromiso_id, codigo_hito, descripcion_hito, fecha_vencimiento,
-          estado_id, descripcion_evidencia, origen_dato, responsable_texto,
-          fecha_vencimiento_texto, fecha_real_texto)
-       values ($1, $2, $3, $4::date, $5, $6, 'MANUAL', $7, $8, $9)
+          fecha_real, estado_id, descripcion_evidencia, origen_dato,
+          responsable_texto, fecha_vencimiento_texto, fecha_real_texto)
+       values ($1, $2, $3, $4::date, $5::date, $6, $7, 'MANUAL', $8, $9, $10)
        returning *`,
       [
         compromisoId,
         codigo,
         descripcion,
         fecha ?? null,
+        fechaReal ?? null,
         estadoId,
         evidencia ?? null,
         responsableTexto ?? null,

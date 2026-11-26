@@ -445,11 +445,16 @@ export class BusquedaPage {
   /**
    * El término es el único parámetro vigente. Se navega sin `merge` para que
    * una URL antigua con `pagina`/`tamano` quede limpia.
+   *
+   * No se recorta aquí: el valor vive en el `[value]` del `<input>` y recortarlo
+   * mientras se escribe reescribiría el campo (y movería el cursor). El recorte
+   * lo hace la API (`termino` ya va recortado a la consulta; los repositorios
+   * recortan `q`).
    */
   private actualizar(cambios: { q: string }): void {
     void this.router.navigate([], {
       relativeTo: this.ruta,
-      queryParams: { q: cambios.q.trim() || null },
+      queryParams: { q: cambios.q || null },
       replaceUrl: true,
     });
   }

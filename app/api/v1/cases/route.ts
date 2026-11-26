@@ -40,6 +40,9 @@ export const dynamic = "force-dynamic";
  * `core.regiones` (422 si no existe); `sinregion=true` es su complemento y
  * alimenta la fila «Sin región» del panorama territorial.
  *
+ * `sectorista=<texto>` filtra por el nombre del usuario sectorista del caso
+ * (`ilike`); `sectoristaId=<uuid>` lo filtra por `punto_focal_usuario_id`.
+ *
  * `conteos=true` no es un filtro: pide que la respuesta incluya los conteos de
  * los chips de estado (`todos`, `abiertos`, `resueltos`, `archivados`), que se
  * calculan con los filtros vigentes pero ignorando el propio estado.
@@ -55,6 +58,8 @@ const FILTERS = [
   "naturaleza",
   "unidad",
   "region",
+  "sectorista",
+  "sectoristaId",
   "sort",
 ] as const;
 

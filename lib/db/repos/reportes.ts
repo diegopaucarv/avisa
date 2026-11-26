@@ -1,5 +1,7 @@
 import type { PoolClient } from "pg";
 
+import { filtroTexto } from "../busqueda";
+
 /**
  * Registro de reportes (Anexo N° 17 de la Guía de Prevención y Gestión de
  * Conflictos Sociales).
@@ -84,13 +86,12 @@ export async function listReportes(
     return `$${params.length}`;
   };
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(
-      `(core.normalizar_ref(r.titulo) like core.normalizar_ref(${like}) or core.normalizar_ref(r.codigo_reporte) like core.normalizar_ref(${like}) or core.normalizar_ref(r.codigo_caso) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    ["r.titulo", "r.codigo_reporte", "r.codigo_caso"],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
   if (query.tipo?.trim()) where.push(`r.tipo = ${bind(query.tipo.trim())}`);
   if (query.region?.trim()) {
     where.push(`r.region = ${bind(query.region.trim())}`);

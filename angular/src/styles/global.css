@@ -25,6 +25,16 @@
   --green-pale: #e9f5ef;
   --font-sans: 'DM Sans', Arial, sans-serif;
   --font-display: 'Manrope', 'DM Sans', sans-serif;
+
+  /*
+   * Barra de búsqueda: un único ancho y alto para toda la aplicación.
+   * Las variantes (`.search-field--compacta`) también se declaran aquí para que
+   * ninguna página vuelva a inventar su propio ancho.
+   */
+  --search-alto: 35px;
+  --search-ancho-min: 210px;
+  --search-ancho-max: 440px;
+  --search-ancho-compacto: 300px;
 }
 * {
   box-sizing: border-box;
@@ -402,9 +412,6 @@ select:focus-visible {
   border: 1px solid var(--line);
   border-radius: 0 0 10px 10px;
   box-shadow: 0 15px 32px #1b314313;
-}
-.global-search-panel .search-field {
-  flex: 1;
 }
 .search-close {
   width: 35px;
@@ -1370,9 +1377,9 @@ select:focus-visible {
   margin-bottom: 14px;
 }
 .search-field {
-  height: 35px;
-  min-width: 210px;
-  max-width: 440px;
+  height: var(--search-alto);
+  min-width: var(--search-ancho-min);
+  max-width: var(--search-ancho-max);
   flex: 1;
   padding: 0 10px;
   display: flex;
@@ -1383,14 +1390,23 @@ select:focus-visible {
   background: #fff;
   color: #8996a1;
 }
+/*
+ * Variante estrecha, para barras de filtros con muchos controles al lado.
+ * Es la única excepción al ancho global y vive aquí, no en la página.
+ */
+.search-field--compacta {
+  max-width: var(--search-ancho-compacto);
+  flex: 0 1 var(--search-ancho-compacto);
+}
 .search-field:focus-within {
   border-color: #96acd0;
+  box-shadow: 0 0 0 3px #cfdff5;
 }
 .search-field input {
   width: 100%;
   min-width: 0;
   border: 0;
-  outline: 0 !important;
+  outline: 0;
   background: transparent;
   color: var(--ink);
   font-size: 12.5px;
@@ -2779,10 +2795,6 @@ select:focus-visible {
   gap: 14px;
   margin-bottom: 16px;
 }
-.directory-toolbar > .search-field {
-  max-width: 460px;
-  flex: 1;
-}
 .directory-filters {
   display: flex;
   align-items: center;
@@ -3020,10 +3032,6 @@ select:focus-visible {
   .directory-toolbar {
     align-items: flex-start;
     flex-direction: column;
-  }
-  .directory-toolbar > .search-field {
-    width: 100%;
-    max-width: none;
   }
   .map-layout {
     grid-template-columns: 1fr;
@@ -3840,6 +3848,16 @@ textarea {
   outline: 2px solid #cfe0f4;
   outline-offset: 1px;
   border-color: #8fb4dd;
+}
+/*
+ * Buscadores dentro de formularios y paneles: comparten alto y radio con la
+ * barra global, pero conservan el ancho del formulario (100%). El foco sigue
+ * siendo el de `.form-input:focus`, que ya dibuja anillo.
+ */
+.form-input[type='search'] {
+  height: var(--search-alto);
+  padding-top: 0;
+  padding-bottom: 0;
 }
 .form-textarea {
   min-height: 82px;

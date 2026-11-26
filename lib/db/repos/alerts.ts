@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
+import { filtroTexto } from "../busqueda";
 import { nextSequentialCode } from "../codes";
 import { ApiError } from "../errors";
 import { anularRegistro, restaurarRegistro } from "./anulacion";
@@ -410,13 +411,12 @@ export async function listAlerts(
     return `$${params.length}`;
   };
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(
-      `(core.normalizar_ref(a.codigo_alerta) like core.normalizar_ref(${like}) or core.normalizar_ref(a.titulo) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(a.descripcion_riesgo, '')) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    ["a.codigo_alerta", "a.titulo", "coalesce(a.descripcion_riesgo, '')"],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);
   if (query.sinCaso === "true") where.push("a.caso_id is null");
   else if (query.sinCaso === "false") where.push("a.caso_id is not null");

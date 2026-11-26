@@ -1,5 +1,7 @@
 import type { PoolClient } from "pg";
 
+import { palabrasDe } from "../busqueda";
+
 export type SearchResultType =
   "case" | "alert" | "document" | "actor" | "commitment" | "demanda";
 
@@ -68,6 +70,24 @@ const DISTRITO_DEL_CASO = `
     left join core.provincias cpv on cpv.id = cd.provincia_id
     left join core.regiones cpr on cpr.id = cpv.region_id`;
 
+/**
+ * «Aparecen todas las palabras» contra cualquiera de las columnas de la rama.
+ *
+ * `$1` es el array de patrones (`%palabra%`) que arma `searchAll`. Se recorre
+ * con `unnest` y se exige `bool_and`, de modo que el orden y la contigüidad de
+ * las palabras dejan de importar (antes un único `like` con el término completo
+ * sólo encontraba «agua rio» si el texto decía exactamente eso).
+ */
+function todasLasPalabras(columnas: readonly string[]): string {
+  const coincidencias = columnas
+    .map(
+      (columna) =>
+        `core.normalizar_ref(${columna}) like core.normalizar_ref(pal)`,
+    )
+    .join(" or ");
+  return `coalesce((select bool_and(${coincidencias}) from unnest($1::text[]) as t(pal)), true)`;
+}
+
 const SEARCH_UNION = `
   select 1 as ord, 'case'::text as type, 'cases'::text as view,
          c.id::text as id,
@@ -82,9 +102,11 @@ const SEARCH_UNION = `
     left join core.cat_estados_caso ec on ec.id = c.estado_id
 ${DISTRITO_DEL_CASO}
 ${REGION_DEL_CASO}
-   where core.normalizar_ref(c.codigo_caso) like core.normalizar_ref($1)
-      or core.normalizar_ref(c.nombre_caso) like core.normalizar_ref($1)
-      or core.normalizar_ref(coalesce(c.resumen_ejecutivo, '')) like core.normalizar_ref($1)
+   where ${todasLasPalabras([
+     "c.codigo_caso",
+     "c.nombre_caso",
+     "coalesce(c.resumen_ejecutivo, '')",
+   ])}
   union all
   select 2, 'alert'::text, 'alerts'::text,
          al.id::text,
@@ -105,8 +127,7 @@ ${REGION_DEL_CASO}
     left join core.regiones apr on apr.id = apv.region_id
 ${DISTRITO_DEL_CASO}
 ${REGION_DEL_CASO}
-   where core.normalizar_ref(al.codigo_alerta) like core.normalizar_ref($1)
-      or core.normalizar_ref(al.titulo) like core.normalizar_ref($1)
+   where ${todasLasPalabras(["al.codigo_alerta", "al.titulo"])}
   union all
   select 3, 'document'::text, 'documents'::text,
          d.id::text,
@@ -122,8 +143,7 @@ ${REGION_DEL_CASO}
     left join core.casos c on c.id = d.caso_id
 ${DISTRITO_DEL_CASO}
 ${REGION_DEL_CASO}
-   where core.normalizar_ref(d.codigo) like core.normalizar_ref($1)
-      or core.normalizar_ref(d.titulo) like core.normalizar_ref($1)
+   where ${todasLasPalabras(["d.codigo", "d.titulo"])}
   union all
   select 4, 'actor'::text, 'directory'::text,
          a.actor_uid::text,
@@ -139,8 +159,7 @@ ${REGION_DEL_CASO}
     left join core.distritos d on d.id = a.distrito_id
     left join core.provincias pd on pd.id = d.provincia_id
     left join core.regiones pr on pr.id = pd.region_id
-   where core.normalizar_ref(a.nombre_actual) like core.normalizar_ref($1)
-      or core.normalizar_ref(coalesce(a.abreviatura, '')) like core.normalizar_ref($1)
+   where ${todasLasPalabras(["a.nombre_actual", "coalesce(a.abreviatura, '')"])}
   union all
   select 5, 'commitment'::text, 'commitments'::text,
          cmp.id::text,
@@ -156,8 +175,7 @@ ${REGION_DEL_CASO}
     left join core.casos c on c.id = cmp.caso_id
 ${DISTRITO_DEL_CASO}
 ${REGION_DEL_CASO}
-   where core.normalizar_ref(cmp.codigo_compromiso) like core.normalizar_ref($1)
-      or core.normalizar_ref(cmp.accion_compromiso) like core.normalizar_ref($1)
+   where ${todasLasPalabras(["cmp.codigo_compromiso", "cmp.accion_compromiso"])}
   union all
   select 6, 'demanda'::text, 'cases'::text,
          dm.id::text,
@@ -172,7 +190,7 @@ ${REGION_DEL_CASO}
     left join core.casos c on c.id = dm.caso_id
 ${DISTRITO_DEL_CASO}
 ${REGION_DEL_CASO}
-   where core.normalizar_ref(dm.descripcion_demanda) like core.normalizar_ref($1)
+   where ${todasLasPalabras(["dm.descripcion_demanda"])}
 `;
 
 const SEARCH_PAGE_SQL = `
@@ -229,7 +247,7 @@ export async function searchAll(
   }
 
   const result = await client.query(SEARCH_PAGE_SQL, [
-    `%${query}%`,
+    palabrasDe(query).map((palabra) => `%${palabra}%`),
     tamano,
     (pagina - 1) * tamano,
   ]);

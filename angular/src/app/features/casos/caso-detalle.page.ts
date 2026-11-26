@@ -71,7 +71,11 @@ import {
   valoresDeCaso,
   type ValoresEditables,
 } from './caso-edicion.mapeo';
-import { CuerpoDemanda, DemandaPanelComponent } from './demanda-panel.component';
+import {
+  CuerpoDemanda,
+  DemandaPanelComponent,
+  type OpcionTematicaDemanda,
+} from './demanda-panel.component';
 import {
   CuerpoEvento,
   EventoPanelComponent,
@@ -104,24 +108,50 @@ type DatosHitoCrudos = {
 
 type HitoDetalle = HitoCasoConResponsable & DatosHitoCrudos;
 
-/** Compromiso del detalle con sus hitos ya enriquecidos. */
-type CompromisoCasoEnFicha = Omit<CompromisoCasoConCaracteristicas, 'hitos'> & {
-  hitos: HitoDetalle[];
+/**
+ * Vínculo de una demanda con sus compromisos (A4). La API entrega `demandaId` y
+ * `demandaCodigo` por compromiso; `CompromisoCasoConCaracteristicas` no los
+ * conserva, así que la ficha los relee del bruto.
+ */
+type VinculoCompromisoDemanda = {
+  demandaId: string | null;
+  demandaCodigo: string | null;
 };
 
+/** Compromiso del detalle con sus hitos y su vínculo de demanda ya resueltos. */
+type CompromisoCasoEnFicha = Omit<CompromisoCasoConCaracteristicas, 'hitos'> &
+  VinculoCompromisoDemanda & {
+    hitos: HitoDetalle[];
+  };
+
 /**
- * Caso del detalle con la descripción de riesgo. `aCaso` no la conserva porque
- * el listado no la necesita, pero `GET /api/v1/cases/{codigo}` la entrega y la
- * ficha la muestra en los datos generales. Se añade aquí, sin tocar `dominio/`.
+ * Caso del detalle con la descripción de riesgo y el sectorista. `aCaso` no
+ * las conserva porque el listado no las necesita, pero
+ * `GET /api/v1/cases/{codigo}` las entrega y la ficha las muestra en los datos
+ * generales. Se añaden aquí, sin tocar `dominio/`.
  */
 type CasoConDescripcionRiesgo = DetalleCasoConCierre['caso'] & {
   descripcionRiesgo: string | null;
+  sectorista: string | null;
 };
 
+/** Temática declarada de una demanda (`A4`). `null` = sin temática. */
+type TematicaDemanda = {
+  tematica: string | null;
+  tematicaId: number | null;
+};
+
+/**
+ * Demanda del expediente con su temática. `aDemandaCaso` del dominio no la
+ * conserva, así que se relee del bruto y se indexa por id.
+ */
+type DemandaCasoConTematica = DemandaCaso & TematicaDemanda;
+
 /** Detalle del caso con las columnas nuevas de compromisos e hitos. */
-type DetalleCasoConCompromisos = Omit<DetalleCasoConCierre, 'compromisos' | 'caso'> & {
+type DetalleCasoConCompromisos = Omit<DetalleCasoConCierre, 'compromisos' | 'caso' | 'demandas'> & {
   compromisos: CompromisoCasoEnFicha[];
   caso: CasoConDescripcionRiesgo;
+  demandas: DemandaCasoConTematica[];
 };
 
 /**
@@ -258,6 +288,92 @@ function datosHitosCrudos(bruto: unknown): Map<string, DatosHitoCrudos> {
   return datos;
 }
 
+/** Primer valor numérico de las claves indicadas; `null` si no hay. */
+function numeroDe(registro: Record<string, unknown>, ...claves: string[]): number | null {
+  for (const clave of claves) {
+    const valor = registro[clave];
+    if (typeof valor === 'number' && Number.isFinite(valor)) return valor;
+    if (typeof valor === 'string' && valor.trim() !== '') {
+      const numero = Number(valor);
+      if (Number.isFinite(numero)) return numero;
+    }
+  }
+  return null;
+}
+
+const SIN_TEMATICA_DEMANDA: TematicaDemanda = { tematica: null, tematicaId: null };
+const SIN_VINCULO_DEMANDA: VinculoCompromisoDemanda = { demandaId: null, demandaCodigo: null };
+
+/**
+ * `tematicaId` y `tematica` de cada demanda del expediente. `dominio/mapeo.ts`
+ * descarta esas columnas nuevas; se releen del bruto y se indexan por id sin
+ * tocar el mapeo compartido.
+ */
+function tematicasDemandasCrudas(bruto: unknown): Map<string, TematicaDemanda> {
+  const mapa = new Map<string, TematicaDemanda>();
+  const registro = esRegistro(bruto) ? bruto : {};
+  const demandas = registro['demandas'];
+  if (!Array.isArray(demandas)) return mapa;
+
+  for (const demanda of demandas) {
+    if (!esRegistro(demanda)) continue;
+    const id = textoDe(demanda, 'id');
+    if (!id) continue;
+    mapa.set(id, {
+      tematica: textoDe(demanda, 'tematica'),
+      tematicaId: numeroDe(demanda, 'tematicaId', 'tematica_id'),
+    });
+  }
+
+  return mapa;
+}
+
+/**
+ * Demanda a la que pertenece cada compromiso del caso. La API la entrega como
+ * `demandaId` y `demandaCodigo`; el mapeo compartido no la conserva.
+ */
+function vinculosCompromisoDemanda(bruto: unknown): Map<string, VinculoCompromisoDemanda> {
+  const mapa = new Map<string, VinculoCompromisoDemanda>();
+  const registro = esRegistro(bruto) ? bruto : {};
+  const compromisos = registro['compromisos'] ?? registro['commitments'];
+  if (!Array.isArray(compromisos)) return mapa;
+
+  for (const compromiso of compromisos) {
+    if (!esRegistro(compromiso)) continue;
+    const id = textoDe(compromiso, 'id');
+    if (!id) continue;
+    mapa.set(id, {
+      demandaId: textoDe(compromiso, 'demandaId', 'demanda_id'),
+      demandaCodigo: textoDe(compromiso, 'demandaCodigo', 'demanda_codigo'),
+    });
+  }
+
+  return mapa;
+}
+
+/**
+ * Catálogo de temáticas tal como lo entrega `/api/v1/catalogs`: el `id` es el
+ * número que espera `tematicaId` y el nombre es el texto visible. El mapeo de
+ * la ficha sólo conserva valor y etiqueta, así que el id se relee aquí.
+ */
+function aTematicasDemanda(bruto: unknown): readonly OpcionTematicaDemanda[] {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const crudo = registro['catalogs'] ?? registro['catalogos'];
+  const catalogo = esRegistro(crudo) ? crudo : {};
+  const filas = catalogo['tematicas'];
+  if (!Array.isArray(filas)) return [];
+
+  const opciones: OpcionTematicaDemanda[] = [];
+  for (const fila of filas) {
+    if (!esRegistro(fila)) continue;
+    const id = numeroDe(fila, 'id');
+    const nombre = textoDe(fila, 'etiqueta', 'codigo', 'nombre');
+    if (id !== null && nombre) opciones.push({ id, nombre });
+  }
+
+  return opciones;
+}
+
 /**
  * Campos retirados de la ficha por el ajuste de producto del 22 nov: la
  * cabecera ya muestra el título, el resumen ejecutivo se quitó y el cierre, el
@@ -300,12 +416,25 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
   const casoBruto = registro['caso'] ?? registro['case'];
   const filaCaso = esRegistro(casoBruto) ? casoBruto : {};
   const descripcionRiesgo = textoDe(filaCaso, 'descripcionRiesgo', 'descripcion_riesgo');
+  const sectorista = textoDe(filaCaso, 'sectorista', 'sectoristaNombre');
   const datos = datosHitosCrudos(bruto);
+  const tematicas = tematicasDemandasCrudas(bruto);
+  const vinculos = vinculosCompromisoDemanda(bruto);
   const compromisos = aCompromisosCaso(bruto, detalle.compromisos).map((compromiso) => ({
     ...compromiso,
+    ...(vinculos.get(compromiso.id) ?? SIN_VINCULO_DEMANDA),
     hitos: compromiso.hitos.map((hito) => ({ ...hito, ...(datos.get(hito.id) ?? SIN_DATOS_HITO) })),
   }));
-  return { ...detalle, caso: { ...detalle.caso, descripcionRiesgo }, compromisos };
+  const demandas = detalle.demandas.map((demanda) => ({
+    ...demanda,
+    ...(tematicas.get(demanda.id) ?? SIN_TEMATICA_DEMANDA),
+  }));
+  return {
+    ...detalle,
+    caso: { ...detalle.caso, descripcionRiesgo, sectorista },
+    compromisos,
+    demandas,
+  };
 }
 
 @Component({
@@ -847,15 +976,36 @@ export class CasoDetallePage {
     this.filasActores().filter((actor) => this.estaVigente(actor.id)),
   );
 
-  readonly ordenDemandas = new OrdenTabla<DemandaCaso>();
-  private readonly accesoresDemandas: Record<string, (demanda: DemandaCaso) => unknown> = {
-    demanda: (demanda) => demanda.descripcion ?? demanda.problema,
-    estado: (demanda) => demanda.estado,
-    origen: (demanda) => demanda.documentoOrigenCodigo ?? demanda.documentoOrigenTitulo,
-  };
+  readonly ordenDemandas = new OrdenTabla<DemandaCasoConTematica>();
+  private readonly accesoresDemandas: Record<string, (demanda: DemandaCasoConTematica) => unknown> =
+    {
+      demanda: (demanda) => demanda.descripcion ?? demanda.problema,
+      tematica: (demanda) => demanda.tematica,
+      estado: (demanda) => demanda.estado,
+      origen: (demanda) => demanda.documentoOrigenCodigo ?? demanda.documentoOrigenTitulo,
+    };
   readonly filasDemandas = computed(() =>
     this.ordenDemandas.ordenar(this.ficha()?.demandas ?? [], this.accesoresDemandas),
   );
+
+  /**
+   * Compromisos del caso agrupados por la demanda a la que pertenecen. Sólo los
+   * vinculados entran en la columna «Compromisos» de la tabla de demandas.
+   */
+  readonly compromisosPorDemanda = computed(() => {
+    const mapa = new Map<string, CompromisoCasoEnFicha[]>();
+    for (const compromiso of this.ficha()?.compromisos ?? []) {
+      if (!compromiso.demandaId) continue;
+      const lista = mapa.get(compromiso.demandaId) ?? [];
+      lista.push(compromiso);
+      mapa.set(compromiso.demandaId, lista);
+    }
+    return mapa;
+  });
+
+  compromisosDeDemanda(demandaId: string): readonly CompromisoCasoEnFicha[] {
+    return this.compromisosPorDemanda().get(demandaId) ?? [];
+  }
 
   readonly ordenAlertas = new OrdenTabla<AlertaCaso>();
   private readonly accesoresAlertas: Record<string, (alerta: AlertaCaso) => unknown> = {
@@ -1198,7 +1348,7 @@ export class CasoDetallePage {
   readonly errorEvento = signal<string | null>(null);
 
   /** Demanda abierta en el panel; `null` significa alta. */
-  readonly demandaEditada = signal<DemandaCaso | null>(null);
+  readonly demandaEditada = signal<DemandaCasoConTematica | null>(null);
   readonly panelDemandaAbierto = signal(false);
   readonly guardandoDemanda = signal(false);
   readonly errorDemanda = signal<string | null>(null);
@@ -1217,6 +1367,23 @@ export class CasoDetallePage {
 
   readonly cargandoTipos = computed(() => {
     const estado = this.catalogoTipos.estado();
+    return estado === 'inactivo' || estado === 'cargando';
+  });
+
+  /**
+   * Catálogo de temáticas con su `id` numérico, que es lo que espera
+   * `tematicaId` en el alta y la edición de demandas. Igual que el de tipos de
+   * hecho, sólo se pide al abrir el panel: la ficha en lectura no lo necesita.
+   */
+  private readonly catalogoTematicas = consulta<readonly OpcionTematicaDemanda[]>({
+    fuente: () => (this.panelDemandaAbierto() ? urlApi('/v1/catalogs') : null),
+    esquema: aTematicasDemanda,
+  });
+
+  readonly tematicasDemanda = computed(() => this.catalogoTematicas.valor() ?? []);
+
+  readonly cargandoTematicasDemanda = computed(() => {
+    const estado = this.catalogoTematicas.estado();
     return estado === 'inactivo' || estado === 'cargando';
   });
 
@@ -1853,7 +2020,7 @@ export class CasoDetallePage {
     this.panelDemandaAbierto.set(true);
   }
 
-  editarDemanda(demanda: DemandaCaso): void {
+  editarDemanda(demanda: DemandaCasoConTematica): void {
     if (!this.puedeModificar()) return;
     this.errorDemanda.set(null);
     this.avisoDemanda.set(null);
@@ -1977,7 +2144,7 @@ export class CasoDetallePage {
     if (error.esProhibido) return 'Su rol no permite modificar las demandas de este caso.';
     if (error.codigo === 'SIN_CAMBIOS') return 'No hay cambios que guardar.';
     if (error.codigo === 'INVALID_INPUT' || error.estado === 422) {
-      return 'Datos inválidos: revise la demanda y el estado de atención.';
+      return 'Datos inválidos: la temática es obligatoria y la demanda debe tener descripción y estado válidos.';
     }
     return error.message;
   }

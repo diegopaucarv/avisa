@@ -615,7 +615,9 @@ export class MatrizConflictividadPage {
   buscar(evento: Event): void {
     const valor = (evento.target as HTMLInputElement).value;
     clearTimeout(this.temporizador);
-    this.temporizador = setTimeout(() => this.actualizarFiltros({ q: valor.trim() }), 300);
+    // Sin `trim`: el valor se refleja en el `<input>` y recortarlo aquí mueve
+    // el cursor. El repositorio recorta `q`.
+    this.temporizador = setTimeout(() => this.actualizarFiltros({ q: valor }), 300);
   }
 
   filtrarEstado(valor: string): void {

@@ -53,7 +53,7 @@
   }
 
   <div class="filter-bar filter-bar-wrap barra-filtros-casos">
-    <label class="search-field search-field-angosta">
+    <label class="search-field search-field--compacta">
       <app-icono nombre="buscar" [tamano]="14" />
       <input
         type="search"
@@ -100,6 +100,17 @@
         <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
         }
       </select>
+    </label>
+
+    <label class="search-field search-field--compacta">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Sectorista..."
+        [value]="filtros().sectorista"
+        aria-label="Filtrar casos por sectorista"
+        (input)="cambiarSectorista($event)"
+      />
     </label>
 
     <label class="edit-switch" [class.activo]="archivados()">
@@ -315,11 +326,12 @@
       </div>
       <h3>{{ caso.titulo }}</h3>
       <p class="case-summary">{{ caso.resumen || 'Sin resumen registrado.' }}</p>
+      <span class="case-sectorista">Sectorista: {{ caso.sectorista || 'sin dato' }}</span>
 
       <div class="case-card-bottom">
         <span [class]="claseRiesgo(caso)">
           <span class="status-dot"></span>
-          R: {{ riesgoMostrado(caso) }}
+          Riesgo: {{ riesgoMostrado(caso) }}
         </span>
         <span
           title="Fecha de última actualización del registro; en los casos del legado es la fecha en que se cargaron."
@@ -346,6 +358,7 @@
           </th>
           <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Caso</th>
           <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
+          <th scope="col" [appThOrden]="'sectorista'" [orden]="orden">Sectorista</th>
           <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
           <th scope="col" [appThOrden]="'riesgo'" [orden]="orden">Riesgo</th>
           <th scope="col" [appThOrden]="'etapa'" [orden]="orden">Etapa</th>
@@ -368,6 +381,7 @@
             <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
           </td>
           <td>{{ caso.region || '—' }}</td>
+          <td>{{ caso.sectorista || 'sin dato' }}</td>
           <td>{{ caso.estado }}</td>
           <td>{{ riesgoMostrado(caso) }}</td>
           <td>{{ caso.etapa }}</td>

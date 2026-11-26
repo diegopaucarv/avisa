@@ -296,6 +296,9 @@ const ESPERA_TECLEO_MS = 250;
 
     .territorio-entrada {
       width: 100%;
+      height: var(--search-alto);
+      padding-top: 0;
+      padding-bottom: 0;
       padding-left: 30px;
       padding-right: 32px;
     }

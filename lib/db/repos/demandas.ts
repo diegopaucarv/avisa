@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
+import { filtroTexto } from "../busqueda";
 import { ApiError } from "../errors";
 import { anularRegistro, restaurarRegistro } from "./anulacion";
 
@@ -18,6 +19,7 @@ const DEMANDA_SELECT = `
   to_char(ah.fecha_reporte, 'YYYY-MM-DD') as fecha_hecho,
   to_char(d.fecha_registro, 'YYYY-MM-DD') as fecha_registro,
   to_char(d.fecha_vencimiento_respuesta, 'YYYY-MM-DD') as fecha_vencimiento,
+  d.tematica_id as tematica_id,
   te.nombre as tematica,
   d.origen_dato as origen,
   d.confidence::float8 as confianza,
@@ -76,6 +78,9 @@ export type DemandaListItem = {
   fechaHecho: string | null;
   fechaRegistro: string | null;
   fechaVencimiento: string | null;
+  /** Id del catálogo `core.cat_tematicas` (integer); puede ser nulo en el legado. */
+  tematicaId: number | null;
+  /** Nombre de la temática (`core.cat_tematicas.nombre`). */
   tematica: string | null;
   origen: string | null;
   confianza: number | null;
@@ -131,6 +136,7 @@ function mapDemanda(row: Record<string, unknown>): DemandaListItem {
     fechaHecho: row.fecha_hecho as string | null,
     fechaRegistro: row.fecha_registro as string | null,
     fechaVencimiento: row.fecha_vencimiento as string | null,
+    tematicaId: row.tematica_id as number | null,
     tematica: row.tematica as string | null,
     origen: row.origen as string | null,
     confianza: row.confianza as number | null,
@@ -177,13 +183,16 @@ export async function listDemandas(
     return `$${params.length}`;
   };
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(
-      `(core.normalizar_ref(coalesce(d.descripcion_demanda, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(d.problema_3p, '')) like core.normalizar_ref(${like}) or core.normalizar_ref(coalesce(d.pedido_3p, '')) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    [
+      "coalesce(d.descripcion_demanda, '')",
+      "coalesce(d.problema_3p, '')",
+      "coalesce(d.pedido_3p, '')",
+    ],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);
   if (query.sinCaso === "true") {
     where.push("d.caso_id is null");
@@ -292,6 +301,24 @@ function optionalText(
   if (!has(body, key)) return undefined;
   const value = body[key];
   if (value === null) return null;
+  if (typeof value !== "string") invalid();
+  const trimmed = value.trim();
+  if (!trimmed) invalid();
+  return trimmed;
+}
+
+/**
+ * Referencia a catálogo: acepta el id numérico del catálogo o un texto (id o
+ * nombre). Se normaliza a texto para `resolveTematica`.
+ */
+function optionalRef(
+  body: Record<string, unknown>,
+  key: string,
+): string | null | undefined {
+  if (!has(body, key)) return undefined;
+  const value = body[key];
+  if (value === null) return null;
+  if (typeof value === "number" && Number.isFinite(value)) return String(value);
   if (typeof value !== "string") invalid();
   const trimmed = value.trim();
   if (!trimmed) invalid();
@@ -412,10 +439,20 @@ export async function createDemanda(
   const fechaRegistro = optionalDate(input, "fechaRegistro");
   const fechaVencimiento = optionalDate(input, "fechaVencimiento");
 
-  const tematicaRef = optionalText(input, "tematica");
-  const tematicaId = tematicaRef
-    ? await resolveTematica(client, tematicaRef)
-    : null;
+  // La temática es obligatoria en el alta: se acepta `tematicaId` (id o nombre)
+  // o, por compatibilidad, `tematica` con el nombre del catálogo.
+  const tematicaIdRef = optionalRef(input, "tematicaId");
+  const tematicaNombreRef = optionalText(input, "tematica");
+  const tematicaRef =
+    tematicaIdRef !== undefined ? tematicaIdRef : tematicaNombreRef;
+  if (tematicaRef === undefined || tematicaRef === null) {
+    throw new ApiError(
+      422,
+      "La temática es obligatoria: envía «tematicaId» (o «tematica»).",
+      "TEMATICA_REQUERIDA",
+    );
+  }
+  const tematicaId = await resolveTematica(client, tematicaRef);
 
   const afectaMujeres = optionalBoolean(input, "afectaMujeres") ?? false;
 
@@ -521,12 +558,20 @@ export async function updateDemanda(
     add("fecha_vencimiento_respuesta", fechaVencimiento, "::date");
   }
 
-  const tematicaRef = optionalText(input, "tematica");
+  const tematicaIdRef = optionalRef(input, "tematicaId");
+  const tematicaNombreRef = optionalText(input, "tematica");
+  const tematicaRef =
+    tematicaIdRef !== undefined ? tematicaIdRef : tematicaNombreRef;
   if (tematicaRef !== undefined) {
-    add(
-      "tematica_id",
-      tematicaRef === null ? null : await resolveTematica(client, tematicaRef),
-    );
+    // En edición sólo se rechaza si el campo llega explícitamente nulo.
+    if (tematicaRef === null) {
+      throw new ApiError(
+        422,
+        "La temática no puede quedar vacía: envía un «tematicaId» válido.",
+        "TEMATICA_REQUERIDA",
+      );
+    }
+    add("tematica_id", await resolveTematica(client, tematicaRef));
   }
 
   const afectaMujeres = optionalBoolean(input, "afectaMujeres");

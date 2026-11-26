@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 
 import { auditChange } from "../audit";
+import { filtroTexto } from "../busqueda";
 import { nextSequentialCode } from "../codes";
 import { ApiError } from "../errors";
 
@@ -323,17 +324,18 @@ function construirFiltros(
 ): string[] {
   const where: string[] = [];
 
-  const search = query.q?.trim();
-  if (search) {
-    const like = bind(`%${search}%`);
-    where.push(
-      `(core.normalizar_ref(s.codigo) like core.normalizar_ref(${like})
-        or core.normalizar_ref(s.titulo) like core.normalizar_ref(${like})
-        or core.normalizar_ref(coalesce(s.detalle, '')) like core.normalizar_ref(${like})
-        or core.normalizar_ref(coalesce(s.destinatario, '')) like core.normalizar_ref(${like})
-        or core.normalizar_ref(coalesce(s.sustento, '')) like core.normalizar_ref(${like}))`,
-    );
-  }
+  const porTexto = filtroTexto(
+    [
+      "s.codigo",
+      "s.titulo",
+      "coalesce(s.detalle, '')",
+      "coalesce(s.destinatario, '')",
+      "coalesce(s.sustento, '')",
+    ],
+    query.q,
+    bind,
+  );
+  if (porTexto) where.push(porTexto);
 
   const caso = query.caso?.trim();
   if (caso) {
