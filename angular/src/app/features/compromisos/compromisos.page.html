@@ -64,7 +64,7 @@
     </button>
   </div>
   } @if (!vistaMatriz() && !vistaEstadisticas()) {
-  <div class="filter-bar">
+  <div class="filter-bar filter-bar-wrap">
     <label class="search-field">
       <app-icono nombre="buscar" [tamano]="14" />
       <input
@@ -95,6 +95,24 @@
         }
       </select>
     </label>
+
+    @if (mesas().length > 0) {
+    <label class="select-filter">
+      Espacio de diálogo
+      <select aria-label="Filtrar por espacio de diálogo" (change)="filtrarMesa($event)">
+        <option value="" [selected]="!filtros().mesa">Todos</option>
+        @for (mesa of mesas(); track mesa.codigo) {
+        <option
+          [value]="mesa.codigo"
+          [selected]="mesa.codigo === filtros().mesa"
+          [title]="mesa.codigo + ' · ' + mesa.titulo"
+        >
+          {{ mesa.codigo }} · {{ mesa.titulo }}
+        </option>
+        }
+      </select>
+    </label>
+    }
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
@@ -334,11 +352,21 @@
     (filaClic)="alClicFila($event)"
   >
     <ng-template appCeldaTabla="caso" let-fila>
+      @if (fila.mesaCodigo) {
+      <span class="celda-caso" [attr.title]="tituloCeldaCaso(fila)">
+        {{ fila.mesaCodigo }} @if (fila.mesaTitulo || fila.casoTitulo) {
+        <small>{{ fila.mesaTitulo || fila.casoTitulo }}</small>
+        } @if (fila.casoCodigo) {
+        <small class="celda-caso-ref">{{ fila.casoCodigo }}</small>
+        }
+      </span>
+      } @else {
       <span class="celda-caso" [attr.title]="fila.casoTitulo || 'Sin caso asociado'">
         {{ fila.casoCodigo || '—' }} @if (fila.casoTitulo) {
         <small>{{ fila.casoTitulo }}</small>
         }
       </span>
+      }
     </ng-template>
 
     <ng-template appCeldaTabla="puntoFocal" let-fila>

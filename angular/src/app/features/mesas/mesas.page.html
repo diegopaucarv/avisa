@@ -2,10 +2,7 @@
   <header class="view-head">
     <div>
       <h1 id="titulo-mesas">Mesas de diálogo</h1>
-      <p class="view-sub">Espacios de diálogo registrados y su vigencia</p>
-    </div>
-    <div class="view-actions">
-      <a class="button-secondary" routerLink="/mesas/compromisos">Compromisos de mesas</a>
+      <p class="view-subtitle">Espacios de diálogo registrados y su vigencia</p>
     </div>
   </header>
 
@@ -131,12 +128,7 @@
     (paginaCambia)="cambiarPagina($event)"
     (tamanoCambia)="cambiarTamano($event)"
   />
-  } } @if (resumen()?.compromisos === 0) {
-  <p class="form-hint">
-    Las mesas aún no tienen compromisos vinculados: la vista de compromisos se llenará al aplicar la
-    migración 81.
-  </p>
-  } @if (seleccionada(); as codigo) {
+  } } @if (seleccionada(); as codigo) {
   <app-mesa-panel [codigo]="codigo" (cerrado)="cerrarPanel()" />
   }
 </section>

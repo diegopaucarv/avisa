@@ -125,6 +125,10 @@ export type Compromiso = {
   casoId: string | null;
   casoCodigo: string | null;
   casoTitulo: string | null;
+  /** Espacio de diálogo real del caso (`core.mesas_dialogo`), si el caso lo es. */
+  mesaId: string | null;
+  mesaCodigo: string | null;
+  mesaTitulo: string | null;
   /** Demanda que atiende el compromiso; `null` cuando no se vinculó ninguna. */
   demandaId: string | null;
   demandaCodigo: string | null;
@@ -365,6 +369,9 @@ export function aCompromiso(bruto: unknown): Compromiso {
     casoId: texto(registro, ['casoId', 'caso_id']),
     casoCodigo: texto(registro, ['casoCode', 'caso_code']),
     casoTitulo: texto(registro, ['casoTitulo', 'caso_titulo']),
+    mesaId: texto(registro, ['mesaId', 'mesa_id']),
+    mesaCodigo: texto(registro, ['mesaCodigo', 'mesa_codigo']),
+    mesaTitulo: texto(registro, ['mesaTitulo', 'mesa_titulo']),
     demandaId: texto(registro, ['demandaId', 'demanda_id']),
     demandaCodigo: texto(registro, ['demandaCodigo', 'demanda_codigo']),
     demandaTexto: texto(registro, ['demandaTexto', 'demanda_texto']),

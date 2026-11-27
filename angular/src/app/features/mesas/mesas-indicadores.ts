@@ -1,11 +1,11 @@
 /**
  * Mesas · indicadores: contrato de `GET /api/v1/mesas/indicadores`.
  *
- * El endpoint devuelve un sobre ya agregado (no filas) para las dos pestañas de
- * SEGUIMIENTO: `/mesas` y `/mesas/compromisos`. Aquí se hace el mapeo tolerante
- * (camelCase o snake_case, sobre envuelto en `data` o directo, números enviados
- * como texto) y el cálculo del ancho de barra, de modo que la plantilla no
- * conozca variantes ni haga aritmética.
+ * El endpoint devuelve un sobre ya agregado (no filas) para el listado de
+ * SEGUIMIENTO `/mesas`. Aquí se hace el mapeo tolerante (camelCase o snake_case,
+ * sobre envuelto en `data` o directo, números enviados como texto) y el cálculo
+ * del ancho de barra, de modo que la plantilla no conozca variantes ni haga
+ * aritmética.
  *
  * Mientras la migración 81 no vincule `core.mesas_dialogo.caso_id` con la base
  * de casos, el backend manda `vinculoDisponible: false` y los contadores de
@@ -46,9 +46,14 @@ export type IndicadoresMesas = {
   hitosEstado: ConteoClave[];
 };
 
-/** Sobre vacío: útil como valor inicial y en pruebas. */
+/**
+ * Sobre vacío: útil como valor inicial y en pruebas.
+ *
+ * `vinculoDisponible` queda `undefined` y no `false`: un sobre sin datos no
+ * declara que la base carezca del vínculo, sólo que la API aún no informó.
+ */
 export const VACIO: IndicadoresMesas = {
-  vinculoDisponible: false,
+  vinculoDisponible: undefined,
   totales: { mesas: 0, miembros: 0, compromisos: 0, hitos: 0 },
   vigencia: [],
   naturaleza: [],

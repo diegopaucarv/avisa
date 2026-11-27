@@ -66,6 +66,7 @@ import {
 import { CompromisoPanelComponent } from './compromiso-panel.component';
 import { EstadisticasCompromisosComponent } from './estadisticas-compromisos.component';
 import { MatrizEquipoComponent } from './matriz-equipo.component';
+import { aMesa, type Mesa } from '../mesas/mesa.mapeo';
 
 type FiltrosCompromisos = {
   q: string;
@@ -73,6 +74,8 @@ type FiltrosCompromisos = {
   tamano: number;
   estado: string;
   tipo: string;
+  /** Código de la mesa de diálogo (`OAIPCS-XXX`); vacío = todas. */
+  mesa: string;
   nivelGobierno: string;
   atiendeGenero: string;
   /** `?vencidos=1`: sólo compromisos con vencimiento efectivo anterior a hoy. */
@@ -386,6 +389,11 @@ function totalDe(bruto: unknown): number {
       margin-top: 2px;
       color: var(--muted);
       font-size: 12px;
+    }
+    /* El código del caso espejo (MD-…) es referencia secundaria bajo la mesa. */
+    .celda-caso .celda-caso-ref {
+      font-size: 11px;
+      opacity: 0.8;
     }
     /* La franja dejó el bloque de redacción: ahora acompaña al resumen de hitos. */
     .celda-hitos {
@@ -821,6 +829,7 @@ export class CompromisosPage {
         tamano: Math.max(1, Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA),
         estado: params.get('estado') ?? '',
         tipo: params.get('tipo') ?? '',
+        mesa: params.get('mesa') ?? '',
         nivelGobierno: params.get('nivelGobierno') ?? '',
         atiendeGenero: params.get('atiendeGenero') ?? '',
         vencidos: params.get('vencidos') === '1',
@@ -834,6 +843,7 @@ export class CompromisosPage {
         tamano: TAMANO_PAGINA,
         estado: '',
         tipo: '',
+        mesa: '',
         nivelGobierno: '',
         atiendeGenero: '',
         vencidos: false,
@@ -912,6 +922,7 @@ export class CompromisosPage {
         q: filtros.q,
         estado: filtros.estado,
         tipo: filtros.tipo,
+        mesa: filtros.mesa,
         nivelGobierno: filtros.nivelGobierno,
         atiendeGenero: filtros.atiendeGenero,
         // «Vencidos» es el mismo corte que usa el semáforo de la fila:
@@ -949,6 +960,18 @@ export class CompromisosPage {
   });
 
   /**
+   * Mesas de diálogo para el filtro. La petición es independiente del listado:
+   * si falla o vuelve vacía, `mesas()` queda vacío, la plantilla oculta el
+   * selector y la vista sigue funcionando sin él.
+   */
+  private readonly recursoMesas = consulta<Mesa[]>({
+    fuente: () => urlConParametros(urlApi('/v1/mesas'), { tamano: 100 }),
+    esquema: (bruto) => normalizarColeccion<unknown>(bruto).elementos.map(aMesa),
+  });
+
+  readonly mesas = computed(() => this.recursoMesas.valor() ?? []);
+
+  /**
    * Indicadores de la pantalla (item 112): totales del servidor, no de la página
    * visible. Cada cifra repite el recorte de filtros con un `estado` adicional (o
    * el corte de vencidos) y lee `total` con `pageSize=1`. Se ocultan en la papelera.
@@ -963,6 +986,7 @@ export class CompromisosPage {
           q: filtros.q,
           estado: filtros.estado,
           tipo: filtros.tipo,
+          mesa: filtros.mesa,
           nivelGobierno: filtros.nivelGobierno,
           atiendeGenero: filtros.atiendeGenero,
           vencimiento_hasta: filtros.vencidos ? isoAyer() : '',
@@ -1046,6 +1070,7 @@ export class CompromisosPage {
         q: filtros.q,
         estado: filtros.estado,
         tipo: filtros.tipo,
+        mesa: filtros.mesa,
         nivelGobierno: filtros.nivelGobierno,
         atiendeGenero: filtros.atiendeGenero,
       });
@@ -1081,6 +1106,7 @@ export class CompromisosPage {
         q: filtros.q,
         estado: filtros.estado,
         tipo: filtros.tipo,
+        mesa: filtros.mesa,
         nivelGobierno: filtros.nivelGobierno,
         atiendeGenero: filtros.atiendeGenero,
       });
@@ -1218,6 +1244,10 @@ export class CompromisosPage {
 
   filtrarTipo(evento: Event): void {
     void this.actualizar({ tipo: this.valorDe(evento), pagina: 1 });
+  }
+
+  filtrarMesa(evento: Event): void {
+    void this.actualizar({ mesa: this.valorDe(evento), pagina: 1 });
   }
 
   cambiarPagina(pagina: number): void {
@@ -1572,6 +1602,23 @@ export class CompromisosPage {
     return etiquetaPuntoFocal(compromiso);
   }
 
+  /**
+   * `title` completo de la celda «Caso / Espacio de diálogo»: código de mesa,
+   * título una sola vez y código del caso espejo `MD-…` como referencia.
+   */
+  tituloCeldaCaso(compromiso: Compromiso): string {
+    if (compromiso.mesaCodigo) {
+      return [
+        compromiso.mesaCodigo,
+        compromiso.mesaTitulo ?? compromiso.casoTitulo,
+        compromiso.casoCodigo,
+      ]
+        .filter((parte): parte is string => Boolean(parte))
+        .join(' · ');
+    }
+    return compromiso.casoTitulo || compromiso.casoCodigo || 'Sin caso asociado';
+  }
+
   /** Resumen de los hitos para la columna «Estado de hitos / validación». */
   hitosTexto(compromiso: Compromiso): string {
     return avanceHitosDe(compromiso.hitos);
@@ -1601,6 +1648,7 @@ export class CompromisosPage {
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
         estado: siguiente.estado || null,
         tipo: siguiente.tipo || null,
+        mesa: siguiente.mesa || null,
         nivelGobierno: siguiente.nivelGobierno || null,
         atiendeGenero: siguiente.atiendeGenero || null,
         vencidos: siguiente.vencidos ? '1' : null,

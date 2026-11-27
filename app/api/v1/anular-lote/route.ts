@@ -21,11 +21,7 @@ export const dynamic = "force-dynamic";
 const MAX_LOTE = 200;
 
 type EntidadAnulable =
-  | "alertas"
-  | "casos"
-  | "compromisos"
-  | "documentos"
-  | "demandas";
+  "alertas" | "casos" | "compromisos" | "documentos" | "demandas";
 
 const ENTIDADES: readonly EntidadAnulable[] = [
   "alertas",
@@ -56,11 +52,7 @@ function leerCuerpo(valor: unknown): {
       : "";
 
   if (!ENTIDADES.includes(entidad as EntidadAnulable)) {
-    throw new ApiError(
-      400,
-      "Entidad no anulable en lote.",
-      "ENTIDAD_INVALIDA",
-    );
+    throw new ApiError(400, "Entidad no anulable en lote.", "ENTIDAD_INVALIDA");
   }
 
   const ids = Array.isArray(cuerpo.ids)
@@ -105,14 +97,6 @@ export async function POST(request: Request) {
   try {
     const sesion = requireSession(request);
 
-    if (!puedeAnularRegistros(sesion.roles)) {
-      throw new ApiError(
-        403,
-        "Su rol no permite anular registros.",
-        "FORBIDDEN",
-      );
-    }
-
     let bruto: unknown;
     try {
       bruto = await request.json();
@@ -121,6 +105,17 @@ export async function POST(request: Request) {
     }
 
     const { entidad, ids, motivo } = leerCuerpo(bruto);
+
+    // El permiso depende de la entidad: la Dirección OAIPCS anula alertas
+    // (migración 78), pero no casos, demandas ni documentos.
+    if (!puedeAnularRegistros(sesion.roles, entidad)) {
+      throw new ApiError(
+        403,
+        "Su rol no permite anular registros.",
+        "FORBIDDEN",
+      );
+    }
+
     const scope = { usuarioId: sesion.uid, rolCodigo: sesion.rol };
 
     const anulados = await withSession(scope, async (client) => {

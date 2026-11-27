@@ -676,6 +676,46 @@ export type CaseDocument = {
   confianza: number | null;
 };
 
+/**
+ * Mesa de diálogo vinculada al caso (`core.mesas_dialogo`, migración 81).
+ *
+ * Cada mesa tiene su caso espejo `MD-AAAA-NNNN` enlazado por
+ * `mesas_dialogo.caso_id` (único, 1:1). Un caso común no tiene mesa: el campo
+ * llega `null` y la ficha no pinta el bloque.
+ */
+export type CaseMesa = {
+  id: string;
+  codigo: string;
+  titulo: string;
+  naturaleza: string | null;
+  estadoVigencia: string | null;
+  fechaInstalacion: string | null;
+  fechaFinVigencia: string | null;
+  tipoInstrumento: string | null;
+  baseLegal: string | null;
+  ambitoDepartamento: string | null;
+  objetivo: string | null;
+  miembros: number;
+};
+
+/** Normaliza a camelCase la fila de `core.mesas_dialogo` del detalle. */
+function mapCaseMesa(row: Record<string, unknown>): CaseMesa {
+  return {
+    id: String(row.id),
+    codigo: String(row.codigo),
+    titulo: String(row.titulo),
+    naturaleza: (row.naturaleza as string | null) ?? null,
+    estadoVigencia: (row.estado_vigencia as string | null) ?? null,
+    fechaInstalacion: (row.fecha_instalacion as string | null) ?? null,
+    fechaFinVigencia: (row.fecha_fin_vigencia as string | null) ?? null,
+    tipoInstrumento: (row.tipo_instrumento as string | null) ?? null,
+    baseLegal: (row.base_legal as string | null) ?? null,
+    ambitoDepartamento: (row.ambito_departamento as string | null) ?? null,
+    objetivo: (row.objetivo as string | null) ?? null,
+    miembros: Number(row.miembros ?? 0),
+  };
+}
+
 export type CaseDetail = {
   case: CaseListItem & {
     regiones: string[];
@@ -683,6 +723,8 @@ export type CaseDetail = {
     fechaCierre: string | null;
     descripcionRiesgo: string | null;
   };
+  /** Mesa de diálogo enlazada; `null` si el caso no es espejo de una mesa. */
+  mesa: CaseMesa | null;
   actors: CaseActor[];
   events: CaseEvent[];
   demandas: CaseDemanda[];
@@ -721,6 +763,7 @@ export async function getCaseByCode(
     alerts,
     stateHistory,
     completeness,
+    mesaVinculada,
   ] = await Promise.all([
     client.query(
       `select a.actor_uid as id,
@@ -754,7 +797,9 @@ export async function getCaseByCode(
              join core.actores org on org.actor_uid = m.organizacion_uid
             where m.persona_uid = a.actor_uid
               and (m.valid_from is null or m.valid_from <= current_date)
-              and (m.valid_to is null or m.valid_to >= current_date)
+              -- valid_to es fin EXCLUSIVO: una membresía cerrada hoy ya no rige
+              -- (coherente con actors.ts y con config.parametro/domain.artefacto).
+              and (m.valid_to is null or m.valid_to > current_date)
             order by m.valid_from desc nulls last
             limit 1
          ) om on true
@@ -949,6 +994,29 @@ export async function getCaseByCode(
         where c.codigo_caso = $1`,
       [code],
     ),
+    // Mesa de diálogo enlazada (migración 81). Una sola consulta por apertura y
+    // por el mismo `client` de `withSession`: la RLS sigue aplicando. `caso_id`
+    // es único, así que devuelve como máximo una fila.
+    client.query(
+      `select m.id,
+              m.codigo,
+              m.titulo,
+              m.naturaleza,
+              m.estado_vigencia,
+              to_char(m.fecha_instalacion, 'YYYY-MM-DD') as fecha_instalacion,
+              to_char(m.fecha_fin_vigencia, 'YYYY-MM-DD') as fecha_fin_vigencia,
+              m.tipo_instrumento,
+              m.base_legal,
+              m.ambito_departamento,
+              m.objetivo,
+              (select count(*)::int
+                 from core.mesa_miembros mm
+                where mm.mesa_id = m.id) as miembros
+         from core.mesas_dialogo m
+        where m.caso_id = $1
+        limit 1`,
+      [row.id],
+    ),
   ]);
 
   const item: CaseListItem = {
@@ -1002,6 +1070,7 @@ export async function getCaseByCode(
       fechaCierre: row.fecha_cierre,
       descripcionRiesgo: row.descripcion_riesgo,
     },
+    mesa: mesaVinculada.rows[0] ? mapCaseMesa(mesaVinculada.rows[0]) : null,
     actors: actors.rows as CaseActor[],
     events: events.rows as CaseEvent[],
     demandas: demandas.rows as CaseDemanda[],

@@ -19,6 +19,7 @@ export const dynamic = "force-dynamic";
 const FILTERS = [
   "q",
   "caso",
+  "mesa",
   "estado",
   "unidad",
   "tipo",
@@ -70,7 +71,12 @@ function leerFecha(
  *
  * `GET` devuelve el sobre paginado de siempre (`items`, `total`, `page`,
  * `pageSize`, más los alias `pagina`/`tamanoPagina`) y acepta los filtros
- * `q`, `caso`, `estado`, `unidad`, `tipo`, `nivelGobierno` y `atiendeGenero`.
+ * `q`, `caso`, `mesa`, `estado`, `unidad`, `tipo`, `nivelGobierno` y
+ * `atiendeGenero`.
+ *
+ * `mesa` recibe el **código** de la mesa de diálogo (`OAIPCS-XXX`, no su id) y
+ * acota a los compromisos que cuelgan del caso espejo `MD-AAAA-NNNN` enlazado a
+ * `core.mesas_dialogo`. Un código inexistente devuelve la lista vacía.
  *
  * Para la vista de calendario se añaden `vencimiento_desde` y
  * `vencimiento_hasta` (ISO `YYYY-MM-DD`, ambos inclusivos). El rango se

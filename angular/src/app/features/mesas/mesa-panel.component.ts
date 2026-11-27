@@ -36,8 +36,7 @@ type GrupoRol = { rol: string; personas: MesaIntegrante[] };
 /**
  * Tono de `.commit-status` para el estado de un compromiso de la mesa.
  *
- * Es el mismo criterio que el listado de `/mesas/compromisos`: «Por iniciar» y
- * «En proceso» comparten el azul de trabajo en curso.
+ * «Por iniciar» y «En proceso» comparten el azul de trabajo en curso.
  */
 function claseEstadoCompromiso(estado: string): string {
   switch (estado) {

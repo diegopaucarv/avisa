@@ -17,6 +17,11 @@
 -- --------
 -- 1. Añade `core.mesas_dialogo.caso_id` (FK a `core.casos`, `on delete set
 --    null`) y un índice único parcial: una mesa por caso y un caso por mesa.
+-- 1b. Crea, si falta, el subsector «Gestión y Prevención de Conflictos» en
+--    `core.cat_subsectores`: en la base real sólo están `Pesca y Acuicultura`
+--    (1) y `Mype e Industria` (2), y `core.codigo_subsector()` reserva
+--    cualquier otro id para 'GEN'. Sin esa fila, `casos.subsector_id` (NOT
+--    NULL, FK) obligaría a etiquetar 21 mesas como pesca o MYPE, que es falso.
 -- 2. Crea `core.siguiente_codigo_mesa()`, que emite la serie opaca
 --    `MD-<año>-<NNNN>` con el mismo mecanismo que la serie de casos
 --    (`core.siguiente_codigo`, migraciones 68-70). El código no incrusta
@@ -34,23 +39,25 @@
 --
 --   · `subsector_id` = `core.cat_subsectores.nombre` normalizado
 --     «Gestión y Prevención de Conflictos».
---     No existe un subsector llamado «OAIPCS»: el catálogo real sólo tiene
---     `Pesca y Acuicultura` (1), `Mype e Industria` (2) y
---     `Gestión y Prevención de Conflictos` (3). Lo confirma la propia función
---     `core.codigo_subsector()` (backups/avisa_neon_schema.sql:1056: 1=PA,
---     2=MI, cualquier otro=GEN) y el sembrado del esquema
---     (docs/AVISA_V10_ESQUEMA_UNIFICADO.sql:8734). Las mesas de diálogo son
---     espacios de prevención de conflictos, así que el tercero es el valor
---     conservador; si OAIPCS decide otro, se cambia el literal de resolución.
+--     No existe un subsector llamado «OAIPCS». En la base real de Neon el
+--     catálogo sólo trae `Pesca y Acuicultura` (1) y `Mype e Industria` (2):
+--     la tercera categoría que documentan `core.codigo_subsector()`
+--     (backups/avisa_neon_schema.sql:1056: 1=PA, 2=MI, cualquier otro=GEN) y el
+--     sembrado del esquema (docs/AVISA_V10_ESQUEMA_UNIFICADO.sql:8734) nunca se
+--     cargó. El bloque 1b la crea si falta (id por secuencia) porque
+--     `casos.subsector_id` es NOT NULL con FK y las mesas no son pesca ni MYPE.
+--     Si OAIPCS prefiere otro subsector, se cambia el literal de resolución y
+--     se retira la fila creada (ver «Reversión»).
 --   · `unidad_responsable_id` = `core.cat_unidades_organicas.siglas` 'OAIPCS'
 --     (backups/avisa_neon_schema.sql:7344; la fila se siembra en
 --     docs/AVISA_V10_ESQUEMA_UNIFICADO.sql:9607).
 --   · `nivel_riesgo_id` = `core.cat_niveles_riesgo.codigo` 'Bajo'
 --     (backups/avisa_neon_schema.sql:5837; ids 1=Bajo, 2=Moderado, 3=Alto).
 --     Se elige el nivel más bajo para no inflar el riesgo de un alta espejo.
---   · `estado_id` = `core.cat_estados_caso.codigo` 'Activo'
---     (backups/avisa_neon_schema.sql:5712; es el estado inicial y coincide con
---     `core.casos.estado_id default 1`).
+--   · `estado_id` = `core.cat_estados_caso.codigo` 'Abierto'.
+--     En Neon el catálogo sólo tiene `Abierto` (1), `Resuelto` (3) y
+--     `Archivado` (4): no existe `Activo`. `Abierto` es el estado inicial y
+--     coincide con `core.casos.estado_id default 1` (schema:5712).
 --
 -- La comparación de códigos usa `core.normalizar_ref` para tolerar mayúsculas,
 -- tildes y separadores (`Activo`/`activo`, `En_seguimiento`/`En seguimiento`).
@@ -136,6 +143,22 @@ comment on column core.mesas_dialogo.caso_id is
 create unique index if not exists ux_mesas_dialogo_caso
   on core.mesas_dialogo (caso_id)
   where caso_id is not null;
+
+-- 1b · Subsector de prevención de conflictos ----------------------------------
+-- En Neon el catálogo sólo tiene `Pesca y Acuicultura` (1) y `Mype e Industria`
+-- (2), pero `core.codigo_subsector()` y el esquema documentado reservan una
+-- tercera categoría para «gestión y prevención de conflictos» (cualquier id
+-- distinto de 1 y 2 devuelve 'GEN'). Sin esa fila, `casos.subsector_id` (NOT
+-- NULL, FK) obliga a etiquetar las 21 mesas como pesca o MYPE, que es falso.
+-- Se crea la fila que falta de forma idempotente; el id lo asigna la secuencia
+-- del catálogo. `core.cat_subsectores` no tiene RLS. Reversible: ver «Reversión».
+insert into core.cat_subsectores (nombre)
+select 'Gestión y Prevención de Conflictos'
+ where not exists (
+   select 1
+     from core.cat_subsectores
+    where core.normalizar_ref(nombre)
+        = core.normalizar_ref('Gestión y Prevención de Conflictos'));
 
 -- 2 · Serie opaca de códigos de mesa -----------------------------------------
 
@@ -228,11 +251,11 @@ begin
 
   select e.id into v_estado
     from core.cat_estados_caso e
-   where core.normalizar_ref(e.codigo) = core.normalizar_ref('Activo')
+   where core.normalizar_ref(e.codigo) = core.normalizar_ref('Abierto')
    order by e.id
    limit 1;
   if v_estado is null then
-    raise exception '81: no existe el estado «Activo» en core.cat_estados_caso; revise el catálogo antes de crear el caso de la mesa %', p_mesa_id;
+    raise exception '81: no existe el estado «Abierto» en core.cat_estados_caso; revise el catálogo antes de crear el caso de la mesa %', p_mesa_id;
   end if;
 
   -- Región principal: sólo coincidencia exacta normalizada. `normalizar_ref`
@@ -334,11 +357,11 @@ begin
 
   select e.id into v_estado
     from core.cat_estados_caso e
-   where core.normalizar_ref(e.codigo) = core.normalizar_ref('Activo')
+   where core.normalizar_ref(e.codigo) = core.normalizar_ref('Abierto')
    order by e.id
    limit 1;
   if v_estado is null then
-    raise exception '81: falta el estado «Activo» en core.cat_estados_caso; revise el catálogo antes de la migración 81';
+    raise exception '81: falta el estado «Abierto» en core.cat_estados_caso; revise el catálogo antes de la migración 81';
   end if;
 end $guardas$;
 
@@ -518,6 +541,13 @@ select ambito, ultimo
 -- -- 7) Limpiar el contador y el log de la migración.
 -- delete from core.secuencia_codigo where ambito like 'MESA-%';
 -- delete from core.migracion_log where clave = '81_mesas_como_casos_2026_11_27';
+--
+-- -- 8) Retirar el subsector que creó el bloque 1b, sólo si ya no lo usa ningún
+-- --    caso. No lo borre si quedan casos apuntándolo (rompería la FK).
+-- delete from core.cat_subsectores s
+--  where core.normalizar_ref(s.nombre)
+--      = core.normalizar_ref('Gestión y Prevención de Conflictos')
+--    and not exists (select 1 from core.casos c where c.subsector_id = s.id);
 --
 -- commit;
 

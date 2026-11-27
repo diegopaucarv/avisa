@@ -9,14 +9,14 @@
   <div class="empty-state">
     <strong>Sin permiso para consultar el archivo</strong>
     <p>
-      Su rol no permite anular ni restaurar registros. Esta vista está reservada a administración y
-      sectoristas.
+      Su rol no permite anular ni restaurar registros. Esta vista está reservada a administración,
+      sectoristas y, sólo para alertas, a la Dirección OAIPCS.
     </p>
   </div>
   } @else {
   <div class="view-toolbar">
     <div class="segmented" role="group" aria-label="Tipo de registro anulado">
-      @for (p of pestanas; track p.valor) {
+      @for (p of pestanas(); track p.valor) {
       <button
         type="button"
         [attr.aria-pressed]="pestana() === p.valor"

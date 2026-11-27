@@ -172,31 +172,18 @@ export type MesaDetalle = {
   compromisos: MesaCompromiso[];
 };
 
-export type CompromisosMesasQuery = {
-  q?: string;
-  /** Código de mesa (`OAIPCS-001`), no id. */
-  mesa?: string;
-  estado?: string;
-  page?: number;
-  pageSize?: number;
-};
-
-export type CompromisosMesasResult = {
-  items: MesaCompromiso[];
-  total: number;
-  page: number;
-  pageSize: number;
-};
-
 /**
- * `mesas_dialogo.caso_id` existe desde la migración 81. Se comprueba una vez y
- * se recuerda en el proceso: el esquema no cambia en caliente, así que no tiene
- * sentido consultar `information_schema` en cada petición.
+ * `mesas_dialogo.caso_id` existe desde la migración 81.
+ *
+ * Sólo se recuerda el resultado positivo: una vez creada la columna no vuelve a
+ * desaparecer, así que memorizar `true` evita consultar `information_schema` en
+ * cada petición. El negativo no se guarda, de modo que un proceso que arrancó
+ * antes de aplicar la migración se entera en la petición siguiente sin reiniciar.
  */
 let vinculoCache: boolean | null = null;
 
 export async function hayVinculoMesas(client: PoolClient): Promise<boolean> {
-  if (vinculoCache !== null) return vinculoCache;
+  if (vinculoCache === true) return true;
   const result = await client.query<{ existe: boolean }>(
     `select exists (
        select 1 from information_schema.columns
@@ -204,8 +191,9 @@ export async function hayVinculoMesas(client: PoolClient): Promise<boolean> {
           and column_name = 'caso_id'
      ) as existe`,
   );
-  vinculoCache = result.rows[0]?.existe === true;
-  return vinculoCache;
+  const existe = result.rows[0]?.existe === true;
+  if (existe) vinculoCache = true;
+  return existe;
 }
 
 /** `replace(codigo,'_',' ')`: la UI muestra el estado legible del catálogo. */
@@ -357,7 +345,10 @@ export async function listMesas(
   }
 
   const page = Math.max(1, Math.trunc(filtros.page ?? 1));
-  const pageSize = Math.min(100, Math.max(1, Math.trunc(filtros.pageSize ?? 25)));
+  const pageSize = Math.min(
+    100,
+    Math.max(1, Math.trunc(filtros.pageSize ?? 25)),
+  );
 
   // Sin el vínculo (migración 81 pendiente) no hay caso al que unir compromisos.
   const compromisosSql = vinculo
@@ -556,74 +547,5 @@ export async function getMesaDetalle(
     caso,
     integrantes: integrantesResult.rows,
     compromisos,
-  };
-}
-
-export async function listCompromisosDeMesas(
-  client: PoolClient,
-  filtros: CompromisosMesasQuery = {},
-): Promise<CompromisosMesasResult> {
-  const page = Math.max(1, Math.trunc(filtros.page ?? 1));
-  const pageSize = Math.min(100, Math.max(1, Math.trunc(filtros.pageSize ?? 25)));
-  const vinculo = await hayVinculoMesas(client);
-
-  // Sin vínculo no hay compromisos ligados a mesas: la página sale vacía.
-  if (!vinculo) {
-    return { items: [], total: 0, page, pageSize };
-  }
-
-  const params: unknown[] = [];
-  const where: string[] = ["cmp.anulado_en is null"];
-  const bind = (value: unknown) => {
-    params.push(value);
-    return `$${params.length}`;
-  };
-
-  const porTexto = filtroTexto(
-    ["cmp.codigo_compromiso", "cmp.accion_compromiso"],
-    filtros.q,
-    bind,
-  );
-  if (porTexto) where.push(porTexto);
-  if (filtros.mesa) {
-    where.push(
-      `core.normalizar_ref(m.codigo) = core.normalizar_ref(${bind(filtros.mesa)})`,
-    );
-  }
-  if (filtros.estado) {
-    where.push(
-      `core.normalizar_ref(ec.codigo) = core.normalizar_ref(${bind(filtros.estado)})`,
-    );
-  }
-
-  const sql = `
-    select cmp.id,
-           cmp.codigo_compromiso as codigo,
-           cmp.accion_compromiso as titulo,
-           replace(ec.codigo, '_', ' ') as estado,
-           uo.siglas as area,
-           to_char(cmp.fecha_vencimiento, 'YYYY-MM-DD') as "fechaLimite",
-           m.codigo as "mesaCodigo",
-           m.titulo as "mesaTitulo",
-           ${HITOS_TOTAL} as "hitosTotal",
-           ${HITOS_CUMPLIDOS} as "hitosCumplidos",
-           ${PROXIMO_HITO} as "proximoHito",
-           count(*) over()::int as total
-      from core.compromisos cmp
-      join core.mesas_dialogo m on m.caso_id = cmp.caso_id
-      left join core.cat_estados_compromiso ec on ec.id = cmp.estado_id
-      left join core.cat_unidades_organicas uo on uo.id = cmp.unidad_responsable_id
-     where ${where.join(" and ")}
-     order by cmp.fecha_inicio desc nulls last, cmp.codigo_compromiso
-     limit ${bind(pageSize)} offset ${bind((page - 1) * pageSize)}
-  `;
-
-  const result = await client.query<CompromisoFila>(sql, params);
-
-  return {
-    items: result.rows.map((row) => mapCompromiso(row, false)),
-    total: result.rows[0]?.total ?? 0,
-    page,
-    pageSize,
   };
 }

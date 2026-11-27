@@ -9,6 +9,7 @@ import {
   esEstadoHitoFicha,
   fechaHoyIso,
   hechoEnVentana,
+  integrantesTexto,
   referenciaHito,
   textoFechaHito,
   textoFechaRealHito,
@@ -143,6 +144,90 @@ describe('hitos de la ficha: esquema del detalle', () => {
     expect(hito.terminal).toBe(false);
     expect(codigoHitoVisible(hito.codigo)).toBe('—');
     expect(textoFechaRealHito(hito.fechaReal, hito.fechaRealTexto)).toBe('Sin fecha real');
+  });
+});
+
+describe('mesa del caso: bloque condicional', () => {
+  it('un caso común no trae mesa', () => {
+    const detalle = aDetalleCasoConCompromisos(CASO_BRUTO);
+
+    expect(detalle.mesa).toBeNull();
+  });
+
+  it('mapea la mesa que entrega la API en camelCase', () => {
+    const detalle = aDetalleCasoConCompromisos({
+      ...CASO_BRUTO,
+      mesa: {
+        id: 'mesa-1',
+        codigo: 'OAIPCS-007',
+        titulo: 'Mesa de diálogo por la educación',
+        naturaleza: 'Temporal',
+        estadoVigencia: 'Por vencer',
+        fechaInstalacion: '2025-03-14',
+        fechaFinVigencia: '2026-12-31',
+        tipoInstrumento: 'Resolución',
+        baseLegal: 'R.M. 123-2025',
+        ambitoDepartamento: 'Lima',
+        objetivo: 'Articular la respuesta institucional.',
+        miembros: 4,
+      },
+    });
+
+    expect(detalle.mesa).toEqual({
+      codigo: 'OAIPCS-007',
+      titulo: 'Mesa de diálogo por la educación',
+      naturaleza: 'Temporal',
+      estadoVigencia: 'Por vencer',
+      fechaInstalacion: '2025-03-14',
+      fechaFinVigencia: '2026-12-31',
+      tipoInstrumento: 'Resolución',
+      baseLegal: 'R.M. 123-2025',
+      ambitoDepartamento: 'Lima',
+      objetivo: 'Articular la respuesta institucional.',
+      miembros: 4,
+    });
+  });
+
+  it('lee también las claves snake_case y no inventa los datos ausentes', () => {
+    const detalle = aDetalleCasoConCompromisos({
+      ...CASO_BRUTO,
+      mesa: {
+        codigo: 'OAIPCS-008',
+        titulo: 'Mesa sin ficha completa',
+        estado_vigencia: 'Vigente',
+        ambito_departamento: 'Cusco',
+      },
+    });
+
+    expect(detalle.mesa?.estadoVigencia).toBe('Vigente');
+    expect(detalle.mesa?.ambitoDepartamento).toBe('Cusco');
+    expect(detalle.mesa?.tipoInstrumento).toBeNull();
+    expect(detalle.mesa?.baseLegal).toBeNull();
+    expect(detalle.mesa?.fechaInstalacion).toBeNull();
+    expect(detalle.mesa?.objetivo).toBeNull();
+    expect(detalle.mesa?.naturaleza).toBeNull();
+    expect(detalle.mesa?.miembros).toBeNull();
+  });
+
+  it('sin estado de vigencia declara «Sin fecha», no un estado inventado', () => {
+    const detalle = aDetalleCasoConCompromisos({
+      ...CASO_BRUTO,
+      mesa: { codigo: 'OAIPCS-009', titulo: 'Mesa sin vigencia' },
+    });
+
+    expect(detalle.mesa?.estadoVigencia).toBe('Sin fecha');
+  });
+});
+
+describe('integrantes de la mesa', () => {
+  it('declara el cero en vez de pintarlo como cifra', () => {
+    expect(integrantesTexto(0)).toBe('sin integrantes registrados');
+    expect(integrantesTexto(null)).toBe('sin integrantes registrados');
+  });
+
+  it('concuerda en singular y plural', () => {
+    expect(integrantesTexto(1)).toBe('1 integrante registrado');
+    expect(integrantesTexto(12)).toBe('12 integrantes registrados');
   });
 });
 

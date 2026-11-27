@@ -53,6 +53,12 @@ import {
   type HitoCasoConResponsable,
 } from '../compromisos/compromiso.mapeo';
 import {
+  claseVigencia,
+  fechaTexto as fechaTextoMesa,
+  vigenciaDe,
+  type EstadoVigencia,
+} from '../mesas/mesa.mapeo';
+import {
   AccionEstado,
   aCatalogosEdicion,
   accionDeEstado,
@@ -156,11 +162,33 @@ type DemandaCasoConTematica = DemandaCaso &
     fechaRegistro: string | null;
   };
 
+/**
+ * Mesa de diálogo del caso (`core.mesas_dialogo`, migración 81). Sólo llega si
+ * el caso es el espejo `MD-AAAA-NNNN` de una mesa; un caso común devuelve
+ * `null`. Los vacíos se conservan como `null`: la plantilla omite la celda en
+ * vez de rellenarla con «0» o texto de relleno.
+ */
+export type MesaDelCaso = {
+  codigo: string | null;
+  titulo: string | null;
+  naturaleza: string | null;
+  estadoVigencia: EstadoVigencia;
+  fechaInstalacion: string | null;
+  fechaFinVigencia: string | null;
+  tipoInstrumento: string | null;
+  baseLegal: string | null;
+  ambitoDepartamento: string | null;
+  objetivo: string | null;
+  miembros: number | null;
+};
+
 /** Detalle del caso con las columnas nuevas de compromisos e hitos. */
 type DetalleCasoConCompromisos = Omit<DetalleCasoConCierre, 'compromisos' | 'caso' | 'demandas'> & {
   compromisos: CompromisoCasoEnFicha[];
   caso: CasoConDescripcionRiesgo;
   demandas: DemandaCasoConTematica[];
+  /** Mesa de diálogo enlazada; `null` si el caso no es mesa. */
+  mesa: MesaDelCaso | null;
 };
 
 /**
@@ -510,6 +538,33 @@ const CAMPOS_OCULTOS: ReadonlySet<CampoEditable> = new Set<CampoEditable>([
 ]);
 
 /**
+ * Mesa del caso. `null` cuando el caso no es espejo de una mesa; el backend ya
+ * entrega camelCase y aquí sólo se valida el vocabulario de la vista.
+ */
+function aMesaDelCaso(bruto: unknown): MesaDelCaso | null {
+  if (!esRegistro(bruto)) return null;
+  return {
+    codigo: textoDe(bruto, 'codigo'),
+    titulo: textoDe(bruto, 'titulo'),
+    naturaleza: textoDe(bruto, 'naturaleza'),
+    estadoVigencia: vigenciaDe(textoDe(bruto, 'estadoVigencia', 'estado_vigencia')),
+    fechaInstalacion: textoDe(bruto, 'fechaInstalacion', 'fecha_instalacion'),
+    fechaFinVigencia: textoDe(bruto, 'fechaFinVigencia', 'fecha_fin_vigencia'),
+    tipoInstrumento: textoDe(bruto, 'tipoInstrumento', 'tipo_instrumento'),
+    baseLegal: textoDe(bruto, 'baseLegal', 'base_legal'),
+    ambitoDepartamento: textoDe(bruto, 'ambitoDepartamento', 'ambito_departamento'),
+    objetivo: textoDe(bruto, 'objetivo'),
+    miembros: numeroDe(bruto, 'miembros'),
+  };
+}
+
+/** «12 integrantes registrados»; un cero se declara, no se pinta como cifra. */
+export function integrantesTexto(miembros: number | null): string {
+  if (miembros === null || miembros <= 0) return 'sin integrantes registrados';
+  return miembros === 1 ? '1 integrante registrado' : `${miembros} integrantes registrados`;
+}
+
+/**
  * Esquema de `GET /api/v1/cases/{codigo}` (y del `PATCH`, mismo contrato):
  * suma al mapeo del caso los hitos con su código, fecha real y bandera de
  * terminal, que la sección «Hitos del caso» necesita. El mapeo compartido
@@ -528,6 +583,7 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
   const tematicas = tematicasDemandasCrudas(bruto);
   const fechas = fechasDemandasCrudas(bruto);
   const vinculos = vinculosCompromisoDemanda(bruto);
+  const mesa = aMesaDelCaso(registro['mesa']);
   const compromisos = aCompromisosCaso(bruto, detalle.compromisos).map((compromiso) => ({
     ...compromiso,
     ...(vinculos.get(compromiso.id) ?? SIN_VINCULO_DEMANDA),
@@ -543,6 +599,7 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
     caso: { ...detalle.caso, descripcionRiesgo, sectorista, sectoristaUsuarioId },
     compromisos,
     demandas,
+    mesa,
   };
 }
 
@@ -1434,6 +1491,14 @@ export class CasoDetallePage {
   readonly textoFechaHito = textoFechaHito;
   readonly textoFechaRealHito = textoFechaRealHito;
   readonly esEstadoHitoFicha = esEstadoHitoFicha;
+
+  /**
+   * Bloque «Espacio de diálogo»: reutiliza el vocabulario de `mesa.mapeo`
+   * (vigencia y fechas) en vez de duplicar catálogos en esta ficha.
+   */
+  readonly claseVigencia = claseVigencia;
+  readonly fechaTextoMesa = fechaTextoMesa;
+  readonly integrantesTexto = integrantesTexto;
   /** Id del hito cuyo `PATCH` está en vuelo; bloquea sus tres controles. */
   readonly guardandoHito = signal<string | null>(null);
   /** Último fallo al editar un hito; se muestra sobre la tabla. */

@@ -59,6 +59,7 @@ import {
   ESTADOS_ALERTA,
   ORDENES_ALERTA,
   PASO_APROBACION_DEFINITIVA,
+  PASO_ARCHIVO,
   PASO_ELABORACION,
   PASO_REMISION,
   PASO_REVISION,
@@ -973,6 +974,15 @@ export class AlertasPage {
           seccion: 'Flujo',
         });
       }
+      if (aristaPermitida(roles, alerta.pasoActual, PASO_ARCHIVO)) {
+        // Arista 4→5: cierre del expediente. Faltaba en la UI y el circuito no
+        // tenía forma de archivar desde la remisión; el sectorista es su dueño.
+        acciones.push({
+          id: 'archivar-flujo',
+          etiqueta: 'Archivar alerta',
+          seccion: 'Flujo',
+        });
+      }
     }
 
     acciones.push(
@@ -1011,6 +1021,9 @@ export class AlertasPage {
       case 'archivar':
         this.abrirArchivo(alerta);
         break;
+      case 'archivar-flujo':
+        this.enviarAccionFila(alerta, PASO_ARCHIVO, alerta.pasoActual);
+        break;
     }
   }
 
@@ -1047,10 +1060,11 @@ export class AlertasPage {
   /** Las alertas se anulan con el privilegio de anulación y sobre su clasificación. */
   puedeAnular(alerta: Alerta): boolean {
     // La acción queda reservada a la Dirección (o al administrador), aunque la
-    // base se la permitiera a otro perfil.
+    // base se la permitiera a otro perfil. `puedeAnularAlertas` incluye a
+    // `direccion_oaipcs`, a quien la matriz de roles le niega `puede_eliminar`.
     if (!this.esDirectora() && !this.capacidades.esAdmin()) return false;
     return (
-      this.capacidades.puedeEliminar() && this.capacidades.puedeModificar(alerta.clasificacion)
+      this.capacidades.puedeAnularAlertas() && this.capacidades.puedeModificar(alerta.clasificacion)
     );
   }
 

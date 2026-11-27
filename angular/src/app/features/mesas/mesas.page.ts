@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
@@ -59,7 +59,6 @@ type RespuestaMesas = {
 @Component({
   selector: 'app-mesas',
   imports: [
-    RouterLink,
     IconoComponent,
     PaginacionComponent,
     TablaComponent,
@@ -70,11 +69,6 @@ type RespuestaMesas = {
   templateUrl: './mesas.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
-    .view-sub {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 12.5px;
-    }
     /*
      * El td de app-tabla es nowrap; el bloque interno concede el salto de línea
      * al código y al título de la mesa, que puede ser largo.

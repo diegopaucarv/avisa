@@ -166,7 +166,7 @@
         title="Imprime la ficha; en el diálogo puede elegir «Guardar como PDF»"
         (click)="imprimir()"
       >
-        {{ esAdmin() ? 'Imprimir / Guardar PDF' : 'Guardar PDF' }}
+        {{ esAdmin() ? 'Imprimir' : 'Guardar PDF' }}
       </button>
       @if (anulado() && puedeAnular()) {
       <button type="button" class="button-secondary" (click)="abrirRestauracion()">
@@ -431,6 +431,66 @@
           </dd>
         </div>
       </dl>
+
+      <!-- Bloque aditivo y condicional: un caso común (sin mesa) no lo pinta. -->
+      @if (d.mesa; as mesa) {
+      <section class="detail-section" aria-labelledby="mesa-caso">
+        <h2 id="mesa-caso">Espacio de diálogo</h2>
+        <div class="etiquetas-linea">
+          <strong>{{ mesa.codigo || '—' }}</strong>
+          @if (mesa.titulo) {
+          <span>{{ mesa.titulo }}</span>
+          }
+          <span [class]="'commit-status ' + claseVigencia(mesa.estadoVigencia)">
+            {{ mesa.estadoVigencia }}
+          </span>
+        </div>
+        <dl class="detail-grid">
+          @if (mesa.tipoInstrumento) {
+          <div>
+            <dt>Tipo de instrumento</dt>
+            <dd>{{ mesa.tipoInstrumento }}</dd>
+          </div>
+          } @if (mesa.naturaleza) {
+          <div>
+            <dt>Naturaleza</dt>
+            <dd>{{ mesa.naturaleza }}</dd>
+          </div>
+          } @if (mesa.fechaInstalacion) {
+          <div>
+            <dt>Instalación</dt>
+            <dd>{{ fechaTextoMesa(mesa.fechaInstalacion) }}</dd>
+          </div>
+          } @if (mesa.fechaFinVigencia) {
+          <div>
+            <dt>Fin de vigencia</dt>
+            <dd>{{ fechaTextoMesa(mesa.fechaFinVigencia) }}</dd>
+          </div>
+          } @if (mesa.baseLegal) {
+          <div>
+            <dt>Base legal</dt>
+            <dd>{{ mesa.baseLegal }}</dd>
+          </div>
+          } @if (mesa.ambitoDepartamento) {
+          <div>
+            <dt>Ámbito departamental</dt>
+            <dd>{{ mesa.ambitoDepartamento }}</dd>
+          </div>
+          } @if (mesa.objetivo) {
+          <div>
+            <dt>Objetivo</dt>
+            <dd>{{ mesa.objetivo }}</dd>
+          </div>
+          } @if (mesa.miembros !== null) {
+          <div>
+            <dt>Integrantes</dt>
+            <dd>{{ integrantesTexto(mesa.miembros) }}</dd>
+          </div>
+          }
+        </dl>
+        <a class="link-button" routerLink="/mesas">Ver mesas de diálogo</a>
+      </section>
+      }
 
       <section class="detail-section" aria-labelledby="actores-caso">
         <div class="detail-section-title">

@@ -70,6 +70,13 @@
               @if (detalle()?.caso?.estado; as estadoCaso) {
                 <small class="form-hint">Estado del caso: {{ estadoCaso }}</small>
               }
+              @if (cabecera().mesaCodigo || cabecera().mesaTitulo) {
+                <small class="form-hint">
+                  Espacio de diálogo: {{ cabecera().mesaCodigo
+                  }}{{ cabecera().mesaCodigo && cabecera().mesaTitulo ? ' · ' : ''
+                  }}{{ cabecera().mesaTitulo }}
+                </small>
+              }
             </div>
             <div>
               <span>Área responsable</span>
@@ -583,8 +590,9 @@
         <section class="detail-section" aria-labelledby="proximo-hito">
           <h3 id="proximo-hito">Próximo hito</h3>
           @if (proximoHito(); as siguienteHito) {
+            @let etiquetaSiguiente = etiquetaHito(siguienteHito.codigo, siguienteHito.descripcion);
             <p class="panel-fecha">
-              <strong>{{ etiquetaHito(siguienteHito.codigo, siguienteHito.descripcion) }}</strong>
+              <strong [attr.title]="etiquetaSiguiente">{{ etiquetaSiguiente }}</strong>
               <span class="commit-status">{{ siguienteHito.estado }}</span>
             </p>
             <p class="form-hint">Planificado para {{ fechaTexto(siguienteHito.fecha) }}.</p>
@@ -606,6 +614,7 @@
           } @else {
             <ol class="timeline">
               @for (hito of hitos(); track hito.id) {
+                @let etiquetaActual = etiquetaHito(hito.codigo, hito.descripcion);
                 <li class="timeline-event">
                   <span
                     class="timeline-dot"
@@ -614,8 +623,8 @@
                   ></span>
                   <div>
                     <div class="timeline-meta">
-                      <strong class="hito-etiqueta">{{
-                        etiquetaHito(hito.codigo, hito.descripcion)
+                      <strong class="hito-etiqueta" [attr.title]="etiquetaActual">{{
+                        etiquetaActual
                       }}</strong>
                       <time>{{ fechaTexto(hito.fecha) }}</time>
                     </div>
@@ -863,9 +872,11 @@
                       }
 
                       @if (item.hito; as hitoHistorial) {
+                        @let etiquetaHistorial =
+                          etiquetaHito(hitoHistorial.codigo, hitoHistorial.descripcion);
                         <div class="timeline-meta">
-                          <strong class="hito-etiqueta">{{
-                            etiquetaHito(hitoHistorial.codigo, hitoHistorial.descripcion)
+                          <strong class="hito-etiqueta" [attr.title]="etiquetaHistorial">{{
+                            etiquetaHistorial
                           }}</strong>
                           <time>{{
                             fechaTexto(hitoHistorial.fechaReal ?? hitoHistorial.fecha)
@@ -902,10 +913,15 @@
                             {{ adjuntoHistorial.entidadTipo === 'hito' ? 'Hito' : 'Compromiso' }}
                           </span>
                           @if (codigoHitoCorto(adjuntoHistorial.hitoCodigo); as codigoAdjunto) {
-                            <span class="badge">{{ codigoAdjunto }}</span>
-                          }
-                          @if (adjuntoHistorial.descripcion) {
-                            <span class="badge">{{ adjuntoHistorial.descripcion }}</span>
+                            @let etiquetaAdjunto =
+                              etiquetaHito(codigoAdjunto, adjuntoHistorial.descripcion);
+                            <span class="badge" [attr.title]="etiquetaAdjunto">{{
+                              etiquetaAdjunto
+                            }}</span>
+                          } @else if (adjuntoHistorial.descripcion) {
+                            <span class="badge" [attr.title]="adjuntoHistorial.descripcion">{{
+                              adjuntoHistorial.descripcion
+                            }}</span>
                           }
                         </div>
                       }

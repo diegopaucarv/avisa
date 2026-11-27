@@ -1,11 +1,13 @@
 /*
  * Gráficos de mesas de diálogo: dos tarjetas de barras horizontales, sin
- * librerías. Todo el color sale de las variables de tema de `global.css`
- * (`--ink`, `--ink-2`, `--muted`, `--line`, `--paper`, `--blue`, `--green`,
- * `--amber`, `--red`); no hay reglas para tema oscuro.
+ * librerías. Todo el color sale de las variables de tema de `global.css` y de
+ * `theme-dark.generated.css` (`--ink`, `--ink-2`, `--muted`, `--line`, `--paper`,
+ * `--blue`, `--green`, `--amber`, `--red`), así que ambos temas funcionan sin
+ * reglas extra y sin `color-mix` ni colores literales.
  *
- * Cada tarjeta mide media cuarto de pantalla como mínimo: se leen de un
- * vistazo bajo la barra de búsqueda de `/mesas` y `/mesas/compromisos`.
+ * Cada tarjeta ocupa media fila (dos columnas en escritorio) y ronda un cuarto
+ * de pantalla de alto: se leen de un vistazo bajo la barra de búsqueda de
+ * `/mesas`, y crecen sin scroll interno si hay más filas.
  */
 
 :host {
@@ -15,9 +17,11 @@
 
 .graficos {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  width: 100%;
   margin: 0 0 14px;
+  box-sizing: border-box;
 }
 
 .chart-heading {
@@ -42,11 +46,12 @@
   flex-direction: column;
   gap: 10px;
   min-width: 0;
-  min-height: clamp(160px, 22vh, 240px);
+  min-height: clamp(220px, 28vh, 260px);
   padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--paper);
+  box-sizing: border-box;
 }
 
 /* El aviso de error ocupa la fila completa: es un único estado del bloque. */
@@ -183,6 +188,7 @@
   transition: width 180ms ease;
 }
 
+/* Permanente y Sin fecha: sin urgencia, neutro y visible sobre `--line`. */
 .tono-verde {
   background: var(--green);
 }
@@ -199,11 +205,7 @@
   background: var(--blue);
 }
 
-/* Permanente y Sin fecha: azul sin urgencia, visible sobre `--line`. */
-.tono-azul-tenue {
-  background: color-mix(in srgb, var(--blue) 42%, var(--paper));
-}
-
+/* Permanente y Sin fecha: sin urgencia, neutro y visible sobre `--line`. */
 .tono-neutro {
   background: var(--muted);
 }

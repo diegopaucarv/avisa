@@ -25,6 +25,14 @@
  * campos que no aparecen. Texto libre sin formato devuelve todo `null`.
  */
 
+import {
+  ENCABEZADO,
+  VINETA,
+  normalizar,
+  normalizarClave,
+  separarClaveValor,
+  valorUtil,
+} from '../../shared/plantilla-texto';
 import { parsearNotasLocal, PLANTILLA_LOCAL } from './local-notas';
 
 /** Datos que no tienen columna en la base y se leen de la ficha de texto. */
@@ -81,34 +89,6 @@ export const PLANTILLA_FICHA = `## Organización e inscripción
 - Enlace de mapa: (URL de Google Maps u otro mapa)
 
 ${PLANTILLA_LOCAL}`;
-
-/** Encabezado markdown de nivel 1 a 6 (`#`, `##`, `###`…). */
-const ENCABEZADO = /^\s{0,3}#{1,6}\s+(.*)$/;
-
-/** Viñeta con guion, asterisco o punto: exige espacio tras `-`/`*`/`•`. */
-const VINETA = /^\s*(?:[-*]\s+|•\s*)(.*)$/;
-
-/** Minúsculas y sin tildes, para reconocer claves sin depender del tecleo. */
-function normalizar(valor: string): string {
-  return valor
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-}
-
-/**
- * Clave comparable: sin tildes, minúsculas, sin markdown (`*`, `_`, `` ` ``), sin
- * un paréntesis final (`Edad (años)`) y sin dos puntos o guiones de cola.
- */
-function normalizarClave(valor: string): string {
-  return normalizar(valor)
-    .replace(/[`*_]/g, '')
-    .replace(/\s*\([^)]*\)\s*$/g, '')
-    .replace(/[:\-–—]+\s*$/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
 
 /**
  * Alias aceptados por campo. Se comparan ya normalizados; sirven para tolerar
@@ -209,31 +189,6 @@ function vacia(): DatosFicha {
     enlaceMapa: null,
     accesibilidad: null,
     ventilacion: null,
-  };
-}
-
-/** `Valor: …` se descarta cuando está vacío o cuando sólo es un guion. */
-function valorUtil(valor: string): string | null {
-  const limpio = valor.trim();
-  if (!limpio || limpio === '—' || limpio === '-') return null;
-  return limpio;
-}
-
-/** Separa `Clave: valor` por el primer `:` (ascii o de ancho completo). */
-function separarClaveValor(contenido: string): { clave: string; valor: string } | null {
-  const ascii = contenido.indexOf(':');
-  const ancho = contenido.indexOf('：');
-
-  let indice = -1;
-  if (ascii === -1) indice = ancho;
-  else if (ancho === -1) indice = ascii;
-  else indice = Math.min(ascii, ancho);
-
-  if (indice < 0) return null;
-
-  return {
-    clave: contenido.slice(0, indice),
-    valor: contenido.slice(indice + 1),
   };
 }
 

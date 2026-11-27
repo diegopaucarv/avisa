@@ -125,12 +125,6 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
   },
   {
     grupo: 'SEGUIMIENTO',
-    etiqueta: 'Compromisos de mesas',
-    ruta: '/mesas/compromisos',
-    icono: 'compromisos',
-  },
-  {
-    grupo: 'SEGUIMIENTO',
     etiqueta: 'Mesas de diálogo',
     ruta: '/mesas',
     icono: 'instituciones',

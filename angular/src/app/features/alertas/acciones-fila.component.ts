@@ -23,7 +23,8 @@ export type IdAccionAlerta =
   | 'modificar'
   | 'historial'
   | 'whatsapp'
-  | 'archivar';
+  | 'archivar'
+  | 'archivar-flujo';
 
 /** Acción ya rotulada; `seccion` agrupa el menú con su encabezado. */
 export type AccionMenu = {

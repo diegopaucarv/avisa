@@ -300,11 +300,31 @@ export class ArchivoPage {
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
 
-  /** El archivo sólo se ofrece a quien puede anular y restaurar. */
-  readonly puedeVer = this.capacidades.puedeEliminar;
-  readonly pestanas = PESTANAS;
+  /**
+   * El archivo se ofrece a quien puede anular y restaurar. La Dirección OAIPCS
+   * entra por las alertas (migración 78) y sólo ve esa pestaña; el resto de
+   * perfiles con `puede_eliminar` ve las cinco.
+   */
+  readonly puedeVer = this.capacidades.puedeAnularAlertas;
 
-  readonly pestana = signal<PestanaArchivo>('casos');
+  /**
+   * Pestañas visibles: la Dirección sin `puede_eliminar` sólo alcanza las
+   * alertas. Se filtra en el cliente porque el backend ya responde 403 a
+   * cualquier otro `?anulados=true`.
+   */
+  readonly pestanas = computed(
+    () =>
+      (this.capacidades.puedeEliminar()
+        ? PESTANAS
+        : PESTANAS.filter((p) => p.valor === 'alertas')) as readonly {
+        valor: PestanaArchivo;
+        etiqueta: string;
+        icono: string;
+      }[],
+  );
+
+  /** Pestaña inicial válida para el rol: casos si puede vaciar todo, alertas si no. */
+  readonly pestana = signal<PestanaArchivo>(this.capacidades.puedeEliminar() ? 'casos' : 'alertas');
   readonly pagina = signal(1);
   readonly tamano = signal(TAMANO_PAGINA);
 

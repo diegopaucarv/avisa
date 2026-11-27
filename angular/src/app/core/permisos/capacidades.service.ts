@@ -144,6 +144,17 @@ export class CapacidadesService {
 
   readonly puedeEliminar = computed(() => this.roles().some((rol) => ANULAN.has(rol)));
 
+  /**
+   * Anulación de alertas: la matriz de roles se la niega a `direccion_oaipcs`
+   * (`puede_eliminar = false`), pero la baja de una alerta es una acción de su
+   * flujo y la base la admite desde la migración 78 (`core.exigir_anulacion` con
+   * la tabla como argumento). Cualquier otra entidad sigue exigiendo
+   * `puedeEliminar`.
+   */
+  readonly puedeAnularAlertas = computed(
+    () => this.puedeEliminar() || this.roles().includes(ROL.direccionOaipcs),
+  );
+
   readonly puedeVerPii = computed(() => this.roles().some((rol) => VEN_PII.has(rol)));
 
   /**

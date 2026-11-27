@@ -75,6 +75,31 @@
 
       @if (esFormulario()) {
         <form class="alerta-form" (submit)="alEnviarAlta($event)">
+          <details class="reporte-pegado">
+            <summary>Pegar reporte completo</summary>
+            <div class="form-field">
+              <label class="form-label" for="alta-reporte">Reporte de alerta temprana</label>
+              <textarea
+                id="alta-reporte"
+                rows="7"
+                placeholder="Pegue aquí el reporte (título, fecha de emisión, ámbito, situación, hechos, actores, demandas, riesgos y acciones)."
+                [value]="reportePegado()"
+                (input)="editarReporte($event)"
+              ></textarea>
+            </div>
+            @if (reporteAviso(); as avisoReporte) {
+              <p class="form-hint" role="status">{{ avisoReporte }}</p>
+            }
+            <div class="reporte-acciones">
+              <button type="button" class="alerta-agregar" (click)="aplicarReporte()">
+                Aplicar al formulario
+              </button>
+              <button type="button" class="alerta-agregar" (click)="copiarPlantillaAlerta()">
+                Copiar plantilla
+              </button>
+            </div>
+          </details>
+
           <h3>{{ esAlta() ? 'Datos de la alerta' : 'Modificar alerta' }}</h3>
 
           <div class="form-field">

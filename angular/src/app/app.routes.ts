@@ -82,11 +82,6 @@ export const routes: Routes = [
           import('./features/compromisos/compromisos.page').then((m) => m.CompromisosPage),
       },
       {
-        path: 'mesas/compromisos',
-        loadComponent: () =>
-          import('./features/mesas/compromisos-mesas.page').then((m) => m.CompromisosMesasPage),
-      },
-      {
         path: 'mesas',
         loadComponent: () => import('./features/mesas/mesas.page').then((m) => m.MesasPage),
       },

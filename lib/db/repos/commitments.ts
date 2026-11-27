@@ -19,6 +19,11 @@ const COMMITMENT_COLUMNS = `
   cmp.caso_id as caso_id,
   c.codigo_caso as caso_code,
   c.nombre_caso as caso_titulo,
+  -- Espacio de diálogo real del caso, derivado por la 1:1 mesas_dialogo.caso_id
+  -- (migración 81). Un caso común no tiene mesa y estos campos vienen nulos.
+  m.id as mesa_id,
+  m.codigo as mesa_codigo,
+  m.titulo as mesa_titulo,
   cmp.tipo_compromiso as tipo,
   replace(cmp.nivel_gobierno, '_', ' ') as nivel_gobierno,
   ec.codigo as estado,
@@ -57,6 +62,7 @@ const COMMITMENT_COLUMNS = `
 const COMMITMENT_FROM = `
   from core.compromisos cmp
   left join core.casos c on c.id = cmp.caso_id
+  left join core.mesas_dialogo m on m.caso_id = cmp.caso_id
   left join core.cat_estados_compromiso ec on ec.id = cmp.estado_id
   left join core.cat_unidades_organicas uo on uo.id = cmp.unidad_responsable_id
   left join core.cat_alcances_geograficos ag on ag.id = cmp.alcance_id
@@ -135,6 +141,8 @@ const HITOS_DETAIL_JSON = `
 export type CommitmentListQuery = {
   q?: string;
   caso?: string;
+  /** Código de la mesa de diálogo (`core.mesas_dialogo.codigo`, p. ej. `OAIPCS-001`). */
+  mesa?: string;
   estado?: string;
   unidad?: string;
   tipo?: string;
@@ -194,6 +202,10 @@ export type CommitmentListItem = {
   casoId: string | null;
   casoCode: string | null;
   casoTitulo: string | null;
+  /** Espacio de diálogo real del caso (`core.mesas_dialogo`), si el caso lo es. */
+  mesaId: string | null;
+  mesaCodigo: string | null;
+  mesaTitulo: string | null;
   tipo: string | null;
   /** Item 16: progresivo_parcial | entendimiento_operativo | condicionado. */
   clasificacionAlcance: ClasificacionAlcance | null;
@@ -335,6 +347,9 @@ function mapItem(row: CommitmentRow): CommitmentListItem {
     casoId: row.caso_id,
     casoCode: row.caso_code,
     casoTitulo: row.caso_titulo,
+    mesaId: row.mesa_id ?? null,
+    mesaCodigo: row.mesa_codigo ?? null,
+    mesaTitulo: row.mesa_titulo ?? null,
     tipo: row.tipo,
     clasificacionAlcance: row.clasificacion_alcance ?? null,
     formalVerbal: row.formal_verbal ?? null,
@@ -399,6 +414,7 @@ export async function listCommitments(
   );
   if (porTexto) where.push(porTexto);
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);
+  if (query.mesa) where.push(`m.codigo = ${bind(query.mesa)}`);
   if (query.estado) {
     where.push(
       `core.normalizar_ref(ec.codigo) = core.normalizar_ref(${bind(query.estado)})`,

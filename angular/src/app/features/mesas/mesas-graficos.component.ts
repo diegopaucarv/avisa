@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 
 import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
@@ -9,40 +9,26 @@ import {
   type IndicadoresMesas,
 } from './mesas-indicadores';
 
-/** Pestaña de SEGUIMIENTO que consume estos gráficos. */
-export type VistaMesas = 'mesas' | 'compromisos';
+type Tono = 'tono-verde' | 'tono-ambar' | 'tono-rojo' | 'tono-azul' | 'tono-neutro';
 
-type Tono =
-  | 'tono-verde'
-  | 'tono-ambar'
-  | 'tono-rojo'
-  | 'tono-azul'
-  | 'tono-azul-tenue'
-  | 'tono-neutro';
-
-type FilaBarra = { clave: string; total: number; tono: Tono };
+type FilaBarra = {
+  clave: string;
+  total: number;
+  tono: Tono;
+  /** Texto largo para el tooltip; si falta, se usa `clave`. */
+  titulo?: string;
+  /** Dato secundario que se anuncia junto al total. */
+  nota?: string;
+};
 
 /** Orden del catálogo de `core.mesas_dialogo.estado_vigencia`. */
 const VIGENCIA_ORDEN = ['Vigente', 'Por vencer', 'Vencido', 'Permanente', 'Sin fecha'] as const;
 
-/** Catálogo de `core.cat_estados_compromiso`. */
-const COMPROMISO_ORDEN = [
-  'Por iniciar',
-  'En proceso',
-  'Cumplido',
-  'Redefinido',
-  'Desestimado',
-] as const;
+/** Cuántas barras caben en la tarjeta sin scroll interno. */
+const TOPES_DEPARTAMENTOS = 8;
 
-/** Catálogo de estados de hito de un compromiso. */
-const HITO_ORDEN = [
-  'Registrado',
-  'En ejecución',
-  'Paralizado',
-  'Cumplido',
-  'Desestimado',
-  'No cumplido',
-] as const;
+/** El backend agrupa el ámbito no reconocido bajo esta etiqueta. */
+const SIN_CLASIFICAR = 'sin clasificar';
 
 function normalizarClave(valor: string): string {
   return valor
@@ -61,69 +47,9 @@ function tonoVigencia(clave: string): Tono {
     case 'vencido':
       return 'tono-rojo';
     default:
-      // Permanente y Sin fecha no tienen urgencia: azul tenue.
-      return 'tono-azul-tenue';
-  }
-}
-
-function tonoCompromiso(clave: string): Tono {
-  switch (normalizarClave(clave)) {
-    case 'cumplido':
-      return 'tono-verde';
-    case 'en proceso':
-      return 'tono-azul';
-    case 'redefinido':
-      return 'tono-ambar';
-    case 'desestimado':
-      return 'tono-rojo';
-    default:
+      // Permanente y Sin fecha no tienen urgencia: se pintan neutros.
       return 'tono-neutro';
   }
-}
-
-function tonoHito(clave: string): Tono {
-  switch (normalizarClave(clave)) {
-    case 'cumplido':
-      return 'tono-verde';
-    case 'en ejecucion':
-      return 'tono-azul';
-    case 'paralizado':
-    case 'desestimado':
-    case 'no cumplido':
-      return 'tono-rojo';
-    default:
-      // Registrado: estado inicial, sin urgencia.
-      return 'tono-neutro';
-  }
-}
-
-function totalDe(filas: readonly ConteoClave[], clave: string): number {
-  const buscada = normalizarClave(clave);
-  return filas.find((fila) => normalizarClave(fila.clave) === buscada)?.total ?? 0;
-}
-
-/**
- * Filas del catálogo completo: siempre aparecen todas las claves pedidas (aunque
- * su total sea 0) y, si la API devuelve estados fuera del catálogo, se añaden al
- * final ordenados por total para no perder ningún conteo.
- */
-function catalogo(
-  filas: readonly ConteoClave[],
-  orden: readonly string[],
-  tono: (clave: string) => Tono,
-): FilaBarra[] {
-  const pedidas = new Set(orden.map(normalizarClave));
-  const conocidas: FilaBarra[] = orden.map((clave) => ({
-    clave,
-    total: totalDe(filas, clave),
-    tono: tono(clave),
-  }));
-  const extras: FilaBarra[] = [...filas]
-    .filter((fila) => !pedidas.has(normalizarClave(fila.clave)))
-    .sort((a, b) => b.total - a.total || a.clave.localeCompare(b.clave, 'es'))
-    .map((fila) => ({ clave: fila.clave, total: fila.total, tono: 'tono-neutro' }));
-
-  return [...conocidas, ...extras];
 }
 
 /** Filas presentes en la respuesta, ordenadas por el catálogo de la vista. */
@@ -144,11 +70,15 @@ function presentes(
 }
 
 /** Las `limite` filas de mayor total, con desempate alfabético estable. */
-function topes(filas: readonly ConteoClave[], limite: number): FilaBarra[] {
+function topes(
+  filas: readonly ConteoClave[],
+  limite: number,
+  tono: (clave: string) => Tono = () => 'tono-azul',
+): FilaBarra[] {
   return [...filas]
     .sort((a, b) => b.total - a.total || a.clave.localeCompare(b.clave, 'es'))
     .slice(0, limite)
-    .map((fila): FilaBarra => ({ clave: fila.clave, total: fila.total, tono: 'tono-azul' }));
+    .map((fila): FilaBarra => ({ clave: fila.clave, total: fila.total, tono: tono(fila.clave) }));
 }
 
 function maximo(filas: readonly FilaBarra[]): number {
@@ -156,24 +86,20 @@ function maximo(filas: readonly FilaBarra[]): number {
 }
 
 /**
- * Dos tarjetas de gráficos de barras para las vistas de mesas de diálogo.
+ * Dos tarjetas de gráficos de barras para el listado de mesas de diálogo.
  *
- * Se colocan justo debajo de la barra de búsqueda de `/mesas` y
- * `/mesas/compromisos`; la pestaña activa decide el par de tarjetas mediante el
- * input `vista`. Todo se dibuja con `div` y `width` porcentual: sin librerías de
- * gráficos, cada valor tiene su texto visible y su resumen en `aria-label`.
- *
- * La tarjeta de compromisos declara la ausencia de vínculo cuando la migración
- * 81 no ha corrido, en vez de pintar barras vacías que parecerían un cero real.
+ * Se colocan justo debajo de la barra de búsqueda de `/mesas`. Todo se dibuja
+ * con `div` y `width` porcentual: sin librerías de gráficos, cada valor tiene su
+ * texto visible y su resumen en `aria-label`.
  */
 @Component({
   selector: 'app-mesas-graficos',
   styleUrl: './mesas-graficos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="graficos" [attr.aria-label]="etiquetaRegion()">
+    <section class="graficos" [attr.aria-label]="etiquetaRegion">
       <h2 class="chart-heading">
-        {{ tituloVista() }}
+        {{ tituloVista }}
         @if (datos()) {
           <span class="chart-heading-meta">{{ resumenTotales() }}</span>
         }
@@ -185,23 +111,25 @@ function maximo(filas: readonly FilaBarra[]): number {
           <p class="chart-empty">{{ mensajeError() }}</p>
           <button type="button" class="chart-retry" (click)="recargar()">Reintentar</button>
         </div>
-      } @else if (esVistaMesas()) {
+      } @else {
         <article class="chart-card">
           <h3 class="chart-title">Mesas por estado de vigencia</h3>
-          <p class="chart-sub">Según la fecha de fin de vigencia de cada mesa.</p>
+          <p class="chart-sub">Reparto de las mesas según la fecha de fin de su vigencia.</p>
           <div class="chart-body">
             @if (cargando()) {
               <div class="chart-skeleton"></div>
               <div class="chart-skeleton"></div>
               <div class="chart-skeleton corto"></div>
-            } @else if (filasVigencia().length === 0) {
+            } @else if (!hayVigencia()) {
               <p class="chart-empty">No hay mesas con estado de vigencia registrado.</p>
             } @else {
               <ul class="chart-barras" role="img" [attr.aria-label]="resumenVigencia()">
                 @for (fila of filasVigencia(); track fila.clave) {
                   <li class="barra-fila">
-                    <span class="barra-etiqueta" [attr.title]="fila.clave">{{ fila.clave }}</span>
-                    <span class="barra-valor">{{ fila.total }}</span>
+                    <span class="barra-etiqueta" [attr.title]="fila.titulo ?? fila.clave">
+                      {{ fila.clave }}
+                    </span>
+                    <span class="barra-valor" [attr.title]="fila.nota">{{ fila.total }}</span>
                     <span class="barra-pista" aria-hidden="true">
                       <span
                         [class]="'barra-relleno ' + fila.tono"
@@ -217,86 +145,29 @@ function maximo(filas: readonly FilaBarra[]): number {
 
         <article class="chart-card">
           <h3 class="chart-title">Mesas por departamento</h3>
-          <p class="chart-sub">Las diez primeras según su ámbito departamental.</p>
+          <p class="chart-sub">
+            Las ocho primeras según su ámbito declarado. Una mesa con varios departamentos suma en
+            cada uno; «Sin clasificar» agrupa los textos no reconocidos.
+          </p>
           <div class="chart-body">
             @if (cargando()) {
               <div class="chart-skeleton"></div>
               <div class="chart-skeleton"></div>
               <div class="chart-skeleton corto"></div>
-            } @else if (filasDepartamentos().length === 0) {
+            } @else if (!hayDepartamentos()) {
               <p class="chart-empty">Sin departamentos registrados en las mesas.</p>
             } @else {
               <ul class="chart-barras" role="img" [attr.aria-label]="resumenDepartamentos()">
                 @for (fila of filasDepartamentos(); track fila.clave) {
                   <li class="barra-fila">
-                    <span class="barra-etiqueta" [attr.title]="fila.clave">{{ fila.clave }}</span>
-                    <span class="barra-valor">{{ fila.total }}</span>
+                    <span class="barra-etiqueta" [attr.title]="fila.titulo ?? fila.clave">
+                      {{ fila.clave }}
+                    </span>
+                    <span class="barra-valor" [attr.title]="fila.nota">{{ fila.total }}</span>
                     <span class="barra-pista" aria-hidden="true">
                       <span
                         [class]="'barra-relleno ' + fila.tono"
                         [style.width]="anchoBarra(fila.total, maxDepartamentos())"
-                      ></span>
-                    </span>
-                  </li>
-                }
-              </ul>
-            }
-          </div>
-        </article>
-      } @else {
-        <article class="chart-card">
-          <h3 class="chart-title">Compromisos por estado</h3>
-          <p class="chart-sub">Catálogo de estados de los compromisos asumidos en mesas.</p>
-          <div class="chart-body">
-            @if (cargando()) {
-              <div class="chart-skeleton"></div>
-              <div class="chart-skeleton"></div>
-              <div class="chart-skeleton corto"></div>
-            } @else if (sinVinculo()) {
-              <p class="chart-empty">
-                Aún no hay compromisos vinculados a mesas: requiere la migración 81.
-              </p>
-            } @else {
-              <ul class="chart-barras" role="img" [attr.aria-label]="resumenCompromisos()">
-                @for (fila of filasCompromisos(); track fila.clave) {
-                  <li class="barra-fila">
-                    <span class="barra-etiqueta" [attr.title]="fila.clave">{{ fila.clave }}</span>
-                    <span class="barra-valor">{{ fila.total }}</span>
-                    <span class="barra-pista" aria-hidden="true">
-                      <span
-                        [class]="'barra-relleno ' + fila.tono"
-                        [style.width]="anchoBarra(fila.total, maxCompromisos())"
-                      ></span>
-                    </span>
-                  </li>
-                }
-              </ul>
-            }
-          </div>
-        </article>
-
-        <article class="chart-card">
-          <h3 class="chart-title">Hitos por estado</h3>
-          <p class="chart-sub">Estados de los hitos de esos compromisos.</p>
-          <div class="chart-body">
-            @if (cargando()) {
-              <div class="chart-skeleton"></div>
-              <div class="chart-skeleton"></div>
-              <div class="chart-skeleton corto"></div>
-            } @else if (sinVinculo()) {
-              <p class="chart-empty">
-                Aún no hay hitos vinculados a mesas: requiere la migración 81.
-              </p>
-            } @else {
-              <ul class="chart-barras" role="img" [attr.aria-label]="resumenHitos()">
-                @for (fila of filasHitos(); track fila.clave) {
-                  <li class="barra-fila">
-                    <span class="barra-etiqueta" [attr.title]="fila.clave">{{ fila.clave }}</span>
-                    <span class="barra-valor">{{ fila.total }}</span>
-                    <span class="barra-pista" aria-hidden="true">
-                      <span
-                        [class]="'barra-relleno ' + fila.tono"
-                        [style.width]="anchoBarra(fila.total, maxHitos())"
                       ></span>
                     </span>
                   </li>
@@ -310,8 +181,8 @@ function maximo(filas: readonly FilaBarra[]): number {
   `,
 })
 export class MesasGraficosComponent {
-  /** Pestaña activa: decide qué par de tarjetas se pinta. */
-  readonly vista = input<VistaMesas>('mesas');
+  readonly tituloVista = 'Indicadores de mesas de diálogo';
+  readonly etiquetaRegion = 'Indicadores de las mesas de diálogo';
 
   private readonly recurso = consulta<IndicadoresMesas>({
     fuente: () => urlApi('/v1/mesas/indicadores'),
@@ -331,39 +202,25 @@ export class MesasGraficosComponent {
     () => this.error()?.message ?? 'No se pudieron cargar los indicadores de mesas.',
   );
 
-  readonly esVistaMesas = computed(() => this.vista() === 'mesas');
-
-  readonly tituloVista = computed(() =>
-    this.esVistaMesas() ? 'Indicadores de mesas de diálogo' : 'Indicadores de compromisos de mesas',
-  );
-
-  readonly etiquetaRegion = computed(() =>
-    this.esVistaMesas()
-      ? 'Indicadores de las mesas de diálogo'
-      : 'Indicadores de los compromisos de las mesas',
-  );
-
   readonly filasVigencia = computed(() =>
     presentes(this.datos()?.vigencia ?? [], VIGENCIA_ORDEN, tonoVigencia),
   );
 
-  readonly filasDepartamentos = computed(() => topes(this.datos()?.departamentos ?? [], 10));
-
-  readonly filasCompromisos = computed(() =>
-    catalogo(this.datos()?.compromisosEstado ?? [], COMPROMISO_ORDEN, tonoCompromiso),
+  // «Sin clasificar» se pinta neutro: no es un departamento, es lo no reconocido.
+  readonly filasDepartamentos = computed(() =>
+    topes(this.datos()?.departamentos ?? [], TOPES_DEPARTAMENTOS, (clave) =>
+      normalizarClave(clave) === SIN_CLASIFICAR ? 'tono-neutro' : 'tono-azul',
+    ),
   );
 
-  readonly filasHitos = computed(() =>
-    catalogo(this.datos()?.hitosEstado ?? [], HITO_ORDEN, tonoHito),
+  /** Un catálogo con todos sus totales en 0 no es un dato: es ausencia. */
+  readonly hayVigencia = computed(() => this.filasVigencia().some((fila) => fila.total > 0));
+  readonly hayDepartamentos = computed(() =>
+    this.filasDepartamentos().some((fila) => fila.total > 0),
   );
 
   readonly maxVigencia = computed(() => maximo(this.filasVigencia()));
   readonly maxDepartamentos = computed(() => maximo(this.filasDepartamentos()));
-  readonly maxCompromisos = computed(() => maximo(this.filasCompromisos()));
-  readonly maxHitos = computed(() => maximo(this.filasHitos()));
-
-  /** La migración 81 aún no vinculó mesas con casos. */
-  readonly sinVinculo = computed(() => this.datos()?.vinculoDisponible === false);
 
   /** Se expone como método para la plantilla. */
   readonly anchoBarra = calcularAncho;
@@ -374,22 +231,18 @@ export class MesasGraficosComponent {
   readonly resumenDepartamentos = computed(
     () => `Mesas por departamento: ${this.resumen(this.filasDepartamentos())}.`,
   );
-  readonly resumenCompromisos = computed(
-    () => `Compromisos por estado: ${this.resumen(this.filasCompromisos())}.`,
-  );
-  readonly resumenHitos = computed(() => `Hitos por estado: ${this.resumen(this.filasHitos())}.`);
 
   readonly resumenTotales = computed(() => {
     const datos = this.datos();
     if (!datos) return '';
-    return this.esVistaMesas()
-      ? `${datos.totales.mesas} mesas · ${datos.totales.miembros} miembros`
-      : `${datos.totales.compromisos} compromisos · ${datos.totales.hitos} hitos`;
+    return `${datos.totales.mesas} mesas · ${datos.totales.miembros} miembros`;
   });
 
   private resumen(filas: readonly FilaBarra[]): string {
     if (filas.length === 0) return 'sin datos';
-    return filas.map((fila) => `${fila.clave} ${fila.total}`).join('; ');
+    return filas
+      .map((fila) => `${fila.clave} ${fila.total}${fila.nota ? `, ${fila.nota}` : ''}`)
+      .join('; ');
   }
 
   recargar(): void {

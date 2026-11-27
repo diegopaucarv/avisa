@@ -1,15 +1,16 @@
 /**
  * Mesas de diálogo: contrato de la API y vocabulario de la vista.
  *
- * `GET /api/v1/mesas`, `/api/v1/mesas/{codigo}` y `/api/v1/mesas/compromisos`
- * devuelven camelCase. Aquí se normaliza al vocabulario de la Guía para que las
- * plantillas no conozcan variantes ni valores crudos de `core.mesas_dialogo`.
+ * `GET /api/v1/mesas` y `/api/v1/mesas/{codigo}` devuelven camelCase. Aquí se
+ * normaliza al vocabulario de la Guía para que las plantillas no conozcan
+ * variantes ni valores crudos de `core.mesas_dialogo`.
  *
  * Las mesas **no** son compromisos: viven en `core.mesas_dialogo` (21 filas) con
- * sus integrantes en `core.mesa_miembros` (62 filas). El vínculo con la base de
- * casos es `core.mesas_dialogo.caso_id`, poblado por la migración 81; mientras
- * no se ejecute, `casoCodigo` llega `null` y los contadores de compromisos en 0.
- * La vista declara esa ausencia en vez de simular cifras.
+ * sus integrantes en `core.mesa_miembros` (62 filas). La migración 81 las enlazó
+ * con la base de casos mediante `core.mesas_dialogo.caso_id`: cada mesa tiene su
+ * caso espejo `MD-AAAA-NNNN`. Contra una base sin ese enlace, `casoCodigo` llega
+ * `null` y los contadores de compromisos en 0; la vista declara esa ausencia en
+ * vez de simular cifras.
  */
 
 import { formatearFechaCorta } from '../../shared/formato-fecha';
@@ -48,7 +49,7 @@ export type Mesa = {
   miembros: number;
   compromisos: number;
   compromisosCumplidos: number;
-  /** Código del caso espejo (`MD-AAAA-NNNN`); `null` si la migración 81 no corrió. */
+  /** Código del caso espejo (`MD-AAAA-NNNN`); `null` si la mesa no está enlazada. */
   casoCodigo: string | null;
 };
 
@@ -77,7 +78,7 @@ export type HitoMesa = {
   fecha: string | null;
 };
 
-/** Compromiso visto desde una mesa (listado `/v1/mesas/compromisos`). */
+/** Compromiso visto desde la ficha de una mesa (`/v1/mesas/{codigo}`). */
 export type CompromisoMesa = {
   id: string;
   codigo: string;

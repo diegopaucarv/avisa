@@ -69,6 +69,11 @@ describe('etiquetaHito', () => {
     expect(etiquetaHito('H001', 'H001')).toBe('H001');
   });
 
+  it('reconoce otros separadores tras el código repetido', () => {
+    expect(etiquetaHito('H001', 'H001. Texto')).toBe(`H001${NBSP}·${NBSP}Texto`);
+    expect(etiquetaHito('H001', 'H001 · Texto')).toBe(`H001${NBSP}·${NBSP}Texto`);
+  });
+
   it('no quita un código distinto del hito', () => {
     expect(etiquetaHito('H001', 'H002 – Texto')).toBe(`H001${NBSP}·${NBSP}H002 – Texto`);
   });

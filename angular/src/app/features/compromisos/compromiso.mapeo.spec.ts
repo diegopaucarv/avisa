@@ -34,6 +34,9 @@ function compromiso(parcial: Partial<Compromiso> = {}): Compromiso {
     casoId: null,
     casoCodigo: null,
     casoTitulo: null,
+    mesaId: null,
+    mesaCodigo: null,
+    mesaTitulo: null,
     demandaId: null,
     demandaCodigo: null,
     demandaTexto: null,
@@ -605,5 +608,41 @@ describe('próximo hito del compromiso', () => {
     });
 
     expect(leido.proximoHito?.codigo).toBe('CS-2026-0001_COMP001_H002');
+  });
+});
+
+describe('espacio de diálogo del compromiso', () => {
+  it('lee mesaId, mesaCodigo y mesaTitulo cuando el caso es una mesa', () => {
+    const leido = aCompromiso({
+      id: 'comp-mesa',
+      casoCodigo: 'MD-2026-0001',
+      mesaId: 'mesa-1',
+      mesaCodigo: 'OAIPCS-001',
+      mesaTitulo: 'Mesa de concertación de prueba',
+    });
+
+    expect(leido.mesaId).toBe('mesa-1');
+    expect(leido.mesaCodigo).toBe('OAIPCS-001');
+    expect(leido.mesaTitulo).toBe('Mesa de concertación de prueba');
+  });
+
+  it('los deja nulos cuando el caso no es una mesa', () => {
+    const leido = aCompromiso({ id: 'comp-caso', casoCodigo: 'CS-2026-0001' });
+
+    expect(leido.mesaId).toBeNull();
+    expect(leido.mesaCodigo).toBeNull();
+    expect(leido.mesaTitulo).toBeNull();
+  });
+
+  it('acepta snake_case del contrato del repositorio', () => {
+    const leido = aCompromiso({
+      id: 'comp-mesa-2',
+      mesa_id: 'mesa-2',
+      mesa_codigo: 'OAIPCS-002',
+      mesa_titulo: 'Otra mesa',
+    });
+
+    expect(leido.mesaCodigo).toBe('OAIPCS-002');
+    expect(leido.mesaTitulo).toBe('Otra mesa');
   });
 });

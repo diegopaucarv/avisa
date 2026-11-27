@@ -965,6 +965,9 @@ export const PASO_REVISION = 2;
 /** Paso 4: remisión a los destinatarios, a cargo del servicio de agente. */
 export const PASO_REMISION = 4;
 
+/** Paso 5: archivo del expediente, a cargo del sectorista (arista 4→5). */
+export const PASO_ARCHIVO = 5;
+
 /**
  * Transiciones legales desde cada paso, según `docs/03_ejecucion/mvp.md` §3.4:
  *

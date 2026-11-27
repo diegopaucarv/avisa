@@ -60,7 +60,7 @@ export async function GET(request: Request) {
 
     const anulados = leerBooleano(params.get("anulados"));
     if (anulados) {
-      if (!puedeAnularRegistros(session.roles)) {
+      if (!puedeAnularRegistros(session.roles, "alertas")) {
         throw new ApiError(
           403,
           "Sin permiso para consultar registros anulados.",

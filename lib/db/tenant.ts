@@ -33,8 +33,29 @@ export type SessionOptions = {
  */
 const ROLES_ANULAN = new Set(["administrador", "sectorista"]);
 
-export function puedeAnularRegistros(roles: readonly string[]): boolean {
-  return roles.some((rol) => ROLES_ANULAN.has(rol));
+/**
+ * Entidades que la Dirección OAIPCS también puede anular, en espejo de
+ * `core.exigir_anulacion(smallint, text)` (migración 78): sólo alertas. La
+ * matriz de roles le niega `puede_eliminar`, pero la baja de una alerta es una
+ * acción de su flujo; cualquier otra tabla sigue respondiendo 42501.
+ */
+const DIRECCION_ANULA = new Set(["alertas"]);
+
+/**
+ * `true` si `roles` puede anular y restaurar registros.
+ *
+ * Sin `entidad`, la respuesta es la regla estricta (`puede_eliminar`). Con
+ * `entidad`, se admite además a `direccion_oaipcs` cuando esa entidad está en
+ * `DIRECCION_ANULA`; así el gate de `?anulados=true` y el lote por entidad no
+ * prometen un permiso que la base rechazaría.
+ */
+export function puedeAnularRegistros(
+  roles: readonly string[],
+  entidad?: string,
+): boolean {
+  if (roles.some((rol) => ROLES_ANULAN.has(rol))) return true;
+  if (!entidad || !DIRECCION_ANULA.has(entidad)) return false;
+  return roles.includes("direccion_oaipcs");
 }
 
 /**

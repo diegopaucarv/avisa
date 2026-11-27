@@ -160,7 +160,7 @@
                 }
               </div>
             } @else {
-              <p class="form-hint">Sin caso vinculado: la migración 81 aún no se aplicó.</p>
+              <p class="form-hint">Sin caso vinculado: la mesa aún no tiene caso espejo.</p>
             }
           </section>
         } @else if (pestana() === 'integrantes') {
@@ -197,8 +197,8 @@
             <h3 id="mesa-compromisos">Compromisos</h3>
             @if (ficha.compromisos.length === 0) {
               <p class="form-hint">
-                La mesa no tiene compromisos vinculados. Se llenarán cuando se aplique la migración
-                81.
+                La mesa no tiene compromisos vinculados. Se llenarán cuando se registren en el caso
+                de la mesa (serie <code>MD-…</code>).
               </p>
             } @else {
               <ul class="mesa-compromisos">

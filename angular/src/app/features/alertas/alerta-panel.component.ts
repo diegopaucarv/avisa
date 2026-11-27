@@ -59,6 +59,12 @@ import {
   recordarCasoVinculado,
   type CasoVinculado,
 } from './caso-vinculado';
+import {
+  PLANTILLA_ALERTA_TEMPRANA,
+  alcanceDesdeAmbito,
+  parsearPlantillaAlerta,
+} from './alerta-plantilla';
+import { copiarAlPortapapeles } from './portapapeles';
 
 /** Opción del combobox de caso: código, título y subsector del caso. */
 export type CasoOpcion = { codigo: string; titulo: string; subsector: string | null };
@@ -529,6 +535,32 @@ function claveProvincia(nombre: string): number {
       border-color: #1f5597;
     }
 
+    /* Reporte pegado: bloque plegable para no cargar el formulario. */
+    .reporte-pegado {
+      padding: 8px 10px;
+      border: 1px dashed #c8d6e4;
+      border-radius: 8px;
+      background: #fbfcfd;
+    }
+
+    .reporte-pegado summary {
+      cursor: pointer;
+      color: #1f5597;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .reporte-pegado .form-field {
+      margin-top: 8px;
+    }
+
+    .reporte-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
     .actor-acciones {
       display: flex;
       flex-wrap: wrap;
@@ -745,6 +777,11 @@ export class AlertaPanelComponent {
   readonly borradorAlta = signal<BorradorAlta>(borradorAltaVacio());
   readonly distritoAlta = signal<OpcionTerritorio | null>(null);
   readonly mensajeLocal = signal<string | null>(null);
+
+  /** Texto del reporte pegado para repartirlo en el borrador. */
+  readonly reportePegado = signal('');
+  /** Aviso del bloque «Pegar reporte completo» (éxito o «no se reconoció»). */
+  readonly reporteAviso = signal<string | null>(null);
 
   /**
    * «Situación actual» es un solo campo de texto: se muestra el borrador unido
@@ -1186,6 +1223,90 @@ export class AlertaPanelComponent {
   quitarHecho(clave: number): void {
     this.hechosBorrador.update((filas) => filas.filter((fila) => fila.clave !== clave));
     this.hechosTocados.set(true);
+    this.mensajeLocal.set(null);
+  }
+
+  /* ---------------------------------------------------------------------- *
+   * Reporte de alerta pegado
+   * ---------------------------------------------------------------------- */
+
+  editarReporte(evento: Event): void {
+    this.reportePegado.set((evento.target as HTMLTextAreaElement).value);
+    this.reporteAviso.set(null);
+  }
+
+  async copiarPlantillaAlerta(): Promise<void> {
+    const copiado = await copiarAlPortapapeles(PLANTILLA_ALERTA_TEMPRANA);
+    this.reporteAviso.set(
+      copiado
+        ? 'Plantilla copiada al portapapeles.'
+        : 'No se pudo copiar la plantilla; copie el texto manualmente.',
+    );
+  }
+
+  /**
+   * Reparte el reporte pegado en los campos del borrador.
+   *
+   * En el alta los hechos se guardan como texto (`hechosRecientes`), con la
+   * fecha en formato compacto para que `partirHecho` la recupere al releer. En
+   * la edición se vierten en la tabla de hechos y se marcan como tocados para
+   * que se persistan al guardar.
+   */
+  aplicarReporte(): void {
+    const datos = parsearPlantillaAlerta(this.reportePegado());
+    if (!datos) {
+      this.reporteAviso.set(
+        'No se reconoció un reporte de alerta en el texto. Revise que incluya el título o las secciones.',
+      );
+      return;
+    }
+
+    const alcance = alcanceDesdeAmbito(datos.ambito);
+    const enAlta = this.esAlta();
+
+    this.borradorAlta.update((actual) => ({
+      ...actual,
+      titulo: datos.titulo ?? actual.titulo,
+      alcance: alcance ?? actual.alcance,
+      situacionActual: datos.situacionActual.map((linea) => this.nuevaLinea(linea)),
+      descripcionRiesgo: datos.riesgos.map((linea) => this.nuevaLinea(linea)),
+      actoresClave: datos.actores.map((linea) => this.nuevaLinea(linea)),
+      demandasInmediatas: datos.demandas.map((fila) => {
+        this.secuenciaLinea += 1;
+        return { id: this.secuenciaLinea, organizacion: fila.organizacion, demanda: fila.demanda };
+      }),
+      accionesSugeridas: datos.acciones.map((linea) => this.nuevaLinea(linea)),
+      hechosRecientes: enAlta
+        ? datos.hechos.map((hecho) =>
+            this.nuevaLinea(
+              hecho.fecha ? `${formatearFechaCorta(hecho.fecha)} — ${hecho.texto}` : hecho.texto,
+            ),
+          )
+        : actual.hechosRecientes,
+    }));
+
+    if (!enAlta) {
+      this.hechosBorrador.set(
+        datos.hechos.map((hecho) => {
+          this.secuenciaHecho += 1;
+          return {
+            clave: this.secuenciaHecho,
+            id: null,
+            fecha: hecho.fecha ?? '',
+            descripcion: hecho.texto,
+            fechaOriginal: '',
+            descripcionOriginal: '',
+          };
+        }),
+      );
+      this.hechosTocados.set(true);
+    }
+
+    this.reporteAviso.set(
+      `Reporte aplicado: ${datos.situacionActual.length} de situación, ${datos.hechos.length} hechos, ` +
+        `${datos.actores.length} actores, ${datos.demandas.length} demandas, ` +
+        `${datos.riesgos.length} riesgos y ${datos.acciones.length} acciones.`,
+    );
     this.mensajeLocal.set(null);
   }
 
