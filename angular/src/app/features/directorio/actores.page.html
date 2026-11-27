@@ -183,10 +183,7 @@
   <dialog #dialogoPadron class="padron-dialogo" aria-labelledby="titulo-padron">
     <form class="padron-form" (submit)="$event.preventDefault(); descargarPadron()">
       <h2 id="titulo-padron">Lista de asistencia</h2>
-      <p>
-        El archivo incluye sólo datos institucionales públicos de la lista temporal; no incorpora
-        DNI, teléfonos ni correos personales.
-      </p>
+      <p>Incluye DNI y celular para el registro de firmas.</p>
       <label>
         Título de la sesión
         <input
@@ -219,7 +216,9 @@
         <button type="button" class="button-secondary" (click)="dialogoPadron.close()">
           Cancelar
         </button>
-        <button type="submit" class="button-primary">Descargar CSV</button>
+        <button type="submit" class="button-primary" [disabled]="descargandoPadron()">
+          Descargar Excel
+        </button>
       </div>
     </form>
   </dialog>
@@ -314,28 +313,22 @@
             @if (actor.telefono; as tel) {
             <span class="contacto-linea">
               <span>{{ tel }}</span>
-              <button
-                type="button"
-                class="boton-copiar-icono"
-                [attr.aria-label]="'Copiar el teléfono de ' + actor.nombre"
-                [attr.title]="copiado() === tel ? 'Copiado' : 'Copiar teléfono'"
-                (click)="copiar(tel, $event)"
-              >
-                <app-icono [nombre]="copiado() === tel ? 'check' : 'copiar'" [tamano]="13" />
-              </button>
+              <app-boton-accion
+                [icono]="copiado() === tel ? 'check' : 'copiar'"
+                [ariaLabel]="'Copiar el teléfono de ' + actor.nombre"
+                [titulo]="copiado() === tel ? 'Copiado' : 'Copiar teléfono'"
+                (accion)="copiar(tel, $event)"
+              />
             </span>
             } @if (actor.email; as correo) {
             <span class="contacto-linea contacto-correo">
               <span>{{ correo }}</span>
-              <button
-                type="button"
-                class="boton-copiar-icono"
-                [attr.aria-label]="'Copiar el correo de ' + actor.nombre"
-                [attr.title]="copiado() === correo ? 'Copiado' : 'Copiar correo'"
-                (click)="copiar(correo, $event)"
-              >
-                <app-icono [nombre]="copiado() === correo ? 'check' : 'copiar'" [tamano]="13" />
-              </button>
+              <app-boton-accion
+                [icono]="copiado() === correo ? 'check' : 'copiar'"
+                [ariaLabel]="'Copiar el correo de ' + actor.nombre"
+                [titulo]="copiado() === correo ? 'Copiado' : 'Copiar correo'"
+                (accion)="copiar(correo, $event)"
+              />
             </span>
             } @if (!actor.telefono && !actor.email) {
             <span class="sin-dato">{{ sinDato }}</span>
@@ -360,53 +353,45 @@
           <td>{{ actor.region || sinDato }}</td>
           <td class="col-acciones" (click)="$event.stopPropagation()">
             <div class="acciones-fila">
-              <button
-                type="button"
-                class="accion"
-                [attr.aria-label]="'Ver la ficha de ' + actor.nombre"
-                [attr.title]="'Ver la ficha de ' + actor.nombre"
-                (click)="abrir(actor)"
-              >
-                <app-icono nombre="ojo" [tamano]="15" />
-              </button>
-              <button
-                type="button"
-                class="accion"
-                [attr.aria-label]="'Editar a ' + actor.nombre"
-                [attr.title]="'Editar a ' + actor.nombre"
-                (click)="abrirEdicion(actor, $event)"
-              >
-                <app-icono nombre="lapiz" [tamano]="15" />
-              </button>
-              <button
-                type="button"
-                class="accion"
-                [class.activa]="estaEnLista(actor)"
-                [attr.aria-pressed]="estaEnLista(actor)"
-                [attr.aria-label]="
+              <app-boton-accion
+                icono="ojo"
+                etiqueta="Ver"
+                [ariaLabel]="'Ver la ficha de ' + actor.nombre"
+                [titulo]="'Ver la ficha de ' + actor.nombre"
+                (accion)="abrir(actor)"
+              />
+              <app-boton-accion
+                icono="lapiz"
+                etiqueta="Editar"
+                [ariaLabel]="'Editar a ' + actor.nombre"
+                [titulo]="'Editar a ' + actor.nombre"
+                (accion)="abrirEdicion(actor, $event)"
+              />
+              <app-boton-accion
+                icono="reloj-mas"
+                [etiqueta]="estaEnLista(actor) ? 'Quitar de lista' : 'Agregar a lista'"
+                [presionado]="estaEnLista(actor)"
+                [ariaLabel]="
                   (estaEnLista(actor) ? 'Quitar de' : 'Agregar a') +
                   ' lista temporal: ' +
                   actor.nombre
                 "
-                [attr.title]="
+                [titulo]="
                   (estaEnLista(actor) ? 'Quitar de' : 'Agregar a') +
                   ' lista temporal: ' +
                   actor.nombre
                 "
-                (click)="alternarLista(actor, $event)"
-              >
-                <app-icono nombre="reloj-mas" [tamano]="15" />
-              </button>
-              <button
-                type="button"
-                class="accion"
-                [disabled]="!capacidades.puedeModificar(actor.clasificacion)"
-                [attr.aria-label]="(actor.activo ? 'Dar de baja a ' : 'Restaurar a ') + actor.nombre"
-                [attr.title]="(actor.activo ? 'Dar de baja a ' : 'Restaurar a ') + actor.nombre"
-                (click)="abrirBaja(actor, actor.activo ? 'anular' : 'restaurar')"
-              >
-                <app-icono nombre="papelera" [tamano]="15" />
-              </button>
+                (accion)="alternarLista(actor, $event)"
+              />
+              <app-boton-accion
+                icono="papelera"
+                [etiqueta]="actor.activo ? 'Dar de baja' : 'Restaurar'"
+                [tono]="actor.activo ? 'peligro' : 'neutro'"
+                [deshabilitado]="!capacidades.puedeModificar(actor.clasificacion)"
+                [ariaLabel]="(actor.activo ? 'Dar de baja a ' : 'Restaurar a ') + actor.nombre"
+                [titulo]="(actor.activo ? 'Dar de baja a ' : 'Restaurar a ') + actor.nombre"
+                (accion)="abrirBaja(actor, actor.activo ? 'anular' : 'restaurar')"
+              />
             </div>
           </td>
         </tr>

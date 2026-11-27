@@ -48,9 +48,11 @@ import {
 import {
   aLocalDirectorio,
   contactoDeLocal,
+  enlaceMapaLocal,
   ubicacionDeLocal,
   type LocalDirectorio,
 } from './local.mapeo';
+import { parsearNotasLocal } from './local-notas';
 
 type FiltrosLocales = {
   q: string;
@@ -292,6 +294,70 @@ const FILTROS_INICIALES: FiltrosLocales = {
       font-size: 13px;
       line-height: 1.65;
       white-space: pre-line;
+    }
+
+    .ficha-mapa {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      align-self: flex-start;
+      margin-top: 2px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: #eef4f9;
+      color: #2f5d86;
+      font-size: 12.5px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .ficha-mapa:hover {
+      background: #e2edf6;
+    }
+
+    .ficha-riesgos {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .ficha-riesgo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ficha-riesgo h4 {
+      margin: 0;
+      color: #52677a;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .ficha-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin: 0;
+      padding-left: 18px;
+      color: #465a6c;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .ficha-texto-completo {
+      margin-top: 4px;
+    }
+
+    .ficha-texto-completo summary {
+      cursor: pointer;
+      color: #2f5d86;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .ficha-texto-completo[open] summary {
+      margin-bottom: 6px;
     }
 
     .ficha-vacio {
@@ -688,6 +754,26 @@ export class LocalesPage {
   /** Local cuya ficha está abierta en el panel lateral. */
   readonly seleccionado = signal<LocalDirectorio | null>(null);
 
+  /** Notas estructuradas de la recomendación del local abierto. */
+  readonly notasSeleccionado = computed(() =>
+    parsearNotasLocal(this.seleccionado()?.recomendacion),
+  );
+
+  /** El local abierto no tiene riesgos de accesibilidad ni ventilación. */
+  readonly sinRiesgos = computed(() => {
+    const notas = this.notasSeleccionado();
+    return notas.accesibilidad.length === 0 && notas.ventilacion.length === 0;
+  });
+
+  /** Hay evaluación estructurada: se ofrece el texto completo como respaldo. */
+  readonly textoCompletoVisible = computed(() => {
+    const local = this.seleccionado();
+    const notas = this.notasSeleccionado();
+    return Boolean(
+      local?.recomendacion && !notas.textoLibre && local.recomendacion !== notas.evaluacion,
+    );
+  });
+
   /** Local de la ventana de WhatsApp; `null` = ventana cerrada. */
   readonly whatsappLocal = signal<LocalDirectorio | null>(null);
 
@@ -809,6 +895,11 @@ export class LocalesPage {
   /** Dirección, distrito, provincia y región en una sola línea. */
   ubicacion(local: LocalDirectorio): string | null {
     return ubicacionDeLocal(local);
+  }
+
+  /** Enlace a Google Maps: URL de referencia o búsqueda por dirección. */
+  enlaceMapa(local: LocalDirectorio): string | null {
+    return enlaceMapaLocal(local);
   }
 
   /** Abre la ventana con el mensaje de WhatsApp ya generado. */

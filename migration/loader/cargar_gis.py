@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Carga `gis/derived/infraestructuras_puntos.csv` en `gis.infraestructuras_puntos`.
+"""Carga `gis/derived/infraestructuras_puntos.csv` en la capa de puntos.
+
+La capa vive en `territorio.infraestructura_punto` desde la migración 75; antes
+estaba en `gis.infraestructuras_puntos`. El loader pregunta cuál existe y escribe
+en la que haya, así que sirve tanto antes como después de aplicar la 75 (la
+migración deja en `gis` una vista de compatibilidad, y una vista no admite
+`TRUNCATE`).
 
 Standalone: no depende de `migration/loader/run.py` ni del xlsx del legado.
 Aplica `migration/39_gis_infraestructuras.sql` (idempotente), trunca la tabla y
@@ -7,7 +13,8 @@ recarga desde el CSV con `COPY` a una tabla temporal. El `distrito_id` se resuel
 sólo para los ubigeos presentes en `core.distritos`; el resto queda en NULL.
 Después aplica `gis/derived/0004_revincular_infraestructuras_por_nombre.sql`,
 que corrige los ubigeos corridos del KML (Tayacaja y otros) re-vinculando por el
-nombre del globo. Sin ese paso la tabla queda con NULLs y distritos vecinos.
+nombre del globo. Ese SQL generado sigue apuntando a `gis.infraestructuras_puntos`;
+aquí se reescribe al nombre resuelto antes de ejecutarlo.
 
 Uso:
     python migration/loader/cargar_gis.py
@@ -36,7 +43,25 @@ SQL_ESQUEMA = RAIZ / "migration" / "39_gis_infraestructuras.sql"
 SQL_REVINCULAR = (
     RAIZ / "gis" / "derived" / "0004_revincular_infraestructuras_por_nombre.sql"
 )
-TABLA = "gis.infraestructuras_puntos"
+TABLA = "territorio.infraestructura_punto"
+TABLA_LEGADO = "gis.infraestructuras_puntos"
+VISTA_DESEMBARCADEROS = ("territorio.v_desembarcaderos", "gis.v_desembarcaderos")
+VISTA_POR_DISTRITO = (
+    "territorio.v_infraestructuras_por_distrito",
+    "gis.v_infraestructuras_por_distrito",
+)
+
+
+async def resolver_nombre(conexion, canonico: str, legado: str) -> str:
+    """Nombre que existe hoy entre el canónico y el heredado.
+
+    La migración 75 movió la capa de `gis` a `territorio`. Preguntar en vez de
+    asumir deja al loader sirviendo a una base migrada y a una que no lo está.
+    """
+    if await conexion.fetchval("select to_regclass($1) is not null", canonico):
+        return canonico
+    return legado
+
 
 # Columnas del CSV, en el orden de la tabla temporal. `distrito_id` y `geom` se
 # calculan en SQL, y `ubigeo_region`/`ubigeo_provincia` son columnas generadas.
@@ -118,8 +143,10 @@ CREATE TEMP TABLE _tmp_infra (
 );
 """
 
-INSERTAR = f"""
-INSERT INTO {TABLA} (
+
+def insertar_sql(tabla: str) -> str:
+    return f"""
+INSERT INTO {tabla} (
     {", ".join(COLUMNAS)}, distrito_id, geom
 )
 SELECT
@@ -245,30 +272,36 @@ async def cargar(dsn: str, csv_ruta: Path, solo_esquema: bool) -> None:
         registros = leer_registros(csv_ruta)
         print(f"CSV: {csv_ruta} → {len(registros)} registros")
 
+        tabla = await resolver_nombre(conexion, TABLA, TABLA_LEGADO)
+        print(f"Tabla destino: {tabla}")
+
         async with conexion.transaction():
-            await conexion.execute("TRUNCATE " + TABLA)
+            await conexion.execute("TRUNCATE " + tabla)
             await conexion.execute(TIPOS_TMP)
             await conexion.copy_records_to_table(
                 "_tmp_infra", records=registros, columns=COLUMNAS
             )
-            await conexion.execute(INSERTAR)
+            await conexion.execute(insertar_sql(tabla))
 
         # La resolución por ubigeo asigna el distrito vecino cuando el ubigeo del
         # KML está corrido; 0004 re-vincula por nombre. Va fuera de la transacción
-        # anterior porque el archivo trae su propio BEGIN/COMMIT.
+        # anterior porque el archivo trae su propio BEGIN/COMMIT. El SQL generado
+        # nombra la ubicación heredada: se reescribe al nombre resuelto.
         if SQL_REVINCULAR.exists():
             print(f"Re-vinculando por nombre: {SQL_REVINCULAR.name}")
-            await conexion.execute(SQL_REVINCULAR.read_text(encoding="utf-8"))
+            await conexion.execute(
+                SQL_REVINCULAR.read_text(encoding="utf-8").replace(TABLA_LEGADO, tabla)
+            )
         else:
             print(
                 f"AVISO: falta {SQL_REVINCULAR.name}; el distrito_id queda resuelto "
                 "sólo por ubigeo"
             )
 
-        total = await conexion.fetchval(f"select count(*) from {TABLA}")
+        total = await conexion.fetchval(f"select count(*) from {tabla}")
         resolubles = await conexion.fetchval(
             "select count(*) from core.distritos where ubigeo::text in "
-            "(select ubigeo from gis.infraestructuras_puntos where ubigeo is not null)"
+            f"(select ubigeo from {tabla} where ubigeo is not null)"
         )
         print(f"Filas cargadas: {total}")
         print(f"Ubigeos distintos en la capa presentes en core.distritos: {resolubles}")
@@ -282,6 +315,9 @@ async def resumen(dsn: str) -> None:
     conexion = await asyncpg.connect(dsn)
     try:
         print("\n--- Verificación ---")
+        tabla = await resolver_nombre(conexion, TABLA, TABLA_LEGADO)
+        v_desembarcaderos = await resolver_nombre(conexion, *VISTA_DESEMBARCADEROS)
+        v_por_distrito = await resolver_nombre(conexion, *VISTA_POR_DISTRITO)
         for fila in await conexion.fetch(
             f"""
             select tipo_registro, count(*) as filas,
@@ -289,29 +325,27 @@ async def resumen(dsn: str) -> None:
                    count(*) filter (where distrito_id is not null) as con_distrito_id,
                    count(*) filter (where geom is not null) as con_geom,
                    count(*) filter (where titular is not null) as con_titular
-            from {TABLA}
+            from {tabla}
             group by tipo_registro order by tipo_registro
             """
         ):
             print("  " + " · ".join(f"{k}={v}" for k, v in fila.items()))
         print(
             "  total:",
-            await conexion.fetchval(f"select count(*) from {TABLA}"),
+            await conexion.fetchval(f"select count(*) from {tabla}"),
         )
         print(
             "  desembarcaderos (vista):",
-            await conexion.fetchval("select count(*) from gis.v_desembarcaderos"),
+            await conexion.fetchval(f"select count(*) from {v_desembarcaderos}"),
         )
         print(
             "  distritos con derechos (vista):",
-            await conexion.fetchval(
-                "select count(*) from gis.v_infraestructuras_por_distrito"
-            ),
+            await conexion.fetchval(f"select count(*) from {v_por_distrito}"),
         )
         print(
             "  área otorgada total (ha):",
             await conexion.fetchval(
-                "select round(sum(area_total_ha), 2) from gis.infraestructuras_puntos "
+                f"select round(sum(area_total_ha), 2) from {tabla} "
                 "where tipo_registro = 'derecho_acuicola'"
             ),
         )

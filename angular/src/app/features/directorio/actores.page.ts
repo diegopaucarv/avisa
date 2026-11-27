@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
 import {
@@ -32,6 +32,7 @@ import {
   type Foto,
 } from '../../dominio/medios';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
@@ -46,10 +47,11 @@ import { ActorPanelComponent } from './actor-panel.component';
 import { ActorPanelAltaComponent, type NaturalezaAlta } from './actor-panel-alta.component';
 import { ActorPanelFusionComponent } from './actor-panel-fusion.component';
 import { alternarActorLista, etiquetaItemLista, quitarActorListaPorIndice } from './lista-temporal';
-import { crearCsvPadronAsistencia } from './padron-asistencia';
+import { crearXlsxPadron, filaPadronDeActor } from './padron-asistencia';
 import {
   aActorDirectorio,
   aCatalogosDirectorio,
+  aDatosPersonales,
   aMembresiaActor,
   SIN_DATO,
   type ActorDirectorio,
@@ -84,6 +86,23 @@ const FILTROS_INICIALES: FiltrosActores = {
 const SIN_MEMBRESIAS: MembresiaActor[] = [];
 
 /**
+ * Motivo que se registra al pedir el DNI y el celular para la lista de firmas.
+ * La base lo guarda en `audit.datos_personales_acceso` antes de descifrar, así
+ * que describe la finalidad concreta y no un texto de relleno.
+ */
+const MOTIVO_PII_PADRON = 'Lista de asistencia';
+
+/** Peticiones de PII simultáneas: el endpoint descifra por actor y no conviene saturarlo. */
+const CONCURRENCIA_PII = 4;
+
+/** Fecha local en `AAAA-MM-DD`, para nombrar el archivo descargado. */
+function fechaDeHoy(ahora = new Date()): string {
+  const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+  const dia = String(ahora.getDate()).padStart(2, '0');
+  return `${ahora.getFullYear()}-${mes}-${dia}`;
+}
+
+/**
  * Directorio · Actores.
  *
  * Listado paginado en servidor (`GET /api/v1/actors`) con los filtros que acepta
@@ -104,6 +123,7 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
   selector: 'app-actores',
   imports: [
     IconoComponent,
+    BotonAccionComponent,
     PaginacionComponent,
     ActorPanelComponent,
     ActorPanelAltaComponent,
@@ -303,24 +323,6 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
       word-break: break-word;
     }
 
-    .boton-copiar-icono {
-      display: inline-flex;
-      flex: none;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      padding: 0;
-      border: 0;
-      background: none;
-      color: #526577;
-      cursor: pointer;
-    }
-
-    .boton-copiar-icono:hover {
-      color: #1f5597;
-    }
-
     .col-acciones {
       width: 1%;
     }
@@ -331,35 +333,6 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
       justify-content: flex-end;
       gap: 4px;
       white-space: nowrap;
-    }
-
-    .accion {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      padding: 0;
-      border: 1px solid #dce3e8;
-      border-radius: 6px;
-      background: #fff;
-      color: #526577;
-      cursor: pointer;
-    }
-
-    .accion:hover:not(:disabled) {
-      background: #f5f7f8;
-    }
-
-    .accion:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    .accion.activa {
-      border-color: #1f5597;
-      color: #1f5597;
-      background: #eef3fa;
     }
 
     /* «sin dato» es información, no un error: tono apagado y sin icono de fallo. */
@@ -826,6 +799,8 @@ export class ActoresPage {
   readonly padronTitulo = signal('');
   readonly padronLugar = signal('');
   readonly padronFecha = signal(new Date().toLocaleDateString('en-CA'));
+  /** Evita un doble envío mientras se piden la PII y se arma el libro. */
+  readonly descargandoPadron = signal(false);
   private readonly dialogoPadron = viewChild<ElementRef<HTMLDialogElement>>('dialogoPadron');
 
   /** Valor copiado recientemente, para confirmar la acción en la fila. */
@@ -906,26 +881,90 @@ export class ActoresPage {
     this.dialogoPadron()?.nativeElement.showModal();
   }
 
-  descargarPadron(): void {
+  async descargarPadron(): Promise<void> {
     const titulo = this.padronTitulo().trim();
     const lugar = this.padronLugar().trim();
     const fecha = this.padronFecha();
-    if (!titulo || !lugar || !fecha) return;
+    if (!titulo || !lugar || !fecha || this.descargandoPadron()) return;
 
-    const contenido = crearCsvPadronAsistencia({
-      titulo,
-      lugar,
-      fecha,
-      actores: this.listaTemporal(),
-    });
-    const archivo = new Blob([contenido], { type: 'text/csv;charset=utf-8' });
+    this.descargandoPadron.set(true);
+    this.exportarError.set(null);
+
+    try {
+      const actores = this.listaTemporal();
+      const pii = await this.piiDeActores(actores);
+      const filas = actores.map((actor) =>
+        filaPadronDeActor(actor, this.ospaDe(actor), pii.get(actor.id) ?? null),
+      );
+
+      const archivo = await crearXlsxPadron({ titulo, lugar, fecha, filas });
+      this.descargarArchivo(archivo, `lista-asistencia-${fechaDeHoy()}.xlsx`);
+      this.dialogoPadron()?.nativeElement.close();
+    } catch (fallo) {
+      // El libro no llegó a armarse: se avisa sin cerrar el diálogo para que el
+      // usuario pueda reintentar con los mismos datos.
+      this.exportarError.set(aErrorApi(fallo).message);
+    } finally {
+      this.descargandoPadron.set(false);
+    }
+  }
+
+  /** «OSPA» del actor: membresía vigente, ancla del listado y, por último, su abreviatura. */
+  private ospaDe(actor: ActorDirectorio): string {
+    return (
+      this.membresiasDe(actor)[0]?.nombre || actor.organizacionAncla || actor.abreviatura || ''
+    );
+  }
+
+  /**
+   * DNI y teléfono de cada actor, con el motivo auditado. Si un actor falla o el
+   * rol no alcanza (403), se omite del mapa y su fila sale sin esos datos: una
+   * ficha sin PII no debe impedir la descarga del resto.
+   */
+  private async piiDeActores(
+    actores: readonly ActorDirectorio[],
+  ): Promise<Map<string, { dni: string | null; telefono: string | null }>> {
+    const datos = new Map<string, { dni: string | null; telefono: string | null }>();
+    if (!this.capacidades.puedeVerPii()) return datos;
+
+    const pendientes = actores.filter((actor) => !!actor.id);
+    let siguiente = 0;
+
+    const trabajador = async () => {
+      while (siguiente < pendientes.length) {
+        const actor = pendientes[siguiente++];
+        const pii = await this.piiDeActor(actor.id);
+        if (pii) datos.set(actor.id, pii);
+      }
+    };
+
+    const trabajadores = Math.min(CONCURRENCIA_PII, pendientes.length);
+    await Promise.all(Array.from({ length: trabajadores }, () => trabajador()));
+    return datos;
+  }
+
+  private async piiDeActor(
+    actorId: string,
+  ): Promise<{ dni: string | null; telefono: string | null } | null> {
+    try {
+      const url = urlConParametros(urlApi(`/v1/actors/${encodeURIComponent(actorId)}/pii`), {
+        motivo: MOTIVO_PII_PADRON,
+      });
+      const bruto = await firstValueFrom(this.http.get<unknown>(url));
+      const datos = aDatosPersonales(bruto);
+      return { dni: datos.dni, telefono: datos.telefono };
+    } catch {
+      return null;
+    }
+  }
+
+  private descargarArchivo(archivo: Blob, nombre: string): void {
     const url = URL.createObjectURL(archivo);
     const enlace = document.createElement('a');
     enlace.href = url;
-    enlace.download = 'lista-de-asistencia.csv';
+    enlace.download = nombre;
     enlace.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    this.dialogoPadron()?.nativeElement.close();
   }
 
   cerrarPanel(): void {
@@ -939,6 +978,10 @@ export class ActoresPage {
       actual.map((seleccionado) => (seleccionado.id === actor.id ? actor : seleccionado)),
     );
     this.listado.recargar();
+    // La columna «Organización» de la tabla se pinta desde `/v1/actors/membresias`,
+    // no desde el listado: se invalida para que refleje el vínculo recién editado
+    // sin recargar la página. Su URL no cambia, así que el `effect` no la relanza.
+    this.membresiasPagina.recargar();
   }
 
   /** Abre el alta con la naturaleza elegida en el menú «Nuevo». */

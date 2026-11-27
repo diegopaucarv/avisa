@@ -1,3 +1,5 @@
+import { createHash, randomUUID } from "node:crypto";
+
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
 import { ApiError } from "../errors";
@@ -399,6 +401,94 @@ function booleano(input: MediaCreateInput, key: string): boolean | undefined {
   return value;
 }
 
+/** Tope de una fotografía cargada desde la SPA. */
+const MAX_CONTENIDO_BYTES = 2 * 1024 * 1024;
+
+const DATA_URL_RE = /^data:([^;,]+)?(?:;[^,]*)?;base64,/i;
+
+type ContenidoImagen = {
+  buffer: Buffer;
+  /** MIME validado (empieza por `image/`). */
+  mime: string;
+  /** sha256 hexadecimal de los bytes decodificados. */
+  hash: string;
+};
+
+/**
+ * Lee `contenido` (base64 puro o data-URL) cuando viene en el cuerpo.
+ *
+ * Devuelve `null` si el campo no vino, para que el alta por `url` siga
+ * comportándose igual que antes del soporte de bytes. El tamaño se mide sobre
+ * los bytes decodificados, nunca sobre lo que declare el cliente.
+ */
+function leerContenidoImagen(
+  input: MediaCreateInput,
+  mimeDeclarado: string | null,
+): ContenidoImagen | null {
+  if (!("contenido" in input)) return null;
+  const valor = input.contenido;
+  if (valor === null || valor === undefined) return null;
+  if (typeof valor !== "string") {
+    throw new ApiError(
+      422,
+      "El contenido de la imagen debe ser base64.",
+      "CONTENIDO_INVALIDO",
+    );
+  }
+
+  let limpio = valor.trim();
+  let mimePrefijo: string | null = null;
+  const dataUrl = DATA_URL_RE.exec(limpio);
+  if (dataUrl) {
+    mimePrefijo = dataUrl[1]?.toLowerCase() ?? null;
+    limpio = limpio.slice(dataUrl[0].length);
+  }
+  limpio = limpio.replace(/\s+/g, "");
+  if (!limpio || !/^[A-Za-z0-9+/]*={0,2}$/.test(limpio)) {
+    throw new ApiError(
+      422,
+      "El contenido de la imagen no es base64 válido.",
+      "BASE64_INVALIDO",
+    );
+  }
+  // Base64 ocupa ~4/3 del binario: el doble lo supera con holgura y evita
+  // decodificar en memoria una carga desproporcionada.
+  if (limpio.length > MAX_CONTENIDO_BYTES * 2) {
+    throw new ApiError(
+      422,
+      "La imagen supera el máximo de 2 MB.",
+      "CONTENIDO_DEMASIADO_GRANDE",
+    );
+  }
+  const buffer = Buffer.from(limpio, "base64");
+  if (buffer.length === 0) {
+    throw new ApiError(422, "La imagen está vacía.", "CONTENIDO_VACIO");
+  }
+  if (buffer.length > MAX_CONTENIDO_BYTES) {
+    throw new ApiError(
+      422,
+      "La imagen supera el máximo de 2 MB.",
+      "CONTENIDO_DEMASIADO_GRANDE",
+    );
+  }
+
+  // El mime del cuerpo manda; si no viene, se toma el del prefijo data-URL.
+  const mime = (mimeDeclarado ?? mimePrefijo ?? "").toLowerCase();
+  if (!mime.startsWith("image/")) {
+    throw new ApiError(
+      422,
+      "El contenido debe ser una imagen.",
+      "MIME_INVALIDO",
+    );
+  }
+
+  return {
+    buffer,
+    mime,
+    hash: createHash("sha256").update(buffer).digest("hex"),
+  };
+}
+
 export async function createMedia(
   client: PoolClient,
   scope: { usuarioId: string; rolCodigo: string },
@@ -418,8 +508,16 @@ export async function createMedia(
     );
   }
   const entidadId = texto(body, "entidadId", 120, true) as string;
-  const url = texto(body, "url", 2000, true) as string;
-  const mime = texto(body, "mime", 100) ?? "image/jpeg";
+  // `url` deja de ser obligatoria sólo si llegan bytes: en ese caso la fila se
+  // sirve por `/api/v1/media/<id>/contenido` y no necesita un UPDATE posterior.
+  const mimeBody = texto(body, "mime", 100);
+  const contenido = leerContenidoImagen(body, mimeBody ?? null);
+  const id = contenido ? randomUUID() : null;
+  const url = contenido
+    ? `/api/v1/media/${id}/contenido`
+    : (texto(body, "url", 2000, true) as string);
+  // Sin bytes, el mime conserva el valor por defecto de antes (`image/jpeg`).
+  const mime = contenido ? contenido.mime : (mimeBody ?? "image/jpeg");
 
   const rol = texto(body, "rol", 12) ?? "galeria";
   if (!ROLE_SET.has(rol)) {
@@ -433,7 +531,9 @@ export async function createMedia(
   const orden = entero(body, "orden", 0) ?? 0;
   const ancho = entero(body, "ancho", 1);
   const alto = entero(body, "alto", 1);
-  const bytes = entero(body, "bytes", 0);
+  // El tamaño real de los bytes decodificados manda sobre el `bytes` del cliente.
+  const bytesDeclarados = entero(body, "bytes", 0);
+  const bytes = contenido ? contenido.buffer.length : (bytesDeclarados ?? null);
   const clasificacion = entero(body, "nivelClasificacion", 1) ?? 2;
   if (clasificacion > 3) {
     throw new ApiError(
@@ -455,48 +555,63 @@ export async function createMedia(
     );
   }
 
+  // Se arman columnas y marcadores en paralelo para poder añadir `id` y las
+  // columnas de bytes sólo cuando hay contenido, sin renumerar parámetros.
+  const params: unknown[] = [];
+  const columnas: string[] = [];
+  const marcadores: string[] = [];
+  const add = (columna: string, valor: unknown, cast = ""): void => {
+    params.push(valor);
+    columnas.push(columna);
+    marcadores.push(`$${params.length}${cast}`);
+  };
+
+  if (id) add("id", id, "::uuid");
+  add("entidad_tipo", entidadTipo);
+  add("entidad_id", entidadId);
+  add("rol", rol);
+  add("titulo", texto(body, "titulo", 160) ?? null);
+  add("descripcion", texto(body, "descripcion", 4000) ?? null);
+  add("url", url);
+  add("mime", mime);
+  add("ancho", ancho ?? null);
+  add("alto", alto ?? null);
+  add("bytes", bytes);
+  add("orden", orden);
+  add("es_principal", esPrincipal);
+  add("alt", texto(body, "alt", 240) ?? null);
+  add("credito", texto(body, "credito", 160) ?? null);
+  add("fuente", texto(body, "fuente", 20) ?? "MANUAL");
+  add(
+    "consentimiento_fecha",
+    texto(body, "consentimientoFecha", 10) ?? null,
+    "::date",
+  );
+  add("base_legal", texto(body, "baseLegal", 120) ?? null);
+  add("nivel_clasificacion", clasificacion);
+  add("created_by", scope.usuarioId);
+  add("updated_by", scope.usuarioId);
+  if (contenido) {
+    add("contenido", contenido.buffer);
+    add("content_type", contenido.mime);
+    add("hash", contenido.hash);
+    columnas.push("cargado_en");
+    marcadores.push("now()");
+  }
+
   const result = await client.query(
-    `insert into core.medios (
-        entidad_tipo, entidad_id, rol, titulo, descripcion, url, mime,
-        ancho, alto, bytes, orden, es_principal, alt, credito, fuente,
-        consentimiento_fecha, base_legal, nivel_clasificacion,
-        created_by, updated_by
-     ) values (
-        $1, $2, $3, $4, $5, $6, $7,
-        $8, $9, $10, $11, $12, $13, $14, $15,
-        $16::date, $17, $18,
-        $19, $19
-     )
+    `insert into core.medios (${columnas.join(", ")})
+     values (${marcadores.join(", ")})
      returning id::text as id`,
-    [
-      entidadTipo,
-      entidadId,
-      rol,
-      texto(body, "titulo", 160) ?? null,
-      texto(body, "descripcion", 4000) ?? null,
-      url,
-      mime,
-      ancho ?? null,
-      alto ?? null,
-      bytes ?? null,
-      orden,
-      esPrincipal,
-      texto(body, "alt", 240) ?? null,
-      texto(body, "credito", 160) ?? null,
-      texto(body, "fuente", 20) ?? "MANUAL",
-      texto(body, "consentimientoFecha", 10) ?? null,
-      texto(body, "baseLegal", 120) ?? null,
-      clasificacion,
-      scope.usuarioId,
-    ],
+    params,
   );
 
-  const id = result.rows[0]?.id as string | undefined;
-  if (!id) throw new ApiError(500, "No se pudo registrar el medio.");
+  const insertado = result.rows[0]?.id as string | undefined;
+  if (!insertado) throw new ApiError(500, "No se pudo registrar el medio.");
 
   const detalle = await client.query(
     `select ${MEDIA_SELECT} ${MEDIA_FROM} where m.id = $1::uuid`,
-    [id],
+    [insertado],
   );
   const fila = detalle.rows[0] as Record<string, unknown> | undefined;
   if (!fila) throw new ApiError(404, "El medio no existe.", "NOT_FOUND");
@@ -504,7 +619,7 @@ export async function createMedia(
 
   await auditChange(client, {
     tabla: "core.medios",
-    registroId: id,
+    registroId: insertado,
     accion: "INSERT",
     usuarioId: scope.usuarioId,
     rolCodigo: scope.rolCodigo,

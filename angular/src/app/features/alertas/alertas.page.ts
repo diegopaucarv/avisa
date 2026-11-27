@@ -33,6 +33,8 @@ import {
   type ResultadoAnulacion,
 } from '../../shared/ui/anular-panel.component';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -73,6 +75,12 @@ import {
   type PatchAlerta,
 } from './alerta.mapeo';
 import { copiarAlPortapapeles } from './portapapeles';
+import {
+  casoVinculadoDesde,
+  leerCasoVinculado,
+  recordarCasoVinculado,
+  type CasoVinculado,
+} from './caso-vinculado';
 
 type FiltrosAlertas = {
   q: string;
@@ -131,6 +139,7 @@ function totalDe(bruto: unknown): number {
   selector: 'app-alertas',
   imports: [
     IconoComponent,
+    BotonAccionComponent,
     PaginacionComponent,
     AccionesFilaComponent,
     AlertaPanelComponent,
@@ -335,31 +344,6 @@ function totalDe(bruto: unknown): number {
       text-decoration: underline;
     }
 
-    .boton-copiar {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex: none;
-      width: 20px;
-      height: 20px;
-      padding: 0;
-      border: 0;
-      border-radius: 5px;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-    }
-
-    .boton-copiar:hover {
-      background: var(--canvas);
-      color: var(--ink-2);
-    }
-
-    .boton-copiar:focus-visible {
-      outline: 2px solid var(--blue);
-      outline-offset: 1px;
-    }
-
     .alerta-caso-titulo {
       display: -webkit-box;
       overflow: hidden;
@@ -508,6 +492,9 @@ export class AlertasPage {
       sort: filtros.orden,
       caso: filtros.caso,
       sinCaso: filtros.sinCaso,
+      // La exportación reenvía los filtros al listado; `archivados` importa para
+      // que exportar desde el Archivo no devuelva las alertas de trabajo.
+      archivados: filtros.archivados,
     });
   });
 
@@ -676,6 +663,29 @@ export class AlertasPage {
   /** Alerta abierta en la ventana de WhatsApp. */
   readonly alertaWhatsapp = signal<Alerta | null>(null);
 
+  /**
+   * Caso vinculado de la alerta que se envía por WhatsApp. Es el mismo
+   * `GET /cases/{codigo}` que usa la ficha; se pide sólo al abrir la ventana y
+   * se recuerda en una caché acotada para no repetirlo al reabrir la alerta.
+   */
+  private readonly casoWhatsappRecurso = consulta<CasoVinculado>({
+    fuente: () => {
+      const codigo = this.alertaWhatsapp()?.casoCodigo?.trim();
+      if (!codigo || leerCasoVinculado(codigo)) return null;
+      return urlApi(`/v1/cases/${encodeURIComponent(codigo)}`);
+    },
+    esquema: casoVinculadoDesde,
+  });
+
+  /** Caso vinculado para anexar al mensaje; `null` mientras carga o si falla. */
+  readonly casoWhatsapp = computed(() => {
+    const codigo = this.alertaWhatsapp()?.casoCodigo?.trim();
+    if (!codigo) return null;
+    const cargado = this.casoWhatsappRecurso.valor();
+    if (cargado?.codigo === codigo) return cargado;
+    return leerCasoVinculado(codigo);
+  });
+
   /** Alerta que se está anulando en el panel compartido. */
   readonly alertaAnulacion = signal<Alerta | null>(null);
   readonly enviandoAnulacion = signal(false);
@@ -792,6 +802,12 @@ export class AlertasPage {
         replaceUrl: true,
       });
     });
+
+    // El caso del mensaje se recuerda para no volver a pedirlo al reabrir.
+    effect(() => {
+      const caso = this.casoWhatsappRecurso.valor();
+      if (caso) recordarCasoVinculado(caso);
+    });
   }
 
   private readonly cerrarAvanzadaFuera = (evento: MouseEvent): void => {
@@ -882,8 +898,13 @@ export class AlertasPage {
    * · «Dirección OAIPCS», sólo para la Dirección: aprobar, solicitar
    *   modificación y archivar sin caso (el «Anular» lo añade
    *   `app-acciones-fila` al final del menú).
-   * · «Flujo», sólo para quien no es Dirección: enviar a revisión, que es el
-   *   paso de elaboración (1) a validación previa (2).
+   * · «Flujo», sólo para quien no es Dirección: enviar a revisión (validación
+   *   previa, paso 2). Se ofrece **siempre** al sectorista, sin mirar el paso
+   *   actual, porque el flujo sólo asciende y ése es su único movimiento hacia
+   *   arriba. El PATCH de la API aplica `pasoActual` sin guardia de transición:
+   *   reenviar a un paso ya alcanzado se acepta (si coincide, es un no-op sin
+   *   traza de revisión), y si fallara, el error se muestra en el aviso de la
+   *   fila y el menú ya se cierra al elegir la acción.
    * · «Otras acciones»: modificar y mensajería instantánea.
    */
   accionesFila(alerta: Alerta): readonly AccionMenu[] {
@@ -905,7 +926,7 @@ export class AlertasPage {
           seccion: 'Dirección OAIPCS',
         });
       }
-    } else if (alerta.pasoActual < PASO_REVISION) {
+    } else {
       acciones.push({
         id: 'enviar-revision',
         etiqueta: 'Enviar a revisión',
@@ -1116,7 +1137,16 @@ export class AlertasPage {
     });
   }
 
-  /** PATCH común de las acciones de flujo de la fila. */
+  /**
+   * PATCH común de las acciones de flujo de la fila.
+   *
+   * El endpoint (`PATCH /v1/alerts/:id`) aplica `pasoActual` sin guardia de
+   * dirección: no rechaza reenviar a un paso ya alcanzado. Si el destino iguala
+   * el paso actual, el UPDATE es un no-op y no se registra traza de revisión; si
+   * el destino es anterior, el backend lo acepta y lo anota como devolución. Un
+   * fallo real (permiso, visibilidad G21, red) cae en `error` y se muestra en el
+   * aviso de la fila; el menú ya se cerró al elegir la acción.
+   */
   private enviarAccionFila(alerta: Alerta, paso: number, pasoPrevio: number): void {
     if (!alerta.id) return;
     this.enviandoFila.set(alerta.id);
@@ -1195,9 +1225,12 @@ export class AlertasPage {
     this.alertaWhatsapp.set(null);
   }
 
-  /** Texto inicial de la ventana de WhatsApp: la plantilla guardada o la generada. */
+  /**
+   * Texto inicial de la ventana de WhatsApp: la plantilla guardada o la
+   * generada. Si ya llegó el caso vinculado, la plantilla anexa su sección.
+   */
   mensajeWhatsapp(alerta: Alerta): string {
-    return alerta.plantillaWhatsapp ?? plantillaWhatsapp(alerta);
+    return alerta.plantillaWhatsapp ?? plantillaWhatsapp(alerta, this.casoWhatsapp());
   }
 
   /* ---------------------------------------------------------------------- *

@@ -122,7 +122,6 @@ html[data-theme='dark'] .data-table tr.row-selected td {
 }
 
 /* ── Botones/menús con fondo fijo claro dentro de modales ────────────────── */
-html[data-theme='dark'] .acciones-boton,
 html[data-theme='dark'] .lista-quitar,
 html[data-theme='dark'] .previa-acceso,
 html[data-theme='dark'] .caso-opcion,
@@ -231,22 +230,25 @@ html[data-theme='dark'] .micro-label {
   color: #fff !important;
 }
 
-/* Menú de acciones de fila (hover que quedaba blanco). */
-html[data-theme='dark'] .acciones-boton {
-  border-color: #2a3038 !important;
-  background: #191e25 !important;
-  color: #c7d2dd !important;
-}
+/* Menú de acciones de fila: el disparador comparte el botón de acción, así
+ * que en oscuro basta con aclarar el hover (--canvas aquí es casi negro). */
 html[data-theme='dark'] .acciones-boton:hover,
 html[data-theme='dark'] .menu-acciones button:hover,
 html[data-theme='dark'] .menu-acciones button:focus-visible {
   background: #232a33 !important;
   color: #fff !important;
 }
-html[data-theme='dark'] .acciones-boton[aria-expanded='true'] {
-  border-color: #2e4361 !important;
-  background: #1d2a3d !important;
-  color: #a9c6ee !important;
+
+/* Botones de acción de fila (icono/texto): mismo criterio de hover. */
+html[data-theme='dark'] .boton-accion:hover:not(:disabled),
+html[data-theme='dark'] .boton-accion:focus-visible {
+  background: #232a33 !important;
+  color: #fff !important;
+}
+html[data-theme='dark'] .boton-accion.peligro:hover:not(:disabled),
+html[data-theme='dark'] .boton-accion.peligro:focus-visible {
+  background: #2a1917 !important;
+  color: #e59189 !important;
 }
 html[data-theme='dark'] .menu-acciones button {
   color: #e3e9f0 !important;

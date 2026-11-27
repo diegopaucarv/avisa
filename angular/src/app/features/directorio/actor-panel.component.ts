@@ -14,9 +14,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { from, switchMap } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
-import { MAX_ADJUNTO_BYTES } from '../../core/http/adjuntos.service';
 import { normalizarColeccion, urlConParametros } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
@@ -51,6 +51,35 @@ import {
  * Ley 29733); por eso debe ser concreto y no un texto genérico de relleno.
  */
 const MOTIVO_PII = 'Consulta de datos personales desde el directorio';
+
+/**
+ * Mismo tope que aplica `POST /api/v1/media` al contenido en bytes (2 MiB). Se
+ * valida en el cliente para avisar antes de subir una imagen que el servidor
+ * rechazará igualmente.
+ */
+const MAX_FOTO_BYTES = 2 * 1024 * 1024;
+
+/**
+ * Lee un archivo como data-URL (`data:image/png;base64,...`).
+ *
+ * La API de medios acepta tanto base64 puro como el prefijo data-URL, así que se
+ * envía el resultado tal cual y el servidor se queda con el MIME del prefijo.
+ */
+function leerArchivoBase64(archivo: File): Promise<string> {
+  return new Promise((resolver, rechazar) => {
+    const lector = new FileReader();
+    lector.onerror = () => rechazar(new Error('No se pudo leer la imagen.'));
+    lector.onload = () => {
+      const resultado = lector.result;
+      if (typeof resultado !== 'string') {
+        rechazar(new Error('No se pudo leer la imagen.'));
+        return;
+      }
+      resolver(resultado);
+    };
+    lector.readAsDataURL(archivo);
+  });
+}
 
 const NIVELES_GOBIERNO = ['Nacional', 'Regional', 'Local', 'Empresa', 'Sociedad Civil'] as const;
 
@@ -652,11 +681,13 @@ export class ActorPanelComponent {
   }
 
   /**
-   * Elige la fotografía desde el lápiz de la cabecera.
+   * Sube la fotografía elegida desde el lápiz de la cabecera.
    *
-   * Se valida que sea una imagen y que quepa en el límite de 20 MB, pero el
-   * archivo no puede subirse: `POST /v1/media` sólo registra una `url` y no
-   * existe un endpoint que almacene el binario. Se avisa en vez de inventarlo.
+   * El archivo se lee como data-URL (igual que `AdjuntosService.subir`) y se
+   * envía como `contenido` base64 a `POST /api/v1/media`; la API lo decodifica,
+   * calcula el hash y deja la fila servible por `/api/v1/media/<id>/contenido`.
+   * Al terminar se invalida la consulta de medios para que la cabecera pinte la
+   * foto nueva sin recargar la página.
    */
   alSeleccionarFoto(evento: Event): void {
     const entrada = evento.target as HTMLInputElement;
@@ -664,19 +695,42 @@ export class ActorPanelComponent {
     entrada.value = '';
     if (!archivo) return;
 
+    const actor = this.actor();
+    if (!actor || !this.puedeEditar()) return;
+
     if (!archivo.type.startsWith('image/')) {
       this.avisoFoto.set('El archivo debe ser una imagen (JPG, PNG o WebP).');
       return;
     }
-    if (archivo.size > MAX_ADJUNTO_BYTES) {
-      this.avisoFoto.set('La imagen supera el máximo de 20 MB.');
+    if (archivo.size > MAX_FOTO_BYTES) {
+      this.avisoFoto.set('La imagen supera el máximo de 2 MB.');
       return;
     }
 
-    this.avisoFoto.set(
-      'No se pudo guardar la fotografía: la API aún no expone la carga del archivo. ' +
-        'Un medio se registra con una URL y no hay endpoint que almacene la imagen.',
-    );
+    this.avisoFoto.set('Subiendo la fotografía…');
+    from(leerArchivoBase64(archivo))
+      .pipe(
+        switchMap((contenido) =>
+          this.http.post<unknown>(urlApi('/v1/media'), {
+            entidadTipo: 'actor',
+            entidadId: actor.id,
+            rol: 'principal',
+            esPrincipal: true,
+            contenido,
+            mime: archivo.type || null,
+          }),
+        ),
+        takeUntilDestroyed(this.destruccion),
+      )
+      .subscribe({
+        next: () => {
+          this.avisoFoto.set('Fotografía actualizada.');
+          this.media.recargar();
+        },
+        error: (fallo: unknown) => {
+          this.avisoFoto.set(aErrorApi(fallo).message);
+        },
+      });
   }
 
   /** Clase de color del posicionamiento; `sin` cuando la base no lo declara. */
@@ -903,6 +957,16 @@ export class ActorPanelComponent {
     const region = draft.region.trim();
     if (region !== (actor.region ?? '').trim()) {
       payload['region'] = region || null;
+    }
+
+    // La organización de una persona es su membresía vigente: sólo se envía si
+    // cambió, para no cerrar y reabrir el vínculo en cada guardado. Las
+    // organizaciones no tienen membresía propia, así que no la mandan.
+    if (!esOrganizacion) {
+      const organizacion = draft.organizacion.trim();
+      if (organizacion !== (actor.organizacionAncla ?? '').trim()) {
+        payload['organizacion'] = organizacion || null;
+      }
     }
 
     if (dni) payload['dni'] = dni;

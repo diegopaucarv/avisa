@@ -23,7 +23,8 @@ export const dynamic = "force-dynamic";
  * se encienden y apagan sobre el mapa principal que ya existe.
  *
  * `GET /api/v1/territorio/capas?recurso=infraestructuras&tipo=derecho_acuicola`
- *   Puntos de `gis.infraestructuras_puntos` (13 456 en la carga vigente). La capa
+ *   Puntos de `territorio.infraestructura_punto` (13 456 en la carga vigente;
+ *   la migración 75 la movió desde `gis.infraestructuras_puntos`). La capa
  *   mezcla dos poblaciones y el mapa las dibuja distinto:
  *
  *     { recurso: "infraestructuras", tipo, items: [ { id, tipo, lat, lon,
@@ -54,7 +55,7 @@ export const dynamic = "force-dynamic";
  *
  * `recurso` es obligatorio; ausente o distinto responde 400 `RECURSO_INVALIDO`.
  * Sólo lectura, con sesión obligatoria aunque las tablas no tengan RLS. Si
- * `territorio.distrito` o `gis.infraestructuras_puntos` todavía no existen, la
+ * `territorio.distrito` o `territorio.infraestructura_punto` todavía no existen, la
  * consulta falla con 503 («capa de datos no inicializada»), nunca con relleno.
  */
 export async function GET(request: Request) {
@@ -79,7 +80,11 @@ export async function GET(request: Request) {
         tipo = tipoCrudo as TipoInfraestructura;
       }
 
-      const page = enteroDe(params.get("pagina") ?? params.get("page"), 1, 1_000_000);
+      const page = enteroDe(
+        params.get("pagina") ?? params.get("page"),
+        1,
+        1_000_000,
+      );
       const pageSize = enteroDe(
         params.get("tamano") ?? params.get("pageSize"),
         CAPAS_PAGE_SIZE,
@@ -115,7 +120,11 @@ export async function GET(request: Request) {
  * al respaldo en vez de cortar la petición: la paginación es un detalle de
  * transporte, no parte del contrato de la capa.
  */
-function enteroDe(valor: string | null, respaldo: number, maximo: number): number {
+function enteroDe(
+  valor: string | null,
+  respaldo: number,
+  maximo: number,
+): number {
   if (!valor) return respaldo;
   const numero = Number(valor);
   if (!Number.isFinite(numero)) return respaldo;

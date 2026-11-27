@@ -267,8 +267,7 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Código</th>
-          <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Caso</th>
+          <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Caso</th>
           <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
           <th scope="col" [appThOrden]="'anulado'" [orden]="orden">Fecha de anulación</th>
           <th scope="col">Acción</th>
@@ -277,8 +276,15 @@
       <tbody>
         @for (caso of filasVisibles(); track caso.codigo) {
         <tr>
-          <td>{{ caso.codigo }}</td>
-          <td>{{ caso.titulo }}</td>
+          <td class="celda-caso">
+            <a
+              class="caso-codigo"
+              [routerLink]="['/casos', caso.codigo]"
+              [attr.title]="'Abrir el expediente completo de ' + caso.codigo"
+              >{{ caso.codigo }}</a
+            >
+            <span class="caso-titulo" [attr.title]="caso.titulo">{{ caso.titulo }}</span>
+          </td>
           <td>{{ caso.region || '—' }}</td>
           <td>{{ fechaHoraTexto(caso.anuladoEn) }}</td>
           <td>
@@ -347,15 +353,25 @@
           <th scope="col" [appThOrden]="'codigo'" [orden]="orden">Caso</th>
           <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
           <th scope="col" [appThOrden]="'sectorista'" [orden]="orden">Sectorista</th>
-          <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
           <th scope="col" [appThOrden]="'riesgo'" [orden]="orden">Riesgo</th>
-          <th scope="col" [appThOrden]="'etapa'" [orden]="orden">Etapa</th>
-          <th scope="col" [appThOrden]="'inicio'" [orden]="orden">Inicio</th>
+          <th
+            scope="col"
+            [appThOrden]="'estado'"
+            [orden]="orden"
+            title="Abierto mientras el caso sigue activo; Cerrado cuando se resolvió o archivó"
+          >
+            Estado
+          </th>
+          <th scope="col">Relaciones</th>
         </tr>
       </thead>
       <tbody>
         @for (caso of filasVisibles(); track caso.codigo) {
-        <tr class="case-row-clickable" [routerLink]="['/casos', caso.codigo]">
+        <!--
+          La fila abre la vista previa y no navega: los enlaces internos (código
+          y relaciones) cortan la propagación para no abrir el panel de paso.
+        -->
+        <tr class="case-row-clickable" (click)="abrirVistaPrevia(caso, $event)">
           <td class="col-seleccion" (click)="$event.stopPropagation()">
             <input
               type="checkbox"
@@ -365,16 +381,57 @@
               (change)="seleccion.alternar(caso.codigo)"
             />
           </td>
-          <td>
-            <a class="table-link" [routerLink]="['/casos', caso.codigo]">{{ caso.codigo }}</a>
+          <td class="celda-caso">
+            <a
+              class="caso-codigo"
+              [routerLink]="['/casos', caso.codigo]"
+              [attr.title]="'Abrir el expediente completo de ' + caso.codigo"
+              (click)="$event.stopPropagation()"
+              >{{ caso.codigo }}</a
+            >
+            <span class="caso-titulo" [attr.title]="caso.titulo">{{ caso.titulo }}</span>
           </td>
           <td>{{ caso.region || '—' }}</td>
           <td>{{ caso.sectorista || 'sin dato' }}</td>
-          <td>{{ caso.estado }}</td>
           <td>{{ riesgoMostrado(caso) }}</td>
-          <td>{{ caso.etapa }}</td>
-          <td [attr.title]="caso.inicio ? null : 'Sin fecha de inicio registrada'">
-            {{ caso.inicio ? fechaTexto(caso.inicio) : '—' }}
+          <td [attr.title]="caso.estado === 'Abierto' ? null : caso.estado">
+            {{ estadoMostrado(caso) }}
+          </td>
+          <td class="celda-relaciones">
+            <div class="relaciones-acciones">
+              <app-boton-accion
+                icono="actividad"
+                etiqueta="Cronología"
+                [ariaLabel]="'Cronología del caso ' + caso.codigo"
+                [ruta]="['/casos', caso.codigo]"
+                fragmento="eventos-caso"
+                (accion)="$event.stopPropagation()"
+              />
+              <app-boton-accion
+                icono="compromisos"
+                etiqueta="Compromisos"
+                [ariaLabel]="'Compromisos del caso ' + caso.codigo"
+                [ruta]="['/casos', caso.codigo]"
+                fragmento="compromisos-caso"
+                (accion)="$event.stopPropagation()"
+              />
+              <app-boton-accion
+                icono="bandeja"
+                etiqueta="Demandas"
+                [ariaLabel]="'Demandas del caso ' + caso.codigo"
+                [ruta]="['/casos', caso.codigo]"
+                fragmento="demandas-caso"
+                (accion)="$event.stopPropagation()"
+              />
+              <app-boton-accion
+                icono="actores"
+                etiqueta="Actores"
+                [ariaLabel]="'Actores del caso ' + caso.codigo"
+                [ruta]="['/casos', caso.codigo]"
+                fragmento="actores-caso"
+                (accion)="$event.stopPropagation()"
+              />
+            </div>
           </td>
         </tr>
         }

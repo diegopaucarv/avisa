@@ -630,7 +630,7 @@ export async function poblacionPorRegion(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Capas opcionales del mapa (`gis.infraestructuras_puntos` y auditorios)      */
+/* Capas opcionales del mapa (`territorio.infraestructura_punto` y auditorios) */
 /* -------------------------------------------------------------------------- */
 
 /**
@@ -711,7 +711,39 @@ type InfraestructuraFila = {
 };
 
 /**
- * Puntos de `gis.infraestructuras_puntos` (13 456 en la carga vigente).
+ * Tabla canónica de la capa de puntos. La migración 75 la movió de `gis` a
+ * `territorio` y dejó en `gis` una vista de compatibilidad. Mientras la 75 no
+ * esté aplicada se sigue leyendo la ubicación anterior: un despliegue de la API
+ * anterior a la migración no debe tumbar el mapa por un renombre.
+ */
+const INFRAESTRUCTURAS_CANONICA = "territorio.infraestructura_punto";
+const INFRAESTRUCTURAS_LEGADO = "gis.infraestructuras_puntos";
+
+/**
+ * Nombre resuelto una sola vez por proceso. La existencia de una tabla no
+ * depende de la sesión ni de la RLS, así que cachearlo es seguro.
+ */
+let tablaInfraestructuras: string | null = null;
+
+/**
+ * Resuelve qué nombre usar para la capa. Los dos valores son constantes de este
+ * módulo —nunca entrada del usuario— y por eso se interpolan en el SQL: un
+ * identificador no se puede pasar como parámetro.
+ */
+async function tablaInfraestructurasDe(client: PoolClient): Promise<string> {
+  if (tablaInfraestructuras) return tablaInfraestructuras;
+  const result = await client.query<{ canonica: boolean }>(
+    `select to_regclass($1) is not null as canonica`,
+    [INFRAESTRUCTURAS_CANONICA],
+  );
+  tablaInfraestructuras = result.rows[0]?.canonica
+    ? INFRAESTRUCTURAS_CANONICA
+    : INFRAESTRUCTURAS_LEGADO;
+  return tablaInfraestructuras;
+}
+
+/**
+ * Puntos de la capa de infraestructuras (13 456 en la carga vigente).
  *
  * La capa no son instalaciones de PRODUCE: mezcla derechos acuícolas privados y
  * sedes institucionales. El tipo se filtra en servidor; el mapa además lo usa
@@ -727,6 +759,7 @@ export async function listarInfraestructurasPuntos(
     Math.max(1, Math.trunc(query.pageSize ?? CAPAS_PAGE_SIZE)),
   );
   const tipo = query.tipo ?? null;
+  const tabla = await tablaInfraestructurasDe(client);
 
   const resumen = await client.query<{
     total: number | string;
@@ -738,12 +771,12 @@ export async function listarInfraestructurasPuntos(
             count(*) filter (where tipo_registro = 'derecho_acuicola')::int as derechos,
             count(*) filter (where tipo_registro = 'institucional')::int as sedes,
             count(*) filter (where latitud is null or longitud is null)::int as sin_coordenada
-       from gis.infraestructuras_puntos`,
+       from ${tabla}`,
   );
 
   const conteo = await client.query<{ total: number | string }>(
     `select count(*)::int as total
-       from gis.infraestructuras_puntos i
+       from ${tabla} i
       where i.latitud is not null
         and i.longitud is not null
         and ($1::text is null or i.tipo_registro = $1)`,
@@ -763,7 +796,7 @@ export async function listarInfraestructurasPuntos(
             case when i.tipo_registro = 'institucional'
                  then i.nombre_infraestructura
             end as nombre_infraestructura
-       from gis.infraestructuras_puntos i
+       from ${tabla} i
       where i.latitud is not null
         and i.longitud is not null
         and ($1::text is null or i.tipo_registro = $1)

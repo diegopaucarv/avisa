@@ -11,6 +11,14 @@ const CASE_SELECT = `
   c.resumen_ejecutivo as summary,
   c.enlace_analisis,
   c.descripcion_riesgo,
+  -- Marca de la Dirección OAIPCS (migración 76): alimenta «Casos priorizados»
+  -- del panorama territorial.
+  c.priorizado,
+  -- Demandas activas del caso: alimenta la columna «Demandas» del cajón del mapa.
+  (select count(*)::int
+     from core.demandas d
+    where d.caso_id = c.id
+      and d.anulado_en is null) as demandas,
   c.pct_avance::float8 as progress,
   to_char(c.fecha_ultima_actualizacion at time zone 'America/Lima', 'YYYY-MM-DD') as updated,
   c.fecha_ultima_actualizacion as updated_at,
@@ -131,7 +139,11 @@ export type CaseListItem = {
   code: string;
   title: string;
   summary: string | null;
+  /** Descripción concreta del riesgo (`core.casos.descripcion_riesgo`). */
+  descripcionRiesgo: string | null;
   enlaceAnalisis: string | null;
+  /** Cantidad de demandas activas del caso (`core.demandas.anulado_en is null`). */
+  demandas: number;
   progress: number | null;
   updated: string | null;
   updatedAt: string | Date | null;
@@ -147,6 +159,8 @@ export type CaseListItem = {
   riskDerived: false;
   prioridad: string | null;
   alcance: string | null;
+  /** Marca de la Dirección OAIPCS (`core.casos.priorizado`), no derivada del riesgo. */
+  priorizado: boolean;
   nivelConflicto: string | null;
   stage: string | null;
   tematica: string | null;
@@ -455,7 +469,9 @@ export async function listCases(
     code: row.code,
     title: row.title,
     summary: row.summary,
+    descripcionRiesgo: row.descripcion_riesgo ?? null,
     enlaceAnalisis: row.enlace_analisis,
+    demandas: Number(row.demandas ?? 0),
     progress: row.progress,
     updated: row.updated,
     updatedAt: row.updated_at,
@@ -470,6 +486,7 @@ export async function listCases(
     riskDerived: false,
     prioridad: row.prioridad,
     alcance: row.alcance,
+    priorizado: row.priorizado === true,
     nivelConflicto: row.nivel_conflicto,
     stage: row.stage,
     tematica: row.tematica,
@@ -546,6 +563,7 @@ export type CaseEvent = {
 export type CaseAlert = {
   id: string;
   codigo: string;
+  titulo: string | null;
   nivel: string | null;
   prioridad: string | null;
   estado: string;
@@ -755,6 +773,9 @@ export async function getCaseByCode(
          left join core.cat_tipos_hecho th on th.id = ev.tipo_hecho_id
          left join core.actores act on act.actor_uid = ev.actor_uid
         where ev.caso_id = $1
+          -- «Quitar hecho» hace baja lógica; sin este filtro el hecho seguiría
+          -- apareciendo en la cronología del expediente.
+          and ev.anulado_en is null
         order by ev.fecha_evento desc, ev.created_at desc`,
       [row.id],
     ),
@@ -763,6 +784,7 @@ export async function getCaseByCode(
               d.problema_3p as problema,
               d.propuesta_3p as propuesta,
               d.pedido_3p as pedido,
+              to_char(d.fecha_registro, 'YYYY-MM-DD') as fecha_registro,
               d.descripcion_demanda as descripcion,
               replace(d.estado_atencion, '_', ' ') as estado,
               d.motivo_no_atencion as motivo,
@@ -775,6 +797,9 @@ export async function getCaseByCode(
          left join core.documentos doc on doc.id = d.documento_origen_id
          left join core.cat_tematicas te on te.id = d.tematica_id
         where d.caso_id = $1
+          -- «Eliminar demanda» también es baja lógica; el expediente sólo debe
+          -- listar las vigentes.
+          and d.anulado_en is null
         order by d.fecha_registro desc nulls last`,
       [row.id],
     ),
@@ -840,6 +865,8 @@ export async function getCaseByCode(
     client.query(
       `select a.id,
               a.codigo_alerta as codigo,
+              -- Título bajo el código en «Alertas vinculadas» del expediente.
+              a.titulo,
               na.nombre as nivel,
               pa.codigo as prioridad,
               case
@@ -923,7 +950,9 @@ export async function getCaseByCode(
     code: row.code,
     title: row.title,
     summary: row.summary,
+    descripcionRiesgo: row.descripcion_riesgo ?? null,
     enlaceAnalisis: row.enlace_analisis,
+    demandas: Number(row.demandas ?? 0),
     progress: row.progress,
     updated: row.updated,
     updatedAt: row.updated_at,
@@ -938,6 +967,7 @@ export async function getCaseByCode(
     riskDerived: false,
     prioridad: row.prioridad,
     alcance: row.alcance,
+    priorizado: row.priorizado === true,
     nivelConflicto: row.nivel_conflicto,
     stage: row.stage,
     tematica: row.tematica,
@@ -1013,6 +1043,16 @@ const MAX_TITLE_LENGTH = 255;
 const MAX_URL_LENGTH = 2048;
 const MAX_TEXT_LENGTH = 20000;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+/**
+ * Roles que pueden marcar un caso como priorizado (`core.casos.priorizado`,
+ * migración 76). Es el mismo conjunto que `esDireccion` en la SPA: si allí se
+ * agrega un rol, aquí también.
+ */
+const ROLES_PRIORIZADO = new Set([
+  "administrador",
+  "direccion_oaipcs",
+  "alta_direccion",
+]);
 const ORIGEN_VALUES = new Set([
   "MANUAL",
   "KAG",
@@ -1042,6 +1082,7 @@ const CASE_WRITE_COLUMNS = [
   "region_principal_id",
   "distrito_principal_id",
   "origen_dato",
+  "priorizado",
 ] as const;
 
 type CatalogKey =
@@ -1112,6 +1153,22 @@ function readField(
     }
   }
   return { present: false, value: undefined };
+}
+
+/**
+ * Booleano estricto para columnas lógicas: acepta `true`/`false` y sus formas
+ * textuales (incluidas las que envía un formulario HTML), pero nunca coacciona
+ * `null`, `""` ni un número distinto de 0/1 a `false` en silencio.
+ */
+function booleanEstricto(value: unknown, etiqueta: string): boolean {
+  if (typeof value === "boolean") return value;
+  if (value === "true" || value === 1 || value === "1") return true;
+  if (value === "false" || value === 0 || value === "0") return false;
+  throw new ApiError(
+    422,
+    `El campo ${etiqueta} debe ser verdadero o falso.`,
+    "INVALID_INPUT",
+  );
 }
 
 /**
@@ -1194,19 +1251,36 @@ async function resolveSectoristaId(
     );
   }
   const id = value.trim();
-  const result = await client.query(
-    `select 1
-       from core.usuarios u
-       join core.usuario_roles ur on ur.usuario_id = u.id
-       join core.roles r on r.id = ur.rol_id
-      where u.id = $1::uuid
-        and u.activo
-        and r.codigo = 'sectorista'
-        and (ur.hasta is null or ur.hasta >= current_date)
-      limit 1`,
-    [id],
-  );
-  if (result.rowCount === 0) {
+  // La validación se hace con `core.es_sectorista` (migración 74) porque
+  // `core.usuarios` y `core.usuario_roles` tienen RLS: con el rol de la API la
+  // consulta directa no ve filas ajenas y rechazaba con 422 toda asignación
+  // distinta de la del propio usuario. Si la migración no está aplicada se cae
+  // a la consulta directa para no romper el `PATCH` (mismo comportamiento que
+  // había antes).
+  let esSectorista: boolean;
+  try {
+    const result = await client.query<{ ok: boolean }>(
+      `select core.es_sectorista($1::uuid) as ok`,
+      [id],
+    );
+    esSectorista = result.rows[0]?.ok === true;
+  } catch (error) {
+    if ((error as { code?: unknown })?.code !== "42883") throw error;
+    const result = await client.query(
+      `select 1
+         from core.usuarios u
+         join core.usuario_roles ur on ur.usuario_id = u.id
+         join core.roles r on r.id = ur.rol_id
+        where u.id = $1::uuid
+          and u.activo
+          and r.codigo = 'sectorista'
+          and (ur.hasta is null or ur.hasta >= current_date)
+        limit 1`,
+      [id],
+    );
+    esSectorista = (result.rowCount ?? 0) > 0;
+  }
+  if (!esSectorista) {
     throw new ApiError(
       422,
       "El sectorista indicado no existe, no está activo o no tiene el rol sectorista.",
@@ -2051,6 +2125,21 @@ export async function updateCase(
     previousRegions = previous.rows.map((item) => String(item.nombre));
     regions = await resolveRegions(client, regionNames);
     add("region_principal_id", regions[0]?.id ?? null);
+  }
+
+  // «Priorizado» es una decisión de la Dirección OAIPCS (migración 76). Se corta
+  // antes de escribir: si el rol no pertenece al conjunto, se responde 403 en vez
+  // de ignorar el campo en silencio, porque el cliente creería que se guardó.
+  const priorizado = readField(body, ["priorizado"]);
+  if (priorizado.present) {
+    if (!ROLES_PRIORIZADO.has(session.rolCodigo)) {
+      throw new ApiError(
+        403,
+        "Sólo la Dirección OAIPCS puede marcar un caso como priorizado.",
+        "SIN_PERMISO_PRIORIZAR",
+      );
+    }
+    add("priorizado", booleanEstricto(priorizado.value, "priorizado"));
   }
 
   if (sets.length === 0) invalid();

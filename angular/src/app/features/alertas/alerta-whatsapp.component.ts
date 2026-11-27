@@ -24,7 +24,9 @@ import { copiarAlPortapapeles } from './portapapeles';
  * de WhatsApp (negritas `*` y emojis) y permite copiarlo al portapapeles.
  *
  * No conoce HTTP ni persiste nada: el texto llega ya armado por `mensaje` y
- * copiar es una operación local, sin permiso del backend.
+ * copiar es una operación local, sin permiso del backend. Ese texto puede
+ * incluir ya la sección «📎 Caso vinculado»: la pantalla que abre la ventana es
+ * quien pide el caso y arma la plantilla.
  */
 @Component({
   selector: 'app-alerta-whatsapp',

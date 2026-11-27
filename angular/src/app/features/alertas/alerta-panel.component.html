@@ -31,7 +31,7 @@
                 >Riesgo {{ etiquetaRiesgo(a.riesgo) }}</span
               >
               <span aria-hidden="true">·</span>
-              <span class="alerta-fecha">{{ fecha(a.fechaReporte) }}</span>
+              <span class="alerta-fecha">Fecha de reporte: {{ fecha(a.fechaReporte) }}</span>
             </div>
           </div>
         }
@@ -165,29 +165,14 @@
             />
           </div>
 
-          <div class="bloque-lista">
-            <span class="form-label">🔍 Situación actual</span>
-            @for (linea of borradorAlta().situacionActual; track linea.id) {
-              <div class="linea-fila">
-                <textarea
-                  rows="2"
-                  aria-label="Situación actual"
-                  [value]="linea.texto"
-                  (input)="editarLinea('situacionActual', linea.id, $event)"
-                ></textarea>
-                <button
-                  type="button"
-                  class="icon-button"
-                  aria-label="Quitar línea de situación actual"
-                  (click)="quitarLinea('situacionActual', linea.id)"
-                >
-                  <app-icono nombre="cerrar" [tamano]="14" />
-                </button>
-              </div>
-            }
-            <button type="button" class="alerta-agregar" (click)="agregarLinea('situacionActual')">
-              ＋ Agregar
-            </button>
+          <div class="form-field">
+            <label class="form-label" for="alta-situacion">🔍 Situación actual</label>
+            <textarea
+              id="alta-situacion"
+              rows="4"
+              [value]="textoSituacion()"
+              (input)="editarSituacion($event)"
+            ></textarea>
           </div>
 
           <div class="bloque-lista">
@@ -235,8 +220,7 @@
                 </button>
               </div>
             }
-            <p class="form-hint">Nombre — Cargo / Organización (texto libre).</p>
-            <span class="form-label">＋ Agregar actor</span>
+            <p class="form-hint">Nombre – Gremio/Institución, Cargo · Teléfono (texto libre).</p>
             <div class="actor-acciones">
               <button type="button" class="button-secondary" (click)="alternarBuscadorActor()">
                 Elegir del directorio
@@ -297,29 +281,33 @@
 
           <div class="bloque-lista">
             <span class="form-label">📌 Demandas inmediatas</span>
-            @for (linea of borradorAlta().demandasInmediatas; track linea.id) {
-              <div class="linea-fila">
+            @for (fila of borradorAlta().demandasInmediatas; track fila.id) {
+              <div class="demanda-fila">
+                <input
+                  type="text"
+                  aria-label="Organización solicitante"
+                  placeholder="Organización solicitante"
+                  [value]="fila.organizacion"
+                  (input)="editarDemanda(fila.id, 'organizacion', $event)"
+                />
                 <textarea
                   rows="2"
-                  aria-label="Demanda inmediata"
-                  [value]="linea.texto"
-                  (input)="editarLinea('demandasInmediatas', linea.id, $event)"
+                  aria-label="Demanda"
+                  placeholder="Demanda"
+                  [value]="fila.demanda"
+                  (input)="editarDemanda(fila.id, 'demanda', $event)"
                 ></textarea>
                 <button
                   type="button"
                   class="icon-button"
                   aria-label="Quitar demanda"
-                  (click)="quitarLinea('demandasInmediatas', linea.id)"
+                  (click)="quitarDemanda(fila.id)"
                 >
                   <app-icono nombre="cerrar" [tamano]="14" />
                 </button>
               </div>
             }
-            <button
-              type="button"
-              class="alerta-agregar"
-              (click)="agregarLinea('demandasInmediatas')"
-            >
+            <button type="button" class="alerta-agregar" (click)="agregarDemanda()">
               ＋ Agregar
             </button>
           </div>
@@ -470,14 +458,6 @@
             </div>
           </section>
 
-          @if (puedeModificar()) {
-            <div class="acciones-form">
-              <button type="button" class="button-secondary" (click)="iniciarEdicion()">
-                Modificar contenido
-              </button>
-            </div>
-          }
-
           <section class="alerta-seccion">
             <div class="alerta-seccion-cuerpo">
               <p>
@@ -486,26 +466,31 @@
                   · {{ a.casoTitulo }}
                 }
               </p>
-            </div>
-          </section>
 
-          <section class="alerta-seccion">
-            <h3 class="alerta-seccion-titulo">Fuente</h3>
-            <div class="alerta-seccion-cuerpo">
-              @if (a.fuenteTipo || a.fuenteDescripcion) {
-                <p>
-                  <b>{{ a.fuenteTipo || 'Fuente' }}</b>
-                  @if (a.fuenteDescripcion) {
-                    · {{ a.fuenteDescripcion }}
-                  }
-                </p>
-              } @else {
-                <p class="alerta-vacio">Sin fuente registrada.</p>
-              }
-              @if (a.fuenteUrl) {
-                <p>
-                  <a [href]="a.fuenteUrl" target="_blank" rel="noopener">Abrir la fuente</a>
-                </p>
+              @if (cargandoCaso()) {
+                <p class="alerta-vacio" role="status">Cargando datos del caso…</p>
+              } @else if (casoVinculado(); as caso) {
+                @if (caso.resumen) {
+                  <p>{{ caso.resumen }}</p>
+                }
+
+                @if (caso.actores.length) {
+                  <h4 class="caso-subtitulo">Actores principales</h4>
+                  <ul>
+                    @for (actor of caso.actores; track $index) {
+                      <li>{{ actor }}</li>
+                    }
+                  </ul>
+                }
+
+                @if (caso.demandas.length) {
+                  <h4 class="caso-subtitulo">Demandas</h4>
+                  <ul>
+                    @for (demanda of caso.demandas; track $index) {
+                      <li>{{ demanda }}</li>
+                    }
+                  </ul>
+                }
               }
             </div>
           </section>
@@ -515,7 +500,7 @@
               entidadTipo="alerta"
               titulo="Adjuntos de la alerta"
               [entidadId]="a.id"
-              [editable]="puedeModificar()"
+              [editable]="puedeModificar() && !soloLectura()"
             />
           </section>
 
@@ -531,9 +516,6 @@
             <span
               >Último revisor: <b>{{ a.ultimoRevisor || '—' }}</b></span
             >
-            <button type="button" class="alerta-traza-boton" (click)="alternarHistorial()">
-              {{ verHistorial() ? 'Ocultar historial' : 'Ver historial' }}
-            </button>
           </div>
 
           @if (verHistorial()) {
@@ -564,30 +546,44 @@
       }
     </div>
 
-    <footer class="drawer-foot">
-      @if (esAlta()) {
-        <button type="button" class="button-secondary" (click)="cerrarConSalida()">Cancelar</button>
-        <button
-          type="button"
-          class="button-primary"
-          [disabled]="guardando()"
-          (click)="guardarAlta()"
-        >
-          {{ guardando() ? 'Registrando…' : 'Registrar alerta' }}
-        </button>
-      } @else if (editando()) {
-        <button type="button" class="button-secondary" (click)="cancelarEdicion()">Cancelar</button>
-        <button
-          type="button"
-          class="button-primary"
-          [disabled]="guardando()"
-          (click)="guardarAlta()"
-        >
-          {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
-        </button>
-      } @else {
-        <button type="button" class="button-secondary" (click)="cerrarConSalida()">Cerrar</button>
-      }
-    </footer>
+    @if (!soloLectura()) {
+      <footer class="drawer-foot">
+        @if (esAlta()) {
+          <button type="button" class="button-secondary" (click)="cerrarConSalida()">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="button-primary"
+            [disabled]="guardando()"
+            (click)="guardarAlta()"
+          >
+            {{ guardando() ? 'Registrando…' : 'Registrar alerta' }}
+          </button>
+        } @else if (editando()) {
+          <button type="button" class="button-secondary" (click)="cancelarEdicion()">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="button-primary"
+            [disabled]="guardando()"
+            (click)="guardarAlta()"
+          >
+            {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+          </button>
+        } @else {
+          @if (puedeModificar()) {
+            <button type="button" class="button-secondary" (click)="iniciarEdicion()">
+              Modificar contenido
+            </button>
+            <button type="button" class="button-secondary" (click)="enviarWhatsapp()">
+              Enviar por WhatsApp
+            </button>
+          }
+          <button type="button" class="button-secondary" (click)="cerrarConSalida()">Cerrar</button>
+        }
+      </footer>
+    }
   </aside>
 </div>

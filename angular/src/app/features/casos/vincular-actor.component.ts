@@ -24,6 +24,13 @@ export type ActorOpcion = {
   nombre: string;
   tipo: string | null;
   institucion: string | null;
+  /** `cargo_actual` del actor; puede faltar. */
+  cargo: string | null;
+  /**
+   * Teléfono del actor. La lista lo trae cuando está disponible; se usa para
+   * componer la línea de «Actores clave» y nunca se envía por WhatsApp.
+   */
+  telefono: string | null;
 };
 
 function esRegistro(valor: unknown): valor is Record<string, unknown> {
@@ -46,6 +53,8 @@ function aOpcion(valor: unknown): ActorOpcion | null {
     nombre,
     tipo: texto(fila['tipo']),
     institucion: texto(fila['organizacionAncla']) ?? texto(fila['distrito']),
+    cargo: texto(fila['cargo']),
+    telefono: texto(fila['telefono']),
   };
 }
 

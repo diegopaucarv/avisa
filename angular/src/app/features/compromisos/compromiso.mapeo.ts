@@ -25,7 +25,13 @@ export type EstadoCompromiso =
   | 'Redefinido'
   | 'Desestimado';
 
-export type EstadoHito = 'Registrado' | 'En ejecución' | 'Paralizado' | 'Cumplido' | 'Desestimado';
+export type EstadoHito =
+  | 'Registrado'
+  | 'En ejecución'
+  | 'Paralizado'
+  | 'Cumplido'
+  | 'Desestimado'
+  | 'No cumplido';
 
 export type TipoCompromiso = 'Actividad' | 'PIP';
 
@@ -46,6 +52,7 @@ export const ESTADOS_HITO = [
   'Paralizado',
   'Cumplido',
   'Desestimado',
+  'No cumplido',
 ] as const satisfies readonly EstadoHito[];
 
 export const TIPOS_COMPROMISO = ['Actividad', 'PIP'] as const satisfies readonly TipoCompromiso[];
@@ -183,7 +190,15 @@ export type DetalleCompromiso = {
   compromiso: Compromiso;
   caso: CasoCompromiso | null;
   documento: DocumentoCompromiso | null;
+  /**
+   * Reunión de la que nace el compromiso. La API todavía no la envía, pero se
+   * lee por si llega: la versión ampliada la usa como segunda fuente.
+   */
+  reunion: DocumentoCompromiso | null;
 };
+
+/** Documento o reunión del que nace el compromiso (fuente de la versión ampliada). */
+export type FuenteCompromiso = DocumentoCompromiso;
 
 export type OpcionCatalogo = {
   valor: string;
@@ -414,6 +429,62 @@ export function etiquetaPuntoFocal(
   return compromiso.puntoFocal ?? compromiso.puntoFocalTexto ?? 'Sin punto focal';
 }
 
+/**
+ * Fuente del compromiso: primero el documento de origen y, si no hay, la
+ * reunión. Sin ninguna de las dos se devuelve `null` (la UI muestra «—»).
+ */
+export function fuenteDe(
+  documento: FuenteCompromiso | null,
+  reunion: FuenteCompromiso | null,
+): FuenteCompromiso | null {
+  if (documento && (documento.codigo || documento.titulo)) return documento;
+  if (reunion && (reunion.codigo || reunion.titulo)) return reunion;
+  return null;
+}
+
+/**
+ * Texto visible de la fuente: código y título si llegan ambos, o el que exista.
+ * Sin dato se declara «—»: no se inventa la fuente.
+ */
+export function etiquetaFuente(fuente: FuenteCompromiso | null | undefined): string {
+  const codigo = fuente?.codigo;
+  const titulo = fuente?.titulo;
+  if (codigo && titulo) return `${codigo} · ${titulo}`;
+  return codigo ?? titulo ?? '—';
+}
+
+/** Estado de cumplimiento legible que ofrece la versión ampliada. */
+export type EstadoCumplimiento = 'Cumplido' | 'No cumplido' | 'En proceso' | 'Por iniciar';
+
+/**
+ * Regla de derivación del estado de cumplimiento (sólo con datos que la API ya
+ * devuelve):
+ *   · `Cumplido` cuando el estado registrado es `Cumplido`.
+ *   · `No cumplido` cuando el estado es terminal y distinto de `Cumplido`
+ *     (`Redefinido`, `Desestimado`) o cuando todos los hitos del compromiso
+ *     están en `No cumplido`.
+ *   · `Por iniciar` cuando el estado registrado es ese; en cualquier otro caso,
+ *     `En proceso`.
+ */
+export function estadoCumplimientoDe(
+  compromiso: Pick<Compromiso, 'estado' | 'terminal' | 'hitos'>,
+): EstadoCumplimiento {
+  if (compromiso.estado === 'Cumplido') return 'Cumplido';
+
+  const terminal =
+    compromiso.terminal ||
+    compromiso.estado === 'Redefinido' ||
+    compromiso.estado === 'Desestimado';
+  if (terminal) return 'No cumplido';
+
+  const hitos = compromiso.hitos;
+  if (hitos.length > 0 && hitos.every((hito) => hito.estado === 'No cumplido')) {
+    return 'No cumplido';
+  }
+
+  return compromiso.estado === 'Por iniciar' ? 'Por iniciar' : 'En proceso';
+}
+
 /** Usuario sugerido para el punto focal, tal como lo entrega el directorio. */
 export type SugerenciaUsuario = { id: string; nombre: string };
 
@@ -433,9 +504,12 @@ export function aDetalleCompromiso(bruto: unknown): DetalleCompromiso {
   const registro = esRegistro(bruto) ? bruto : {};
   const crudoCaso = leer(registro, ['caso']);
   const crudoDocumento = leer(registro, ['documentoOrigen', 'documento_origen']);
+  // La API aún no devuelve la reunión; se acepta por si el detalle la agrega.
+  const crudoReunion = leer(registro, ['reunion', 'reunión']);
 
   const caso = esRegistro(crudoCaso) ? crudoCaso : null;
   const documento = esRegistro(crudoDocumento) ? crudoDocumento : null;
+  const reunion = esRegistro(crudoReunion) ? crudoReunion : null;
 
   return {
     compromiso: aCompromiso(leer(registro, ['commitment', 'compromiso']) ?? registro),
@@ -451,6 +525,13 @@ export function aDetalleCompromiso(bruto: unknown): DetalleCompromiso {
           codigo: texto(documento, ['codigo', 'code']),
           titulo: texto(documento, ['titulo', 'title']),
           fecha: texto(documento, ['fecha']),
+        }
+      : null,
+    reunion: reunion
+      ? {
+          codigo: texto(reunion, ['codigo', 'code', 'codigoReunion', 'codigo_reunion']),
+          titulo: texto(reunion, ['titulo', 'title']),
+          fecha: texto(reunion, ['fecha']),
         }
       : null,
   };

@@ -11,7 +11,30 @@ export class ApiError extends Error {
   }
 }
 
-type PgLikeError = { code?: string };
+type PgLikeError = {
+  code?: string;
+  /** Columna que provocó el fallo (lo entrega el driver en violaciones de columna). */
+  column?: string;
+  /** Restricción violada (`..._check`, `..._fkey`, `..._key`). */
+  constraint?: string;
+};
+
+/**
+ * Nombre del objeto que provocó el fallo, para no responder sólo «Datos
+ * inválidos»: sin él, quien captura la alerta no sabe qué campo corregir.
+ * Devuelve `null` cuando el driver no identifica nada (no se inventa).
+ */
+function objetoDelFallo(error: PgLikeError): string | null {
+  if (error.column) return `la columna «${error.column}»`;
+  if (error.constraint) return `la restricción «${error.constraint}»`;
+  return null;
+}
+
+/** Une un texto base con el objeto del fallo, si se conoce. */
+function detalleConObjeto(base: string, error: PgLikeError): string {
+  const objeto = objetoDelFallo(error);
+  return objeto ? `${base} Revisa ${objeto}.` : base;
+}
 
 /**
  * Traduce errores de PostgreSQL y de la propia API a respuestas estables.
@@ -54,17 +77,43 @@ export function jsonError(error: unknown): NextResponse {
     );
   }
   if (code === "22P02" || code === "23514") {
-    return NextResponse.json({ detail: "Datos inválidos." }, { status: 422 });
+    return NextResponse.json(
+      { detail: detalleConObjeto("Datos inválidos.", error as PgLikeError) },
+      { status: 422 },
+    );
+  }
+  // 23502: falta un valor obligatorio. Antes caía en 500 «Error interno», que no
+  // dice nada a quien está llenando el formulario.
+  if (code === "23502") {
+    return NextResponse.json(
+      {
+        detail: detalleConObjeto(
+          "Falta un valor obligatorio.",
+          error as PgLikeError,
+        ),
+      },
+      { status: 422 },
+    );
   }
   if (code === "23505") {
     return NextResponse.json(
-      { detail: "El registro ya existe." },
+      {
+        detail: detalleConObjeto(
+          "El registro ya existe.",
+          error as PgLikeError,
+        ),
+      },
       { status: 409 },
     );
   }
   if (code === "23503") {
     return NextResponse.json(
-      { detail: "La referencia no existe o está en uso." },
+      {
+        detail: detalleConObjeto(
+          "La referencia no existe o está en uso.",
+          error as PgLikeError,
+        ),
+      },
       { status: 409 },
     );
   }

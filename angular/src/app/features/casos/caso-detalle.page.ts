@@ -24,6 +24,7 @@ import {
   DemandaCaso,
   DocumentoCaso,
   EventoCaso,
+  fechaIso,
   TramoEstadoCaso,
 } from '../../dominio/mapeo';
 import {
@@ -32,8 +33,11 @@ import {
   type ModoAnulacion,
 } from '../../shared/ui/anular-panel.component';
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
-import { formatearFecha, formatearFechaCompacta } from '../../shared/formato-fecha';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
+import { formatearFecha, formatearFechaCompacta, partesFecha } from '../../shared/formato-fecha';
 import { copiarAlPortapapeles } from '../alertas/portapapeles';
+import { AlertaPanelComponent } from '../alertas/alerta-panel.component';
+import { aDetalleAlerta, type DetalleAlerta } from '../alertas/alerta.mapeo';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
@@ -146,7 +150,11 @@ type TematicaDemanda = {
  * Demanda del expediente con su temática. `aDemandaCaso` del dominio no la
  * conserva, así que se relee del bruto y se indexa por id.
  */
-type DemandaCasoConTematica = DemandaCaso & TematicaDemanda;
+type DemandaCasoConTematica = DemandaCaso &
+  TematicaDemanda & {
+    /** Fecha de registro (`core.demandas.fecha_registro`) normalizada; `null` si falta. */
+    fechaRegistro: string | null;
+  };
 
 /** Detalle del caso con las columnas nuevas de compromisos e hitos. */
 type DetalleCasoConCompromisos = Omit<DetalleCasoConCierre, 'compromisos' | 'caso' | 'demandas'> & {
@@ -306,6 +314,31 @@ const SIN_TEMATICA_DEMANDA: TematicaDemanda = { tematica: null, tematicaId: null
 const SIN_VINCULO_DEMANDA: VinculoCompromisoDemanda = { demandaId: null, demandaCodigo: null };
 
 /**
+ * Ventana de demandas del expediente, en meses, contada desde el último hecho
+ * registrado. `core.demandas` no vincula la demanda con el hecho que la origina.
+ */
+const MESES_VENTANA_DEMANDAS = 6;
+
+/**
+ * Resta meses a una fecha `YYYY-MM-DD` sin desplazar el día por zona horaria.
+ * Si el día no existe en el mes destino (31 → febrero), se ajusta al último día
+ * disponible. Devuelve `null` si la fecha de entrada no se reconoce.
+ */
+function restarMeses(fecha: string, meses: number): string | null {
+  const partes = partesFecha(fecha);
+  if (!partes) return null;
+
+  const [anio, mes, dia] = partes;
+  const destino = new Date(Date.UTC(anio, mes - 1 - meses, 1));
+  const anioDestino = destino.getUTCFullYear();
+  const mesDestino = destino.getUTCMonth();
+  const ultimoDia = new Date(Date.UTC(anioDestino, mesDestino + 1, 0)).getUTCDate();
+  const diaDestino = Math.min(dia, ultimoDia);
+
+  return `${anioDestino}-${String(mesDestino + 1).padStart(2, '0')}-${String(diaDestino).padStart(2, '0')}`;
+}
+
+/**
  * `tematicaId` y `tematica` de cada demanda del expediente. `dominio/mapeo.ts`
  * descarta esas columnas nuevas; se releen del bruto y se indexan por id sin
  * tocar el mapeo compartido.
@@ -324,6 +357,27 @@ function tematicasDemandasCrudas(bruto: unknown): Map<string, TematicaDemanda> {
       tematica: textoDe(demanda, 'tematica'),
       tematicaId: numeroDe(demanda, 'tematicaId', 'tematica_id'),
     });
+  }
+
+  return mapa;
+}
+
+/**
+ * Fecha de registro de cada demanda del expediente. `GET /cases/{codigo}` la
+ * entrega como `fecha_registro`; el mapeo del dominio no la conserva, así que
+ * se relee del bruto y se indexa por id (igual que la temática).
+ */
+function fechasDemandasCrudas(bruto: unknown): Map<string, string | null> {
+  const mapa = new Map<string, string | null>();
+  const registro = esRegistro(bruto) ? bruto : {};
+  const demandas = registro['demandas'];
+  if (!Array.isArray(demandas)) return mapa;
+
+  for (const demanda of demandas) {
+    if (!esRegistro(demanda)) continue;
+    const id = textoDe(demanda, 'id');
+    if (!id) continue;
+    mapa.set(id, fechaIso(textoDe(demanda, 'fechaRegistro', 'fecha_registro')));
   }
 
   return mapa;
@@ -411,6 +465,7 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
   const sectoristaUsuarioId = textoDe(filaCaso, 'sectoristaUsuarioId', 'sectorista_usuario_id');
   const datos = datosHitosCrudos(bruto);
   const tematicas = tematicasDemandasCrudas(bruto);
+  const fechas = fechasDemandasCrudas(bruto);
   const vinculos = vinculosCompromisoDemanda(bruto);
   const compromisos = aCompromisosCaso(bruto, detalle.compromisos).map((compromiso) => ({
     ...compromiso,
@@ -420,6 +475,7 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
   const demandas = detalle.demandas.map((demanda) => ({
     ...demanda,
     ...(tematicas.get(demanda.id) ?? SIN_TEMATICA_DEMANDA),
+    fechaRegistro: fechas.get(demanda.id) ?? null,
   }));
   return {
     ...detalle,
@@ -438,10 +494,12 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
     GlosarioComponent,
     EventoPanelComponent,
     DemandaPanelComponent,
+    AlertaPanelComponent,
     AnularPanelComponent,
     RielRelacionesComponent,
     ThOrdenDirective,
     VincularActorComponent,
+    BotonAccionComponent,
   ],
   templateUrl: './caso-detalle.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -507,10 +565,10 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       }
     }
 
-    /* Botones de la línea de tiempo: sólo el icono, sin relleno de texto. */
-    .timeline-icono {
+    /* Botones de la línea de tiempo: icono sin relleno, alineados a la
+       izquierda de la viñeta. */
+    .timeline-acciones app-boton-accion {
       min-width: 28px;
-      padding: 0 6px;
     }
 
     .caso-acciones > * {
@@ -693,6 +751,14 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       font-weight: 600;
     }
 
+    /* Priorizado (migración 76): la casilla y su estado comparten línea. */
+    .campo-casilla {
+      align-items: center;
+      cursor: pointer;
+      display: inline-flex;
+      gap: 6px;
+    }
+
     .campo-editable .edit-form {
       text-align: left;
     }
@@ -767,20 +833,6 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
 
     .dato-contacto .correo-contacto {
       font-size: 12px;
-    }
-
-    .copiar-dato {
-      padding: 0;
-      border: 0;
-      background: transparent;
-      color: var(--blue-dark);
-      cursor: pointer;
-      line-height: 1;
-    }
-
-    .copiar-dato:hover,
-    .copiar-dato:focus-visible {
-      color: var(--blue, #1a4f8b);
     }
 
     .actor-cargo {
@@ -942,6 +994,37 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       white-space: normal;
     }
 
+    /* «Alertas vinculadas»: el título va bajo el código, recortado a dos líneas; */
+    /* el atributo title conserva el texto completo cuando el recorte lo esconde. */
+    .alerta-fila {
+      cursor: pointer;
+    }
+
+    .alerta-celda {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .alerta-celda-linea {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .alerta-celda-titulo {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      max-width: 100%;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11.5px;
+      line-height: 1.3;
+      white-space: normal;
+    }
+
     @media (max-width: 1120px) {
       .ficha-layout {
         grid-template-columns: minmax(0, 1fr);
@@ -971,6 +1054,7 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       .view-actions app-glosario,
       .detail-section-title button,
       .timeline-edit,
+      app-boton-accion,
       .archivo-confirmacion,
       .campo-editable .edit-form,
       .campo-editable .link-button,
@@ -1127,9 +1211,58 @@ export class CasoDetallePage {
       estado: (demanda) => demanda.estado,
       origen: (demanda) => demanda.documentoOrigenCodigo ?? demanda.documentoOrigenTitulo,
     };
-  readonly filasDemandas = computed(() =>
-    this.ordenDemandas.ordenar(this.ficha()?.demandas ?? [], this.accesoresDemandas),
+  /**
+   * Fecha del hecho más reciente del caso (`YYYY-MM-DD`), o `null` si no hay
+   * hechos con fecha. Se toma el máximo y no se confía en el orden de la API.
+   */
+  private readonly fechaUltimoHecho = computed(() => {
+    let ultima: string | null = null;
+    for (const evento of this.ficha()?.eventos ?? []) {
+      const fecha = fechaIso(evento.fecha);
+      if (fecha !== null && (ultima === null || fecha > ultima)) ultima = fecha;
+    }
+    return ultima;
+  });
+
+  // TODO(confirmar): `core.demandas` no guarda el hecho que originó cada
+  // demanda. Se aproxima por fecha: sólo entran las demandas de la ventana de
+  // 6 meses contada desde el último hecho registrado. Falta confirmar qué hacer
+  // cuando ese último hecho tiene más de 6 meses: ¿dejar la tabla vacía
+  // (comportamiento actual) o mostrar el histórico completo?
+  readonly filasDemandas = computed(() => {
+    const ultimoHecho = this.fechaUltimoHecho();
+    if (ultimoHecho === null) return [];
+    const umbral = restarMeses(ultimoHecho, MESES_VENTANA_DEMANDAS);
+    if (umbral === null) return [];
+    const demandas = (this.ficha()?.demandas ?? []).filter(
+      (demanda) => demanda.fechaRegistro !== null && demanda.fechaRegistro >= umbral,
+    );
+    return this.ordenDemandas.ordenar(demandas, this.accesoresDemandas);
+  });
+
+  /** Meses de la ventana de demandas, para los textos de la vista. */
+  readonly mesesVentanaDemandas = MESES_VENTANA_DEMANDAS;
+
+  /**
+   * Demandas del caso que la ventana deja fuera (anteriores al umbral o sin
+   * `fecha_registro`). La vista lo dice en voz alta para que no parezca que el
+   * expediente perdió datos.
+   */
+  readonly demandasFueraDeVentana = computed(() =>
+    Math.max(0, (this.ficha()?.demandas.length ?? 0) - this.filasDemandas().length),
   );
+
+  /** Explica por qué la tabla de demandas está vacía; no siempre es «no hay». */
+  readonly motivoDemandasVacias = computed(() => {
+    if (this.fechaUltimoHecho() === null) {
+      return 'El caso no tiene hechos registrados y la ventana se cuenta desde el último hecho.';
+    }
+    const fuera = this.demandasFueraDeVentana();
+    if (fuera > 0) {
+      return `Sin demandas en los últimos ${MESES_VENTANA_DEMANDAS} meses desde el último hecho. ${fuera} demanda(s) quedan fuera de la ventana o sin fecha.`;
+    }
+    return 'Sin demandas registradas en el caso.';
+  });
 
   /**
    * Compromisos del caso agrupados por la demanda a la que pertenecen. Sólo los
@@ -1463,6 +1596,61 @@ export class CasoDetallePage {
   readonly sectoristas = computed(() => this.catalogoEdicion.valor()?.sectoristas ?? []);
 
   /**
+   * Nombre del sectorista para la ficha. La API resuelve `sectorista` con un
+   * join a `core.usuarios`, tabla con RLS que sólo deja ver al administrador o
+   * la fila propia: para el resto de roles llega nulo. El catálogo de la
+   * migración 74 sí trae el nombre, así que se usa como respaldo.
+   */
+  readonly sectoristaNombre = computed(() => {
+    const id = this.sectoristaActualId();
+    const nombre = id ? this.sectoristas().find((opcion) => opcion.id === id)?.nombre : undefined;
+    return nombre ?? this.caso()?.sectorista ?? '';
+  });
+
+  /**
+   * Marca de la Dirección OAIPCS (`core.casos.priorizado`, migración 76). Es una
+   * decisión explícita: no se deriva del riesgo ni de la prioridad de atención.
+   */
+  readonly esDireccion = this.capacidades.esDireccion;
+  readonly priorizadoActual = computed(() => this.caso()?.priorizado === true);
+  readonly guardandoPriorizado = signal(false);
+  readonly errorPriorizado = signal<string | null>(null);
+
+  /**
+   * `PATCH /api/v1/cases/{codigo}` con sólo `priorizado`. La API responde 403 si
+   * el rol no es de Dirección, así que la casilla se protege dos veces: aquí y
+   * en el backend.
+   */
+  alternarPriorizado(evento: Event): void {
+    const codigo = this.codigo();
+    if (!codigo || !this.esDireccion() || this.guardandoPriorizado()) return;
+    const casilla = evento.target as HTMLInputElement;
+    const valor = casilla.checked;
+    if (valor === this.priorizadoActual()) return;
+
+    this.guardandoPriorizado.set(true);
+    this.errorPriorizado.set(null);
+    this.http
+      .patch<unknown>(urlApi(`/v1/cases/${encodeURIComponent(codigo)}`), { priorizado: valor })
+      .subscribe({
+        next: (respuesta) => {
+          this.guardandoPriorizado.set(false);
+          this.detalleActualizado.set(aDetalleCasoConCompromisos(respuesta));
+          this.avisoCampo.set(
+            valor ? 'Caso marcado como priorizado.' : 'Caso desmarcado como priorizado.',
+          );
+        },
+        error: (fallo: unknown) => {
+          this.guardandoPriorizado.set(false);
+          // La casilla vuelve a su estado real: un control no puede quedarse
+          // mostrando algo que no se guardó.
+          casilla.checked = this.priorizadoActual();
+          this.errorPriorizado.set(this.mensajeDeErrorCampo(fallo));
+        },
+      });
+  }
+
+  /**
    * Valores actuales del caso. Los campos de catálogo se resuelven a su valor
    * canónico para que abrir y guardar sin cambios no envíe un `PATCH` espurio.
    */
@@ -1520,6 +1708,47 @@ export class CasoDetallePage {
   readonly guardandoDemanda = signal(false);
   readonly errorDemanda = signal<string | null>(null);
   readonly avisoDemanda = signal<string | null>(null);
+
+  /** Alerta vinculada abierta en el panel de sólo lectura; `null` lo cierra. */
+  readonly alertaVinculada = signal<AlertaCaso | null>(null);
+
+  /**
+   * La tabla del expediente sólo trae el resumen de la alerta. El panel necesita
+   * la ficha completa, así que se pide al abrir: una lectura por alerta abierta.
+   */
+  private readonly detalleAlerta = consulta<DetalleAlerta>({
+    fuente: () => {
+      const alerta = this.alertaVinculada();
+      return alerta ? urlApi(`/v1/alerts/${encodeURIComponent(alerta.id)}`) : null;
+    },
+    esquema: aDetalleAlerta,
+  });
+
+  /** Descarta la respuesta de una alerta anterior mientras carga la nueva. */
+  private readonly detalleAlertaVigente = computed(() => {
+    const abierta = this.alertaVinculada();
+    const detalle = this.detalleAlerta.valor();
+    return abierta && detalle && detalle.alerta.id === abierta.id ? detalle : null;
+  });
+
+  readonly alertaPanel = computed(() => this.detalleAlertaVigente()?.alerta ?? null);
+  readonly cargandoAlerta = computed(
+    () => this.detalleAlerta.estado() === 'cargando' && this.detalleAlertaVigente() === null,
+  );
+  readonly errorAlerta = this.detalleAlerta.error;
+  readonly panelAlertaAbierto = computed(() => this.alertaVinculada() !== null);
+
+  abrirAlerta(alerta: AlertaCaso): void {
+    this.alertaVinculada.set(alerta);
+  }
+
+  cerrarPanelAlerta(): void {
+    this.alertaVinculada.set(null);
+  }
+
+  recargarAlerta(): void {
+    this.detalleAlerta.recargar();
+  }
 
   /**
    * El catálogo de tipos de hecho sólo se pide al abrir el panel: la ficha en
@@ -2185,8 +2414,10 @@ export class CasoDetallePage {
       next: () => {
         this.guardandoVinculo.set(false);
         this.panelVincularAbierto.set(false);
-        this.actoresRecurso.recargar();
-        this.recurso.recargar();
+        // `recargar()` limpia `detalleActualizado`. Sin eso, `ficha()` seguiría
+        // leyendo la instantánea del último `PATCH` y el actor recién vinculado
+        // no aparecería hasta refrescar la página.
+        this.recargar();
         this.avisoActores.set('Actor vinculado al caso.');
       },
       error: (fallo: unknown) => {
@@ -2230,8 +2461,8 @@ export class CasoDetallePage {
       next: () => {
         this.enviandoBaja.set(false);
         this.actorADesvincular.set(null);
-        this.actoresRecurso.recargar();
-        this.recurso.recargar();
+        // Mismo motivo que en el alta: la instantánea del `PATCH` oculta la recarga.
+        this.recargar();
         this.avisoActores.set('Actor desvinculado del caso. El histórico se conserva.');
       },
       error: (fallo: unknown) => {

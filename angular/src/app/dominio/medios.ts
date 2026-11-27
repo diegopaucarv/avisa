@@ -10,6 +10,7 @@
  * «Sin fotografías». No se siembran imágenes ni se estiman.
  */
 
+import { ENTORNO } from '../core/config/entorno';
 import { booleano, esRegistro, numero, texto } from './mapeo';
 
 /** Tipos de entidad que acepta `core.medios` (`MEDIA_ENTITY_TYPES`). */
@@ -46,6 +47,26 @@ export type Foto = {
   credito: string | null;
 };
 
+/**
+ * URL servible de una foto. El servidor devuelve rutas relativas
+ * (`/api/v1/media/<id>/contenido`); si `apiBase` apunta a otro origen, la ruta
+ * relativa resolvería contra el host de la SPA y la imagen no cargaría. En ese
+ * caso se antepone el origen de la API. Absolutas y `data:` pasan tal cual.
+ */
+function urlMedio(cruda: string | null): string {
+  const url = (cruda ?? '').trim();
+  if (!url || !url.startsWith('/')) return url;
+
+  const base = ENTORNO.apiBase;
+  if (!/^https?:\/\//i.test(base)) return url;
+
+  try {
+    return new URL(url, base).toString();
+  } catch {
+    return url;
+  }
+}
+
 /** Fila de `items[]` del sobre paginado de medios. */
 export function aFoto(bruto: unknown): Foto {
   const registro = esRegistro(bruto) ? bruto : {};
@@ -57,7 +78,7 @@ export function aFoto(bruto: unknown): Foto {
     rol: texto(registro, ['rol']) ?? 'galeria',
     titulo: texto(registro, ['titulo']),
     descripcion: texto(registro, ['descripcion']),
-    url: texto(registro, ['url']) ?? '',
+    url: urlMedio(texto(registro, ['url'])),
     mime: texto(registro, ['mime']) ?? '',
     ancho: numero(registro, ['ancho']),
     alto: numero(registro, ['alto']),

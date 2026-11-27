@@ -3,11 +3,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
-import {
-  normalizarColeccion,
-  paramsDePagina,
-  urlConParametros,
-} from '../../core/http/coleccion';
+import { normalizarColeccion, paramsDePagina, urlConParametros } from '../../core/http/coleccion';
 import { aErrorApi, type ErrorApi } from '../../core/http/errores';
 
 /**
@@ -25,7 +21,7 @@ import { aErrorApi, type ErrorApi } from '../../core/http/errores';
 
 export type EstadoCapa = 'inactivo' | 'cargando' | 'listo' | 'error';
 
-/** Las dos poblaciones que mezcla `gis.infraestructuras_puntos`. */
+/** Las dos poblaciones que mezcla la capa de infraestructuras. */
 export type TipoInfraestructura = 'derecho_acuicola' | 'institucional';
 
 export type PuntoInfraestructura = {

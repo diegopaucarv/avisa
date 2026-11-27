@@ -14,6 +14,7 @@ import { type DensidadPreferida, type TemaPreferido } from '../../core/http/pref
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { TemaService } from '../../core/tema/tema.service';
 import { ALCANCES, esRegistro } from '../../dominio/mapeo';
+import { AccionesPreferenciaService } from '../../shared/ui/acciones-preferencia.service';
 import { describir } from '../../shared/ui/descriptor-entidad';
 import { IconoComponent } from '../../shared/ui/icono.component';
 
@@ -188,6 +189,7 @@ export class PreferenciasPage {
   private readonly capacidades = inject(CapacidadesService);
   private readonly alcanceServicio = inject(AlcanceService);
   private readonly temaServicio = inject(TemaService);
+  private readonly accionesServicio = inject(AccionesPreferenciaService);
 
   readonly usuario = this.sesion.usuario;
   readonly tamanos = TAMANOS;
@@ -196,6 +198,8 @@ export class PreferenciasPage {
   readonly tema = computed<TemaPreferido>(() => this.temaServicio.preferencia());
   /** Densidad vigente (`comoda|compacta`); también vive en el servidor. */
   readonly densidad = computed<DensidadPreferida>(() => this.temaServicio.densidad());
+  /** El botón de acción pinta texto en vez de icono cuando está activo. */
+  readonly accionesConTexto = this.accionesServicio.conTexto;
 
   /**
    * Copia editable del ámbito: el panel sólo lo consolida al guardar, igual
@@ -271,6 +275,10 @@ export class PreferenciasPage {
       return siguiente;
     });
     this.olvidarAviso();
+  }
+
+  alternarAccionesTexto(): void {
+    this.accionesServicio.alternar();
   }
 
   /**

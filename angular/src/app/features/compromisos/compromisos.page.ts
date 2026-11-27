@@ -47,6 +47,7 @@ import {
   ESTADOS_COMPROMISO,
   TIPOS_COMPROMISO,
   aCompromiso,
+  estadoCumplimientoDe,
   etiquetaNivelGobierno,
   etiquetaPuntoFocal,
   formatearFecha,
@@ -54,6 +55,7 @@ import {
   resolverVencimiento,
   situacionDe,
   type Compromiso,
+  type EstadoCumplimiento,
   type EstadoHito,
   type Hito,
   type OrigenVencimiento,
@@ -635,6 +637,7 @@ export class CompromisosPage {
     unidad: (compromiso) => compromiso.unidad,
     puntoFocal: (compromiso) => etiquetaPuntoFocal(compromiso),
     estado: (compromiso) => compromiso.estado,
+    plazo: (compromiso) => resolverVencimiento(compromiso).fecha,
     vencimiento: (compromiso) => compromiso.fechaVencimiento,
     anulado: (compromiso) => compromiso.anuladoEn,
   };
@@ -655,7 +658,14 @@ export class CompromisosPage {
       titulo: 'Fecha de inicio',
       formato: (valor) => this.fechaTexto(valor as string | null),
     },
-    { clave: 'estado', titulo: 'Estado', ordenable: true },
+    {
+      clave: 'plazo',
+      titulo: 'Plazo',
+      ordenable: true,
+      acceso: (fila) => resolverVencimiento(fila as Compromiso).fecha,
+      formato: (valor) => this.fechaTexto(valor as string | null),
+    },
+    { clave: 'estado', titulo: 'Estado de cumplimiento', ordenable: true },
     {
       clave: 'avance',
       titulo: 'Avance',
@@ -1436,6 +1446,24 @@ export class CompromisosPage {
     if (estado === 'Cumplido') return 'hito-cumplido';
     if (estado === 'Desestimado') return 'hito-desestimado';
     return 'hito-registrado';
+  }
+
+  /**
+   * Estado de cumplimiento derivado para la matriz del Anexo 14: misma regla
+   * que la versión ampliada (`estadoCumplimientoDe`).
+   */
+  estadoCumplimiento(compromiso: Compromiso): EstadoCumplimiento {
+    return estadoCumplimientoDe(compromiso);
+  }
+
+  /** Plazo efectivo de una fila del Anexo 14 (fecha manual o del próximo hito). */
+  filaPlazo(fila: Compromiso): string | null {
+    return resolverVencimiento(fila).fecha;
+  }
+
+  /** Procedencia del plazo efectivo, para la nota de la celda. */
+  filaPlazoOrigen(fila: Compromiso): OrigenVencimiento {
+    return resolverVencimiento(fila).origen;
   }
 
   /**

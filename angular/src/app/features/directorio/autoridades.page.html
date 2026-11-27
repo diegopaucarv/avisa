@@ -8,9 +8,21 @@
       </p>
     </div>
     <div class="view-actions">
+      <app-barra-seleccion
+        entidad="actores"
+        [cantidad]="seleccion.cantidad()"
+        [idsSeleccionados]="seleccion.lista()"
+        (fallo)="alFallarExportacion($event)"
+      />
       <span class="view-total"> {{ totalUniverso() }} registros </span>
     </div>
   </header>
+
+  @if (exportarError(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (errorAccion(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  }
 
   <!-- Criterio aplicado: la base no tiene una columna «autoridad». -->
   <p class="criterio-nota">
@@ -111,6 +123,15 @@
     <table class="data-table">
       <thead>
         <tr>
+          <th scope="col" class="col-seleccion">
+            <input
+              type="checkbox"
+              aria-label="Seleccionar todos los registros de esta página"
+              [checked]="seleccion.todas(idsVisibles())"
+              [indeterminate]="seleccion.algunas(idsVisibles())"
+              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+            />
+          </th>
           <th scope="col" class="col-foto">Foto</th>
           <th scope="col" class="col-nombre">Apellidos y Nombres</th>
           <th scope="col">Contacto</th>
@@ -128,6 +149,15 @@
           [class.fila-inactiva]="!fila.activo"
           (click)="abrir(fila)"
         >
+          <td class="col-seleccion" (click)="$event.stopPropagation()">
+            <input
+              type="checkbox"
+              [checked]="seleccion.esta(fila.id)"
+              [attr.aria-label]="'Seleccionar a ' + fila.nombre"
+              (click)="$event.stopPropagation()"
+              (change)="seleccion.alternar(fila.id)"
+            />
+          </td>
           <td class="col-foto">
             @if (fila.abreviatura) {
             <span class="tabla-foto-texto">{{ fila.abreviatura }}</span>
@@ -152,15 +182,12 @@
             @if (fila.email) {
             <span class="contacto-linea">
               <span>{{ fila.email }}</span>
-              <button
-                type="button"
-                class="boton-copiar-icono"
-                [attr.aria-label]="'Copiar el correo de ' + fila.nombre"
-                [attr.title]="copiado() === fila.email ? 'Copiado' : 'Copiar correo'"
-                (click)="copiar(fila.email, $event)"
-              >
-                <app-icono [nombre]="copiado() === fila.email ? 'check' : 'copiar'" [tamano]="13" />
-              </button>
+              <app-boton-accion
+                [icono]="copiado() === fila.email ? 'check' : 'copiar'"
+                [ariaLabel]="'Copiar el correo de ' + fila.nombre"
+                [titulo]="copiado() === fila.email ? 'Copiado' : 'Copiar correo'"
+                (accion)="copiar(fila.email, $event)"
+              />
             </span>
             } @else {
             <span class="sin-dato" title="sin dato">{{ sinDato }}</span>
@@ -190,15 +217,30 @@
           </td>
           <td class="col-acciones" (click)="$event.stopPropagation()">
             <div class="acciones-fila">
-              <button
-                type="button"
-                class="accion"
-                [attr.aria-label]="'Ver la ficha de ' + fila.nombre"
-                [attr.title]="'Ver la ficha de ' + fila.nombre"
-                (click)="abrir(fila)"
-              >
-                <app-icono nombre="ojo" [tamano]="15" />
-              </button>
+              <app-boton-accion
+                icono="ojo"
+                etiqueta="Ver"
+                [ariaLabel]="'Ver la ficha de ' + fila.nombre"
+                [titulo]="'Ver la ficha de ' + fila.nombre"
+                (accion)="abrir(fila)"
+              />
+              <app-boton-accion
+                icono="lapiz"
+                etiqueta="Editar"
+                [deshabilitado]="!capacidades.puedeModificar(fila.clasificacion)"
+                [ariaLabel]="'Editar a ' + fila.nombre"
+                [titulo]="'Editar a ' + fila.nombre"
+                (accion)="editar(fila, $event)"
+              />
+              <app-boton-accion
+                icono="papelera"
+                [etiqueta]="fila.activo ? 'Dar de baja' : 'Restaurar'"
+                [tono]="fila.activo ? 'peligro' : 'neutro'"
+                [deshabilitado]="!capacidades.puedeModificar(fila.clasificacion)"
+                [ariaLabel]="(fila.activo ? 'Dar de baja a ' : 'Restaurar a ') + fila.nombre"
+                [titulo]="(fila.activo ? 'Dar de baja a ' : 'Restaurar a ') + fila.nombre"
+                (accion)="abrirBaja(fila, $event)"
+              />
             </div>
           </td>
         </tr>
@@ -443,4 +485,26 @@
     </footer>
   </aside>
 </div>
+} @if (cargandoEdicion()) {
+<p class="actualizando" role="status">Cargando la ficha editable…</p>
+} @if (actorEdicion(); as actor) {
+<app-actor-panel
+  [actor]="actor"
+  [regiones]="regionesCatalogo()"
+  [editarInicial]="true"
+  (cerrar)="cerrarEdicion()"
+  (actualizado)="alActualizarActor($event)"
+  (solicitarBaja)="abrirBajaDesdePanel('anular')"
+  (solicitarRestaurar)="abrirBajaDesdePanel('restaurar')"
+/>
+} @if (bajaAbierta(); as baja) {
+<app-anular-panel
+  [modo]="baja.modo"
+  entidad="autoridad"
+  [codigo]="baja.abreviatura || baja.nombre"
+  [enviando]="enviandoBaja()"
+  [errorEnvio]="errorBaja()"
+  (cerrar)="cerrarBaja()"
+  (hecho)="alConfirmarBaja($event)"
+/>
 }

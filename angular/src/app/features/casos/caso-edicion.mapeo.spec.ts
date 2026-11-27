@@ -255,6 +255,29 @@ describe('aCatalogosEdicion', () => {
 
     expect(opcionesDeCampo(catalogos, 'riesgo')).toEqual([]);
   });
+
+  /**
+   * El selector de punto focal se identifica por UUID, no por `codigo`, así que
+   * tiene su propia forma. Sin esta lista el campo Sectorista se pinta en sólo
+   * lectura: el usuario ve el nombre pero no puede cambiarlo.
+   */
+  it('conserva los sectoristas con su UUID y descarta filas incompletas', () => {
+    const catalogos = aCatalogosEdicion({
+      catalogs: {
+        sectoristas: [
+          { id: '00000000-0000-0000-0000-000000000010', nombre: 'Peggy Contreras Montes' },
+          { id: '', nombre: 'Sin identificador' },
+          { nombre: 'Sin identificador' },
+          null,
+        ],
+      },
+    });
+
+    expect(catalogos.sectoristas).toEqual([
+      { id: '00000000-0000-0000-0000-000000000010', nombre: 'Peggy Contreras Montes' },
+    ]);
+    expect(aCatalogosEdicion(bruto).sectoristas).toEqual([]);
+  });
 });
 
 describe('valores y detalle', () => {

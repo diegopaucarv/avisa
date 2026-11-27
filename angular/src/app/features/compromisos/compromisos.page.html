@@ -183,10 +183,19 @@
     <ng-template appCeldaTabla="estado" let-fila>
       <span
         class="commit-status"
-        [class.commit-cumplido]="fila.estado === 'Cumplido'"
-        [class.commit-en-curso]="fila.estado === 'En proceso'"
+        [class.commit-cumplido]="estadoCumplimiento(fila) === 'Cumplido'"
+        [class.commit-en-curso]="estadoCumplimiento(fila) === 'En proceso'"
+        [class.commit-paralizado]="estadoCumplimiento(fila) === 'No cumplido'"
       >
-        {{ fila.estado }}
+        {{ estadoCumplimiento(fila) }}
+      </span>
+    </ng-template>
+
+    <ng-template appCeldaTabla="plazo" let-fila>
+      <span class="celda-vencimiento">
+        {{ fechaTexto(filaPlazo(fila)) }} @if (filaPlazoOrigen(fila); as origen) {
+        <small>{{ origenTexto(origen) }}</small>
+        }
       </span>
     </ng-template>
 
@@ -195,9 +204,9 @@
     </ng-template>
   </app-tabla>
   <p class="desglose-nota">
-    Compromiso (columnas 1 y 10), Responsable (11), Fecha de inicio (8) y Estado (14) del Anexo 14.
-    «Avance» cuenta los hitos cumplidos y «Observaciones» resume lo declarado; ninguna de las dos es
-    una columna de la matriz.
+    Compromiso (columnas 1 y 10), Responsable (11), Fecha de inicio (8), Plazo y Estado de
+    cumplimiento (14) del Anexo 14. «Avance» cuenta los hitos cumplidos y «Observaciones» resume lo
+    declarado; ninguna de las dos es una columna de la matriz.
   </p>
   @if (total() > 0) {
   <app-paginacion

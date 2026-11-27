@@ -82,6 +82,7 @@ const ALERT_SELECT = `
   ss.nombre as subsector,
   a.mesa_id,
   a.sectorista_usuario_id,
+  su.nombre as sectorista,
   a.origen_dato as origen,
   a.confidence::float8 as confianza,
   a.es_validado_humano as validado,
@@ -119,6 +120,7 @@ const ALERT_FROM = `
   left join core.usuarios ua on ua.id = a.anulado_por
   left join core.usuarios ur on ur.id = a.archivado_por
   left join core.usuarios mu on mu.id = a.updated_by
+  left join core.usuarios su on su.id = a.sectorista_usuario_id
   left join lateral (
     select (array_agg(coalesce(urv.nombre, 'Sin identificar') order by r.created_at desc))[1] as ultimo_revisor,
            json_agg(
@@ -165,8 +167,11 @@ export type AlertListQuery = {
   /**
    * `true` lista sólo las alertas archivadas; por omisión el listado de trabajo
    * oculta las archivadas (`archivado_en is null`). Archivar no es anular.
+   *
+   * Acepta también su forma en texto porque la exportación reenvía los filtros
+   * tal como llegan en la URL (`archivados=true|false`).
    */
-  incluirArchivados?: boolean;
+  incluirArchivados?: boolean | string;
   page?: number;
   pageSize?: number;
 };
@@ -250,6 +255,8 @@ export type AlertItem = {
   subsector: string | null;
   mesaId: string | null;
   sectoristaUsuarioId: string | null;
+  /** Nombre legible del sectorista asignado; `null` si no se resuelve. */
+  sectorista: string | null;
   origen: string;
   confianza: number | null;
   validado: boolean;
@@ -372,6 +379,7 @@ function mapAlert(row: Record<string, any>): AlertItem {
     subsector: row.subsector,
     mesaId: row.mesa_id,
     sectoristaUsuarioId: row.sectorista_usuario_id,
+    sectorista: row.sectorista,
     origen: row.origen,
     confianza: row.confianza,
     validado: row.validado,
@@ -450,7 +458,7 @@ export async function listAlerts(
   // Archivo: no es un estado ni un borrado lógico. Por omisión las archivadas
   // salen de la cola de trabajo; `archivados=true` las lista. La papelera las
   // sigue mostrando porque ya está acotada a las anuladas.
-  if (query.incluirArchivados) {
+  if (query.incluirArchivados === true || query.incluirArchivados === "true") {
     where.push("a.archivado_en is not null");
   } else if (!query.incluirAnulados) {
     where.push("a.archivado_en is null");

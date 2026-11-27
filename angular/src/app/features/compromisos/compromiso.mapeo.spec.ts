@@ -2,17 +2,23 @@ import { describe, expect, it } from 'vitest';
 
 import type { CompromisoCaso } from '../../dominio/mapeo';
 import {
+  ESTADOS_HITO,
   aCompromiso,
   aCompromisosCaso,
   aSugerenciaUsuario,
+  estadoCumplimientoDe,
+  estadoHitoDe,
   etiquetaClasificacionAlcance,
   etiquetaDemandaVinculada,
   etiquetaFormalVerbal,
+  etiquetaFuente,
   etiquetaPuntoFocal,
   formatearFecha,
+  fuenteDe,
   resolverVencimiento,
   situacionDe,
   type Compromiso,
+  type Hito,
 } from './compromiso.mapeo';
 
 /** 23/11/2026, fecha fija para no depender del reloj de la máquina. */
@@ -66,6 +72,110 @@ function compromiso(parcial: Partial<Compromiso> = {}): Compromiso {
     ...parcial,
   };
 }
+
+function hito(parcial: Partial<Hito> = {}): Hito {
+  return {
+    id: 'hito-1',
+    codigo: null,
+    descripcion: null,
+    fecha: null,
+    fechaReal: null,
+    estado: 'Registrado',
+    terminal: false,
+    validacion: null,
+    descripcionEvidencia: null,
+    linkEvidencia: null,
+    responsableTexto: null,
+    responsableUsuarioId: null,
+    fechaTexto: null,
+    fechaRealTexto: null,
+    ...parcial,
+  };
+}
+
+describe('estadoCumplimientoDe', () => {
+  it('etiqueta «Cumplido» cuando el estado registrado lo es', () => {
+    expect(estadoCumplimientoDe(compromiso({ estado: 'Cumplido' }))).toBe('Cumplido');
+  });
+
+  it('etiqueta «No cumplido» para un estado terminal distinto de Cumplido', () => {
+    expect(estadoCumplimientoDe(compromiso({ estado: 'Redefinido', terminal: true }))).toBe(
+      'No cumplido',
+    );
+    expect(estadoCumplimientoDe(compromiso({ estado: 'Desestimado', terminal: true }))).toBe(
+      'No cumplido',
+    );
+  });
+
+  it('deduce el terminal por el estado aunque la API no mande la bandera', () => {
+    expect(estadoCumplimientoDe(compromiso({ estado: 'Redefinido' }))).toBe('No cumplido');
+    expect(estadoCumplimientoDe(compromiso({ estado: 'Desestimado' }))).toBe('No cumplido');
+  });
+
+  it('etiqueta «No cumplido» cuando todos los hitos lo están', () => {
+    expect(
+      estadoCumplimientoDe(
+        compromiso({
+          estado: 'En proceso',
+          hitos: [
+            hito({ id: 'h1', estado: 'No cumplido' }),
+            hito({ id: 'h2', estado: 'No cumplido' }),
+          ],
+        }),
+      ),
+    ).toBe('No cumplido');
+  });
+
+  it('se queda en «En proceso» si algún hito no está en «No cumplido»', () => {
+    expect(
+      estadoCumplimientoDe(
+        compromiso({
+          estado: 'En proceso',
+          hitos: [
+            hito({ id: 'h1', estado: 'No cumplido' }),
+            hito({ id: 'h2', estado: 'Cumplido' }),
+          ],
+        }),
+      ),
+    ).toBe('En proceso');
+  });
+
+  it('conserva «Por iniciar» y cae en «En proceso» en cualquier otro caso', () => {
+    expect(estadoCumplimientoDe(compromiso({ estado: 'Por iniciar' }))).toBe('Por iniciar');
+    expect(estadoCumplimientoDe(compromiso({ estado: 'En proceso' }))).toBe('En proceso');
+  });
+
+  it('no marca «No cumplido» cuando no hay hitos', () => {
+    expect(estadoCumplimientoDe(compromiso({ estado: 'En proceso', hitos: [] }))).toBe(
+      'En proceso',
+    );
+  });
+});
+
+describe('fuente del compromiso', () => {
+  it('prefiere el documento de origen y, si no hay, la reunión', () => {
+    const documento = { codigo: 'DOC-1', titulo: 'Acta', fecha: '2026-11-20' };
+    const reunion = { codigo: 'REU-1', titulo: 'Mesa de diálogo', fecha: null };
+
+    expect(fuenteDe(documento, reunion)).toBe(documento);
+    expect(fuenteDe(null, reunion)).toBe(reunion);
+    expect(fuenteDe({ codigo: null, titulo: null, fecha: null }, reunion)).toBe(reunion);
+    expect(fuenteDe(null, null)).toBeNull();
+  });
+
+  it('compone código y título, o muestra sólo el que exista', () => {
+    expect(etiquetaFuente({ codigo: 'DOC-1', titulo: 'Acta', fecha: null })).toBe('DOC-1 · Acta');
+    expect(etiquetaFuente({ codigo: 'DOC-2', titulo: null, fecha: null })).toBe('DOC-2');
+    expect(etiquetaFuente({ codigo: null, titulo: 'Sólo título', fecha: null })).toBe(
+      'Sólo título',
+    );
+  });
+
+  it('declara «—» cuando no hay fuente', () => {
+    expect(etiquetaFuente(null)).toBe('—');
+    expect(etiquetaFuente({ codigo: null, titulo: null, fecha: '2026-11-20' })).toBe('—');
+  });
+});
 
 describe('resolverVencimiento', () => {
   it('prefiere la fecha manual y marca su origen', () => {
@@ -267,6 +377,37 @@ describe('columnas nuevas del compromiso', () => {
     expect(leido.hitos[1].responsableTexto).toBe('FONDEPES');
     expect(leido.hitos[1].fechaTexto).toBe('02.01.2026');
     expect(leido.hitos[1].fechaRealTexto).toBe('03.01.2026');
+  });
+
+  it('lee la validación y la evidencia de cada hito', () => {
+    const leido = aCompromiso({
+      id: 'comp-13',
+      hitos: [
+        {
+          id: 'hito-1',
+          validacion: 'Aprobada',
+          descripcionEvidencia: 'Acta firmada',
+          linkEvidencia: 'https://ejemplo.test/acta.pdf',
+        },
+      ],
+    });
+
+    expect(leido.hitos[0].validacion).toBe('Aprobada');
+    expect(leido.hitos[0].descripcionEvidencia).toBe('Acta firmada');
+    expect(leido.hitos[0].linkEvidencia).toBe('https://ejemplo.test/acta.pdf');
+  });
+});
+
+describe('estados de hito del catálogo', () => {
+  it('incluye «No cumplido» entre los seis estados', () => {
+    expect(ESTADOS_HITO).toContain('No cumplido');
+    expect(ESTADOS_HITO).toHaveLength(6);
+  });
+
+  it('normaliza «No cumplido» sin caer en «Registrado»', () => {
+    expect(estadoHitoDe('No cumplido')).toBe('No cumplido');
+    expect(estadoHitoDe('no_cumplido')).toBe('No cumplido');
+    expect(estadoHitoDe(null)).toBe('Registrado');
   });
 });
 

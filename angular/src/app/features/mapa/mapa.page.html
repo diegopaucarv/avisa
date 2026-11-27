@@ -408,10 +408,13 @@
     </div>
 
     @if (casosPrioritarios().length === 0) {
-    <p class="panel-vacio">No hay casos visibles con estos criterios.</p>
+    <p class="panel-vacio">
+      Ningún caso visible está marcado como priorizado. La marca la decide la Dirección OAIPCS desde
+      el expediente del caso.
+    </p>
     } @else {
     <div class="table-wrap">
-      <table class="data-table" aria-label="Casos priorizados por gravedad, prioridad y antigüedad">
+      <table class="data-table" aria-label="Casos priorizados por la Dirección OAIPCS">
         <thead>
           <tr>
             <th scope="col" [appThOrden]="'codigo'" [orden]="ordenPrioritarios">Caso</th>
@@ -556,33 +559,49 @@
         @if (cajonCasos().length === 0) {
         <p class="casos-drawer-vacio">No hay casos visibles con este territorio y ámbito.</p>
         } @else {
-        <ul class="casos-drawer-lista" aria-label="Casos del cajón">
-          @for (caso of cajonCasos(); track caso.id) {
-          <li>
-            <a
-              class="casos-drawer-caso"
-              [routerLink]="['/casos', caso.codigo]"
-              (click)="cerrarCajon()"
-            >
-              <span class="casos-drawer-principal">
-                <span class="casos-drawer-codigo">{{ caso.codigo }}</span>
-                <span class="casos-drawer-titulo">{{ caso.titulo }}</span>
-                <span class="casos-drawer-meta">
-                  <span>Región: {{ caso.region || 'Sin región' }}</span>
-                  <span>Conflictividad: {{ caso.nivelConflicto || 'Sin declarar' }}</span>
-                  <span>Estado: {{ caso.estado }}</span>
-                </span>
-              </span>
-              <span class="casos-drawer-tags">
-                <span [class]="'status-badge risk-' + caso.riesgo.toLowerCase()">
-                  <span class="status-dot"></span>
-                  Riesgo: {{ caso.riesgo }}
-                </span>
-              </span>
-            </a>
-          </li>
-          }
-        </ul>
+        <div class="table-wrap">
+          <table class="data-table cajon-casos-tabla" aria-label="Casos del cajón">
+            <thead>
+              <tr>
+                <th scope="col">Caso</th>
+                <th scope="col">Resumen</th>
+                <th scope="col">Situación</th>
+                <th scope="col">Riesgo</th>
+                <th scope="col">Riesgo concreto</th>
+                <th scope="col">Demandas</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (caso of cajonCasos(); track caso.id) {
+              <tr>
+                <td class="celda-caso cajon-caso">
+                  <a
+                    class="cajon-caso-codigo"
+                    [routerLink]="['/casos', caso.codigo]"
+                    [attr.title]="'Abrir el expediente completo de ' + caso.codigo"
+                    (click)="cerrarCajon()"
+                    >{{ caso.codigo }}</a
+                  >
+                  <span class="cajon-caso-titulo" [attr.title]="caso.titulo"
+                    >{{ caso.titulo }}</span
+                  >
+                </td>
+                <td class="cajon-caso-texto">
+                  <span [attr.title]="caso.resumen || null">{{ caso.resumen || '—' }}</span>
+                </td>
+                <td>{{ situacionCaso(caso) }}</td>
+                <td>{{ caso.riesgo }}</td>
+                <td class="cajon-caso-texto">
+                  <span [attr.title]="caso.descripcionRiesgo || null"
+                    >{{ caso.descripcionRiesgo || '—' }}</span
+                  >
+                </td>
+                <td>{{ caso.demandas }}</td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
         }
       </div>
 

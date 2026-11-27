@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import {
   PASO_APROBACION_DEFINITIVA,
+  aAlerta,
   accionesDeFlujo,
+  actorSinTelefono,
   claseEstado,
   etapaDeFlujo,
   plantillaWhatsapp,
@@ -206,6 +208,47 @@ describe('plantillaWhatsapp', () => {
     expect(seccion).toContain('De considerarlo pertinente, se sugiere:');
     expect(seccion).toContain('- Reunión con dirigentes');
   });
+
+  it('omite la sección del caso cuando no se pasan sus datos', () => {
+    expect(plantillaWhatsapp(alertaBase())).not.toContain('📎 Caso vinculado');
+    expect(plantillaWhatsapp(alertaBase(), null)).not.toContain('📎 Caso vinculado');
+  });
+
+  it('anexa nombre, resumen, actores y demandas del caso vinculado', () => {
+    const mensaje = plantillaWhatsapp(alertaBase(), {
+      codigo: 'CA-2026-001',
+      titulo: 'Protesta en Puno',
+      resumen: 'Conflicto por el transporte urbano.',
+      actores: ['Federación de transportistas', 'Municipalidad de Puno'],
+      demandas: ['Derogar la ordenanza municipal'],
+    });
+
+    expect(mensaje).toContain('*📎 Caso vinculado*');
+    expect(mensaje).toContain('CA-2026-001 · Protesta en Puno');
+    expect(mensaje).toContain('Conflicto por el transporte urbano.');
+    expect(mensaje).toContain(
+      'Actores principales:\n- Federación de transportistas\n- Municipalidad de Puno',
+    );
+    expect(mensaje).toContain('Demandas:\n- Derogar la ordenanza municipal');
+  });
+
+  it('coloca la sección del caso después de las acciones sugeridas', () => {
+    const mensaje = plantillaWhatsapp(alertaBase(), { codigo: 'CA-2026-001' });
+    expect(mensaje.indexOf('*📎 Caso vinculado*')).toBeGreaterThan(
+      mensaje.indexOf('*🧭 ACCIONES SUGERIDAS*'),
+    );
+  });
+
+  it('no añade la sección del caso si viene sin ningún dato útil', () => {
+    const mensaje = plantillaWhatsapp(alertaBase(), {
+      codigo: '   ',
+      titulo: null,
+      resumen: '',
+      actores: [],
+      demandas: [],
+    });
+    expect(mensaje).not.toContain('📎 Caso vinculado');
+  });
 });
 
 describe('claseEstado', () => {
@@ -219,5 +262,28 @@ describe('claseEstado', () => {
     ['', 'state-pending'],
   ] as const)('%s usa la clase %s', (estado: string, clase: string) => {
     expect(claseEstado(estado)).toBe(clase);
+  });
+});
+
+describe('actorSinTelefono', () => {
+  it('quita el sufijo «· Tel. …» del final', () => {
+    expect(actorSinTelefono('Juan Pérez – FENACO, Presidente · Tel. 987654321')).toBe(
+      'Juan Pérez – FENACO, Presidente',
+    );
+  });
+
+  it('deja la línea intacta cuando no hay teléfono', () => {
+    expect(actorSinTelefono('Juan Pérez – FENACO')).toBe('Juan Pérez – FENACO');
+  });
+
+  it('no arrastra el teléfono al mensaje de WhatsApp', () => {
+    const mensaje = plantillaWhatsapp(
+      aAlerta({
+        codigo: 'AT-2026-01',
+        actoresClave: ['Juan Pérez – FENACO · Tel. 987654321'],
+      }),
+    );
+    expect(mensaje).toContain('- Juan Pérez – FENACO');
+    expect(mensaje).not.toContain('987654321');
   });
 });

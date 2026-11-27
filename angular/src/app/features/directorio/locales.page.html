@@ -185,6 +185,12 @@
               <dd>{{ local.ubicacionRef || '—' }}</dd>
             </div>
           </dl>
+          @if (enlaceMapa(local); as enlace) {
+          <a class="ficha-mapa" [href]="enlace" target="_blank" rel="noopener noreferrer">
+            <app-icono nombre="pin" [tamano]="14" />
+            Ver en el mapa
+          </a>
+          }
         </section>
 
         <section class="ficha-seccion" aria-labelledby="local-panel-capacidad">
@@ -211,6 +217,35 @@
               <dd>{{ siNo(local.tieneAudioMicro) }}</dd>
             </div>
           </dl>
+        </section>
+
+        <section class="ficha-seccion" aria-labelledby="local-panel-riesgos">
+          <h3 id="local-panel-riesgos">Riesgos del local</h3>
+          @if (sinRiesgos()) {
+          <p class="ficha-vacio">Sin riesgos registrados.</p>
+          } @else {
+          <div class="ficha-riesgos">
+            @if (notasSeleccionado().accesibilidad.length > 0) {
+            <div class="ficha-riesgo">
+              <h4>Accesibilidad</h4>
+              <ul class="ficha-lista">
+                @for (nota of notasSeleccionado().accesibilidad; track $index) {
+                <li>{{ nota }}</li>
+                }
+              </ul>
+            </div>
+            } @if (notasSeleccionado().ventilacion.length > 0) {
+            <div class="ficha-riesgo">
+              <h4>Ventilación</h4>
+              <ul class="ficha-lista">
+                @for (nota of notasSeleccionado().ventilacion; track $index) {
+                <li>{{ nota }}</li>
+                }
+              </ul>
+            </div>
+            }
+          </div>
+          }
         </section>
 
         <section class="ficha-seccion" aria-labelledby="local-panel-contacto">
@@ -242,10 +277,17 @@
 
         <section class="ficha-seccion" aria-labelledby="local-panel-recomendacion">
           <h3 id="local-panel-recomendacion">Evaluación</h3>
-          @if (local.recomendacion) {
-          <p class="ficha-recomendacion">{{ local.recomendacion }}</p>
+          @if (notasSeleccionado().textoLibre; as textoLibre) {
+          <p class="ficha-recomendacion">{{ textoLibre }}</p>
+          } @else if (notasSeleccionado().evaluacion; as evaluacion) {
+          <p class="ficha-recomendacion">{{ evaluacion }}</p>
           } @else {
           <p class="ficha-vacio">Sin evaluación registrada.</p>
+          } @if (textoCompletoVisible()) {
+          <details class="ficha-texto-completo">
+            <summary>Ver texto completo</summary>
+            <p class="ficha-recomendacion">{{ local.recomendacion }}</p>
+          </details>
           }
         </section>
       </div>

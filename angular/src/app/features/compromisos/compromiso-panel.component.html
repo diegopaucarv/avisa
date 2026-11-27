@@ -40,10 +40,11 @@
         <div class="panel-badges">
           <span
             class="commit-status"
-            [class.commit-cumplido]="cabecera().estado === 'Cumplido'"
-            [class.commit-en-curso]="cabecera().estado === 'En proceso'"
+            [class.commit-cumplido]="cumplimiento() === 'Cumplido'"
+            [class.commit-en-curso]="cumplimiento() === 'En proceso'"
+            [class.commit-paralizado]="cumplimiento() === 'No cumplido'"
           >
-            {{ cabecera().estado }}
+            {{ cumplimiento() }}
           </span>
           <span class="badge">{{ cabecera().tipo }}</span>
           @if (cabecera().clasificacionAlcance) {
@@ -72,12 +73,67 @@
           <h3 id="datos-compromiso">Datos del compromiso</h3>
           <div class="detail-data-row">
             <div>
+              <span>Redacción</span>
+              <strong>{{ cabecera().accion }}</strong>
+            </div>
+            <div>
+              <span>Fuente</span>
+              <strong>{{ fuenteTexto() }}</strong>
+              @if (fuente()?.fecha; as fechaFuente) {
+                <small class="form-hint">{{ fechaTexto(fechaFuente) }}</small>
+              }
+            </div>
+            <div>
+              <span>Fecha de inicio</span>
+              <strong>{{ fechaTexto(cabecera().fechaInicio) }}</strong>
+            </div>
+            <div>
+              <span>Plazo</span>
+              @if (vencimiento().fecha; as fechaPlazo) {
+                <strong>{{ fechaTexto(fechaPlazo) }}</strong>
+                <span [class]="'due-state ' + situacion().clase">{{ situacion().etiqueta }}</span>
+                <small class="form-hint">
+                  {{
+                    vencimiento().origen === 'manual' ? 'Fecha manual' : 'Derivada del próximo hito'
+                  }}
+                </small>
+              } @else {
+                <strong>—</strong>
+                <small class="form-hint">Sin fecha de vencimiento registrada.</small>
+              }
+            </div>
+            <div>
+              <span>Oficina responsable</span>
+              <strong>{{ cabecera().unidad || '—' }}</strong>
+              @if (!cabecera().unidad && (cabecera().puntoFocal || cabecera().puntoFocalTexto)) {
+                <small class="form-hint">Sin oficina registrada; el punto focal va aparte.</small>
+              }
+            </div>
+            <div>
+              <span>Estado de cumplimiento</span>
+              <strong
+                class="commit-status"
+                [class.commit-cumplido]="cumplimiento() === 'Cumplido'"
+                [class.commit-en-curso]="cumplimiento() === 'En proceso'"
+                [class.commit-paralizado]="cumplimiento() === 'No cumplido'"
+              >
+                {{ cumplimiento() }}
+              </strong>
+              @if (motivoCumplimiento(); as motivoEstado) {
+                <small class="form-hint">{{ motivoEstado }}</small>
+              }
+            </div>
+            <div>
+              <span>Punto focal</span>
+              <strong>{{ etiquetaPuntoFocal(cabecera()) }}</strong>
+            </div>
+            <div>
               <span>Tipo de compromiso <app-glosario termino="tipo-compromiso" /></span>
               <strong>{{ cabecera().tipo }}</strong>
             </div>
             <div>
-              <span>Unidad responsable</span>
-              <strong>{{ cabecera().unidad || '—' }}</strong>
+              <span>Nivel de gobierno <app-glosario termino="nivel-gobierno" /></span>
+              <strong>{{ nivelTexto(cabecera().nivelGobierno) }}</strong>
             </div>
             <div>
               <span>Alcance (registrado)</span>
@@ -85,24 +141,12 @@
               <small class="form-hint">Se registra a mano; no se deriva de la región.</small>
             </div>
             <div>
-              <span>Nivel de gobierno <app-glosario termino="nivel-gobierno" /></span>
-              <strong>{{ nivelTexto(cabecera().nivelGobierno) }}</strong>
-            </div>
-            <div>
-              <span>Brecha de género</span>
-              <strong>{{ cabecera().atiendeGenero ? 'Sí' : 'No' }}</strong>
-            </div>
-            <div>
-              <span>Fecha de inicio</span>
-              <strong>{{ fechaTexto(cabecera().fechaInicio) }}</strong>
-            </div>
-            <div>
               <span>Demanda que atiende</span>
               <strong>{{ etiquetaDemanda(cabecera()) }}</strong>
             </div>
             <div>
-              <span>Punto focal</span>
-              <strong>{{ etiquetaPuntoFocal(cabecera()) }}</strong>
+              <span>Brecha de género</span>
+              <strong>{{ cabecera().atiendeGenero ? 'Sí' : 'No' }}</strong>
             </div>
           </div>
 
@@ -118,16 +162,6 @@
               <span class="form-hint">Sin medios de verificación registrados.</span>
             }
           </div>
-
-          @if (detalle()?.documento; as documentoOrigen) {
-            <div class="panel-linea">
-              <span class="form-label">Documento de origen</span>
-              <span>
-                {{ documentoOrigen.codigo || '—' }} · {{ documentoOrigen.titulo || 'Sin título' }} ·
-                {{ fechaTexto(documentoOrigen.fecha) }}
-              </span>
-            </div>
-          }
 
           @if (criteriosLegibles(); as criteriosVista) {
             <div class="panel-linea">
@@ -530,33 +564,6 @@
       }
 
       @if (!modoAlta()) {
-        <section class="detail-section" aria-labelledby="vencimiento-compromiso">
-          <h3 id="vencimiento-compromiso">Vencimiento</h3>
-          @if (vencimiento().fecha; as fechaVencimiento) {
-            <p class="panel-fecha">
-              <strong>{{ fechaTexto(fechaVencimiento) }}</strong>
-              <span [class]="'due-state ' + situacion().clase">{{ situacion().etiqueta }}</span>
-              <span class="badge">
-                {{
-                  vencimiento().origen === 'manual' ? 'Fecha manual' : 'Derivada del próximo hito'
-                }}
-              </span>
-            </p>
-            <p class="form-hint">
-              @if (vencimiento().origen === 'manual') {
-                La fecha manual prevalece sobre la del próximo hito.
-              } @else {
-                No hay fecha manual: se muestra la del próximo hito con fecha.
-              }
-            </p>
-          } @else {
-            <p>
-              <span class="due-state due-sin-fecha">Sin fecha</span>
-            </p>
-            <p class="panel-aviso">Añada una fecha de vencimiento manual.</p>
-          }
-        </section>
-
         <section class="detail-section" aria-labelledby="proximo-hito">
           <h3 id="proximo-hito">Próximo hito</h3>
           @if (proximoHito(); as siguienteHito) {
@@ -599,12 +606,17 @@
                       <span
                         class="commit-status"
                         [class.commit-cumplido]="hito.estado === 'Cumplido'"
-                        [class.commit-paralizado]="hito.estado === 'Paralizado'"
+                        [class.commit-paralizado]="
+                          hito.estado === 'Paralizado' || hito.estado === 'No cumplido'
+                        "
                       >
                         {{ hito.estado }}
                       </span>
                       @if (hito.terminal) {
                         <span class="badge">Terminal</span>
+                      }
+                      @if (hito.validacion) {
+                        <span class="badge">Validación: {{ hito.validacion }}</span>
                       }
                       @if (hito.fechaReal) {
                         <span class="badge badge-formal">
@@ -663,6 +675,23 @@
                         </label>
                       }
                     </div>
+                    @if (hito.descripcionEvidencia || hito.linkEvidencia) {
+                      <div class="panel-linea">
+                        <span class="form-label">Evidencia</span>
+                        @if (hito.descripcionEvidencia) {
+                          <span>{{ hito.descripcionEvidencia }}</span>
+                        }
+                        @if (hito.linkEvidencia; as enlaceEvidencia) {
+                          @if (esEnlace(enlaceEvidencia)) {
+                            <a [href]="enlaceEvidencia" target="_blank" rel="noopener">
+                              {{ enlaceEvidencia }}
+                            </a>
+                          } @else {
+                            <span>{{ enlaceEvidencia }}</span>
+                          }
+                        }
+                      </div>
+                    }
                     @if (adjuntosHitoAbiertos(hito.id)) {
                       <div class="panel-hito-adjuntos">
                         <app-adjuntos-panel

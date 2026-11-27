@@ -22,8 +22,54 @@ export type CatalogSectorista = {
   nombre: string;
 };
 
-async function querySectoristas(sql: string): Promise<CatalogSectorista[]> {
-  const result = await getPool().query<CatalogSectorista>(sql);
+const SECTORISTAS_DIRECTO = `
+  select u.id::text as id, u.nombre
+    from core.usuarios u
+    join core.usuario_roles ur on ur.usuario_id = u.id
+    join core.roles r on r.id = ur.rol_id
+   where u.activo
+     and r.codigo = 'sectorista'
+     and (ur.hasta is null or ur.hasta >= current_date)
+   group by u.id, u.nombre
+   order by u.nombre`;
+
+const SECTORISTAS_FUNCION = `select id::text as id, nombre from core.nombres_sectoristas()`;
+
+/**
+ * `false` cuando la migración 74 aún no está aplicada. Se recuerda entre
+ * peticiones para no repetir el error 42883 en cada catálogo.
+ */
+let sectoristasPorFuncion: boolean | null = null;
+
+/** 42883: la función no existe todavía. */
+function funcionAusente(error: unknown): boolean {
+  return (error as { code?: unknown })?.code === "42883";
+}
+
+/**
+ * Sectoristas asignables. `core.usuarios` y `core.usuario_roles` tienen RLS que
+ * sólo deja ver al administrador o la fila propia, así que con el rol de la API
+ * la consulta directa devolvía cero filas y el selector de punto focal quedaba
+ * sin opciones. La migración 74 publica `core.nombres_sectoristas()`
+ * (security definer) con exactamente esos pares (id, nombre).
+ *
+ * Se conserva la consulta directa como respaldo: si la migración no se aplicó,
+ * el catálogo se comporta como antes en vez de tumbar `/v1/catalogs` (que
+ * arrastraría todos los desplegables de la aplicación).
+ */
+async function querySectoristas(): Promise<CatalogSectorista[]> {
+  if (sectoristasPorFuncion !== false) {
+    try {
+      const result =
+        await getPool().query<CatalogSectorista>(SECTORISTAS_FUNCION);
+      sectoristasPorFuncion = true;
+      return result.rows;
+    } catch (error) {
+      if (!funcionAusente(error)) throw error;
+      sectoristasPorFuncion = false;
+    }
+  }
+  const result = await getPool().query<CatalogSectorista>(SECTORISTAS_DIRECTO);
   return result.rows;
 }
 
@@ -188,17 +234,9 @@ export async function getCatalogs(): Promise<Catalogs> {
     ),
     // Sectoristas asignables: usuarios activos con el rol `sectorista` vigente.
     // El rol vive en `core.usuario_roles` + `core.roles` (no en una columna).
-    querySectoristas(
-      `select u.id::text as id, u.nombre
-         from core.usuarios u
-         join core.usuario_roles ur on ur.usuario_id = u.id
-         join core.roles r on r.id = ur.rol_id
-        where u.activo
-          and r.codigo = 'sectorista'
-          and (ur.hasta is null or ur.hasta >= current_date)
-        group by u.id, u.nombre
-        order by u.nombre`,
-    ),
+    // `querySectoristas` usa la función de la migración 74 para saltar la RLS
+    // de `core.usuarios`; ver el comentario de la propia función.
+    querySectoristas(),
   ]);
 
   return {

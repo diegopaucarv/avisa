@@ -677,6 +677,55 @@ function bloque(titulo: string, lineas: readonly string[]): string {
 }
 
 /**
+ * Quita el sufijo «· Tel. …» de una línea de actor. El teléfono se guarda en la
+ * alerta para el panel y las exportaciones, pero no debe viajar por WhatsApp.
+ */
+export function actorSinTelefono(linea: string): string {
+  return linea.replace(/\s*·\s*Tel\.?\s*[0-9][0-9\s()+.-]*$/i, '').trim();
+}
+
+/**
+ * Datos del caso vinculado que la plantilla puede anexar.
+ *
+ * Todos los campos son opcionales: quien llama decide qué conoce y, si no pasa
+ * nada, la plantilla conserva exactamente el mensaje de siempre.
+ */
+export type CasoVinculadoWhatsapp = {
+  codigo?: string | null;
+  titulo?: string | null;
+  resumen?: string | null;
+  actores?: readonly string[];
+  demandas?: readonly string[];
+};
+
+/**
+ * Sección «📎 Caso vinculado»: nombre, resumen, actores y demandas del
+ * expediente. Devuelve `null` si no hay ni un dato útil, para no añadir un
+ * encabezado vacío a la plantilla.
+ */
+function seccionCasoVinculado(caso: CasoVinculadoWhatsapp | null | undefined): string | null {
+  if (!caso) return null;
+
+  const identificacion = [caso.codigo?.trim(), caso.titulo?.trim()]
+    .filter((parte): parte is string => !!parte)
+    .join(' · ');
+  const resumen = (caso.resumen ?? '').trim();
+  const actores = (caso.actores ?? []).map((actor) => actor.trim()).filter(Boolean);
+  const demandas = (caso.demandas ?? []).map((demanda) => demanda.trim()).filter(Boolean);
+
+  if (!identificacion && !resumen && actores.length === 0 && demandas.length === 0) {
+    return null;
+  }
+
+  return bloque('📎 Caso vinculado', [
+    identificacion,
+    resumen,
+    ...(actores.length ? ['Actores principales:', ...actores.map((actor) => `- ${actor}`)] : []),
+    ...(demandas.length ? ['Demandas:', ...demandas.map((demanda) => `- ${demanda}`)] : []),
+  ]);
+}
+
+/**
  * Mensaje de WhatsApp con la estructura del «Reporte de alerta temprana».
  * `*` es negrita en WhatsApp y los encabezados llevan emoji para que el mensaje
  * se lea desde el móvil sin formato. Las fechas van en forma compacta
@@ -688,8 +737,11 @@ function bloque(titulo: string, lineas: readonly string[]): string {
  *
  * No incorpora `plantillaWhatsapp`: si la alerta tiene una plantilla guardada,
  * es ella la que manda (la decide quien llama).
+ *
+ * `caso` es opcional. Sólo cuando el llamador pasa los datos del caso vinculado
+ * se anexa la sección «📎 Caso vinculado»; sin ellos el mensaje no cambia.
  */
-export function plantillaWhatsapp(alerta: Alerta): string {
+export function plantillaWhatsapp(alerta: Alerta, caso?: CasoVinculadoWhatsapp | null): string {
   const titulo = tituloLimpio(alerta.titulo) || alerta.codigo;
   const fecha = alerta.fechaReporte ? formatearFechaCompacta(alerta.fechaReporte) : 'Sin fecha';
   const descripcion = (alerta.descripcionRiesgo ?? '').trim();
@@ -714,7 +766,7 @@ export function plantillaWhatsapp(alerta: Alerta): string {
     bloque('🏗️ 2. HECHOS RECIENTES Y ACCIONES EN CURSO', [alerta.hechosRecientes ?? '']),
     bloque(
       '👥 3. ACTORES CLAVE',
-      alerta.actoresClave.map((actor) => `- ${actor}`),
+      alerta.actoresClave.map((actor) => `- ${actorSinTelefono(actor)}`),
     ),
     bloque(
       '📌 4. DEMANDAS INMEDIATAS',
@@ -723,6 +775,10 @@ export function plantillaWhatsapp(alerta: Alerta): string {
     bloque('⚠️ RIESGOS', [descripcion, ...riesgos.map((riesgo) => `- ${riesgo}`)]),
     bloque('🧭 ACCIONES SUGERIDAS', acciones),
   ];
+
+  const seccionCaso = seccionCasoVinculado(caso);
+  if (seccionCaso) partes.push(seccionCaso);
+
   return partes.filter((parte) => parte.trim()).join('\n\n');
 }
 

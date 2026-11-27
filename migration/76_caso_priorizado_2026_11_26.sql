@@ -1,7 +1,14 @@
 -- =============================================================================
--- 71 · Marca de caso priorizado
+-- 76 · Marca de caso priorizado
 --
 -- Fecha: 2026-11-26
+--
+-- Numeración
+-- ----------
+-- Se numera 76 y no 71 porque la clave `71_proceso_instancia_cascada_2026_11_26`
+-- ya está aplicada en la base (su archivo se consolidó después en la 66 y no se
+-- conservó). Mantener el 71 dejaría dos migraciones distintas con el mismo
+-- número, y quien comprobara `clave like '71%'` creería que esta ya corrió.
 --
 -- Por qué
 -- -------
@@ -27,8 +34,16 @@
 -- Idempotente: puede reejecutarse sin efectos.
 -- =============================================================================
 
-ALTER TABLE core.casos
-  ADD COLUMN IF NOT EXISTS priorizado boolean NOT NULL DEFAULT false;
+begin;
 
-COMMENT ON COLUMN core.casos.priorizado IS
+alter table core.casos
+  add column if not exists priorizado boolean not null default false;
+
+comment on column core.casos.priorizado is
   'Caso marcado como priorizado por la Dirección OAIPCS. Alimenta la tabla «Casos priorizados» del panorama territorial.';
+
+insert into core.migracion_log (clave)
+values ('76_caso_priorizado_2026_11_26')
+on conflict (clave) do nothing;
+
+commit;

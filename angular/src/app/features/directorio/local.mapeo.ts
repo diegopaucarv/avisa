@@ -114,6 +114,26 @@ export function ubicacionDeLocal(local: LocalDirectorio): string | null {
   return partes.length > 0 ? partes.join(', ') : null;
 }
 
+/**
+ * Enlace para abrir el local en Google Maps.
+ *
+ * `ubicacion_ref` trae a veces una URL de Google Maps y a veces una referencia
+ * textual (o `null`). Sólo se considera URL si empieza por http(s), en cuyo caso
+ * se devuelve tal cual; si no, se busca por la dirección del local. Devuelve
+ * `null` cuando no hay ni URL ni dirección: la ficha entonces no ofrece botón.
+ */
+export function enlaceMapaLocal(
+  local: Pick<LocalDirectorio, 'ubicacionRef' | 'direccion'>,
+): string | null {
+  const referencia = local.ubicacionRef?.trim() ?? '';
+  if (/^https?:\/\//i.test(referencia)) return referencia;
+
+  const direccion = local.direccion?.trim() ?? '';
+  if (!direccion) return null;
+
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`;
+}
+
 /** Registro de `GET /api/v1/locales` → dominio del directorio. */
 export function aLocalDirectorio(bruto: unknown): LocalDirectorio {
   const registro: Registro = esRegistro(bruto) ? bruto : {};

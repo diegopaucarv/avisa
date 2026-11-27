@@ -286,6 +286,7 @@ export type DocumentoCaso = {
 export type AlertaCaso = {
   id: string;
   codigo: string;
+  titulo: string | null;
   nivel: string | null;
   prioridad: string | null;
   estado: string;
@@ -451,6 +452,8 @@ function aAlertaCaso(bruto: unknown): AlertaCaso {
   return {
     id: texto(registro, ['id']) ?? '',
     codigo: texto(registro, ['codigo', 'code']) ?? 'Sin código',
+    // Nulo si la alerta no tiene título: no se inventa cadena vacía.
+    titulo: texto(registro, ['titulo']),
     nivel: texto(registro, ['nivel']),
     prioridad: texto(registro, ['prioridad']),
     estado: texto(registro, ['estado']) ?? 'Sin estado',
@@ -582,6 +585,8 @@ export function aCaso(bruto: unknown): Caso {
     codigo: texto(registro, ['codigo', 'code', 'codigoCaso']) ?? '',
     titulo: texto(registro, ['titulo', 'title']) ?? 'Sin título',
     resumen: texto(registro, ['resumen', 'summary']),
+    descripcionRiesgo: texto(registro, ['descripcionRiesgo', 'descripcion_riesgo']),
+    demandas: numero(registro, ['demandas']) ?? 0,
     avance: numero(registro, ['avance', 'progress']),
     // `fecha_ultima_actualizacion`: instante de carga del legado, no la fecha del
     // caso. La tarjeta del listado y la vista previa son los únicos lugares que
@@ -598,6 +603,7 @@ export function aCaso(bruto: unknown): Caso {
     estado: estadoDeCaso(texto(registro, ['estado'])),
     riesgo: riesgoDe(texto(registro, ['riesgo', 'risk'])),
     prioridad: unoDe(texto(registro, ['prioridad']), PRIORIDADES, 'Medio'),
+    priorizado: booleano(registro, ['priorizado']),
     alcance: unoDe(texto(registro, ['alcance']), ALCANCES, 'Centro'),
     nivelConflicto: nivelDe(texto(registro, ['nivelConflicto', 'nivel_conflicto'])),
     naturaleza: naturalezaDe(texto(registro, ['naturaleza'])),

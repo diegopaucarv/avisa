@@ -18,6 +18,7 @@ import {
   esRegistro,
   fechaIso,
   leer,
+  lista,
   numero,
   texto,
   type Registro,
@@ -96,6 +97,21 @@ export type ActorDirectorio = {
   vigenciaHasta?: string | null;
   /** RUC de la organización (`core.organizaciones.ruc`), no PII. */
   ruc?: string | null;
+  /**
+   * Locales donde el actor figura como responsable. La API todavía no los
+   * expone: `core.local_responsables` no tiene `actor_uid` y está vacía, así
+   * que hoy llega `[]` y la ficha no pinta la sección. El mapeo ya la lee para
+   * que, en cuanto exista el JOIN, la vista funcione sin cambios.
+   */
+  localesDelActor: LocalDeActor[];
+};
+
+/** Local del directorio reducido a lo que pinta la ficha del actor. */
+export type LocalDeActor = {
+  id: string;
+  codigo: string | null;
+  nombre: string;
+  direccion: string | null;
 };
 
 /** Pertenencia vigente de una persona a una organización. */
@@ -206,6 +222,23 @@ export function aActorDirectorio(bruto: unknown): ActorDirectorio {
     vigenciaDesde: fechaIso(texto(registro, ['vigenciaDesde', 'vigencia_desde'])),
     vigenciaHasta: fechaIso(texto(registro, ['vigenciaHasta', 'vigencia_hasta'])),
     ruc: texto(registro, ['ruc']),
+    localesDelActor: lista(registro, ['localesDelActor', 'locales_del_actor'])
+      .map(aLocalDeActor)
+      .filter((local): local is LocalDeActor => local !== null),
+  };
+}
+
+/** Fila de `localesDelActor` → local mínimo de la ficha; descarta filas sin id. */
+function aLocalDeActor(bruto: unknown): LocalDeActor | null {
+  if (!esRegistro(bruto)) return null;
+  const id = texto(bruto, ['id']);
+  if (!id) return null;
+
+  return {
+    id,
+    codigo: texto(bruto, ['codigo']),
+    nombre: texto(bruto, ['nombre']) ?? 'Sin nombre',
+    direccion: texto(bruto, ['direccion']),
   };
 }
 

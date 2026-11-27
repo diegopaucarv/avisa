@@ -66,6 +66,10 @@ const ACTOR_SELECT = `
 // El ETL no escribe `organizacion_ancla_uid`, así que el ancla se resuelve por
 // respaldo con la membresía vigente más reciente de la persona. El `LEFT JOIN
 // LATERAL` sólo lo evalúa donde `ACTOR_SELECT` ya proyecta el nombre.
+//
+// `valid_to` es un fin EXCLUSIVO: al reasignar una persona se cierra la
+// membresía con `valid_to = current_date` y la nueva arranca con
+// `valid_from = current_date`; con `>=` ambas contarían como vigentes ese día.
 const ACTOR_FROM = `
   from core.actores a
   left join core.cat_tipos_actor ta on ta.id = a.tipo_actor_id
@@ -82,7 +86,7 @@ const ACTOR_FROM = `
       join core.actores org on org.actor_uid = m.organizacion_uid
      where m.persona_uid = a.actor_uid
        and (m.valid_from is null or m.valid_from <= current_date)
-       and (m.valid_to   is null or m.valid_to   >= current_date)
+       and (m.valid_to   is null or m.valid_to   > current_date)
      order by m.valid_from desc nulls last
      limit 1
   ) om on true
@@ -499,6 +503,133 @@ async function leerActor(
 }
 
 /* ------------------------------------------------------------------ */
+/* Membresía / organización                                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Resuelve una organización a partir de su `actor_uid`, su `codigo_legado` o su
+ * nombre (comparado con `core.normalizar_ref`).
+ *
+ * Lo usan el alta (`organizacionUid`) y la edición (`organizacion` /
+ * `organizacionId`): centralizar la normalización evita que el alta y el PATCH
+ * acepten referencias distintas del mismo vínculo.
+ */
+async function resolverOrganizacionId(
+  client: PoolClient,
+  referencia: string,
+): Promise<string> {
+  const result = await client.query<{ id: string; naturaleza: string }>(
+    `select actor_uid::text as id, naturaleza
+       from core.actores
+      where actor_uid::text = $1
+         or codigo_legado = $1
+         or core.normalizar_ref(nombre_actual) = core.normalizar_ref($1)
+      order by case
+                 when actor_uid::text = $1 then 0
+                 when codigo_legado = $1 then 1
+                 else 2
+               end,
+               (naturaleza = 'organizacion') desc
+      limit 1`,
+    [referencia],
+  );
+  const fila = result.rows[0];
+  if (!fila) {
+    throw new ApiError(
+      422,
+      "La organización indicada no existe en el directorio.",
+      "ORGANIZACION_NO_EXISTE",
+    );
+  }
+  if (fila.naturaleza !== "organizacion") {
+    throw new ApiError(
+      422,
+      "El actor indicado no es una organización.",
+      "ORGANIZACION_INVALIDA",
+    );
+  }
+  return fila.id;
+}
+
+type MembresiaVigente = {
+  id: string;
+  organizacionId: string;
+  cargo: string | null;
+  hasta: string | null;
+};
+
+/** Membresía vigente más reciente de una persona, si la tiene. */
+async function membresiaVigenteDe(
+  client: PoolClient,
+  personaId: string,
+): Promise<MembresiaVigente | null> {
+  const result = await client.query(
+    `select m.id::text as id,
+            m.organizacion_uid::text as organizacion_id,
+            m.cargo,
+            to_char(m.valid_to, 'YYYY-MM-DD') as hasta
+       from core.actor_membresia m
+      where m.persona_uid = $1::uuid
+        and (m.valid_from is null or m.valid_from <= current_date)
+        and (m.valid_to is null or m.valid_to > current_date)
+      order by m.valid_from desc nulls last
+      limit 1`,
+    [personaId],
+  );
+  const row = result.rows[0];
+  if (!row) return null;
+  return {
+    id: row.id as string,
+    organizacionId: row.organizacion_id as string,
+    cargo: (row.cargo as string | null) ?? null,
+    hasta: (row.hasta as string | null) ?? null,
+  };
+}
+
+/** Cierra la membresía vigente de la persona con esa organización. */
+async function cerrarMembresiaVigente(
+  client: PoolClient,
+  personaId: string,
+  organizacionId: string,
+): Promise<void> {
+  await client.query(
+    `update core.actor_membresia
+        set valid_to = current_date
+      where persona_uid = $1::uuid
+        and organizacion_uid = $2::uuid
+        and (valid_to is null or valid_to > current_date)
+        and (valid_from is null or valid_from <= current_date)`,
+    [personaId, organizacionId],
+  );
+}
+
+/** Inserta una membresía nueva; `desde` nulo usa `current_date`. */
+async function insertarMembresia(
+  client: PoolClient,
+  personaId: string,
+  organizacionId: string,
+  cargo: string | null,
+  desde: string | null,
+): Promise<string> {
+  const result = await client.query<{ id: string }>(
+    `insert into core.actor_membresia
+       (persona_uid, organizacion_uid, cargo, valid_from)
+     values ($1::uuid, $2::uuid, $3, coalesce($4::date, current_date))
+     returning id::text as id`,
+    [personaId, organizacionId, cargo, desde],
+  );
+  const id = result.rows[0]?.id;
+  if (!id) {
+    throw new ApiError(
+      503,
+      "No se pudo registrar la membresía.",
+      "MEMBRESIA_FALLIDA",
+    );
+  }
+  return id;
+}
+
+/* ------------------------------------------------------------------ */
 /* Alta                                                               */
 /* ------------------------------------------------------------------ */
 
@@ -657,29 +788,7 @@ export async function createActor(
   // Membresía: se resuelve antes del alta para poder fijar el ancla institucional.
   let organizacionId: string | null = null;
   if (naturaleza === "persona" && organizacionRef) {
-    const org = await client.query<{ id: string; naturaleza: string }>(
-      `select actor_uid::text as id, naturaleza
-         from core.actores
-        where actor_uid::text = $1 or codigo_legado = $1
-        limit 1`,
-      [organizacionRef],
-    );
-    const fila = org.rows[0];
-    if (!fila) {
-      throw new ApiError(
-        422,
-        "La organización indicada no existe en el directorio.",
-        "ORGANIZACION_NO_EXISTE",
-      );
-    }
-    if (fila.naturaleza !== "organizacion") {
-      throw new ApiError(
-        422,
-        "El actor indicado no es una organización.",
-        "ORGANIZACION_INVALIDA",
-      );
-    }
-    organizacionId = fila.id;
+    organizacionId = await resolverOrganizacionId(client, organizacionRef);
   }
 
   const nivelIdentificacion = dni ? 1 : ruc ? 2 : 3;
@@ -733,16 +842,12 @@ export async function createActor(
   }
 
   if (organizacionId) {
-    await client.query(
-      `insert into core.actor_membresia
-         (persona_uid, organizacion_uid, cargo, valid_from)
-       values ($1, $2, $3, $4)`,
-      [
-        actorId,
-        organizacionId,
-        membresiaCargo ?? null,
-        membresiaDesde ?? new Date().toISOString().slice(0, 10),
-      ],
+    await insertarMembresia(
+      client,
+      actorId,
+      organizacionId,
+      membresiaCargo ?? null,
+      membresiaDesde ?? null,
     );
   }
 
@@ -811,6 +916,10 @@ const ACTOR_UPDATE_FIELDS = new Set([
   "estadoOspa",
   "vigenciaDesde",
   "vigenciaHasta",
+  // La organización de una persona no es una columna de `core.actores`: estos
+  // dos campos se traducen a su membresía vigente (ver bloque de membresía).
+  "organizacion",
+  "organizacionId",
 ]);
 
 /**
@@ -863,7 +972,7 @@ export async function updateActor(
     `select a.actor_uid::text as id, a.nombre_actual, a.abreviatura, a.naturaleza,
             a.cargo_actual, a.nivel_gobierno, a.categoria, a.perfil_descripcion,
             a.activo, a.tipo_actor_id, a.rol_actor_id, a.perfil_id, a.region_id,
-            a.nivel_identificacion_id,
+            a.nivel_identificacion_id, a.organizacion_ancla_uid::text as organizacion_ancla_uid,
             ta.nombre as tipo, ra.nombre as funcion, pf.nombre as posicionamiento,
             (o.actor_uid is not null) as tiene_org,
             o.ruc, o.expediente_ospa, o.estado_ospa,
@@ -1298,6 +1407,120 @@ export async function updateActor(
     });
   }
 
+  // ---- Membresía (organización de una persona) -----------------------------
+  // La organización de una persona es su membresía vigente en
+  // `core.actor_membresia`, no una columna de `core.actores`. `organizacionId`
+  // (uuid) tiene prioridad sobre `organizacion` (uuid, código o nombre) cuando
+  // llegan ambos.
+  if (tiene(input, "organizacionId") || tiene(input, "organizacion")) {
+    if (naturalezaFinal !== "persona") {
+      throw new ApiError(
+        422,
+        "La membresía sólo aplica a personas.",
+        "MEMBRESIA_SOLO_PERSONA",
+      );
+    }
+
+    let organizacionPropuesta: string | null;
+    if (tiene(input, "organizacionId")) {
+      const crudo = input.organizacionId;
+      if (crudo === null || crudo === undefined) {
+        organizacionPropuesta = null;
+      } else if (typeof crudo !== "string") {
+        throw new ApiError(
+          422,
+          "El identificador de la organización no es válido.",
+          "FIELD_INVALID",
+        );
+      } else {
+        const valor = crudo.trim();
+        organizacionPropuesta = valor
+          ? await resolverOrganizacionId(client, valor)
+          : null;
+      }
+    } else {
+      const referencia = leerTexto(
+        input,
+        "organizacion",
+        255,
+        "La organización",
+      );
+      organizacionPropuesta = referencia
+        ? await resolverOrganizacionId(client, referencia)
+        : null;
+    }
+
+    const vigente = await membresiaVigenteDe(client, actorId);
+    // El ancla gana en el `coalesce` de `ACTOR_SELECT`, así que es lo que el
+    // cliente ve como organización actual; se compara contra ella para no
+    // cerrar y reabrir una membresía idéntica en cada guardado.
+    const anclaActual = (antes.organizacion_ancla_uid as string | null) ?? null;
+    const actualId = anclaActual ?? vigente?.organizacionId ?? null;
+
+    if (organizacionPropuesta !== actualId) {
+      if (vigente) {
+        await cerrarMembresiaVigente(client, actorId, vigente.organizacionId);
+        await auditChange(client, {
+          tabla: "core.actor_membresia",
+          registroId: vigente.id,
+          accion: "UPDATE",
+          usuarioId: scope.usuarioId,
+          rolCodigo: autoridad.codigo,
+          antes: {
+            organizacion_uid: vigente.organizacionId,
+            valid_to: vigente.hasta,
+          },
+          despues: {
+            organizacion_uid: vigente.organizacionId,
+            valid_to: "current_date",
+          },
+        });
+      }
+
+      if (organizacionPropuesta) {
+        // Conserva el cargo saliente si el PATCH no manda uno propio.
+        const cargoMembresia =
+          cargo !== undefined ? cargo : (vigente?.cargo ?? null);
+        const nuevaMembresiaId = await insertarMembresia(
+          client,
+          actorId,
+          organizacionPropuesta,
+          cargoMembresia,
+          null,
+        );
+        await auditChange(client, {
+          tabla: "core.actor_membresia",
+          registroId: nuevaMembresiaId,
+          accion: "INSERT",
+          usuarioId: scope.usuarioId,
+          rolCodigo: autoridad.codigo,
+          despues: {
+            organizacion_uid: organizacionPropuesta,
+            cargo: cargoMembresia,
+          },
+        });
+      }
+
+      // Si el ancla no se sincroniza, `ACTOR_SELECT` seguiría mostrando la
+      // organización anterior aunque la membresía ya haya cambiado.
+      await client.query(
+        `update core.actores
+            set organizacion_ancla_uid = $2::uuid, updated_by = $3
+          where actor_uid = $1::uuid`,
+        [actorId, organizacionPropuesta, scope.usuarioId],
+      );
+      await auditChange(client, {
+        tabla: "core.actores",
+        registroId: actorId,
+        accion: "UPDATE",
+        usuarioId: scope.usuarioId,
+        rolCodigo: autoridad.codigo,
+        antes: { organizacion_ancla_uid: actualId },
+        despues: { organizacion_ancla_uid: organizacionPropuesta },
+      });
+    }
+  }
+
   return leerActor(client, actorId);
 }
 
@@ -1642,7 +1865,7 @@ export async function listActors(
           where mf.persona_uid = a.actor_uid
             and (mf.organizacion_uid::text = ${org} or fo.codigo_legado = ${org})
             and (mf.valid_from is null or mf.valid_from <= current_date)
-            and (mf.valid_to   is null or mf.valid_to   >= current_date)
+            and (mf.valid_to   is null or mf.valid_to   > current_date)
        )`,
     );
   }
@@ -1698,7 +1921,7 @@ export async function listMembresiasDeActores(
        join core.actores org on org.actor_uid = m.organizacion_uid
       where m.persona_uid::text = any($1::text[])
         and (m.valid_from is null or m.valid_from <= current_date)
-        and (m.valid_to   is null or m.valid_to   >= current_date)
+        and (m.valid_to   is null or m.valid_to   > current_date)
       order by m.persona_uid::text,
                m.valid_from desc nulls last,
                org.nombre_actual asc`,

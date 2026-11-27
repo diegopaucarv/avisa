@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 
 import { urlApi } from '../../core/config/entorno';
+import { consulta } from '../../core/http/consulta';
 import type { ErrorApi } from '../../core/http/errores';
 import { RIESGOS, formatearFechaCorta } from '../../dominio/mapeo';
 import type { Riesgo } from '../../dominio/modelos';
@@ -41,6 +42,12 @@ import {
   type PatchAlerta,
 } from './alerta.mapeo';
 import { CasoComboboxComponent } from './caso-combobox.component';
+import {
+  casoVinculadoDesde,
+  leerCasoVinculado,
+  recordarCasoVinculado,
+  type CasoVinculado,
+} from './caso-vinculado';
 
 /** Opción del combobox de caso: código, título y subsector del caso. */
 export type CasoOpcion = { codigo: string; titulo: string; subsector: string | null };
@@ -57,8 +64,10 @@ type CampoLinea =
   | 'hechosRecientes'
   | 'descripcionRiesgo'
   | 'actoresClave'
-  | 'demandasInmediatas'
   | 'accionesSugeridas';
+
+/** Fila de «Demandas inmediatas»: organización solicitante + demanda. */
+type DemandaBorrador = { id: number; organizacion: string; demanda: string };
 
 /** Campos del borrador que siguen siendo texto o selección simple. */
 type CampoAlta = 'titulo' | 'region' | 'provincia';
@@ -74,7 +83,7 @@ type BorradorAlta = {
   hechosRecientes: Linea[];
   situacionActual: Linea[];
   actoresClave: Linea[];
-  demandasInmediatas: Linea[];
+  demandasInmediatas: DemandaBorrador[];
   accionesSugeridas: Linea[];
 };
 
@@ -109,6 +118,18 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
   return limpio ? limpio : null;
 }
 
+/**
+ * Línea de «Actores clave» desde el Directorio:
+ * «Nombre – Gremio/Institución, Cargo · Tel. 9xxxxxxxx», omitiendo lo que falta.
+ */
+function lineaActorDirectorio(actor: ActorOpcion): string {
+  const organizacion = (actor.institucion ?? actor.tipo ?? '').trim();
+  const cola = [organizacion, (actor.cargo ?? '').trim()].filter(Boolean).join(', ');
+  const telefono = (actor.telefono ?? '').trim();
+  const base = cola ? `${actor.nombre} – ${cola}` : actor.nombre;
+  return telefono ? `${base} · Tel. ${telefono}` : base;
+}
+
 /** `Distrito · Provincia · Región` → provincia y región. */
 function partesDeRuta(ruta: string | null | undefined): { provincia: string; region: string } {
   const partes = (ruta ?? '')
@@ -125,7 +146,8 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
  * «Modificar contenido», que abre el mismo formulario del alta ya prellenado.
  *
  * No conoce HTTP de escritura: emite el `PatchAlerta` ya calculado o el
- * `AltaAlerta`. La única lectura es la búsqueda en el Directorio de actores.
+ * `AltaAlerta`. Sólo lee el Directorio de actores (búsqueda) y el caso vinculado
+ * (`GET /cases/{codigo}`), ambos para mostrar datos que no vienen en la alerta.
  */
 @Component({
   selector: 'app-alerta-panel',
@@ -194,8 +216,8 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
     }
 
     .alerta-geografia {
-      color: #4a6b93;
-      font-weight: 600;
+      color: #64748b;
+      font-weight: 400;
     }
 
     .alerta-fecha {
@@ -293,6 +315,16 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
       font-style: italic;
     }
 
+    /* Subtítulos internos del bloque «Caso vinculado» (sólo lectura). */
+    .caso-subtitulo {
+      margin: 0;
+      color: #1a2b3e;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
     /* Listas con «＋» del formulario. */
     .bloque-lista {
       display: flex;
@@ -319,6 +351,30 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
       min-width: 0;
       min-height: 38px;
       resize: vertical;
+    }
+
+    /* Demandas: organización arriba, demanda debajo y quitar a la derecha. */
+    .demanda-fila {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px;
+      align-items: start;
+    }
+
+    .demanda-fila input,
+    .demanda-fila textarea {
+      grid-column: 1;
+      min-width: 0;
+    }
+
+    .demanda-fila textarea {
+      min-height: 38px;
+      resize: vertical;
+    }
+
+    .demanda-fila .icon-button {
+      grid-column: 2;
+      grid-row: 1 / span 2;
     }
 
     .alerta-agregar {
@@ -510,6 +566,12 @@ export class AlertaPanelComponent {
   readonly errorCarga = input<ErrorApi | null>(null);
   /** Permiso para registrar y para modificar el contenido de una alerta. */
   readonly puedeModificar = input(false);
+  /**
+   * Sólo lectura: la ficha se abre siempre en modo consulta (nunca el alta) y
+   * esconde las acciones de escritura. La usa el expediente para ver la alerta
+   * vinculada sin salir del caso.
+   */
+  readonly soloLectura = input(false);
   readonly guardando = input(false);
   readonly errorGuardado = input<string | null>(null);
   readonly aviso = input<string | null>(null);
@@ -528,6 +590,8 @@ export class AlertaPanelComponent {
   readonly reintentar = output<void>();
   readonly guardar = output<PatchAlerta>();
   readonly registrar = output<AltaAlerta>();
+  /** «Enviar por WhatsApp»: el contenedor abre la ventana de mensajería. */
+  readonly whatsapp = output<Alerta>();
 
   readonly riesgos = RIESGOS;
   readonly alcances = ALCANCES_ALERTA;
@@ -547,6 +611,16 @@ export class AlertaPanelComponent {
   readonly distritoAlta = signal<OpcionTerritorio | null>(null);
   readonly mensajeLocal = signal<string | null>(null);
 
+  /**
+   * «Situación actual» es un solo campo de texto: se muestra el borrador unido
+   * por saltos de línea aunque por dentro siga siendo una lista de líneas.
+   */
+  readonly textoSituacion = computed(() =>
+    this.borradorAlta()
+      .situacionActual.map((linea) => linea.texto)
+      .join('\n'),
+  );
+
   /** Búsqueda en el Directorio de actores para «Elegir del directorio». */
   readonly buscandoActor = signal(false);
   readonly consultaActor = signal('');
@@ -554,11 +628,44 @@ export class AlertaPanelComponent {
   readonly buscandoDirectorio = signal(false);
   readonly errorActor = signal<string | null>(null);
 
-  /** `alerta === null` significa alta. */
-  readonly esAlta = computed(() => this.alerta() === null);
+  /** `alerta === null` significa alta; en sólo lectura nunca se da de alta. */
+  readonly esAlta = computed(() => !this.soloLectura() && this.alerta() === null);
 
   /** El formulario se muestra en el alta y también al modificar una alerta. */
   readonly esFormulario = computed(() => this.esAlta() || this.editando());
+
+  /** Código del caso vinculado, sólo mientras la ficha está en modo lectura. */
+  private readonly codigoCaso = computed(() => {
+    if (this.esFormulario()) return null;
+    const codigo = this.alerta()?.casoCodigo?.trim();
+    return codigo ? codigo : null;
+  });
+
+  /**
+   * Datos de lectura del caso vinculado. `GET /cases/{codigo}` ya trae el
+   * resumen, los actores y las demandas, así que no hace falta otro endpoint.
+   * Se piden sólo cuando la ficha los muestra y se recuerdan en una caché
+   * acotada para no repetir la lectura al reabrir la misma alerta.
+   */
+  private readonly casoVinculadoRecurso = consulta<CasoVinculado>({
+    fuente: () => {
+      const codigo = this.codigoCaso();
+      if (!codigo || leerCasoVinculado(codigo)) return null;
+      return urlApi(`/v1/cases/${encodeURIComponent(codigo)}`);
+    },
+    esquema: casoVinculadoDesde,
+  });
+
+  /** Caso vinculado visible; `null` mientras carga, si falla o no hay caso. */
+  readonly casoVinculado = computed(() => {
+    const codigo = this.codigoCaso();
+    if (!codigo) return null;
+    const cargado = this.casoVinculadoRecurso.valor();
+    if (cargado?.codigo === codigo) return cargado;
+    return leerCasoVinculado(codigo);
+  });
+  readonly cargandoCaso = computed(() => this.casoVinculadoRecurso.estado() === 'cargando');
+  readonly errorCaso = this.casoVinculadoRecurso.error;
 
   readonly inicialDistritoAlta = computed(() => {
     const distrito = this.distritoAlta();
@@ -585,6 +692,12 @@ export class AlertaPanelComponent {
       this.cerrarBuscadorActor();
     });
 
+    // El caso leído se recuerda para no volver a pedirlo al reabrir la alerta.
+    effect(() => {
+      const caso = this.casoVinculadoRecurso.valor();
+      if (caso) recordarCasoVinculado(caso);
+    });
+
     // Siembra por alerta y modo. La firma evita reescribir lo que el usuario está
     // editando mientras la misma alerta sigue abierta.
     let firma: string | null = null;
@@ -600,8 +713,9 @@ export class AlertaPanelComponent {
         return;
       }
       this.sembrar(alerta);
-      // El modo «editar» sólo aplica si el perfil puede modificar el contenido.
-      this.editando.set(modo === 'editar' && this.puedeModificar());
+      // El modo «editar» sólo aplica si el perfil puede modificar el contenido
+      // y la ficha no está abierta en sólo lectura.
+      this.editando.set(!this.soloLectura() && modo === 'editar' && this.puedeModificar());
       this.verHistorial.set(modo === 'historial');
     });
 
@@ -631,7 +745,7 @@ export class AlertaPanelComponent {
       hechosRecientes: this.lineasDesdeTexto(alerta.hechosRecientes),
       descripcionRiesgo: this.lineasDesdeTexto(alerta.descripcionRiesgo),
       actoresClave: this.lineasDesdeArray(alerta.actoresClave),
-      demandasInmediatas: this.lineasDesdeArray(alerta.demandasInmediatas),
+      demandasInmediatas: this.demandasDesdeArray(alerta.demandasInmediatas),
       accionesSugeridas: this.lineasDesdeArray(alerta.accionesSugeridas),
     });
     this.distritoAlta.set(
@@ -669,7 +783,13 @@ export class AlertaPanelComponent {
     return geografiaAlerta(alerta);
   }
 
+  /**
+   * Rótulo del estado en la ficha. Sólo aquí «Pendiente de revisión» se lee
+   * como «Pendiente de aprobación»: en la tabla del listado se mantiene el
+   * rótulo corto de `etiquetaEstado`.
+   */
   estadoVisible(alerta: Alerta): string {
+    if (alerta.estado === 'Pendiente de revisión') return 'Pendiente de aprobación';
     return etiquetaEstado(alerta.estado);
   }
 
@@ -751,6 +871,19 @@ export class AlertaPanelComponent {
     this.actualizarLineas(campo, (lineas) => [...lineas, this.nuevaLinea('')]);
   }
 
+  /**
+   * Edita «Situación actual» como un único texto. Se guarda en una sola línea
+   * del borrador (contrato interno `Linea[]`), reutilizando su id para no
+   * forzar el repintado del textarea en cada pulsación.
+   */
+  editarSituacion(evento: Event): void {
+    const valor = (evento.target as HTMLTextAreaElement).value;
+    const actual = this.borradorAlta();
+    const id = actual.situacionActual[0]?.id ?? this.nuevaLinea('').id;
+    this.borradorAlta.set({ ...actual, situacionActual: [{ id, texto: valor }] });
+    this.mensajeLocal.set(null);
+  }
+
   quitarLinea(campo: CampoLinea, id: number): void {
     this.actualizarLineas(campo, (lineas) => lineas.filter((linea) => linea.id !== id));
   }
@@ -762,6 +895,41 @@ export class AlertaPanelComponent {
     );
   }
 
+  /* ------------------------------- Demandas ------------------------------ */
+
+  agregarDemanda(): void {
+    this.secuenciaLinea += 1;
+    const nueva: DemandaBorrador = {
+      id: this.secuenciaLinea,
+      organizacion: '',
+      demanda: '',
+    };
+    this.borradorAlta.update((actual) => ({
+      ...actual,
+      demandasInmediatas: [...actual.demandasInmediatas, nueva],
+    }));
+    this.mensajeLocal.set(null);
+  }
+
+  quitarDemanda(id: number): void {
+    this.borradorAlta.update((actual) => ({
+      ...actual,
+      demandasInmediatas: actual.demandasInmediatas.filter((fila) => fila.id !== id),
+    }));
+    this.mensajeLocal.set(null);
+  }
+
+  editarDemanda(id: number, campo: 'organizacion' | 'demanda', evento: Event): void {
+    const valor = (evento.target as HTMLInputElement).value;
+    this.borradorAlta.update((actual) => ({
+      ...actual,
+      demandasInmediatas: actual.demandasInmediatas.map((fila) =>
+        fila.id === id ? { ...fila, [campo]: valor } : fila,
+      ),
+    }));
+    this.mensajeLocal.set(null);
+  }
+
   private actualizarLineas(campo: CampoLinea, transformar: (lineas: Linea[]) => Linea[]): void {
     const actual = this.borradorAlta();
     const lineas = transformar(actual[campo]);
@@ -771,7 +939,6 @@ export class AlertaPanelComponent {
       hechosRecientes: campo === 'hechosRecientes' ? lineas : actual.hechosRecientes,
       descripcionRiesgo: campo === 'descripcionRiesgo' ? lineas : actual.descripcionRiesgo,
       actoresClave: campo === 'actoresClave' ? lineas : actual.actoresClave,
-      demandasInmediatas: campo === 'demandasInmediatas' ? lineas : actual.demandasInmediatas,
       accionesSugeridas: campo === 'accionesSugeridas' ? lineas : actual.accionesSugeridas,
     });
     this.mensajeLocal.set(null);
@@ -795,6 +962,45 @@ export class AlertaPanelComponent {
       .map((valor) => valor.trim())
       .filter((valor) => valor.length > 0)
       .map((valor) => this.nuevaLinea(valor));
+  }
+
+  /**
+   * «Organización: demanda» → dos campos. Sin dos puntos, todo el texto queda
+   * como demanda y la organización vacía, para no inventar un solicitante.
+   */
+  private demandasDesdeArray(valores: readonly string[]): DemandaBorrador[] {
+    return valores
+      .map((valor) => valor.trim())
+      .filter((valor) => valor.length > 0)
+      .map((valor) => {
+        this.secuenciaLinea += 1;
+        const corte = valor.indexOf(':');
+        if (corte > 0) {
+          return {
+            id: this.secuenciaLinea,
+            organizacion: valor.slice(0, corte).trim(),
+            demanda: valor.slice(corte + 1).trim(),
+          };
+        }
+        return { id: this.secuenciaLinea, organizacion: '', demanda: valor };
+      });
+  }
+
+  /**
+   * Vuelve a «Organización: demanda» sólo con lo que haya. Antes de este cambio
+   * el borrador guardaba líneas sueltas; el repositorio sigue recibiendo un
+   * arreglo de textos, así que el contrato con la API no cambia.
+   */
+  private textoDesdeDemandas(demandas: readonly DemandaBorrador[]): string[] | null {
+    const lineas = demandas
+      .map((fila) => {
+        const organizacion = fila.organizacion.trim();
+        const demanda = fila.demanda.trim();
+        if (organizacion && demanda) return `${organizacion}: ${demanda}`;
+        return demanda || organizacion;
+      })
+      .filter((linea) => linea.length > 0);
+    return lineas.length ? lineas : null;
   }
 
   private textoDesdeLineas(lineas: readonly Linea[]): string {
@@ -875,11 +1081,16 @@ export class AlertaPanelComponent {
     });
   }
 
-  /** Añade una línea «Nombre — Cargo / Organización» a partir del Directorio. */
+  /**
+   * Añade una línea de «Actores clave» a partir del Directorio, con la forma
+   * «Nombre – Gremio/Institución, Cargo · Tel. 9xxxxxxxx». Los fragmentos que
+   * faltan se omiten; el teléfono sólo entra si el actor lo tiene.
+   */
   elegirActorDirectorio(actor: ActorOpcion): void {
-    const detalle = actor.institucion ?? actor.tipo ?? '';
-    const texto = detalle ? `${actor.nombre} — ${detalle}` : actor.nombre;
-    this.actualizarLineas('actoresClave', (lineas) => [...lineas, this.nuevaLinea(texto)]);
+    this.actualizarLineas('actoresClave', (lineas) => [
+      ...lineas,
+      this.nuevaLinea(lineaActorDirectorio(actor)),
+    ]);
     this.cerrarBuscadorActor();
   }
 
@@ -949,7 +1160,7 @@ export class AlertaPanelComponent {
       const actores = this.jsonDesdeLineas(borrador.actoresClave);
       if (actores) cuerpo.actoresClave = actores;
 
-      const demandas = this.jsonDesdeLineas(borrador.demandasInmediatas);
+      const demandas = this.textoDesdeDemandas(borrador.demandasInmediatas);
       if (demandas) cuerpo.demandasInmediatas = demandas;
 
       const sugeridas = this.jsonDesdeLineas(borrador.accionesSugeridas);
@@ -1021,7 +1232,7 @@ export class AlertaPanelComponent {
       patch.actoresClave = actores;
     }
 
-    const demandas = this.jsonDesdeLineas(borrador.demandasInmediatas);
+    const demandas = this.textoDesdeDemandas(borrador.demandasInmediatas);
     if ((demandas ?? []).join('\n') !== alerta.demandasInmediatas.join('\n')) {
       patch.demandasInmediatas = demandas;
     }
@@ -1041,7 +1252,7 @@ export class AlertaPanelComponent {
   /** «Modificar contenido» reutiliza el formulario del alta ya prellenado. */
   iniciarEdicion(): void {
     const alerta = this.alerta();
-    if (!alerta || !this.puedeModificar()) return;
+    if (!alerta || this.soloLectura() || !this.puedeModificar()) return;
 
     this.sembrar(alerta);
     this.editando.set(true);
@@ -1051,6 +1262,12 @@ export class AlertaPanelComponent {
     this.editando.set(false);
     this.cerrarBuscadorActor();
     this.mensajeLocal.set(null);
+  }
+
+  /** El panel no arma el mensaje: sólo pide a la página que abra la ventana. */
+  enviarWhatsapp(): void {
+    const alerta = this.alerta();
+    if (alerta) this.whatsapp.emit(alerta);
   }
 
   alternarHistorial(): void {

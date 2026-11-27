@@ -35,6 +35,20 @@
 --
 -- Idempotente: DROP CONSTRAINT IF EXISTS + ADD CONSTRAINT.
 -- Reversible: el bloque de reversión está al final, comentado.
+--
+-- Claves huérfanas 71 y 72
+-- -------------------------
+-- Esta migración absorbió dos cambios que se habían numerado por separado y
+-- cuyo archivo no se conservó:
+--
+--   71_proceso_instancia_cascada_2026_11_26
+--       → lo cubre el bloque 1: proceso_instancia.alerta_id pasa a ON DELETE SET NULL.
+--   72_cronologia_vinculos_cascada_2026_11_26
+--       → lo cubre el bloque 1: cronologia_vinculos.alerta_id pasa a ON DELETE SET NULL.
+--
+-- Ambas claves se retiraron de `core.migracion_log` para que una comprobación por
+-- prefijo `71%`/`72%` no dé por aplicada una migración que ya no existe. Por eso
+-- las migraciones siguientes empiezan en 73 (números 71 y 72 quedan retirados).
 -- =============================================================================
 
 begin;

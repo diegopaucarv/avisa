@@ -1,5 +1,12 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
@@ -14,8 +21,22 @@ import {
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
+import {
+  AnularPanelComponent,
+  type ResultadoAnulacion,
+} from '../../shared/ui/anular-panel.component';
+import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
+import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import { ActorPanelComponent } from './actor-panel.component';
+import {
+  aActorDirectorio,
+  aCatalogosDirectorio,
+  type ActorDirectorio,
+  type CatalogosDirectorio,
+} from './directorio.mapeo';
 
 /**
  * Directorio · «Autoridades y agentes».
@@ -85,6 +106,14 @@ type AutoridadCaso = {
 type DatosPersonales = { dni: string | null; email: string | null; telefono: string | null };
 
 type EstadoPii = 'inactivo' | 'cargando' | 'listo' | 'sin_ficha' | 'prohibido' | 'error';
+
+/** Baja lógica o restauración pendiente de confirmar en el panel. */
+type BajaAutoridad = {
+  id: string;
+  nombre: string;
+  abreviatura: string | null;
+  modo: 'anular' | 'restaurar';
+};
 
 type FiltrosAutoridades = {
   q: string;
@@ -212,9 +241,7 @@ function aPagina(bruto: unknown): PaginaAutoridades {
   const registro = esRegistro(bruto) ? bruto : {};
 
   return {
-    filas: coleccion.elementos
-      .map(aFila)
-      .filter((fila): fila is AutoridadFila => fila !== null),
+    filas: coleccion.elementos.map(aFila).filter((fila): fila is AutoridadFila => fila !== null),
     total: coleccion.total,
     facets: aFacetas(registro['facets']),
     criterio: aCriterio(registro['criterio']),
@@ -251,7 +278,14 @@ function aDatosPersonales(bruto: unknown): { tieneFicha: boolean; datos: DatosPe
 
 @Component({
   selector: 'app-autoridades-page',
-  imports: [IconoComponent, PaginacionComponent],
+  imports: [
+    IconoComponent,
+    BotonAccionComponent,
+    PaginacionComponent,
+    BarraSeleccionComponent,
+    ActorPanelComponent,
+    AnularPanelComponent,
+  ],
   templateUrl: './autoridades.page.html',
   styleUrl: './autoridades.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -310,9 +344,7 @@ export class AutoridadesPage {
   readonly error = this.listado.error;
 
   readonly criterio = computed(() => this.listado.valor()?.criterio ?? CRITERIO_LOCAL);
-  readonly notaCriterio = computed(
-    () => `${this.criterio().universo} ${this.criterio().tipo}`,
-  );
+  readonly notaCriterio = computed(() => `${this.criterio().universo} ${this.criterio().tipo}`);
 
   readonly tipos = computed(() => this.listado.valor()?.facets.tipos ?? []);
   readonly instituciones = computed(() => this.listado.valor()?.facets.instituciones ?? []);
@@ -326,6 +358,30 @@ export class AutoridadesPage {
 
   /** Ficha abierta en el panel lateral. */
   readonly seleccionada = signal<AutoridadFila | null>(null);
+
+  /** Selección de la tabla (página visible) para exportar. */
+  readonly seleccion = new SeleccionTabla();
+
+  /** Actor completo de la fila que se edita; `null` cuando no hay panel abierto. */
+  readonly actorEdicion = signal<ActorDirectorio | null>(null);
+  readonly cargandoEdicion = signal(false);
+  readonly errorAccion = signal<string | null>(null);
+  readonly exportarError = signal<string | null>(null);
+
+  /** Baja lógica o restauración pendiente de confirmar. */
+  readonly bajaAbierta = signal<BajaAutoridad | null>(null);
+  readonly enviandoBaja = signal(false);
+  readonly errorBaja = signal<string | null>(null);
+
+  /**
+   * Regiones del catálogo territorial para el select de la edición. Es un
+   * catálogo aparte de `regiones()`, que son las facetas del listado.
+   */
+  private readonly catalogos = consulta<CatalogosDirectorio>({
+    fuente: () => urlApi('/v1/catalogs'),
+    esquema: aCatalogosDirectorio,
+  });
+  readonly regionesCatalogo = computed(() => this.catalogos.valor()?.regiones ?? []);
 
   /** Casos vinculados de la ficha abierta; se piden aparte del listado. */
   private readonly detalle = consulta<AutoridadCaso[]>({
@@ -354,9 +410,7 @@ export class AutoridadesPage {
   readonly puedeVerPii = this.capacidades.puedeVerPii;
   readonly piiVisible = computed(() => this.estadoPii() === 'listo');
   readonly piiCargando = computed(() => this.estadoPii() === 'cargando');
-  readonly sinAccesoPii = computed(
-    () => !this.puedeVerPii() || this.estadoPii() === 'prohibido',
-  );
+  readonly sinAccesoPii = computed(() => !this.puedeVerPii() || this.estadoPii() === 'prohibido');
 
   /** Valor copiado recientemente, para confirmar la acción. */
   readonly copiado = signal<string | null>(null);
@@ -397,6 +451,140 @@ export class AutoridadesPage {
     this.seleccionada.set(null);
   }
 
+  /** Ids de la página visible, para «seleccionar todos». */
+  idsVisibles(): string[] {
+    return this.filas().map((fila) => fila.id);
+  }
+
+  /**
+   * Abre la ficha de edición. La fila de autoridades sólo trae la proyección
+   * del listado, así que se pide el actor completo a `GET /v1/actors/{uid}` y
+   * se entrega al panel, que ya conoce el modo edición.
+   */
+  editar(fila: AutoridadFila, evento?: Event): void {
+    evento?.stopPropagation();
+    if (!this.capacidades.puedeModificar(fila.clasificacion)) return;
+
+    this.errorAccion.set(null);
+    this.cargandoEdicion.set(true);
+    this.actorEdicion.set(null);
+
+    this.http
+      .get<unknown>(urlApi(`/v1/actors/${encodeURIComponent(fila.id)}`))
+      .pipe(takeUntilDestroyed(this.destruccion))
+      .subscribe({
+        next: (bruto) => {
+          this.cargandoEdicion.set(false);
+          this.actorEdicion.set(aActorDirectorio(bruto));
+        },
+        error: (fallo: unknown) => {
+          this.cargandoEdicion.set(false);
+          this.errorAccion.set(aErrorApi(fallo).message);
+        },
+      });
+  }
+
+  cerrarEdicion(): void {
+    this.actorEdicion.set(null);
+    this.cargandoEdicion.set(false);
+  }
+
+  /** Refleja lo guardado en la ficha abierta y refresca el listado. */
+  alActualizarActor(actor: ActorDirectorio): void {
+    this.actorEdicion.set(actor);
+    this.seleccionada.update((actual) =>
+      actual && actual.id === actor.id
+        ? {
+            ...actual,
+            nombre: actor.nombre,
+            abreviatura: actor.abreviatura,
+            cargo: actor.cargo,
+            email: actor.email ?? null,
+            region: actor.region,
+            distrito: actor.distrito,
+            nivelGobierno: actor.nivelGobierno,
+            perfil: actor.perfil,
+            activo: actor.activo,
+          }
+        : actual,
+    );
+    this.listado.recargar();
+  }
+
+  /** Abre el panel de baja o restauración desde una fila de la tabla. */
+  abrirBaja(fila: AutoridadFila, evento?: Event): void {
+    evento?.stopPropagation();
+    if (!this.capacidades.puedeModificar(fila.clasificacion)) return;
+    this.errorBaja.set(null);
+    this.bajaAbierta.set({
+      id: fila.id,
+      nombre: fila.nombre,
+      abreviatura: fila.abreviatura,
+      modo: fila.activo ? 'anular' : 'restaurar',
+    });
+  }
+
+  /** Abre la baja o restauración pedida desde el pie del panel de edición. */
+  abrirBajaDesdePanel(modo: 'anular' | 'restaurar'): void {
+    const actor = this.actorEdicion();
+    if (!actor) return;
+    this.errorBaja.set(null);
+    this.bajaAbierta.set({
+      id: actor.id,
+      nombre: actor.nombre,
+      abreviatura: actor.abreviatura,
+      modo,
+    });
+  }
+
+  cerrarBaja(): void {
+    this.bajaAbierta.set(null);
+    this.errorBaja.set(null);
+  }
+
+  /** Ejecuta `POST …/baja` o `POST …/restaurar` según lo confirmado. */
+  alConfirmarBaja(resultado: ResultadoAnulacion): void {
+    const abierta = this.bajaAbierta();
+    if (!abierta || this.enviandoBaja()) return;
+
+    const esAnular = resultado.modo === 'anular';
+    const url = urlApi(
+      `/v1/actors/${encodeURIComponent(abierta.id)}/${esAnular ? 'baja' : 'restaurar'}`,
+    );
+
+    this.enviandoBaja.set(true);
+    this.errorBaja.set(null);
+
+    const peticion = esAnular
+      ? this.http.post<unknown>(url, { motivo: resultado.motivo })
+      : this.http.post<unknown>(url, {});
+
+    peticion.pipe(takeUntilDestroyed(this.destruccion)).subscribe({
+      next: (bruto) => {
+        this.enviandoBaja.set(false);
+        this.bajaAbierta.set(null);
+
+        // La fila deja de estar seleccionada: su estado acaba de cambiar.
+        if (this.seleccion.esta(abierta.id)) this.seleccion.alternar(abierta.id);
+
+        const actor = aActorDirectorio(bruto);
+        if (this.actorEdicion()) this.actorEdicion.set(actor);
+        this.seleccionada.update((actual) =>
+          actual && actual.id === abierta.id ? { ...actual, activo: actor.activo } : actual,
+        );
+        this.listado.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.enviandoBaja.set(false);
+        this.errorBaja.set(aErrorApi(fallo).message);
+      },
+    });
+  }
+
+  alFallarExportacion(mensaje: string): void {
+    this.exportarError.set(mensaje);
+  }
+
   /**
    * Pide DNI, correo y teléfono con motivo auditado. Sólo se llama desde el
    * botón explícito de la ficha; abrirla no registra ningún acceso a PII.
@@ -417,10 +605,9 @@ export class AutoridadesPage {
     this.errorPii.set(null);
     this.datosPii.set(null);
 
-    const url = urlConParametros(
-      urlApi(`/v1/autoridades/${encodeURIComponent(ficha.id)}/pii`),
-      { motivo: MOTIVO_PII },
-    );
+    const url = urlConParametros(urlApi(`/v1/autoridades/${encodeURIComponent(ficha.id)}/pii`), {
+      motivo: MOTIVO_PII,
+    });
 
     this.http
       .get<unknown>(url)
@@ -500,6 +687,8 @@ export class AutoridadesPage {
   limpiar(): void {
     clearTimeout(this.temporizadorBusqueda);
     this.cerrarFicha();
+    this.cerrarEdicion();
+    this.cerrarBaja();
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {},
@@ -518,6 +707,8 @@ export class AutoridadesPage {
     // Cualquier cambio de consulta descarta la ficha abierta: así no queda PII
     // en pantalla mientras el listado de fondo ya es otro.
     this.cerrarFicha();
+    this.cerrarEdicion();
+    this.cerrarBaja();
 
     void this.router.navigate([], {
       relativeTo: this.ruta,

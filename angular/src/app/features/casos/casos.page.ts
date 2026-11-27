@@ -25,18 +25,11 @@ import {
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
-import {
-  ALCANCES,
-  aCaso,
-  esRegistro,
-  formatearFechaCaso,
-  formatearFechaCorta,
-  leer,
-  texto,
-} from '../../dominio/mapeo';
+import { ALCANCES, aCaso, esRegistro, formatearFechaCorta, leer, texto } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 
 import { ExportarMenuComponent } from '../../shared/ui/exportar-menu.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
@@ -276,6 +269,7 @@ function aConteos(bruto: unknown): ConteosCasos {
     CasoVistaPreviaComponent,
     ExportarMenuComponent,
     ThOrdenDirective,
+    BotonAccionComponent,
   ],
   templateUrl: './casos.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -456,6 +450,52 @@ function aConteos(bruto: unknown): ConteosCasos {
 
     .vista-previa-aviso {
       margin: 0 0 10px;
+    }
+
+    /*
+     * Columna «Caso»: código arriba y nombre hasta dos líneas. La celda global
+     * del listado es nowrap; aquí se libera para poder recortar el título y
+     * se fija un ancho mínimo para que el código no se parta.
+     */
+    .celda-caso {
+      min-width: 260px;
+      max-width: 460px;
+      white-space: normal;
+    }
+
+    .caso-codigo {
+      display: inline-block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+
+    .caso-codigo:hover,
+    .caso-codigo:focus-visible {
+      color: var(--blue);
+      text-decoration: underline;
+    }
+
+    .caso-titulo {
+      display: -webkit-box;
+      max-width: 420px;
+      margin-top: 2px;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 12.5px;
+      line-height: 1.35;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    /* Última columna: accesos directos a las secciones de la ficha. Se
+       mantiene en una sola línea para que la fila no crezca a lo alto. */
+    .relaciones-acciones {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     /* Indicador operativo de la semana: tira de cifras con la jerarquía del
@@ -779,15 +819,12 @@ export class CasosPage {
 
   private readonly accesoresCaso: Record<string, (caso: CasoConSectorista) => unknown> = {
     codigo: (caso) => caso.codigo,
-    titulo: (caso) => caso.titulo,
     anulado: (caso) => caso.anuladoEn,
     region: (caso) => caso.region,
     sectorista: (caso) => caso.sectorista,
     estado: (caso) => caso.estado,
     prioridad: (caso) => caso.prioridad,
     riesgo: (caso) => PESO_RIESGO[caso.riesgo],
-    etapa: (caso) => caso.etapa,
-    inicio: (caso) => caso.inicio,
   };
 
   readonly filasVisibles = computed(() => this.orden.ordenar(this.casos(), this.accesoresCaso));
@@ -934,10 +971,6 @@ export class CasosPage {
     });
   }
 
-  fechaTexto(valor: string | null | undefined): string {
-    return formatearFechaCaso(valor);
-  }
-
   /** Un caso archivado ya no tiene riesgo operativo: se muestra «Inactivo». */
   estaArchivado(caso: Caso): boolean {
     return caso.estado === ESTADO_ARCHIVADO;
@@ -945,6 +978,15 @@ export class CasosPage {
 
   riesgoMostrado(caso: Caso): string {
     return caso.estado === ESTADO_ARCHIVADO ? 'Inactivo' : caso.riesgo;
+  }
+
+  /**
+   * La columna «Estado» responde una sola pregunta —¿el caso sigue abierto?—
+   * sin repetir el catálogo: `Resuelto` y `Archivado` se leen como «Cerrado» y
+   * el estado crudo queda en el `title` de la celda.
+   */
+  estadoMostrado(caso: Caso): string {
+    return caso.estado === 'Abierto' ? 'Abierto' : 'Cerrado';
   }
 
   /** Clase del badge de riesgo: sin color de nivel cuando está archivado. */

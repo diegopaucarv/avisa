@@ -56,33 +56,36 @@ type UbicacionMenu = { top: number; left: number; ancho: number };
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       padding: 0;
-      border: 1px solid #dce3e8;
-      border-radius: 7px;
-      background: #fff;
-      color: #526577;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
       cursor: pointer;
+      transition:
+        background-color 0.12s ease,
+        color 0.12s ease;
     }
 
     .acciones-boton:hover {
-      background: #f5f7f8;
+      background: var(--canvas);
+      color: var(--ink);
     }
 
     .acciones-boton:focus-visible {
-      outline: 2px solid #5b8fd6;
+      outline: 2px solid var(--blue);
       outline-offset: 1px;
     }
 
     .acciones-boton[aria-expanded='true'] {
-      border-color: #c9d8ea;
-      background: #eef3fa;
-      color: #4a6b93;
+      background: var(--blue-pale);
+      color: var(--blue);
     }
 
     .acciones-boton:disabled {
-      opacity: 0.55;
+      opacity: 0.45;
       cursor: progress;
     }
 

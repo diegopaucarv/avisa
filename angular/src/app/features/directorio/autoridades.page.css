@@ -141,26 +141,6 @@
   white-space: nowrap;
 }
 
-.boton-copiar-icono {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: none;
-  width: 22px;
-  height: 22px;
-  padding: 0;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.boton-copiar-icono:hover {
-  background: var(--canvas);
-  color: var(--ink);
-}
-
 .actor-organizacion {
   display: flex;
   flex-direction: column;
@@ -176,25 +156,6 @@
   display: flex;
   justify-content: flex-end;
   gap: 4px;
-}
-
-.accion {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.accion:hover {
-  background: var(--canvas);
-  color: var(--ink);
 }
 
 .sin-dato {

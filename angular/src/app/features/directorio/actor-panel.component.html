@@ -175,14 +175,6 @@
                   placeholder="sin dato"
                   (input)="actualizarTexto('organizacion', $event)"
                 />
-                <!--
-                  La API de actores no acepta el vínculo institucional en el PATCH:
-                  enviarlo devolvería 422 FIELD_NOT_EDITABLE. Se edita aquí para
-                  capturarlo, pero este formulario todavía no puede guardarlo.
-                -->
-                <span class="actor-pista">
-                  Aún no se guarda: la edición del actor no expone este campo en la API.
-                </span>
               </label>
               <label>
                 Abreviatura
@@ -538,6 +530,30 @@
               <p class="panel-vacio">Sin descripción de perfil registrada.</p>
             }
           </section>
+
+          <!--
+            Locales donde el actor figura como responsable. La relación todavía
+            no se puede resolver en la base (`core.local_responsables` está
+            vacía y no tiene `actor_uid`), así que `localesDelActor` llega vacío
+            y el bloque no se pinta. El mapeo ya lo lee: en cuanto la API
+            devuelva el array, la ficha funciona sin cambios.
+          -->
+          @if (a.localesDelActor.length > 0) {
+            <section class="panel-seccion" aria-labelledby="actor-panel-locales">
+              <h3 id="actor-panel-locales">Locales</h3>
+              <div class="panel-col">
+                @for (local of a.localesDelActor; track local.id) {
+                  <div class="panel-campo">
+                    <span class="panel-etiqueta">{{ local.codigo || 'Sin código' }}</span>
+                    <span class="panel-valor">{{ local.nombre }}</span>
+                    @if (local.direccion) {
+                      <span class="panel-pista">{{ local.direccion }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </section>
+          }
 
           <span [class]="'panel-posicionamiento ' + clasePosicionamiento()">
             {{ a.posicionamiento || 'Sin posicionamiento registrado' }}

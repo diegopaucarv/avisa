@@ -392,10 +392,34 @@
               </div>
             </div>
             } @else {
-            <span class="campo-valor">{{ d.caso.sectorista || 'sin dato' }}</span>
+            <span class="campo-valor">{{ sectoristaNombre() || 'sin dato' }}</span>
             @if (puedeModificar() && modoEdicion() && sectoristas().length > 0 && !editando()) {
             <button type="button" class="link-button" (click)="abrirSectorista()">Editar</button>
             } }
+          </dd>
+        </div>
+        <div class="campo-editable">
+          <dt>Priorizado</dt>
+          <dd>
+            @if (esDireccion() && modoEdicion() && puedeModificar()) {
+            <label class="campo-casilla">
+              <input
+                type="checkbox"
+                [checked]="priorizadoActual()"
+                [disabled]="guardandoPriorizado()"
+                (change)="alternarPriorizado($event)"
+              />
+              <span>{{ priorizadoActual() ? 'Sí' : 'No' }}</span>
+            </label>
+            } @else {
+            <span class="campo-valor">{{ priorizadoActual() ? 'Sí' : 'No' }}</span>
+            @if (!esDireccion()) {
+            <span class="form-hint" title="La marca la decide la Dirección OAIPCS">
+              sólo Dirección
+            </span>
+            } } @if (errorPriorizado(); as error) {
+            <p class="form-error" role="alert">{{ error }}</p>
+            }
           </dd>
         </div>
       </dl>
@@ -470,27 +494,25 @@
                   <div class="dato-contacto">
                     <span>{{ telefonoActor(actor) }}</span>
                     @if (actor.telefono?.trim()) {
-                    <button
-                      type="button"
-                      class="copiar-dato"
-                      [attr.aria-label]="'Copiar el teléfono de ' + nombreActor(actor)"
-                      (click)="copiarDato(actor.telefono, 'Teléfono')"
-                    >
-                      <app-icono nombre="copiar" [tamano]="12" />
-                    </button>
+                    <app-boton-accion
+                      icono="copiar"
+                      etiqueta="Copiar"
+                      [ariaLabel]="'Copiar el teléfono de ' + nombreActor(actor)"
+                      [titulo]="'Copiar el teléfono de ' + nombreActor(actor)"
+                      (accion)="copiarDato(actor.telefono, 'Teléfono')"
+                    />
                     }
                   </div>
                   <div class="dato-contacto">
                     <span class="correo-contacto">{{ actor.correo || '—' }}</span>
                     @if (actor.correo?.trim()) {
-                    <button
-                      type="button"
-                      class="copiar-dato"
-                      [attr.aria-label]="'Copiar el correo de ' + nombreActor(actor)"
-                      (click)="copiarDato(actor.correo, 'Correo')"
-                    >
-                      <app-icono nombre="copiar" [tamano]="12" />
-                    </button>
+                    <app-boton-accion
+                      icono="copiar"
+                      etiqueta="Copiar"
+                      [ariaLabel]="'Copiar el correo de ' + nombreActor(actor)"
+                      [titulo]="'Copiar el correo de ' + nombreActor(actor)"
+                      (accion)="copiarDato(actor.correo, 'Correo')"
+                    />
                     }
                   </div>
                 </td>
@@ -592,24 +614,21 @@
             <span class="tl-texto">{{ evento.descripcion }}</span>
             @if (modoEdicion() && puedeModificar()) {
             <div class="timeline-acciones">
-              <button
-                type="button"
-                class="button-secondary timeline-edit timeline-icono"
-                [attr.aria-label]="'Editar el hecho del ' + fechaCorta(evento.fecha)"
-                [attr.title]="'Editar el hecho del ' + fechaCorta(evento.fecha)"
-                (click)="editarHecho(evento)"
-              >
-                <app-icono nombre="papelera" [tamano]="14" />
-              </button>
-              <button
-                type="button"
-                class="button-secondary timeline-edit timeline-icono"
-                [attr.aria-label]="'Quitar el hecho del ' + fechaCorta(evento.fecha)"
-                [attr.title]="'Quitar el hecho del ' + fechaCorta(evento.fecha)"
-                (click)="pedirQuitarHecho(evento.id)"
-              >
-                <app-icono nombre="menos" [tamano]="14" />
-              </button>
+              <app-boton-accion
+                icono="lapiz"
+                etiqueta="Editar"
+                [ariaLabel]="'Editar el hecho del ' + fechaCorta(evento.fecha)"
+                [titulo]="'Editar el hecho del ' + fechaCorta(evento.fecha)"
+                (accion)="editarHecho(evento)"
+              />
+              <app-boton-accion
+                icono="menos"
+                etiqueta="Quitar"
+                tono="peligro"
+                [ariaLabel]="'Quitar el hecho del ' + fechaCorta(evento.fecha)"
+                [titulo]="'Quitar el hecho del ' + fechaCorta(evento.fecha)"
+                (accion)="pedirQuitarHecho(evento.id)"
+              />
             </div>
             } @if (hechoAQuitar() === evento.id) {
             <div class="baja-inline timeline-confirmacion">
@@ -643,14 +662,23 @@
 
       <section class="detail-section" aria-labelledby="demandas-caso">
         <div class="detail-section-title">
-          <h2 id="demandas-caso">Demandas ({{ d.demandas.length }})</h2>
+          <div>
+            <h2 id="demandas-caso">Demandas ({{ filasDemandas().length }})</h2>
+            <p>
+              Se listan las demandas de los últimos {{ mesesVentanaDemandas }} meses a partir del
+              último hecho registrado.@if (demandasFueraDeVentana() > 0) {<span>
+                {{ demandasFueraDeVentana() }} demanda(s) quedan fuera de la ventana o sin
+                fecha.</span
+              >}
+            </p>
+          </div>
           <div class="demandas-acciones">
             @if (puedeModificar()) {
             <button type="button" class="button-secondary" (click)="altaDemanda()">
               <app-icono nombre="bandeja" [tamano]="14" />
               Registrar demanda
             </button>
-            } @if (d.demandas.length > 0) {
+            } @if (filasDemandas().length > 0) {
             <button
               type="button"
               class="button-secondary"
@@ -699,8 +727,8 @@
         <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
         } @if (errorDemanda(); as error) {
         <p class="form-error" role="alert">{{ error }}</p>
-        } @if (d.demandas.length === 0) {
-        <p class="empty-inline">Sin demandas registradas.</p>
+        } @if (filasDemandas().length === 0) {
+        <p class="empty-inline">{{ motivoDemandasVacias() }}</p>
         } @else {
         <div class="table-wrap">
           <table class="data-table">
@@ -801,34 +829,40 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th scope="col" [appThOrden]="'codigo'" [orden]="ordenAlertas">Código</th>
-                <th scope="col" [appThOrden]="'nivel'" [orden]="ordenAlertas">Nivel</th>
-                <th scope="col" [appThOrden]="'prioridad'" [orden]="ordenAlertas">Prioridad</th>
-                <th scope="col" [appThOrden]="'estado'" [orden]="ordenAlertas">Estado</th>
-                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenAlertas">Fecha de reporte</th>
+                <th scope="col" [appThOrden]="'codigo'" [orden]="ordenAlertas">Alerta</th>
+                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenAlertas">Fecha</th>
+                <th scope="col">Enlace</th>
               </tr>
             </thead>
             <tbody>
               @for (alerta of filasAlertas(); track alerta.id) {
-              <tr>
+              <tr class="alerta-fila" (click)="abrirAlerta(alerta)">
                 <td>
-                  <a
-                    [routerLink]="['/alertas']"
-                    [queryParams]="{ q: alerta.codigo }"
-                    [attr.aria-label]="'Ver la alerta ' + alerta.codigo + ' en Alertas'"
-                  >
-                    <strong>{{ alerta.codigo || 'Sin código' }}</strong>
-                  </a>
-                </td>
-                <td>{{ alerta.nivel || '—' }}</td>
-                <td>{{ alerta.prioridad || '—' }}</td>
-                <td>
-                  <span class="status-badge">{{ alerta.estado }}</span>
-                  @if (alerta.anulada) {
-                  <span class="status-badge state-dismissed">Anulada</span>
-                  }
+                  <div class="alerta-celda">
+                    <div class="alerta-celda-linea">
+                      <strong>{{ alerta.codigo || 'Sin código' }}</strong>
+                      @if (alerta.anulada) {
+                      <span class="status-badge state-dismissed">Anulada</span>
+                      }
+                    </div>
+                    @if (alerta.titulo) {
+                    <span class="alerta-celda-titulo" [title]="alerta.titulo"
+                      >{{ alerta.titulo }}</span
+                    >
+                    }
+                  </div>
                 </td>
                 <td>{{ fechaTexto(alerta.fechaReporte) }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="link-button"
+                    [attr.aria-label]="'Abrir la alerta ' + alerta.codigo"
+                    (click)="$event.stopPropagation(); abrirAlerta(alerta)"
+                  >
+                    Ver alerta
+                  </button>
+                </td>
               </tr>
               }
             </tbody>
@@ -1072,6 +1106,15 @@
     [puedeConfirmar]="puedeAnular()"
     (cerrar)="cerrarPanelAnulacion()"
     (hecho)="confirmarAnulacion($event)"
+  />
+  } @if (panelAlertaAbierto()) {
+  <app-alerta-panel
+    [alerta]="alertaPanel()"
+    [cargando]="cargandoAlerta()"
+    [errorCarga]="errorAlerta()"
+    [soloLectura]="true"
+    (cerrar)="cerrarPanelAlerta()"
+    (reintentar)="recargarAlerta()"
   />
   } }
 </section>

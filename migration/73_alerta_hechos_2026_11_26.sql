@@ -30,7 +30,9 @@
 -- Idempotente: no duplica hechos si se reejecuta sin cambios en el texto.
 -- =============================================================================
 
-CREATE TABLE IF NOT EXISTS core.alerta_hechos (
+begin;
+
+create table if not exists core.alerta_hechos (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   alerta_id     uuid NOT NULL REFERENCES core.alertas_tempranas (id) ON DELETE CASCADE,
   fecha         date,
@@ -109,3 +111,9 @@ SELECT alerta_id, fecha, descripcion, orden
  WHERE descripcion <> '';
 
 DROP FUNCTION IF EXISTS pg_temp.fecha_ddmmaaaa(text);
+
+insert into core.migracion_log (clave)
+values ('73_alerta_hechos_2026_11_26')
+on conflict (clave) do nothing;
+
+commit;

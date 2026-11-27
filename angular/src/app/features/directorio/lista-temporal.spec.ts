@@ -22,6 +22,7 @@ function actor(id: string): ActorDirectorio {
     activo: true,
     clasificacion: 2,
     perfil: null,
+    localesDelActor: [],
   };
 }
 

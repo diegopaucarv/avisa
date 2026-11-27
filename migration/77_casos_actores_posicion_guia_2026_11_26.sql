@@ -1,7 +1,14 @@
 -- =============================================================================
--- 72 · Posicionamiento del actor en el caso según la Guía (§8.2.4)
+-- 77 · Posicionamiento del actor en el caso según la Guía (§8.2.4)
 --
 -- Fecha: 2026-11-26
+--
+-- Numeración
+-- ----------
+-- Se numera 77 y no 72 por la misma razón que la 76: la clave
+-- `72_cronologia_vinculos_cascada_2026_11_26` ya está aplicada en la base y su
+-- archivo no se conservó. Reutilizar el número escondía esta migración tras una
+-- comprobación por prefijo.
 --
 -- Por qué
 -- -------
@@ -34,7 +41,9 @@
 -- Idempotente: puede reejecutarse sin efectos.
 -- =============================================================================
 
-DO $$
+begin;
+
+do $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1
@@ -71,8 +80,14 @@ BEGIN
     ALTER TABLE core.casos_actores
       DROP CONSTRAINT casos_actores_posicion_check;
   END IF;
-END
+end
 $$;
 
-COMMENT ON CONSTRAINT casos_actores_posicion_guia_check ON core.casos_actores IS
+comment on constraint casos_actores_posicion_guia_check on core.casos_actores is
   'Posicionamiento del actor en el caso: vocabulario de la Guía §8.2.4, con los valores heredados admitidos como legado.';
+
+insert into core.migracion_log (clave)
+values ('77_casos_actores_posicion_guia_2026_11_26')
+on conflict (clave) do nothing;
+
+commit;

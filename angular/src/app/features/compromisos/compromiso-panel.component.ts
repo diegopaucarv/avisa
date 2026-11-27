@@ -46,19 +46,24 @@ import {
   aDetalleCompromiso,
   aHistorialCompromiso,
   aSugerenciaUsuario,
+  estadoCumplimientoDe,
   etiquetaClasificacionAlcance,
   etiquetaDemandaVinculada,
   etiquetaFormalVerbal,
+  etiquetaFuente,
   etiquetaNivelGobierno,
   etiquetaPuntoFocal as etiquetaPuntoFocalDe,
   formatearFecha,
+  fuenteDe,
   resolverVencimiento,
   situacionDe,
   type CatalogosCompromiso,
   type Compromiso,
   type DetalleCompromiso,
+  type EstadoCumplimiento,
   type EstadoHito,
   type EventoCompromiso,
+  type FuenteCompromiso,
   type Hito,
   type HistorialCompromiso,
   type OpcionCatalogo,
@@ -627,6 +632,28 @@ export class CompromisoPanelComponent {
 
   /** Semáforo del vencimiento efectivo (manual o derivado del próximo hito). */
   readonly situacion = computed<Situacion>(() => situacionDe(this.cabecera()));
+
+  /** Fuente del compromiso: documento de origen y, si no hay, reunión. */
+  readonly fuente = computed<FuenteCompromiso | null>(() =>
+    fuenteDe(this.detalle()?.documento ?? null, this.detalle()?.reunion ?? null),
+  );
+  readonly fuenteTexto = computed(() => etiquetaFuente(this.fuente()));
+
+  /** Estado de cumplimiento derivado; la regla vive en `estadoCumplimientoDe`. */
+  readonly cumplimiento = computed<EstadoCumplimiento>(() => estadoCumplimientoDe(this.cabecera()));
+
+  /**
+   * Explica por qué la etiqueta derivada no coincide con el estado registrado,
+   * para que «No cumplido» no parezca un dato inventado.
+   */
+  readonly motivoCumplimiento = computed<string | null>(() => {
+    const estado = this.cabecera().estado;
+    if (this.cumplimiento() !== 'No cumplido' || this.cumplimiento() === estado) return null;
+    if (this.cabecera().terminal || estado === 'Redefinido' || estado === 'Desestimado') {
+      return `Estado terminal «${estado}»: no se cumplió.`;
+    }
+    return 'Todos los hitos están en «No cumplido».';
+  });
 
   readonly puedeModificar = computed(() =>
     this.modoAlta()

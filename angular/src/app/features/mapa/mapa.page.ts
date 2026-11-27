@@ -52,6 +52,7 @@ import {
   indicePoblacionPorRegion,
   normalizarRegion,
   regionDe,
+  situacionDe,
   tasaPor100k,
   type ConteoDistrito,
   type FilaRegion,
@@ -660,76 +661,47 @@ function compararInicio(a: string | null, b: string | null): number {
       overscroll-behavior: contain;
     }
 
-    .casos-drawer-lista {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .casos-drawer-caso {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-      padding: 9px 11px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .casos-drawer-caso:hover,
-    .casos-drawer-caso:focus-visible {
-      border-color: #c9d5e0;
-      background: var(--blue-pale);
-    }
-
-    .casos-drawer-principal {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    .casos-drawer-codigo {
-      color: #35618f;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-
-    .casos-drawer-titulo {
-      margin-top: 2px;
-      color: var(--ink);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    .casos-drawer-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2px 10px;
-      margin-top: 5px;
-      color: #5a6b7b;
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    .casos-drawer-tags {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-    }
-
     .casos-drawer-vacio {
       margin: 0;
       padding: 24px 4px;
       color: #59697a;
       font-size: 13px;
       line-height: 1.5;
+    }
+
+    /* Tabla del cajón «Ver casos»: seis columnas en un panel estrecho; las de
+       texto se recortan y «table-wrap» desplaza en horizontal. */
+    .data-table.cajon-casos-tabla .cajon-caso,
+    .data-table.cajon-casos-tabla .cajon-caso-texto {
+      max-width: 220px;
+      white-space: normal;
+    }
+
+    .cajon-caso-codigo {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .cajon-caso-codigo:hover,
+    .cajon-caso-codigo:focus-visible {
+      color: var(--blue);
+      text-decoration: underline;
+    }
+
+    .cajon-caso-titulo {
+      display: block;
+      color: var(--ink);
+      font-size: 12.5px;
+    }
+
+    .data-table.cajon-casos-tabla .cajon-caso-texto > span {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .casos-drawer-pie {
@@ -1173,7 +1145,14 @@ export class MapaPage {
     ),
   );
 
-  readonly casosPrioritarios = computed(() => this.casosOrdenados().slice(0, 50));
+  /**
+   * «Casos priorizados» son los que la Dirección OAIPCS marcó a mano
+   * (`core.casos.priorizado`, migración 76), no los primeros por riesgo. Se
+   * conserva el orden por gravedad dentro de la selección.
+   */
+  readonly casosPrioritarios = computed(() =>
+    this.casosOrdenados().filter((caso) => caso.priorizado),
+  );
 
   /** Orden local de la tabla «Casos priorizados» (independiente de la de regiones). */
   readonly ordenPrioritarios = new OrdenTabla<Caso>();
@@ -1394,6 +1373,15 @@ export class MapaPage {
 
   formatearNumero(valor: number | null): string {
     return valor === null ? '—' : FORMATO_ENTERO.format(valor);
+  }
+
+  /**
+   * Situación del caso para el cajón: `situacionDe` agrupa los cuatro niveles,
+   * pero el caso sin nivel declarado se muestra «—» y no se estima.
+   */
+  situacionCaso(caso: Caso): string {
+    if (caso.nivelConflicto === null) return '—';
+    return situacionDe(caso.nivelConflicto) === 'manifiesto' ? 'Manifiesto' : 'Latente';
   }
 
   alternarCapaDistritos(): void {

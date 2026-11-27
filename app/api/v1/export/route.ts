@@ -77,9 +77,11 @@ const FILTROS_ALERTAS = [
   "caso",
   "sinCaso",
   "prioridad",
+  "riesgo",
   "nivel",
   "estado",
   "distritoId",
+  "archivados",
   "sort",
 ] as const;
 
@@ -178,6 +180,8 @@ function registro(sesion: {
       titulo: "Alertas",
       listar: lector(listAlerts),
       filtros: FILTROS_ALERTAS,
+      // El listado llama `incluirArchivados` a lo que en la URL es `archivados`.
+      renombrar: { archivados: "incluirArchivados" },
     },
     compromisos: {
       titulo: "Compromisos",

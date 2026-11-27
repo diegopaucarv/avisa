@@ -51,6 +51,13 @@ export type Caso = {
   codigo: string;
   titulo: string;
   resumen: string | null;
+  /**
+   * Descripción concreta del riesgo (`core.casos.descripcion_riesgo`). `null`
+   * mientras el caso no la declare; la interfaz la pinta como «—».
+   */
+  descripcionRiesgo: string | null;
+  /** Cantidad de demandas activas (`core.demandas` con `anulado_en` nulo). */
+  demandas: number;
   avance: number | null;
   /**
    * Instante de la última actualización (`fecha_ultima_actualizacion`). Es la
@@ -79,6 +86,11 @@ export type Caso = {
   /** Riesgo del caso. Se recalcula en el caso, no se hereda de la alerta. */
   riesgo: Riesgo;
   prioridad: PrioridadAtencion;
+  /**
+   * Marca de la Dirección OAIPCS (`core.casos.priorizado`, migración 76). Es una
+   * decisión explícita y no se deduce del riesgo ni de la prioridad.
+   */
+  priorizado: boolean;
   alcance: Alcance;
   /**
    * Nivel de conflictividad declarado (Guía §7.5.1). `null` = sin declarar: la

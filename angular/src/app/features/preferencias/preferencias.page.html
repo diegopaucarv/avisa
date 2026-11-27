@@ -177,6 +177,41 @@
         </div>
       </section>
 
+      <section class="surface detail-section" aria-labelledby="titulo-acciones">
+        <div class="pref-section">
+          <div class="pref-section-head">
+            <h3 id="titulo-acciones">Botones de acción</h3>
+            <span class="pref-hint">Icono o texto en los listados</span>
+          </div>
+
+          <div class="pref-options">
+            <button
+              type="button"
+              class="pref-option"
+              role="switch"
+              [class.selected]="accionesConTexto()"
+              [attr.aria-checked]="accionesConTexto()"
+              (click)="alternarAccionesTexto()"
+            >
+              <span class="pref-option-icon"><app-icono nombre="lapiz" [tamano]="14" /></span>
+              <span class="pref-option-copy">
+                <strong>Mostrar texto en los botones de acción</strong>
+                <small>Editar, borrar, copiar o ver se rotulan con palabras.</small>
+              </span>
+              <span class="pref-switch-track" aria-hidden="true">
+                <span class="pref-switch-thumb"></span>
+              </span>
+            </button>
+          </div>
+
+          <p class="pref-note">
+            Desactivado, los botones de las tablas y listados muestran el icono con su descripción
+            emergente; activado, muestran el texto. Se guarda en este navegador y se aplica al
+            instante; los botones sin rótulo —como los de copiar— siguen mostrando el icono.
+          </p>
+        </div>
+      </section>
+
       <section class="surface detail-section" aria-labelledby="titulo-avisos">
         <div class="pref-section">
           <div class="pref-section-head">
