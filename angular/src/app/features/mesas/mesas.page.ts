@@ -23,6 +23,7 @@ import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import {
   CeldaTablaDirectiva,
   TablaComponent,
+  type ClicFila,
   type ColumnaTabla,
 } from '../../shared/ui/tabla.component';
 import {
@@ -72,7 +73,7 @@ type RespuestaMesas = {
     .view-sub {
       margin: 4px 0 0;
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12.5px;
     }
     /*
      * El td de app-tabla es nowrap; el bloque interno concede el salto de línea
@@ -255,8 +256,9 @@ export class MesasPage {
     this.recurso.recargar();
   }
 
-  abrir(mesa: Mesa): void {
-    this.seleccionada.set(mesa.codigo);
+  /** La fila entera abre la ficha de su mesa, igual que el código. */
+  alClicFila(evento: ClicFila): void {
+    this.seleccionada.set((evento.fila as Mesa).codigo);
   }
 
   cerrarPanel(): void {

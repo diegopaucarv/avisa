@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 
 import { ApiError } from "../errors";
+import { excluirCasosMesa } from "./casos-filtro";
 
 /**
  * Dashboard analítico: series temporales de actividad de la oficina (item 57).
@@ -372,6 +373,7 @@ select 'casos'::text as clave,
        null::date as vencimiento
   from core.casos c
  where c.anulado_en is null
+   and ${excluirCasosMesa("c")}
    and ($1::int is null
         or c.region_principal_id = $1
         or exists (select 1

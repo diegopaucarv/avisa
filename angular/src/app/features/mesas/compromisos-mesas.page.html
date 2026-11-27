@@ -43,7 +43,9 @@
       </select>
     </label>
 
-    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+    <button type="button" class="button-secondary" [disabled]="!hayFiltros()" (click)="limpiar()">
+      Limpiar filtros
+    </button>
   </div>
 
   <app-mesas-graficos vista="compromisos" />
@@ -53,12 +55,12 @@
       <p>{{ error()?.message }}</p>
       <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
     </div>
-  } @else if (!cargando() && total() === 0) {
+  } @else if (!cargando() && total() === 0 && !hayFiltros()) {
     <div class="empty-state">
       <strong>Sin compromisos vinculados a mesas</strong>
       <p>
-        Las mesas de diálogo todavía no tienen compromisos vinculados. La vista se llenará cuando
-        se aplique la migración 81, que crea el caso espejo de cada mesa y lo enlaza con sus
+        Las mesas de diálogo todavía no tienen compromisos vinculados. La vista se llenará cuando se
+        aplique la migración 81, que crea el caso espejo de cada mesa y lo enlaza con sus
         compromisos.
       </p>
       <a class="table-link" routerLink="/mesas">Ver mesas de diálogo</a>
@@ -107,12 +109,8 @@
         <div class="celda-hitos">
           <span class="hitos-cuenta">{{ fila.hitosCumplidos }}/{{ fila.hitosTotal }}</span>
           @if (fila.proximoHito; as proximo) {
-            <span
-              class="celda-hitos-texto"
-              [attr.title]="etiquetaHito(proximo.codigo, proximo.descripcion)"
-            >
-              {{ etiquetaHito(proximo.codigo, proximo.descripcion) }}
-            </span>
+            @let etiqueta = etiquetaHito(proximo.codigo, proximo.descripcion);
+            <span class="celda-hitos-texto" [attr.title]="etiqueta"> {{ etiqueta }} </span>
             <small class="hito-fecha">{{ fechaTexto(proximo.fecha) }}</small>
           } @else if (fila.hitosTotal > 0) {
             <small class="hito-fecha">Sin próximo hito con fecha</small>
@@ -133,7 +131,6 @@
       />
     }
   }
-
   @if (mesaAbierta(); as codigo) {
     <app-mesa-panel [codigo]="codigo" (cerrado)="cerrarPanel()" />
   }

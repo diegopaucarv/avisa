@@ -78,12 +78,7 @@
       </select>
     </label>
 
-    <button
-      type="button"
-      class="button-secondary"
-      [disabled]="!hayFiltros()"
-      (click)="limpiar()"
-    >
+    <button type="button" class="button-secondary" [disabled]="!hayFiltros()" (click)="limpiar()">
       Limpiar filtros
     </button>
   </div>
@@ -104,15 +99,13 @@
     [claveFila]="'codigo'"
     [clicable]="true"
     resumen="Mesas de diálogo y su vigencia"
-    (filaClic)="abrir($any($event.fila))"
+    (filaClic)="alClicFila($event)"
   >
     <ng-template appCeldaTabla="mesa" let-fila>
       <div class="celda-mesa">
         <span class="table-link mesa-codigo">{{ fila.codigo }}</span>
         @if (fila.titulo) {
         <span class="mesa-titulo">{{ fila.titulo }}</span>
-        } @else {
-        <span class="micro-label">Sin título registrado</span>
         }
       </div>
     </ng-template>
@@ -123,17 +116,11 @@
       </span>
     </ng-template>
 
-    <ng-template appCeldaTabla="ambito" let-fila>
-      {{ fila.ambito || '—' }}
-    </ng-template>
+    <ng-template appCeldaTabla="ambito" let-fila> {{ fila.ambito || '—' }} </ng-template>
 
-    <ng-template appCeldaTabla="compromisos" let-fila>
-      {{ avanceCompromisos(fila) }}
-    </ng-template>
+    <ng-template appCeldaTabla="compromisos" let-fila> {{ avanceCompromisos(fila) }} </ng-template>
 
-    <ng-template appCeldaTabla="miembros" let-fila>
-      {{ fila.miembros }}
-    </ng-template>
+    <ng-template appCeldaTabla="miembros" let-fila> {{ fila.miembros }} </ng-template>
   </app-tabla>
 
   @if (total() > 0) {
@@ -144,16 +131,12 @@
     (paginaCambia)="cambiarPagina($event)"
     (tamanoCambia)="cambiarTamano($event)"
   />
-  } }
-
-  @if (resumen()?.compromisos === 0) {
+  } } @if (resumen()?.compromisos === 0) {
   <p class="form-hint">
-    Las mesas aún no tienen compromisos vinculados: la vista de compromisos se llenará al aplicar
-    la migración 81.
+    Las mesas aún no tienen compromisos vinculados: la vista de compromisos se llenará al aplicar la
+    migración 81.
   </p>
-  }
-
-  @if (seleccionada(); as codigo) {
+  } @if (seleccionada(); as codigo) {
   <app-mesa-panel [codigo]="codigo" (cerrado)="cerrarPanel()" />
   }
 </section>

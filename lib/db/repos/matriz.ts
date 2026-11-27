@@ -2,6 +2,7 @@ import type { PoolClient } from "pg";
 
 import { filtroTexto } from "../busqueda";
 import { ApiError } from "../errors";
+import { excluirCasosMesa } from "./casos-filtro";
 
 /**
  * Matriz de conflictos del equipo (formato del Excel A..W).
@@ -409,7 +410,9 @@ function construirWhere(
   query: MatrizListQuery,
   bind: (valor: unknown) => string,
 ): string[] {
-  const where: string[] = [];
+  // Los casos espejo de mesas (`MD-...`) quedan fuera de la matriz: la vista los
+  // devolvería como una fila sin región, prioridad ni compromisos.
+  const where: string[] = [excluirCasosMesa("v15")];
 
   const region = query.region?.trim();
   if (region) {

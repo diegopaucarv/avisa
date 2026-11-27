@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 
 import { listCommitments } from "./commitments";
+import { excluirCasosMesa } from "./casos-filtro";
 import { listarConflictividad } from "./conflictividad";
 import { listReportes } from "./reportes";
 
@@ -173,7 +174,12 @@ async function consultarAnexo14Vista(
   query: Anexo14Query,
 ): Promise<Anexo14Resultado> {
   const params: unknown[] = [];
-  const where: string[] = ["cs.anulado_en is null"];
+  const where: string[] = [
+    "cs.anulado_en is null",
+    // Los casos de mesa (`MD-...`) no tienen compromisos ni geografía: se dejan
+    // fuera del Anexo 14 para no añadir filas vacías al formato oficial.
+    excluirCasosMesa("cs"),
+  ];
 
   const caso = texto(query.caso);
   if (caso) {

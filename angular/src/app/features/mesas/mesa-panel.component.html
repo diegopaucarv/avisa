@@ -1,4 +1,4 @@
-<div class="drawer-scrim" (click)="alFondo($event)">
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
   <aside
     #panel
     class="drawer"
@@ -214,12 +214,13 @@
                     <div class="mesa-hitos-linea">
                       @if (compromiso.hitos.length > 0) {
                         @for (hito of compromiso.hitos; track $index) {
+                          @let etiqueta = etiquetaHito(hito.codigo, hito.descripcion);
                           <span
-                            class="commit-status"
                             [class]="'commit-status ' + claseEstadoHito(hito.estado)"
-                            [attr.title]="etiquetaHito(hito.codigo, hito.descripcion)"
+                            [attr.title]="etiqueta + ' · Estado: ' + hito.estado"
                           >
-                            {{ etiquetaHito(hito.codigo, hito.descripcion) }}
+                            <span class="sr-only">Estado: {{ hito.estado }}</span>
+                            {{ etiqueta }}
                           </span>
                           @if (hito.fecha) {
                             <small class="mesa-hito-fecha">{{ fechaTexto(hito.fecha) }}</small>

@@ -590,3 +590,20 @@ describe('resumen de validación de hitos', () => {
     expect(resumenValidacionHitos([])).toBeNull();
   });
 });
+
+describe('próximo hito del compromiso', () => {
+  it('conserva el código para componer la etiqueta de la ficha', () => {
+    const leido = aCompromiso({
+      id: 'comp-1',
+      proximoHito: {
+        id: 'hito-1',
+        codigo: 'CS-2026-0001_COMP001_H002',
+        descripcion: 'Texto del hito',
+        fecha: '2026-12-01',
+        estado: 'Registrado',
+      },
+    });
+
+    expect(leido.proximoHito?.codigo).toBe('CS-2026-0001_COMP001_H002');
+  });
+});

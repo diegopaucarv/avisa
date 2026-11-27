@@ -2,6 +2,7 @@ import type { PoolClient } from "pg";
 
 import { filtroTexto } from "../busqueda";
 import { ApiError } from "../errors";
+import { excluirCasosMesa } from "./casos-filtro";
 
 /**
  * Matriz de conflictividad (Anexo 15), una fila por caso abierto.
@@ -303,7 +304,13 @@ function construirWhere(
   query: ConflictividadListQuery,
   bind: (valor: unknown) => string,
 ): string[] {
-  const where: string[] = ["b.anulado_en is null"];
+  const where: string[] = [
+    "b.anulado_en is null",
+    // Casos espejo de mesas: sin distrito, nivel ni prioridad, no son filas del
+    // Anexo 15. Se excluyen del listado, del resumen y de la exportación (que
+    // reutiliza este mismo constructor).
+    excluirCasosMesa("b"),
+  ];
 
   const region = query.region?.trim();
   if (region) {

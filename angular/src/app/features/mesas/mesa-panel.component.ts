@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   afterNextRender,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -264,6 +266,11 @@ export class MesaPanelComponent {
   readonly cerrado = output<void>();
 
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
+  private readonly destruccion = inject(DestroyRef);
+
+  /** Elemento que tenía el foco al abrir, para devolvérselo al cerrar. */
+  private readonly focoPrevio =
+    typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null);
 
   private readonly recurso = consulta<MesaDetalle | null>({
     fuente: () => urlApi(`/v1/mesas/${encodeURIComponent(this.codigo())}`),
@@ -305,6 +312,7 @@ export class MesaPanelComponent {
 
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
+    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
   }
 
   verPestana(pestana: Pestana): void {
@@ -325,6 +333,39 @@ export class MesaPanelComponent {
 
   alFondo(evento: MouseEvent): void {
     if (evento.target === evento.currentTarget) this.cerrar();
+  }
+
+  alTecla(evento: KeyboardEvent): void {
+    if (evento.key === 'Tab') this.atraparFoco(evento);
+  }
+
+  /** El panel es modal: Tab y Shift+Tab ciclan dentro de él. */
+  private atraparFoco(evento: KeyboardEvent): void {
+    const panel = this.panel()?.nativeElement;
+    if (!panel) return;
+
+    const enfocables = Array.from(
+      panel.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+      ),
+    );
+
+    const primero = enfocables[0];
+    const ultimo = enfocables[enfocables.length - 1];
+    if (!primero || !ultimo) return;
+
+    const activo = document.activeElement;
+
+    if (!evento.shiftKey && activo === ultimo) {
+      evento.preventDefault();
+      primero.focus();
+      return;
+    }
+
+    if (evento.shiftKey && (activo === primero || !panel.contains(activo))) {
+      evento.preventDefault();
+      ultimo.focus();
+    }
   }
 
   cerrar(): void {

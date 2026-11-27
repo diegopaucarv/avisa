@@ -3,6 +3,7 @@ import { auditChange } from "../audit";
 import { filtroTexto } from "../busqueda";
 import { ApiError } from "../errors";
 import { normalizarMotivo } from "./anulacion";
+import { excluirCasosMesa } from "./casos-filtro";
 
 const CASE_SELECT = `
   c.id,
@@ -260,6 +261,11 @@ async function construirWhere(
     params.push(value);
     return `$${params.length}`;
   };
+
+  // Los casos espejo de mesas (`MD-AAAA-NNNN`) no entran en el listado ni en los
+  // chips: no declaran distrito, nivel ni prioridad y sólo inflarían totales.
+  // `getCaseByCode` los sigue resolviendo porque no pasa por este constructor.
+  where.push(excluirCasosMesa("c"));
 
   // Se exige que aparezcan todas las palabras del término: un único `like` con
   // el término completo sólo encontraba las palabras contiguas y en ese orden.
@@ -2685,7 +2691,10 @@ export async function listNudosSemana(
 
   const [casos, filas] = await Promise.all([
     client.query<{ total: number }>(
-      `select count(*)::int as total from core.casos where anulado_en is null`,
+      `select count(*)::int as total
+         from core.casos
+        where anulado_en is null
+          and ${excluirCasosMesa()}`,
     ),
     client.query(
       `select ${NUDO_SELECT},

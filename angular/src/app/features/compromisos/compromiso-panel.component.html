@@ -584,7 +584,7 @@
           <h3 id="proximo-hito">Próximo hito</h3>
           @if (proximoHito(); as siguienteHito) {
             <p class="panel-fecha">
-              <strong>{{ siguienteHito.descripcion || 'Sin descripción' }}</strong>
+              <strong>{{ etiquetaHito(siguienteHito.codigo, siguienteHito.descripcion) }}</strong>
               <span class="commit-status">{{ siguienteHito.estado }}</span>
             </p>
             <p class="form-hint">Planificado para {{ fechaTexto(siguienteHito.fecha) }}.</p>

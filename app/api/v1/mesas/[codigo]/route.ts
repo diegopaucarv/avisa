@@ -19,13 +19,14 @@ export async function GET(
 ) {
   try {
     const session = requireSession(request);
-    // Next 16 entrega los parámetros de ruta como Promise.
+    // Next 16 entrega los parámetros de ruta como Promise y ya decodificados.
+    // No se vuelve a llamar `decodeURIComponent`: un `%` suelto en el código
+    // lanzaría `URIError` y la respuesta sería un 500 en vez de un 404.
     const { codigo } = await context.params;
-    const decoded = decodeURIComponent(codigo);
 
     const detalle = await withSession(
       { usuarioId: session.uid, rolCodigo: session.rol },
-      (client) => getMesaDetalle(client, decoded),
+      (client) => getMesaDetalle(client, codigo),
     );
 
     if (!detalle) {

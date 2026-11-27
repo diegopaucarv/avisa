@@ -32,7 +32,14 @@ import { ESTADOS_COMPROMISO } from '../compromisos/compromiso.mapeo';
 
 import { MesaPanelComponent } from './mesa-panel.component';
 import { MesasGraficosComponent } from './mesas-graficos.component';
-import { aCompromisoMesa, aMesa, fechaTexto, type CompromisoMesa, type Mesa } from './mesa.mapeo';
+import {
+  aCompromisoMesa,
+  aMesa,
+  fechaTexto,
+  normalizarClave,
+  type CompromisoMesa,
+  type Mesa,
+} from './mesa.mapeo';
 
 type FiltrosMesas = {
   q: string;
@@ -49,12 +56,12 @@ type FiltrosMesas = {
  * reutiliza los tonos ya definidos en `global.css`.
  */
 function claseEstadoCompromiso(estado: string): string {
-  switch (estado) {
-    case 'Cumplido':
+  switch (normalizarClave(estado)) {
+    case 'cumplido':
       return 'commit-cumplido';
-    case 'Redefinido':
+    case 'redefinido':
       return 'commit-por-vencer';
-    case 'Desestimado':
+    case 'desestimado':
       return 'commit-vencido';
     default:
       return 'commit-en-curso';
@@ -176,6 +183,12 @@ export class CompromisosMesasPage {
   );
 
   readonly filtros = computed(() => this.parametros());
+
+  /** Hay una búsqueda o un filtro activo: el vacío no es «falta migración 81». */
+  readonly hayFiltros = computed(() => {
+    const filtros = this.parametros();
+    return Boolean(filtros.q.trim() || filtros.mesa || filtros.estado);
+  });
 
   private readonly recurso = consulta<Coleccion<CompromisoMesa>>({
     fuente: () => {

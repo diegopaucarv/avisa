@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 import { auditChange } from "../audit";
 import { ApiError } from "../errors";
+import { excluirCasosMesa } from "./casos-filtro";
 
 /**
  * Tablero (Kanban) de la bandeja de trabajo.
@@ -233,6 +234,7 @@ const ENTIDAD_LATERAL = `
       left join core.cat_niveles_riesgo nrk on nrk.id = ck.nivel_riesgo_id
       left join core.cat_estados_caso ec_caso on ec_caso.id = ck.estado_id
      where t.entidad_tipo = 'caso' and ck.id = t.entidad_id
+       and ${excluirCasosMesa("ck")}
   ) e on true
 `;
 

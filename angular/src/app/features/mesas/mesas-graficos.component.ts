@@ -132,9 +132,7 @@ function presentes(
   orden: readonly string[],
   tono: (clave: string) => Tono,
 ): FilaBarra[] {
-  const posicion = new Map(
-    orden.map((clave, indice) => [normalizarClave(clave), indice] as const),
-  );
+  const posicion = new Map(orden.map((clave, indice) => [normalizarClave(clave), indice] as const));
 
   return [...filas]
     .sort((a, b) => {
@@ -336,7 +334,7 @@ export class MesasGraficosComponent {
   readonly esVistaMesas = computed(() => this.vista() === 'mesas');
 
   readonly tituloVista = computed(() =>
-    this.esVistaMesas() ? 'Mesas de diálogo' : 'Compromisos de mesas',
+    this.esVistaMesas() ? 'Indicadores de mesas de diálogo' : 'Indicadores de compromisos de mesas',
   );
 
   readonly etiquetaRegion = computed(() =>

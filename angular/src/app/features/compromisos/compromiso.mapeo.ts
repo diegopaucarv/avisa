@@ -112,6 +112,7 @@ export type Hito = {
 
 export type ProximoHito = {
   id: string;
+  codigo: string | null;
   descripcion: string | null;
   fecha: string;
   estado: EstadoHito;
@@ -346,6 +347,7 @@ function aProximoHito(bruto: unknown): ProximoHito | null {
   if (!fecha) return null;
   return {
     id: texto(bruto, ['id']) ?? '',
+    codigo: texto(bruto, ['codigo']),
     descripcion: texto(bruto, ['descripcion']),
     fecha,
     estado: estadoHitoDe(texto(bruto, ['estado'])),

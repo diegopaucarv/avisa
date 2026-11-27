@@ -1,6 +1,7 @@
 import type { PoolClient } from "pg";
 
 import { palabrasDe } from "../busqueda";
+import { excluirCasosMesa } from "./casos-filtro";
 
 export type SearchResultType =
   "case" | "alert" | "document" | "actor" | "commitment" | "demanda";
@@ -107,6 +108,7 @@ ${REGION_DEL_CASO}
      "c.nombre_caso",
      "coalesce(c.resumen_ejecutivo, '')",
    ])}
+     and ${excluirCasosMesa("c")}
   union all
   select 2, 'alert'::text, 'alerts'::text,
          al.id::text,
@@ -306,6 +308,7 @@ const SUBSECTORES_SQL = `
     left join core.cat_subsectores s on s.id = c.subsector_id
     left join core.cat_niveles_riesgo nr on nr.id = c.nivel_riesgo_id
    where c.anulado_en is null
+     and ${excluirCasosMesa("c")}
    group by coalesce(s.nombre, 'Sin subsector')
    order by count(*) desc, 1
 `;

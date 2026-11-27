@@ -13,7 +13,7 @@
  * refleja ese sobre tal cual.
  */
 
-import { booleano, esRegistro, leer, lista, numero, texto, type Registro } from '../../dominio/mapeo';
+import { esRegistro, leer, lista, numero, texto, type Registro } from '../../dominio/mapeo';
 
 /** Conteo genérico `clave → total` (vigencia, naturaleza, estado, departamento…). */
 export type ConteoClave = { clave: string; total: number };
@@ -27,8 +27,11 @@ export type ConteoMesa = {
 };
 
 export type IndicadoresMesas = {
-  /** `false` cuando la migración 81 no ha vinculado mesas con casos. */
-  vinculoDisponible: boolean;
+  /**
+   * `false` cuando la migración 81 no ha vinculado mesas con casos; `undefined`
+   * si la API no informa el campo (ausente no equivale a «sin vínculo»).
+   */
+  vinculoDisponible: boolean | undefined;
   totales: {
     mesas: number;
     miembros: number;
@@ -101,13 +104,11 @@ export function leerIndicadores(bruto: unknown): IndicadoresMesas {
   const datos = raiz(bruto);
   const crudo = leer(datos, ['totales', 'totals', 'resumen']);
   const totales = esRegistro(crudo) ? crudo : datos;
+  const vinculo = leer(datos, ['vinculoDisponible', 'vinculo_disponible', 'linkDisponible']);
 
   return {
-    vinculoDisponible: booleano(datos, [
-      'vinculoDisponible',
-      'vinculo_disponible',
-      'linkDisponible',
-    ]),
+    // Sólo un `false` explícito declara «sin vínculo»; ausente queda `undefined`.
+    vinculoDisponible: typeof vinculo === 'boolean' ? vinculo : undefined,
     totales: {
       mesas: entero(numero(totales, ['mesas', 'totalMesas', 'total_mesas'])),
       miembros: entero(numero(totales, ['miembros', 'members'])),
@@ -126,7 +127,12 @@ export function leerIndicadores(bruto: unknown): IndicadoresMesas {
     compromisosPorMesa: lista(datos, ['compromisosPorMesa', 'compromisos_por_mesa']).map(
       aConteoMesa,
     ),
-    hitosEstado: conteos(datos, ['hitosEstado', 'hitos_estado', 'porEstadoHito', 'por_estado_hito']),
+    hitosEstado: conteos(datos, [
+      'hitosEstado',
+      'hitos_estado',
+      'porEstadoHito',
+      'por_estado_hito',
+    ]),
   };
 }
 

@@ -14,7 +14,7 @@
 
 import { formatearFechaCorta } from '../../shared/formato-fecha';
 import { esRegistro, leer, lista, numero, texto, type Registro } from '../../dominio/mapeo';
-import type { EstadoCompromiso } from '../compromisos/compromiso.mapeo';
+import { estadoCompromisoDe, type EstadoCompromiso } from '../compromisos/compromiso.mapeo';
 
 export type EstadoVigencia = 'Vigente' | 'Por vencer' | 'Vencido' | 'Permanente' | 'Sin fecha';
 
@@ -118,7 +118,7 @@ export type MesaDetalle = {
   compromisos: CompromisoMesa[];
 };
 
-function normalizarClave(valor: string | null): string {
+export function normalizarClave(valor: string | null): string {
   return (valor ?? '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
@@ -202,13 +202,15 @@ export function aCompromisoMesa(bruto: unknown): CompromisoMesa {
     id: texto(registro, ['id']) ?? '',
     codigo: texto(registro, ['codigo', 'code']) ?? 'Sin código',
     titulo: texto(registro, ['titulo', 'accion', 'acción']) ?? 'Sin descripción',
-    estado: (texto(registro, ['estado']) ?? 'Por iniciar') as EstadoCompromiso,
+    estado: estadoCompromisoDe(texto(registro, ['estado'])),
     area: texto(registro, ['area', 'unidad']),
     fechaLimite: texto(registro, ['fechaLimite', 'fecha_limite', 'fechaVencimiento']),
     mesaCodigo: texto(registro, ['mesaCodigo', 'mesa_codigo']),
     mesaTitulo: texto(registro, ['mesaTitulo', 'mesa_titulo']),
     hitosTotal: numero(registro, ['hitosTotal', 'hitos_total']) ?? hitos.length,
-    hitosCumplidos: numero(registro, ['hitosCumplidos', 'hitos_cumplidos']) ?? 0,
+    hitosCumplidos:
+      numero(registro, ['hitosCumplidos', 'hitos_cumplidos']) ??
+      hitos.filter(esHitoCumplido).length,
     proximoHito: esRegistro(proximo) ? aHito(proximo) : null,
     hitos,
   };

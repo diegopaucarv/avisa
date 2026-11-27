@@ -181,6 +181,7 @@ export type CommitmentHitoDetail = CommitmentHito & {
 
 export type CommitmentProximoHito = {
   id: string;
+  codigo: string | null;
   descripcion: string | null;
   fecha: string;
   estado: string | null;
@@ -306,6 +307,7 @@ function pickProximoHito(
     if (hito.fecha && !hito.terminal) {
       return {
         id: hito.id,
+        codigo: hito.codigo,
         descripcion: hito.descripcion,
         fecha: hito.fecha,
         estado: hito.estado,
