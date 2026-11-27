@@ -3425,6 +3425,8 @@ export type CasoActor = {
   naturaleza: string | null;
   posicionamiento: string | null;
   correo: string | null;
+  /** Teléfono de contacto público, no PII (`core.actores.telefono_contacto`); aditivo. */
+  telefono: string | null;
   posicion: string | null;
   nivelInfluencia: number | null;
   rolEnCaso: string | null;
@@ -3444,9 +3446,29 @@ export type CasoActoresResult = {
   generadoEn: string;
 };
 
+/**
+ * Órdenes de la tabla de actores del caso.
+ *
+ * `contacto` sigue el orden de la columna de la ficha (teléfono arriba, correo
+ * debajo) y deja los huecos al final; `nombre` es el orden histórico. Cualquier
+ * otro valor —o su ausencia— conserva el orden por nombre.
+ */
+const ORDENES_ACTORES: Record<string, string> = {
+  nombre: "a.nombre_actual",
+  contacto: `nullif(btrim(coalesce(a.telefono_contacto, '')), '') nulls last,
+             nullif(btrim(coalesce(a.email_contacto, '')), '') nulls last,
+             a.nombre_actual`,
+};
+
+function ordenActores(sort: string | undefined): string {
+  const clave = (sort ?? "").trim().toLowerCase();
+  return ORDENES_ACTORES[clave] ?? ORDENES_ACTORES.nombre;
+}
+
 export async function listarActoresCaso(
   client: PoolClient,
   code: string,
+  sort?: string,
 ): Promise<CasoActoresResult> {
   const caso = await casoPorCodigo(client, code);
   const presencia = await presenciaSoportes(client);
@@ -3478,6 +3500,7 @@ export async function listarActoresCaso(
             a.naturaleza,
             pf.nombre as posicionamiento,
             a.email_contacto as correo,
+            a.telefono_contacto as telefono,
             ca.nivel_influencia,
             replace(ca.posicion, '_', ' ') as posicion,
             ${rolExpr} as rol_en_caso,
@@ -3492,7 +3515,7 @@ export async function listarActoresCaso(
        left join core.cat_roles_actor ra on ra.id = a.rol_actor_id
        left join core.cat_perfiles_actor pf on pf.id = a.perfil_id
       where ca.caso_id = $1
-      order by ${presencia.actoresBaja ? "(ca.anulado_en is null) desc," : ""} a.nombre_actual`,
+      order by ${presencia.actoresBaja ? "(ca.anulado_en is null) desc, " : ""}${ordenActores(sort)}`,
     [caso.id],
   );
 
@@ -3505,6 +3528,7 @@ export async function listarActoresCaso(
     naturaleza: (row.naturaleza as string | null) ?? null,
     posicionamiento: (row.posicionamiento as string | null) ?? null,
     correo: (row.correo as string | null) ?? null,
+    telefono: (row.telefono as string | null) ?? null,
     posicion: (row.posicion as string | null) ?? null,
     nivelInfluencia:
       row.nivel_influencia === null || row.nivel_influencia === undefined

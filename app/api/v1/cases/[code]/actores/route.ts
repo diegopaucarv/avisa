@@ -1,12 +1,17 @@
 import { ApiError, jsonError } from "@/lib/db/errors";
-import { jsonOk, requireSession } from "@/lib/db/http";
+import { jsonOk, queryParams, requireSession } from "@/lib/db/http";
 import { listarActoresCaso, vincularActorCaso } from "@/lib/db/repos/cases";
 import { withSession } from "@/lib/db/tenant";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Actores vinculados al caso, con su vínculo vigente y su baja lógica. */
+/**
+ * Actores vinculados al caso, con su vínculo vigente y su baja lógica.
+ *
+ * Acepta `sort`: `contacto` ordena por teléfono y luego correo; cualquier otra
+ * cosa —o su ausencia— conserva el orden por nombre.
+ */
 export async function GET(
   request: Request,
   context: { params: Promise<{ code: string }> },
@@ -15,10 +20,11 @@ export async function GET(
     const session = requireSession(request);
     const { code } = await context.params;
     const decoded = decodeURIComponent(code);
+    const sort = queryParams(request).get("sort") ?? undefined;
 
     const result = await withSession(
       { usuarioId: session.uid, rolCodigo: session.rol },
-      (client) => listarActoresCaso(client, decoded),
+      (client) => listarActoresCaso(client, decoded, sort),
     );
 
     return jsonOk(result);
