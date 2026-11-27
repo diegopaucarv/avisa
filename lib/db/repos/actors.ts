@@ -61,7 +61,11 @@ const ACTOR_SELECT = `
   o.vigencia_desde,
   o.vigencia_hasta,
   o.ruc,
-  o.numero_integrantes
+  o.numero_integrantes,
+  -- Provincia derivable del distrito: el listado ya la conoce por join, aunque
+  -- la tabla del directorio no la muestre. Se añade al final para no alterar
+  -- el orden de las columnas existentes.
+  p.nombre as provincia
 `;
 
 // El ETL no escribe `organizacion_ancla_uid`, así que el ancla se resuelve por
@@ -78,6 +82,7 @@ const ACTOR_FROM = `
   left join core.cat_perfiles_actor pf on pf.id = a.perfil_id
   left join core.regiones rg on rg.id = a.region_id
   left join core.distritos d on d.id = a.distrito_id
+  left join core.provincias p on p.id = d.provincia_id
   left join core.cat_nivel_identificacion ni on ni.id = a.nivel_identificacion_id
   left join core.organizaciones o on o.actor_uid = a.actor_uid
   left join core.actores oa on oa.actor_uid = a.organizacion_ancla_uid
@@ -120,6 +125,8 @@ export type ActorListItem = {
   telefono: string | null;
   region: string | null;
   distrito: string | null;
+  /** `core.provincias.nombre`, derivada de `distrito_id`; `null` si no hay distrito. */
+  provincia: string | null;
   organizacionAncla: string | null;
   organizacionAnclaUid: string | null;
   activo: boolean;
@@ -183,6 +190,7 @@ function mapActor(row: Record<string, unknown>): ActorListItem {
     telefono: row.telefono as string | null,
     region: row.region as string | null,
     distrito: row.distrito as string | null,
+    provincia: (row.provincia as string | null) ?? null,
     organizacionAncla: row.organizacion_ancla as string | null,
     organizacionAnclaUid: row.organizacion_ancla_uid as string | null,
     activo: row.activo as boolean,

@@ -1239,6 +1239,115 @@ export async function createAlert(
   return detail;
 }
 
+/**
+ * Roles con potestad de dirección sobre el circuito de alertas.
+ */
+const ROLES_DIRECCION_FLUJO: ReadonlySet<string> = new Set([
+  "direccion_oaipcs",
+  "alta_direccion",
+]);
+
+const ROL_ADMINISTRADOR = "administrador";
+
+/**
+ * Quién recorre cada arista del circuito (§3.4 de `docs/03_ejecucion/mvp.md`).
+ *
+ * Es la misma tabla que pinta la SPA (`ACCIONES_POR_PASO`), pero aquí manda:
+ * el cliente no decide el flujo. `direccion` abrevia los dos roles de
+ * dirección; cualquier arista ausente queda cerrada —incluido reabrir desde el
+ * paso 5, que la Guía prohíbe («5 → ninguna»).
+ */
+type RolFlujo = "sectorista" | "direccion" | "servicio_agente";
+
+const TRANSICIONES_LEGALES: Readonly<Record<string, readonly RolFlujo[]>> = {
+  "1>2": ["sectorista"],
+  "2>3": ["direccion"],
+  "2>1": ["sectorista"],
+  "3>4": ["servicio_agente"],
+  "3>2": ["direccion"],
+  "3>1": ["direccion"],
+  "4>5": ["sectorista"],
+};
+
+function rolRecorreArista(
+  rolCodigo: string,
+  exigidos: readonly RolFlujo[],
+): boolean {
+  return exigidos.some((exigido) =>
+    exigido === "direccion"
+      ? ROLES_DIRECCION_FLUJO.has(rolCodigo)
+      : exigido === rolCodigo,
+  );
+}
+
+/**
+ * Guardia de dirección del flujo (E10).
+ *
+ * Antes el PATCH aceptaba cualquier `pasoActual`: un sectorista podía rebobinar
+ * la alerta y cualquier rol podía saltar a la aprobación definitiva o darla por
+ * atendida. Ahora sólo se recorre una arista con el rol que la Guía le asigna, y
+ * `administrador` puede corregir cualquier paso.
+ *
+ * Se evalúa sólo cuando el paso cambia: reenviar el mismo valor sigue siendo un
+ * no-op sin traza, porque la SPA repite el paso al pulsar sin comprobarlo.
+ *
+ * Excepción deliberada: el «Deshacer» de la SPA devuelve al paso previo exacto.
+ * Se permite retroceder a quien hizo el último cambio según
+ * `core.alerta_revision` —no a cualquier portador del rol— y sólo por esa
+ * traza, nunca porque el cliente lo afirme.
+ */
+async function validarTransicionPaso(
+  client: PoolClient,
+  session: WriteSession,
+  alertaId: string,
+  desde: unknown,
+  hasta: number,
+): Promise<void> {
+  // Un `NULL` en `paso_actual` no describe un punto del circuito: sin origen no
+  // hay arista que validar, y bloquearlo rompería las alertas del legado.
+  if (desde === null || desde === undefined) return;
+  const actual = Number(desde);
+  if (!Number.isFinite(actual)) return;
+  if (hasta === actual) return;
+  if (session.rolCodigo === ROL_ADMINISTRADOR) return;
+
+  const exigidos = TRANSICIONES_LEGALES[`${actual}>${hasta}`];
+  if (exigidos && rolRecorreArista(session.rolCodigo, exigidos)) return;
+
+  if (
+    hasta < actual &&
+    (await esAutorDelUltimoCambio(client, alertaId, session.usuarioId))
+  ) {
+    return;
+  }
+
+  throw new ApiError(
+    409,
+    hasta < actual
+      ? "No puede devolver la alerta a un paso anterior: sólo quien hizo el último cambio, o administración, puede deshacerlo."
+      : "Ese paso no corresponde a su rol en el circuito de alertas.",
+    "TRANSICION_NO_PERMITIDA",
+  );
+}
+
+/** `true` si el usuario registró la última revisión de la alerta. */
+async function esAutorDelUltimoCambio(
+  client: PoolClient,
+  alertaId: string,
+  usuarioId: string,
+): Promise<boolean> {
+  const result = await client.query<{ usuario_id: string | null }>(
+    `select usuario_id
+       from core.alerta_revision
+      where alerta_id = $1::uuid
+      order by created_at desc, id desc
+      limit 1`,
+    [alertaId],
+  );
+  const autor = result.rows[0]?.usuario_id;
+  return Boolean(autor) && autor === usuarioId;
+}
+
 export async function updateAlert(
   client: PoolClient,
   session: WriteSession,
@@ -1262,6 +1371,15 @@ export async function updateAlert(
   let pasoNuevo: number | null = null;
   if (paso.present) {
     pasoNuevo = intIn(paso.value, 1, 99);
+    // Corta antes de escribir: una transición ilegal no debe tocar la fila ni
+    // dejar traza de revisión.
+    await validarTransicionPaso(
+      client,
+      session,
+      String(row.id),
+      row.paso_actual,
+      pasoNuevo,
+    );
     add("paso_actual", pasoNuevo);
   }
 

@@ -28,7 +28,7 @@
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   } @if (avisoCreacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
-  } @if (!verPapelera() && !vistaMatriz()) {
+  } @if (!verPapelera() && !vistaMatriz() && !vistaEstadisticas()) {
   <div class="reality-strip" role="group" aria-label="Indicadores del listado de compromisos">
     <button
       type="button"
@@ -63,7 +63,7 @@
       <span>vencidos</span>
     </button>
   </div>
-  } @if (!vistaMatriz()) {
+  } @if (!vistaMatriz() && !vistaEstadisticas()) {
   <div class="filter-bar">
     <label class="search-field">
       <app-icono nombre="buscar" [tamano]="14" />
@@ -142,6 +142,13 @@
         (click)="cambiarModo('anexo14')"
       >
         Matriz Anexo 14
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="modo() === 'estadisticas'"
+        (click)="cambiarModo('estadisticas')"
+      >
+        Estadísticas
       </button>
     </div>
     }
@@ -273,7 +280,9 @@
     Conteo sobre {{ compromisosResumen().length }} compromisos con los filtros activos; «GORE»
     corresponde al nivel regional.
   </p>
-  } } @else if (!vistaCalendario()) { @if (estado() === 'error') {
+  } } @else if (vistaEstadisticas()) {
+  <app-estadisticas-compromisos />
+  } @else if (!vistaCalendario()) { @if (estado() === 'error') {
   <div class="empty-state" role="alert">
     <p>{{ error()?.message }}</p>
     <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>

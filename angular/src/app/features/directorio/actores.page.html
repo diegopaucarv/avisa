@@ -211,13 +211,54 @@
           (input)="padronFecha.set($any($event.target).value)"
         />
       </label>
+
+      <!--
+        La selección decide el contenido del Excel: quitar a alguien aquí no lo
+        saca de la lista temporal, sólo de esta descarga. Se reinicia a todos
+        al abrir el diálogo.
+      -->
+      <div class="padron-seleccion" role="group" aria-label="Actores incluidos en la lista">
+        <div class="padron-seleccion-cabecera">
+          <span class="padron-conteo" aria-live="polite"
+            >{{ padronIncluidos() }} actores incluidos</span
+          >
+          <div class="padron-seleccion-acciones">
+            <button type="button" (click)="seleccionarTodosPadron()">Seleccionar todos</button>
+            <button type="button" (click)="quitarSeleccionPadron()">Quitar selección</button>
+          </div>
+        </div>
+        <ul class="padron-lista">
+          @for (actor of listaTemporal(); track actor.id) {
+          <li>
+            <label class="padron-fila">
+              <input
+                type="checkbox"
+                [checked]="padronEstaIncluido(actor.id)"
+                (change)="alternarInclusionPadron(actor.id)"
+              />
+              <span>{{ actor.nombre }}</span>
+            </label>
+          </li>
+          }
+        </ul>
+      </div>
+
       <p>Las firmas se dejan en blanco.</p>
+
+      @if (padronError(); as mensaje) {
+      <p class="padron-error" role="alert">{{ mensaje }}</p>
+      }
+
       <div class="padron-actions">
         <button type="button" class="button-secondary" (click)="dialogoPadron.close()">
           Cancelar
         </button>
-        <button type="submit" class="button-primary" [disabled]="descargandoPadron()">
-          Descargar Excel
+        <button
+          type="submit"
+          class="button-primary"
+          [disabled]="descargandoPadron() || padronIncluidos() === 0"
+        >
+          {{ descargandoPadron() ? 'Generando…' : 'Descargar Excel' }}
         </button>
       </div>
     </form>

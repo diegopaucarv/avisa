@@ -64,6 +64,7 @@ import {
   type Situacion,
 } from './compromiso.mapeo';
 import { CompromisoPanelComponent } from './compromiso-panel.component';
+import { EstadisticasCompromisosComponent } from './estadisticas-compromisos.component';
 import { MatrizEquipoComponent } from './matriz-equipo.component';
 
 type FiltrosCompromisos = {
@@ -82,7 +83,7 @@ type FiltrosCompromisos = {
 /** Cifra de la franja de indicadores; cada una filtra la tabla. */
 type IndicadorCompromisos = 'todos' | 'cumplido' | 'enProceso' | 'vencidos';
 
-type ModoVista = 'tabla' | 'calendario' | 'resumen' | 'matriz' | 'anexo14';
+type ModoVista = 'tabla' | 'calendario' | 'resumen' | 'matriz' | 'anexo14' | 'estadisticas';
 
 /** Una fila del desglose: la etiqueta agrupada y cuántos compromisos suma. */
 type FilaDesglose = { etiqueta: string; total: number };
@@ -221,6 +222,7 @@ function totalDe(bruto: unknown): number {
     CompromisoPanelComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
+    EstadisticasCompromisosComponent,
     MatrizEquipoComponent,
     TablaComponent,
     CeldaTablaDirectiva,
@@ -881,6 +883,11 @@ export class CompromisosPage {
 
   /** La matriz del Anexo 14 lista los compromisos con sus columnas de seguimiento. */
   readonly vistaAnexo14 = computed(() => !this.verPapelera() && this.modo() === 'anexo14');
+
+  /** La pestaña de estadísticas agrega el conjunto; tampoco lista la papelera. */
+  readonly vistaEstadisticas = computed(
+    () => !this.verPapelera() && this.modo() === 'estadisticas',
+  );
 
   /**
    * Rejilla del mes visible, de lunes a domingo. Incluye los días de los meses

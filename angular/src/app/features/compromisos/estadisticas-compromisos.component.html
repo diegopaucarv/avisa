@@ -1,0 +1,175 @@
+<div class="estadisticas">
+  <div class="est-head">
+    <div>
+      <h2>Estadísticas</h2>
+      <p class="est-nota">
+        Conteos sobre compromisos vigentes (no anulados), con el catálogo real de
+        <code>core.cat_estados_compromiso</code>. «No cumplidos» agrupa los estados cerrados
+        distintos de «Cumplido» (<em>Redefinido</em> y <em>Desestimado</em>), la misma regla que
+        usa la columna «Estado de cumplimiento».
+      </p>
+    </div>
+    <button type="button" class="button-secondary" [disabled]="!datos()" (click)="exportar()">
+      Exportar CSV
+    </button>
+  </div>
+
+  @if (cargando()) {
+  <div class="empty-state" role="status">Cargando las estadísticas…</div>
+  } @else if (estado() === 'error') {
+  <div class="empty-state" role="alert">
+    <p>{{ error()?.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  } @else if (datos(); as d) {
+  <section class="executive-kpis est-kpis" aria-label="Indicadores de compromisos">
+    <div class="stat-card">
+      <span class="stat-copy">
+        <span>Compromisos</span>
+        <strong>{{ d.total }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-copy">
+        <span>Vigentes</span>
+        <strong>{{ d.vigentes }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-copy">
+        <span>Cumplidos</span>
+        <strong>{{ d.cumplidos }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-copy">
+        <span>No cumplidos</span>
+        <strong>{{ d.noCumplidos }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-copy">
+        <span>En proceso</span>
+        <strong>{{ d.enProceso }}</strong>
+      </span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-copy">
+        <span>Por iniciar</span>
+        <strong>{{ d.pendientes }}</strong>
+      </span>
+    </div>
+  </section>
+
+  <section class="est-card" aria-labelledby="est-ranking-area">
+    <h3 id="est-ranking-area">Ranking por área responsable</h3>
+    @if (d.porArea.length === 0) {
+    <p class="est-vacio">No hay áreas con compromisos registrados.</p>
+    } @else {
+    <div class="est-scroll">
+      <table class="est-tabla">
+        <thead>
+          <tr>
+            <th scope="col">Área</th>
+            <th scope="col">Nombre</th>
+            <th scope="col" class="num">Total</th>
+            <th scope="col" class="num">Cumplidos</th>
+            <th scope="col" class="num">No cumplidos</th>
+            <th scope="col">% cumplimiento</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fila of d.porArea; track fila.area) {
+          <tr>
+            <th scope="row">{{ fila.area }}</th>
+            <td class="est-nombre" [attr.title]="fila.nombre">{{ fila.nombre }}</td>
+            <td class="num">{{ fila.total }}</td>
+            <td class="num">{{ fila.cumplidos }}</td>
+            <td class="num">{{ fila.noCumplidos }}</td>
+            <td>
+              <div class="est-porcentaje">
+                <span class="est-barra" aria-hidden="true">
+                  <i [style.width.%]="fila.porcentajeCumplimiento"></i>
+                </span>
+                <span class="est-cifra">{{ fila.porcentajeCumplimiento }}%</span>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  </section>
+
+  <div class="est-grid">
+    <section class="est-card" aria-labelledby="est-plazo">
+      <h3 id="est-plazo">Situación de plazo</h3>
+      <ul class="est-plazos">
+        <li>
+          <span>Hito vencido sin cumplir</span>
+          <b>{{ d.porPlazo.vencidos }}</b>
+          <span class="est-barra" aria-hidden="true">
+            <i class="vencido" [style.width.%]="porcentajePlazo(d.porPlazo.vencidos)"></i>
+          </span>
+        </li>
+        <li>
+          <span>Al día</span>
+          <b>{{ d.porPlazo.alDia }}</b>
+          <span class="est-barra" aria-hidden="true">
+            <i [style.width.%]="porcentajePlazo(d.porPlazo.alDia)"></i>
+          </span>
+        </li>
+        <li>
+          <span>Sin plazo registrado</span>
+          <b>{{ d.porPlazo.sinPlazo }}</b>
+          <span class="est-barra" aria-hidden="true">
+            <i class="sinplazo" [style.width.%]="porcentajePlazo(d.porPlazo.sinPlazo)"></i>
+          </span>
+        </li>
+      </ul>
+      <p class="est-nota">
+        El plazo se mide con <code>hitos_compromiso.fecha_vencimiento</code>. «Sin plazo» son los
+        compromisos sin ningún hito con fecha, no un cero inventado.
+      </p>
+    </section>
+
+    <section class="est-card" aria-labelledby="est-estado-hito">
+      <h3 id="est-estado-hito">Hitos por estado</h3>
+      @if (d.porEstadoHito.length === 0) {
+      <p class="est-vacio">Sin hitos registrados.</p>
+      } @else {
+      <ul class="est-estados">
+        @for (fila of d.porEstadoHito; track fila.estado) {
+        <li>
+          <span>{{ fila.estado }}</span>
+          <b>{{ fila.total }}</b>
+        </li>
+        }
+      </ul>
+      }
+    </section>
+  </div>
+
+  <section class="est-card" aria-labelledby="est-estado-compromiso">
+    <h3 id="est-estado-compromiso">Compromisos por estado</h3>
+    @if (d.porEstado.length === 0) {
+    <p class="est-vacio">Sin compromisos registrados.</p>
+    } @else {
+    <ul class="est-estados">
+      @for (fila of d.porEstado; track fila.estado) {
+      <li>
+        <span>
+          {{ fila.estado }}
+          @if (fila.categoria) {
+          <small>{{ fila.categoria }}</small>
+          }
+        </span>
+        <b>{{ fila.total }}</b>
+      </li>
+      }
+    </ul>
+    }
+  </section>
+  }
+</div>

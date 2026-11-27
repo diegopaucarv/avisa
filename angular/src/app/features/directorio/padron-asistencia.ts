@@ -226,8 +226,9 @@ export async function crearXlsxPadron({
  * Padrón a partir de fichas del directorio.
  *
  * El DNI y el celular viajan resueltos en `filas`: la pantalla los pide por
- * `/pii` con motivo auditado y aquí sólo se vuelcan. Provincia no existe en el
- * objeto del directorio, así que la celda se deja vacía en vez de inventarla.
+ * `/pii` con motivo auditado y aquí sólo se vuelcan. La provincia es derivable
+ * del distrito en el listado (`distrito_id → provincia_id → nombre`), así que
+ * se toma de `actor.provincia` y no se inventa cuando falta.
  */
 export function filaPadronDeActor(
   actor: ActorDirectorio,
@@ -239,7 +240,7 @@ export function filaPadronDeActor(
     cargo: actor.cargo || actor.funcion || '',
     dni: pii?.dni ?? '',
     celular: pii?.telefono ?? '',
-    provincia: '',
+    provincia: actor.provincia ?? '',
     distrito: actor.distrito ?? '',
     ospa: ospaDeMembresia || actor.organizacionAncla || actor.abreviatura || '',
   };

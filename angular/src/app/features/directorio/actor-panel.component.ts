@@ -20,6 +20,7 @@ import { urlApi } from '../../core/config/entorno';
 import { normalizarColeccion, urlConParametros } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
+import { resolverUrlMedia } from '../../core/http/url-media';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aFoto, esFotoPintable, fotoPrincipal, type Foto } from '../../dominio/medios';
 import { IconoComponent } from '../../shared/ui/icono.component';
@@ -615,7 +616,14 @@ export class ActorPanelComponent {
     },
   });
 
-  readonly foto = computed(() => fotoPrincipal(this.media.valor() ?? []));
+  readonly foto = computed(() => {
+    const principal = fotoPrincipal(this.media.valor() ?? []);
+    if (!principal) return null;
+    // `aFoto` ya resuelve la ruta relativa contra `apiBase`, pero se refuerza
+    // aquí para que la foto cargue aunque el medio llegue sin resolver desde
+    // otra fuente. Con una URL absoluta o `data:`/`blob:` es un no-op.
+    return { ...principal, url: resolverUrlMedia(principal.url) };
+  });
 
   readonly iniciales = computed(() => {
     const nombre = this.actor()?.nombre ?? '';

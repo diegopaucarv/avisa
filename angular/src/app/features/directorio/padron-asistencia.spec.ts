@@ -58,6 +58,7 @@ const actor: ActorDirectorio = {
   categoria: null,
   region: 'Piura',
   distrito: 'Castilla',
+  provincia: 'Piura',
   organizacionAncla: 'Asociación local',
   validado: false,
   activo: true,
@@ -109,7 +110,7 @@ describe('padrón de asistencia en Excel', () => {
       'Representante',
       '01234567',
       '999 888 777',
-      '',
+      'Piura',
       'Castilla',
       '',
       'OSPA de la membresía',
@@ -147,6 +148,8 @@ describe('padrón de asistencia en Excel', () => {
     const datos = filaComoArray(hoja, 5);
     expect(datos[3]).toBe('');
     expect(datos[4]).toBe('');
+    // La provincia no depende de la PII: se deriva del distrito en el listado.
+    expect(datos[5]).toBe('Piura');
     // Sin membresía se cae al ancla del listado.
     expect(datos[8]).toBe('Asociación local');
   });

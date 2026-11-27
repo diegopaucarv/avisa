@@ -80,6 +80,11 @@ export type ActorDirectorio = {
   telefono?: string | null;
   region: string | null;
   distrito: string | null;
+  /**
+   * `core.provincias.nombre`, derivada de `distrito_id` por la API. Opcional
+   * para no romper los literales existentes que no la declaran.
+   */
+  provincia?: string | null;
   organizacionAncla: string | null;
   validado: boolean;
   activo: boolean;
@@ -216,6 +221,7 @@ export function aActorDirectorio(bruto: unknown): ActorDirectorio {
     telefono: texto(registro, ['telefono', 'telefonoContacto', 'telefono_contacto']),
     region: texto(registro, ['region']),
     distrito: texto(registro, ['distrito']),
+    provincia: texto(registro, ['provincia']),
     organizacionAncla: texto(registro, ['organizacionAncla', 'organizacion_ancla']),
     validado: booleano(registro, ['validado']),
     activo: booleano(registro, ['activo']),
@@ -326,6 +332,47 @@ export function aDatosPersonales(bruto: unknown): DatosPersonales {
   const tieneFicha = typeof fichaCruda === 'boolean' ? fichaCruda : !vacio;
 
   return { dni, email, telefono, vacio, tieneFicha };
+}
+
+/** Datos de un actor dentro de la respuesta en lote. */
+export type PiiLoteActor = { dni: string | null; telefono: string | null };
+
+export type PiiLote = {
+  /** Sólo los ids con algún dato; el resto se considera «sin dato». */
+  datos: Map<string, PiiLoteActor>;
+  /** Motivo por id cuando ese actor falló; el lote no se aborta por uno solo. */
+  errores: Map<string, string>;
+};
+
+/**
+ * `POST /api/v1/actors/pii` → `{datos: {id: {dni, telefono}}, errores: {id: motivo}}`.
+ *
+ * Un id sin dato no llega en `datos`, igual que el 200 con campos nulos del
+ * endpoint individual: no es un error. Se tolera que falte cualquiera de las dos
+ * claves para no romper si el servidor devuelve sólo una.
+ */
+export function aPiiLote(bruto: unknown): PiiLote {
+  const registro = esRegistro(bruto) ? bruto : {};
+
+  const crudoDatos = leer(registro, ['datos']);
+  const filas = esRegistro(crudoDatos) ? crudoDatos : {};
+  const datos = new Map<string, PiiLoteActor>();
+  for (const [id, valor] of Object.entries(filas)) {
+    const fila = esRegistro(valor) ? valor : {};
+    datos.set(id, {
+      dni: datoPii(fila, ['dni']),
+      telefono: datoPii(fila, ['telefono']),
+    });
+  }
+
+  const crudoErrores = leer(registro, ['errores']);
+  const motivos = esRegistro(crudoErrores) ? crudoErrores : {};
+  const errores = new Map<string, string>();
+  for (const [id, motivo] of Object.entries(motivos)) {
+    if (typeof motivo === 'string' && motivo.trim()) errores.set(id, motivo.trim());
+  }
+
+  return { datos, errores };
 }
 
 /* ------------------------------------------------------------------ */

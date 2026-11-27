@@ -14,10 +14,19 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { firstValueFrom } from 'rxjs';
+
 import { urlApi } from '../../core/config/entorno';
 import { consulta } from '../../core/http/consulta';
-import type { ErrorApi } from '../../core/http/errores';
-import { RIESGOS, formatearFechaCorta } from '../../dominio/mapeo';
+import { aErrorApi, type ErrorApi } from '../../core/http/errores';
+import {
+  RIESGOS,
+  booleano,
+  esRegistro,
+  formatearFechaCorta,
+  lista,
+  texto,
+} from '../../dominio/mapeo';
 import type { Riesgo } from '../../dominio/modelos';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
@@ -139,6 +148,71 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
     .map((parte) => parte.trim())
     .filter((parte) => parte.length > 0);
   return { provincia: partes[1] ?? '', region: partes[2] ?? '' };
+}
+
+/** Hecho tal como lo entrega `GET /v1/alerts/{id}/hechos`. */
+type HechoApi = { id: string; fecha: string | null; descripcion: string };
+
+/** Sobre de la lista de hechos con la marca de «ya inicializada». */
+type HechosAlerta = { items: HechoApi[]; inicializada: boolean };
+
+/** Hechos cargados, atados a la alerta concreta para no mezclar paneles. */
+type HechosCargados = HechosAlerta & { alertaId: string };
+
+/**
+ * Fila editable de hechos. `id` es `null` mientras sólo existe en el borrador:
+ * al guardar se crea con POST. Los valores «originales» permiten enviar sólo lo
+ * que de verdad cambió.
+ */
+type HechoBorrador = {
+  clave: number;
+  id: string | null;
+  fecha: string;
+  descripcion: string;
+  fechaOriginal: string;
+  descripcionOriginal: string;
+};
+
+/** Motivo que viaja en la baja lógica de un hecho quitado desde el panel. */
+const MOTIVO_QUITAR_HECHO = 'Hecho quitado desde el panel de la alerta.';
+
+/** Una fila válida de la API; una sin id o sin descripción no se puede editar. */
+function aHechoApi(bruto: unknown): HechoApi | null {
+  if (!esRegistro(bruto)) return null;
+  const id = texto(bruto, ['id']);
+  const descripcion = texto(bruto, ['descripcion']);
+  if (!id || !descripcion) return null;
+  const fecha = texto(bruto, ['fecha']);
+  return {
+    id,
+    fecha: fecha && fecha.length >= 10 ? fecha.slice(0, 10) : null,
+    descripcion,
+  };
+}
+
+function aHechosAlerta(bruto: unknown): HechosAlerta {
+  const registro = esRegistro(bruto) ? bruto : {};
+  const items: HechoApi[] = [];
+  for (const crudo of lista(registro, ['items'])) {
+    const hecho = aHechoApi(crudo);
+    if (hecho) items.push(hecho);
+  }
+  return { items, inicializada: booleano(registro, ['inicializada']) };
+}
+
+/**
+ * Hash estable y positivo por nombre de provincia.
+ *
+ * El buscador de territorio sólo reaplica `inicial` cuando cambia su `id`; como
+ * la provincia se guarda por nombre, se deriva un id reproducible para forzar
+ * el repinte cuando cambia (al sembrar la alerta o al elegir un distrito).
+ */
+function claveProvincia(nombre: string): number {
+  let hash = 0;
+  for (let i = 0; i < nombre.length; i += 1) {
+    hash = (hash * 31 + nombre.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash) || 1;
 }
 
 /**
@@ -353,6 +427,27 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
 
     .hecho-texto {
       font-weight: 400;
+    }
+
+    /*
+      Hechos editables: fecha, descripción y quitar en una rejilla. Las columnas
+      usan minmax(0, …) para que un texto largo no ensanche la fila.
+    */
+    .hecho-fila {
+      display: grid;
+      grid-template-columns: minmax(0, 150px) minmax(0, 1fr) auto;
+      gap: 6px;
+      align-items: start;
+    }
+
+    .hecho-fila input,
+    .hecho-fila textarea {
+      min-width: 0;
+    }
+
+    .hecho-fila textarea {
+      min-height: 38px;
+      resize: vertical;
     }
 
     /* Subtítulos internos del bloque «Caso vinculado» (sólo lectura). */
@@ -662,19 +757,52 @@ export class AlertaPanelComponent {
   );
 
   /**
-   * «Hechos recientes» en sólo lectura, ya separados en fecha y descripción.
+   * «Hechos recientes» del texto heredado, ya separados en fecha y descripción.
    *
-   * Mientras la tabla `core.alerta_hechos` no tenga CRUD en la interfaz, el
-   * texto guardado sigue trayendo la fecha pegada al relato (`13.06 – …`). El
-   * parser replica las migraciones 79 y 80 en lectura, con la fecha de reporte
-   * como contexto para resolver los `dd.mm` sin año. No se usa al guardar:
-   * `hechos_recientes` sigue siendo el texto autoritativo.
+   * Es el **respaldo** para alertas cuya tabla `core.alerta_hechos` aún no tiene
+   * filas: el texto guardado puede traer la fecha pegada al relato (`13.06 – …`)
+   * y el parser replica las migraciones 79 y 80, con la fecha de reporte como
+   * contexto para resolver los `dd.mm` sin año. Cuando hay filas, manda la lista
+   * del servidor.
    */
   readonly hechosLegibles = computed<readonly HechoLinea[]>(() => {
     const alerta = this.alerta();
     if (!alerta) return [];
     return hechosComoLineas(alerta.hechosRecientes, alerta.fechaReporte);
   });
+
+  /**
+   * Hechos de la ficha en sólo lectura. Con filas en la tabla mandan ellas; si la
+   * alerta nunca se inicializó se usa el texto heredado; y si ya se inicializó y
+   * se quitaron todos, no se muestra nada (no se resucita el texto viejo).
+   */
+  readonly hechosVisibles = computed<readonly HechoLinea[]>(() => {
+    const alerta = this.alerta();
+    if (!alerta) return [];
+    const cargado = this.hechosDe(alerta);
+    if (cargado) {
+      if (cargado.items.length > 0) {
+        return cargado.items.map((item) => ({ fecha: item.fecha, texto: item.descripcion }));
+      }
+      if (cargado.inicializada) return [];
+    }
+    return this.hechosLegibles();
+  });
+
+  /** Filas editables de hechos en el formulario de una alerta existente. */
+  readonly hechosBorrador = signal<HechoBorrador[]>([]);
+  readonly guardandoHechos = signal(false);
+  readonly errorHechos = signal<string | null>(null);
+
+  /** Hechos leídos para la alerta abierta; `null` hasta que responde la API. */
+  private readonly hechosServidor = signal<HechosCargados | null>(null);
+  /** Ids que la alerta tenía en la base al abrir la edición. */
+  private readonly hechosOriginales = signal<readonly string[]>([]);
+  /** `true` en cuanto el usuario agrega, edita o quita un hecho. */
+  private readonly hechosTocados = signal(false);
+
+  private secuenciaHecho = 0;
+  private turnoHechos = 0;
 
   /** Búsqueda en el Directorio de actores para «Elegir del directorio». */
   readonly buscandoActor = signal(false);
@@ -726,6 +854,18 @@ export class AlertaPanelComponent {
     const distrito = this.distritoAlta();
     if (distrito?.tipo !== 'distrito') return null;
     return { id: distrito.id, nombre: distrito.nombre, ruta: distrito.ruta };
+  });
+
+  /**
+   * Provincia del borrador para el buscador. `app-territorio-buscador` no tiene
+   * un modo provincia propio: se busca un distrito y se guarda su provincia. El
+   * id es un hash estable del nombre para que el componente reaplique la
+   * etiqueta cuando el valor cambie (al sembrar o al elegir un distrito).
+   */
+  readonly inicialProvinciaAlta = computed(() => {
+    const provincia = this.borradorAlta().provincia.trim();
+    if (!provincia) return null;
+    return { id: claveProvincia(provincia), nombre: provincia, ruta: provincia };
   });
 
   private secuenciaLinea = 0;
@@ -782,6 +922,18 @@ export class AlertaPanelComponent {
       this.distritoAlta.set(null);
       this.mensajeLocal.set(null);
     });
+
+    // Cuando responden los hechos del servidor se reemplazan las filas del
+    // borrador, siempre que el usuario aún no las haya tocado. Cubre el caso de
+    // abrir en modo «editar» antes de que llegue la API: sin esto, guardar las
+    // filas sembradas desde el texto crearía duplicados en la tabla.
+    effect(() => {
+      const cargado = this.hechosServidor();
+      const alerta = this.alerta();
+      if (!cargado || !alerta || cargado.alertaId !== alerta.id) return;
+      if (!this.editando() || this.hechosTocados()) return;
+      this.sembrarHechos(alerta);
+    });
   }
 
   /**
@@ -814,6 +966,7 @@ export class AlertaPanelComponent {
           }
         : null,
     );
+    this.sembrarHechos(alerta);
     this.cerrarBuscadorActor();
     this.mensajeLocal.set(null);
   }
@@ -913,6 +1066,23 @@ export class AlertaPanelComponent {
     this.mensajeLocal.set(null);
   }
 
+  /**
+   * El buscador de territorio no ofrece provincias sueltas: se elige un distrito
+   * de la provincia buscada y se guarda su provincia. Sin selección se limpia.
+   */
+  alElegirProvinciaAlta(opcion: OpcionTerritorio | null): void {
+    const distrito = opcion?.tipo === 'distrito' ? opcion : null;
+    const provincia = distrito
+      ? (distrito.provincia ?? '').trim() || partesDeRuta(distrito.ruta).provincia
+      : '';
+    this.borradorAlta.update((actual) => ({
+      ...actual,
+      provincia,
+      region: distrito?.region || actual.region,
+    }));
+    this.mensajeLocal.set(null);
+  }
+
   cambiarCasoAlta(codigo: string): void {
     this.borradorAlta.update((actual) => ({ ...actual, casoCode: codigo }));
     this.mensajeLocal.set(null);
@@ -982,6 +1152,40 @@ export class AlertaPanelComponent {
         fila.id === id ? { ...fila, [campo]: valor } : fila,
       ),
     }));
+    this.mensajeLocal.set(null);
+  }
+
+  /* -------------------------------- Hechos ------------------------------- */
+
+  agregarHecho(): void {
+    this.secuenciaHecho += 1;
+    this.hechosBorrador.update((filas) => [
+      ...filas,
+      {
+        clave: this.secuenciaHecho,
+        id: null,
+        fecha: '',
+        descripcion: '',
+        fechaOriginal: '',
+        descripcionOriginal: '',
+      },
+    ]);
+    this.hechosTocados.set(true);
+    this.mensajeLocal.set(null);
+  }
+
+  editarHecho(clave: number, campo: 'fecha' | 'descripcion', evento: Event): void {
+    const valor = (evento.target as HTMLInputElement | HTMLTextAreaElement).value;
+    this.hechosBorrador.update((filas) =>
+      filas.map((fila) => (fila.clave === clave ? { ...fila, [campo]: valor } : fila)),
+    );
+    this.hechosTocados.set(true);
+    this.mensajeLocal.set(null);
+  }
+
+  quitarHecho(clave: number): void {
+    this.hechosBorrador.update((filas) => filas.filter((fila) => fila.clave !== clave));
+    this.hechosTocados.set(true);
     this.mensajeLocal.set(null);
   }
 
@@ -1161,11 +1365,11 @@ export class AlertaPanelComponent {
 
   alEnviarAlta(evento: Event): void {
     evento.preventDefault();
-    this.guardarAlta();
+    void this.guardarAlta();
   }
 
-  guardarAlta(): void {
-    if (!this.puedeModificar() || this.guardando()) return;
+  async guardarAlta(): Promise<void> {
+    if (!this.puedeModificar() || this.guardando() || this.guardandoHechos()) return;
 
     const borrador = this.borradorAlta();
     const titulo = borrador.titulo.trim();
@@ -1230,13 +1434,35 @@ export class AlertaPanelComponent {
     if (!alerta) return;
 
     const patch = this.patchDesdeBorrador(alerta, borrador, titulo);
-    if (Object.keys(patch).length === 0) {
+    const hayHechos = this.hayCambiosHechos();
+
+    if (Object.keys(patch).length === 0 && !hayHechos) {
       this.mensajeLocal.set('No hay cambios que guardar.');
       return;
     }
 
     this.mensajeLocal.set(null);
-    this.guardar.emit(patch);
+
+    // Los hechos se escriben uno a uno; si alguno falla no se emite el PATCH para
+    // no dejar la ficha a medias entre dos estados.
+    if (hayHechos) {
+      try {
+        await this.persistirHechos(alerta.id);
+      } catch (fallo) {
+        this.errorHechos.set(aErrorApi(fallo).message);
+        return;
+      }
+    }
+
+    if (Object.keys(patch).length > 0) {
+      this.guardar.emit(patch);
+      return;
+    }
+
+    // Sólo se guardaron hechos: no hay PATCH que emitir, pero sí que cerrar el
+    // formulario para mostrar la ficha ya persistida.
+    this.editando.set(false);
+    this.mensajeLocal.set('Hechos guardados.');
   }
 
   /** `PatchAlerta` con sólo las claves cuyo valor difiere de la alerta abierta. */
@@ -1270,12 +1496,6 @@ export class AlertaPanelComponent {
     );
     if (situacion !== undefined) patch.situacionActual = situacion;
 
-    const hechos = diferenciaTexto(
-      this.textoDesdeLineas(borrador.hechosRecientes),
-      alerta.hechosRecientes,
-    );
-    if (hechos !== undefined) patch.hechosRecientes = hechos;
-
     const descripcion = diferenciaTexto(
       this.textoDesdeLineas(borrador.descripcionRiesgo),
       alerta.descripcionRiesgo,
@@ -1301,6 +1521,223 @@ export class AlertaPanelComponent {
   }
 
   /* ---------------------------------------------------------------------- *
+   * Hechos: lectura y persistencia
+   * ---------------------------------------------------------------------- */
+
+  /** Hechos cargados, sólo si pertenecen a la alerta indicada. */
+  private hechosDe(alerta: Alerta): HechosCargados | null {
+    const cargado = this.hechosServidor();
+    return cargado && cargado.alertaId === alerta.id ? cargado : null;
+  }
+
+  private hechoDesdeApi(hecho: HechoApi): HechoBorrador {
+    this.secuenciaHecho += 1;
+    const fecha = hecho.fecha ?? '';
+    return {
+      clave: this.secuenciaHecho,
+      id: hecho.id,
+      fecha,
+      descripcion: hecho.descripcion,
+      fechaOriginal: fecha,
+      descripcionOriginal: hecho.descripcion,
+    };
+  }
+
+  /**
+   * Siembra el borrador de hechos. Con filas del servidor manda la tabla; si la
+   * alerta nunca se inicializó se parte del texto heredado (se migra en el
+   * primer guardado de hechos); si ya se inicializó y está vacía, no se inventa
+   * nada. En todos los casos se pide/refresca la lista propia.
+   */
+  private sembrarHechos(alerta: Alerta): void {
+    const cargado = this.hechosDe(alerta);
+    const filas =
+      cargado && cargado.items.length > 0
+        ? cargado.items.map((hecho) => this.hechoDesdeApi(hecho))
+        : cargado?.inicializada
+          ? []
+          : this.hechosDesdeTexto(alerta);
+
+    this.hechosBorrador.set(filas);
+    this.hechosOriginales.set(
+      filas.filter((fila) => fila.id !== null).map((fila) => fila.id as string),
+    );
+    this.hechosTocados.set(false);
+    this.errorHechos.set(null);
+    this.cargarHechos(alerta.id);
+  }
+
+  /** Relato heredado → filas sin id, que se crearán al guardar. */
+  private hechosDesdeTexto(alerta: Alerta): HechoBorrador[] {
+    return hechosComoLineas(alerta.hechosRecientes, alerta.fechaReporte).map((hecho) => {
+      this.secuenciaHecho += 1;
+      const fecha = hecho.fecha ?? '';
+      return {
+        clave: this.secuenciaHecho,
+        id: null,
+        fecha,
+        descripcion: hecho.texto,
+        fechaOriginal: '',
+        descripcionOriginal: '',
+      };
+    });
+  }
+
+  /** `true` si el usuario tocó hechos y el resultado difiere de lo persistido. */
+  private hayCambiosHechos(): boolean {
+    if (!this.hechosTocados()) return false;
+
+    const conservados = new Set(
+      this.hechosBorrador()
+        .map((fila) => fila.id)
+        .filter((id): id is string => id !== null),
+    );
+    if (this.hechosOriginales().some((id) => !conservados.has(id))) return true;
+
+    return this.hechosBorrador().some((fila) =>
+      fila.id === null
+        ? fila.descripcion.trim().length > 0
+        : fila.descripcion.trim() !== fila.descripcionOriginal ||
+          (fila.fecha || '') !== fila.fechaOriginal,
+    );
+  }
+
+  /**
+   * Aplica los cambios de hechos contra la API: baja lógica de los quitados,
+   * alta de los nuevos y edición de los que cambiaron. Cada petición recompone
+   * `hechos_recientes` en el servidor; al terminar se recarga la lista propia.
+   */
+  private async persistirHechos(alertaId: string): Promise<void> {
+    this.guardandoHechos.set(true);
+    this.errorHechos.set(null);
+
+    const lista = urlApi(`/v1/alerts/${encodeURIComponent(alertaId)}/hechos`);
+    const urlHecho = (hechoId: string) =>
+      urlApi(`/v1/alerts/${encodeURIComponent(alertaId)}/hechos/${encodeURIComponent(hechoId)}`);
+
+    try {
+      const filas = this.hechosBorrador();
+
+      const vacia = filas.find((fila) => fila.id !== null && !fila.descripcion.trim());
+      if (vacia) {
+        throw new Error('La descripción de un hecho no puede quedar vacía.');
+      }
+
+      const conservados = new Set(
+        filas.map((fila) => fila.id).filter((id): id is string => id !== null),
+      );
+      const quitados = this.hechosOriginales().filter((id) => !conservados.has(id));
+
+      for (const id of quitados) {
+        try {
+          await firstValueFrom(
+            this.http.delete(urlHecho(id), { body: { motivo: MOTIVO_QUITAR_HECHO } }),
+          );
+        } catch (fallo) {
+          // Un 404 significa que ya no estaba (p. ej. reintento tras un fallo
+          // parcial): la baja ya está aplicada y no debe bloquear el resto.
+          if (aErrorApi(fallo).estado !== 404) throw fallo;
+        }
+      }
+
+      const resultantes: HechoBorrador[] = [];
+      for (const fila of filas) {
+        const descripcion = fila.descripcion.trim();
+
+        if (fila.id === null) {
+          // Una fila recién agregada y vacía se descarta: no es un hecho.
+          if (!descripcion) continue;
+          const creado = aHechoApi(
+            await firstValueFrom(
+              this.http.post<unknown>(lista, { fecha: fila.fecha || null, descripcion }),
+            ),
+          );
+          const aplicada = this.filaActualizada(fila, creado, descripcion);
+          resultantes.push(aplicada);
+          // Se refleja en el borrador al instante: si una escritura posterior
+          // falla, el reintento no vuelve a crear la misma fila.
+          this.reemplazarFila(aplicada);
+          continue;
+        }
+
+        const cambia =
+          descripcion !== fila.descripcionOriginal || (fila.fecha || '') !== fila.fechaOriginal;
+        if (!cambia) {
+          resultantes.push(fila);
+          continue;
+        }
+
+        const guardado = aHechoApi(
+          await firstValueFrom(
+            this.http.patch<unknown>(urlHecho(fila.id), {
+              fecha: fila.fecha || null,
+              descripcion,
+            }),
+          ),
+        );
+        const aplicada = this.filaActualizada(fila, guardado, descripcion);
+        resultantes.push(aplicada);
+        this.reemplazarFila(aplicada);
+      }
+
+      this.hechosBorrador.set(resultantes);
+      this.hechosOriginales.set(
+        resultantes.filter((fila) => fila.id !== null).map((fila) => fila.id as string),
+      );
+      this.hechosTocados.set(false);
+      this.cargarHechos(alertaId, true);
+    } finally {
+      this.guardandoHechos.set(false);
+    }
+  }
+
+  /** Refleja en el borrador lo que devolvió la API y fija los valores «originales». */
+  private filaActualizada(
+    fila: HechoBorrador,
+    guardado: HechoApi | null,
+    descripcion: string,
+  ): HechoBorrador {
+    const fecha = guardado?.fecha ?? (fila.fecha || null);
+    return {
+      ...fila,
+      id: guardado?.id ?? fila.id,
+      fecha: fecha ?? '',
+      descripcion: guardado?.descripcion ?? descripcion,
+      fechaOriginal: fecha ?? '',
+      descripcionOriginal: guardado?.descripcion ?? descripcion,
+    };
+  }
+
+  private reemplazarFila(actualizada: HechoBorrador): void {
+    this.hechosBorrador.update((filas) =>
+      filas.map((fila) => (fila.clave === actualizada.clave ? actualizada : fila)),
+    );
+  }
+
+  /**
+   * Lectura de hechos. `forzar` se usa tras una escritura: la lista del panel
+   * debe reflejar lo que quedó en la base aunque el id no haya cambiado.
+   */
+  private cargarHechos(alertaId: string, forzar = false): void {
+    if (!forzar && this.hechosServidor()?.alertaId === alertaId) return;
+
+    const turno = ++this.turnoHechos;
+    const url = urlApi(`/v1/alerts/${encodeURIComponent(alertaId)}/hechos`);
+
+    this.http.get<unknown>(url).subscribe({
+      next: (bruto) => {
+        if (turno !== this.turnoHechos) return;
+        this.hechosServidor.set({ ...aHechosAlerta(bruto), alertaId });
+      },
+      error: () => {
+        if (turno !== this.turnoHechos) return;
+        // Sin lista se conserva el texto heredado como respaldo.
+        this.hechosServidor.set(null);
+      },
+    });
+  }
+
+  /* ---------------------------------------------------------------------- *
    * Contenido narrativo
    * ---------------------------------------------------------------------- */
 
@@ -1316,6 +1753,7 @@ export class AlertaPanelComponent {
   cancelarEdicion(): void {
     this.editando.set(false);
     this.cerrarBuscadorActor();
+    this.errorHechos.set(null);
     this.mensajeLocal.set(null);
   }
 

@@ -146,13 +146,18 @@
               />
             </div>
             <div class="form-field">
-              <label class="form-label" for="alta-provincia">Provincia</label>
-              <input
-                id="alta-provincia"
-                type="text"
-                [value]="borradorAlta().provincia"
-                (input)="campoAlta('provincia', $event)"
+              <span class="form-label">Provincia</span>
+              <app-territorio-buscador
+                etiqueta="Provincia"
+                marcador="Provincia: Islay, Maynas…"
+                [soloDistritos]="true"
+                [compacto]="true"
+                [inicial]="inicialProvinciaAlta()"
+                (elegido)="alElegirProvinciaAlta($event)"
               />
+              <p class="form-hint">
+                Busque cualquier distrito de la provincia; se guarda la provincia.
+              </p>
             </div>
           }
 
@@ -177,27 +182,72 @@
 
           <div class="bloque-lista">
             <span class="form-label">🏗️ Hechos recientes y acciones en curso</span>
-            @for (linea of borradorAlta().hechosRecientes; track linea.id) {
-              <div class="linea-fila">
-                <textarea
-                  rows="2"
-                  aria-label="Hecho reciente"
-                  [value]="linea.texto"
-                  (input)="editarLinea('hechosRecientes', linea.id, $event)"
-                ></textarea>
-                <button
-                  type="button"
-                  class="icon-button"
-                  aria-label="Quitar hecho"
-                  (click)="quitarLinea('hechosRecientes', linea.id)"
-                >
-                  <app-icono nombre="cerrar" [tamano]="14" />
-                </button>
-              </div>
+            @if (esAlta()) {
+              @for (linea of borradorAlta().hechosRecientes; track linea.id) {
+                <div class="linea-fila">
+                  <textarea
+                    rows="2"
+                    aria-label="Hecho reciente"
+                    [value]="linea.texto"
+                    (input)="editarLinea('hechosRecientes', linea.id, $event)"
+                  ></textarea>
+                  <button
+                    type="button"
+                    class="icon-button"
+                    aria-label="Quitar hecho"
+                    (click)="quitarLinea('hechosRecientes', linea.id)"
+                  >
+                    <app-icono nombre="cerrar" [tamano]="14" />
+                  </button>
+                </div>
+              }
+              <button
+                type="button"
+                class="alerta-agregar"
+                (click)="agregarLinea('hechosRecientes')"
+              >
+                ＋ Agregar hecho
+              </button>
+            } @else {
+              @if (errorHechos(); as falloHechos) {
+                <p class="form-error" role="alert">{{ falloHechos }}</p>
+              }
+              @for (fila of hechosBorrador(); track fila.clave) {
+                <div class="hecho-fila">
+                  <input
+                    type="date"
+                    aria-label="Fecha del hecho (opcional)"
+                    [value]="fila.fecha"
+                    (input)="editarHecho(fila.clave, 'fecha', $event)"
+                  />
+                  <textarea
+                    rows="2"
+                    aria-label="Descripción del hecho"
+                    placeholder="Qué ocurrió"
+                    [value]="fila.descripcion"
+                    (input)="editarHecho(fila.clave, 'descripcion', $event)"
+                  ></textarea>
+                  <button
+                    type="button"
+                    class="icon-button"
+                    aria-label="Quitar hecho"
+                    (click)="quitarHecho(fila.clave)"
+                  >
+                    <app-icono nombre="cerrar" [tamano]="14" />
+                  </button>
+                </div>
+              }
+              @if (!hechosBorrador().length) {
+                <p class="form-hint">Aún no hay hechos registrados.</p>
+              } @else {
+                <p class="form-hint">
+                  La fecha es opcional; sin fecha se guarda sólo la descripción.
+                </p>
+              }
+              <button type="button" class="alerta-agregar" (click)="agregarHecho()">
+                ＋ Agregar hecho
+              </button>
             }
-            <button type="button" class="alerta-agregar" (click)="agregarLinea('hechosRecientes')">
-              ＋ Agregar hecho
-            </button>
           </div>
 
           <div class="bloque-lista">
@@ -386,9 +436,9 @@
           <section class="alerta-seccion">
             <h3 class="alerta-seccion-titulo">🏗️ 2. Hechos recientes y acciones en curso</h3>
             <div class="alerta-seccion-cuerpo">
-              @if (hechosLegibles().length) {
+              @if (hechosVisibles().length) {
                 <ul class="hechos-lista">
-                  @for (hecho of hechosLegibles(); track $index) {
+                  @for (hecho of hechosVisibles(); track $index) {
                     <li>
                       @if (hecho.fecha) {
                         <span class="hecho-fecha">{{ fecha(hecho.fecha) }}</span>
@@ -578,10 +628,10 @@
           <button
             type="button"
             class="button-primary"
-            [disabled]="guardando()"
+            [disabled]="guardando() || guardandoHechos()"
             (click)="guardarAlta()"
           >
-            {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+            {{ guardando() || guardandoHechos() ? 'Guardando…' : 'Guardar cambios' }}
           </button>
         } @else {
           @if (puedeModificar()) {

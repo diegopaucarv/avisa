@@ -726,11 +726,12 @@ function isoSiValida(anio: number, mes: number, dia: number): string | null {
  * Separa la fecha del texto de un hecho.
  *
  * Replica en lectura lo que hicieron las migraciones 79 y 80 sobre
- * `core.alerta_hechos`: reconoce `dd.mm.aaaa`, `dd/mm/aaaa` y `dd.MMM.aaaa`
- * como prefijo; con `fechaReporte` reconoce además `dd.mm` sin año, tomando el
- * año del reporte (y el anterior si el hecho cayera después). Cualquier otra
- * forma —rangos, sólo mes, fechas a mitad del relato— se deja intacta, porque
- * inventar el año falsearía el dato.
+ * `core.alerta_hechos`: reconoce `dd.mm.aaaa`, `dd/mm/aaaa`, `dd.MMM.aaaa` y el
+ * formato compacto que recompone la API (`05NOV2026`) como prefijo; con
+ * `fechaReporte` reconoce además `dd.mm` sin año, tomando el año del reporte (y
+ * el anterior si el hecho cayera después). Cualquier otra forma —rangos, sólo
+ * mes, fechas a mitad del relato— se deja intacta, porque inventar el año
+ * falsearía el dato.
  *
  * No se usa para guardar: `hechos_recientes` sigue siendo el texto
  * autoritativo hasta que exista la tabla en la interfaz. Es sólo presentación.
@@ -762,6 +763,21 @@ export function partirHecho(linea: string, fechaReporte?: string | null): HechoL
       const fecha = isoSiValida(Number(letras[3]), mes, Number(letras[1]));
       if (fecha) {
         const resto = limpio.slice(letras[0].length).replace(/^\s*[–—-]?\s*:?\s*/, '');
+        return { fecha, texto: resto.trim() || limpio };
+      }
+    }
+  }
+
+  // ddMMMaaaa: el formato compacto que escribe la API (`05NOV2026`). Es el
+  // que recompone `hechos_recientes` desde la tabla, así que tiene que poder
+  // volver a leerse al editar.
+  const compacta = /^(\d{1,2})([A-Za-z]{3})(\d{4})(?!\d)/.exec(limpio);
+  if (compacta) {
+    const mes = MESES_HECHO[compacta[2].toUpperCase()];
+    if (mes) {
+      const fecha = isoSiValida(Number(compacta[3]), mes, Number(compacta[1]));
+      if (fecha) {
+        const resto = limpio.slice(compacta[0].length).replace(/^\s*[–—-]?\s*:?\s*/, '');
         return { fecha, texto: resto.trim() || limpio };
       }
     }
@@ -943,6 +959,9 @@ export const PASO_APROBACION_DEFINITIVA = 3;
 /** Paso 2: revisión / validación previa a la que se devuelve una alerta. */
 export const PASO_REVISION = 2;
 
+/** Paso 4: remisión a los destinatarios, a cargo del servicio de agente. */
+export const PASO_REMISION = 4;
+
 /**
  * Transiciones legales desde cada paso, según `docs/03_ejecucion/mvp.md` §3.4:
  *
@@ -1008,4 +1027,52 @@ const ACCIONES_POR_PASO: Readonly<Record<number, readonly AccionFlujo[]>> = {
 
 export function accionesDeFlujo(paso: number): readonly AccionFlujo[] {
   return ACCIONES_POR_PASO[paso] ?? [];
+}
+
+/** Rol que recorre una arista del circuito, en la nomenclatura de la Guía. */
+type RolArista = 'sectorista' | 'direccion' | 'servicio_agente';
+
+/**
+ * Quién recorre cada arista (§3.4 de la Guía), copia de `TRANSICIONES_LEGALES`
+ * en `lib/db/repos/alerts.ts`.
+ *
+ * El backend manda. Esta copia existe sólo para no pintar un botón que la API
+ * respondería con 409: la vista de alertas ofrece «Aprobar» a la Dirección y
+ * «Enviar a revisión» al sectorista, y sin este filtro ambos aparecían en pasos
+ * donde la arista no existe (por ejemplo, aprobar desde elaboración).
+ */
+const ARISTAS_DE_ROL: Readonly<Record<string, readonly RolArista[]>> = {
+  '1>2': ['sectorista'],
+  '2>3': ['direccion'],
+  '2>1': ['sectorista'],
+  '3>4': ['servicio_agente'],
+  '3>2': ['direccion'],
+  '3>1': ['direccion'],
+  '4>5': ['sectorista'],
+};
+
+const ROLES_DIRECCION_FLUJO: ReadonlySet<string> = new Set(['direccion_oaipcs', 'alta_direccion']);
+
+/**
+ * `true` si `roles` puede llevar la alerta del paso `desde` al paso `hasta`.
+ *
+ * · `administrador` siempre puede (la base lo exceptúa del guardia).
+ * · Un paso que no cambia no es una transición: devuelve `false` para que la
+ *   UI no ofrezca un botón que no haría nada.
+ * · No modela la excepción de retroceso «por autor del último cambio»: esa
+ *   acción tiene su propia píldora («Deshacer») en la fila.
+ */
+export function aristaPermitida(roles: readonly string[], desde: number, hasta: number): boolean {
+  if (!Number.isFinite(desde) || !Number.isFinite(hasta)) return true;
+  if (desde === hasta) return false;
+  if (roles.includes('administrador')) return true;
+
+  const exigidos = ARISTAS_DE_ROL[`${desde}>${hasta}`];
+  if (!exigidos) return false;
+
+  return exigidos.some((exigido) =>
+    exigido === 'direccion'
+      ? roles.some((rol) => ROLES_DIRECCION_FLUJO.has(rol))
+      : roles.includes(exigido),
+  );
 }

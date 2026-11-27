@@ -48,11 +48,12 @@ import { ActorPanelAltaComponent, type NaturalezaAlta } from './actor-panel-alta
 import { ActorPanelFusionComponent } from './actor-panel-fusion.component';
 import { alternarActorLista, etiquetaItemLista, quitarActorListaPorIndice } from './lista-temporal';
 import { crearXlsxPadron, filaPadronDeActor } from './padron-asistencia';
+import { fechaLocalIso } from './padron-fecha';
 import {
   aActorDirectorio,
   aCatalogosDirectorio,
-  aDatosPersonales,
   aMembresiaActor,
+  aPiiLote,
   SIN_DATO,
   type ActorDirectorio,
   type CatalogosDirectorio,
@@ -92,15 +93,8 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
  */
 const MOTIVO_PII_PADRON = 'Lista de asistencia';
 
-/** Peticiones de PII simultáneas: el endpoint descifra por actor y no conviene saturarlo. */
-const CONCURRENCIA_PII = 4;
-
-/** Fecha local en `AAAA-MM-DD`, para nombrar el archivo descargado. */
-function fechaDeHoy(ahora = new Date()): string {
-  const mes = String(ahora.getMonth() + 1).padStart(2, '0');
-  const dia = String(ahora.getDate()).padStart(2, '0');
-  return `${ahora.getFullYear()}-${mes}-${dia}`;
-}
+/** DNI y celular de un actor, tal como los consume el padrón. */
+type PiiActorPadron = { dni: string | null; telefono: string | null };
 
 /**
  * Directorio · Actores.
@@ -538,7 +532,9 @@ function fechaDeHoy(ahora = new Date()): string {
     .padron-form {
       display: grid;
       gap: 14px;
+      max-height: calc(100vh - 40px);
       padding: 20px;
+      overflow-y: auto;
     }
 
     .padron-form h2,
@@ -578,6 +574,106 @@ function fechaDeHoy(ahora = new Date()): string {
     .padron-form input:focus-visible {
       outline: 2px solid #3576c5;
       outline-offset: 2px;
+    }
+
+    /* Selección interna del diálogo: decide qué filas entran al Excel. */
+    .padron-seleccion {
+      display: grid;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid #e1e8ef;
+      border-radius: 8px;
+      background: #f7f9fc;
+    }
+
+    .padron-seleccion-cabecera {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px 10px;
+    }
+
+    .padron-conteo {
+      color: #35495c;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+
+    .padron-seleccion-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .padron-seleccion-acciones button {
+      padding: 3px 8px;
+      border: 1px solid #cfd9e2;
+      border-radius: 5px;
+      background: #fff;
+      color: #3576c5;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .padron-seleccion-acciones button:hover {
+      background: #eef4fb;
+    }
+
+    .padron-seleccion-acciones button:focus-visible {
+      outline: 2px solid #3576c5;
+      outline-offset: 2px;
+    }
+
+    .padron-lista {
+      max-height: 168px;
+      margin: 0;
+      padding: 0;
+      overflow-y: auto;
+      list-style: none;
+      border-top: 1px solid #e6edf4;
+    }
+
+    .padron-lista li {
+      border-bottom: 1px solid #e6edf4;
+    }
+
+    .padron-lista li:last-child {
+      border-bottom: 0;
+    }
+
+    .padron-form .padron-fila {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 2px;
+      color: #33475a;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* El estilo general del formulario agranda los inputs; aquí no aplica. */
+    .padron-form .padron-fila input {
+      flex: none;
+      width: 16px;
+      height: 16px;
+      min-height: 0;
+      margin: 0;
+      padding: 0;
+      accent-color: #3576c5;
+    }
+
+    .padron-form .padron-error {
+      margin: 0;
+      padding: 8px 10px;
+      border: 1px solid #f0b8b3;
+      border-radius: 6px;
+      background: #fef3f2;
+      color: #b42318;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.45;
     }
 
     .padron-actions {
@@ -798,10 +894,22 @@ export class ActoresPage {
   readonly listaTemporalAbierta = signal(false);
   readonly padronTitulo = signal('');
   readonly padronLugar = signal('');
-  readonly padronFecha = signal(new Date().toLocaleDateString('en-CA'));
+  readonly padronFecha = signal(fechaLocalIso());
   /** Evita un doble envío mientras se piden la PII y se arma el libro. */
   readonly descargandoPadron = signal(false);
+  /** ids de la lista temporal que entran al Excel; se reinicia a todos al abrir. */
+  readonly padronInclusion = signal<ReadonlySet<string>>(new Set());
+  /** Último fallo del diálogo; se pinta dentro para poder reintentar. */
+  readonly padronError = signal<string | null>(null);
   private readonly dialogoPadron = viewChild<ElementRef<HTMLDialogElement>>('dialogoPadron');
+
+  /** Actores seleccionados dentro del diálogo: sólo estos se escriben al libro. */
+  readonly padronActores = computed(() => {
+    const incluidos = this.padronInclusion();
+    return this.listaTemporal().filter((actor) => incluidos.has(actor.id));
+  });
+
+  readonly padronIncluidos = computed(() => this.padronActores().length);
 
   /** Valor copiado recientemente, para confirmar la acción en la fila. */
   readonly copiado = signal<string | null>(null);
@@ -876,9 +984,37 @@ export class ActoresPage {
     if (!this.listaTemporal().length) return;
     this.padronTitulo.set('');
     this.padronLugar.set('');
-    this.padronFecha.set(new Date().toISOString().slice(0, 10));
+    // Fecha local: `toISOString()` devolvía el día siguiente por la noche en Lima.
+    this.padronFecha.set(fechaLocalIso());
+    this.padronInclusion.set(new Set(this.listaTemporal().map((actor) => actor.id)));
+    this.padronError.set(null);
     this.listaTemporalAbierta.set(true);
     this.dialogoPadron()?.nativeElement.showModal();
+  }
+
+  padronEstaIncluido(actorId: string): boolean {
+    return this.padronInclusion().has(actorId);
+  }
+
+  alternarInclusionPadron(actorId: string): void {
+    const siguiente = new Set(this.padronInclusion());
+    if (siguiente.has(actorId)) {
+      siguiente.delete(actorId);
+    } else {
+      siguiente.add(actorId);
+    }
+    this.padronInclusion.set(siguiente);
+    this.padronError.set(null);
+  }
+
+  seleccionarTodosPadron(): void {
+    this.padronInclusion.set(new Set(this.listaTemporal().map((actor) => actor.id)));
+    this.padronError.set(null);
+  }
+
+  quitarSeleccionPadron(): void {
+    this.padronInclusion.set(new Set());
+    this.padronError.set(null);
   }
 
   async descargarPadron(): Promise<void> {
@@ -887,23 +1023,40 @@ export class ActoresPage {
     const fecha = this.padronFecha();
     if (!titulo || !lugar || !fecha || this.descargandoPadron()) return;
 
+    const actores = this.padronActores();
+    if (!actores.length) {
+      this.padronError.set('Selecciona al menos un actor para generar la lista.');
+      return;
+    }
+
     this.descargandoPadron.set(true);
-    this.exportarError.set(null);
+    this.padronError.set(null);
 
     try {
-      const actores = this.listaTemporal();
-      const pii = await this.piiDeActores(actores);
+      const { datos: pii, fallos } = await this.piiDeActores(actores);
+
+      // Un 200 sin datos deja la fila vacía y no frena la descarga; un 403, un
+      // 500 o un fallo de red sí se reportan y se deja reintentar, para no
+      // descargar un padrón incompleto creyendo que los actores no tienen DNI.
+      if (fallos.length) {
+        const motivos = [...new Set(fallos)].join(' · ').replace(/[.\s]+$/, '');
+        this.padronError.set(
+          `No se pudieron leer los datos de ${fallos.length} de ${actores.length} actores: ${motivos}. Vuelve a intentarlo.`,
+        );
+        return;
+      }
+
       const filas = actores.map((actor) =>
         filaPadronDeActor(actor, this.ospaDe(actor), pii.get(actor.id) ?? null),
       );
 
       const archivo = await crearXlsxPadron({ titulo, lugar, fecha, filas });
-      this.descargarArchivo(archivo, `lista-asistencia-${fechaDeHoy()}.xlsx`);
+      this.descargarArchivo(archivo, `lista-asistencia-${fechaLocalIso()}.xlsx`);
       this.dialogoPadron()?.nativeElement.close();
     } catch (fallo) {
-      // El libro no llegó a armarse: se avisa sin cerrar el diálogo para que el
-      // usuario pueda reintentar con los mismos datos.
-      this.exportarError.set(aErrorApi(fallo).message);
+      // El libro no llegó a armarse (o falló el import de exceljs): se avisa
+      // sin cerrar el diálogo para que el usuario pueda reintentar.
+      this.padronError.set(aErrorApi(fallo).message);
     } finally {
       this.descargandoPadron.set(false);
     }
@@ -917,45 +1070,34 @@ export class ActoresPage {
   }
 
   /**
-   * DNI y teléfono de cada actor, con el motivo auditado. Si un actor falla o el
-   * rol no alcanza (403), se omite del mapa y su fila sale sin esos datos: una
-   * ficha sin PII no debe impedir la descarga del resto.
+   * DNI y teléfono de todos los actores en **un solo viaje** (`POST /v1/actors/pii`).
+   *
+   * El motivo viaja una vez y el servidor audita cada actor por separado. Se
+   * devuelven aparte los datos leídos y los motivos de fallo: un id sin dato no
+   * es un error, pero un 403, un 500 o un corte de red sí deben verse en el
+   * diálogo en vez de confundirse con «el actor no tiene DNI».
    */
   private async piiDeActores(
     actores: readonly ActorDirectorio[],
-  ): Promise<Map<string, { dni: string | null; telefono: string | null }>> {
-    const datos = new Map<string, { dni: string | null; telefono: string | null }>();
-    if (!this.capacidades.puedeVerPii()) return datos;
+  ): Promise<{ datos: Map<string, PiiActorPadron>; fallos: string[] }> {
+    const datos = new Map<string, PiiActorPadron>();
+    if (!this.capacidades.puedeVerPii()) return { datos, fallos: [] };
 
-    const pendientes = actores.filter((actor) => !!actor.id);
-    let siguiente = 0;
+    const ids = actores.map((actor) => actor.id).filter((id) => !!id);
+    if (!ids.length) return { datos, fallos: [] };
 
-    const trabajador = async () => {
-      while (siguiente < pendientes.length) {
-        const actor = pendientes[siguiente++];
-        const pii = await this.piiDeActor(actor.id);
-        if (pii) datos.set(actor.id, pii);
-      }
-    };
-
-    const trabajadores = Math.min(CONCURRENCIA_PII, pendientes.length);
-    await Promise.all(Array.from({ length: trabajadores }, () => trabajador()));
-    return datos;
-  }
-
-  private async piiDeActor(
-    actorId: string,
-  ): Promise<{ dni: string | null; telefono: string | null } | null> {
-    try {
-      const url = urlConParametros(urlApi(`/v1/actors/${encodeURIComponent(actorId)}/pii`), {
+    // Un fallo del lote completo (403, 422, 500 o red) se propaga: no se puede
+    // fingir que los actores no tienen DNI cuando en realidad no se consultó.
+    const bruto = await firstValueFrom(
+      this.http.post<unknown>(urlApi('/v1/actors/pii'), {
+        ids,
         motivo: MOTIVO_PII_PADRON,
-      });
-      const bruto = await firstValueFrom(this.http.get<unknown>(url));
-      const datos = aDatosPersonales(bruto);
-      return { dni: datos.dni, telefono: datos.telefono };
-    } catch {
-      return null;
-    }
+      }),
+    );
+
+    const lote = aPiiLote(bruto);
+    for (const [id, valor] of lote.datos) datos.set(id, valor);
+    return { datos, fallos: [...lote.errores.values()] };
   }
 
   private descargarArchivo(archivo: Blob, nombre: string): void {

@@ -1672,6 +1672,262 @@ export async function getCommitmentsSummary(
 }
 
 /* ------------------------------------------------------------------ */
+/* Estadísticas: conteos, ranking por área y situación de plazo        */
+/* ------------------------------------------------------------------ */
+
+/** Conteo por estado del catálogo `core.cat_estados_compromiso`. */
+export type CommitmentEstadisticaEstado = {
+  estado: string;
+  categoria: string;
+  total: number;
+};
+
+/** Fila del ranking por área responsable (unidad orgánica). */
+export type CommitmentEstadisticaArea = {
+  area: string;
+  nombre: string;
+  total: number;
+  cumplidos: number;
+  noCumplidos: number;
+  /** Porcentaje de cumplimiento redondeado a un decimal; 0 si no hay filas. */
+  porcentajeCumplimiento: number;
+};
+
+/** Conteo de hitos por estado (`core.cat_estados_hito`). */
+export type CommitmentEstadisticaEstadoHito = {
+  estado: string;
+  total: number;
+};
+
+/**
+ * Sobre de estadísticas de compromisos (Guía §8.3.2 / C1).
+ *
+ * Los bloques se derivan del catálogo real `core.cat_estados_compromiso`
+ * (Por iniciar · En proceso · Cumplido · Redefinido · Desestimado):
+ *   · `vigentes`    = estados no terminales (abiertos).
+ *   · `cumplidos`   = estado `Cumplido`.
+ *   · `noCumplidos` = estados terminales distintos de `Cumplido`
+ *                     (`Redefinido`, `Desestimado`). Es la misma regla que
+ *                     aplica `estadoCumplimientoDe` en la SPA para pintar la
+ *                     columna «Estado de cumplimiento».
+ *   · `enProceso`   = estado `En proceso`.
+ *   · `pendientes`  = estado `Por iniciar`.
+ *
+ * El plazo se mide con `hitos_compromiso.fecha_vencimiento`, igual que
+ * `getCommitmentsSummary`: `core.compromisos` no guarda un vencimiento propio
+ * del que fiarse para este corte.
+ */
+export type CommitmentsEstadisticas = {
+  total: number;
+  vigentes: number;
+  cumplidos: number;
+  noCumplidos: number;
+  enProceso: number;
+  pendientes: number;
+  porEstado: CommitmentEstadisticaEstado[];
+  porArea: CommitmentEstadisticaArea[];
+  porPlazo: {
+    /** Compromisos con al menos un hito vencido y sin cumplir. */
+    vencidos: number;
+    /** Con plazo y sin hitos vencidos pendientes. */
+    alDia: number;
+    /** Sin ningún hito con `fecha_vencimiento` (no se puede medir el plazo). */
+    sinPlazo: number;
+  };
+  porEstadoHito: CommitmentEstadisticaEstadoHito[];
+  generatedAt: string;
+};
+
+type CommitmentsEstadisticasRow = {
+  total: number;
+  vigentes: number;
+  cumplidos: number;
+  no_cumplidos: number;
+  en_proceso: number;
+  pendientes: number;
+  plazo_vencidos: number;
+  plazo_al_dia: number;
+  plazo_sin_plazo: number;
+  por_estado: CommitmentEstadisticaEstado[] | null;
+  por_area:
+    | {
+        area: string;
+        nombre: string;
+        total: number;
+        cumplidos: number;
+        noCumplidos: number;
+      }[]
+    | null;
+  por_estado_hito: CommitmentEstadisticaEstadoHito[] | null;
+};
+
+/**
+ * Porcentaje de cumplimiento de un área, redondeado a un decimal.
+ * Un total de cero no produce `NaN`: se declara 0.
+ */
+function porcentajeCumplimiento(cumplidos: number, total: number): number {
+  if (!total) return 0;
+  return Math.round((cumplidos / total) * 1000) / 10;
+}
+
+/**
+ * Estadísticas agregadas de compromisos para la pestaña «Estadísticas».
+ *
+ * Se resuelve en **una sola consulta** con una CTE `base` que marca, por
+ * compromiso, su estado y si tiene hitos vencidos o con plazo. Así todos los
+ * bloques leen la misma instantánea y, sobre todo, la misma RLS: la función
+ * recibe el cliente de `withSession` (nunca abre uno propio ni eleva el rol),
+ * y `core.compromisos` / `core.hitos_compromiso` siguen protegidos por sus
+ * políticas.
+ *
+ * Los `json_agg(... order by ...)` ya devuelven el ranking y el orden del
+ * catálogo listos; el porcentaje se calcula aquí, en JS, para no depender de
+ * cómo serialice `numeric` el driver.
+ */
+export async function getCommitmentsEstadisticas(
+  client: PoolClient,
+): Promise<CommitmentsEstadisticas> {
+  const result = await client.query<CommitmentsEstadisticasRow>(`
+    with base as (
+      select
+        c.id,
+        c.unidad_responsable_id,
+        ec.id as estado_id,
+        ec.codigo as estado_codigo,
+        ec.categoria as estado_categoria,
+        ec.es_terminal as terminal,
+        exists (
+          select 1
+            from core.hitos_compromiso h
+            left join core.cat_estados_hito eh on eh.id = h.estado_id
+           where h.compromiso_id = c.id
+             and h.anulado_en is null
+             and h.fecha_vencimiento is not null
+             and h.fecha_vencimiento < current_date
+             and coalesce(eh.codigo, '') <> 'Cumplido'
+        ) as vencido,
+        exists (
+          select 1
+            from core.hitos_compromiso h
+           where h.compromiso_id = c.id
+             and h.anulado_en is null
+             and h.fecha_vencimiento is not null
+        ) as con_plazo
+      from core.compromisos c
+      join core.cat_estados_compromiso ec on ec.id = c.estado_id
+     where c.anulado_en is null
+    )
+    select
+      (select count(*)::int from base) as total,
+      (select count(*)::int from base b where not b.terminal) as vigentes,
+      (select count(*)::int from base b
+        where b.estado_codigo = 'Cumplido') as cumplidos,
+      (select count(*)::int from base b
+        where b.terminal and b.estado_codigo <> 'Cumplido') as no_cumplidos,
+      (select count(*)::int from base b
+        where b.estado_codigo = 'En proceso') as en_proceso,
+      (select count(*)::int from base b
+        where b.estado_codigo = 'Por iniciar') as pendientes,
+      (select count(*)::int from base b where b.vencido) as plazo_vencidos,
+      (select count(*)::int from base b
+        where b.con_plazo and not b.vencido) as plazo_al_dia,
+      (select count(*)::int from base b where not b.con_plazo) as plazo_sin_plazo,
+      coalesce((
+        select json_agg(json_build_object(
+                 'estado', e.estado_codigo,
+                 'categoria', e.estado_categoria,
+                 'total', e.total
+               ) order by e.estado_id)
+          from (
+            select
+              b.estado_id,
+              b.estado_codigo,
+              b.estado_categoria,
+              count(*)::int as total
+              from base b
+             group by b.estado_id, b.estado_codigo, b.estado_categoria
+          ) e
+      ), '[]'::json) as por_estado,
+      coalesce((
+        select json_agg(json_build_object(
+                 'area', a.area,
+                 'nombre', a.nombre,
+                 'total', a.total,
+                 'cumplidos', a.cumplidos,
+                 'noCumplidos', a.no_cumplidos
+               ) order by a.total desc, a.area)
+          from (
+            select
+              uo.siglas as area,
+              uo.nombre_completo as nombre,
+              count(*)::int as total,
+              (count(*) filter (
+                 where b.estado_codigo = 'Cumplido'
+               ))::int as cumplidos,
+              (count(*) filter (
+                 where b.terminal and b.estado_codigo <> 'Cumplido'
+               ))::int as no_cumplidos
+              from base b
+              join core.cat_unidades_organicas uo
+                on uo.id = b.unidad_responsable_id
+             group by uo.id, uo.siglas, uo.nombre_completo
+          ) a
+      ), '[]'::json) as por_area,
+      coalesce((
+        select json_agg(json_build_object(
+                 'estado', eh.codigo,
+                 'total', h.total
+               ) order by eh.id)
+          from (
+            select hh.estado_id, count(*)::int as total
+              from core.hitos_compromiso hh
+              join core.compromisos c on c.id = hh.compromiso_id
+             where hh.anulado_en is null and c.anulado_en is null
+             group by hh.estado_id
+          ) h
+          join core.cat_estados_hito eh on eh.id = h.estado_id
+      ), '[]'::json) as por_estado_hito
+  `);
+
+  const row = result.rows[0];
+
+  // El porcentaje se calcula en JS: `numeric` llega como texto con el driver de
+  // `pg` y aquí el valor es un entero pequeño que conviene redondear de forma
+  // explícita antes de exponerlo al cliente.
+  const porArea: CommitmentEstadisticaArea[] = (row?.por_area ?? []).map(
+    (fila) => ({
+      area: fila.area,
+      nombre: fila.nombre,
+      total: fila.total,
+      cumplidos: fila.cumplidos,
+      noCumplidos: fila.noCumplidos,
+      porcentajeCumplimiento: porcentajeCumplimiento(
+        fila.cumplidos,
+        fila.total,
+      ),
+    }),
+  );
+
+  return {
+    total: row?.total ?? 0,
+    vigentes: row?.vigentes ?? 0,
+    cumplidos: row?.cumplidos ?? 0,
+    noCumplidos: row?.no_cumplidos ?? 0,
+    enProceso: row?.en_proceso ?? 0,
+    pendientes: row?.pendientes ?? 0,
+    porEstado: row?.por_estado ?? [],
+    porArea,
+    porPlazo: {
+      vencidos: row?.plazo_vencidos ?? 0,
+      alDia: row?.plazo_al_dia ?? 0,
+      sinPlazo: row?.plazo_sin_plazo ?? 0,
+    },
+    porEstadoHito: row?.por_estado_hito ?? [],
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+/* ------------------------------------------------------------------ */
 /* Historial: eventos, hitos y adjuntos de un compromiso               */
 /* ------------------------------------------------------------------ */
 
