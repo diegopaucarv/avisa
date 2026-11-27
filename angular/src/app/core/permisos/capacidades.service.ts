@@ -120,6 +120,16 @@ export class CapacidadesService {
 
   readonly esAdmin = computed(() => this.roles().includes(ROL.administrador));
 
+  /**
+   * Códigos de rol crudos (`core.roles.codigo`), para las matrices que la UI
+   * replica del backend —hoy el circuito de alertas—.
+   *
+   * Los permisos se preguntan con los métodos de arriba; esto es la salida de
+   * escape para comparar contra una tabla de transiciones sin inventar un
+   * método por arista.
+   */
+  readonly codigosRoles = computed<readonly string[]>(() => this.roles());
+
   /** Perfiles de dirección (ver el cuadro `DIRECCION`). */
   readonly esDireccion = computed(() => this.roles().some((rol) => DIRECCION.has(rol)));
 

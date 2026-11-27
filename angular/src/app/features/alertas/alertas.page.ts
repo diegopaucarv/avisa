@@ -59,9 +59,11 @@ import {
   ESTADOS_ALERTA,
   ORDENES_ALERTA,
   PASO_APROBACION_DEFINITIVA,
+  PASO_REMISION,
   PASO_REVISION,
   aAlerta,
   aDetalleAlerta,
+  aristaPermitida,
   claseEstado,
   claveRiesgo,
   etapaDeFlujo,
@@ -899,26 +901,31 @@ export class AlertasPage {
    *   modificación y archivar sin caso (el «Anular» lo añade
    *   `app-acciones-fila` al final del menú).
    * · «Flujo», sólo para quien no es Dirección: enviar a revisión (validación
-   *   previa, paso 2). Se ofrece **siempre** al sectorista, sin mirar el paso
-   *   actual, porque el flujo sólo asciende y ése es su único movimiento hacia
-   *   arriba. El PATCH de la API aplica `pasoActual` sin guardia de transición:
-   *   reenviar a un paso ya alcanzado se acepta (si coincide, es un no-op sin
-   *   traza de revisión), y si fallara, el error se muestra en el aviso de la
-   *   fila y el menú ya se cierra al elegir la acción.
+   *   previa, paso 2).
    * · «Otras acciones»: modificar y mensajería instantánea.
+   *
+   * Las dos acciones de flujo se filtran con `aristaPermitida`, espejo del guardia
+   * `validarTransicionPaso` de la API. Sin ese filtro se ofrecía «Aprobar» desde
+   * elaboración (arista 1→3 inexistente) y el PATCH contestaba 409: la vista
+   * prometía una acción que el backend rechaza.
    */
   accionesFila(alerta: Alerta): readonly AccionMenu[] {
     const acciones: AccionMenu[] = [];
+    const roles = this.capacidades.codigosRoles();
+    const puedeAprobar = aristaPermitida(roles, alerta.pasoActual, PASO_APROBACION_DEFINITIVA);
+    const puedeDevolver = aristaPermitida(roles, alerta.pasoActual, PASO_REVISION);
 
     if (this.esDirectora()) {
-      if (alerta.pasoActual < PASO_APROBACION_DEFINITIVA) {
+      if (puedeAprobar) {
         acciones.push({ id: 'aprobar', etiqueta: 'Aprobar alerta', seccion: 'Dirección OAIPCS' });
       }
-      acciones.push({
-        id: 'solicitar-modificacion',
-        etiqueta: 'Solicitar modificación',
-        seccion: 'Dirección OAIPCS',
-      });
+      if (puedeDevolver) {
+        acciones.push({
+          id: 'solicitar-modificacion',
+          etiqueta: 'Solicitar modificación',
+          seccion: 'Dirección OAIPCS',
+        });
+      }
       if (this.puedeArchivar(alerta)) {
         acciones.push({
           id: 'archivar',
@@ -926,10 +933,19 @@ export class AlertasPage {
           seccion: 'Dirección OAIPCS',
         });
       }
-    } else {
+    } else if (puedeDevolver) {
       acciones.push({
         id: 'enviar-revision',
         etiqueta: 'Enviar a revisión',
+        seccion: 'Flujo',
+      });
+    } else if (aristaPermitida(roles, alerta.pasoActual, PASO_REMISION)) {
+      // Arista 3→4: sin esta acción el circuito no podía salir de la aprobación
+      // definitiva desde la interfaz, porque el servicio de agente no es
+      // «Dirección» y «Enviar a revisión» no es su movimiento.
+      acciones.push({
+        id: 'remitir',
+        etiqueta: 'Ordenar remisión',
         seccion: 'Flujo',
       });
     }
@@ -954,6 +970,9 @@ export class AlertasPage {
         break;
       case 'enviar-revision':
         this.pedirRevisionFila(alerta);
+        break;
+      case 'remitir':
+        this.enviarAccionFila(alerta, PASO_REMISION, alerta.pasoActual);
         break;
       case 'modificar':
         this.abrir(alerta, 'editar');
@@ -1140,12 +1159,11 @@ export class AlertasPage {
   /**
    * PATCH común de las acciones de flujo de la fila.
    *
-   * El endpoint (`PATCH /v1/alerts/:id`) aplica `pasoActual` sin guardia de
-   * dirección: no rechaza reenviar a un paso ya alcanzado. Si el destino iguala
-   * el paso actual, el UPDATE es un no-op y no se registra traza de revisión; si
-   * el destino es anterior, el backend lo acepta y lo anota como devolución. Un
-   * fallo real (permiso, visibilidad G21, red) cae en `error` y se muestra en el
-   * aviso de la fila; el menú ya se cerró al elegir la acción.
+   * La API valida la transición (`validarTransicionPaso`): un paso que no
+   * corresponde al rol responde 409 con `TRANSICION_NO_PERMITIDA`. El menú ya
+   * filtra con `aristaPermitida`, así que este error debería ser excepcional —lo
+   * provoca, por ejemplo, que el paso de la fila esté desactualizado respecto de
+   * la base—; se muestra en el aviso de la fila igual que cualquier otro fallo.
    */
   private enviarAccionFila(alerta: Alerta, paso: number, pasoPrevio: number): void {
     if (!alerta.id) return;

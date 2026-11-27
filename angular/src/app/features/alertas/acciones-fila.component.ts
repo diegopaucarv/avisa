@@ -18,6 +18,7 @@ export type IdAccionAlerta =
   | 'aprobar'
   | 'solicitar-modificacion'
   | 'enviar-revision'
+  | 'remitir'
   | 'modificar'
   | 'historial'
   | 'whatsapp'
