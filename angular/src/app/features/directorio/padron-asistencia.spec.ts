@@ -72,6 +72,8 @@ const fila: FilaPadronAsistencia = filaPadronDeActor(actor, 'OSPA de la membres�
 });
 
 describe('padrón de asistencia en Excel', () => {
+  // La primera llamada carga `exceljs` en frío dentro del worker (≈25 s en esta
+  // máquina); el límite por defecto de 5 s no alcanza y no es un fallo de lógica.
   it('arma las filas de metadatos, los encabezados exactos y los datos desde la fila 5', async () => {
     const blob = await crearXlsxPadron({
       titulo: 'Mesa técnica',
@@ -124,7 +126,7 @@ describe('padrón de asistencia en Excel', () => {
 
     // Cuatro filas de cabecera más una por asistente.
     expect(hoja.actualRowCount).toBe(5);
-  });
+  }, 60_000);
 
   it('omite el título, el DNI y el celular cuando no hay datos', async () => {
     const sinDatos = filaPadronDeActor(actor);

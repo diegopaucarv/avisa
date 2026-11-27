@@ -7,6 +7,8 @@ import {
   actorSinTelefono,
   claseEstado,
   etapaDeFlujo,
+  hechosComoLineas,
+  partirHecho,
   plantillaWhatsapp,
   type Alerta,
 } from './alerta.mapeo';
@@ -285,5 +287,92 @@ describe('actorSinTelefono', () => {
     );
     expect(mensaje).toContain('- Juan Pérez – FENACO');
     expect(mensaje).not.toContain('987654321');
+  });
+});
+
+describe('partirHecho', () => {
+  it('separa la fecha numérica con puntos y el texto', () => {
+    expect(partirHecho('12.06.2026 Se reunieron los gremios')).toEqual({
+      fecha: '2026-06-12',
+      texto: 'Se reunieron los gremios',
+    });
+  });
+
+  it('acepta barras y descarta el separador con dos puntos', () => {
+    expect(partirHecho('24.01.2026: Se emitió el informe')).toEqual({
+      fecha: '2026-01-24',
+      texto: 'Se emitió el informe',
+    });
+    expect(partirHecho('24/01/2026 Informe emitido')).toEqual({
+      fecha: '2026-01-24',
+      texto: 'Informe emitido',
+    });
+  });
+
+  it('reconoce el mes en letras, incluida la abreviatura local SET', () => {
+    expect(partirHecho('08.SET.2025 Paro de 24 horas').fecha).toBe('2025-09-08');
+    expect(partirHecho('08.SEP.2025 Paro de 24 horas').fecha).toBe('2025-09-08');
+  });
+
+  it('conserva el texto completo en un rango de fechas', () => {
+    // La segunda fecha aporta contexto; limpiarla perdería información.
+    const hecho = partirHecho('28.04.2026–30.04.2026 Bloqueo del muelle');
+    expect(hecho.fecha).toBe('2026-04-28');
+    expect(hecho.texto).toBe('28.04.2026–30.04.2026 Bloqueo del muelle');
+  });
+
+  it('deduce el año de «dd.mm» con la fecha de reporte', () => {
+    expect(partirHecho('09.02 - Operativo en la caleta', '2026-02-10').fecha).toBe('2026-02-09');
+  });
+
+  it('retrocede un año si el hecho cae después del reporte', () => {
+    expect(partirHecho('15.12 - Reunión gremial', '2025-01-20').fecha).toBe('2024-12-15');
+  });
+
+  it('no inventa el año de «dd.mm» sin fecha de reporte', () => {
+    expect(partirHecho('09.02 - Operativo en la caleta')).toEqual({
+      fecha: null,
+      texto: '09.02 - Operativo en la caleta',
+    });
+  });
+
+  it('deja intacta una fecha imposible', () => {
+    expect(partirHecho('31.02.2026 Reunión')).toEqual({
+      fecha: null,
+      texto: '31.02.2026 Reunión',
+    });
+  });
+
+  it('deja intacto el texto libre', () => {
+    expect(partirHecho('Se convocó a una reunión')).toEqual({
+      fecha: null,
+      texto: 'Se convocó a una reunión',
+    });
+  });
+});
+
+describe('hechosComoLineas', () => {
+  it('parte por saltos de línea y descarta vacíos', () => {
+    const lineas = hechosComoLineas('12.06.2026 Uno\n\n13.06.2026 Dos\n   ');
+    expect(lineas).toEqual([
+      { fecha: '2026-06-12', texto: 'Uno' },
+      { fecha: '2026-06-13', texto: 'Dos' },
+    ]);
+  });
+
+  it('quita las viñetas «- », «* » y «• » del relato heredado', () => {
+    const lineas = hechosComoLineas('- 12.06.2026 Uno\n* 13.06.2026 Dos\n• Tres');
+    expect(lineas.map((linea) => linea.texto)).toEqual(['Uno', 'Dos', 'Tres']);
+    expect(lineas[2].fecha).toBeNull();
+  });
+
+  it('devuelve una lista vacía cuando no hay texto', () => {
+    expect(hechosComoLineas(null)).toEqual([]);
+    expect(hechosComoLineas('   ')).toEqual([]);
+  });
+
+  it('pasa la fecha de reporte a cada línea', () => {
+    const lineas = hechosComoLineas('09.02 - Operativo\n10.02 - Reunión', '2026-02-10');
+    expect(lineas.map((linea) => linea.fecha)).toEqual(['2026-02-09', '2026-02-10']);
   });
 });

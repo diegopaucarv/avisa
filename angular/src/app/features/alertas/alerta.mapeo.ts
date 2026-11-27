@@ -791,9 +791,9 @@ export function partirHecho(linea: string, fechaReporte?: string | null): HechoL
 
 /**
  * Parte el texto de «hechos recientes» en líneas. Acepta el formato heredado
- * (una línea por hecho, con «- » delante y la fecha embebida) y devuelve cada
- * hecho ya separado en fecha y descripción. `fechaReporte` es el contexto que
- * permite resolver los `dd.mm` sin año.
+ * (una línea por hecho, con «- », «* » o «• » delante y la fecha embebida) y
+ * devuelve cada hecho ya separado en fecha y descripción. `fechaReporte` es el
+ * contexto que permite resolver los `dd.mm` sin año.
  */
 export function hechosComoLineas(
   texto: string | null | undefined,
@@ -803,7 +803,7 @@ export function hechosComoLineas(
     .split(/\r?\n/)
     .map((linea) => linea.trim())
     .filter((linea) => linea.length > 0)
-    .map((linea) => partirHecho(linea.replace(/^[-•·]\s*/, ''), fechaReporte))
+    .map((linea) => partirHecho(linea.replace(/^[-*•·]\s*/, ''), fechaReporte))
     .filter((hecho) => hecho.texto.length > 0);
 }
 

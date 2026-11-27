@@ -340,6 +340,12 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
       line-height: 1.55;
     }
 
+    /* Sin fecha el texto ocupa las dos columnas: si no, la rejilla lo comprime
+       en la columna «auto» y el párrafo queda en una tira estrecha. */
+    .hecho-texto:only-child {
+      grid-column: 1 / -1;
+    }
+
     .hecho-fecha {
       font-weight: 700;
       white-space: nowrap;
