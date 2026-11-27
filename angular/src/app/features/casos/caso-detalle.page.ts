@@ -488,6 +488,31 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       align-self: start;
     }
 
+    /*
+     * El nombre del caso se queda con la mitad izquierda del encabezado y los
+     * botones con la derecha: sin el tope, un título largo empujaba las acciones
+     * y las partía en dos filas. Por debajo de 900 px vuelve a ocupar la línea
+     * completa, porque ahí los botones ya van debajo.
+     */
+    .view-head > div:first-child {
+      flex: 1 1 50%;
+      max-width: 50%;
+      min-width: 0;
+    }
+
+    @media (max-width: 960px) {
+      .view-head > div:first-child {
+        flex-basis: 100%;
+        max-width: none;
+      }
+    }
+
+    /* Botones de la línea de tiempo: sólo el icono, sin relleno de texto. */
+    .timeline-icono {
+      min-width: 28px;
+      padding: 0 6px;
+    }
+
     .caso-acciones > * {
       width: 100%;
     }
@@ -784,14 +809,23 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       margin: 8px 0;
     }
 
+    /*
+     * Columna de selección de demandas: se ajusta al checkbox. El ancho es una
+     * sugerencia en una tabla de layout automático, así que lo que manda es
+     * quitar el relleno: la celda mide lo que mide la casilla.
+     */
     .demanda-check-col {
-      width: 32px;
+      width: 1%;
+      padding-right: 2px;
+      padding-left: 2px;
       text-align: center;
+      white-space: nowrap;
     }
 
     .demanda-check {
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
+      margin: 0;
       cursor: pointer;
     }
 
@@ -1578,6 +1612,9 @@ export class CasoDetallePage {
     }
     if (!this.puedeModificar()) return;
     this.modoEdicion.set(true);
+    // El punto focal se edita con la ficha: al entrar en modo edición el select
+    // queda listo, sin un segundo clic en «Editar».
+    if (this.sectoristas().length > 0) this.abrirSectorista();
   }
 
   alCambiarCampo(evento: Event): void {

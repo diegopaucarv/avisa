@@ -7,7 +7,9 @@
     [disabled]="descargando() !== null"
     (click)="alternar()"
   >
-    <app-icono nombre="documentos" [tamano]="14" />
+    @if (conIcono()) {
+      <app-icono nombre="documentos" [tamano]="14" />
+    }
     <span>{{ descargando() ? 'Generando…' : etiqueta() }}</span>
     <app-icono nombre="chevron-abajo" [tamano]="14" />
   </button>

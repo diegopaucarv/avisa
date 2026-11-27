@@ -154,14 +154,18 @@
       } } @if (puedeAnular()) {
       <button type="button" class="button-danger" (click)="abrirAnulacion()">Anular caso</button>
       }
-      <app-exportar-menu entidad="casos" [id]="d.caso.id" (fallo)="alFallarExportacion($event)" />
+      <app-exportar-menu
+        entidad="casos"
+        [id]="d.caso.id"
+        [conIcono]="false"
+        (fallo)="alFallarExportacion($event)"
+      />
       <button
         type="button"
         class="button-secondary"
         title="Imprime la ficha; en el diálogo puede elegir «Guardar como PDF»"
         (click)="imprimir()"
       >
-        <app-icono nombre="documentos" [tamano]="14" />
         {{ esAdmin() ? 'Imprimir / Guardar PDF' : 'Guardar PDF' }}
       </button>
       @if (anulado() && puedeAnular()) {
@@ -554,7 +558,7 @@
 
       <section class="detail-section" aria-labelledby="eventos-caso">
         <div class="detail-section-title">
-          <h2 id="eventos-caso">Cronología ({{ d.eventos.length }})</h2>
+          <h2 id="eventos-caso">Línea de tiempo ({{ d.eventos.length }})</h2>
           <div class="cronologia-acciones">
             @if (puedeModificar()) {
             <button type="button" class="button-secondary" (click)="registrarHecho()">
@@ -590,19 +594,21 @@
             <div class="timeline-acciones">
               <button
                 type="button"
-                class="button-secondary timeline-edit"
+                class="button-secondary timeline-edit timeline-icono"
                 [attr.aria-label]="'Editar el hecho del ' + fechaCorta(evento.fecha)"
+                [attr.title]="'Editar el hecho del ' + fechaCorta(evento.fecha)"
                 (click)="editarHecho(evento)"
               >
-                Editar
+                <app-icono nombre="papelera" [tamano]="14" />
               </button>
               <button
                 type="button"
-                class="button-secondary timeline-edit"
+                class="button-secondary timeline-edit timeline-icono"
                 [attr.aria-label]="'Quitar el hecho del ' + fechaCorta(evento.fecha)"
+                [attr.title]="'Quitar el hecho del ' + fechaCorta(evento.fecha)"
                 (click)="pedirQuitarHecho(evento.id)"
               >
-                Quitar hecho
+                <app-icono nombre="menos" [tamano]="14" />
               </button>
             </div>
             } @if (hechoAQuitar() === evento.id) {
@@ -848,9 +854,6 @@
                   Clasificación
                 </th>
                 <th scope="col" [appThOrden]="'estado'" [orden]="ordenCompromisos">Estado</th>
-                <th scope="col" [appThOrden]="'nivel'" [orden]="ordenCompromisos">
-                  Nivel de gobierno <app-glosario termino="nivel-gobierno" />
-                </th>
                 <th scope="col" [appThOrden]="'unidad'" [orden]="ordenCompromisos">Unidad</th>
                 <th scope="col" [appThOrden]="'vencimiento'" [orden]="ordenCompromisos">
                   Vencimiento
@@ -876,7 +879,6 @@
                   }
                 </td>
                 <td>{{ compromiso.estado || '—' }}</td>
-                <td>{{ nivelGobiernoTexto(compromiso.nivelGobierno) }}</td>
                 <td>{{ compromiso.unidad || '—' }}</td>
                 <td>
                   {{ fechaTexto(compromiso.vencimiento) }} @if (compromiso.origenVencimiento ===

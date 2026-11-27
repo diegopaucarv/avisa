@@ -121,6 +121,12 @@ export class ExportarMenuComponent {
   /** Exporta sólo estos registros; tiene prioridad sobre la vista completa. */
   readonly ids = input<readonly string[] | null>(null);
   readonly etiqueta = input('Exportar');
+
+  /**
+   * Icono de descarga del botón. La ficha del caso lo apaga para dejar el
+   * encabezado sólo con palabras; el resto de vistas lo conserva.
+   */
+  readonly conIcono = input(true);
   /** Filtros vigentes de la vista; se omiten al exportar la base completa. */
   readonly consulta = input<Record<string, string> | null>(null);
   /** Recorte explícito de salidas; por defecto manda la regla del perfil. */
