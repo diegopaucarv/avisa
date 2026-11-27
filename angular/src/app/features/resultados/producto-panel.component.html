@@ -1,0 +1,228 @@
+<div class="drawer-scrim">
+  <aside
+    #panel
+    class="drawer producto-drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Ficha del producto del diálogo"
+  >
+    <header class="drawer-head">
+      @if (producto(); as p) {
+        <div class="producto-cabecera">
+          <p class="producto-codigo">{{ p.codigo || 'Sin código' }}</p>
+          <h2 class="producto-titulo">{{ p.titulo || 'Sin título' }}</h2>
+          <div class="producto-insignias">
+            <span class="producto-tipo">{{ p.tipoNombre || p.tipo || 'Sin tipo' }}</span>
+            <span aria-hidden="true">·</span>
+            <span>{{ formatearFecha(p.fecha) }}</span>
+            @if (p.casoCode) {
+              <span aria-hidden="true">·</span>
+              <span>{{ p.casoCode }}</span>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="producto-cabecera">
+          <p class="producto-codigo">Producto del diálogo</p>
+          <h2 class="producto-titulo">Ficha del producto</h2>
+        </div>
+      }
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la ficha del producto"
+        (click)="cerrarConSalida()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      @if (cargando()) {
+        <p class="form-hint" role="status">Cargando el producto…</p>
+      }
+
+      @if (errorCarga(); as error) {
+        <div class="empty-state" role="alert">
+          <strong>No se pudo cargar el producto</strong>
+          <p>{{ error }}</p>
+          <button type="button" class="button-secondary" (click)="reintentar.emit()">
+            Reintentar
+          </button>
+        </div>
+      }
+
+      @if (errorGuardado(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+
+      @if (aviso(); as mensaje) {
+        <p class="form-hint aviso-ok" role="status">{{ mensaje }}</p>
+      }
+
+      @if (producto(); as p) {
+        <section class="producto-seccion flujo-seccion" aria-labelledby="producto-flujo-titulo">
+          <div class="producto-seccion-cabecera">
+            <h3 id="producto-flujo-titulo">Flujo de aprobación</h3>
+            <span [class]="'status-badge ' + claseEstado(p.estado)">
+              <span class="status-dot"></span>
+              {{ p.estadoUi }}
+            </span>
+          </div>
+
+          <ol class="flujo-pasos">
+            @for (etapa of etapas; track etapa.paso) {
+              <li
+                class="flujo-paso"
+                [class.flujo-paso--hecho]="etapa.paso < paso()"
+                [class.flujo-paso--actual]="etapa.paso === paso()"
+                [attr.aria-current]="etapa.paso === paso() ? 'step' : null"
+              >
+                <span class="flujo-paso-marca" aria-hidden="true">
+                  @if (etapa.paso < paso()) {
+                    <app-icono nombre="check" [tamano]="13" />
+                  } @else {
+                    {{ etapa.paso }}
+                  }
+                </span>
+                <span class="flujo-paso-texto">
+                  <strong>{{ etapa.nombre }}</strong>
+                  <small>{{ etapa.responsable }}</small>
+                </span>
+              </li>
+            }
+          </ol>
+
+          @if (etapa(); as actual) {
+            <p class="flujo-actual">
+              Etapa actual: <b>paso {{ actual.paso }} · {{ actual.nombre }}</b>
+              <span aria-hidden="true">·</span>
+              Responsable: <b>{{ actual.responsable }}</b>
+            </p>
+          }
+        </section>
+
+        @if (accionPendiente(); as pendiente) {
+          <div
+            class="flujo-confirmacion"
+            role="group"
+            aria-label="Confirmación de cambio de etapa"
+          >
+            <p>
+              <strong>{{ pendiente.etiqueta }}</strong>
+              <span>{{ pendiente.detalle }}</span>
+            </p>
+            <p class="form-hint">
+              Responsable: {{ pendiente.responsable }} · Destino: paso {{ pendiente.paso }} ·
+              {{ nombreDePaso(pendiente.paso) }}
+            </p>
+          </div>
+        }
+
+        <section class="producto-seccion" aria-labelledby="producto-identificacion">
+          <h3 id="producto-identificacion">Identificación</h3>
+          <dl class="producto-datos">
+            <div>
+              <dt>Código</dt>
+              <dd>{{ p.codigo || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Tipo</dt>
+              <dd>{{ p.tipoNombre || p.tipo || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Fecha</dt>
+              <dd>{{ formatearFecha(p.fecha) }}</dd>
+            </div>
+            <div>
+              <dt>Caso vinculado</dt>
+              <dd>
+                @if (p.casoCode) {
+                  {{ p.casoCode }}
+                } @else {
+                  <span class="producto-vacio">Sin caso</span>
+                }
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="producto-seccion" aria-labelledby="producto-contenido">
+          <h3 id="producto-contenido">Contenido</h3>
+          @if (p.resumen) {
+            <p class="producto-texto">{{ p.resumen }}</p>
+          } @else {
+            <p class="producto-vacio">Sin resumen ejecutivo.</p>
+          }
+        </section>
+
+        <section class="producto-seccion" aria-labelledby="producto-trazabilidad">
+          <h3 id="producto-trazabilidad">Trazabilidad</h3>
+          <dl class="producto-datos">
+            <div>
+              <dt>Estado</dt>
+              <dd>{{ p.estadoUi }}</dd>
+            </div>
+            <div>
+              <dt>Responsable</dt>
+              <dd>{{ p.responsableNombre || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Versión</dt>
+              <dd>{{ p.versionActual }}</dd>
+            </div>
+            <div>
+              <dt>Validado humano</dt>
+              <dd>{{ p.validado ? 'Sí' : 'No' }}</dd>
+            </div>
+            <div>
+              <dt>Archivo</dt>
+              <dd>{{ p.tieneArchivo ? 'Con archivo' : 'Sin archivo' }}</dd>
+            </div>
+          </dl>
+        </section>
+      }
+    </div>
+
+    <footer class="drawer-foot">
+      @if (accionPendiente(); as pendiente) {
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="guardando()"
+          (click)="cancelarAccion()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="button-primary"
+          [disabled]="guardando()"
+          (click)="confirmarAccion()"
+        >
+          {{ guardando() ? 'Guardando…' : 'Confirmar' }}
+        </button>
+      } @else {
+        @for (accion of acciones(); track accion.paso) {
+          <button
+            type="button"
+            [class]="esAvance(accion) ? 'button-primary' : 'button-secondary'"
+            [disabled]="guardando()"
+            (click)="pedirAccion(accion)"
+          >
+            {{ accion.etiqueta }}
+          </button>
+        }
+        <button
+          type="button"
+          class="button-secondary"
+          [disabled]="guardando()"
+          (click)="cerrarConSalida()"
+        >
+          Cerrar
+        </button>
+      }
+    </footer>
+  </aside>
+</div>

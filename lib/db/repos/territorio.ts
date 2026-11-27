@@ -712,35 +712,10 @@ type InfraestructuraFila = {
 
 /**
  * Tabla canónica de la capa de puntos. La migración 75 la movió de `gis` a
- * `territorio` y dejó en `gis` una vista de compatibilidad. Mientras la 75 no
- * esté aplicada se sigue leyendo la ubicación anterior: un despliegue de la API
- * anterior a la migración no debe tumbar el mapa por un renombre.
+ * `territorio` y dejó en `gis` solo una vista de compatibilidad; la 75 ya está
+ * aplicada, así que se lee siempre el nombre canónico.
  */
 const INFRAESTRUCTURAS_CANONICA = "territorio.infraestructura_punto";
-const INFRAESTRUCTURAS_LEGADO = "gis.infraestructuras_puntos";
-
-/**
- * Nombre resuelto una sola vez por proceso. La existencia de una tabla no
- * depende de la sesión ni de la RLS, así que cachearlo es seguro.
- */
-let tablaInfraestructuras: string | null = null;
-
-/**
- * Resuelve qué nombre usar para la capa. Los dos valores son constantes de este
- * módulo —nunca entrada del usuario— y por eso se interpolan en el SQL: un
- * identificador no se puede pasar como parámetro.
- */
-async function tablaInfraestructurasDe(client: PoolClient): Promise<string> {
-  if (tablaInfraestructuras) return tablaInfraestructuras;
-  const result = await client.query<{ canonica: boolean }>(
-    `select to_regclass($1) is not null as canonica`,
-    [INFRAESTRUCTURAS_CANONICA],
-  );
-  tablaInfraestructuras = result.rows[0]?.canonica
-    ? INFRAESTRUCTURAS_CANONICA
-    : INFRAESTRUCTURAS_LEGADO;
-  return tablaInfraestructuras;
-}
 
 /**
  * Puntos de la capa de infraestructuras (13 456 en la carga vigente).
@@ -759,7 +734,9 @@ export async function listarInfraestructurasPuntos(
     Math.max(1, Math.trunc(query.pageSize ?? CAPAS_PAGE_SIZE)),
   );
   const tipo = query.tipo ?? null;
-  const tabla = await tablaInfraestructurasDe(client);
+  // Es una constante de este módulo (nunca entrada del usuario), por eso se
+  // interpola en el SQL: un identificador no se puede pasar como parámetro.
+  const tabla = INFRAESTRUCTURAS_CANONICA;
 
   const resumen = await client.query<{
     total: number | string;

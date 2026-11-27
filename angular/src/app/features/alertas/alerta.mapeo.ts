@@ -684,6 +684,129 @@ export function actorSinTelefono(linea: string): string {
   return linea.replace(/\s*·\s*Tel\.?\s*[0-9][0-9\s()+.-]*$/i, '').trim();
 }
 
+/** Un hecho del relato, ya separado en fecha y texto. */
+export type HechoLinea = {
+  /** `YYYY-MM-DD`, o `null` si el relato no trae una fecha completa. */
+  fecha: string | null;
+  texto: string;
+};
+
+/** Abreviaturas que usa la data; `SET` es la local y `SEP` la del estándar. */
+const MESES_HECHO: Readonly<Record<string, number>> = {
+  ENE: 1,
+  FEB: 2,
+  MAR: 3,
+  ABR: 4,
+  MAY: 5,
+  JUN: 6,
+  JUL: 7,
+  AGO: 8,
+  SET: 9,
+  SEP: 9,
+  OCT: 10,
+  NOV: 11,
+  DIC: 12,
+};
+
+/** `YYYY-MM-DD` si la terna es un día real del calendario; `null` si no. */
+function isoSiValida(anio: number, mes: number, dia: number): string | null {
+  if (mes < 1 || mes > 12 || dia < 1 || dia > 31) return null;
+  const prueba = new Date(Date.UTC(anio, mes - 1, dia));
+  if (
+    prueba.getUTCFullYear() !== anio ||
+    prueba.getUTCMonth() !== mes - 1 ||
+    prueba.getUTCDate() !== dia
+  ) {
+    return null;
+  }
+  return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+}
+
+/**
+ * Separa la fecha del texto de un hecho.
+ *
+ * Replica en lectura lo que hicieron las migraciones 79 y 80 sobre
+ * `core.alerta_hechos`: reconoce `dd.mm.aaaa`, `dd/mm/aaaa` y `dd.MMM.aaaa`
+ * como prefijo; con `fechaReporte` reconoce además `dd.mm` sin año, tomando el
+ * año del reporte (y el anterior si el hecho cayera después). Cualquier otra
+ * forma —rangos, sólo mes, fechas a mitad del relato— se deja intacta, porque
+ * inventar el año falsearía el dato.
+ *
+ * No se usa para guardar: `hechos_recientes` sigue siendo el texto
+ * autoritativo hasta que exista la tabla en la interfaz. Es sólo presentación.
+ */
+export function partirHecho(linea: string, fechaReporte?: string | null): HechoLinea {
+  const limpio = linea.trim();
+  if (!limpio) return { fecha: null, texto: '' };
+
+  // dd.mm.aaaa · dd/mm/aaaa
+  const numerica = /^(\d{1,2})[./](\d{1,2})[./](\d{4})(?!\d)/.exec(limpio);
+  if (numerica) {
+    const fecha = isoSiValida(Number(numerica[3]), Number(numerica[2]), Number(numerica[1]));
+    if (fecha) {
+      const resto = limpio.slice(numerica[0].length).replace(/^\s*[–—-]?\s*:?\s*/, '');
+      // Un rango (`28.04.2026–30.04.2026`) conserva el texto: la segunda fecha
+      // aporta contexto y la primera ya está en `fecha`.
+      if (!/^\d{1,2}[./]\d{1,2}[./]\d{4}/.test(resto)) {
+        return { fecha, texto: resto.trim() || limpio };
+      }
+      return { fecha, texto: limpio };
+    }
+  }
+
+  // dd.MMM.aaaa
+  const letras = /^(\d{1,2})\.([A-Za-z]{3})\.(\d{4})(?!\d)/.exec(limpio);
+  if (letras) {
+    const mes = MESES_HECHO[letras[2].toUpperCase()];
+    if (mes) {
+      const fecha = isoSiValida(Number(letras[3]), mes, Number(letras[1]));
+      if (fecha) {
+        const resto = limpio.slice(letras[0].length).replace(/^\s*[–—-]?\s*:?\s*/, '');
+        return { fecha, texto: resto.trim() || limpio };
+      }
+    }
+  }
+
+  // dd.mm sin año: sólo con la fecha de reporte como referencia.
+  const sinAnio = /^(\d{1,2})[./](\d{1,2})\s*[–—-]/.exec(limpio);
+  if (sinAnio && fechaReporte) {
+    const referencia = /^(\d{4})-(\d{2})-(\d{2})/.exec(fechaReporte.trim());
+    if (referencia) {
+      const dia = Number(sinAnio[1]);
+      const mes = Number(sinAnio[2]);
+      const anio = Number(referencia[1]);
+      let candidata = isoSiValida(anio, mes, dia);
+      if (candidata && candidata > fechaReporte.trim().slice(0, 10)) {
+        candidata = isoSiValida(anio - 1, mes, dia);
+      }
+      if (candidata) {
+        const resto = limpio.slice(sinAnio[0].length - 1).replace(/^\s*[–—-]?\s*:?\s*/, '');
+        return { fecha: candidata, texto: resto.trim() || limpio };
+      }
+    }
+  }
+
+  return { fecha: null, texto: limpio };
+}
+
+/**
+ * Parte el texto de «hechos recientes» en líneas. Acepta el formato heredado
+ * (una línea por hecho, con «- » delante y la fecha embebida) y devuelve cada
+ * hecho ya separado en fecha y descripción. `fechaReporte` es el contexto que
+ * permite resolver los `dd.mm` sin año.
+ */
+export function hechosComoLineas(
+  texto: string | null | undefined,
+  fechaReporte?: string | null,
+): HechoLinea[] {
+  return (texto ?? '')
+    .split(/\r?\n/)
+    .map((linea) => linea.trim())
+    .filter((linea) => linea.length > 0)
+    .map((linea) => partirHecho(linea.replace(/^[-•·]\s*/, ''), fechaReporte))
+    .filter((hecho) => hecho.texto.length > 0);
+}
+
 /**
  * Datos del caso vinculado que la plantilla puede anexar.
  *

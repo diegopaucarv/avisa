@@ -485,6 +485,41 @@ export function estadoCumplimientoDe(
   return compromiso.estado === 'Por iniciar' ? 'Por iniciar' : 'En proceso';
 }
 
+/**
+ * Resumen legible del estado de los hitos para la columna «Estado de hitos»:
+ * `2 de 4 cumplidos · 1 en ejecución`. Sólo cuenta lo registrado; nunca
+ * estima hitos que la API no devuelve.
+ */
+export function avanceHitosDe(hitos: readonly Pick<Hito, 'estado'>[]): string {
+  const total = hitos.length;
+  if (total === 0) return 'Sin hitos';
+
+  const cumplidos = hitos.filter((hito) => hito.estado === 'Cumplido').length;
+  const pendientes = hitos.filter((hito) => hito.estado !== 'Cumplido');
+  // El orden del catálogo fija el orden del texto: dos filas iguales se leen igual.
+  const otros = ESTADOS_HITO.filter((estado) => estado !== 'Cumplido')
+    .map((estado) => {
+      const cuenta = pendientes.filter((hito) => hito.estado === estado).length;
+      return cuenta > 0 ? `${cuenta} ${estado.toLowerCase()}` : null;
+    })
+    .filter((parte): parte is string => parte !== null);
+
+  const detalle = otros.length > 0 ? ` · ${otros.join(' · ')}` : '';
+  return `${cumplidos}/${total} cumplidos${detalle}`;
+}
+
+/**
+ * Cuántos hitos traen una validación declarada. Sólo el detalle del compromiso
+ * devuelve `validacion`; en el listado no llega, así que se declara `null` en
+ * lugar de inventar una validación.
+ */
+export function resumenValidacionHitos(hitos: readonly Pick<Hito, 'validacion'>[]): string | null {
+  if (hitos.length === 0) return null;
+  const conValidacion = hitos.filter((hito) => (hito.validacion ?? '').trim() !== '').length;
+  if (conValidacion === 0) return null;
+  return `${conValidacion} de ${hitos.length} hitos con validación registrada.`;
+}
+
 /** Usuario sugerido para el punto focal, tal como lo entrega el directorio. */
 export type SugerenciaUsuario = { id: string; nombre: string };
 

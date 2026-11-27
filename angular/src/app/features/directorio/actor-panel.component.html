@@ -461,6 +461,62 @@
                   <span class="panel-vacio">{{ sinDato }}</span>
                 }
               </div>
+              <!--
+                Campos que la API ya devuelve y la ficha no pintaba. Se agregan
+                al final del bloque, después de los tres campos de siempre.
+              -->
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Tipo de actor</span>
+                @if (a.tipo) {
+                  <span class="panel-valor">{{ a.tipo }}</span>
+                } @else {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                }
+              </div>
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Función</span>
+                @if (a.funcion) {
+                  <span class="panel-valor">{{ a.funcion }}</span>
+                } @else {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                }
+              </div>
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Nivel de gobierno</span>
+                @if (a.nivelGobierno) {
+                  <span class="panel-valor">{{ a.nivelGobierno }}</span>
+                } @else {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                }
+              </div>
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Distrito</span>
+                @if (a.distrito) {
+                  <span class="panel-valor">{{ a.distrito }}</span>
+                } @else {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                }
+              </div>
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Categoría</span>
+                @if (a.categoria) {
+                  <span class="panel-valor">{{ a.categoria }}</span>
+                } @else {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                }
+              </div>
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Validación humana</span>
+                <span class="panel-valor">{{ a.validado ? 'Sí' : 'No' }}</span>
+              </div>
+              <div class="panel-campo">
+                <span class="panel-etiqueta">Clasificación de la información</span>
+                @if (clasificacionTexto(); as clasificacion) {
+                  <span class="panel-valor">{{ clasificacion }}</span>
+                } @else {
+                  <span class="panel-vacio">{{ sinDato }}</span>
+                }
+              </div>
             </div>
           </div>
 
@@ -506,6 +562,15 @@
                       <span class="panel-vacio">{{ sinDato }}</span>
                     }
                   </div>
+                  <!-- `core.organizaciones.numero_integrantes`: afiliados declarados. -->
+                  <div class="panel-campo">
+                    <span class="panel-etiqueta">Cantidad de afiliados</span>
+                    @if (a.numeroIntegrantes != null) {
+                      <span class="panel-valor">{{ a.numeroIntegrantes }}</span>
+                    } @else {
+                      <span class="panel-vacio">{{ sinDato }}</span>
+                    }
+                  </div>
                 </div>
               </div>
               <p class="panel-nota">
@@ -530,6 +595,34 @@
               <p class="panel-vacio">Sin descripción de perfil registrada.</p>
             }
           </section>
+
+          <!--
+            Datos que no tienen columna en la base y se escriben en la
+            descripción libre con la plantilla de `docs/plantilla-ficha-actor.md`.
+            Sólo se pinta la sección si la ficha siguió la plantilla en algún
+            campo; el texto legado sin formato no llena filas vacías.
+          -->
+          @if (hayComplementarios()) {
+            <section class="panel-seccion" aria-labelledby="actor-panel-complementarios">
+              <h3 id="actor-panel-complementarios">Datos complementarios</h3>
+              <p class="panel-nota">
+                <app-icono nombre="info" [tamano]="12" />
+                <span>Leídos de la descripción libre; no son columnas de la base.</span>
+              </p>
+              <div class="panel-col">
+                @for (fila of complementarios(); track fila.etiqueta) {
+                  <div class="panel-campo">
+                    <span class="panel-etiqueta">{{ fila.etiqueta }}</span>
+                    @if (fila.valor) {
+                      <span class="panel-valor">{{ fila.valor }}</span>
+                    } @else {
+                      <span class="panel-vacio">—</span>
+                    }
+                  </div>
+                }
+              </div>
+            </section>
+          }
 
           <!--
             Locales donde el actor figura como responsable. La relación todavía

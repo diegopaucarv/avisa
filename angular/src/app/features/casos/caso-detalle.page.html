@@ -257,6 +257,14 @@
           Editar
         </button>
         } }
+        <!-- E3: el riesgo concreto es el texto libre del caso
+             (core.casos.descripcion_riesgo); no se deriva del nivel de riesgo. -->
+        <div class="riesgo-concreto">
+          <h3>Riesgo concreto</h3>
+          <p class="resumen-texto">
+            {{ d.caso.descripcionRiesgo || 'Sin descripción de riesgo registrada.' }}
+          </p>
+        </div>
       </section>
       <dl class="detail-grid" id="datos-caso">
         @for (def of campos; track def.campo) {
@@ -466,7 +474,7 @@
                 </th>
                 <th scope="col" [appThOrden]="'institucion'" [orden]="ordenActores">Institución</th>
                 <th scope="col" [appThOrden]="'contacto'" [orden]="ordenActores">Contacto</th>
-                <th scope="col" [appThOrden]="'tipologia'" [orden]="ordenActores">Tipología</th>
+                <th scope="col" [appThOrden]="'tipologia'" [orden]="ordenActores">Tipologías</th>
                 @if (puedeModificar()) {
                 <th scope="col">Acciones</th>
                 }
@@ -516,7 +524,7 @@
                     }
                   </div>
                 </td>
-                <td>{{ actor.tipo || '—' }}</td>
+                <td>{{ textoTipologias(actor) || '—' }}</td>
                 @if (puedeModificar()) {
                 <td>
                   <button
@@ -580,19 +588,19 @@
 
       <section class="detail-section" aria-labelledby="eventos-caso">
         <div class="detail-section-title">
-          <h2 id="eventos-caso">Línea de tiempo ({{ d.eventos.length }})</h2>
+          <h2 id="eventos-caso">Línea de tiempo ({{ hechosVisibles().length }})</h2>
           <div class="cronologia-acciones">
             @if (puedeModificar()) {
             <button type="button" class="button-secondary" (click)="registrarHecho()">
               <app-icono nombre="documentos" [tamano]="14" />
               Registrar hecho
             </button>
-            } @if (d.eventos.length > 0) {
+            } @if (hechosVisibles().length > 0) {
             <button
               type="button"
               class="button-secondary"
-              title="Copia la cronología completa en formato WhatsApp"
-              (click)="copiarCronologia(d.eventos)"
+              title="Copia el último hecho registrado en formato WhatsApp"
+              (click)="copiarCronologia(hechosVisibles())"
             >
               <app-icono nombre="copiar" [tamano]="14" />
               Copiar
@@ -606,9 +614,16 @@
         <p class="form-error" role="alert">{{ error }}</p>
         } @if (d.eventos.length === 0) {
         <p class="empty-inline">Sin hechos registrados.</p>
+        } @else if (hechosVisibles().length === 0) {
+        <!-- Hay histórico, pero el último hecho quedó fuera de la ventana: se
+             dice en voz alta para que no parezca que el expediente perdió datos. -->
+        <p class="empty-inline">
+          Sin hechos en los últimos {{ mesesVentanaCronologia }} meses. El último hecho registrado
+          es anterior a la ventana o no tiene fecha válida.
+        </p>
         } @else {
         <ol class="timeline-list">
-          @for (evento of d.eventos; track evento.id) {
+          @for (evento of hechosVisibles(); track evento.id) {
           <li>
             <span class="tl-fecha">{{ fechaCorta(evento.fecha) }} -</span>
             <span class="tl-texto">{{ evento.descripcion }}</span>

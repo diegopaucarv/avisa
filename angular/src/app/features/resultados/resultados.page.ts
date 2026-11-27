@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { urlApi } from '../../core/config/entorno';
@@ -15,11 +15,18 @@ import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import {
   aDocumento,
-  claseEstado,
-  formatearFecha,
+  formatearFecha as formatearFechaDocumento,
   type Documento,
 } from '../documentos/documento.mapeo';
 import { ListaAsistenciaComponent } from './lista-asistencia.component';
+import { ProductoPanelComponent } from './producto-panel.component';
+import {
+  claseEstadoProducto,
+  etapaDeProducto,
+  etapasProducto,
+  type AccionFlujo,
+} from './producto.mapeo';
+import { ResultadosService } from './resultados.service';
 
 type Pestana = 'ayuda_memoria' | 'relatoria' | 'reporte_actividad' | 'acta';
 
@@ -63,6 +70,7 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
     IconoComponent,
     ThOrdenDirective,
     ListaAsistenciaComponent,
+    ProductoPanelComponent,
   ],
   template: `
     <section class="view-body" aria-labelledby="titulo-resultados">
@@ -145,6 +153,20 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
         }
       </div>
 
+      <!-- Mismo vocabulario que alertas: deja visible el recorrido completo. -->
+      <div class="flujo-leyenda" role="note" aria-label="Etapas del flujo de aprobación">
+        <span class="flujo-leyenda-titulo">Flujo de aprobación</span>
+        @for (etapa of etapasFlujo; track etapa.paso) {
+          <span class="flujo-leyenda-paso">
+            <span class="flujo-leyenda-numero" aria-hidden="true">{{ etapa.paso }}</span>
+            {{ etapa.nombre }}
+          </span>
+          @if (!$last) {
+            <span class="flujo-leyenda-flecha" aria-hidden="true">→</span>
+          }
+        }
+      </div>
+
       @if (estado() === 'error') {
         <div class="empty-state" role="alert">
           <strong>No se pudieron cargar los resultados</strong>
@@ -171,14 +193,26 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
                 <th scope="col" [appThOrden]="'titulo'" [orden]="orden">Título</th>
                 <th scope="col" [appThOrden]="'fecha'" [orden]="orden">Fecha de reunión</th>
                 <th scope="col" [appThOrden]="'caso'" [orden]="orden">Caso vinculado</th>
+                <th scope="col" [appThOrden]="'etapa'" [orden]="orden">Etapa</th>
                 <th scope="col" [appThOrden]="'estado'" [orden]="orden">Estado</th>
+                <th scope="col" class="col-acciones">Acciones</th>
               </tr>
             </thead>
             <tbody>
               @for (documento of filasVisibles(); track documento.id) {
-                <tr>
+                <tr (click)="abrirProducto(documento)">
                   <td class="col-codigo" [attr.title]="documento.codigo">
-                    {{ documento.codigo || 'Sin código' }}
+                    <button
+                      type="button"
+                      class="table-link"
+                      [attr.aria-label]="
+                        'Abrir el producto ' +
+                        (documento.codigo || documento.titulo || 'sin título')
+                      "
+                      (click)="abrirProducto(documento); $event.stopPropagation()"
+                    >
+                      {{ documento.codigo || 'Sin código' }}
+                    </button>
                   </td>
                   <td class="celda-titulo">{{ documento.titulo || 'Sin título' }}</td>
                   <td>{{ formatearFecha(documento.fecha) }}</td>
@@ -188,6 +222,7 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
                         class="table-link"
                         [routerLink]="['/casos', documento.casoCode]"
                         [attr.title]="documento.casoTitulo"
+                        (click)="$event.stopPropagation()"
                       >
                         {{ documento.casoCode }}
                       </a>
@@ -196,10 +231,50 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
                     }
                   </td>
                   <td>
-                    <span [class]="'status-badge ' + claseEstado(documento.estadoUi)">
+                    @if (etapaDelProducto(documento); as etapa) {
+                      <div
+                        class="flujo-mini"
+                        [attr.title]="
+                          'Paso ' + etapa.paso + ' de ' + etapasFlujo.length + ' · ' + etapa.nombre
+                        "
+                        [attr.aria-label]="
+                          'Etapa ' + etapa.paso + ' de ' + etapasFlujo.length + ': ' + etapa.nombre
+                        "
+                      >
+                        <span class="flujo-mini-pasos" aria-hidden="true">
+                          @for (paso of etapasFlujo; track paso.paso) {
+                            <span
+                              class="flujo-mini-punto"
+                              [class.completado]="paso.paso < etapa.paso"
+                              [class.actual]="paso.paso === etapa.paso"
+                            ></span>
+                          }
+                        </span>
+                        <span class="flujo-mini-etapa">{{ etapa.nombre }}</span>
+                      </div>
+                    } @else {
+                      <span class="sin-dato">Sin etapa</span>
+                    }
+                  </td>
+                  <td>
+                    <span [class]="'status-badge ' + claseEstado(documento.estado)">
                       <span class="status-dot"></span>
                       {{ documento.estadoUi }}
                     </span>
+                  </td>
+                  <td class="col-acciones">
+                    <button
+                      type="button"
+                      class="table-link flujo-abrir"
+                      [attr.aria-label]="
+                        'Abrir la ficha de ' +
+                        (documento.codigo || documento.titulo || 'el producto')
+                      "
+                      (click)="abrirProducto(documento); $event.stopPropagation()"
+                    >
+                      <app-icono nombre="ojo" [tamano]="14" />
+                      Abrir
+                    </button>
                   </td>
                 </tr>
               }
@@ -221,6 +296,17 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
       @if (mostrarLista()) {
         <app-lista-asistencia (cerrar)="cerrarLista()" />
       }
+
+      @if (productoPanel(); as producto) {
+        <app-producto-panel
+          [producto]="producto"
+          [guardando]="guardandoFlujo()"
+          [errorGuardado]="errorFlujo()"
+          [aviso]="avisoFlujo()"
+          (cerrar)="cerrarPanel()"
+          (accion)="alAccionFlujo($event)"
+        />
+      }
     </section>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -231,6 +317,104 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
 
     .surface.panel {
       padding: 17px;
+    }
+
+    /* Leyenda del flujo: mismo recorrido que la ficha, visible también arriba. */
+    .flujo-leyenda {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .flujo-leyenda-titulo {
+      color: var(--ink-2);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .flujo-leyenda-paso {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px 3px 4px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--paper);
+    }
+
+    .flujo-leyenda-numero {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: var(--blue-pale);
+      color: var(--blue);
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+
+    .flujo-leyenda-flecha {
+      color: var(--muted);
+    }
+
+    /* Indicador compacto de la etapa actual dentro de cada fila. */
+    .flujo-mini {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .flujo-mini-pasos {
+      display: inline-flex;
+      gap: 3px;
+    }
+
+    .flujo-mini-punto {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--line);
+    }
+
+    .flujo-mini-punto.completado {
+      background: #5b9874;
+    }
+
+    .flujo-mini-punto.actual {
+      background: var(--blue);
+      box-shadow: 0 0 0 2px var(--blue-pale);
+    }
+
+    .flujo-mini-etapa {
+      color: var(--ink-2);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .data-table tbody tr {
+      cursor: pointer;
+    }
+
+    .data-table th.col-acciones,
+    .data-table td.col-acciones {
+      width: 118px;
+      min-width: 96px;
+      white-space: nowrap;
+    }
+
+    .flujo-abrir {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
     }
 
     .sin-dato {
@@ -326,8 +510,13 @@ const PESTANAS: readonly { codigo: Pestana; etiqueta: string; descripcion: strin
   `,
 })
 export class ResultadosPage {
+  private readonly resultados = inject(ResultadosService);
+
   readonly pestanas = PESTANAS;
   readonly tamano = 25;
+
+  readonly etapasFlujo = etapasProducto;
+  readonly etapaDelProducto = etapaDeProducto;
 
   readonly activa = signal<Pestana>('acta');
   readonly pagina = signal(1);
@@ -359,6 +548,7 @@ export class ResultadosPage {
     titulo: (documento) => documento.titulo,
     fecha: (documento) => documento.fecha,
     caso: (documento) => documento.casoCode,
+    etapa: (documento) => etapaDeProducto(documento)?.paso ?? 0,
     estado: (documento) => documento.estadoUi,
   };
 
@@ -376,13 +566,17 @@ export class ResultadosPage {
     if (this.activa() === pestana) return;
     this.pagina.set(1);
     this.activa.set(pestana);
+    // La ficha abierta pertenece a la pestaña anterior; no se reutiliza.
+    this.productoPanel.set(null);
   }
 
   cambiarPagina(pagina: number): void {
+    this.productoPanel.set(null);
     this.pagina.set(pagina);
   }
 
   cambiarTamano(tamano: number): void {
+    this.productoPanel.set(null);
     this.porPagina.set(tamano);
     this.pagina.set(1);
   }
@@ -399,6 +593,63 @@ export class ResultadosPage {
 
   cerrarLista(): void {
     this.mostrarLista.set(false);
+  }
+
+  /* -------- Ficha y flujo de aprobación del producto -------- */
+
+  readonly productoPanel = signal<Documento | null>(null);
+  readonly guardandoFlujo = signal(false);
+  readonly errorFlujo = signal<string | null>(null);
+  readonly avisoFlujo = signal<string | null>(null);
+
+  abrirProducto(documento: Documento): void {
+    this.errorFlujo.set(null);
+    this.avisoFlujo.set(null);
+    this.guardandoFlujo.set(false);
+    this.productoPanel.set(documento);
+  }
+
+  cerrarPanel(): void {
+    this.productoPanel.set(null);
+  }
+
+  /**
+   * Aplica una transición confirmada por la ficha.
+   *
+   * El panel ya filtró por rol y la ficha pidió confirmación; aquí sólo se
+   * hace el `PATCH` y se refleja la fila devuelta para que la tabla y la
+   * cabecera del panel no esperen a la recarga.
+   */
+  alAccionFlujo(accion: AccionFlujo): void {
+    const producto = this.productoPanel();
+    if (!producto || this.guardandoFlujo()) return;
+
+    this.guardandoFlujo.set(true);
+    this.errorFlujo.set(null);
+    this.avisoFlujo.set(null);
+
+    this.resultados.actualizarEstado(producto.id, accion.estado).subscribe({
+      next: (actualizado) => {
+        this.guardandoFlujo.set(false);
+        this.productoPanel.set(actualizado);
+        const etapa = etapaDeProducto(actualizado);
+        const destino = etapa ? `paso ${etapa.paso} · ${etapa.nombre}` : `paso ${accion.paso}`;
+        this.avisoFlujo.set(`${actualizado.codigo || 'El producto'}: ${destino}.`);
+        this.listado.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.guardandoFlujo.set(false);
+        this.errorFlujo.set(this.mensajeDeError(fallo));
+      },
+    });
+  }
+
+  private mensajeDeError(fallo: unknown): string {
+    if (fallo && typeof fallo === 'object' && 'message' in fallo) {
+      const mensaje = (fallo as { message?: unknown }).message;
+      if (typeof mensaje === 'string' && mensaje.trim()) return mensaje;
+    }
+    return 'No se pudo cambiar la etapa del producto.';
   }
 
   readonly archivoNombre = signal<string | null>(null);
@@ -420,6 +671,14 @@ export class ResultadosPage {
     setTimeout(() => this.procesandoIa.set(false), 700);
   }
 
-  formatearFecha = formatearFecha;
-  claseEstado = claseEstado;
+  /**
+   * Se delega en el formateador de documentos para no duplicar las reglas de
+   * fecha; el import va con alias para que el nombre del método no choque.
+   */
+  formatearFecha(valor: string | null | undefined): string {
+    return formatearFechaDocumento(valor);
+  }
+
+  /** Clase de estado compartida con la leyenda del flujo y la ficha lateral. */
+  readonly claseEstado = claseEstadoProducto;
 }

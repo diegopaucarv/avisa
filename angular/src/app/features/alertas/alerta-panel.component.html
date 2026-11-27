@@ -386,8 +386,19 @@
           <section class="alerta-seccion">
             <h3 class="alerta-seccion-titulo">🏗️ 2. Hechos recientes y acciones en curso</h3>
             <div class="alerta-seccion-cuerpo">
-              @if (a.hechosRecientes) {
-                <p>{{ a.hechosRecientes }}</p>
+              @if (hechosLegibles().length) {
+                <ul class="hechos-lista">
+                  @for (hecho of hechosLegibles(); track $index) {
+                    <li>
+                      @if (hecho.fecha) {
+                        <span class="hecho-fecha">{{ fecha(hecho.fecha) }}</span>
+                        <span class="hecho-texto">{{ hecho.texto }}</span>
+                      } @else {
+                        <span class="hecho-texto">{{ hecho.texto }}</span>
+                      }
+                    </li>
+                  }
+                </ul>
               } @else {
                 <p class="alerta-vacio">Sin contenido.</p>
               }

@@ -3482,11 +3482,24 @@ const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const POSICIONES = new Map<string, string>([
+  // Guía §8.2.4: es el vocabulario que envía el formulario desde la migración 77.
+  ["dialogante", "Dialogante"],
+  ["legitimante", "Legitimante"],
+  ["conflictivo", "Conflictivo"],
+  // Legado: vínculos creados antes de la 77. Se siguen aceptando y la lectura
+  // los devuelve tal cual para no reescribir historia.
   ["apoyo", "Apoyo"],
   ["oposicion", "Oposicion"],
   ["neutral", "Neutral"],
   ["no_dialogante", "No_dialogante"],
 ]);
+
+/**
+ * Influencia neutra para los vínculos que no declaran nivel. El formulario dejó
+ * de pedirlo (lo reemplazó el posicionamiento), pero la columna es NOT NULL: sin
+ * este valor, todo vínculo nuevo fallaría con 23502.
+ */
+const INFLUENCIA_NEUTRA = 50;
 
 function normalizarClave(valor: string): string {
   return valor
@@ -3702,7 +3715,7 @@ export async function vincularActorCaso(
     if (!normalizado) {
       throw new ApiError(
         422,
-        "El posicionamiento debe ser Apoyo, Oposición, Neutral o No dialogante.",
+        "El posicionamiento debe ser Dialogante, Legitimante o Conflictivo.",
         "INVALID_INPUT",
       );
     }
@@ -3733,11 +3746,9 @@ export async function vincularActorCaso(
     nivelInfluencia = numero;
   }
   if (nivelInfluencia === null && presencia.actoresInfluenciaObligatoria) {
-    throw new ApiError(
-      422,
-      "Declara el nivel de influencia (1–100): la base no admite el vínculo sin ese dato.",
-      "INVALID_INPUT",
-    );
+    // El campo salió del formulario: se persiste el valor neutro en vez de
+    // rechazar el alta. La columna histórica es NOT NULL y no admite nulos.
+    nivelInfluencia = INFLUENCIA_NEUTRA;
   }
 
   const rolEnCaso =

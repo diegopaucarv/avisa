@@ -38,14 +38,6 @@
         }
 
         <div class="panel-badges">
-          <span
-            class="commit-status"
-            [class.commit-cumplido]="cumplimiento() === 'Cumplido'"
-            [class.commit-en-curso]="cumplimiento() === 'En proceso'"
-            [class.commit-paralizado]="cumplimiento() === 'No cumplido'"
-          >
-            {{ cumplimiento() }}
-          </span>
           <span class="badge">{{ cabecera().tipo }}</span>
           @if (cabecera().clasificacionAlcance) {
             <span class="badge">
@@ -73,6 +65,24 @@
           <h3 id="datos-compromiso">Datos del compromiso</h3>
           <div class="detail-data-row">
             <div>
+              <span>Caso / Espacio de diálogo</span>
+              <strong>{{ casoTexto() }}</strong>
+              @if (detalle()?.caso?.estado; as estadoCaso) {
+                <small class="form-hint">Estado del caso: {{ estadoCaso }}</small>
+              }
+            </div>
+            <div>
+              <span>Área responsable</span>
+              <strong>{{ cabecera().unidad || '—' }}</strong>
+              @if (!cabecera().unidad && (cabecera().puntoFocal || cabecera().puntoFocalTexto)) {
+                <small class="form-hint">Sin área registrada; el punto focal va aparte.</small>
+              }
+            </div>
+            <div>
+              <span>Punto focal</span>
+              <strong>{{ etiquetaPuntoFocal(cabecera()) }}</strong>
+            </div>
+            <div>
               <span>Redacción</span>
               <strong>{{ cabecera().accion }}</strong>
             </div>
@@ -84,8 +94,11 @@
               }
             </div>
             <div>
-              <span>Fecha de inicio</span>
+              <span>Fecha</span>
               <strong>{{ fechaTexto(cabecera().fechaInicio) }}</strong>
+              @if (cabecera().fechaInicio) {
+                <small class="form-hint">Fecha de inicio</small>
+              }
             </div>
             <div>
               <span>Plazo</span>
@@ -103,13 +116,6 @@
               }
             </div>
             <div>
-              <span>Oficina responsable</span>
-              <strong>{{ cabecera().unidad || '—' }}</strong>
-              @if (!cabecera().unidad && (cabecera().puntoFocal || cabecera().puntoFocalTexto)) {
-                <small class="form-hint">Sin oficina registrada; el punto focal va aparte.</small>
-              }
-            </div>
-            <div>
               <span>Estado de cumplimiento</span>
               <strong
                 class="commit-status"
@@ -124,34 +130,16 @@
               }
             </div>
             <div>
-              <span>Punto focal</span>
-              <strong>{{ etiquetaPuntoFocal(cabecera()) }}</strong>
-            </div>
-            <div>
-              <span>Tipo de compromiso <app-glosario termino="tipo-compromiso" /></span>
-              <strong>{{ cabecera().tipo }}</strong>
-            </div>
-            <div>
-              <span>Nivel de gobierno <app-glosario termino="nivel-gobierno" /></span>
-              <strong>{{ nivelTexto(cabecera().nivelGobierno) }}</strong>
-            </div>
-            <div>
-              <span>Alcance (registrado)</span>
-              <strong>{{ cabecera().alcance || '—' }}</strong>
-              <small class="form-hint">Se registra a mano; no se deriva de la región.</small>
-            </div>
-            <div>
-              <span>Demanda que atiende</span>
-              <strong>{{ etiquetaDemanda(cabecera()) }}</strong>
-            </div>
-            <div>
-              <span>Brecha de género</span>
-              <strong>{{ cabecera().atiendeGenero ? 'Sí' : 'No' }}</strong>
+              <span>Estado de hitos / validación</span>
+              <strong>{{ hitosResumen() }}</strong>
+              @if (validacionResumen(); as validacion) {
+                <small class="form-hint">{{ validacion }}</small>
+              }
             </div>
           </div>
 
           <div class="panel-linea">
-            <span class="form-label">Medios de verificación</span>
+            <span class="form-label">Evidencia</span>
             @if (cabecera().evidenciaUri; as evidencia) {
               @if (esEnlace(evidencia)) {
                 <a [href]="evidencia" target="_blank" rel="noopener">{{ evidencia }}</a>
@@ -159,8 +147,36 @@
                 <span>{{ evidencia }}</span>
               }
             } @else {
-              <span class="form-hint">Sin medios de verificación registrados.</span>
+              <span class="form-hint">Sin evidencia registrada.</span>
             }
+          </div>
+
+          <div class="panel-linea">
+            <span class="form-label">Clasificación y vínculos</span>
+            <dl class="criterios-lista">
+              <div>
+                <dt>Tipo de compromiso <app-glosario termino="tipo-compromiso" /></dt>
+                <dd>{{ cabecera().tipo }}</dd>
+              </div>
+              <div>
+                <dt>Nivel de gobierno <app-glosario termino="nivel-gobierno" /></dt>
+                <dd>{{ nivelTexto(cabecera().nivelGobierno) }}</dd>
+              </div>
+              <div>
+                <dt>Alcance (registrado)</dt>
+                <dd>
+                  {{ cabecera().alcance || '—' }} · se registra a mano, no se deriva de la región.
+                </dd>
+              </div>
+              <div>
+                <dt>Demanda que atiende</dt>
+                <dd>{{ etiquetaDemanda(cabecera()) }}</dd>
+              </div>
+              <div>
+                <dt>Brecha de género</dt>
+                <dd>{{ cabecera().atiendeGenero ? 'Sí' : 'No' }}</dd>
+              </div>
+            </dl>
           </div>
 
           @if (criteriosLegibles(); as criteriosVista) {

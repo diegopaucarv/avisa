@@ -152,7 +152,6 @@ export class VincularActorComponent {
   readonly buscandoAlgo = signal(false);
   readonly seleccionado = signal<ActorOpcion | null>(null);
   readonly posicion = signal('');
-  readonly nivelInfluencia = signal('');
   readonly rolEnCaso = signal('');
   readonly vigenteDesde = signal('');
   readonly errorLocal = signal<string | null>(null);
@@ -220,10 +219,6 @@ export class VincularActorComponent {
     this.posicion.set((evento.target as HTMLSelectElement).value);
   }
 
-  alCambiarNivel(evento: Event): void {
-    this.nivelInfluencia.set((evento.target as HTMLInputElement).value);
-  }
-
   alCambiarRol(evento: Event): void {
     this.rolEnCaso.set((evento.target as HTMLInputElement).value);
   }
@@ -233,16 +228,11 @@ export class VincularActorComponent {
   }
 
   readonly requierePosicion = () => this.vinculo()?.posicionObligatoria ?? true;
-  readonly requiereNivel = () => this.vinculo()?.influenciaObligatoria ?? true;
 
   puedeGuardar(): boolean {
     if (this.guardando()) return false;
     if (!this.seleccionado()) return false;
     if (this.requierePosicion() && !this.posicion()) return false;
-    if (this.requiereNivel()) {
-      const nivel = Number(this.nivelInfluencia());
-      if (!Number.isInteger(nivel) || nivel < 1 || nivel > 100) return false;
-    }
     return true;
   }
 
@@ -255,20 +245,9 @@ export class VincularActorComponent {
       this.errorLocal.set('Declara el posicionamiento del actor.');
       return;
     }
-    const nivelTexto = this.nivelInfluencia().trim();
-    if (this.requiereNivel() && nivelTexto === '') {
-      this.errorLocal.set('Declara el nivel de influencia (1–100).');
-      return;
-    }
-    const nivel = nivelTexto === '' ? null : Number(nivelTexto);
-    if (nivel !== null && (!Number.isInteger(nivel) || nivel < 1 || nivel > 100)) {
-      this.errorLocal.set('El nivel de influencia debe ser un entero entre 1 y 100.');
-      return;
-    }
 
     const cuerpo: CuerpoVincularActor = { actorId: actor.id };
     if (this.posicion()) cuerpo.posicion = this.posicion();
-    if (nivel !== null) cuerpo.nivelInfluencia = nivel;
     if (this.rolEnCaso().trim()) cuerpo.rolEnCaso = this.rolEnCaso().trim();
     if (this.vigenteDesde().trim()) {
       cuerpo.vigenteDesde = this.vigenteDesde().trim();

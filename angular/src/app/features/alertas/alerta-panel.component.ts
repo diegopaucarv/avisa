@@ -35,10 +35,12 @@ import {
   claveRiesgo,
   etiquetaEstado,
   geografiaAlerta,
+  hechosComoLineas,
   tituloLimpio,
   type Alerta,
   type AlcanceAlerta,
   type AltaAlerta,
+  type HechoLinea,
   type PatchAlerta,
 } from './alerta.mapeo';
 import { CasoComboboxComponent } from './caso-combobox.component';
@@ -313,6 +315,38 @@ function partesDeRuta(ruta: string | null | undefined): { provincia: string; reg
     .alerta-vacio {
       color: #99a3aa;
       font-style: italic;
+    }
+
+    /*
+      Hechos en sólo lectura: fecha a la izquierda y relato a la derecha, con
+      sangría francesa. En grid el texto largo se queda en su columna y no
+      vuelve a caer bajo la fecha.
+    */
+    .hechos-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .hechos-lista li {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 6px;
+      color: #33475b;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+
+    .hecho-fecha {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .hecho-texto {
+      font-weight: 400;
     }
 
     /* Subtítulos internos del bloque «Caso vinculado» (sólo lectura). */
@@ -620,6 +654,21 @@ export class AlertaPanelComponent {
       .situacionActual.map((linea) => linea.texto)
       .join('\n'),
   );
+
+  /**
+   * «Hechos recientes» en sólo lectura, ya separados en fecha y descripción.
+   *
+   * Mientras la tabla `core.alerta_hechos` no tenga CRUD en la interfaz, el
+   * texto guardado sigue trayendo la fecha pegada al relato (`13.06 – …`). El
+   * parser replica las migraciones 79 y 80 en lectura, con la fecha de reporte
+   * como contexto para resolver los `dd.mm` sin año. No se usa al guardar:
+   * `hechos_recientes` sigue siendo el texto autoritativo.
+   */
+  readonly hechosLegibles = computed<readonly HechoLinea[]>(() => {
+    const alerta = this.alerta();
+    if (!alerta) return [];
+    return hechosComoLineas(alerta.hechosRecientes, alerta.fechaReporte);
+  });
 
   /** Búsqueda en el Directorio de actores para «Elegir del directorio». */
   readonly buscandoActor = signal(false);

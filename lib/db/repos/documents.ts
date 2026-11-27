@@ -7,11 +7,10 @@ import { ApiError } from "../errors";
 import { anularRegistro, restaurarRegistro } from "./anulacion";
 
 /**
- * `core.documentos.estado` es texto libre y sólo contiene 'Activo' o NULL.
- * No existe todavía un workflow de estados (rechazado, en revisión...), así
- * que la interfaz muestra 'Cargado' para ambos casos y preserva el valor
- * crudo en `estado`. Cuando la migración D3 defina un catálogo de estados
- * habrá que reemplazar esta derivación por el join al catálogo.
+ * `core.documentos.estado` es texto libre (`varchar(40)`, sin CHECK). Los
+ * valores heredados son 'Activo' o NULL; el flujo de aprobación de productos
+ * del diálogo (D5) añade 'Validado', 'Aprobado' y 'Remitido'. La derivación
+ * `ESTADO_UI` conserva el literal y sólo rotula NULL/Activo como 'Cargado'.
  */
 const ESTADO_UI = `
   case
@@ -596,6 +595,9 @@ const ESTADOS_DOCUMENTO = [
   "En análisis",
   "Extraído",
   "Validado",
+  // Pasos 3 y 4 del flujo de productos del diálogo (D5).
+  "Aprobado",
+  "Remitido",
   "Rechazado",
 ] as const;
 

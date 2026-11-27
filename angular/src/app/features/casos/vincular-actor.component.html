@@ -91,23 +91,6 @@
             </span>
           </label>
 
-          <label class="form-campo">
-            <span>
-              Nivel de influencia (1–100)
-              @if (requiereNivel()) {
-                <span aria-hidden="true">*</span>
-              }
-            </span>
-            <input
-              class="form-input"
-              type="number"
-              min="1"
-              max="100"
-              [value]="nivelInfluencia()"
-              (input)="alCambiarNivel($event)"
-            />
-          </label>
-
           @if (vinculo()?.rolEnCaso) {
             <label class="form-campo">
               <span>Rol en el caso</span>

@@ -60,7 +60,8 @@ const ACTOR_SELECT = `
   o.estado_ospa,
   o.vigencia_desde,
   o.vigencia_hasta,
-  o.ruc
+  o.ruc,
+  o.numero_integrantes
 `;
 
 // El ETL no escribe `organizacion_ancla_uid`, así que el ancla se resuelve por
@@ -135,6 +136,8 @@ export type ActorListItem = {
   vigenciaDesde: string | null;
   vigenciaHasta: string | null;
   ruc: string | null;
+  /** `core.organizaciones.numero_integrantes`: afiliados declarados (no PII). */
+  numeroIntegrantes: number | null;
 };
 
 export type ActorListResult = {
@@ -194,6 +197,7 @@ function mapActor(row: Record<string, unknown>): ActorListItem {
     vigenciaDesde: fechaISO(row.vigencia_desde),
     vigenciaHasta: fechaISO(row.vigencia_hasta),
     ruc: (row.ruc as string | null) ?? null,
+    numeroIntegrantes: (row.numero_integrantes as number | null) ?? null,
   };
 }
 

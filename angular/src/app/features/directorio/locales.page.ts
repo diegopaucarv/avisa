@@ -53,6 +53,7 @@ import {
   type LocalDirectorio,
 } from './local.mapeo';
 import { parsearNotasLocal } from './local-notas';
+import { parsearFicha } from './ficha-plantilla';
 
 type FiltrosLocales = {
   q: string;
@@ -758,6 +759,23 @@ export class LocalesPage {
   readonly notasSeleccionado = computed(() =>
     parsearNotasLocal(this.seleccionado()?.recomendacion),
   );
+
+  /**
+   * Campos de la ficha de texto que no son columnas del local (ámbito, dirección
+   * y enlace de mapa cuando faltan en la tabla). Reutiliza el mismo parser que la
+   * ficha del actor.
+   */
+  readonly complementariosSeleccionado = computed(() =>
+    parsearFicha(this.seleccionado()?.recomendacion),
+  );
+
+  /** Hay una URL de mapa sólo en la ficha y no en `ubicacion_ref`. */
+  readonly enlaceMapaFicha = computed(() => {
+    const local = this.seleccionado();
+    const enlace = this.complementariosSeleccionado().enlaceMapa;
+    if (!local || !enlace) return null;
+    return enlace === enlaceMapaLocal(local) ? null : enlace;
+  });
 
   /** El local abierto no tiene riesgos de accesibilidad ni ventilación. */
   readonly sinRiesgos = computed(() => {

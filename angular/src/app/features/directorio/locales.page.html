@@ -168,6 +168,15 @@
             decoding="async"
             referrerpolicy="no-referrer"
           />
+          } @else if (local.fotoUrl) {
+          <!-- `core.locales.foto_url`: la ficha la ignoraba y sólo usaba la galería. -->
+          <img
+            [src]="local.fotoUrl"
+            [alt]="local.nombre"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+          />
           } @else {
           <span class="ficha-foto-vacia">Sin fotografía del local</span>
           }
@@ -290,6 +299,45 @@
           </details>
           }
         </section>
+
+        <!--
+          Datos de la ficha de texto que no son columnas del local. Sólo se
+          muestran los que no duplican lo ya visible: la dirección se oculta si
+          la columna existe y el mapa se oculta si coincide con el enlace
+          calculado desde la dirección.
+        -->
+        @if (local.recomendacion) {
+        <section class="ficha-seccion" aria-labelledby="local-panel-complementarios">
+          <h3 id="local-panel-complementarios">Datos complementarios</h3>
+          <p class="ficha-nota">Leídos de la ficha de texto; no son columnas de la base.</p>
+          <dl class="ficha-datos">
+            <div class="ficha-ancho">
+              <dt>Ámbito de acción</dt>
+              <dd>{{ complementariosSeleccionado().ambito || '—' }}</dd>
+            </div>
+            @if (!local.direccion) {
+            <div class="ficha-ancho">
+              <dt>Dirección (ficha)</dt>
+              <dd>{{ complementariosSeleccionado().direccion || '—' }}</dd>
+            </div>
+            } @if (enlaceMapaFicha(); as enlaceFicha) {
+            <div class="ficha-ancho">
+              <dt>Enlace de mapa (ficha)</dt>
+              <dd>
+                <a
+                  class="ficha-mapa"
+                  [href]="enlaceFicha"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Abrir enlace de la ficha
+                </a>
+              </dd>
+            </div>
+            }
+          </dl>
+        </section>
+        }
       </div>
     </aside>
   </div>

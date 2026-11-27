@@ -4,6 +4,7 @@ import { Observable, map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
 import { urlConParametros } from '../../core/http/coleccion';
+import { aDetalleDocumento, type Documento } from '../documentos/documento.mapeo';
 import {
   aActores,
   aActorCreado,
@@ -65,6 +66,19 @@ export class ResultadosService {
       pageSize: limite,
     });
     return this.http.get<unknown>(url).pipe(map((bruto) => aActores(bruto)));
+  }
+
+  /**
+   * Cambia el paso del flujo de un producto del diálogo.
+   *
+   * Se reutiliza `PATCH /v1/documents/:id` con `estado`, el mismo contrato que
+   * ya usa la ficha de documentos para Validar/Rechazar. No se inventa una
+   * ruta ni se reescriben campos: el repositorio valida el literal.
+   */
+  actualizarEstado(id: string, estado: string): Observable<Documento> {
+    return this.http
+      .patch<unknown>(urlApi(`/v1/documents/${encodeURIComponent(id)}`), { estado })
+      .pipe(map((bruto) => aDetalleDocumento(bruto).documento));
   }
 
   crearActor(nombre: string, naturaleza: NaturalezaActor): Observable<ActorOpcion> {

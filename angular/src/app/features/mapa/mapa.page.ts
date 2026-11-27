@@ -1192,9 +1192,14 @@ export class MapaPage {
   );
 
   /** Rótulo del cajón: territorio de la fila y ámbito aplicado. */
-  readonly cajonTitulo = computed(
-    () => `Casos · ${this.cajonTerritorio()} · ${this.alcanceActivo() ?? 'Todos'}`,
-  );
+  readonly cajonTitulo = computed(() => {
+    const fila = this.filaSeleccionada();
+    const ambito = this.alcanceActivo() ?? 'Todos';
+    // La región manda en el título porque el cajón se abre desde su fila.
+    return fila === null
+      ? `${this.cajonTerritorio()} · ${ambito}`
+      : `Casos de ${fila.region} · ${ambito}`;
+  });
 
   /** Mismos queryParams que la fila de la tabla, para que el listado coincida. */
   readonly cajonEnlace = computed<Record<string, string>>(() => {
@@ -1299,6 +1304,17 @@ export class MapaPage {
     if (evento.key === 'Tab') this.atraparFoco(this.ficha()?.nativeElement, evento);
   }
 
+  /**
+   * Abre el cajón de casos al pulsar una fila de «Casos por región». La fila
+   * fija antes la región seleccionada —el mismo estado que un clic en un
+   * círculo del mapa— y `cajonCasos` se alimenta de `filaSeleccionada`: así el
+   * disparador no necesita un segundo estado que mantener en sincronía.
+   */
+  abrirCasosRegion(fila: FilaRegion, evento?: Event): void {
+    this.claveSeleccionada.set(normalizarRegion(fila.region));
+    this.abrirCajon(evento);
+  }
+
   abrirCajon(evento?: Event): void {
     if (this.cajonAbierto()) return;
     const disparador = evento?.currentTarget;
@@ -1382,6 +1398,14 @@ export class MapaPage {
   situacionCaso(caso: Caso): string {
     if (caso.nivelConflicto === null) return '—';
     return situacionDe(caso.nivelConflicto) === 'manifiesto' ? 'Manifiesto' : 'Latente';
+  }
+
+  /**
+   * Píldora del riesgo con las clases globales `status-badge` + `risk-*`, las
+   * mismas del listado de casos: el color del nivel no se reimplementa aquí.
+   */
+  claseRiesgo(caso: Caso): string {
+    return 'status-badge risk-' + caso.riesgo.toLowerCase();
   }
 
   alternarCapaDistritos(): void {

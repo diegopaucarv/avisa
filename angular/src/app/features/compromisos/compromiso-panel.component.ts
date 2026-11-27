@@ -46,6 +46,7 @@ import {
   aDetalleCompromiso,
   aHistorialCompromiso,
   aSugerenciaUsuario,
+  avanceHitosDe,
   estadoCumplimientoDe,
   etiquetaClasificacionAlcance,
   etiquetaDemandaVinculada,
@@ -56,6 +57,7 @@ import {
   formatearFecha,
   fuenteDe,
   resolverVencimiento,
+  resumenValidacionHitos,
   situacionDe,
   type CatalogosCompromiso,
   type Compromiso,
@@ -638,6 +640,24 @@ export class CompromisoPanelComponent {
     fuenteDe(this.detalle()?.documento ?? null, this.detalle()?.reunion ?? null),
   );
   readonly fuenteTexto = computed(() => etiquetaFuente(this.fuente()));
+
+  /**
+   * Caso / espacio de diálogo como «código · título». Se prefiere el caso
+   * resuelto por el detalle y, si no llega, el que ya trae la fila.
+   */
+  readonly casoTexto = computed<string>(() => {
+    const caso = this.detalle()?.caso;
+    const codigo = caso?.codigo ?? this.cabecera().casoCodigo;
+    const titulo = caso?.titulo ?? this.cabecera().casoTitulo;
+    if (codigo && titulo) return `${codigo} · ${titulo}`;
+    return codigo ?? titulo ?? '—';
+  });
+
+  /** Estado resumido de los hitos para la fila «Estado de hitos / validación». */
+  readonly hitosResumen = computed(() => avanceHitosDe(this.hitos()));
+
+  /** Cuántos hitos traen validación; `null` cuando el detalle no la registra. */
+  readonly validacionResumen = computed(() => resumenValidacionHitos(this.hitos()));
 
   /** Estado de cumplimiento derivado; la regla vive en `estadoCumplimientoDe`. */
   readonly cumplimiento = computed<EstadoCumplimiento>(() => estadoCumplimientoDe(this.cabecera()));

@@ -339,6 +339,67 @@ function restarMeses(fecha: string, meses: number): string | null {
 }
 
 /**
+ * Ventana de la cronología del expediente (E3), en meses, contada desde hoy.
+ * El requisito pide mostrar sólo el último hecho y sólo si es reciente: el
+ * «mínimo» de antigüedad es en realidad un máximo de seis meses.
+ */
+const MESES_VENTANA_CRONOLOGIA = 6;
+
+/**
+ * Fecha de hoy en `YYYY-MM-DD`, en hora local del navegador. Se construye con
+ * los getters locales y no con `toISOString()` para no desplazar el día según
+ * la zona horaria.
+ */
+export function fechaHoyIso(ahora: Date = new Date()): string {
+  const anio = ahora.getFullYear();
+  const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+  const dia = String(ahora.getDate()).padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
+
+/**
+ * Hecho visible de la cronología: el más reciente con fecha válida, siempre que
+ * su fecha caiga dentro de la ventana de `meses` contada desde `hoy` (el borde
+ * se incluye). Sin hechos, sin fechas válidas o con el último fuera de la
+ * ventana devuelve `null`: la ficha no inventa ni muestra hechos antiguos.
+ */
+export function hechoEnVentana<T extends { fecha: string }>(
+  eventos: readonly T[],
+  hoy: string,
+  meses = MESES_VENTANA_CRONOLOGIA,
+): T | null {
+  const umbral = restarMeses(hoy, meses);
+  if (umbral === null) return null;
+
+  let ultimo: { evento: T; fecha: string } | null = null;
+  for (const evento of eventos) {
+    const fecha = fechaIso(evento.fecha);
+    if (fecha === null) continue;
+    // `YYYY-MM-DD` se compara lexicográficamente sin construir fechas.
+    if (ultimo === null || fecha > ultimo.fecha) ultimo = { evento, fecha };
+  }
+
+  if (ultimo === null || ultimo.fecha < umbral) return null;
+  return ultimo.evento;
+}
+
+/**
+ * Tipologías del actor para la tabla: su tipo (rol estructural: público,
+ * social o privado) y su función en la intervención (principal, secundario o
+ * tercero imparcial). Ambos datos ya vienen del endpoint del caso (`tipo` y
+ * `funcion`); no se crea un campo nuevo. Se recortan, se deduplican y, si hay
+ * más de uno, se separan con comas.
+ */
+export function textoTipologias(actor: Pick<ActorCaso, 'tipo' | 'funcion'>): string {
+  const valores = new Set<string>();
+  for (const valor of [actor.tipo, actor.funcion]) {
+    const limpio = (valor ?? '').trim();
+    if (limpio) valores.add(limpio);
+  }
+  return [...valores].join(', ');
+}
+
+/**
  * `tematicaId` y `tematica` de cada demanda del expediente. `dominio/mapeo.ts`
  * descarta esas columnas nuevas; se releen del bruto y se indexan por id sin
  * tocar el mapeo compartido.
@@ -631,6 +692,23 @@ export function aDetalleCasoConCompromisos(bruto: unknown): DetalleCasoConCompro
       font-size: 13px;
       line-height: 1.6;
       text-align: justify;
+    }
+
+    /* Riesgo concreto (E3): texto libre de core.casos.descripcion_riesgo,
+       separado del resumen ejecutivo para no confundir ambos relatos. */
+    .riesgo-concreto {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .riesgo-concreto h3 {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
     /* Edición en línea de las etiquetas de riesgo y conflictividad (item 26). */
@@ -1187,7 +1265,9 @@ export class CasoDetallePage {
     actor: (actor) => this.nombreActor(actor),
     institucion: (actor) => this.institucionActor(actor),
     contacto: (actor) => [this.telefonoActor(actor), actor.correo],
-    tipologia: (actor) => actor.tipo,
+    // Se ordena por el texto completo (tipo y función) para que el usuario
+    // vea el mismo criterio que la celda «Tipologías».
+    tipologia: (actor) => textoTipologias(actor),
   };
   readonly filasActores = computed(() =>
     this.ordenActores.ordenar(this.ficha()?.actores ?? [], this.accesoresActores),
@@ -1242,6 +1322,20 @@ export class CasoDetallePage {
 
   /** Meses de la ventana de demandas, para los textos de la vista. */
   readonly mesesVentanaDemandas = MESES_VENTANA_DEMANDAS;
+
+  /**
+   * Cronología del expediente (E3). El requisito pide sólo el último hecho y
+   * sólo si es reciente: la antigüedad máxima es de seis meses contados desde
+   * hoy. El filtro es de presentación; la API sigue devolviendo el histórico.
+   */
+  private readonly hoy = fechaHoyIso();
+  readonly hechosVisibles = computed<readonly EventoCaso[]>(() => {
+    const hecho = hechoEnVentana(this.ficha()?.eventos ?? [], this.hoy);
+    return hecho ? [hecho] : [];
+  });
+  readonly mesesVentanaCronologia = MESES_VENTANA_CRONOLOGIA;
+  /** Se expone a la plantilla y al CSV; la lógica vive fuera de la clase. */
+  readonly textoTipologias = textoTipologias;
 
   /**
    * Demandas del caso que la ventana deja fuera (anteriores al umbral o sin
@@ -1430,7 +1524,9 @@ export class CasoDetallePage {
       {
         etiqueta: 'Línea de tiempo',
         ancla: 'eventos-caso',
-        contador: ficha.eventos.length,
+        // La ficha sólo lista el último hecho reciente: el contador debe
+        // describir lo que se ve y no el histórico del caso.
+        contador: this.hechosVisibles().length,
         icono: 'actividad',
       },
       {
@@ -1514,8 +1610,9 @@ export class CasoDetallePage {
   }
 
   /**
-   * Copia la cronología completa en formato WhatsApp (`*05NOV2026* - texto`)
-   * sin abrir ningún editor (item 34).
+   * Copia el hecho visible en formato WhatsApp (`*05NOV2026* - texto`) sin
+   * abrir ningún editor (item 34). La ficha sólo lista el último hecho
+   * reciente, así que la copia usa esa misma lista.
    */
   async copiarCronologia(eventos: readonly EventoCaso[]): Promise<void> {
     if (eventos.length === 0) return;
@@ -1525,7 +1622,7 @@ export class CasoDetallePage {
     const ok = await copiarAlPortapapeles(texto);
     this.avisoCronologia.set(
       ok
-        ? 'Cronología copiada al portapapeles.'
+        ? 'Hecho copiado al portapapeles.'
         : 'No se pudo copiar. Seleccione el texto y use Ctrl + C.',
     );
   }
@@ -2345,7 +2442,7 @@ export class CasoDetallePage {
     const escapar = (valor: string | null | undefined): string =>
       `"${(valor ?? '').replace(/"/g, '""')}"`;
     const filas = [
-      ['Actor', 'Institución', 'Cargo', 'Teléfono', 'Correo', 'Tipología'].map(escapar).join(';'),
+      ['Actor', 'Institución', 'Cargo', 'Teléfono', 'Correo', 'Tipologías'].map(escapar).join(';'),
       ...actores.map((actor) =>
         [
           this.nombreActor(actor),
@@ -2353,7 +2450,7 @@ export class CasoDetallePage {
           this.cargoActor(actor),
           this.telefonoActor(actor),
           actor.correo,
-          actor.tipo,
+          textoTipologias(actor),
         ]
           .map(escapar)
           .join(';'),

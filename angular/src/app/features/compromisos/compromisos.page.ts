@@ -52,6 +52,7 @@ import {
   etiquetaPuntoFocal,
   formatearFecha,
   formatearFechaHora,
+  avanceHitosDe,
   resolverVencimiento,
   situacionDe,
   type Compromiso,
@@ -372,6 +373,36 @@ function totalDe(bruto: unknown): number {
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    /* Caso y título en dos líneas: el código manda y el título sólo contextualiza. */
+    .celda-caso {
+      display: block;
+      max-width: 220px;
+      white-space: normal;
+    }
+    .celda-caso small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    /* La franja dejó el bloque de redacción: ahora acompaña al resumen de hitos. */
+    .celda-hitos {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      white-space: normal;
+    }
+    .celda-hitos-texto {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .celda-evidencia {
+      display: block;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
     .aviso-fecha {
       color: var(--amber);
     }
@@ -636,7 +667,12 @@ export class CompromisosPage {
     caso: (compromiso) => compromiso.casoCodigo,
     unidad: (compromiso) => compromiso.unidad,
     puntoFocal: (compromiso) => etiquetaPuntoFocal(compromiso),
+    redaccion: (compromiso) => compromiso.accion,
+    fuente: (compromiso) => compromiso.documentoOrigenId,
+    fecha: (compromiso) => compromiso.fechaInicio,
     estado: (compromiso) => compromiso.estado,
+    // Ordenar por el mismo valor que pinta la columna «Estado de cumplimiento».
+    cumplimiento: (compromiso) => estadoCumplimientoDe(compromiso),
     plazo: (compromiso) => resolverVencimiento(compromiso).fecha,
     vencimiento: (compromiso) => compromiso.fechaVencimiento,
     anulado: (compromiso) => compromiso.anuladoEn,
@@ -689,14 +725,40 @@ export class CompromisosPage {
     { clave: 'accion', titulo: 'Acción' },
   ];
 
-  /** Columnas del listado activo. */
+  /**
+   * Columnas del listado activo, en el orden que pide la ficha de seguimiento:
+   * caso, área, punto focal, redacción, fuente, fecha, plazo, cumplimiento,
+   * hitos/validación y evidencia. «Estado» y «Cumplimiento» no se duplican:
+   * sólo se muestra el estado derivado de cumplimiento.
+   */
   readonly columnasListado: readonly ColumnaTabla[] = [
-    { clave: 'compromiso', titulo: 'Compromiso', ordenable: true },
-    { clave: 'caso', titulo: 'Caso', ordenable: true },
-    { clave: 'unidad', titulo: 'Unidad responsable', ordenable: true },
+    { clave: 'caso', titulo: 'Caso / Espacio de diálogo', ordenable: true },
+    { clave: 'unidad', titulo: 'Área responsable', ordenable: true },
     { clave: 'puntoFocal', titulo: 'Punto focal', ordenable: true },
-    { clave: 'estado', titulo: 'Estado', ordenable: true },
-    { clave: 'vencimiento', titulo: 'Vencimiento', ordenable: true },
+    { clave: 'redaccion', titulo: 'Redacción', ordenable: true },
+    {
+      clave: 'fuente',
+      titulo: 'Fuente',
+      ordenable: true,
+      // El listado sólo trae el id del documento de origen; el título completo
+      // se ve en la versión ampliada. No se inventa el nombre del documento.
+      formato: (valor) => (valor ? 'Documento de origen' : '—'),
+    },
+    {
+      clave: 'fecha',
+      titulo: 'Fecha',
+      ordenable: true,
+      formato: (valor) => this.fechaTexto(valor as string | null),
+    },
+    {
+      clave: 'plazo',
+      titulo: 'Plazo',
+      ordenable: true,
+      acceso: (fila) => resolverVencimiento(fila as Compromiso).fecha,
+    },
+    { clave: 'cumplimiento', titulo: 'Estado de cumplimiento', ordenable: true },
+    { clave: 'hitos', titulo: 'Estado de hitos / validación' },
+    { clave: 'evidencia', titulo: 'Evidencia' },
   ];
 
   /** Orden que pinta `app-tabla`; la página sigue ordenando con `OrdenTabla`. */
@@ -1501,6 +1563,16 @@ export class CompromisosPage {
   /** Texto visible del punto focal en la tabla: nombre resuelto o texto libre. */
   puntoFocalTexto(compromiso: Compromiso): string {
     return etiquetaPuntoFocal(compromiso);
+  }
+
+  /** Resumen de los hitos para la columna «Estado de hitos / validación». */
+  hitosTexto(compromiso: Compromiso): string {
+    return avanceHitosDe(compromiso.hitos);
+  }
+
+  /** Un medio de verificación es enlace si empieza por http(s). */
+  esEnlace(valor: string | null | undefined): boolean {
+    return typeof valor === 'string' && /^https?:\/\//i.test(valor.trim());
   }
 
   fechaHoraTexto(valor: string | null | undefined): string {

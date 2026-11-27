@@ -44,6 +44,7 @@ import {
   type MembresiaActor,
   type OpcionCatalogo,
 } from './directorio.mapeo';
+import { parsearFicha } from './ficha-plantilla';
 
 /**
  * Motivo que se envía con la solicitud de PII. La base lo registra en
@@ -665,6 +666,61 @@ export class ActorPanelComponent {
 
   readonly correoContacto = computed(() => this.datos()?.email ?? null);
   readonly telefonoContacto = computed(() => this.datos()?.telefono ?? null);
+
+  /** Etiqueta legible de `core.cat_clasificacion` (nivel de clasificación). */
+  readonly clasificacionTexto = computed(() => {
+    switch (this.actor()?.clasificacion) {
+      case 1:
+        return 'Público';
+      case 2:
+        return 'Reservado';
+      case 3:
+        return 'Confidencial';
+      default:
+        return null;
+    }
+  });
+
+  /**
+   * Datos que sólo viven en la descripción libre (plantilla markdown de
+   * `docs/plantilla-ficha-actor.md`). El actor no tiene columnas para ellos.
+   */
+  readonly datosFicha = computed(() => parsearFicha(this.actor()?.perfil));
+
+  /**
+   * Filas de «Datos complementarios» con etiqueta y valor. Se omite «Cantidad
+   * de afiliados» cuando la organización ya la trae de la base
+   * (`numero_integrantes`), para no repetir el mismo número dos veces.
+   */
+  readonly complementarios = computed(() => {
+    const datos = this.datosFicha();
+    const filas: { etiqueta: string; valor: string | null }[] = [
+      { etiqueta: 'Artes de pesca', valor: datos.artesDePesca },
+      { etiqueta: 'Inscripción en PRODUCE', valor: datos.inscripcionProduce },
+      { etiqueta: 'Vigencia de poder actual', valor: datos.vigenciaPoder },
+      { etiqueta: 'Registros públicos', valor: datos.registrosPublicos },
+      { etiqueta: 'Ámbito de acción', valor: datos.ambito },
+      { etiqueta: 'Cantidad de afiliados', valor: datos.cantidadAfiliados },
+      {
+        etiqueta: 'Cantidad de organizaciones afiliadas',
+        valor: datos.cantidadOrganizacionesAfiliadas,
+      },
+      { etiqueta: 'Capacidad de ordenar', valor: datos.capacidadOrdenar },
+      { etiqueta: 'Cargo público o político', valor: datos.cargoPublico },
+      { etiqueta: 'Cercanía a PRODUCE', valor: datos.cercaniaProduce },
+      { etiqueta: 'Declaraciones en redes', valor: datos.declaracionesRedes },
+      { etiqueta: 'Edad', valor: datos.edad },
+    ];
+
+    return this.actor()?.numeroIntegrantes != null
+      ? filas.filter((fila) => fila.etiqueta !== 'Cantidad de afiliados')
+      : filas;
+  });
+
+  /** Sólo se pinta la sección si la ficha siguió la plantilla en algún campo. */
+  readonly hayComplementarios = computed(() =>
+    this.complementarios().some((fila) => fila.valor !== null),
+  );
 
   /** Texto de dato ausente y máscara, expuestos a la plantilla. */
   readonly sinDato = SIN_DATO;

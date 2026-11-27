@@ -6,6 +6,7 @@ import {
   aCompromiso,
   aCompromisosCaso,
   aSugerenciaUsuario,
+  avanceHitosDe,
   estadoCumplimientoDe,
   estadoHitoDe,
   etiquetaClasificacionAlcance,
@@ -16,6 +17,7 @@ import {
   formatearFecha,
   fuenteDe,
   resolverVencimiento,
+  resumenValidacionHitos,
   situacionDe,
   type Compromiso,
   type Hito,
@@ -549,5 +551,42 @@ describe('compromisos del detalle del caso', () => {
     expect(compromiso.formalVerbal).toBeNull();
     expect(compromiso.asumidoMinistro).toBe(false);
     expect(compromiso.hitos[0].responsableTexto).toBeNull();
+  });
+});
+
+describe('resumen de hitos para la columna de seguimiento', () => {
+  it('declara «Sin hitos» cuando el compromiso no tiene ninguno', () => {
+    expect(avanceHitosDe([])).toBe('Sin hitos');
+  });
+
+  it('cuenta los cumplidos y resume el resto en orden del catálogo', () => {
+    const resumen = avanceHitosDe([
+      { estado: 'Cumplido' },
+      { estado: 'Cumplido' },
+      { estado: 'En ejecución' },
+      { estado: 'No cumplido' },
+    ]);
+
+    expect(resumen).toBe('2/4 cumplidos · 1 en ejecución · 1 no cumplido');
+  });
+
+  it('no inventa cumplidos: sin hitos cumplidos empieza en 0', () => {
+    expect(avanceHitosDe([{ estado: 'Paralizado' }])).toBe('0/1 cumplidos · 1 paralizado');
+  });
+});
+
+describe('resumen de validación de hitos', () => {
+  it('no declara validación cuando ningún hito la registra', () => {
+    expect(resumenValidacionHitos([{ validacion: null }, { validacion: '   ' }])).toBeNull();
+  });
+
+  it('cuenta los hitos con validación declarada', () => {
+    expect(
+      resumenValidacionHitos([{ validacion: 'Verificado en campo' }, { validacion: null }]),
+    ).toBe('1 de 2 hitos con validación registrada.');
+  });
+
+  it('no inventa validación para un compromiso sin hitos', () => {
+    expect(resumenValidacionHitos([])).toBeNull();
   });
 });

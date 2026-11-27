@@ -281,6 +281,7 @@
       <div class="surface-heading regiones-cabeza">
         <div>
           <h3 id="titulo-regiones">Casos por región</h3>
+          <p>Pulsa una fila para ver el detalle de sus casos; el nombre abre el listado.</p>
         </div>
       </div>
 
@@ -310,9 +311,25 @@
           </thead>
           <tbody>
             @for (fila of filasRegion(); track fila.region) {
-            <tr [class.row-selected]="esSeleccionada(fila)">
+            <!--
+              La fila abre el cajón de casos de la región (requisito E2) y no
+              navega. El nombre sigue siendo el enlace al listado, así que corta
+              la propagación para no abrir el cajón de paso.
+            -->
+            <tr
+              class="case-row-clickable"
+              [class.row-selected]="esSeleccionada(fila)"
+              tabindex="0"
+              (click)="abrirCasosRegion(fila, $event)"
+              (keydown.enter)="abrirCasosRegion(fila, $event)"
+            >
               <td class="col-region">
-                <a class="table-link" [routerLink]="['/casos']" [queryParams]="verCasos(fila)">
+                <a
+                  class="table-link"
+                  [routerLink]="['/casos']"
+                  [queryParams]="verCasos(fila)"
+                  (click)="$event.stopPropagation()"
+                >
                   <strong>{{ fila.region }}</strong>
                 </a>
               </td>
@@ -560,10 +577,10 @@
         <p class="casos-drawer-vacio">No hay casos visibles con este territorio y ámbito.</p>
         } @else {
         <div class="table-wrap">
-          <table class="data-table cajon-casos-tabla" aria-label="Casos del cajón">
+          <table class="data-table cajon-casos-tabla" aria-label="Casos de la región">
             <thead>
               <tr>
-                <th scope="col">Caso</th>
+                <th scope="col">Nombre</th>
                 <th scope="col">Resumen</th>
                 <th scope="col">Situación</th>
                 <th scope="col">Riesgo</th>
@@ -575,22 +592,32 @@
               @for (caso of cajonCasos(); track caso.id) {
               <tr>
                 <td class="celda-caso cajon-caso">
+                  <!-- Sin título declarado el nombre es el código: nunca queda
+                       una celda vacía que obligue a adivinar el caso. -->
                   <a
-                    class="cajon-caso-codigo"
+                    class="cajon-caso-codigo cajon-caso-titulo"
                     [routerLink]="['/casos', caso.codigo]"
                     [attr.title]="'Abrir el expediente completo de ' + caso.codigo"
                     (click)="cerrarCajon()"
-                    >{{ caso.codigo }}</a
+                    >{{ caso.titulo || caso.codigo }}</a
                   >
-                  <span class="cajon-caso-titulo" [attr.title]="caso.titulo"
-                    >{{ caso.titulo }}</span
-                  >
+                  @if (caso.titulo) {
+                  <span class="cajon-caso-codigo">{{ caso.codigo }}</span>
+                  }
                 </td>
                 <td class="cajon-caso-texto">
                   <span [attr.title]="caso.resumen || null">{{ caso.resumen || '—' }}</span>
                 </td>
-                <td>{{ situacionCaso(caso) }}</td>
-                <td>{{ caso.riesgo }}</td>
+                <td
+                  [attr.title]="
+                    caso.nivelConflicto ? null : 'Sin nivel de conflictividad declarado'
+                  "
+                >
+                  {{ situacionCaso(caso) }}
+                </td>
+                <td>
+                  <span [class]="claseRiesgo(caso)">{{ caso.riesgo }}</span>
+                </td>
                 <td class="cajon-caso-texto">
                   <span [attr.title]="caso.descripcionRiesgo || null"
                     >{{ caso.descripcionRiesgo || '—' }}</span

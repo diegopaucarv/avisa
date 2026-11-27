@@ -324,34 +324,12 @@
     (seleccionCambio)="alCambiarSeleccion($event)"
     (filaClic)="alClicFila($event)"
   >
-    <ng-template appCeldaTabla="compromiso" let-fila>
-      <div class="celda-compromiso">
-        <button
-          type="button"
-          class="table-link compromiso-codigo"
-          [attr.aria-label]="'Abrir el compromiso ' + fila.codigo + ': ' + fila.accion"
-          (click)="abrir(fila); $event.stopPropagation()"
-        >
-          {{ fila.codigo }}
-        </button>
-        <span class="compromiso-accion">{{ fila.accion }}</span>
-        @if (fila.hitos.length > 0) {
-        <span
-          class="hitos-franja"
-          role="img"
-          [attr.title]="resumenHitos(fila)"
-          [attr.aria-label]="resumenHitos(fila)"
-        >
-          @for (hito of hitosOrdenados(fila); track hito.id) {
-          <span [class]="clasesHito(hito)"></span>
-          }
-        </span>
-        }
-      </div>
-    </ng-template>
-
     <ng-template appCeldaTabla="caso" let-fila>
-      <span [attr.title]="fila.casoTitulo">{{ fila.casoCodigo || '—' }}</span>
+      <span class="celda-caso" [attr.title]="fila.casoTitulo || 'Sin caso asociado'">
+        {{ fila.casoCodigo || '—' }} @if (fila.casoTitulo) {
+        <small>{{ fila.casoTitulo }}</small>
+        }
+      </span>
     </ng-template>
 
     <ng-template appCeldaTabla="puntoFocal" let-fila>
@@ -364,17 +342,21 @@
       }
     </ng-template>
 
-    <ng-template appCeldaTabla="estado" let-fila>
-      <span
-        class="commit-status"
-        [class.commit-cumplido]="fila.estado === 'Cumplido'"
-        [class.commit-en-curso]="fila.estado === 'En proceso'"
-      >
-        {{ fila.estado }}
-      </span>
+    <ng-template appCeldaTabla="redaccion" let-fila>
+      <div class="celda-compromiso">
+        <button
+          type="button"
+          class="table-link compromiso-codigo"
+          [attr.aria-label]="'Abrir el compromiso ' + fila.codigo + ': ' + fila.accion"
+          (click)="abrir(fila); $event.stopPropagation()"
+        >
+          {{ fila.codigo }}
+        </button>
+        <span class="compromiso-accion">{{ fila.accion }}</span>
+      </div>
     </ng-template>
 
-    <ng-template appCeldaTabla="vencimiento" let-fila>
+    <ng-template appCeldaTabla="plazo" let-fila>
       <div class="celda-vencimiento">
         @if (vencimiento(fila).fecha; as fechaVenc) { {{ fechaTexto(fechaVenc) }}
         <span [class]="'due-state ' + situacion(fila).clase">{{ situacion(fila).etiqueta }}</span>
@@ -384,6 +366,46 @@
         <small class="aviso-fecha">Añada una fecha de vencimiento manual</small>
         }
       </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="cumplimiento" let-fila>
+      <span
+        class="commit-status"
+        [class.commit-cumplido]="estadoCumplimiento(fila) === 'Cumplido'"
+        [class.commit-en-curso]="estadoCumplimiento(fila) === 'En proceso'"
+        [class.commit-paralizado]="estadoCumplimiento(fila) === 'No cumplido'"
+        [attr.title]="'Estado registrado: ' + fila.estado"
+      >
+        {{ estadoCumplimiento(fila) }}
+      </span>
+    </ng-template>
+
+    <ng-template appCeldaTabla="hitos" let-fila>
+      <div class="celda-hitos">
+        @if (fila.hitos.length > 0) {
+        <span
+          class="hitos-franja"
+          role="img"
+          [attr.title]="resumenHitos(fila)"
+          [attr.aria-label]="resumenHitos(fila)"
+        >
+          @for (hito of hitosOrdenados(fila); track hito.id) {
+          <span [class]="clasesHito(hito)"></span>
+          }
+        </span>
+        }
+        <span class="celda-hitos-texto">{{ hitosTexto(fila) }}</span>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="evidencia" let-fila>
+      @if (fila.evidenciaUri; as evidencia) { @if (esEnlace(evidencia)) {
+      <a class="table-link" [href]="evidencia" target="_blank" rel="noopener">Ver evidencia</a>
+      } @else {
+      <span class="celda-evidencia" [attr.title]="evidencia">{{ evidencia }}</span>
+      } } @else {
+      <span aria-hidden="true">—</span>
+      }
     </ng-template>
   </app-tabla>
   } @if (total() > 0) {

@@ -98,6 +98,11 @@ export type ActorDirectorio = {
   /** RUC de la organización (`core.organizaciones.ruc`), no PII. */
   ruc?: string | null;
   /**
+   * Cantidad de afiliados capturada en `core.organizaciones.numero_integrantes`.
+   * Es un conteo declarado, no PII; sólo aplica a organizaciones.
+   */
+  numeroIntegrantes?: number | null;
+  /**
    * Locales donde el actor figura como responsable. La API todavía no los
    * expone: `core.local_responsables` no tiene `actor_uid` y está vacía, así
    * que hoy llega `[]` y la ficha no pinta la sección. El mapeo ya la lee para
@@ -222,6 +227,7 @@ export function aActorDirectorio(bruto: unknown): ActorDirectorio {
     vigenciaDesde: fechaIso(texto(registro, ['vigenciaDesde', 'vigencia_desde'])),
     vigenciaHasta: fechaIso(texto(registro, ['vigenciaHasta', 'vigencia_hasta'])),
     ruc: texto(registro, ['ruc']),
+    numeroIntegrantes: numero(registro, ['numeroIntegrantes', 'numero_integrantes']),
     localesDelActor: lista(registro, ['localesDelActor', 'locales_del_actor'])
       .map(aLocalDeActor)
       .filter((local): local is LocalDeActor => local !== null),

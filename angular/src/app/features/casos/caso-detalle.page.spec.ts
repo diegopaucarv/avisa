@@ -7,9 +7,12 @@ import {
   claseEstadoHito,
   codigoHitoVisible,
   esEstadoHitoFicha,
+  fechaHoyIso,
+  hechoEnVentana,
   referenciaHito,
   textoFechaHito,
   textoFechaRealHito,
+  textoTipologias,
 } from './caso-detalle.page';
 
 describe('hitos de la ficha: columnas', () => {
@@ -140,5 +143,61 @@ describe('hitos de la ficha: esquema del detalle', () => {
     expect(hito.terminal).toBe(false);
     expect(codigoHitoVisible(hito.codigo)).toBe('—');
     expect(textoFechaRealHito(hito.fechaReal, hito.fechaRealTexto)).toBe('Sin fecha real');
+  });
+});
+
+/** Fecha local en `YYYY-MM-DD`: se arma con el constructor local a propósito. */
+describe('cronología del expediente: fecha de hoy', () => {
+  it('devuelve la fecha local sin desplazarla por zona horaria', () => {
+    expect(fechaHoyIso(new Date(2026, 10, 27))).toBe('2026-11-27');
+    expect(fechaHoyIso(new Date(2026, 0, 1))).toBe('2026-01-01');
+  });
+});
+
+describe('cronología del expediente: sólo el último hecho reciente', () => {
+  const hoy = '2026-11-27';
+
+  it('elige el hecho más reciente aunque el arreglo llegue desordenado', () => {
+    const eventos = [
+      { id: 'viejo', fecha: '2026-06-10' },
+      { id: 'nuevo', fecha: '2026-11-20' },
+      { id: 'medio', fecha: '2026-09-01' },
+    ];
+
+    expect(hechoEnVentana(eventos, hoy)?.id).toBe('nuevo');
+  });
+
+  it('devuelve null si el último hecho tiene más de seis meses', () => {
+    const eventos = [
+      { id: 'a', fecha: '2026-05-26' },
+      { id: 'b', fecha: '2026-03-01' },
+    ];
+
+    expect(hechoEnVentana(eventos, hoy)).toBeNull();
+  });
+
+  it('incluye el borde de la ventana (seis meses exactos)', () => {
+    expect(hechoEnVentana([{ id: 'borde', fecha: '2026-05-27' }], hoy)?.id).toBe('borde');
+  });
+
+  it('devuelve null sin hechos o con fechas inválidas', () => {
+    expect(hechoEnVentana([], hoy)).toBeNull();
+    expect(hechoEnVentana([{ id: 'x', fecha: '' }], hoy)).toBeNull();
+    expect(hechoEnVentana([{ id: 'y', fecha: 'sin-fecha' }], hoy)).toBeNull();
+  });
+});
+
+describe('tipologías del actor en la tabla', () => {
+  it('une tipo y función separados por coma', () => {
+    expect(textoTipologias({ tipo: 'Actor social', funcion: 'Principal' })).toBe(
+      'Actor social, Principal',
+    );
+  });
+
+  it('recorta, deduplica y omite los vacíos', () => {
+    expect(textoTipologias({ tipo: '  Actor público  ', funcion: null })).toBe('Actor público');
+    expect(textoTipologias({ tipo: 'Principal', funcion: 'Principal' })).toBe('Principal');
+    expect(textoTipologias({ tipo: '', funcion: '   ' })).toBe('');
+    expect(textoTipologias({ tipo: null, funcion: null })).toBe('');
   });
 });
