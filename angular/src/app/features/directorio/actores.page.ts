@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, map } from 'rxjs';
+import { firstValueFrom, map, Subject, takeUntil } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
 import {
@@ -676,6 +676,18 @@ type PiiActorPadron = { dni: string | null; telefono: string | null };
       line-height: 1.45;
     }
 
+    /* Aviso de permisos: informativo, no un error de la descarga. */
+    .padron-form .padron-aviso {
+      margin: 0;
+      padding: 8px 10px;
+      border: 1px solid #e6d5a8;
+      border-radius: 6px;
+      background: #fdf8e8;
+      color: #7a5c08;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
     .padron-actions {
       display: flex;
       justify-content: flex-end;
@@ -901,6 +913,14 @@ export class ActoresPage {
   readonly padronInclusion = signal<ReadonlySet<string>>(new Set());
   /** Último fallo del diálogo; se pinta dentro para poder reintentar. */
   readonly padronError = signal<string | null>(null);
+  /**
+   * Generación en curso. Se numera cada intento: al cancelar se incrementa el
+   * contador y lo que llegue con un token viejo se descarta sin descargar ni
+   * avisar de un error que no existe.
+   */
+  private padronToken = 0;
+  /** Corta la petición de PII en vuelo cuando se cancela la generación. */
+  private readonly padronCancelado = new Subject<void>();
   private readonly dialogoPadron = viewChild<ElementRef<HTMLDialogElement>>('dialogoPadron');
 
   /** Actores seleccionados dentro del diálogo: sólo estos se escriben al libro. */
@@ -1029,11 +1049,14 @@ export class ActoresPage {
       return;
     }
 
+    this.padronToken += 1;
+    const token = this.padronToken;
     this.descargandoPadron.set(true);
     this.padronError.set(null);
 
     try {
       const { datos: pii, fallos } = await this.piiDeActores(actores);
+      if (token !== this.padronToken) return;
 
       // Un 200 sin datos deja la fila vacía y no frena la descarga; un 403, un
       // 500 o un fallo de red sí se reportan y se deja reintentar, para no
@@ -1051,15 +1074,41 @@ export class ActoresPage {
       );
 
       const archivo = await crearXlsxPadron({ titulo, lugar, fecha, filas });
+      // El armado del libro no se puede abortar: si el usuario canceló mientras
+      // tanto, el archivo se descarta en vez de aparecer tras cerrar el diálogo.
+      if (token !== this.padronToken) return;
+
       this.descargarArchivo(archivo, `lista-asistencia-${fechaLocalIso()}.xlsx`);
       this.dialogoPadron()?.nativeElement.close();
     } catch (fallo) {
+      // Un aborto del usuario no es un fallo que deba pintarse.
+      if (token !== this.padronToken) return;
       // El libro no llegó a armarse (o falló el import de exceljs): se avisa
       // sin cerrar el diálogo para que el usuario pueda reintentar.
       this.padronError.set(aErrorApi(fallo).message);
     } finally {
+      if (token === this.padronToken) this.descargandoPadron.set(false);
+    }
+  }
+
+  /**
+   * «Cancelar» del diálogo y Escape: cierra y, si había una generación en
+   * curso, la aborta.
+   *
+   * Antes el botón sólo cerraba el `<dialog>`: las peticiones de PII y el armado
+   * del libro seguían vivos y el Excel aparecía descargado tras el cierre.
+   */
+  cancelarPadron(evento?: Event): void {
+    evento?.preventDefault();
+
+    if (this.descargandoPadron()) {
+      this.padronToken += 1;
+      this.padronCancelado.next();
       this.descargandoPadron.set(false);
     }
+
+    this.padronError.set(null);
+    this.dialogoPadron()?.nativeElement.close();
   }
 
   /** «OSPA» del actor: membresía vigente, ancla del listado y, por último, su abreviatura. */
@@ -1088,11 +1137,14 @@ export class ActoresPage {
 
     // Un fallo del lote completo (403, 422, 500 o red) se propaga: no se puede
     // fingir que los actores no tienen DNI cuando en realidad no se consultó.
+    // `takeUntil` corta la petición si el usuario cancela la generación.
     const bruto = await firstValueFrom(
-      this.http.post<unknown>(urlApi('/v1/actors/pii'), {
-        ids,
-        motivo: MOTIVO_PII_PADRON,
-      }),
+      this.http
+        .post<unknown>(urlApi('/v1/actors/pii'), {
+          ids,
+          motivo: MOTIVO_PII_PADRON,
+        })
+        .pipe(takeUntil(this.padronCancelado)),
     );
 
     const lote = aPiiLote(bruto);

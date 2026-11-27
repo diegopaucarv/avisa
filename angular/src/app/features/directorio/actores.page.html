@@ -180,10 +180,21 @@
   </div>
   }
 
-  <dialog #dialogoPadron class="padron-dialogo" aria-labelledby="titulo-padron">
+  <dialog
+    #dialogoPadron
+    class="padron-dialogo"
+    aria-labelledby="titulo-padron"
+    (cancel)="cancelarPadron($event)"
+  >
     <form class="padron-form" (submit)="$event.preventDefault(); descargarPadron()">
       <h2 id="titulo-padron">Lista de asistencia</h2>
       <p>Incluye DNI y celular para el registro de firmas.</p>
+      @if (!capacidades.puedeVerPii()) {
+      <p class="padron-aviso" role="status">
+        Tu perfil no puede leer DNI ni celulares: esas dos columnas saldrán en blanco. Pide la lista
+        a un sectorista o a la Dirección para completarlas.
+      </p>
+      }
       <label>
         Título de la sesión
         <input
@@ -250,8 +261,8 @@
       }
 
       <div class="padron-actions">
-        <button type="button" class="button-secondary" (click)="dialogoPadron.close()">
-          Cancelar
+        <button type="button" class="button-secondary" (click)="cancelarPadron()">
+          {{ descargandoPadron() ? 'Cancelar generación' : 'Cancelar' }}
         </button>
         <button
           type="submit"

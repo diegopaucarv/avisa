@@ -1,0 +1,215 @@
+/*
+ * Gráficos de mesas de diálogo: dos tarjetas de barras horizontales, sin
+ * librerías. Todo el color sale de las variables de tema de `global.css`
+ * (`--ink`, `--ink-2`, `--muted`, `--line`, `--paper`, `--blue`, `--green`,
+ * `--amber`, `--red`); no hay reglas para tema oscuro.
+ *
+ * Cada tarjeta mide media cuarto de pantalla como mínimo: se leen de un
+ * vistazo bajo la barra de búsqueda de `/mesas` y `/mesas/compromisos`.
+ */
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.graficos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+
+.chart-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  color: var(--ink);
+  font: 700 15px/1.25 var(--font-display);
+}
+
+.chart-heading-meta {
+  color: var(--muted);
+  font: 500 12px/1.3 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  min-height: clamp(160px, 22vh, 240px);
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+}
+
+/* El aviso de error ocupa la fila completa: es un único estado del bloque. */
+.chart-card-ancho {
+  grid-column: 1 / -1;
+}
+
+.chart-title {
+  margin: 0;
+  color: var(--ink);
+  font: 700 13.5px/1.25 var(--font-display);
+}
+
+.chart-sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.chart-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  min-width: 0;
+}
+
+.chart-barras {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chart-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.chart-skeleton {
+  height: 18px;
+  border-radius: 6px;
+  background: var(--line);
+  animation: chart-pulso 1.5s ease-in-out infinite;
+}
+
+.chart-skeleton:nth-child(2) {
+  width: 84%;
+  animation-delay: 120ms;
+}
+
+.chart-skeleton.corto {
+  width: 62%;
+  animation-delay: 240ms;
+}
+
+@keyframes chart-pulso {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.chart-retry {
+  align-self: flex-start;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--blue-pale);
+  color: var(--blue);
+  font: 600 12.5px/1 var(--font-sans);
+  cursor: pointer;
+}
+
+.chart-retry:hover {
+  background: var(--blue);
+  color: var(--paper);
+}
+
+.chart-retry:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+/* Etiqueta y total en la primera línea; la pista de la barra ocupa la segunda. */
+.barra-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 3px;
+}
+
+.barra-etiqueta {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-2);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barra-valor {
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.barra-pista {
+  grid-column: 1 / -1;
+  display: block;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.barra-relleno {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--blue);
+  transition: width 180ms ease;
+}
+
+.tono-verde {
+  background: var(--green);
+}
+
+.tono-ambar {
+  background: var(--amber);
+}
+
+.tono-rojo {
+  background: var(--red);
+}
+
+.tono-azul {
+  background: var(--blue);
+}
+
+/* Permanente y Sin fecha: azul sin urgencia, visible sobre `--line`. */
+.tono-azul-tenue {
+  background: color-mix(in srgb, var(--blue) 42%, var(--paper));
+}
+
+.tono-neutro {
+  background: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .graficos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

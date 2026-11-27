@@ -223,6 +223,33 @@
       Cancelar
     </button>
   </div>
+  } @if (devolucionFila(); as devolucion) {
+  <div
+    class="form-hint view-actions"
+    role="group"
+    aria-label="Confirmación de devolución a elaboración"
+  >
+    <span>
+      ¿Desea devolver la alerta <strong>{{ tituloAlerta(devolucion.alerta) }}</strong> a elaboración
+      (paso {{ devolucion.paso }} de 5)? Se conserva la historia del cambio.
+    </span>
+    <button
+      type="button"
+      class="button-primary"
+      [disabled]="enviandoFila() !== null"
+      (click)="confirmarDevolucionFila()"
+    >
+      Aceptar
+    </button>
+    <button
+      type="button"
+      class="button-secondary"
+      [disabled]="enviandoFila() !== null"
+      (click)="cancelarDevolucionFila()"
+    >
+      Cancelar
+    </button>
+  </div>
   } @if (avisoFila(); as aviso) {
   <div
     [class]="aviso.tipo === 'ok' ? 'form-hint aviso-ok view-actions' : 'form-error view-actions'"

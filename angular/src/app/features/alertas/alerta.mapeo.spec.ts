@@ -75,6 +75,16 @@ describe('aristaPermitida', () => {
     expect(aristaPermitida(['direccion_oaipcs'], 5, 2)).toBe(false);
   });
 
+  it('deja devolver a elaboración al sectorista desde validación previa', () => {
+    expect(aristaPermitida(['sectorista'], 2, 1)).toBe(true);
+    expect(aristaPermitida(['sectorista'], 3, 1)).toBe(false);
+  });
+
+  it('deja devolver a elaboración a la Dirección desde la aprobación', () => {
+    expect(aristaPermitida(['direccion_oaipcs'], 3, 1)).toBe(true);
+    expect(aristaPermitida(['alta_direccion'], 2, 1)).toBe(false);
+  });
+
   it('no deja al sectorista cruzar aristas de dirección ni de remisión', () => {
     expect(aristaPermitida(['sectorista'], 2, 3)).toBe(false);
     expect(aristaPermitida(['sectorista'], 3, 4)).toBe(false);

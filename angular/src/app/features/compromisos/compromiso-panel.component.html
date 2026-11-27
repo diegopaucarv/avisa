@@ -614,10 +614,11 @@
                   ></span>
                   <div>
                     <div class="timeline-meta">
-                      <strong>{{ codigoHito(hito.codigo) }}</strong>
+                      <strong class="hito-etiqueta">{{
+                        etiquetaHito(hito.codigo, hito.descripcion)
+                      }}</strong>
                       <time>{{ fechaTexto(hito.fecha) }}</time>
                     </div>
-                    <p>{{ hito.descripcion || 'Sin descripción' }}</p>
                     <div class="timeline-actions">
                       <span
                         class="commit-status"
@@ -863,12 +864,13 @@
 
                       @if (item.hito; as hitoHistorial) {
                         <div class="timeline-meta">
-                          <strong>Hito {{ codigoHito(hitoHistorial.codigo) }}</strong>
+                          <strong class="hito-etiqueta">{{
+                            etiquetaHito(hitoHistorial.codigo, hitoHistorial.descripcion)
+                          }}</strong>
                           <time>{{
                             fechaTexto(hitoHistorial.fechaReal ?? hitoHistorial.fecha)
                           }}</time>
                         </div>
-                        <p>{{ hitoHistorial.descripcion || 'Sin descripción' }}</p>
                         <div class="timeline-actions">
                           <span
                             class="commit-status"
@@ -899,8 +901,8 @@
                           <span class="badge">
                             {{ adjuntoHistorial.entidadTipo === 'hito' ? 'Hito' : 'Compromiso' }}
                           </span>
-                          @if (adjuntoHistorial.hitoCodigo) {
-                            <span class="badge">{{ codigoHito(adjuntoHistorial.hitoCodigo) }}</span>
+                          @if (codigoHitoCorto(adjuntoHistorial.hitoCodigo); as codigoAdjunto) {
+                            <span class="badge">{{ codigoAdjunto }}</span>
                           }
                           @if (adjuntoHistorial.descripcion) {
                             <span class="badge">{{ adjuntoHistorial.descripcion }}</span>

@@ -59,6 +59,7 @@ import {
   ESTADOS_ALERTA,
   ORDENES_ALERTA,
   PASO_APROBACION_DEFINITIVA,
+  PASO_ELABORACION,
   PASO_REMISION,
   PASO_REVISION,
   aAlerta,
@@ -647,6 +648,9 @@ export class AlertasPage {
   /** Envío a revisión disparado desde una fila que espera confirmación explícita. */
   readonly revisionFila = signal<{ alerta: Alerta; paso: number } | null>(null);
 
+  /** Devolución a elaboración disparada desde una fila que espera confirmación. */
+  readonly devolucionFila = signal<{ alerta: Alerta; paso: number } | null>(null);
+
   /** Paso al que puede volver una fila tras un cambio de flujo exitoso. */
   readonly deshacerFila = signal<{ id: string; pasoPrevio: number; codigo: string } | null>(null);
 
@@ -926,6 +930,15 @@ export class AlertasPage {
           seccion: 'Dirección OAIPCS',
         });
       }
+      if (aristaPermitida(roles, alerta.pasoActual, PASO_ELABORACION)) {
+        // Arista 3→1: la Dirección devuelve el candidato a elaboración cuando lo
+        // que falta es la alerta misma, no la corrección de forma.
+        acciones.push({
+          id: 'devolver-elaboracion',
+          etiqueta: 'Devolver a elaboración',
+          seccion: 'Dirección OAIPCS',
+        });
+      }
       if (this.puedeArchivar(alerta)) {
         acciones.push({
           id: 'archivar',
@@ -933,21 +946,33 @@ export class AlertasPage {
           seccion: 'Dirección OAIPCS',
         });
       }
-    } else if (puedeDevolver) {
-      acciones.push({
-        id: 'enviar-revision',
-        etiqueta: 'Enviar a revisión',
-        seccion: 'Flujo',
-      });
-    } else if (aristaPermitida(roles, alerta.pasoActual, PASO_REMISION)) {
-      // Arista 3→4: sin esta acción el circuito no podía salir de la aprobación
-      // definitiva desde la interfaz, porque el servicio de agente no es
-      // «Dirección» y «Enviar a revisión» no es su movimiento.
-      acciones.push({
-        id: 'remitir',
-        etiqueta: 'Ordenar remisión',
-        seccion: 'Flujo',
-      });
+    } else {
+      if (puedeDevolver) {
+        acciones.push({
+          id: 'enviar-revision',
+          etiqueta: 'Enviar a revisión',
+          seccion: 'Flujo',
+        });
+      }
+      if (aristaPermitida(roles, alerta.pasoActual, PASO_REMISION)) {
+        // Arista 3→4: sin esta acción el circuito no podía salir de la aprobación
+        // definitiva desde la interfaz, porque el servicio de agente no es
+        // «Dirección» y «Enviar a revisión» no es su movimiento.
+        acciones.push({
+          id: 'remitir',
+          etiqueta: 'Ordenar remisión',
+          seccion: 'Flujo',
+        });
+      }
+      if (aristaPermitida(roles, alerta.pasoActual, PASO_ELABORACION)) {
+        // Arista 2→1: el sectorista devuelve a elaboración un candidato que no
+        // sustenta la alerta (la Dirección usa la misma acción desde el paso 3).
+        acciones.push({
+          id: 'devolver-elaboracion',
+          etiqueta: 'Devolver a elaboración',
+          seccion: 'Flujo',
+        });
+      }
     }
 
     acciones.push(
@@ -974,6 +999,9 @@ export class AlertasPage {
       case 'remitir':
         this.enviarAccionFila(alerta, PASO_REMISION, alerta.pasoActual);
         break;
+      case 'devolver-elaboracion':
+        this.pedirDevolucionFila(alerta);
+        break;
       case 'modificar':
         this.abrir(alerta, 'editar');
         break;
@@ -993,6 +1021,7 @@ export class AlertasPage {
     this.aviso.set(null);
     this.aprobacionFila.set(null);
     this.revisionFila.set(null);
+    this.devolucionFila.set(null);
     this.deshacerFila.set(null);
     this.modoPanel.set(modo);
     this.alertaAbierta.set(alerta);
@@ -1005,6 +1034,8 @@ export class AlertasPage {
     this.errorGuardado.set(null);
     this.aviso.set(null);
     this.aprobacionFila.set(null);
+    this.revisionFila.set(null);
+    this.devolucionFila.set(null);
     this.deshacerFila.set(null);
     this.avisoAlta.set(null);
     this.modoPanel.set('ver');
@@ -1051,6 +1082,8 @@ export class AlertasPage {
     }
     this.deshacerFila.set(null);
     this.avisoFila.set(null);
+    this.revisionFila.set(null);
+    this.devolucionFila.set(null);
     this.aprobacionFila.set({ alerta, paso: PASO_APROBACION_DEFINITIVA });
   }
 
@@ -1091,6 +1124,7 @@ export class AlertasPage {
     this.deshacerFila.set(null);
     this.avisoFila.set(null);
     this.aprobacionFila.set(null);
+    this.devolucionFila.set(null);
     this.revisionFila.set({ alerta, paso: PASO_REVISION });
   }
 
@@ -1117,6 +1151,47 @@ export class AlertasPage {
 
   cancelarRevisionFila(): void {
     this.revisionFila.set(null);
+  }
+
+  private pedirDevolucionFila(alerta: Alerta): void {
+    if (!this.capacidades.puedeModificar(alerta.clasificacion)) {
+      this.avisoFila.set({
+        id: alerta.id,
+        texto: 'Su rol no permite devolver esta alerta a elaboración.',
+        tipo: 'error',
+      });
+      return;
+    }
+    this.deshacerFila.set(null);
+    this.avisoFila.set(null);
+    this.aprobacionFila.set(null);
+    this.revisionFila.set(null);
+    this.devolucionFila.set({ alerta, paso: PASO_ELABORACION });
+  }
+
+  confirmarDevolucionFila(): void {
+    const pendiente = this.devolucionFila();
+    if (!pendiente || this.enviandoFila()) return;
+
+    const { alerta, paso } = pendiente;
+    this.devolucionFila.set(null);
+    if (!alerta.id) return;
+
+    if (!this.capacidades.puedeModificar(alerta.clasificacion)) {
+      this.avisoFila.set({
+        id: alerta.id,
+        texto: 'Su rol no permite devolver esta alerta a elaboración.',
+        tipo: 'error',
+      });
+      return;
+    }
+
+    this.deshacerFila.set(null);
+    this.enviarAccionFila(alerta, paso, alerta.pasoActual);
+  }
+
+  cancelarDevolucionFila(): void {
+    this.devolucionFila.set(null);
   }
 
   deshacerAccionFila(): void {

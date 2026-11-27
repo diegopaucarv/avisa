@@ -124,6 +124,19 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     icono: 'compromisos',
   },
   {
+    grupo: 'SEGUIMIENTO',
+    etiqueta: 'Compromisos de mesas',
+    ruta: '/mesas/compromisos',
+    icono: 'compromisos',
+  },
+  {
+    grupo: 'SEGUIMIENTO',
+    etiqueta: 'Mesas de diálogo',
+    ruta: '/mesas',
+    icono: 'instituciones',
+    exacto: true,
+  },
+  {
     grupo: 'GESTIÓN DE IYC',
     etiqueta: 'Documentos',
     ruta: '/documentos',

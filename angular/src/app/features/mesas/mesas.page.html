@@ -1,0 +1,159 @@
+<section class="view-body" aria-labelledby="titulo-mesas">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-mesas">Mesas de diálogo</h1>
+      <p class="view-sub">Espacios de diálogo registrados y su vigencia</p>
+    </div>
+    <div class="view-actions">
+      <a class="button-secondary" routerLink="/mesas/compromisos">Compromisos de mesas</a>
+    </div>
+  </header>
+
+  <div class="reality-strip" role="group" aria-label="Indicadores de las mesas de diálogo">
+    <button
+      type="button"
+      [attr.aria-pressed]="indicadorActivo() === 'todos'"
+      (click)="filtrarIndicador('todos')"
+    >
+      <b>{{ resumen()?.mesas ?? 0 }}</b>
+      <span>mesas</span>
+    </button>
+    <button
+      type="button"
+      [attr.aria-pressed]="indicadorActivo() === 'vigente'"
+      (click)="filtrarIndicador('vigente')"
+    >
+      <b>{{ resumen()?.vigentes ?? 0 }}</b>
+      <span>vigentes</span>
+    </button>
+    <button
+      type="button"
+      [attr.aria-pressed]="indicadorActivo() === 'porVencer'"
+      (click)="filtrarIndicador('porVencer')"
+    >
+      <b>{{ resumen()?.porVencer ?? 0 }}</b>
+      <span>por vencer</span>
+    </button>
+    <button
+      type="button"
+      [attr.aria-pressed]="indicadorActivo() === 'vencido'"
+      (click)="filtrarIndicador('vencido')"
+    >
+      <b>{{ resumen()?.vencidas ?? 0 }}</b>
+      <span>vencidas</span>
+    </button>
+  </div>
+
+  <div class="filter-bar filter-bar-wrap">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por código, título o ámbito"
+        [value]="filtros().q"
+        aria-label="Buscar mesas de diálogo"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Vigencia
+      <select aria-label="Filtrar por vigencia" (change)="filtrarVigencia($event)">
+        <option value="" [selected]="!filtros().vigencia">Todas</option>
+        @for (estado of estados; track estado) {
+        <option [value]="estado" [selected]="estado === filtros().vigencia">{{ estado }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Naturaleza
+      <select aria-label="Filtrar por naturaleza" (change)="filtrarNaturaleza($event)">
+        <option value="" [selected]="!filtros().naturaleza">Todas</option>
+        @for (naturaleza of naturalezas; track naturaleza) {
+        <option [value]="naturaleza" [selected]="naturaleza === filtros().naturaleza">
+          {{ naturaleza }}
+        </option>
+        }
+      </select>
+    </label>
+
+    <button
+      type="button"
+      class="button-secondary"
+      [disabled]="!hayFiltros()"
+      (click)="limpiar()"
+    >
+      Limpiar filtros
+    </button>
+  </div>
+
+  <app-mesas-graficos />
+
+  @if (error(); as fallo) {
+  <div class="empty-state" role="alert">
+    <p>{{ fallo.message }}</p>
+    <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+  </div>
+  } @else {
+  <app-tabla
+    [columnas]="columnas"
+    [filas]="mesas()"
+    [cargando]="cargando()"
+    vacio="No hay mesas que coincidan con los filtros."
+    [claveFila]="'codigo'"
+    [clicable]="true"
+    resumen="Mesas de diálogo y su vigencia"
+    (filaClic)="abrir($any($event.fila))"
+  >
+    <ng-template appCeldaTabla="mesa" let-fila>
+      <div class="celda-mesa">
+        <span class="table-link mesa-codigo">{{ fila.codigo }}</span>
+        @if (fila.titulo) {
+        <span class="mesa-titulo">{{ fila.titulo }}</span>
+        } @else {
+        <span class="micro-label">Sin título registrado</span>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="vigencia" let-fila>
+      <span [class]="'commit-status ' + claseVigencia(fila.estadoVigencia)">
+        {{ fila.estadoVigencia }}
+      </span>
+    </ng-template>
+
+    <ng-template appCeldaTabla="ambito" let-fila>
+      {{ fila.ambito || '—' }}
+    </ng-template>
+
+    <ng-template appCeldaTabla="compromisos" let-fila>
+      {{ avanceCompromisos(fila) }}
+    </ng-template>
+
+    <ng-template appCeldaTabla="miembros" let-fila>
+      {{ fila.miembros }}
+    </ng-template>
+  </app-tabla>
+
+  @if (total() > 0) {
+  <app-paginacion
+    [pagina]="filtros().pagina"
+    [tamano]="filtros().tamano"
+    [total]="total()"
+    (paginaCambia)="cambiarPagina($event)"
+    (tamanoCambia)="cambiarTamano($event)"
+  />
+  } }
+
+  @if (resumen()?.compromisos === 0) {
+  <p class="form-hint">
+    Las mesas aún no tienen compromisos vinculados: la vista de compromisos se llenará al aplicar
+    la migración 81.
+  </p>
+  }
+
+  @if (seleccionada(); as codigo) {
+  <app-mesa-panel [codigo]="codigo" (cerrado)="cerrarPanel()" />
+  }
+</section>

@@ -956,6 +956,9 @@ export type AccionFlujo = {
 /** Paso 3: la aprobación definitiva de la Dirección OAIPCS. */
 export const PASO_APROBACION_DEFINITIVA = 3;
 
+/** Paso 1: elaboración del candidato por el sectorista. */
+export const PASO_ELABORACION = 1;
+
 /** Paso 2: revisión / validación previa a la que se devuelve una alerta. */
 export const PASO_REVISION = 2;
 

@@ -1,0 +1,249 @@
+<div class="drawer-scrim" (click)="alFondo($event)">
+  <aside
+    #panel
+    class="drawer"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="panel-mesa-titulo"
+  >
+    <header class="drawer-head">
+      <div>
+        <p class="micro-label">{{ codigo() }}</p>
+        <h2 id="panel-mesa-titulo">{{ mesa()?.titulo ?? 'Mesa de diálogo' }}</h2>
+      </div>
+      <button
+        type="button"
+        class="button-secondary"
+        aria-label="Cerrar el panel de la mesa"
+        (click)="cerrar()"
+      >
+        <app-icono nombre="cerrar" [tamano]="14" />
+        Cerrar
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      @if (cargando()) {
+        <div class="mesa-skeleton" role="status" aria-label="Cargando la ficha de la mesa">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      } @else if (estado() === 'error') {
+        <div class="empty-state" role="alert">
+          @if (noEncontrada()) {
+            <strong>La mesa no existe</strong>
+            <p>No hay una mesa de diálogo con el código «{{ codigo() }}».</p>
+          } @else {
+            <p>{{ error()?.message }}</p>
+          }
+          <div class="mesa-acciones">
+            <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+            <button type="button" class="button-secondary" (click)="cerrar()">Cerrar</button>
+          </div>
+        </div>
+      } @else if (detalle(); as ficha) {
+        <div class="segmented mesa-tabs" role="group" aria-label="Secciones de la mesa">
+          <button
+            type="button"
+            [attr.aria-pressed]="pestana() === 'resumen'"
+            (click)="verPestana('resumen')"
+          >
+            Resumen
+          </button>
+          <button
+            type="button"
+            [attr.aria-pressed]="pestana() === 'integrantes'"
+            (click)="verPestana('integrantes')"
+          >
+            Integrantes ({{ ficha.integrantes.length }})
+          </button>
+          <button
+            type="button"
+            [attr.aria-pressed]="pestana() === 'compromisos'"
+            (click)="verPestana('compromisos')"
+          >
+            Compromisos ({{ ficha.compromisos.length }})
+          </button>
+        </div>
+
+        @if (pestana() === 'resumen') {
+          <section class="detail-section" aria-labelledby="mesa-resumen">
+            <h3 id="mesa-resumen">Ficha de la mesa</h3>
+            <p class="mesa-codigo-grande">{{ ficha.mesa.codigo }}</p>
+            <p class="mesa-titulo-grande">{{ ficha.mesa.titulo }}</p>
+
+            <div class="mesa-chips">
+              <span [class]="'commit-status ' + claseVigencia(ficha.mesa.estadoVigencia)">
+                {{ ficha.mesa.estadoVigencia }}
+              </span>
+              <span class="badge">{{ ficha.mesa.naturaleza }}</span>
+              @if (ficha.mesa.tipoInstrumento) {
+                <span class="badge">{{ ficha.mesa.tipoInstrumento }}</span>
+              }
+              @if (ficha.mesa.ambito) {
+                <span class="badge">{{ ficha.mesa.ambito }}</span>
+              }
+            </div>
+
+            <dl class="mesa-datos">
+              <div>
+                <dt>Instalación</dt>
+                <dd>{{ fechaTexto(ficha.mesa.fechaInstalacion) }}</dd>
+              </div>
+              <div>
+                <dt>Fin de vigencia</dt>
+                <dd>{{ fechaTexto(ficha.mesa.fechaFinVigencia) }}</dd>
+              </div>
+              <div>
+                <dt>Miembros</dt>
+                <dd>{{ ficha.mesa.miembros }}</dd>
+              </div>
+              <div>
+                <dt>Compromisos</dt>
+                <dd>{{ avanceCompromisos(ficha.mesa) }}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="detail-section" aria-labelledby="mesa-marco">
+            <h3 id="mesa-marco">Objetivo y marco</h3>
+            <dl class="mesa-datos">
+              <div>
+                <dt>Objetivo</dt>
+                <dd>{{ ficha.mesa.objetivo || '—' }}</dd>
+              </div>
+              <div>
+                <dt>Base legal</dt>
+                <dd>{{ ficha.mesa.baseLegal || '—' }}</dd>
+              </div>
+              <div>
+                <dt>Fecha de la norma</dt>
+                <dd>{{ fechaTexto(ficha.mesa.fechaNorma) }}</dd>
+              </div>
+              <div>
+                <dt>Rol que produce</dt>
+                <dd>{{ ficha.mesa.rolProduce || '—' }}</dd>
+              </div>
+              <div>
+                <dt>Documento de designación</dt>
+                <dd>{{ ficha.mesa.docDesignacion || '—' }}</dd>
+              </div>
+              <div>
+                <dt>Evidencia</dt>
+                <dd>
+                  @if (ficha.mesa.linkEvidencia; as enlace) {
+                    @if (esEnlace(enlace)) {
+                      <a [href]="enlace" target="_blank" rel="noopener">{{ enlace }}</a>
+                    } @else {
+                      {{ enlace }}
+                    }
+                  } @else {
+                    —
+                  }
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="detail-section" aria-labelledby="mesa-caso">
+            <h3 id="mesa-caso">Caso vinculado</h3>
+            @if (ficha.caso; as casoVinculado) {
+              <div class="mesa-caso">
+                <a class="table-link" [routerLink]="['/casos', casoVinculado.codigo]">
+                  {{ casoVinculado.codigo }}
+                </a>
+                <span class="badge">{{ casoVinculado.estado }}</span>
+                @if (casoVinculado.titulo) {
+                  <span class="mesa-caso-titulo">{{ casoVinculado.titulo }}</span>
+                }
+              </div>
+            } @else {
+              <p class="form-hint">Sin caso vinculado: la migración 81 aún no se aplicó.</p>
+            }
+          </section>
+        } @else if (pestana() === 'integrantes') {
+          <section class="detail-section" aria-labelledby="mesa-integrantes">
+            <h3 id="mesa-integrantes">Integrantes</h3>
+            @if (integrantesPorRol().length === 0) {
+              <p class="form-hint">La mesa no registra integrantes.</p>
+            } @else {
+              <ul class="mesa-integrantes">
+                @for (grupo of integrantesPorRol(); track grupo.rol) {
+                  <li>
+                    <span class="mesa-rol">{{ grupo.rol }}</span>
+                    <ul class="mesa-personas">
+                      @for (persona of grupo.personas; track persona.id) {
+                        <li class="mesa-persona">
+                          <strong>{{ persona.nombre }}</strong>
+                          @if (persona.docDesignacion; as documento) {
+                            @if (esEnlace(documento)) {
+                              <a [href]="documento" target="_blank" rel="noopener">Designación</a>
+                            } @else {
+                              <span>{{ documento }}</span>
+                            }
+                          }
+                        </li>
+                      }
+                    </ul>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        } @else {
+          <section class="detail-section" aria-labelledby="mesa-compromisos">
+            <h3 id="mesa-compromisos">Compromisos</h3>
+            @if (ficha.compromisos.length === 0) {
+              <p class="form-hint">
+                La mesa no tiene compromisos vinculados. Se llenarán cuando se aplique la migración
+                81.
+              </p>
+            } @else {
+              <ul class="mesa-compromisos">
+                @for (compromiso of ficha.compromisos; track compromiso.id) {
+                  <li class="mesa-compromiso">
+                    <div class="mesa-compromiso-cabecera">
+                      <strong>{{ compromiso.codigo }}</strong>
+                      <span [class]="'commit-status ' + claseEstadoCompromiso(compromiso.estado)">
+                        {{ compromiso.estado }}
+                      </span>
+                    </div>
+                    <p class="mesa-compromiso-texto">{{ compromiso.titulo }}</p>
+                    <div class="mesa-hitos-linea">
+                      @if (compromiso.hitos.length > 0) {
+                        @for (hito of compromiso.hitos; track $index) {
+                          <span
+                            class="commit-status"
+                            [class]="'commit-status ' + claseEstadoHito(hito.estado)"
+                            [attr.title]="etiquetaHito(hito.codigo, hito.descripcion)"
+                          >
+                            {{ etiquetaHito(hito.codigo, hito.descripcion) }}
+                          </span>
+                          @if (hito.fecha) {
+                            <small class="mesa-hito-fecha">{{ fechaTexto(hito.fecha) }}</small>
+                          }
+                        }
+                      } @else {
+                        <span class="form-hint">Sin hitos registrados</span>
+                      }
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        }
+      } @else {
+        <div class="empty-state">
+          <p>La mesa no tiene ficha disponible.</p>
+          <div class="mesa-acciones">
+            <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+            <button type="button" class="button-secondary" (click)="cerrar()">Cerrar</button>
+          </div>
+        </div>
+      }
+    </div>
+  </aside>
+</div>

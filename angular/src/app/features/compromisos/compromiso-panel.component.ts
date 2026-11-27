@@ -32,6 +32,7 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 import { salirModal } from '../../shared/ui/modal-salida';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
 import { formatearFechaHora } from '../../shared/formato-fecha';
+import { codigoHitoCorto, etiquetaHito as etiquetaHitoDe } from '../../shared/hito-texto';
 import {
   ALCANCES,
   CLASIFICACIONES_ALCANCE,
@@ -475,6 +476,9 @@ export class CompromisoPanelComponent {
   /** Lecturas legibles de los vínculos nuevos; las plantillas no repiten reglas. */
   readonly etiquetaDemanda = etiquetaDemandaVinculada;
   readonly etiquetaPuntoFocal = etiquetaPuntoFocalDe;
+  /** Texto de hito compartido con las demás vistas (`shared/hito-texto`). */
+  readonly codigoHitoCorto = codigoHitoCorto;
+  readonly etiquetaHito = etiquetaHitoDe;
 
   readonly editando = signal(false);
   readonly guardando = signal(false);

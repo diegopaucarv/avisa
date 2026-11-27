@@ -1,0 +1,140 @@
+<section class="view-body" aria-labelledby="titulo-compromisos-mesas">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-compromisos-mesas">Compromisos de mesas</h1>
+      <p class="view-sub">Compromisos de los casos vinculados a mesas de diálogo</p>
+    </div>
+    <div class="view-actions">
+      <a class="button-secondary" routerLink="/mesas">Mesas de diálogo</a>
+    </div>
+  </header>
+
+  <div class="filter-bar">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por código o descripción del compromiso"
+        [value]="filtros().q"
+        aria-label="Buscar compromisos de mesas"
+        (input)="buscar($event)"
+      />
+    </label>
+
+    <label class="select-filter">
+      Mesa
+      <select aria-label="Filtrar por mesa de diálogo" (change)="filtrarMesa($event)">
+        <option value="" [selected]="!filtros().mesa">Todas</option>
+        @for (mesa of mesas(); track mesa.codigo) {
+          <option [value]="mesa.codigo" [selected]="mesa.codigo === filtros().mesa">
+            {{ mesa.codigo }} — {{ mesa.titulo }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <label class="select-filter">
+      Estado
+      <select aria-label="Filtrar por estado del compromiso" (change)="filtrarEstado($event)">
+        <option value="" [selected]="!filtros().estado">Todos</option>
+        @for (estado of estados; track estado) {
+          <option [value]="estado" [selected]="estado === filtros().estado">{{ estado }}</option>
+        }
+      </select>
+    </label>
+
+    <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
+  </div>
+
+  <app-mesas-graficos vista="compromisos" />
+
+  @if (estado() === 'error') {
+    <div class="empty-state" role="alert">
+      <p>{{ error()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else if (!cargando() && total() === 0) {
+    <div class="empty-state">
+      <strong>Sin compromisos vinculados a mesas</strong>
+      <p>
+        Las mesas de diálogo todavía no tienen compromisos vinculados. La vista se llenará cuando
+        se aplique la migración 81, que crea el caso espejo de cada mesa y lo enlaza con sus
+        compromisos.
+      </p>
+      <a class="table-link" routerLink="/mesas">Ver mesas de diálogo</a>
+    </div>
+  } @else {
+    <app-tabla
+      [columnas]="columnas"
+      [filas]="compromisos()"
+      [cargando]="cargando()"
+      [clicable]="true"
+      vacio="No hay compromisos para los filtros seleccionados."
+      (filaClic)="alClicFila($event)"
+    >
+      <ng-template appCeldaTabla="compromiso" let-fila>
+        <div class="celda-compromiso">
+          <span class="table-link compromiso-codigo">{{ fila.codigo }}</span>
+          <span class="compromiso-accion">{{ fila.titulo }}</span>
+        </div>
+      </ng-template>
+
+      <ng-template appCeldaTabla="mesa" let-fila>
+        <div class="celda-mesa">
+          @if (fila.mesaCodigo) {
+            <button
+              type="button"
+              class="table-link mesa-codigo"
+              [attr.aria-label]="'Abrir la mesa ' + fila.mesaCodigo"
+              (click)="abrirMesa(fila.mesaCodigo); $event.stopPropagation()"
+            >
+              {{ fila.mesaCodigo }}
+            </button>
+          } @else {
+            <span aria-hidden="true">—</span>
+          }
+          @if (fila.mesaTitulo) {
+            <span class="mesa-titulo-tabla">{{ fila.mesaTitulo }}</span>
+          }
+        </div>
+      </ng-template>
+
+      <ng-template appCeldaTabla="estado" let-fila>
+        <span [class]="'commit-status ' + claseEstado(fila.estado)">{{ fila.estado }}</span>
+      </ng-template>
+
+      <ng-template appCeldaTabla="seguimiento" let-fila>
+        <div class="celda-hitos">
+          <span class="hitos-cuenta">{{ fila.hitosCumplidos }}/{{ fila.hitosTotal }}</span>
+          @if (fila.proximoHito; as proximo) {
+            <span
+              class="celda-hitos-texto"
+              [attr.title]="etiquetaHito(proximo.codigo, proximo.descripcion)"
+            >
+              {{ etiquetaHito(proximo.codigo, proximo.descripcion) }}
+            </span>
+            <small class="hito-fecha">{{ fechaTexto(proximo.fecha) }}</small>
+          } @else if (fila.hitosTotal > 0) {
+            <small class="hito-fecha">Sin próximo hito con fecha</small>
+          } @else {
+            <small class="hito-fecha">Sin hitos registrados</small>
+          }
+        </div>
+      </ng-template>
+    </app-tabla>
+
+    @if (total() > 0) {
+      <app-paginacion
+        [pagina]="filtros().pagina"
+        [tamano]="filtros().tamano"
+        [total]="total()"
+        (paginaCambia)="cambiarPagina($event)"
+        (tamanoCambia)="cambiarTamano($event)"
+      />
+    }
+  }
+
+  @if (mesaAbierta(); as codigo) {
+    <app-mesa-panel [codigo]="codigo" (cerrado)="cerrarPanel()" />
+  }
+</section>
