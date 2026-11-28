@@ -1085,6 +1085,13 @@ export class LocalesPage {
 
   cerrarMensaje(): void {
     this.mensajeAbierto.set(false);
+
+    // Al volver a la ficha, el foco no debe quedarse en el `body`.
+    if (this.seleccionado()) {
+      afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }), {
+        injector: this.injector,
+      });
+    }
   }
 
   alCambiarDestinatarios(lista: DestinatarioMensaje[]): void {
