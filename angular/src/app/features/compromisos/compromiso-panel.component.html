@@ -14,14 +14,37 @@
           {{ modoAlta() ? 'Registrar compromiso' : cabecera().accion }}
         </h2>
       </div>
-      <button
-        type="button"
-        class="icon-button"
-        aria-label="Cerrar el panel del compromiso"
-        (click)="cerrar()"
-      >
-        <app-icono nombre="cerrar" [tamano]="18" />
-      </button>
+      <div class="panel-cabecera-acciones">
+        @if (!formularioVisible()) {
+          @if (puedeAnular()) {
+            <app-boton-accion
+              icono="papelera"
+              etiqueta="Anular"
+              tono="peligro"
+              [ariaLabel]="'Anular el compromiso ' + cabecera().codigo"
+              [titulo]="'Anular el compromiso ' + cabecera().codigo"
+              (accion)="anular.emit()"
+            />
+          }
+          @if (puedeModificar()) {
+            <app-boton-accion
+              icono="lapiz"
+              etiqueta="Modificar"
+              [ariaLabel]="'Modificar el compromiso ' + cabecera().codigo"
+              [titulo]="'Modificar el compromiso ' + cabecera().codigo"
+              (accion)="abrirEdicion()"
+            />
+          }
+        }
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar el panel del compromiso"
+          (click)="cerrar()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </div>
     </header>
 
     <div class="drawer-body">
@@ -974,38 +997,33 @@
       }
     </div>
 
-    <footer class="drawer-foot">
-      @if (!puedeModificar()) {
-        <p class="form-hint panel-permiso">
-          @if (modoAlta()) {
-            Su rol no permite registrar compromisos.
-          } @else {
-            Sólo lectura: su rol no puede modificar este compromiso.
-          }
-        </p>
-      }
-      @if (formularioVisible()) {
-        <button
-          type="button"
-          class="button-secondary"
-          [disabled]="guardando()"
-          (click)="cancelar()"
-        >
-          Cancelar
-        </button>
-        <button type="button" class="button-primary" [disabled]="guardando()" (click)="guardar()">
-          {{ guardando() ? 'Guardando…' : modoAlta() ? 'Registrar compromiso' : 'Guardar cambios' }}
-        </button>
-      } @else {
-        @if (puedeAnular()) {
-          <button type="button" class="button-danger" (click)="anular.emit()">
-            Anular compromiso
+    @if (formularioVisible() || !puedeModificar()) {
+      <footer class="drawer-foot">
+        @if (!puedeModificar()) {
+          <p class="form-hint panel-permiso">
+            @if (modoAlta()) {
+              Su rol no permite registrar compromisos.
+            } @else {
+              Sólo lectura: su rol no puede modificar este compromiso.
+            }
+          </p>
+        }
+        @if (formularioVisible()) {
+          <button
+            type="button"
+            class="button-secondary"
+            [disabled]="guardando()"
+            (click)="cancelar()"
+          >
+            Cancelar
+          </button>
+          <button type="button" class="button-primary" [disabled]="guardando()" (click)="guardar()">
+            {{
+              guardando() ? 'Guardando…' : modoAlta() ? 'Registrar compromiso' : 'Guardar cambios'
+            }}
           </button>
         }
-        @if (puedeModificar()) {
-          <button type="button" class="button-primary" (click)="abrirEdicion()">Modificar</button>
-        }
-      }
-    </footer>
+      </footer>
+    }
   </aside>
 </div>

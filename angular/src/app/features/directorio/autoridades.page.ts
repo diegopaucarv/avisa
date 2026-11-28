@@ -44,11 +44,14 @@ import {
 /**
  * Directorio · «Autoridades y agentes».
  *
- * Vista de solo lectura que separa a las autoridades y a los agentes del sector
- * del listado general de actores. Consume `GET /api/v1/autoridades`, que aplica
- * el único criterio verificable de la base: las personas registradas como
- * «Actor público». El reparto autoridad/agente sale del cargo y la institución
- * del dominio del correo de contacto; el criterio se declara en pantalla.
+ * Separa a las autoridades y a los agentes del sector del listado general de
+ * actores. Consume `GET /api/v1/autoridades`, que aplica el único criterio
+ * verificable de la base: las personas registradas como «Actor público». El
+ * reparto autoridad/agente sale del cargo y la institución del dominio del
+ * correo de contacto.
+ *
+ * La ficha permite editar la persona reutilizando `actor-panel`, con la misma
+ * comprobación de permisos que el resto del directorio.
  *
  * El listado no trae datos personales: el DNI y el teléfono se piden sólo al
  * pulsar «Ver datos personales», con un motivo auditado. Sin permiso, la ficha
@@ -145,8 +148,9 @@ const SIN_DATO = '—';
 const MOTIVO_PII = 'Consulta de datos personales de una autoridad del directorio';
 
 /**
- * Espejo de `CRITERIO_AUTORIDADES` de `lib/db/repos/autoridades.ts`, para que la
- * nota se vea aunque la API no responda. Si cambia el criterio, cambia en ambos.
+ * Espejo de `CRITERIO_AUTORIDADES` de `lib/db/repos/autoridades.ts`, para que
+ * el criterio mapeado no quede vacío si la API no lo envía. Si cambia el
+ * criterio, cambia en ambos.
  */
 const CRITERIO_LOCAL: AutoridadCriterio = {
   universo:
@@ -349,9 +353,6 @@ export class AutoridadesPage {
   readonly estado = this.listado.estado;
   readonly error = this.listado.error;
 
-  readonly criterio = computed(() => this.listado.valor()?.criterio ?? CRITERIO_LOCAL);
-  readonly notaCriterio = computed(() => `${this.criterio().universo} ${this.criterio().tipo}`);
-
   readonly tipos = computed(() => this.listado.valor()?.facets.tipos ?? []);
   readonly instituciones = computed(() => this.listado.valor()?.facets.instituciones ?? []);
   readonly regiones = computed(() => this.listado.valor()?.facets.regiones ?? []);
@@ -493,7 +494,11 @@ export class AutoridadesPage {
       .subscribe({
         next: (bruto) => {
           this.cargandoEdicion.set(false);
-          this.actorEdicion.set(aActorDirectorio(bruto));
+          // `GET /v1/actors/{uid}` devuelve el detalle envuelto (`{ actor, … }`);
+          // pasarlo tal cual a `aActorDirectorio` dejaría un actor vacío.
+          const registro = esRegistro(bruto) ? bruto : {};
+          const actor = esRegistro(registro['actor']) ? registro['actor'] : registro;
+          this.actorEdicion.set(aActorDirectorio(actor));
         },
         error: (fallo: unknown) => {
           this.cargandoEdicion.set(false);
@@ -676,8 +681,8 @@ export class AutoridadesPage {
     }, 300);
   }
 
-  cambiarTipo(tipo: string): void {
-    void this.actualizar({ tipo, pagina: 1 });
+  cambiarTipo(evento: Event): void {
+    void this.actualizar({ tipo: (evento.target as HTMLSelectElement).value, pagina: 1 });
   }
 
   cambiarInstitucion(evento: Event): void {

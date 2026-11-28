@@ -29,6 +29,7 @@ import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aCaso, aDetalleCaso, type DemandaCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { esDialogoSuperior, salirModal } from '../../shared/ui/modal-salida';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
@@ -179,7 +180,7 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
 
 @Component({
   selector: 'app-compromiso-panel',
-  imports: [IconoComponent, GlosarioComponent, AdjuntosPanelComponent],
+  imports: [IconoComponent, BotonAccionComponent, GlosarioComponent, AdjuntosPanelComponent],
   templateUrl: './compromiso-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -399,6 +400,12 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
     .panel-permiso {
       margin: 0 auto 0 0;
       align-self: center;
+    }
+    .panel-cabecera-acciones {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
     }
     .panel-caso-lista {
       display: flex;

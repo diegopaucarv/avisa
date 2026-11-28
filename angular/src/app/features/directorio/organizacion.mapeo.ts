@@ -7,16 +7,13 @@
  * `core.cat_tipos_organizacion`.
  *
  * No hay campo de distrito: `core.organizaciones` no tiene `distrito_id`, y
- * esta capa no lo inventa.
+ * esta capa no lo inventa. La región no está en `core.organizaciones` sino en
+ * el actor colectivo (`core.actores.region_id`) y `GET /v1/organizaciones` no
+ * la proyecta: se rellena desde el detalle del actor en la página.
  */
 
-import {
-  booleano,
-  esRegistro,
-  numero,
-  texto,
-  type Registro,
-} from '../../dominio/mapeo';
+import { booleano, esRegistro, numero, texto, type Registro } from '../../dominio/mapeo';
+import { aActorDirectorio, type ActorDirectorio } from './directorio.mapeo';
 
 /**
  * `core.cat_tipos_organizacion.nombre` completo (7 filas verificadas en la
@@ -45,6 +42,12 @@ export type OrganizacionDirectorio = {
   ruc: string | null;
   razonSocial: string | null;
   numeroIntegrantes: number | null;
+  /**
+   * Región del actor colectivo (`core.actores.region_id`). El listado no la
+   * proyecta hoy; la página la completa desde `GET /v1/actors/{uid}` o, en su
+   * defecto, la deriva de la región de sus integrantes.
+   */
+  region: string | null;
   /** Fechas ISO `YYYY-MM-DD`; el formato de pantalla lo pone la página. */
   vigenciaDesde: string | null;
   vigenciaHasta: string | null;
@@ -78,6 +81,7 @@ export function aOrganizacionDirectorio(bruto: unknown): OrganizacionDirectorio 
     ruc: texto(registro, ['ruc']),
     razonSocial: texto(registro, ['razonSocial', 'razon_social']),
     numeroIntegrantes: numero(registro, ['numeroIntegrantes', 'numero_integrantes']),
+    region: texto(registro, ['region']),
     vigenciaDesde: texto(registro, ['vigenciaDesde', 'vigencia_desde']),
     vigenciaHasta: texto(registro, ['vigenciaHasta', 'vigencia_hasta']),
     estadoOspa: texto(registro, ['estadoOspa', 'estado_ospa']),
@@ -95,4 +99,18 @@ export function aOrganizacionDirectorio(bruto: unknown): OrganizacionDirectorio 
     representante: texto(registro, ['representante']),
     activo: booleano(registro, ['activo']),
   };
+}
+
+/**
+ * Respuesta de actor de la API → dominio del directorio.
+ *
+ * `GET /v1/actors/{uid}` envuelve el actor (`{ actor, casos, organizacion, … }`)
+ * mientras que las respuestas de escritura (PATCH y baja lógica) lo devuelven
+ * plano. Desenvolver aquí evita pasar el sobre a `aActorDirectorio`, que
+ * produciría un actor vacío (`id: ''`, nombre «Sin nombre»).
+ */
+export function aActorDesdeApi(bruto: unknown): ActorDirectorio {
+  const registro: Registro = esRegistro(bruto) ? bruto : {};
+  const actor = registro['actor'];
+  return aActorDirectorio(esRegistro(actor) ? actor : registro);
 }

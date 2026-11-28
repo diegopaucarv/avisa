@@ -27,6 +27,7 @@ import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { esDialogoSuperior, salirModal } from '../../shared/ui/modal-salida';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
@@ -107,7 +108,7 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
  */
 @Component({
   selector: 'app-documento-panel',
-  imports: [IconoComponent, AdjuntosPanelComponent],
+  imports: [IconoComponent, BotonAccionComponent, AdjuntosPanelComponent],
   templateUrl: './documento-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -125,6 +126,13 @@ function diferenciaTexto(valor: string, original: string | null): string | null 
       flex-direction: column;
       gap: 3px;
       min-width: 0;
+    }
+
+    .panel-cabecera-acciones {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
     }
 
     .panel-codigo {

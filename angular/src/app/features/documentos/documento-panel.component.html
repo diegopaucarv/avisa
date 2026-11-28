@@ -220,14 +220,37 @@
           </div>
         </div>
 
-        <button
-          type="button"
-          class="icon-button"
-          aria-label="Cerrar el panel del documento"
-          (click)="cerrarConSalida()"
-        >
-          <app-icono nombre="cerrar" [tamano]="18" />
-        </button>
+        <div class="panel-cabecera-acciones">
+          @if (!editando()) {
+            @if (puedeModificar()) {
+              <app-boton-accion
+                icono="lapiz"
+                etiqueta="Modificar"
+                [ariaLabel]="'Modificar el documento ' + d.codigo"
+                [titulo]="'Modificar el documento ' + d.codigo"
+                (accion)="iniciarEdicion()"
+              />
+            }
+            @if (puedeAnular()) {
+              <app-boton-accion
+                icono="papelera"
+                etiqueta="Anular"
+                tono="peligro"
+                [ariaLabel]="'Anular el documento ' + d.codigo"
+                [titulo]="'Anular el documento ' + d.codigo"
+                (accion)="anular.emit()"
+              />
+            }
+          }
+          <button
+            type="button"
+            class="icon-button"
+            aria-label="Cerrar el panel del documento"
+            (click)="cerrarConSalida()"
+          >
+            <app-icono nombre="cerrar" [tamano]="18" />
+          </button>
+        </div>
       </header>
 
       <div class="drawer-body panel-cuerpo">
@@ -406,19 +429,6 @@
           @if (errorEstado(); as errorFlujo) {
             <p class="form-error" role="alert">{{ errorFlujo }}</p>
           }
-
-          <div class="panel-formulario-acciones">
-            @if (puedeModificar()) {
-              <button type="button" class="button-secondary" (click)="iniciarEdicion()">
-                Modificar
-              </button>
-            } @else {}
-            @if (puedeAnular()) {
-              <button type="button" class="button-danger" (click)="anular.emit()">
-                Anular documento
-              </button>
-            }
-          </div>
         }
 
         <section class="detail-section" aria-labelledby="documento-panel-datos">

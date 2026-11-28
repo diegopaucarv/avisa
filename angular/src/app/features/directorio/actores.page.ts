@@ -2,17 +2,15 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  ElementRef,
   computed,
   effect,
   inject,
   input,
   signal,
-  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, map, Subject, takeUntil } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
 import {
@@ -39,7 +37,6 @@ import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import {
   AnularPanelComponent,
@@ -48,19 +45,17 @@ import {
 import { ActorPanelComponent } from './actor-panel.component';
 import { ActorPanelAltaComponent, type NaturalezaAlta } from './actor-panel-alta.component';
 import { ActorPanelFusionComponent } from './actor-panel-fusion.component';
-import { alternarActorLista, etiquetaItemLista, quitarActorListaPorIndice } from './lista-temporal';
-import { crearXlsxPadron, filaPadronDeActor } from './padron-asistencia';
-import { fechaLocalIso } from './padron-fecha';
 import {
   aActorDirectorio,
   aCatalogosDirectorio,
   aMembresiaActor,
-  aPiiLote,
   SIN_DATO,
   type ActorDirectorio,
   type CatalogosDirectorio,
   type MembresiaActor,
 } from './directorio.mapeo';
+import { ListaAsistenciaComponent } from './lista-asistencia.component';
+import { ListaAsistenciaService } from './lista-asistencia.service';
 import { HttpClient } from '@angular/common/http';
 
 type FiltrosActores = {
@@ -87,16 +82,6 @@ const FILTROS_INICIALES: FiltrosActores = {
 
 /** Referencia estable para «sin membresías»; evita arrays nuevos en cada lectura. */
 const SIN_MEMBRESIAS: MembresiaActor[] = [];
-
-/**
- * Motivo que se registra al pedir el DNI y el celular para la lista de firmas.
- * La base lo guarda en `audit.datos_personales_acceso` antes de descifrar, así
- * que describe la finalidad concreta y no un texto de relleno.
- */
-const MOTIVO_PII_PADRON = 'Lista de asistencia';
-
-/** DNI y celular de un actor, tal como los consume el padrón. */
-type PiiActorPadron = { dni: string | null; telefono: string | null };
 
 /**
  * Directorio · Actores.
@@ -126,6 +111,7 @@ type PiiActorPadron = { dni: string | null; telefono: string | null };
     ActorPanelFusionComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
+    ListaAsistenciaComponent,
     ThOrdenDirective,
   ],
   templateUrl: './actores.page.html',
@@ -142,7 +128,7 @@ type PiiActorPadron = { dni: string | null; telefono: string | null };
       width: 100%;
       max-width: 1420px;
       margin: 0 auto;
-      /* Espacio inferior extra: el botón flotante de la lista temporal vive ahí. */
+      /* Espacio inferior extra: el botón flotante de la lista de asistencia vive ahí. */
       padding: 27px 34px 96px;
       box-sizing: border-box;
     }
@@ -260,18 +246,6 @@ type PiiActorPadron = { dni: string | null; telefono: string | null };
       word-break: break-word;
     }
 
-    .col-acciones {
-      width: 1%;
-    }
-
-    .acciones-fila {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 4px;
-      white-space: nowrap;
-    }
-
     /* «sin dato» es información, no un error: tono apagado y sin icono de fallo. */
     .sin-dato {
       color: #97a1aa;
@@ -308,349 +282,9 @@ type PiiActorPadron = { dni: string | null; telefono: string | null };
       font-size: 12px;
     }
 
-    /*
-      Botón flotante de la lista temporal. z-index 60: por encima de la
-      cabecera (30) y del menú lateral (41), pero por debajo del velo modal
-      (80). El desplazamiento inferior respeta el área segura de los móviles.
-    */
-    .lista-temporal-fab {
-      position: fixed;
-      right: 28px;
-      bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-      z-index: 60;
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 12px 16px;
-      border: 1px solid #cfd9e2;
-      border-radius: 999px;
-      background: #1f5597;
-      color: #fff;
-      font: 600 13px/1 var(--font-body, inherit);
-      box-shadow: 0 10px 26px rgb(17 32 45 / 22%);
-      cursor: pointer;
-    }
-
-    .lista-temporal-fab:hover {
-      background: #1a4a85;
-    }
-
-    .lista-temporal-fab:focus-visible {
-      outline: 2px solid #3576c5;
-      outline-offset: 2px;
-    }
-
-    /* Sin actores la lista sigue accesible, pero no llama la atención. */
-    .lista-temporal-fab-vacia {
-      border-color: #cfd9e2;
-      background: #fff;
-      color: #465a6c;
-      box-shadow: 0 8px 20px rgb(17 32 45 / 12%);
-    }
-
-    .lista-temporal-fab-vacia:hover {
-      background: #f5f7f8;
-    }
-
-    .lista-temporal-contador {
-      min-width: 22px;
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: rgb(255 255 255 / 22%);
-      font-size: 12px;
-      font-variant-numeric: tabular-nums;
-      text-align: center;
-    }
-
-    .lista-temporal-fab-vacia .lista-temporal-contador {
-      background: #eef2f6;
-      color: #526577;
-    }
-
-    /* El cajón de la lista temporal no necesita los 600 px de una ficha. */
-    .lista-temporal-drawer {
-      width: min(420px, 100%);
-      gap: 12px;
-      padding: 18px 18px 14px;
-    }
-
-    .lista-temporal-cabecera {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .lista-temporal-cabecera h2 {
-      margin: 0;
-      color: #1a2b3e;
-      font: 700 15px/1.4 var(--font-display);
-    }
-
-    .lista-temporal-cabecera p,
-    .lista-temporal-vacia {
-      margin: 4px 0 0;
-      color: #7b8896;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .lista-temporal-acciones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    /* La lista puede crecer sin límite: sólo este cuerpo se desplaza. */
-    .lista-temporal-cuerpo {
-      flex: 1 1 auto;
-      min-height: 0;
-      overflow-y: auto;
-    }
-
-    .lista-temporal-items {
-      display: grid;
-      gap: 0;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .lista-temporal-items li {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      min-width: 0;
-      padding: 9px 0;
-      border-top: 1px solid #edf0f2;
-    }
-
-    .lista-temporal-items li > div {
-      display: grid;
-      gap: 3px;
-      min-width: 0;
-    }
-
-    .lista-temporal-items strong {
-      color: #465a6c;
-      font-size: 13px;
-    }
-
-    .lista-temporal-items span {
-      color: #8a98a5;
-      font-size: 12.5px;
-    }
-
-    .lista-quitar {
-      flex: none;
-      padding: 5px 8px;
-      border: 1px solid #dce3e8;
-      border-radius: 5px;
-      background: #fff;
-      color: #526577;
-      font-size: 12.5px;
-      cursor: pointer;
-    }
-
-    /* El diálogo nativo se centra en la ventana: margen automático y alto guiado. */
-    .padron-dialogo {
-      position: fixed;
-      inset: 0;
-      width: min(520px, calc(100vw - 32px));
-      height: fit-content;
-      max-height: calc(100vh - 40px);
-      margin: auto;
-      padding: 0;
-      border: 1px solid #dce5ef;
-      border-radius: 12px;
-      color: #26384a;
-      box-shadow: 0 24px 70px rgb(10 20 30 / 28%);
-    }
-
-    .padron-dialogo::backdrop {
-      background: var(--modal-velo);
-    }
-
-    .padron-form {
-      display: grid;
-      gap: 14px;
-      max-height: calc(100vh - 40px);
-      padding: 20px;
-      overflow-y: auto;
-    }
-
-    .padron-form h2,
-    .padron-form p {
-      margin: 0;
-    }
-
-    .padron-form h2 {
-      font: 700 17.5px/1.35 var(--font-display);
-    }
-
-    .padron-form p {
-      color: #68798a;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .padron-form label {
-      display: grid;
-      gap: 5px;
-      color: #465a6c;
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .padron-form input {
-      min-width: 0;
-      min-height: 38px;
-      padding: 0 10px;
-      border: 1px solid #cfd9e2;
-      border-radius: 6px;
-      background: #fff;
-      color: #26384a;
-      font: inherit;
-    }
-
-    .padron-form input:focus-visible {
-      outline: 2px solid #3576c5;
-      outline-offset: 2px;
-    }
-
-    /* Selección interna del diálogo: decide qué filas entran al Excel. */
-    .padron-seleccion {
-      display: grid;
-      gap: 8px;
-      padding: 10px 12px;
-      border: 1px solid #e1e8ef;
-      border-radius: 8px;
-      background: #f7f9fc;
-    }
-
-    .padron-seleccion-cabecera {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 6px 10px;
-    }
-
-    .padron-conteo {
-      color: #35495c;
-      font-size: 12.5px;
-      font-weight: 700;
-    }
-
-    .padron-seleccion-acciones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .padron-seleccion-acciones button {
-      padding: 3px 8px;
-      border: 1px solid #cfd9e2;
-      border-radius: 5px;
-      background: #fff;
-      color: #3576c5;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .padron-seleccion-acciones button:hover {
-      background: #eef4fb;
-    }
-
-    .padron-seleccion-acciones button:focus-visible {
-      outline: 2px solid #3576c5;
-      outline-offset: 2px;
-    }
-
-    .padron-lista {
-      max-height: 168px;
-      margin: 0;
-      padding: 0;
-      overflow-y: auto;
-      list-style: none;
-      border-top: 1px solid #e6edf4;
-    }
-
-    .padron-lista li {
-      border-bottom: 1px solid #e6edf4;
-    }
-
-    .padron-lista li:last-child {
-      border-bottom: 0;
-    }
-
-    .padron-form .padron-fila {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 2px;
-      color: #33475a;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    /* El estilo general del formulario agranda los inputs; aquí no aplica. */
-    .padron-form .padron-fila input {
-      flex: none;
-      width: 16px;
-      height: 16px;
-      min-height: 0;
-      margin: 0;
-      padding: 0;
-      accent-color: #3576c5;
-    }
-
-    .padron-form .padron-error {
-      margin: 0;
-      padding: 8px 10px;
-      border: 1px solid #f0b8b3;
-      border-radius: 6px;
-      background: #fef3f2;
-      color: #b42318;
-      font-size: 13px;
-      font-weight: 600;
-      line-height: 1.45;
-    }
-
-    /* Aviso de permisos: informativo, no un error de la descarga. */
-    .padron-form .padron-aviso {
-      margin: 0;
-      padding: 8px 10px;
-      border: 1px solid #e6d5a8;
-      border-radius: 6px;
-      background: #fdf8e8;
-      color: #7a5c08;
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    .padron-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 2px;
-    }
-
     @media (max-width: 720px) {
       .view-body {
         padding: 18px 16px 88px;
-      }
-
-      /* En pantallas angostas el botón se queda con el icono y el contador. */
-      .lista-temporal-fab {
-        right: 16px;
-        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-      }
-
-      .lista-temporal-fab-texto {
-        display: none;
       }
     }
   `,
@@ -732,8 +366,11 @@ export class ActoresPage {
   readonly actores = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
 
-  /** Selección de la tabla (página visible) para exportar. */
-  readonly seleccion = new SeleccionTabla();
+  /**
+   * Lista de asistencia de la sesión. Vive en un servicio raíz para no perderse
+   * al cambiar de página ni al navegar entre actores y organizaciones.
+   */
+  readonly lista = inject(ListaAsistenciaService);
 
   /** Orden local de la página visible. */
   readonly orden = new OrdenTabla<ActorDirectorio>();
@@ -751,6 +388,35 @@ export class ActoresPage {
     return this.actores()
       .map((actor) => actor.id)
       .filter((id): id is string => !!id);
+  }
+
+  /** Entradas de persona de la lista; las organizaciones se marcan en su vista. */
+  readonly personasEnLista = computed(() =>
+    this.lista.entradas().filter((entrada) => entrada.tipo === 'persona'),
+  );
+
+  /** Ids de personas en la lista, para la barra de selección y la exportación. */
+  readonly idsPersonasEnLista = computed(() =>
+    this.personasEnLista().map((entrada) => entrada.actor.id),
+  );
+
+  /** Estado de la casilla de cabecera: toda la página visible está en la lista. */
+  readonly todasVisiblesEnLista = computed(() => {
+    const ids = this.idsVisibles();
+    return ids.length > 0 && ids.every((id) => this.lista.esta(id));
+  });
+
+  /** Estado intermedio de la casilla de cabecera: hay parte de la página marcada. */
+  readonly algunasVisiblesEnLista = computed(() => {
+    const ids = this.idsVisibles();
+    const marcadas = ids.filter((id) => this.lista.esta(id)).length;
+    return marcadas > 0 && marcadas < ids.length;
+  });
+
+  /** Añade o quita toda la página visible de la lista de asistencia. */
+  alternarPaginaLista(evento: Event): void {
+    const marcar = (evento.target as HTMLInputElement).checked;
+    this.lista.alternarVarios(this.actores(), 'persona', marcar);
   }
 
   /**
@@ -855,36 +521,6 @@ export class ActoresPage {
   readonly enviandoBaja = signal(false);
   readonly errorBaja = signal<string | null>(null);
 
-  /** Selección de trabajo en memoria, conservada al cambiar página o filtros. */
-  readonly listaTemporal = signal<ActorDirectorio[]>([]);
-  readonly listaTemporalAbierta = signal(false);
-  readonly padronTitulo = signal('');
-  readonly padronLugar = signal('');
-  readonly padronFecha = signal(fechaLocalIso());
-  /** Evita un doble envío mientras se piden la PII y se arma el libro. */
-  readonly descargandoPadron = signal(false);
-  /** ids de la lista temporal que entran al Excel; se reinicia a todos al abrir. */
-  readonly padronInclusion = signal<ReadonlySet<string>>(new Set());
-  /** Último fallo del diálogo; se pinta dentro para poder reintentar. */
-  readonly padronError = signal<string | null>(null);
-  /**
-   * Generación en curso. Se numera cada intento: al cancelar se incrementa el
-   * contador y lo que llegue con un token viejo se descarta sin descargar ni
-   * avisar de un error que no existe.
-   */
-  private padronToken = 0;
-  /** Corta la petición de PII en vuelo cuando se cancela la generación. */
-  private readonly padronCancelado = new Subject<void>();
-  private readonly dialogoPadron = viewChild<ElementRef<HTMLDialogElement>>('dialogoPadron');
-
-  /** Actores seleccionados dentro del diálogo: sólo estos se escriben al libro. */
-  readonly padronActores = computed(() => {
-    const incluidos = this.padronInclusion();
-    return this.listaTemporal().filter((actor) => incluidos.has(actor.id));
-  });
-
-  readonly padronIncluidos = computed(() => this.padronActores().length);
-
   /** Valor copiado recientemente, para confirmar la acción en la fila. */
   readonly copiado = signal<string | null>(null);
   private temporizadorCopiado?: ReturnType<typeof setTimeout>;
@@ -922,34 +558,12 @@ export class ActoresPage {
   }
 
   estaEnLista(actor: ActorDirectorio): boolean {
-    return this.listaTemporal().some((seleccionado) => seleccionado.id === actor.id);
+    return this.lista.esta(actor.id);
   }
 
   alternarLista(actor: ActorDirectorio, evento?: Event): void {
     evento?.stopPropagation();
-    this.listaTemporal.update((actual) => alternarActorLista(actual, actor));
-  }
-
-  quitarDeListaPorIndice(indice: number): void {
-    this.listaTemporal.update((actual) => quitarActorListaPorIndice(actual, indice));
-  }
-
-  /** «Cargo · OSPA» de un ítem de la lista temporal. */
-  etiquetaListaTemporal(actor: ActorDirectorio): string {
-    return etiquetaItemLista(actor, this.membresiasDe(actor)[0]?.nombre);
-  }
-
-  /**
-   * Cierra la lista temporal. El clic dentro del cajón también burbujea hasta el
-   * velo, así que sólo cerramos cuando el clic nació en el propio velo.
-   */
-  cerrarListaTemporal(evento: Event): void {
-    if (evento.target !== evento.currentTarget) return;
-    this.listaTemporalAbierta.set(false);
-  }
-
-  vaciarLista(): void {
-    this.listaTemporal.set([]);
+    this.lista.alternar(actor, 'persona');
   }
 
   /** Copia al portapapeles y confirma el valor copiado durante un instante. */
@@ -961,167 +575,6 @@ export class ActoresPage {
     this.copiado.set(valor);
     clearTimeout(this.temporizadorCopiado);
     this.temporizadorCopiado = setTimeout(() => this.copiado.set(null), 1600);
-  }
-
-  abrirPadron(): void {
-    if (!this.listaTemporal().length) return;
-    this.padronTitulo.set('');
-    this.padronLugar.set('');
-    // Fecha local: `toISOString()` devolvía el día siguiente por la noche en Lima.
-    this.padronFecha.set(fechaLocalIso());
-    this.padronInclusion.set(new Set(this.listaTemporal().map((actor) => actor.id)));
-    this.padronError.set(null);
-    this.listaTemporalAbierta.set(true);
-    this.dialogoPadron()?.nativeElement.showModal();
-  }
-
-  padronEstaIncluido(actorId: string): boolean {
-    return this.padronInclusion().has(actorId);
-  }
-
-  alternarInclusionPadron(actorId: string): void {
-    const siguiente = new Set(this.padronInclusion());
-    if (siguiente.has(actorId)) {
-      siguiente.delete(actorId);
-    } else {
-      siguiente.add(actorId);
-    }
-    this.padronInclusion.set(siguiente);
-    this.padronError.set(null);
-  }
-
-  seleccionarTodosPadron(): void {
-    this.padronInclusion.set(new Set(this.listaTemporal().map((actor) => actor.id)));
-    this.padronError.set(null);
-  }
-
-  quitarSeleccionPadron(): void {
-    this.padronInclusion.set(new Set());
-    this.padronError.set(null);
-  }
-
-  async descargarPadron(): Promise<void> {
-    const titulo = this.padronTitulo().trim();
-    const lugar = this.padronLugar().trim();
-    const fecha = this.padronFecha();
-    if (!titulo || !lugar || !fecha || this.descargandoPadron()) return;
-
-    const actores = this.padronActores();
-    if (!actores.length) {
-      this.padronError.set('Selecciona al menos un actor para generar la lista.');
-      return;
-    }
-
-    this.padronToken += 1;
-    const token = this.padronToken;
-    this.descargandoPadron.set(true);
-    this.padronError.set(null);
-
-    try {
-      const { datos: pii, fallos } = await this.piiDeActores(actores);
-      if (token !== this.padronToken) return;
-
-      // Un 200 sin datos deja la fila vacía y no frena la descarga; un 403, un
-      // 500 o un fallo de red sí se reportan y se deja reintentar, para no
-      // descargar un padrón incompleto creyendo que los actores no tienen DNI.
-      if (fallos.length) {
-        const motivos = [...new Set(fallos)].join(' · ').replace(/[.\s]+$/, '');
-        this.padronError.set(
-          `No se pudieron leer los datos de ${fallos.length} de ${actores.length} actores: ${motivos}. Vuelve a intentarlo.`,
-        );
-        return;
-      }
-
-      const filas = actores.map((actor) =>
-        filaPadronDeActor(actor, this.ospaDe(actor), pii.get(actor.id) ?? null),
-      );
-
-      const archivo = await crearXlsxPadron({ titulo, lugar, fecha, filas });
-      // El armado del libro no se puede abortar: si el usuario canceló mientras
-      // tanto, el archivo se descarta en vez de aparecer tras cerrar el diálogo.
-      if (token !== this.padronToken) return;
-
-      this.descargarArchivo(archivo, `lista-asistencia-${fechaLocalIso()}.xlsx`);
-      this.dialogoPadron()?.nativeElement.close();
-    } catch (fallo) {
-      // Un aborto del usuario no es un fallo que deba pintarse.
-      if (token !== this.padronToken) return;
-      // El libro no llegó a armarse (o falló el import de exceljs): se avisa
-      // sin cerrar el diálogo para que el usuario pueda reintentar.
-      this.padronError.set(aErrorApi(fallo).message);
-    } finally {
-      if (token === this.padronToken) this.descargandoPadron.set(false);
-    }
-  }
-
-  /**
-   * «Cancelar» del diálogo y Escape: cierra y, si había una generación en
-   * curso, la aborta.
-   *
-   * Antes el botón sólo cerraba el `<dialog>`: las peticiones de PII y el armado
-   * del libro seguían vivos y el Excel aparecía descargado tras el cierre.
-   */
-  cancelarPadron(evento?: Event): void {
-    evento?.preventDefault();
-
-    if (this.descargandoPadron()) {
-      this.padronToken += 1;
-      this.padronCancelado.next();
-      this.descargandoPadron.set(false);
-    }
-
-    this.padronError.set(null);
-    this.dialogoPadron()?.nativeElement.close();
-  }
-
-  /** «OSPA» del actor: membresía vigente, ancla del listado y, por último, su abreviatura. */
-  private ospaDe(actor: ActorDirectorio): string {
-    return (
-      this.membresiasDe(actor)[0]?.nombre || actor.organizacionAncla || actor.abreviatura || ''
-    );
-  }
-
-  /**
-   * DNI y teléfono de todos los actores en **un solo viaje** (`POST /v1/actors/pii`).
-   *
-   * El motivo viaja una vez y el servidor audita cada actor por separado. Se
-   * devuelven aparte los datos leídos y los motivos de fallo: un id sin dato no
-   * es un error, pero un 403, un 500 o un corte de red sí deben verse en el
-   * diálogo en vez de confundirse con «el actor no tiene DNI».
-   */
-  private async piiDeActores(
-    actores: readonly ActorDirectorio[],
-  ): Promise<{ datos: Map<string, PiiActorPadron>; fallos: string[] }> {
-    const datos = new Map<string, PiiActorPadron>();
-    if (!this.capacidades.puedeVerPii()) return { datos, fallos: [] };
-
-    const ids = actores.map((actor) => actor.id).filter((id) => !!id);
-    if (!ids.length) return { datos, fallos: [] };
-
-    // Un fallo del lote completo (403, 422, 500 o red) se propaga: no se puede
-    // fingir que los actores no tienen DNI cuando en realidad no se consultó.
-    // `takeUntil` corta la petición si el usuario cancela la generación.
-    const bruto = await firstValueFrom(
-      this.http
-        .post<unknown>(urlApi('/v1/actors/pii'), {
-          ids,
-          motivo: MOTIVO_PII_PADRON,
-        })
-        .pipe(takeUntil(this.padronCancelado)),
-    );
-
-    const lote = aPiiLote(bruto);
-    for (const [id, valor] of lote.datos) datos.set(id, valor);
-    return { datos, fallos: [...lote.errores.values()] };
-  }
-
-  private descargarArchivo(archivo: Blob, nombre: string): void {
-    const url = URL.createObjectURL(archivo);
-    const enlace = document.createElement('a');
-    enlace.href = url;
-    enlace.download = nombre;
-    enlace.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   cerrarPanel(): void {
@@ -1168,9 +621,7 @@ export class ActoresPage {
 
   alActualizarActor(actor: ActorDirectorio): void {
     this.seleccionado.set(actor);
-    this.listaTemporal.update((actual) =>
-      actual.map((seleccionado) => (seleccionado.id === actor.id ? actor : seleccionado)),
-    );
+    this.lista.actualizar(actor);
     this.listado.recargar();
     // La columna «Organización» de la tabla se pinta desde `/v1/actors/membresias`,
     // no desde el listado: se invalida para que refleje el vínculo recién editado
@@ -1178,7 +629,7 @@ export class ActoresPage {
     this.membresiasPagina.recargar();
   }
 
-  /** Abre el alta con la naturaleza elegida en el menú «Nuevo». */
+  /** Abre el alta con la naturaleza elegida (acción del encabezado del shell). */
   abrirAlta(naturaleza: NaturalezaAlta): void {
     this.altaNaturaleza.set(naturaleza);
   }

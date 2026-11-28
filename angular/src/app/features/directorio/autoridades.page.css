@@ -46,25 +46,6 @@
   font-weight: 600;
 }
 
-.criterio-nota {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin: 0;
-  padding: 9px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--canvas);
-  color: var(--muted);
-  font-size: 12.5px;
-  line-height: 1.5;
-}
-
-.criterio-nota app-icono {
-  margin-top: 2px;
-  color: var(--blue);
-}
-
 .col-foto {
   width: 64px;
   text-align: center;
@@ -193,6 +174,13 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
+}
+
+.ficha-cabecera-acciones {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
 }
 
 .ficha-avatar {

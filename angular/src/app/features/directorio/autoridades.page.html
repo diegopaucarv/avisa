@@ -24,38 +24,19 @@
   <p class="form-error" role="alert">{{ mensaje }}</p>
   }
 
-  <!-- Criterio aplicado: la base no tiene una columna «autoridad». -->
-  <p class="criterio-nota">
-    <app-icono nombre="info" [tamano]="14" />
-    <span><strong>Criterio:</strong> {{ notaCriterio() }}</span>
-  </p>
-
-  <nav class="tab-bar" aria-label="Filtrar por tipo">
-    <button
-      type="button"
-      class="tab-button"
-      [class.active]="filtros().tipo === ''"
-      [attr.aria-pressed]="filtros().tipo === ''"
-      (click)="cambiarTipo('')"
-    >
-      Todos
-      <span class="tab-count">{{ totalUniverso() }}</span>
-    </button>
-    @for (tipo of tipos(); track tipo.valor) {
-    <button
-      type="button"
-      class="tab-button"
-      [class.active]="filtros().tipo === tipo.valor"
-      [attr.aria-pressed]="filtros().tipo === tipo.valor"
-      (click)="cambiarTipo(tipo.valor)"
-    >
-      {{ tipo.etiqueta }}
-      <span class="tab-count">{{ tipo.conteo }}</span>
-    </button>
-    }
-  </nav>
-
   <div class="filter-bar filter-bar-wrap">
+    <label class="select-filter">
+      Tipo
+      <select aria-label="Filtrar por tipo" (change)="cambiarTipo($event)">
+        <option value="" [selected]="filtros().tipo === ''">Todos ({{ totalUniverso() }})</option>
+        @for (tipo of tipos(); track tipo.valor) {
+        <option [value]="tipo.valor" [selected]="filtros().tipo === tipo.valor">
+          {{ tipo.etiqueta }} ({{ tipo.conteo }})
+        </option>
+        }
+      </select>
+    </label>
+
     <label class="search-field">
       <app-icono nombre="buscar" [tamano]="14" />
       <input
@@ -289,14 +270,24 @@
         </div>
       </div>
 
-      <button
-        type="button"
-        class="icon-button"
-        aria-label="Cerrar la ficha"
-        (click)="cerrarFicha()"
-      >
-        <app-icono nombre="cerrar" [tamano]="18" />
-      </button>
+      <div class="ficha-cabecera-acciones">
+        <app-boton-accion
+          icono="lapiz"
+          etiqueta="Editar"
+          [deshabilitado]="!capacidades.puedeModificar(ficha.clasificacion)"
+          [ariaLabel]="'Editar a ' + ficha.nombre"
+          [titulo]="'Editar a ' + ficha.nombre"
+          (accion)="editar(ficha, $event)"
+        />
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar la ficha"
+          (click)="cerrarFicha()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </div>
     </header>
 
     <div class="drawer-body">

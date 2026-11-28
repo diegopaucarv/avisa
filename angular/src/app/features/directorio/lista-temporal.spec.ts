@@ -26,7 +26,7 @@ function actor(id: string): ActorDirectorio {
   };
 }
 
-describe('lista temporal de actores', () => {
+describe('lista de asistencia de actores', () => {
   it('agrega un actor sin alterar la lista previa', () => {
     const existente = actor('a');
     const nuevo = actor('b');

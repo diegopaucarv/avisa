@@ -372,7 +372,13 @@
         </div>
         <div class="detalle-acciones">
           @if (puedeEditar()) {
-          <button type="button" class="button-secondary" (click)="abrirEdicion(s)">Editar</button>
+          <app-boton-accion
+            icono="lapiz"
+            etiqueta="Editar"
+            [ariaLabel]="'Editar la sugerencia ' + s.codigo"
+            [titulo]="'Editar la sugerencia ' + s.codigo"
+            (accion)="abrirEdicion(s)"
+          />
           }
           <button
             type="button"

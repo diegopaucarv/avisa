@@ -34,6 +34,24 @@ export type DatosPadronExcel = {
   filas: readonly FilaPadronAsistencia[];
 };
 
+/** Cabecera de la sesión; la fecha es ISO (`YYYY-MM-DD`). */
+export type SesionPadron = {
+  titulo: string;
+  lugar: string;
+  fecha: string;
+};
+
+/**
+ * Una entrada de la lista de asistencia. La organización no firma por sí misma:
+ * se expande a sus integrantes al exportar.
+ */
+export type EntradaLista = {
+  tipo: 'persona' | 'organizacion';
+  actor: ActorDirectorio;
+};
+
+export type TipoEntrada = EntradaLista['tipo'];
+
 /** MIME del libro; el nombre del archivo lo decide la pantalla que descarga. */
 export const MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
@@ -220,6 +238,77 @@ export async function crearXlsxPadron({
 
   const contenido = await libro.xlsx.writeBuffer();
   return new Blob([contenido], { type: MIME_XLSX });
+}
+
+/**
+ * Normaliza la cabecera de la sesión. Devuelve `null` si falta un campo
+ * obligatorio: la lista de asistencia no se genera con una cabecera a medias.
+ */
+export function normalizarSesion(sesion: SesionPadron): SesionPadron | null {
+  const titulo = sesion.titulo.trim();
+  const lugar = sesion.lugar.trim();
+  const fecha = sesion.fecha.trim();
+  if (!titulo || !lugar || !fecha) return null;
+  return { titulo, lugar, fecha };
+}
+
+/**
+ * Personas que firman la lista: las personas agregadas más los integrantes de
+ * cada organización. Deduplica por `id` para que una persona que ya está en la
+ * lista no se repita cuando también la aporta una organización.
+ *
+ * El orden de las entradas manda: se respeta el orden en que el usuario agregó
+ * personas y organizaciones.
+ */
+export function personasDeLista(
+  entradas: readonly EntradaLista[],
+  miembrosPorOrganizacion: ReadonlyMap<string, readonly ActorDirectorio[]>,
+): ActorDirectorio[] {
+  const vistas = new Set<string>();
+  const personas: ActorDirectorio[] = [];
+
+  const agregar = (actor: ActorDirectorio): void => {
+    if (!actor.id || vistas.has(actor.id)) return;
+    vistas.add(actor.id);
+    personas.push(actor);
+  };
+
+  for (const entrada of entradas) {
+    if (entrada.tipo === 'organizacion') {
+      for (const miembro of miembrosPorOrganizacion.get(entrada.actor.id) ?? []) agregar(miembro);
+    } else {
+      agregar(entrada.actor);
+    }
+  }
+
+  return personas;
+}
+
+/** «Organización: N integrantes» para las entradas de grupo del cajón. */
+export function etiquetaGrupoOrganizacion(actor: ActorDirectorio): string {
+  const integrantes = actor.numeroIntegrantes;
+  if (typeof integrantes === 'number' && integrantes >= 0) {
+    return `Organización: ${integrantes} ${integrantes === 1 ? 'integrante' : 'integrantes'}`;
+  }
+  return 'Organización';
+}
+
+/**
+ * Filas del Excel a partir de las personas ya expandidas. `sinPii` cuenta a
+ * quienes no tienen ni DNI ni celular, para poder avisar sin romper la descarga.
+ */
+export function filasPadronDePersonas(
+  personas: readonly ActorDirectorio[],
+  pii: ReadonlyMap<string, { dni: string | null; telefono: string | null }> = new Map(),
+  ospaDe: (actor: ActorDirectorio) => string | null = () => null,
+): { filas: FilaPadronAsistencia[]; sinPii: number } {
+  let sinPii = 0;
+  const filas = personas.map((persona) => {
+    const datos = pii.get(persona.id) ?? null;
+    if (!datos || (!datos.dni && !datos.telefono)) sinPii += 1;
+    return filaPadronDeActor(persona, ospaDe(persona), datos);
+  });
+  return { filas, sinPii };
 }
 
 /**

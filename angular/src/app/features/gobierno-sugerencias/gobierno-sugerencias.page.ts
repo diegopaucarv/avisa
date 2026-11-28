@@ -26,6 +26,7 @@ import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -107,6 +108,7 @@ type OpcionSimple = { codigo: string; etiqueta: string };
   selector: 'app-gobierno-sugerencias-page',
   imports: [
     IconoComponent,
+    BotonAccionComponent,
     PaginacionComponent,
     ThOrdenDirective,
     SugerenciaFormComponent,
@@ -525,8 +527,9 @@ type OpcionSimple = { codigo: string; etiqueta: string };
     }
     .detalle-acciones {
       display: flex;
+      align-items: center;
       flex-shrink: 0;
-      gap: 6px;
+      gap: 4px;
     }
     .eyebrow {
       display: block;

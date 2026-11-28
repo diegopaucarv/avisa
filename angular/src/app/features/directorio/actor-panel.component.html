@@ -59,14 +59,43 @@
           </div>
         </div>
 
-        <button
-          type="button"
-          class="icon-button"
-          aria-label="Cerrar la ficha del actor"
-          (click)="cerrarConSalida()"
-        >
-          <app-icono nombre="cerrar" [tamano]="18" />
-        </button>
+        <div class="panel-cabecera-acciones">
+          @if (puedeEditar() && !editando()) {
+            <app-boton-accion
+              icono="lapiz"
+              etiqueta="Editar"
+              [ariaLabel]="'Editar a ' + a.nombre"
+              [titulo]="'Editar a ' + a.nombre"
+              (accion)="iniciarEdicion()"
+            />
+            @if (a.activo) {
+              <app-boton-accion
+                icono="papelera"
+                etiqueta="Dar de baja"
+                tono="peligro"
+                [ariaLabel]="'Dar de baja a ' + a.nombre"
+                [titulo]="'Dar de baja a ' + a.nombre"
+                (accion)="solicitarBaja.emit()"
+              />
+            } @else {
+              <app-boton-accion
+                icono="papelera"
+                etiqueta="Restaurar"
+                [ariaLabel]="'Restaurar a ' + a.nombre"
+                [titulo]="'Restaurar a ' + a.nombre"
+                (accion)="solicitarRestaurar.emit()"
+              />
+            }
+          }
+          <button
+            type="button"
+            class="icon-button"
+            aria-label="Cerrar la ficha del actor"
+            (click)="cerrarConSalida()"
+          >
+            <app-icono nombre="cerrar" [tamano]="18" />
+          </button>
+        </div>
       </header>
 
       <div class="drawer-body">
@@ -178,6 +207,9 @@
                     aria-controls="actor-org-lista"
                     aria-label="Buscar organización del directorio"
                     [attr.aria-expanded]="comboOrgAbierto()"
+                    [attr.aria-activedescendant]="
+                      comboOrgIndice() >= 0 ? 'actor-org-op-' + comboOrgIndice() : null
+                    "
                     (click)="alternarComboOrganizacion()"
                   >
                     <span class="combo-org-valor">
@@ -203,6 +235,9 @@
                           placeholder="Buscar por nombre o abreviatura…"
                           autocomplete="off"
                           [attr.aria-expanded]="true"
+                          [attr.aria-activedescendant]="
+                            comboOrgIndice() >= 0 ? 'actor-org-op-' + comboOrgIndice() : null
+                          "
                           [value]="comboOrgBusqueda()"
                           (input)="alBuscarOrganizacion($event)"
                         />
@@ -225,6 +260,7 @@
                               type="button"
                               class="combo-org-opcion"
                               role="option"
+                              [id]="'actor-org-op-' + i"
                               [attr.aria-selected]="org.nombre === borrador().organizacion"
                               [class.combo-org-resaltado]="i === comboOrgIndice()"
                               (click)="elegirOrganizacion(org)"
@@ -542,6 +578,9 @@
                     aria-controls="actor-org-lista"
                     aria-label="Buscar organización del directorio"
                     [attr.aria-expanded]="comboOrgAbierto()"
+                    [attr.aria-activedescendant]="
+                      comboOrgIndice() >= 0 ? 'actor-org-op-' + comboOrgIndice() : null
+                    "
                     (click)="alternarComboOrganizacion()"
                   >
                     <span class="combo-org-valor">
@@ -567,6 +606,9 @@
                           placeholder="Buscar por nombre o abreviatura…"
                           autocomplete="off"
                           [attr.aria-expanded]="true"
+                          [attr.aria-activedescendant]="
+                            comboOrgIndice() >= 0 ? 'actor-org-op-' + comboOrgIndice() : null
+                          "
                           [value]="comboOrgBusqueda()"
                           (input)="alBuscarOrganizacion($event)"
                         />
@@ -588,6 +630,7 @@
                             <div
                               class="combo-org-opcion combo-org-opcion-lectura"
                               role="option"
+                              [id]="'actor-org-op-' + i"
                               [attr.aria-selected]="org.nombre === a.organizacionAncla"
                               [class.combo-org-resaltado]="i === comboOrgIndice()"
                             >
@@ -841,26 +884,10 @@
         <footer class="drawer-foot panel-pie">
           <button type="button" class="button-secondary" (click)="alternarLista.emit()">
             <app-icono nombre="reloj-mas" [tamano]="14" />
-            {{ enLista() ? 'Quitar de lista' : 'Agregar a lista temporal' }}
+            {{
+              enLista() ? 'Quitar de la lista de asistencia' : 'Agregar a la lista de asistencia'
+            }}
           </button>
-          <div class="panel-pie-acciones">
-            @if (puedeEditar()) {
-              @if (a.activo) {
-                <button type="button" class="button-secondary" (click)="solicitarBaja.emit()">
-                  Dar de baja
-                </button>
-              } @else {
-                <button type="button" class="button-secondary" (click)="solicitarRestaurar.emit()">
-                  Restaurar
-                </button>
-              }
-            }
-            @if (puedeEditar()) {
-              <button type="button" class="button-primary" (click)="iniciarEdicion()">
-                Editar
-              </button>
-            }
-          </div>
         </footer>
       }
     }

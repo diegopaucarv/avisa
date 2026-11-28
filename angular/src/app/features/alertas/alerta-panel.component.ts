@@ -32,6 +32,7 @@ import {
 } from '../../dominio/mapeo';
 import type { Riesgo } from '../../dominio/modelos';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { esDialogoSuperior, salirModal } from '../../shared/ui/modal-salida';
 import {
@@ -252,6 +253,7 @@ function claveProvincia(nombre: string): number {
   selector: 'app-alerta-panel',
   imports: [
     IconoComponent,
+    BotonAccionComponent,
     RouterLink,
     TerritorioBuscadorComponent,
     AdjuntosPanelComponent,
@@ -273,6 +275,13 @@ function claveProvincia(nombre: string): number {
       flex-direction: column;
       gap: 6px;
       min-width: 0;
+    }
+
+    .panel-cabecera-acciones {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
     }
 
     .alerta-codigo {

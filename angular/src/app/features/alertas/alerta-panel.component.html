@@ -36,14 +36,25 @@
           </div>
         }
       }
-      <button
-        type="button"
-        class="icon-button"
-        aria-label="Cerrar la ficha de la alerta"
-        (click)="cerrarConSalida()"
-      >
-        <app-icono nombre="cerrar" [tamano]="18" />
-      </button>
+      <div class="panel-cabecera-acciones">
+        @if (!soloLectura() && !esAlta() && !editando() && puedeModificar()) {
+          <app-boton-accion
+            icono="lapiz"
+            etiqueta="Modificar contenido"
+            ariaLabel="Modificar el contenido de la alerta"
+            titulo="Modificar el contenido de la alerta"
+            (accion)="iniciarEdicion()"
+          />
+        }
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar la ficha de la alerta"
+          (click)="cerrarConSalida()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </div>
     </header>
 
     <div class="drawer-body">
@@ -734,9 +745,6 @@
           </button>
         } @else {
           @if (puedeModificar()) {
-            <button type="button" class="button-secondary" (click)="iniciarEdicion()">
-              Modificar contenido
-            </button>
             <button type="button" class="button-secondary" (click)="enviarWhatsapp()">
               Enviar por WhatsApp
             </button>

@@ -17,14 +17,24 @@
         </div>
       </div>
 
-      <button
-        type="button"
-        class="icon-button"
-        aria-label="Cerrar el panel del registro anulado"
-        (click)="cerrarConSalida()"
-      >
-        <app-icono nombre="cerrar" [tamano]="18" />
-      </button>
+      <div class="panel-cabecera-acciones">
+        <app-boton-accion
+          icono="papelera"
+          etiqueta="Restaurar"
+          [deshabilitado]="enviando()"
+          ariaLabel="Restaurar el registro"
+          titulo="Restaurar el registro"
+          (accion)="restaurar.emit()"
+        />
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar el panel del registro anulado"
+          (click)="cerrarConSalida()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </div>
     </header>
 
     <div class="drawer-body">
@@ -78,17 +88,6 @@
           <p class="panel-texto">{{ fila().descripcion }}</p>
         </section>
       }
-
-      <div class="panel-acciones">
-        <button
-          type="button"
-          class="button-primary"
-          [disabled]="enviando()"
-          (click)="restaurar.emit()"
-        >
-          {{ enviando() ? 'Restaurando…' : 'Restaurar' }}
-        </button>
-      </div>
     </div>
   </aside>
 </div>

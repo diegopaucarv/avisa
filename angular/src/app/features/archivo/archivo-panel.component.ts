@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 
 import { formatearFechaHora } from '../../shared/formato-fecha';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { salirModal } from '../../shared/ui/modal-salida';
 import type { FilaArchivo } from './archivo.tipos';
@@ -29,7 +30,7 @@ import type { FilaArchivo } from './archivo.tipos';
  */
 @Component({
   selector: 'app-archivo-panel',
-  imports: [IconoComponent],
+  imports: [IconoComponent, BotonAccionComponent],
   templateUrl: './archivo-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -47,6 +48,13 @@ import type { FilaArchivo } from './archivo.tipos';
       flex-direction: column;
       gap: 3px;
       min-width: 0;
+    }
+
+    .panel-cabecera-acciones {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
     }
 
     .panel-codigo {
@@ -150,14 +158,6 @@ import type { FilaArchivo } from './archivo.tipos';
       color: #a0aab3;
       font-size: 13px;
       font-style: italic;
-    }
-
-    .panel-acciones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding-top: 12px;
-      border-top: 1px solid #eef2f6;
     }
   `,
 })

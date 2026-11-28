@@ -9,8 +9,8 @@
 
       <app-barra-seleccion
         entidad="actores"
-        [cantidad]="seleccion.cantidad()"
-        [idsSeleccionados]="seleccion.lista()"
+        [cantidad]="idsPersonasEnLista().length"
+        [idsSeleccionados]="idsPersonasEnLista()"
         (fallo)="alFallarExportacion($event)"
       />
     </div>
@@ -61,196 +61,7 @@
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
 
-  <!--
-    Botón flotante de la lista temporal: reemplaza el botón del encabezado para
-    que la selección esté siempre a mano sin competir con las acciones de la
-    vista. El contador es la única seña de cuántos actores lleva la sesión.
-  -->
-  <button
-    type="button"
-    class="lista-temporal-fab"
-    [class.lista-temporal-fab-vacia]="listaTemporal().length === 0"
-    [attr.aria-expanded]="listaTemporalAbierta()"
-    aria-controls="lista-temporal-actores"
-    [attr.aria-label]="'Abrir la lista temporal de actores (' + listaTemporal().length + ')'"
-    (click)="listaTemporalAbierta.set(true)"
-  >
-    <app-icono nombre="reloj-mas" [tamano]="18" />
-    <span class="lista-temporal-fab-texto">Lista temporal</span>
-    <span class="lista-temporal-contador">{{ listaTemporal().length }}</span>
-  </button>
-
-  @if (listaTemporalAbierta()) {
-  <!--
-    La lista temporal es una selección de trabajo de la sesión, no un dato del
-    listado: se abre como cajón lateral para poder consultarla sin perder la
-    página ni los filtros (el estado vive en la página, así que sobrevive a
-    cualquier cambio de página).
-  -->
-  <div
-    class="drawer-scrim"
-    role="presentation"
-    (click)="cerrarListaTemporal($event)"
-    (document:keydown.escape)="listaTemporalAbierta.set(false)"
-  >
-    <aside
-      class="drawer lista-temporal-drawer"
-      id="lista-temporal-actores"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="titulo-lista-temporal"
-    >
-      <header class="lista-temporal-cabecera">
-        <div>
-          <h2 id="titulo-lista-temporal">Lista temporal de actores</h2>
-          <p>
-            Selección de trabajo de esta sesión; se conserva al cambiar los filtros y las páginas.
-          </p>
-        </div>
-        <button
-          type="button"
-          class="icon-button"
-          aria-label="Cerrar la lista temporal"
-          (click)="listaTemporalAbierta.set(false)"
-        >
-          <app-icono nombre="cerrar" [tamano]="18" />
-        </button>
-      </header>
-
-      @if (listaTemporal().length > 0) {
-      <div class="lista-temporal-acciones">
-        <button type="button" class="button-secondary" (click)="abrirPadron()">
-          Generar lista
-        </button>
-        <button type="button" class="button-secondary" (click)="vaciarLista()">Vaciar lista</button>
-      </div>
-      }
-
-      <div class="lista-temporal-cuerpo">
-        @if (listaTemporal().length === 0) {
-        <p class="lista-temporal-vacia">
-          Aún no agregaste actores. Usa el icono «Agregar a lista temporal» en cualquier fila del
-          directorio.
-        </p>
-        } @else {
-        <ul class="lista-temporal-items">
-          @for (actor of listaTemporal(); track $index) {
-          <li>
-            <div>
-              <strong>{{ actor.nombre }}</strong>
-              <span>{{ etiquetaListaTemporal(actor) }}</span>
-            </div>
-            <button
-              type="button"
-              class="lista-quitar"
-              [attr.aria-label]="'Quitar ' + actor.nombre + ' de la lista temporal'"
-              (click)="quitarDeListaPorIndice($index)"
-            >
-              Quitar
-            </button>
-          </li>
-          }
-        </ul>
-        }
-      </div>
-    </aside>
-  </div>
-  }
-
-  <dialog
-    #dialogoPadron
-    class="padron-dialogo"
-    aria-labelledby="titulo-padron"
-    (cancel)="cancelarPadron($event)"
-  >
-    <form class="padron-form" (submit)="$event.preventDefault(); descargarPadron()">
-      <h2 id="titulo-padron">Lista de asistencia</h2>
-      <p>Incluye DNI y celular para el registro de firmas.</p>
-      @if (!capacidades.puedeVerPii()) {
-      <p class="padron-aviso" role="status">
-        Tu perfil no puede leer DNI ni celulares: esas dos columnas saldrán en blanco. Pide la lista
-        a un sectorista o a la Dirección para completarlas.
-      </p>
-      }
-      <label>
-        Título de la sesión
-        <input
-          required
-          maxlength="180"
-          [value]="padronTitulo()"
-          (input)="padronTitulo.set($any($event.target).value)"
-        />
-      </label>
-      <label>
-        Lugar / sede
-        <input
-          required
-          maxlength="180"
-          [value]="padronLugar()"
-          (input)="padronLugar.set($any($event.target).value)"
-        />
-      </label>
-      <label>
-        Fecha
-        <input
-          required
-          type="date"
-          [value]="padronFecha()"
-          (input)="padronFecha.set($any($event.target).value)"
-        />
-      </label>
-
-      <!--
-        La selección decide el contenido del Excel: quitar a alguien aquí no lo
-        saca de la lista temporal, sólo de esta descarga. Se reinicia a todos
-        al abrir el diálogo.
-      -->
-      <div class="padron-seleccion" role="group" aria-label="Actores incluidos en la lista">
-        <div class="padron-seleccion-cabecera">
-          <span class="padron-conteo" aria-live="polite"
-            >{{ padronIncluidos() }} actores incluidos</span
-          >
-          <div class="padron-seleccion-acciones">
-            <button type="button" (click)="seleccionarTodosPadron()">Seleccionar todos</button>
-            <button type="button" (click)="quitarSeleccionPadron()">Quitar selección</button>
-          </div>
-        </div>
-        <ul class="padron-lista">
-          @for (actor of listaTemporal(); track actor.id) {
-          <li>
-            <label class="padron-fila">
-              <input
-                type="checkbox"
-                [checked]="padronEstaIncluido(actor.id)"
-                (change)="alternarInclusionPadron(actor.id)"
-              />
-              <span>{{ actor.nombre }}</span>
-            </label>
-          </li>
-          }
-        </ul>
-      </div>
-
-      <p>Las firmas se dejan en blanco.</p>
-
-      @if (padronError(); as mensaje) {
-      <p class="padron-error" role="alert">{{ mensaje }}</p>
-      }
-
-      <div class="padron-actions">
-        <button type="button" class="button-secondary" (click)="cancelarPadron()">
-          {{ descargandoPadron() ? 'Cancelar generación' : 'Cancelar' }}
-        </button>
-        <button
-          type="submit"
-          class="button-primary"
-          [disabled]="descargandoPadron() || padronIncluidos() === 0"
-        >
-          {{ descargandoPadron() ? 'Generando…' : 'Descargar Excel' }}
-        </button>
-      </div>
-    </form>
-  </dialog>
+  <app-lista-asistencia />
 
   @if (estado() === "error") {
   <div class="empty-state" role="alert">
@@ -276,10 +87,10 @@
           <th scope="col" class="col-seleccion">
             <input
               type="checkbox"
-              aria-label="Seleccionar todos los registros de esta página"
-              [checked]="seleccion.todas(idsVisibles())"
-              [indeterminate]="seleccion.algunas(idsVisibles())"
-              (change)="seleccion.alternarPagina(idsVisibles(), $event)"
+              aria-label="Añadir todos los actores de esta página a la lista de asistencia"
+              [checked]="todasVisiblesEnLista()"
+              [indeterminate]="algunasVisiblesEnLista()"
+              (change)="alternarPaginaLista($event)"
             />
           </th>
           <th scope="col" class="col-foto">Foto</th>
@@ -291,7 +102,6 @@
             Organización / Institución
           </th>
           <th scope="col" [appThOrden]="'region'" [orden]="orden">Región</th>
-          <th scope="col" class="col-acciones">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -305,10 +115,10 @@
           <td class="col-seleccion" (click)="$event.stopPropagation()">
             <input
               type="checkbox"
-              [checked]="seleccion.esta(actor.id)"
-              [attr.aria-label]="'Seleccionar a ' + actor.nombre"
+              [checked]="lista.esta(actor.id)"
+              [attr.aria-label]="'Añadir a ' + actor.nombre + ' a la lista de asistencia'"
               (click)="$event.stopPropagation()"
-              (change)="seleccion.alternar(actor.id)"
+              (change)="alternarLista(actor)"
             />
           </td>
           <td class="col-foto">
@@ -380,49 +190,6 @@
             } @else { {{ sinDato }} }
           </td>
           <td>{{ actor.region || sinDato }}</td>
-          <td class="col-acciones" (click)="$event.stopPropagation()">
-            <div class="acciones-fila">
-              <app-boton-accion
-                icono="ojo"
-                etiqueta="Ver"
-                [ariaLabel]="'Ver la ficha de ' + actor.nombre"
-                [titulo]="'Ver la ficha de ' + actor.nombre"
-                (accion)="abrir(actor)"
-              />
-              <app-boton-accion
-                icono="lapiz"
-                etiqueta="Editar"
-                [ariaLabel]="'Editar a ' + actor.nombre"
-                [titulo]="'Editar a ' + actor.nombre"
-                (accion)="abrirEdicion(actor, $event)"
-              />
-              <app-boton-accion
-                icono="reloj-mas"
-                [etiqueta]="estaEnLista(actor) ? 'Quitar de lista' : 'Agregar a lista'"
-                [presionado]="estaEnLista(actor)"
-                [ariaLabel]="
-                  (estaEnLista(actor) ? 'Quitar de' : 'Agregar a') +
-                  ' lista temporal: ' +
-                  actor.nombre
-                "
-                [titulo]="
-                  (estaEnLista(actor) ? 'Quitar de' : 'Agregar a') +
-                  ' lista temporal: ' +
-                  actor.nombre
-                "
-                (accion)="alternarLista(actor, $event)"
-              />
-              <app-boton-accion
-                icono="papelera"
-                [etiqueta]="actor.activo ? 'Dar de baja' : 'Restaurar'"
-                [tono]="actor.activo ? 'peligro' : 'neutro'"
-                [deshabilitado]="!capacidades.puedeModificar(actor.clasificacion)"
-                [ariaLabel]="(actor.activo ? 'Dar de baja a ' : 'Restaurar a ') + actor.nombre"
-                [titulo]="(actor.activo ? 'Dar de baja a ' : 'Restaurar a ') + actor.nombre"
-                (accion)="abrirBaja(actor, actor.activo ? 'anular' : 'restaurar')"
-              />
-            </div>
-          </td>
         </tr>
         }
       </tbody>

@@ -91,9 +91,17 @@ function mensajeDeError(error: unknown): string {
  * transacción (`withSession`) cubre todo el lote.
  *
  * Respuesta:
- *   `{ datos: { "<id>": { dni, telefono } }, errores: { "<id>": "<motivo>" } }`
+ *   `{ datos: { "<id>": { dni, telefono } }, errores: { "<id>": "<motivo>" },
+ *      noDescifrados: number }`
  *   · `datos` omite los ids sin dato (sin ficha o con ambos campos vacíos).
- *   · `errores` recoge el fallo de un id sin abortar el lote.
+ *   · `errores` recoge el fallo de contrato/permiso de un id sin abortar el
+ *     lote.
+ *   · `noDescifrados` cuenta las filas cuyo dato estaba corrupto o ilegible:
+ *     salen en `datos` con ambos campos en `null` para no romper la descarga.
+ *
+ * Un dato corrupto en una fila no puede tumbar el lote entero: el fallo de
+ * descifrado se captura por actor y esa fila sale sin PII. Sólo los errores de
+ * contrato o permiso (`ApiError`) se reportan como error individual.
  *
  * El gate de permisos se resuelve **una vez** antes del bucle: si la sesión no
  * puede ver PII o falta la clave, el lote entero responde 403/503 en vez de
@@ -124,6 +132,8 @@ export async function POST(request: Request) {
           { dni: string | null; telefono: string | null }
         > = {};
         const errores: Record<string, string> = {};
+        /** Filas cuyo dato estaba corrupto: se devuelven sin PII, sin abortar. */
+        let noDescifrados = 0;
 
         for (const id of ids) {
           try {
@@ -137,14 +147,22 @@ export async function POST(request: Request) {
 
             datos[id] = { dni: pii.dni, telefono: pii.telefono };
           } catch (error) {
-            // El fallo de un id no invalida el resto del lote.
-            errores[id] = mensajeDeError(error);
+            // Un fallo de contrato/permiso se reporta por id sin abortar el lote.
+            if (error instanceof ApiError) {
+              errores[id] = mensajeDeError(error);
+              continue;
+            }
+            // Dato corrupto o ilegible de una fila: no tumba la descarga, sale
+            // sin PII y se cuenta aparte para que la pantalla pueda avisar.
+            datos[id] = { dni: null, telefono: null };
+            noDescifrados += 1;
           }
         }
 
         return {
           datos,
           errores,
+          noDescifrados,
           generatedAt: new Date().toISOString(),
         };
       },

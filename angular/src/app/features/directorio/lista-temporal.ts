@@ -14,8 +14,8 @@ export function quitarActorLista(actual: ActorDirectorio[], id: string): ActorDi
 }
 
 /**
- * Quita la entrada de una posición concreta. La lista puede contener al mismo
- * actor más de una vez, así que el índice —y no el id— es la clave de borrado.
+ * Quita la entrada en una posición concreta. El índice —y no el id— es la
+ * clave de borrado: la vista puede pintar la misma ficha más de una vez.
  */
 export function quitarActorListaPorIndice(
   actual: ActorDirectorio[],
@@ -25,7 +25,7 @@ export function quitarActorListaPorIndice(
 }
 
 /**
- * Etiqueta de un ítem de la lista temporal: «Cargo · OSPA».
+ * Etiqueta de un ítem de la lista de asistencia: «Cargo · OSPA».
  *
  * «OSPA» es aquí la organización de la primera membresía vigente del actor
  * (`organizacionDeMembresia`). Si no hay vínculo, se cae al ancla del listado y,

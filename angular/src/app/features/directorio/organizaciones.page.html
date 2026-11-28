@@ -4,14 +4,16 @@
     <div class="view-actions">
       <app-barra-seleccion
         entidad="organizaciones"
-        [cantidad]="seleccion.cantidad()"
-        [idsSeleccionados]="seleccion.lista()"
+        [cantidad]="idsSeleccionados().length"
+        [idsSeleccionados]="idsSeleccionados()"
         (fallo)="alFallarExportacion($event)"
       />
     </div>
   </header>
 
   @if (exportarError(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (errorAccion(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
   }
 
@@ -57,6 +59,8 @@
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
+
+  <app-lista-asistencia />
 
   @if (estado() === "error") {
   <div class="empty-state" role="alert">
@@ -178,17 +182,50 @@
           </div>
         </div>
 
-        <button
-          type="button"
-          class="icon-button"
-          aria-label="Cerrar la ficha de la organización"
-          (click)="cerrarPanel()"
-        >
-          <app-icono nombre="cerrar" [tamano]="18" />
-        </button>
+        <div class="ficha-cabecera-acciones">
+          @if (capacidades.puedeEditar()) {
+          <app-boton-accion
+            icono="lapiz"
+            etiqueta="Editar"
+            [ariaLabel]="'Editar la organización ' + org.nombre"
+            [titulo]="'Editar la organización ' + org.nombre"
+            (accion)="editar(org)"
+          />
+          @if (org.activo) {
+          <app-boton-accion
+            icono="papelera"
+            etiqueta="Eliminar"
+            tono="peligro"
+            [ariaLabel]="'Eliminar la organización ' + org.nombre"
+            [titulo]="'Eliminar la organización ' + org.nombre"
+            (accion)="abrirBaja('anular')"
+          />
+          } @else {
+          <app-boton-accion
+            icono="papelera"
+            etiqueta="Restaurar"
+            [ariaLabel]="'Restaurar la organización ' + org.nombre"
+            [titulo]="'Restaurar la organización ' + org.nombre"
+            (accion)="abrirBaja('restaurar')"
+          />
+          } }
+          <button
+            type="button"
+            class="icon-button"
+            aria-label="Cerrar la ficha de la organización"
+            (click)="cerrarPanel()"
+          >
+            <app-icono nombre="cerrar" [tamano]="18" />
+          </button>
+        </div>
       </header>
 
       <div class="drawer-body">
+        @if (org.fotoUrl) {
+        <!-- `core.organizaciones.foto_url`: el modal la ignoraba y sólo usaba la galería. -->
+        <app-foto-ficha [src]="org.fotoUrl" [alt]="org.nombre" />
+        }
+
         <section class="ficha-seccion" aria-labelledby="organizacion-panel-identificacion">
           <h3 id="organizacion-panel-identificacion">Identificación</h3>
           <dl class="ficha-datos">
@@ -215,6 +252,15 @@
             <div>
               <dt>Dirección</dt>
               <dd>{{ org.direccion || "—" }}</dd>
+            </div>
+            <div>
+              <dt>Región</dt>
+              <dd>@if (regionFicha(); as region) { {{ region.valor }} } @else { — }</dd>
+              @if (regionFicha()?.derivada) {
+              <p class="ficha-nota">Derivada de la región de sus integrantes.</p>
+              } @else if (!regionFicha()) {
+              <p class="ficha-nota">La ficha no registra región.</p>
+              }
             </div>
           </dl>
         </section>
@@ -254,10 +300,24 @@
         </section>
 
         <section class="ficha-seccion" aria-labelledby="organizacion-panel-actores">
-          <h3 id="organizacion-panel-actores">Actores</h3>
-          <p class="ficha-vacio">
-            Personas del directorio con pertenencia vigente a esta organización.
+          <h3 id="organizacion-panel-actores">Integrantes</h3>
+          @if (estadoIntegrantes() === "cargando" && integrantes().length === 0) {
+          <p class="ficha-vacio" role="status">Cargando integrantes…</p>
+          } @else if (integrantes().length === 0) {
+          <p class="ficha-vacio">Sin personas con pertenencia vigente registrada.</p>
+          } @else {
+          <p class="ficha-conteo">
+            {{ integrantesTotal() }} {{ integrantesTotal() === 1 ? "persona con pertenencia vigente"
+            : "personas con pertenencia vigente" }}
           </p>
+          <ul class="ficha-integrantes">
+            @for (persona of integrantesVisibles(); track persona.id) {
+            <li>{{ persona.nombre }}</li>
+            }
+          </ul>
+          @if (integrantesRestantes() > 0) {
+          <p class="ficha-vacio">y {{ integrantesRestantes() }} más</p>
+          } }
           <button type="button" class="button-secondary" (click)="verActores(org)">
             <app-icono nombre="actores" [tamano]="14" />
             Ver la lista de actores
@@ -297,12 +357,6 @@
                 } @else { — }
               </dd>
             </div>
-            <div class="ficha-ancho">
-              <dt>Galería fotográfica</dt>
-              <dd>
-                <app-galeria-fotos entidadTipo="organizacion" [entidadId]="org.id" />
-              </dd>
-            </div>
           </dl>
         </section>
 
@@ -317,5 +371,34 @@
       </div>
     </aside>
   </div>
+  } @if (cargandoEdicion()) {
+  <p class="org-actualizando" role="status">Cargando la ficha editable…</p>
+  } @if (actorEdicion(); as actor) {
+  <app-actor-panel
+    [actor]="actor"
+    [regiones]="regionesCatalogo()"
+    [editarInicial]="true"
+    (cerrar)="cerrarEdicion()"
+    (actualizado)="alActualizarActor($event)"
+    (solicitarBaja)="abrirBaja('anular')"
+    (solicitarRestaurar)="abrirBaja('restaurar')"
+  />
+  } @if (altaNaturaleza(); as naturaleza) {
+  <app-actor-panel-alta
+    [naturalezaInicial]="naturaleza"
+    [tipoInicial]="altaTipo()"
+    (cerrar)="cerrarAlta()"
+    (creado)="alCrearOrganizacion($event)"
+  />
+  } @if (bajaAbierta(); as baja) {
+  <app-anular-panel
+    [modo]="baja.modo"
+    entidad="organización"
+    [codigo]="baja.codigo || baja.nombre"
+    [enviando]="enviandoBaja()"
+    [errorEnvio]="errorBaja()"
+    (cerrar)="cerrarBaja()"
+    (hecho)="alConfirmarBaja($event)"
+  />
   }
 </section>

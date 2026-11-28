@@ -24,6 +24,7 @@ import { aErrorApi } from '../../core/http/errores';
 import { resolverUrlMedia } from '../../core/http/url-media';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aFoto, esFotoPintable, fotoPrincipal, urlFoto, type Foto } from '../../dominio/medios';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { esDialogoSuperior, salirModal } from '../../shared/ui/modal-salida';
 import {
@@ -135,7 +136,7 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
  */
 @Component({
   selector: 'app-actor-panel',
-  imports: [IconoComponent, RouterLink],
+  imports: [IconoComponent, BotonAccionComponent, RouterLink],
   templateUrl: './actor-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -160,6 +161,13 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       align-items: center;
       gap: 12px;
       min-width: 0;
+    }
+
+    .panel-cabecera-acciones {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
     }
 
     .panel-foto {
@@ -429,16 +437,10 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       color: #657684;
     }
 
-    /* Pie: «Agregar a lista temporal» a la izquierda, acciones y «Editar» a la derecha. */
+    /* Pie: sólo «Agregar/Quitar de la lista de asistencia» a la izquierda. */
     .panel-pie {
       align-items: center;
       justify-content: space-between;
-    }
-
-    .panel-pie-acciones {
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     /* Formulario de edición por bloques numerados. */
@@ -655,6 +657,15 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       background: #eef3fa;
     }
 
+    /* En lectura las filas no son elegibles: sin realce de hover que engañe. */
+    .combo-org-opcion-lectura:hover {
+      background: transparent;
+    }
+
+    .combo-org-opcion-lectura.combo-org-resaltado {
+      background: #eef3fa;
+    }
+
     .combo-org-opcion[aria-selected='true'] {
       background: #e3edf9;
     }
@@ -775,7 +786,7 @@ export class ActorPanelComponent {
   readonly regiones = input<OpcionCatalogo[]>([]);
   /** Abre la ficha directamente en modo edición (acción «Editar» de la tabla). */
   readonly editarInicial = input(false);
-  /** Indica si el actor ya está en la lista temporal, para alternar la etiqueta. */
+  /** Indica si el actor ya está en la lista de asistencia, para alternar la etiqueta. */
   readonly enLista = input(false);
 
   readonly cerrar = output<void>();

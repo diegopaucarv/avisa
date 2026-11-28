@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,11 +7,12 @@ import {
   Injector,
   afterNextRender,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 
@@ -23,6 +25,8 @@ import {
   type Coleccion,
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
+import { aErrorApi } from '../../core/http/errores';
+import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import {
   aFoto,
   esFotoPintable,
@@ -30,6 +34,10 @@ import {
   fotosPorEntidad,
   type Foto,
 } from '../../dominio/medios';
+import {
+  AnularPanelComponent,
+  type ResultadoAnulacion,
+} from '../../shared/ui/anular-panel.component';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 import {
   formatearFechaCompacta,
@@ -37,11 +45,12 @@ import {
   partesFecha,
 } from '../../shared/formato-fecha';
 
-import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
+import { FotoFichaComponent } from '../../shared/ui/foto-ficha.component';
+import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { esDialogoSuperior } from '../../shared/ui/modal-salida';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
-import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import {
   CeldaTablaDirectiva,
   TablaComponent,
@@ -49,11 +58,23 @@ import {
   type ColumnaTabla,
   type OrdenColumna,
 } from '../../shared/ui/tabla.component';
+import { ActorPanelComponent } from './actor-panel.component';
+import { ActorPanelAltaComponent, type NaturalezaAlta } from './actor-panel-alta.component';
+import {
+  TIPO_ACTOR_PUBLICO,
+  aActorDirectorio,
+  aCatalogosDirectorio,
+  type ActorDirectorio,
+  type CatalogosDirectorio,
+} from './directorio.mapeo';
 import {
   TIPOS_ORGANIZACION,
+  aActorDesdeApi,
   aOrganizacionDirectorio,
   type OrganizacionDirectorio,
 } from './organizacion.mapeo';
+import { ListaAsistenciaComponent } from './lista-asistencia.component';
+import { ListaAsistenciaService } from './lista-asistencia.service';
 
 type FiltrosOrganizaciones = {
   q: string;
@@ -81,18 +102,28 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
  * viven en la URL con `replaceUrl` para no llenar el historial.
  *
  * Al pulsar una fila se abre la ficha en un panel lateral; no se navega. La
- * ficha muestra únicamente campos reales de `core.organizaciones` y del actor
- * colectivo, con «—» donde la base no tiene dato.
+ * ficha muestra los campos reales de `core.organizaciones` y del actor
+ * colectivo, con «—» donde la base no tiene dato. La región se toma del actor
+ * y, si falta, se deriva de la de sus integrantes; los integrantes se listan
+ * por nombre con `GET /v1/actors?organizacion=<id>`.
+ *
+ * `?alta=organizacion` (o `?alta=institucion`) abre el alta directamente, para
+ * los enlaces que llegan desde la ficha de un actor.
  */
 @Component({
   selector: 'app-organizaciones',
   imports: [
     IconoComponent,
+    BotonAccionComponent,
     PaginacionComponent,
     BarraSeleccionComponent,
-    GaleriaFotosComponent,
     TablaComponent,
     CeldaTablaDirectiva,
+    FotoFichaComponent,
+    ActorPanelComponent,
+    ActorPanelAltaComponent,
+    AnularPanelComponent,
+    ListaAsistenciaComponent,
   ],
   templateUrl: './organizaciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -108,7 +139,8 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
       width: 100%;
       max-width: 1420px;
       margin: 0 auto;
-      padding: 27px 34px 50px;
+      /* Espacio inferior extra: el botón flotante de la lista de asistencia vive ahí. */
+      padding: 27px 34px 96px;
       box-sizing: border-box;
     }
 
@@ -175,11 +207,24 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
       width: min(560px, 100%);
     }
 
+    /* El cuerpo se queda con el alto libre para que el pie quede anclado abajo. */
+    .drawer-body {
+      flex: 1;
+      min-height: 0;
+    }
+
     .ficha-cabecera {
       display: flex;
       flex-direction: column;
       gap: 3px;
       min-width: 0;
+    }
+
+    .ficha-cabecera-acciones {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
     }
 
     .ficha-etiqueta {
@@ -242,17 +287,37 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
       min-width: 0;
     }
 
-    /* La fotografía ocupa las columnas de la cuadrícula, no una sola. */
-    .ficha-datos > div.ficha-ancho {
-      grid-column: 1 / -1;
-    }
-
     .ficha-datos dt {
       color: #97a1aa;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
+    }
+
+    .ficha-conteo {
+      margin: 0;
+      color: #465a6c;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .ficha-integrantes {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 0;
+      padding: 0 0 0 18px;
+      color: #465a6c;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .ficha-nota {
+      margin: 0;
+      color: #97a1aa;
+      font-size: 12px;
+      line-height: 1.4;
     }
 
     .ficha-datos dd {
@@ -280,7 +345,7 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
 
     @media (max-width: 720px) {
       .view-body {
-        padding: 18px 16px 40px;
+        padding: 18px 16px 88px;
       }
     }
   `,
@@ -288,8 +353,12 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
 export class OrganizacionesPage {
   private readonly ruta = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
   private readonly destruccion = inject(DestroyRef);
   private readonly injector = inject(Injector);
+
+  /** La edición y la baja lógica exigen `puede_editar` en la base. */
+  readonly capacidades = inject(CapacidadesService);
 
   readonly tipos = TIPOS_ORGANIZACION;
 
@@ -312,6 +381,12 @@ export class OrganizacionesPage {
 
   readonly filtros = computed(() => this.parametros());
 
+  /** `?alta=organizacion|institucion` abre el alta al entrar desde otra vista. */
+  private readonly altaSolicitada = toSignal(
+    this.ruta.queryParamMap.pipe(map((params) => params.get('alta'))),
+    { initialValue: null },
+  );
+
   private readonly listado = consulta<Coleccion<OrganizacionDirectorio>>({
     fuente: () => {
       const filtros = this.parametros();
@@ -332,11 +407,21 @@ export class OrganizacionesPage {
   readonly organizaciones = computed(() => this.listado.valor()?.elementos ?? []);
   readonly total = computed(() => this.listado.valor()?.total ?? 0);
 
-  /** Selección de la tabla (página visible) para exportar. */
-  readonly seleccion = new SeleccionTabla();
+  /**
+   * Lista de asistencia de la sesión, compartida con el directorio de actores.
+   * Marcar una organización la añade; al exportar se expanden sus integrantes.
+   */
+  readonly lista = inject(ListaAsistenciaService);
 
-  /** Ids marcados, en una referencia estable para `app-tabla`. */
-  readonly idsSeleccionados = computed(() => this.seleccion.lista());
+  /** Entradas de organización de la lista de asistencia. */
+  readonly organizacionesEnLista = computed(() =>
+    this.lista.entradas().filter((entrada) => entrada.tipo === 'organizacion'),
+  );
+
+  /** Ids de organizaciones en la lista, en una referencia estable para `app-tabla`. */
+  readonly idsSeleccionados = computed(() =>
+    this.organizacionesEnLista().map((entrada) => entrada.actor.id),
+  );
 
   /** Orden local de la página visible. */
   readonly orden = new OrdenTabla<OrganizacionDirectorio>();
@@ -394,16 +479,56 @@ export class OrganizacionesPage {
     if (clave) this.orden.alternar(clave);
   }
 
-  /** Refleja en `SeleccionTabla` lo que marca la tabla (barra de selección). */
+  /** Refleja en la lista de asistencia lo que marca la tabla de organizaciones. */
   alCambiarSeleccion(ids: readonly string[]): void {
     // Una organización sin id real llega como `#índice`: no se puede exportar.
     const marcadas = new Set(ids.filter((id) => !!id && !id.startsWith('#')));
-    for (const id of this.seleccion.lista()) {
-      if (!marcadas.has(id)) this.seleccion.alternar(id);
+
+    // Quita de la lista las que la tabla dejó de marcar.
+    for (const entrada of this.organizacionesEnLista()) {
+      if (!marcadas.has(entrada.actor.id)) this.lista.quitar(entrada.actor.id);
     }
+
+    // Añade las recién marcadas; sus datos salen de la página visible.
+    const enPagina = new Map(this.organizaciones().map((org) => [org.id, org]));
     for (const id of marcadas) {
-      if (!this.seleccion.esta(id)) this.seleccion.alternar(id);
+      if (this.lista.esta(id)) continue;
+      const org = enPagina.get(id);
+      if (org) this.lista.alternar(this.actorDeOrganizacion(org), 'organizacion');
     }
+  }
+
+  /**
+   * Ficha mínima del directorio para tratar una organización como entrada de la
+   * lista. La organización no firma: al exportar se cambia por sus integrantes.
+   */
+  private actorDeOrganizacion(org: OrganizacionDirectorio): ActorDirectorio {
+    return {
+      id: org.id,
+      nombre: org.nombre,
+      abreviatura: org.abreviatura,
+      naturaleza: 'Organización',
+      tipo: org.tipo,
+      funcion: null,
+      posicionamiento: null,
+      cargo: null,
+      nivelGobierno: null,
+      categoria: null,
+      region: org.region,
+      distrito: null,
+      organizacionAncla: null,
+      validado: false,
+      activo: org.activo,
+      clasificacion: 2,
+      perfil: org.perfil,
+      expedienteOspa: org.expedienteOspa,
+      estadoOspa: org.estadoOspa,
+      vigenciaDesde: org.vigenciaDesde,
+      vigenciaHasta: org.vigenciaHasta,
+      ruc: org.ruc,
+      numeroIntegrantes: org.numeroIntegrantes,
+      localesDelActor: [],
+    };
   }
 
   alClicFila(evento: ClicFila): void {
@@ -470,6 +595,99 @@ export class OrganizacionesPage {
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
+  /** Fallo de una acción (editar, baja); vacío si no hubo. */
+  readonly errorAccion = signal<string | null>(null);
+
+  /** Detalle del actor colectivo: aporta la región propia de la organización. */
+  private readonly detalleActorConsulta = consulta<ActorDirectorio>({
+    fuente: () => {
+      const id = this.seleccionado()?.id;
+      if (!id) return null;
+      return urlApi(`/v1/actors/${encodeURIComponent(id)}`);
+    },
+    esquema: aActorDesdeApi,
+  });
+  readonly detalleActor = this.detalleActorConsulta.valor;
+
+  /** Integrantes con pertenencia vigente, por nombre, para la ficha. */
+  private readonly integrantesConsulta = consulta<{ personas: ActorDirectorio[]; total: number }>({
+    fuente: () => {
+      const id = this.seleccionado()?.id;
+      if (!id) return null;
+      return urlConParametros(urlApi('/v1/actors'), {
+        organizacion: id,
+        ...paramsDePagina({ pagina: 1, tamano: 25 }),
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return { personas: coleccion.elementos.map(aActorDirectorio), total: coleccion.total };
+    },
+  });
+  readonly integrantes = computed(() => this.integrantesConsulta.valor()?.personas ?? []);
+  readonly integrantesTotal = computed(() => this.integrantesConsulta.valor()?.total ?? 0);
+  /** Primeros nombres visibles; el resto se resume con «y X más». */
+  readonly integrantesVisibles = computed(() => this.integrantes().slice(0, 6));
+  readonly integrantesRestantes = computed(() =>
+    Math.max(0, this.integrantesTotal() - this.integrantesVisibles().length),
+  );
+  readonly estadoIntegrantes = this.integrantesConsulta.estado;
+
+  /**
+   * Región de la ficha: la propia del actor colectivo o, si falta, la más
+   * frecuente entre sus integrantes. `derivada` avisa de que no es un dato
+   * declarado de la organización.
+   */
+  readonly regionFicha = computed<{ valor: string; derivada: boolean } | null>(() => {
+    const org = this.seleccionado();
+    if (!org) return null;
+
+    const propia = org.region ?? this.detalleActor()?.region ?? null;
+    if (propia) return { valor: propia, derivada: false };
+
+    const conteo = new Map<string, number>();
+    for (const persona of this.integrantes()) {
+      if (!persona.region) continue;
+      conteo.set(persona.region, (conteo.get(persona.region) ?? 0) + 1);
+    }
+
+    let elegida: string | null = null;
+    let maximo = 0;
+    for (const [region, cantidad] of conteo) {
+      if (cantidad > maximo) {
+        maximo = cantidad;
+        elegida = region;
+      }
+    }
+    return elegida ? { valor: elegida, derivada: true } : null;
+  });
+
+  /** Registro que se edita en `app-actor-panel`; `null` cuando está cerrado. */
+  readonly actorEdicion = signal<ActorDirectorio | null>(null);
+  readonly cargandoEdicion = signal(false);
+
+  /** Baja lógica o restauración pendiente de confirmar. */
+  readonly bajaAbierta = signal<{
+    id: string;
+    nombre: string;
+    codigo: string | null;
+    modo: 'anular' | 'restaurar';
+  } | null>(null);
+  readonly enviandoBaja = signal(false);
+  readonly errorBaja = signal<string | null>(null);
+
+  /** `null` = alta cerrada; la naturaleza fija el bloque del formulario. */
+  readonly altaNaturaleza = signal<NaturalezaAlta | null>(null);
+  /** Tipo de actor preseleccionado en el alta (`?alta=institucion`). */
+  readonly altaTipo = signal('');
+
+  /** Regiones del catálogo para el select de la edición. */
+  private readonly catalogos = consulta<CatalogosDirectorio>({
+    fuente: () => urlApi('/v1/catalogs'),
+    esquema: aCatalogosDirectorio,
+  });
+  readonly regionesCatalogo = computed(() => this.catalogos.valor()?.regiones ?? []);
+
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
 
   /** Elemento que tenía el foco al abrir, para devolvérselo al cerrar. */
@@ -480,10 +698,31 @@ export class OrganizacionesPage {
   constructor() {
     this.destruccion.onDestroy(() => clearTimeout(this.temporizadorBusqueda));
 
+    // `?alta=…` abre el modal y desaparece de la URL: recargar no lo reabre.
+    effect(() => {
+      const alta = this.altaSolicitada();
+      if (!alta) return;
+
+      const valida = alta === 'organizacion' || alta === 'institucion';
+      if (valida && this.capacidades.puedeEditar()) {
+        this.altaTipo.set(alta === 'institucion' ? TIPO_ACTOR_PUBLICO : '');
+        this.altaNaturaleza.set('organizacion');
+      }
+
+      void this.router.navigate([], {
+        relativeTo: this.ruta,
+        queryParams: { alta: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
+
     if (typeof document !== 'undefined') {
-      // Escape cierra el panel aunque el foco se haya ido a un bloque de texto.
+      // Escape cierra la ficha sólo si está encima: con el panel de edición o
+      // la baja abiertos, el que se cierra es el de arriba.
       const alEscape = (evento: KeyboardEvent): void => {
         if (evento.key !== 'Escape' || !this.seleccionado()) return;
+        if (!esDialogoSuperior(this.panel()?.nativeElement)) return;
         evento.preventDefault();
         this.cerrarPanel();
       };
@@ -545,6 +784,8 @@ export class OrganizacionesPage {
   limpiar(): void {
     clearTimeout(this.temporizadorBusqueda);
     this.cerrarPanel();
+    this.cerrarEdicion();
+    this.cerrarBaja();
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {},
@@ -553,6 +794,124 @@ export class OrganizacionesPage {
   }
 
   recargar(): void {
+    this.listado.recargar();
+  }
+
+  /** Abre la edición de la organización desde el actor completo. */
+  editar(org: OrganizacionDirectorio, evento?: Event): void {
+    evento?.stopPropagation();
+    if (!this.capacidades.puedeEditar() || !org.id) return;
+
+    this.errorAccion.set(null);
+    this.cargandoEdicion.set(true);
+    this.actorEdicion.set(null);
+
+    this.http
+      .get<unknown>(urlApi(`/v1/actors/${encodeURIComponent(org.id)}`))
+      .pipe(takeUntilDestroyed(this.destruccion))
+      .subscribe({
+        next: (bruto) => {
+          this.cargandoEdicion.set(false);
+          this.actorEdicion.set(aActorDesdeApi(bruto));
+        },
+        error: (fallo: unknown) => {
+          this.cargandoEdicion.set(false);
+          this.errorAccion.set(aErrorApi(fallo).message);
+        },
+      });
+  }
+
+  cerrarEdicion(): void {
+    this.actorEdicion.set(null);
+    this.cargandoEdicion.set(false);
+  }
+
+  /** Refleja lo guardado en la ficha y recarga el detalle y los integrantes. */
+  alActualizarActor(actor: ActorDirectorio): void {
+    this.actorEdicion.set(actor);
+    this.seleccionado.update((actual) =>
+      actual && actual.id === actor.id
+        ? {
+            ...actual,
+            nombre: actor.nombre,
+            abreviatura: actor.abreviatura,
+            ruc: actor.ruc ?? actual.ruc,
+            region: actor.region ?? actual.region,
+            numeroIntegrantes: actor.numeroIntegrantes ?? actual.numeroIntegrantes,
+            perfil: actor.perfil ?? actual.perfil,
+            activo: actor.activo,
+          }
+        : actual,
+    );
+
+    this.listado.recargar();
+    this.detalleActorConsulta.recargar();
+    this.integrantesConsulta.recargar();
+  }
+
+  /** Abre la baja lógica (o la restauración) de la organización abierta. */
+  abrirBaja(modo: 'anular' | 'restaurar', evento?: Event): void {
+    evento?.stopPropagation();
+    const org = this.seleccionado();
+    if (!org || !org.id || !this.capacidades.puedeEditar()) return;
+
+    this.errorBaja.set(null);
+    this.bajaAbierta.set({ id: org.id, nombre: org.nombre, codigo: org.codigo, modo });
+  }
+
+  cerrarBaja(): void {
+    this.bajaAbierta.set(null);
+    this.errorBaja.set(null);
+  }
+
+  /** Ejecuta `POST …/baja` o `…/restaurar`; es un UPDATE, no borra el registro. */
+  alConfirmarBaja(resultado: ResultadoAnulacion): void {
+    const abierta = this.bajaAbierta();
+    if (!abierta || this.enviandoBaja()) return;
+
+    const esAnular = resultado.modo === 'anular';
+    const url = urlApi(
+      `/v1/actors/${encodeURIComponent(abierta.id)}/${esAnular ? 'baja' : 'restaurar'}`,
+    );
+
+    this.enviandoBaja.set(true);
+    this.errorBaja.set(null);
+
+    const peticion = esAnular
+      ? this.http.post<unknown>(url, { motivo: resultado.motivo })
+      : this.http.post<unknown>(url, {});
+
+    peticion.pipe(takeUntilDestroyed(this.destruccion)).subscribe({
+      next: (bruto) => {
+        this.enviandoBaja.set(false);
+        this.bajaAbierta.set(null);
+
+        // Una organización dada de baja no debe seguir en la lista de asistencia.
+        this.lista.quitar(abierta.id);
+
+        const actor = aActorDesdeApi(bruto);
+        if (this.actorEdicion()) this.actorEdicion.set(actor);
+        this.seleccionado.update((actual) =>
+          actual && actual.id === abierta.id ? { ...actual, activo: actor.activo } : actual,
+        );
+        this.listado.recargar();
+        this.detalleActorConsulta.recargar();
+      },
+      error: (fallo: unknown) => {
+        this.enviandoBaja.set(false);
+        this.errorBaja.set(aErrorApi(fallo).message);
+      },
+    });
+  }
+
+  cerrarAlta(): void {
+    this.altaNaturaleza.set(null);
+    this.altaTipo.set('');
+  }
+
+  /** Tras crear la organización: cierra el alta y refresca el listado. */
+  alCrearOrganizacion(_actor: ActorDirectorio): void {
+    this.cerrarAlta();
     this.listado.recargar();
   }
 
@@ -631,6 +990,8 @@ export class OrganizacionesPage {
     // Cualquier cambio de consulta descarta la ficha abierta: así no queda una
     // organización de otro listado en pantalla.
     this.cerrarPanel();
+    this.cerrarEdicion();
+    this.cerrarBaja();
 
     void this.router.navigate([], {
       relativeTo: this.ruta,
