@@ -908,6 +908,8 @@ export class LocalesPage {
       const alEscape = (evento: KeyboardEvent): void => {
         if (evento.key !== 'Escape') return;
 
+        // Las dos ventanas viven en el mismo componente: WhatsApp, que siempre
+        // va encima, se cierra antes que la ficha.
         if (this.whatsappLocal()) {
           evento.preventDefault();
           this.cerrarWhatsapp();

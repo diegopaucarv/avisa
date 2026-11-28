@@ -75,6 +75,18 @@ export const ESTADOS_ALERTA = [
   'Atendida',
 ] as const;
 
+/**
+ * Opciones del filtro de estado del listado. La cola se opera de forma binaria
+ * —«Atendidas» frente a «Pendientes»— y no por los cinco estados del flujo:
+ * lo que decide es `paso_actual >= 5`, no la etapa de aprobación. `Atendida`
+ * reutiliza el valor canónico que ya entiende el servidor; `Pendiente` es su
+ * complemento derivado en SQL.
+ */
+export const FILTROS_ESTADO_ALERTA = [
+  { valor: 'Atendida', etiqueta: 'Atendidas' },
+  { valor: 'Pendiente', etiqueta: 'Pendientes' },
+] as const;
+
 export const ORDENES_ALERTA: readonly { valor: string; etiqueta: string }[] = [
   { valor: 'recent', etiqueta: 'Fecha de reporte (más reciente)' },
   { valor: 'riesgo', etiqueta: 'Riesgo (alto primero)' },

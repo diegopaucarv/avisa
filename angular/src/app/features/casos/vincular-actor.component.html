@@ -1,5 +1,11 @@
-<div class="drawer-scrim">
-  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="vincular-actor-titulo">
+<div class="drawer-scrim" (click)="alFondo($event)">
+  <aside
+    #panel
+    class="drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="vincular-actor-titulo"
+  >
     <header class="drawer-head">
       <div>
         <p class="evento-panel-codigo">{{ codigoCaso() }}</p>

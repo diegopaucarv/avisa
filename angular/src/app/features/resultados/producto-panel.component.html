@@ -1,4 +1,4 @@
-<div class="drawer-scrim">
+<div class="drawer-scrim" (click)="alFondo($event)">
   <aside
     #panel
     class="drawer producto-drawer"
@@ -104,11 +104,7 @@
         </section>
 
         @if (accionPendiente(); as pendiente) {
-          <div
-            class="flujo-confirmacion"
-            role="group"
-            aria-label="Confirmación de cambio de etapa"
-          >
+          <div class="flujo-confirmacion" role="group" aria-label="Confirmación de cambio de etapa">
             <p>
               <strong>{{ pendiente.etiqueta }}</strong>
               <span>{{ pendiente.detalle }}</span>
@@ -214,14 +210,6 @@
             {{ accion.etiqueta }}
           </button>
         }
-        <button
-          type="button"
-          class="button-secondary"
-          [disabled]="guardando()"
-          (click)="cerrarConSalida()"
-        >
-          Cerrar
-        </button>
       }
     </footer>
   </aside>

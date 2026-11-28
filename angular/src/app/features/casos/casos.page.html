@@ -26,9 +26,6 @@
         [consulta]="filtrosExportacion()"
         (fallo)="alFallarExportacion($event)"
       />
-      @if (capacidades.puedeEditar()) {
-      <button type="button" class="button-primary" (click)="abrirAlta()">Nuevo caso</button>
-      }
     </div>
     }
   </header>
@@ -64,7 +61,11 @@
       />
     </label>
 
-    <div class="tab-bar chips-en-linea" role="group" aria-label="Filtrar casos por nivel de riesgo">
+    <div
+      class="tab-bar chips-en-linea chips-riesgo"
+      role="group"
+      aria-label="Filtrar casos por nivel de riesgo"
+    >
       <button
         type="button"
         class="tab-button"
@@ -87,38 +88,8 @@
       }
     </div>
 
-    <label class="select-filter">
-      Región
-      <select
-        aria-label="Filtrar casos por región"
-        [value]="filtros().sinRegion ? valorSinRegion : filtros().region"
-        (change)="cambiarRegion($event)"
-      >
-        <option value="">Todas</option>
-        <option [value]="valorSinRegion">Sin región</option>
-        @for (opcion of regiones(); track opcion.valor) {
-        <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="edit-switch" [class.activo]="archivados()">
-      <span [class.activo]="!archivados()">Abiertos</span>
-      <input
-        type="checkbox"
-        role="switch"
-        [checked]="archivados()"
-        aria-label="Ver casos archivados en lugar de abiertos"
-        (change)="cambiarArchivados($event)"
-      />
-      <span class="edit-switch-track" aria-hidden="true">
-        <span class="edit-switch-thumb"></span>
-      </span>
-      <span [class.activo]="archivados()">Archivados</span>
-    </label>
-
     <div
-      class="tab-bar chips-en-linea"
+      class="tab-bar chips-en-linea chips-espacio"
       role="group"
       aria-label="Alternar entre casos y mesas de diálogo"
     >

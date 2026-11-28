@@ -32,6 +32,16 @@
   <div class="executive-kpis">
     <div class="stat-card">
       <span class="stat-icon">
+        <app-icono nombre="actividad" [tamano]="16" />
+      </span>
+      <span class="stat-copy">
+        <span>Casos manifiestos</span>
+        <strong>{{ conteoSituacion().manifiestos }}</strong>
+      </span>
+    </div>
+
+    <div class="stat-card">
+      <span class="stat-icon">
         <app-icono nombre="reloj" [tamano]="16" />
       </span>
       <span class="stat-copy">
@@ -42,32 +52,10 @@
 
     <div class="stat-card">
       <span class="stat-icon">
-        <app-icono nombre="actividad" [tamano]="16" />
-      </span>
-      <span class="stat-copy">
-        <span>Casos manifiestos</span>
-        <strong>{{ conteoSituacion().manifiestos }}</strong>
-      </span>
-    </div>
-
-    @if (conteoSituacion().sinNivel > 0) {
-    <div class="stat-card">
-      <span class="stat-icon">
-        <app-icono nombre="info" [tamano]="16" />
-      </span>
-      <span class="stat-copy">
-        <span>Sin nivel declarado · cuenta como latente</span>
-        <strong>{{ conteoSituacion().sinNivel }}</strong>
-      </span>
-    </div>
-    }
-
-    <div class="stat-card">
-      <span class="stat-icon">
         <app-icono nombre="mapa" [tamano]="16" />
       </span>
       <span class="stat-copy">
-        <span>Regiones con al menos un caso</span>
+        <span>Regiones afectadas</span>
         <strong>{{ regionesConCasos() }}</strong>
       </span>
     </div>
@@ -83,25 +71,6 @@
     </div>
   </div>
 
-  <div class="segmented ambito-chips" role="group" aria-label="Filtrar por ámbito">
-    <button
-      type="button"
-      [attr.aria-pressed]="alcanceActivo() === null"
-      (click)="elegirAlcance(null)"
-    >
-      Todos <span class="chip-count">{{ base().length }}</span>
-    </button>
-    @for (conteo of conteos(); track conteo.alcance) {
-    <button
-      type="button"
-      [attr.aria-pressed]="alcanceActivo() === conteo.alcance"
-      (click)="elegirAlcance(conteo.alcance)"
-    >
-      {{ conteo.alcance }} <span class="chip-count">{{ conteo.total }}</span>
-    </button>
-    }
-  </div>
-
   @if (sinCoincidenciasAlcance()) {
   <div class="surface panel vacio">
     <h3>{{ alcanceTexto() }} sin casos visibles</h3>
@@ -109,25 +78,10 @@
   </div>
   } @else {
   <div class="panel-doble">
-    @if (filasRegion().length > 0) {
-    <section class="surface panel" aria-labelledby="titulo-mapa">
+    <section class="surface panel panel-mapa" aria-labelledby="titulo-mapa">
       <div class="surface-heading mapa-cabeza">
         <div>
           <h3 id="titulo-mapa">Mapa referencial</h3>
-        </div>
-        <div class="mapa-controles" role="group" aria-label="Capas del mapa">
-          <button
-            type="button"
-            class="button-secondary"
-            [attr.aria-pressed]="capaDistritosVisible()"
-            (click)="alternarCapaDistritos()"
-          >
-            <app-icono nombre="mapa" [tamano]="14" />
-            Límites distritales
-          </button>
-          @if (estadoDistritos() === 'cargando') {
-          <span class="mapa-estado" role="status">Cargando la capa distrital…</span>
-          }
         </div>
         @if (filaSeleccionada(); as seleccion) {
         <span class="region-chip region-chip-activa">
@@ -140,7 +94,17 @@
         }
       </div>
 
-      @if (errorDistritos(); as fallo) {
+      @if (errorRegiones(); as fallo) {
+      <div class="mapa-aviso" role="alert">
+        <p>
+          La capa de departamentos no está disponible ({{ fallo.estado === 0 ? 'sin conexión' :
+          'error ' + fallo.estado }}). El resto del mapa sigue vigente.
+        </p>
+        <button type="button" class="button-secondary" (click)="reintentarRegiones()">
+          Reintentar
+        </button>
+      </div>
+      } @if (capasOpcionales()['distritos']) { @if (errorDistritos(); as fallo) {
       <div class="mapa-aviso" role="alert">
         <p>
           La capa distrital no está disponible ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
@@ -150,272 +114,280 @@
           Reintentar
         </button>
       </div>
-      }
+      } }
 
-      <div
-        #lienzo
-        class="mapa-lienzo"
-        role="region"
-        tabindex="0"
-        aria-label="Mapa referencial de las regiones con casos visibles y límites distritales"
-      ></div>
+      <div class="mapa-marco">
+        <div
+          #lienzo
+          class="mapa-lienzo"
+          role="region"
+          tabindex="0"
+          aria-label="Mapa referencial con los departamentos, el coroplético por región y las capas opcionales"
+        ></div>
 
-      <div class="mapa-capas" role="group" aria-labelledby="titulo-capas">
-        <h4 id="titulo-capas">Capas</h4>
-
-        <label class="capa-fila">
-          <input
-            type="checkbox"
-            [checked]="capaInfraVisible()"
-            (change)="alternarCapaInfraestructura()"
-          />
-          <span class="capa-texto">
-            <span class="capa-nombre">
-              <span class="punto-situacion" style="background: #397c79" aria-hidden="true"></span>
-              <span
-                class="punto-situacion"
-                style="background: #eaf1fb; border: 1.5px solid #1d427f"
-                aria-hidden="true"
-              ></span>
-              Infraestructuras · derechos acuícolas y sedes
-            </span>
-            <span class="capa-sub">
-              Puntos de <code>gis.infraestructuras_puntos</code>: derechos acuícolas en burbuja teal
-              y sedes en anillo azul.
-            </span>
-          </span>
-          <span class="capa-conteo">
-            @if (resumenInfra().total > 0) { {{ formatearNumero(resumenInfra().total) }} } @else { —
-            }
-          </span>
-        </label>
-
-        @if (capaInfraVisible()) {
-        <div class="capa-filtro" role="group" aria-label="Filtrar infraestructuras por tipo">
+        <div class="mapa-flotantes" role="group" aria-label="Capas del mapa">
           <button
             type="button"
-            [attr.aria-pressed]="filtroInfra() === 'todos'"
-            (click)="elegirFiltroInfra('todos')"
+            class="mapa-flotante mapa-flotante-alerta"
+            [attr.aria-pressed]="coropletaAlertas()"
+            aria-label="Riesgo en alertas de los últimos 3 meses"
+            title="Riesgo en alertas de los últimos 3 meses"
+            (click)="alternarCoropletaAlertas()"
           >
-            Todas
+            <app-icono nombre="alerta" [tamano]="17" />
           </button>
           <button
             type="button"
-            [attr.aria-pressed]="filtroInfra() === 'derecho_acuicola'"
-            (click)="elegirFiltroInfra('derecho_acuicola')"
+            class="mapa-flotante mapa-flotante-manifiesto"
+            [attr.aria-pressed]="coropletaManifiestos()"
+            aria-label="Porcentaje de casos manifiestos por región"
+            title="Porcentaje de casos manifiestos por región"
+            (click)="alternarCoropletaManifiestos()"
           >
-            Derechos acuícolas ({{ formatearNumero(resumenInfra().derechosAcuicolas) }})
+            <app-icono nombre="casos" [tamano]="17" />
           </button>
           <button
             type="button"
-            [attr.aria-pressed]="filtroInfra() === 'institucional'"
-            (click)="elegirFiltroInfra('institucional')"
+            class="mapa-flotante"
+            [attr.aria-pressed]="panelCapasAbierto()"
+            [attr.aria-expanded]="panelCapasAbierto()"
+            aria-controls="panel-capas-opcionales"
+            aria-label="Capas opcionales"
+            title="Capas opcionales"
+            (click)="alternarPanelCapas()"
           >
-            Sedes ({{ formatearNumero(resumenInfra().sedes) }})
+            <app-icono nombre="cuadricula" [tamano]="17" />
           </button>
         </div>
-        @if (estadoInfra() === 'cargando') {
-        <p class="mapa-estado-capas" role="status">Cargando los puntos de infraestructuras…</p>
-        } @if (errorInfra(); as fallo) {
-        <p class="mapa-estado-capas" role="alert">
-          No se pudo cargar la capa ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
-          fallo.estado }}).
-          <button type="button" class="button-secondary" (click)="reintentarInfraestructura()">
-            Reintentar
-          </button>
-        </p>
-        } @if (resumenInfra().sinCoordenada > 0) {
-        <p class="mapa-estado-capas">
-          {{ formatearNumero(resumenInfra().sinCoordenada) }} puntos no traen coordenada y no se
-          dibujan.
-        </p>
-        } }
 
-        <label class="capa-fila">
-          <input
-            type="checkbox"
-            [checked]="capaAuditoriosVisible()"
-            (change)="alternarCapaAuditorios()"
-          />
-          <span class="capa-texto">
-            <span class="capa-nombre">
-              <span
-                class="punto-situacion"
-                style="background: #fff; border: 2px solid #1d427f"
-                aria-hidden="true"
-              ></span>
-              Auditorios
-            </span>
-            <span class="capa-sub">
-              Ubicados por centroide del distrito (precisión «distrito, no dirección»).
-            </span>
-          </span>
-          <span class="capa-conteo">
-            @if (resumenAuditorios().total > 0) { {{ formatearNumero(resumenAuditorios().total) }} }
-            @else { — }
-          </span>
-        </label>
+        @if (panelCapasAbierto()) {
+        <div class="mapa-panel-scrim" (click)="alFondoPanel($event)" aria-hidden="true"></div>
 
-        @if (capaAuditoriosVisible()) { @if (estadoAuditorios() === 'cargando') {
-        <p class="mapa-estado-capas" role="status">Cargando los auditorios…</p>
-        } @if (errorAuditorios(); as fallo) {
-        <p class="mapa-estado-capas" role="alert">
-          No se pudo cargar la capa ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
-          fallo.estado }}).
-          <button type="button" class="button-secondary" (click)="reintentarAuditorios()">
-            Reintentar
-          </button>
-        </p>
-        } @if (resumenAuditorios().conCentroide > 0) {
-        <p class="mapa-estado-capas">
-          {{ formatearNumero(resumenAuditorios().conCentroide) }} se ubican por centroide; {{
-          formatearNumero(resumenAuditorios().sinCentroide) }} sin centroide y {{
-          formatearNumero(resumenAuditorios().sinDistrito) }} sin distrito no se dibujan.
-        </p>
-        } }
-      </div>
-    </section>
-    }
-
-    <section class="surface panel" aria-labelledby="titulo-regiones">
-      <div class="surface-heading regiones-cabeza">
-        <div>
-          <h3 id="titulo-regiones">Casos por región</h3>
-          <p>Pulsa una fila para ver el detalle de sus casos; el nombre abre el listado.</p>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table class="data-table" aria-label="Casos por región">
-          <colgroup>
-            <col class="col-region" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th scope="col" class="col-region" [appThOrden]="'region'" [orden]="ordenRegiones">
-                Región
-              </th>
-              <th scope="col" class="col-num" [appThOrden]="'riesgoAlto'" [orden]="ordenRegiones">
-                Riesgo alto
-              </th>
-              <th scope="col" [appThOrden]="'situacion'" [orden]="ordenRegiones">
-                Latentes<br />Manifiestos
-              </th>
-              <th scope="col" class="col-num" [appThOrden]="'proporcion'" [orden]="ordenRegiones">
-                % latente
-              </th>
-              <th scope="col" class="col-num" [appThOrden]="'total'" [orden]="ordenRegiones">
-                Total
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (fila of filasRegion(); track fila.region) {
-            <!--
-              La fila abre el cajón de casos de la región (requisito E2) y no
-              navega. El nombre sigue siendo el enlace al listado, así que corta
-              la propagación para no abrir el cajón de paso.
-            -->
-            <tr
-              class="case-row-clickable"
-              [class.row-selected]="esSeleccionada(fila)"
-              tabindex="0"
-              (click)="abrirCasosRegion(fila, $event)"
-              (keydown.enter)="abrirCasosRegion(fila, $event)"
+        <div
+          #panelCapas
+          id="panel-capas-opcionales"
+          class="mapa-panel-capas"
+          role="dialog"
+          aria-modal="false"
+          aria-labelledby="titulo-panel-capas"
+          tabindex="-1"
+          (keydown)="alTeclaPanel($event)"
+        >
+          <div class="mapa-panel-cabeza">
+            <h4 id="titulo-panel-capas">Capas opcionales</h4>
+            <button
+              type="button"
+              class="icon-button"
+              aria-label="Cerrar el panel de capas"
+              (click)="cerrarPanelCapas()"
             >
-              <td class="col-region">
-                <a
-                  class="table-link"
-                  [routerLink]="['/casos']"
-                  [queryParams]="verCasos(fila)"
-                  (click)="$event.stopPropagation()"
-                >
-                  <strong>{{ fila.region }}</strong>
-                </a>
-              </td>
-              <td class="col-num">{{ fila.riesgoAlto }}</td>
-              <td>{{ fila.latentes }}<br />{{ fila.manifiestos }}</td>
-              <td class="col-num">
-                <span
-                  class="punto-situacion"
-                  [style.background]="colorManifiesto(fila.proporcionLatente)"
-                  aria-hidden="true"
-                ></span
-                >{{ porcentajeLatente(fila.proporcionLatente) }}
-              </td>
-              <td class="col-num">{{ fila.total }}</td>
-            </tr>
-            } @if (sinRegion() > 0) {
-            <tr>
-              <td class="col-region">
-                <a class="table-link" [routerLink]="['/casos']" [queryParams]="verCasosSinRegion()">
-                  <strong>Sin región</strong>
-                </a>
-              </td>
-              <td class="col-num">{{ riesgoAltoSinRegion() }}</td>
-              <td>
-                {{ situacionSinRegion().latentes }}<br />{{ situacionSinRegion().manifiestos }}
-              </td>
-              <td class="col-num">
-                <span
-                  class="punto-situacion"
-                  [style.background]="colorManifiesto(situacionSinRegion().proporcionLatente)"
-                  aria-hidden="true"
-                ></span
-                >{{ porcentajeLatente(situacionSinRegion().proporcionLatente) }}
-              </td>
-              <td class="col-num">{{ sinRegion() }}</td>
-            </tr>
+              <app-icono nombre="cerrar" [tamano]="16" />
+            </button>
+          </div>
+
+          <div class="mapa-panel-lista">
+            <label class="capa-fila">
+              <input
+                type="checkbox"
+                [checked]="capasOpcionales()['derechos']"
+                (change)="alternarCapa('derechos')"
+              />
+              <span class="capa-texto">
+                <span class="capa-nombre">Derechos acuícolas</span>
+                <span class="capa-sub">Puntos de <code>gis.infraestructuras_puntos</code>.</span>
+              </span>
+              <span class="capa-conteo">
+                @if (resumenInfra().derechosAcuicolas > 0) { {{
+                formatearNumero(resumenInfra().derechosAcuicolas) }} } @else { — }
+              </span>
+            </label>
+            @if (capasOpcionales()['derechos']) { @if (estadoInfra() === 'cargando') {
+            <p class="mapa-estado-capas" role="status">Cargando los derechos acuícolas…</p>
+            } @if (errorInfra(); as fallo) {
+            <p class="mapa-estado-capas" role="alert">
+              No se pudo cargar la capa ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
+              fallo.estado }}).
+              <button type="button" class="button-secondary" (click)="reintentarInfraestructura()">
+                Reintentar
+              </button>
+            </p>
+            } }
+
+            <label class="capa-fila">
+              <input
+                type="checkbox"
+                [checked]="capasOpcionales()['fondepes']"
+                (change)="alternarCapa('fondepes')"
+              />
+              <span class="capa-texto">
+                <span class="capa-nombre">Sedes FONDEPES</span>
+                <span class="capa-sub">Anillos azules con tooltip por sede.</span>
+              </span>
+              <span class="capa-conteo">
+                @if (resumenFondepes().total > 0) { {{ formatearNumero(resumenFondepes().total) }} }
+                @else { — }
+              </span>
+            </label>
+            @if (capasOpcionales()['fondepes']) { @if (estadoFondepes() === 'cargando') {
+            <p class="mapa-estado-capas" role="status">Cargando las sedes FONDEPES…</p>
+            } @if (errorFondepes(); as fallo) {
+            <p class="mapa-estado-capas" role="alert">
+              No se pudo cargar la capa ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
+              fallo.estado }}).
+              <button type="button" class="button-secondary" (click)="reintentarFondepes()">
+                Reintentar
+              </button>
+            </p>
+            } }
+
+            <label class="capa-fila">
+              <input
+                type="checkbox"
+                [checked]="capasOpcionales()['dpa']"
+                (change)="alternarCapa('dpa')"
+              />
+              <span class="capa-texto">
+                <span class="capa-nombre">Desembarcaderos (DPA)</span>
+                <span class="capa-sub">Desembarcaderos pesqueros artesanales.</span>
+              </span>
+              <span class="capa-conteo">
+                @if (resumenDpa().total > 0) { {{ formatearNumero(resumenDpa().total) }} } @else { —
+                }
+              </span>
+            </label>
+            @if (capasOpcionales()['dpa']) { @if (estadoDpa() === 'cargando') {
+            <p class="mapa-estado-capas" role="status">Cargando los desembarcaderos…</p>
+            } @if (errorDpa(); as fallo) {
+            <p class="mapa-estado-capas" role="alert">
+              No se pudo cargar la capa ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
+              fallo.estado }}).
+              <button type="button" class="button-secondary" (click)="reintentarDpa()">
+                Reintentar
+              </button>
+            </p>
+            } }
+
+            <label class="capa-fila">
+              <input
+                type="checkbox"
+                [checked]="capasOpcionales()['auditorios']"
+                (change)="alternarCapa('auditorios')"
+              />
+              <span class="capa-texto">
+                <span class="capa-nombre">Auditorios</span>
+                <span class="capa-sub">
+                  Ubicados por centroide del distrito (precisión «distrito, no dirección»).
+                </span>
+              </span>
+              <span class="capa-conteo">
+                @if (resumenAuditorios().total > 0) { {{ formatearNumero(resumenAuditorios().total)
+                }} } @else { — }
+              </span>
+            </label>
+            @if (capasOpcionales()['auditorios']) { @if (estadoAuditorios() === 'cargando') {
+            <p class="mapa-estado-capas" role="status">Cargando los auditorios…</p>
+            } @if (errorAuditorios(); as fallo) {
+            <p class="mapa-estado-capas" role="alert">
+              No se pudo cargar la capa ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
+              fallo.estado }}).
+              <button type="button" class="button-secondary" (click)="reintentarAuditorios()">
+                Reintentar
+              </button>
+            </p>
+            } }
+
+            <label class="capa-fila">
+              <input
+                type="checkbox"
+                [checked]="capasOpcionales()['provincias']"
+                (change)="alternarCapa('provincias')"
+              />
+              <span class="capa-texto">
+                <span class="capa-nombre">Provincias</span>
+                <span class="capa-sub">Contornos finos, sin relleno.</span>
+              </span>
+              <span class="capa-conteo">
+                @if (provinciasTotal() > 0) { {{ formatearNumero(provinciasTotal()) }} } @else { — }
+              </span>
+            </label>
+            @if (capasOpcionales()['provincias']) { @if (estadoProvincias() === 'cargando') {
+            <p class="mapa-estado-capas" role="status">Cargando las provincias…</p>
+            } @if (errorProvincias(); as fallo) {
+            <p class="mapa-estado-capas" role="alert">
+              No se pudo cargar la capa ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
+              fallo.estado }}).
+              <button type="button" class="button-secondary" (click)="reintentarProvincias()">
+                Reintentar
+              </button>
+            </p>
+            } }
+
+            <label class="capa-fila">
+              <input
+                type="checkbox"
+                [checked]="capasOpcionales()['distritos']"
+                (change)="alternarCapa('distritos')"
+              />
+              <span class="capa-texto">
+                <span class="capa-nombre">Distritos</span>
+                <span class="capa-sub">
+                  Límites distritales coropléticos; el clic abre la ficha del distrito.
+                </span>
+              </span>
+              <span class="capa-conteo">
+                @if (distritosCargados() !== null) { {{ formatearNumero(distritosCargados()) }} }
+                @else { — }
+              </span>
+            </label>
+            @if (capasOpcionales()['distritos'] && estadoDistritos() === 'cargando') {
+            <p class="mapa-estado-capas" role="status">Cargando la capa distrital…</p>
             }
-          </tbody>
-        </table>
-      </div>
 
-      @if (filasRegion().length === 0) {
-      <p class="panel-vacio">No hay casos con región asignada en el conjunto visible.</p>
-      }
+            <label class="capa-fila">
+              <input
+                type="checkbox"
+                [checked]="capasOpcionales()['anp']"
+                (change)="alternarCapa('anp')"
+              />
+              <span class="capa-texto">
+                <span class="capa-nombre">ANP · Reservas Nacionales</span>
+                <span class="capa-sub">Contorno verde discontinuo con relleno tenue.</span>
+              </span>
+              <span class="capa-conteo">
+                @if (anpTotal() > 0) { {{ formatearNumero(anpTotal()) }} } @else { — }
+              </span>
+            </label>
+            @if (capasOpcionales()['anp']) { @if (estadoAnp() === 'cargando') {
+            <p class="mapa-estado-capas" role="status">Cargando las áreas naturales protegidas…</p>
+            } @if (errorAnp(); as fallo) {
+            <p class="mapa-estado-capas" role="alert">
+              No se pudo cargar la capa ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
+              fallo.estado }}).
+              <button type="button" class="button-secondary" (click)="reintentarAnp()">
+                Reintentar
+              </button>
+            </p>
+            } }
+          </div>
+        </div>
+        }
+      </div>
     </section>
+
+    <app-panorama-distribucion
+      [filas]="filasDistribucion()"
+      [variable]="variableDistribucion()"
+      [metrica]="metricaDistribucion()"
+      [ventanaDias]="ventanaDias()"
+      [alertasDisponibles]="alertasDisponibles()"
+      [cargando]="cargandoDistribucion()"
+      [aviso]="avisoIndicadores()"
+      [titulo]="tituloDistribucion()"
+      [subtitulo]="subtituloDistribucion()"
+      (variableCambia)="elegirVariable($event)"
+      (metricaCambia)="elegirMetrica($event)"
+    />
   </div>
-
-  <section class="surface panel" aria-labelledby="titulo-vista-esquematica">
-    <div class="surface-heading">
-      <div>
-        <h3 id="titulo-vista-esquematica">Casos abiertos</h3>
-      </div>
-    </div>
-
-    <div class="ambitos">
-      @for (banda of bandas(); track banda.alcance) {
-      <article class="ambito">
-        <header class="ambito-cabeza">
-          <span class="ambito-nombre">{{ banda.alcance }}</span>
-          <span class="ambito-total">
-            {{ banda.total }} {{ banda.total === 1 ? 'caso' : 'casos' }} · {{ banda.proporcion }} %
-          </span>
-        </header>
-        <div class="ambito-barra" aria-hidden="true">
-          <span [style.width.%]="banda.proporcion"></span>
-        </div>
-        <div class="ambito-regiones">
-          @for (region of banda.regiones; track region.region) {
-          <span class="region-chip">
-            <span
-              class="punto-situacion"
-              [style.background]="colorManifiesto(region.proporcionLatente)"
-              aria-hidden="true"
-            ></span>
-            {{ region.region }} <strong>{{ region.total }}</strong>
-          </span>
-          } @if (banda.sinRegion > 0) {
-          <span class="region-chip region-chip-vacia">
-            Sin región <strong>{{ banda.sinRegion }}</strong>
-          </span>
-          }
-        </div>
-      </article>
-      }
-    </div>
-  </section>
 
   <section class="surface panel" aria-labelledby="titulo-casos-prioritarios">
     <div class="surface-heading">
@@ -463,8 +435,7 @@
     </div>
     }
   </section>
-
-  @if (fichaDistrito(); as distrito) {
+  } @if (fichaDistrito(); as distrito) {
   <div class="casos-drawer-scrim" (click)="alFondoFicha($event)" (keydown)="alTeclaFicha($event)">
     <aside
       #ficha
@@ -536,114 +507,7 @@
           </tbody>
         </table>
       </div>
-
-      <footer class="casos-drawer-pie">
-        <button type="button" class="button-secondary" (click)="cerrarFichaDistrito()">
-          Cerrar
-        </button>
-      </footer>
     </aside>
   </div>
-  } @if (cajonAbierto()) {
-  <div class="casos-drawer-scrim" (click)="alFondoCajon($event)" (keydown)="alTeclaCajon($event)">
-    <aside
-      #cajon
-      class="casos-drawer"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="cajon-casos-titulo"
-      tabindex="-1"
-    >
-      <header class="casos-drawer-cabeza">
-        <div>
-          <h3 id="cajon-casos-titulo">{{ cajonTitulo() }}</h3>
-          <p class="casos-drawer-sub">
-            {{ cajonCasos().length }} {{ cajonCasos().length === 1 ? 'caso visible' : 'casos
-            visibles' }} · sólo lectura
-          </p>
-        </div>
-        <button
-          type="button"
-          class="icon-button"
-          aria-label="Cerrar el cajón de casos"
-          (click)="cerrarCajon()"
-        >
-          <app-icono nombre="cerrar" [tamano]="18" />
-        </button>
-      </header>
-
-      <div class="casos-drawer-cuerpo">
-        @if (cajonCasos().length === 0) {
-        <p class="casos-drawer-vacio">No hay casos visibles con este territorio y ámbito.</p>
-        } @else {
-        <div class="table-wrap">
-          <table class="data-table cajon-casos-tabla" aria-label="Casos de la región">
-            <thead>
-              <tr>
-                <th scope="col">Nombre</th>
-                <th scope="col">Resumen</th>
-                <th scope="col">Situación</th>
-                <th scope="col">Riesgo</th>
-                <th scope="col">Riesgo concreto</th>
-                <th scope="col">Demandas</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (caso of cajonCasos(); track caso.id) {
-              <tr>
-                <td class="celda-caso cajon-caso">
-                  <!-- Sin título declarado el nombre es el código: nunca queda
-                       una celda vacía que obligue a adivinar el caso. -->
-                  <a
-                    class="cajon-caso-codigo cajon-caso-titulo"
-                    [routerLink]="['/casos', caso.codigo]"
-                    [attr.title]="'Abrir el expediente completo de ' + caso.codigo"
-                    (click)="cerrarCajon()"
-                    >{{ caso.titulo || caso.codigo }}</a
-                  >
-                  @if (caso.titulo) {
-                  <span class="cajon-caso-codigo">{{ caso.codigo }}</span>
-                  }
-                </td>
-                <td class="cajon-caso-texto">
-                  <span [attr.title]="caso.resumen || null">{{ caso.resumen || '—' }}</span>
-                </td>
-                <td
-                  [attr.title]="
-                    caso.nivelConflicto ? null : 'Sin nivel de conflictividad declarado'
-                  "
-                >
-                  {{ situacionCaso(caso) }}
-                </td>
-                <td>
-                  <span [class]="claseRiesgo(caso)">{{ caso.riesgo }}</span>
-                </td>
-                <td class="cajon-caso-texto">
-                  <span [attr.title]="caso.descripcionRiesgo || null"
-                    >{{ caso.descripcionRiesgo || '—' }}</span
-                  >
-                </td>
-                <td>{{ caso.demandas }}</td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        }
-      </div>
-
-      <footer class="casos-drawer-pie">
-        <button type="button" class="button-secondary" (click)="cerrarCajon()">Cerrar</button>
-        <a
-          class="button-primary"
-          [routerLink]="['/casos']"
-          [queryParams]="cajonEnlace()"
-          (click)="cerrarCajon()"
-        >
-          Abrir listado completo
-        </a>
-      </footer>
-    </aside>
-  </div>
-  } } }
+  } }
 </section>

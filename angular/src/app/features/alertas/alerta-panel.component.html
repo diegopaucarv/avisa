@@ -1,4 +1,4 @@
-<div class="drawer-scrim" (keydown)="alTecla($event)">
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
   <aside
     #panel
     class="drawer"
@@ -741,7 +741,6 @@
               Enviar por WhatsApp
             </button>
           }
-          <button type="button" class="button-secondary" (click)="cerrarConSalida()">Cerrar</button>
         }
       </footer>
     }

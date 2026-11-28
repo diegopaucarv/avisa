@@ -1,4 +1,4 @@
-<div class="modal-scrim">
+<div class="modal-scrim" (click)="alFondo($event)">
   <section
     #dialogo
     class="modal"
@@ -54,7 +54,6 @@
         <app-icono nombre="copiar" [tamano]="14" />
         {{ copiado() ? 'Copiado ✓' : 'Copiar mensaje' }}
       </button>
-      <button type="button" class="button-secondary" (click)="cerrarConSalida()">Cerrar</button>
     </footer>
   </section>
 </div>

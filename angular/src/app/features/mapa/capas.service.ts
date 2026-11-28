@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
@@ -68,6 +68,9 @@ export type ResumenAuditorios = {
   sinDistrito: number;
 };
 
+/** Las tres capas de puntos que comparten contrato con `infraestructuras`. */
+export type RecursoPuntos = 'infraestructuras' | 'fondepes' | 'desembarcaderos';
+
 /** Tope de `tamano` que admite `GET /api/v1/territorio/capas` (10 000). */
 const LOTE_INFRAESTRUCTURAS = 5_000;
 
@@ -83,6 +86,20 @@ const RESUMEN_AUDITORIOS_VACIO: ResumenAuditorios = {
   conCentroide: 0,
   sinCentroide: 0,
   sinDistrito: 0,
+};
+
+type CapaPuntos = {
+  estado: EstadoCapa;
+  error: ErrorApi | null;
+  resumen: ResumenInfraestructuras;
+  puntos: readonly PuntoInfraestructura[];
+};
+
+const CAPA_PUNTOS_VACIA: CapaPuntos = {
+  estado: 'inactivo',
+  error: null,
+  resumen: RESUMEN_INFRA_VACIO,
+  puntos: [],
 };
 
 function esRegistro(valor: unknown): valor is Record<string, unknown> {
@@ -179,20 +196,33 @@ function aResumenAuditorios(bruto: unknown): ResumenAuditorios {
 export class CapasMapaService {
   private readonly http = inject(HttpClient);
 
-  private readonly _estadoInfra = signal<EstadoCapa>('inactivo');
-  private readonly _errorInfra = signal<ErrorApi | null>(null);
-  private readonly _resumenInfra = signal<ResumenInfraestructuras>(RESUMEN_INFRA_VACIO);
-  private readonly _puntosInfra = signal<readonly PuntoInfraestructura[]>([]);
-
   private readonly _estadoAuditorios = signal<EstadoCapa>('inactivo');
   private readonly _errorAuditorios = signal<ErrorApi | null>(null);
   private readonly _resumenAuditorios = signal<ResumenAuditorios>(RESUMEN_AUDITORIOS_VACIO);
   private readonly _auditorios = signal<readonly AuditorioMapa[]>([]);
 
-  readonly estadoInfra = this._estadoInfra.asReadonly();
-  readonly errorInfra = this._errorInfra.asReadonly();
-  readonly resumenInfra = this._resumenInfra.asReadonly();
-  readonly puntosInfra = this._puntosInfra.asReadonly();
+  // Cada capa de puntos guarda su propio estado: encender FONDEPES no debe
+  // reutilizar (ni invalidar) el estado de derechos acuícolas.
+  private readonly _capasPuntos = signal<Record<RecursoPuntos, CapaPuntos>>({
+    infraestructuras: CAPA_PUNTOS_VACIA,
+    fondepes: CAPA_PUNTOS_VACIA,
+    desembarcaderos: CAPA_PUNTOS_VACIA,
+  });
+
+  readonly estadoInfra = computed(() => this._capasPuntos()['infraestructuras'].estado);
+  readonly errorInfra = computed(() => this._capasPuntos()['infraestructuras'].error);
+  readonly resumenInfra = computed(() => this._capasPuntos()['infraestructuras'].resumen);
+  readonly puntosInfra = computed(() => this._capasPuntos()['infraestructuras'].puntos);
+
+  readonly estadoFondepes = computed(() => this._capasPuntos()['fondepes'].estado);
+  readonly errorFondepes = computed(() => this._capasPuntos()['fondepes'].error);
+  readonly resumenFondepes = computed(() => this._capasPuntos()['fondepes'].resumen);
+  readonly puntosFondepes = computed(() => this._capasPuntos()['fondepes'].puntos);
+
+  readonly estadoDpa = computed(() => this._capasPuntos()['desembarcaderos'].estado);
+  readonly errorDpa = computed(() => this._capasPuntos()['desembarcaderos'].error);
+  readonly resumenDpa = computed(() => this._capasPuntos()['desembarcaderos'].resumen);
+  readonly puntosDpa = computed(() => this._capasPuntos()['desembarcaderos'].puntos);
 
   readonly estadoAuditorios = this._estadoAuditorios.asReadonly();
   readonly errorAuditorios = this._errorAuditorios.asReadonly();
@@ -200,26 +230,43 @@ export class CapasMapaService {
   readonly auditorios = this._auditorios.asReadonly();
 
   /**
-   * Trae los puntos de infraestructuras recorriendo todas las páginas. Ya
-   * cargados, el filtro por tipo se resuelve en el cliente para no volver a
-   * pedir 13 456 filas cada vez que se cambia el segmentado.
+   * Trae los puntos de una capa recorriendo todas las páginas. Ya cargados, el
+   * filtro por tipo se resuelve en el cliente para no volver a pedir 13 456
+   * filas cada vez que se cambia de capa.
    */
   async cargarInfraestructuras(): Promise<void> {
-    const estado = this._estadoInfra();
-    if (estado === 'cargando' || estado === 'listo') return;
+    await this.cargarPuntos('infraestructuras');
+  }
 
-    this._estadoInfra.set('cargando');
-    this._errorInfra.set(null);
+  /** Sedes de FONDEPES: misma forma que infraestructuras, endpoint propio. */
+  async cargarFondepes(): Promise<void> {
+    await this.cargarPuntos('fondepes');
+  }
+
+  /** Desembarcaderos pesqueros artesanales (DPA). */
+  async cargarDesembarcaderos(): Promise<void> {
+    await this.cargarPuntos('desembarcaderos');
+  }
+
+  private async cargarPuntos(recurso: RecursoPuntos): Promise<void> {
+    const actual = this._capasPuntos()[recurso];
+    if (actual.estado === 'cargando' || actual.estado === 'listo') return;
+
+    this.parcharCapa(recurso, { estado: 'cargando', error: null });
 
     try {
-      const { puntos, resumen } = await this.leerInfraestructuras();
-      this._puntosInfra.set(puntos);
-      this._resumenInfra.set(resumen);
-      this._estadoInfra.set('listo');
+      const { puntos, resumen } = await this.leerPuntos(recurso);
+      this.parcharCapa(recurso, { puntos, resumen, estado: 'listo' });
     } catch (fallo) {
-      this._errorInfra.set(aErrorApi(fallo));
-      this._estadoInfra.set('error');
+      this.parcharCapa(recurso, { error: aErrorApi(fallo), estado: 'error' });
     }
+  }
+
+  private parcharCapa(recurso: RecursoPuntos, cambio: Partial<CapaPuntos>): void {
+    this._capasPuntos.update((capas) => ({
+      ...capas,
+      [recurso]: { ...capas[recurso], ...cambio },
+    }));
   }
 
   /** Los 27 auditorios en una sola petición; ya vienen ubicados por distrito. */
@@ -251,7 +298,7 @@ export class CapasMapaService {
     }
   }
 
-  private async leerInfraestructuras(): Promise<{
+  private async leerPuntos(recurso: RecursoPuntos): Promise<{
     puntos: PuntoInfraestructura[];
     resumen: ResumenInfraestructuras;
   }> {
@@ -263,7 +310,7 @@ export class CapasMapaService {
       const bruto = await firstValueFrom(
         this.http.get<unknown>(
           urlConParametros(urlApi('/v1/territorio/capas'), {
-            recurso: 'infraestructuras',
+            recurso,
             ...paramsDePagina({ pagina, tamano: LOTE_INFRAESTRUCTURAS }),
           }),
         ),

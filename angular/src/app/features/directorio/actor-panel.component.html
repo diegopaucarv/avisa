@@ -1,4 +1,4 @@
-<div class="drawer-scrim" (keydown)="alTecla($event)">
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
   <aside
     #panel
     class="drawer"
@@ -167,15 +167,93 @@
 
             <section class="actor-bloque" aria-labelledby="bloque-representatividad">
               <h3 id="bloque-representatividad">Representatividad e institución</h3>
-              <label class="ancho">
-                Organización / Institución
-                <input
-                  maxlength="255"
-                  [value]="borrador().organizacion"
-                  placeholder="sin dato"
-                  (input)="actualizarTexto('organizacion', $event)"
-                />
-              </label>
+              <div class="ancho combo-org-campo">
+                <span class="combo-org-etiqueta">Organización / Institución</span>
+                <div class="combo-org" (keydown)="alTeclaOrganizacion($event)">
+                  <button
+                    type="button"
+                    class="combo-org-disparador"
+                    role="combobox"
+                    aria-haspopup="listbox"
+                    aria-controls="actor-org-lista"
+                    aria-label="Buscar organización del directorio"
+                    [attr.aria-expanded]="comboOrgAbierto()"
+                    (click)="alternarComboOrganizacion()"
+                  >
+                    <span class="combo-org-valor">
+                      @if (borrador().organizacion) {
+                        <span class="panel-valor">{{ borrador().organizacion }}</span>
+                      } @else {
+                        <span class="panel-vacio">Buscar organización…</span>
+                      }
+                    </span>
+                    <app-icono nombre="chevron-abajo" [tamano]="14" />
+                  </button>
+
+                  @if (comboOrgAbierto()) {
+                    <div class="combo-org-panel">
+                      <div class="combo-org-buscador">
+                        <app-icono nombre="buscar" [tamano]="13" />
+                        <input
+                          type="text"
+                          role="combobox"
+                          aria-autocomplete="list"
+                          aria-controls="actor-org-lista"
+                          aria-label="Buscar organización por nombre o abreviatura"
+                          placeholder="Buscar por nombre o abreviatura…"
+                          autocomplete="off"
+                          [attr.aria-expanded]="true"
+                          [value]="comboOrgBusqueda()"
+                          (input)="alBuscarOrganizacion($event)"
+                        />
+                      </div>
+
+                      <ul
+                        id="actor-org-lista"
+                        class="combo-org-lista"
+                        role="listbox"
+                        aria-label="Organizaciones del directorio"
+                      >
+                        @if (orgOpciones().length === 0) {
+                          <li class="combo-org-vacio" role="presentation">
+                            {{ orgCargando() ? 'Buscando organizaciones…' : 'Sin coincidencias.' }}
+                          </li>
+                        }
+                        @for (org of orgOpciones(); track org.id; let i = $index) {
+                          <li role="presentation">
+                            <button
+                              type="button"
+                              class="combo-org-opcion"
+                              role="option"
+                              [attr.aria-selected]="org.nombre === borrador().organizacion"
+                              [class.combo-org-resaltado]="i === comboOrgIndice()"
+                              (click)="elegirOrganizacion(org)"
+                            >
+                              <span class="combo-org-nombre">{{ org.nombre }}</span>
+                              @if (org.abreviatura) {
+                                <span class="combo-org-abrev">{{ org.abreviatura }}</span>
+                              }
+                            </button>
+                          </li>
+                        }
+                      </ul>
+
+                      <div class="combo-org-pie">
+                        <button
+                          type="button"
+                          class="combo-org-nueva"
+                          (click)="irNuevaOrganizacion()"
+                        >
+                          ＋ Añadir nueva organización
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <span class="actor-pista"
+                  >Se vincula la persona a una organización del directorio.</span
+                >
+              </div>
               <label>
                 Abreviatura
                 <input
@@ -254,6 +332,11 @@
                     <option [value]="region.valor">{{ region.etiqueta }}</option>
                   }
                 </select>
+                @if (!borrador().region && regionesDerivadas().length > 0) {
+                  <span class="actor-pista"
+                    >Derivada de sus casos: {{ regionDerivadaTexto() }}</span
+                  >
+                }
               </label>
               <label>
                 Tipo de actor
@@ -448,13 +531,87 @@
                 resolverlo con coalesce(organizacion_ancla, membresía vigente) — ver
                 lib/db/repos/actors.ts), el campo queda en «sin dato».
               -->
-              <div class="panel-campo">
+              <div class="panel-campo combo-org-campo">
                 <span class="panel-etiqueta">Organización</span>
-                @if (a.organizacionAncla) {
-                  <span class="panel-valor">{{ a.organizacionAncla }}</span>
-                } @else {
-                  <span class="panel-vacio">{{ sinDato }}</span>
-                }
+                <div class="combo-org" (keydown)="alTeclaOrganizacion($event)">
+                  <button
+                    type="button"
+                    class="combo-org-disparador"
+                    role="combobox"
+                    aria-haspopup="listbox"
+                    aria-controls="actor-org-lista"
+                    aria-label="Buscar organización del directorio"
+                    [attr.aria-expanded]="comboOrgAbierto()"
+                    (click)="alternarComboOrganizacion()"
+                  >
+                    <span class="combo-org-valor">
+                      @if (a.organizacionAncla) {
+                        <span class="panel-valor">{{ a.organizacionAncla }}</span>
+                      } @else {
+                        <span class="panel-vacio">{{ sinDato }}</span>
+                      }
+                    </span>
+                    <app-icono nombre="chevron-abajo" [tamano]="14" />
+                  </button>
+
+                  @if (comboOrgAbierto()) {
+                    <div class="combo-org-panel">
+                      <div class="combo-org-buscador">
+                        <app-icono nombre="buscar" [tamano]="13" />
+                        <input
+                          type="text"
+                          role="combobox"
+                          aria-autocomplete="list"
+                          aria-controls="actor-org-lista"
+                          aria-label="Buscar organización por nombre o abreviatura"
+                          placeholder="Buscar por nombre o abreviatura…"
+                          autocomplete="off"
+                          [attr.aria-expanded]="true"
+                          [value]="comboOrgBusqueda()"
+                          (input)="alBuscarOrganizacion($event)"
+                        />
+                      </div>
+
+                      <ul
+                        id="actor-org-lista"
+                        class="combo-org-lista"
+                        role="listbox"
+                        aria-label="Organizaciones del directorio"
+                      >
+                        @if (orgOpciones().length === 0) {
+                          <li class="combo-org-vacio" role="presentation">
+                            {{ orgCargando() ? 'Buscando organizaciones…' : 'Sin coincidencias.' }}
+                          </li>
+                        }
+                        @for (org of orgOpciones(); track org.id; let i = $index) {
+                          <li role="presentation">
+                            <div
+                              class="combo-org-opcion combo-org-opcion-lectura"
+                              role="option"
+                              [attr.aria-selected]="org.nombre === a.organizacionAncla"
+                              [class.combo-org-resaltado]="i === comboOrgIndice()"
+                            >
+                              <span class="combo-org-nombre">{{ org.nombre }}</span>
+                              @if (org.abreviatura) {
+                                <span class="combo-org-abrev">{{ org.abreviatura }}</span>
+                              }
+                            </div>
+                          </li>
+                        }
+                      </ul>
+
+                      <div class="combo-org-pie">
+                        <button
+                          type="button"
+                          class="combo-org-nueva"
+                          (click)="irNuevaOrganizacion()"
+                        >
+                          ＋ Añadir nueva organización
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
               </div>
               <div class="panel-campo">
                 <span class="panel-etiqueta">Abreviatura</span>
@@ -468,8 +625,11 @@
                 <span class="panel-etiqueta">Región</span>
                 @if (a.region) {
                   <span class="panel-valor">{{ a.region }}</span>
+                } @else if (regionesDerivadas().length > 0) {
+                  <span class="panel-valor">{{ regionDerivadaTexto() }}</span>
+                  <span class="panel-pista">Derivada de sus casos</span>
                 } @else {
-                  <span class="panel-vacio">{{ sinDato }}</span>
+                  <span class="panel-vacio">—</span>
                 }
               </div>
               <!--
@@ -516,9 +676,32 @@
                   <span class="panel-vacio">{{ sinDato }}</span>
                 }
               </div>
-
             </div>
           </div>
+
+          @if (casos().length > 0) {
+            <section class="panel-seccion" aria-labelledby="actor-panel-casos">
+              <h3 id="actor-panel-casos">Casos en los que participa</h3>
+              <ul class="panel-casos">
+                @for (caso of casos(); track caso.codigo) {
+                  <li>
+                    <a
+                      class="panel-caso"
+                      [routerLink]="['/casos', caso.codigo]"
+                      fragment="actores-caso"
+                      [attr.title]="'Abrir el caso ' + caso.codigo"
+                    >
+                      <span class="panel-caso-codigo">{{ caso.codigo }}</span>
+                      <span class="panel-caso-nombre">{{ caso.nombre }}</span>
+                      @if (caso.region) {
+                        <span class="panel-caso-region">{{ caso.region }}</span>
+                      }
+                    </a>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
 
           @if (esOrganizacion()) {
             <section class="panel-seccion" aria-labelledby="actor-panel-ospa">
@@ -672,9 +855,6 @@
                 </button>
               }
             }
-            <button type="button" class="button-secondary" (click)="cerrarConSalida()">
-              Cerrar
-            </button>
             @if (puedeEditar()) {
               <button type="button" class="button-primary" (click)="iniciarEdicion()">
                 Editar

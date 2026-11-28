@@ -1,6 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  computed,
+  inject,
+  viewChild,
+} from '@angular/core';
 
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { salirModal } from '../../shared/ui/modal-salida';
 import { ImportacionService } from './importacion.service';
 import { TIPOS_IMPORTACION, tiposPorGrupo } from './importacion.tipos';
 
@@ -11,12 +20,12 @@ const LIMITE_VISIBLE = 40;
  * Panel de importación.
  *
  * Es un asistente de cuatro pasos en una sola pantalla: tipo de hoja, contenido,
- * previsualización con rechazos y aplicación. No se cierra al hacer clic fuera
- * ni con Escape: cerrar el panel a mitad de una revisión obligaría a repetir el
- * archivo. Sólo lo cierran sus botones.
+ * previsualización con rechazos y aplicación. Se cierra con Escape, con el clic
+ * fuera o con la ✕ desde cualquier paso: el estado del asistente vive en
+ * `ImportacionService`, así que cerrar no pierde lo ya revisado.
  *
- * Todo el estado vive en `ImportacionService`, de modo que el shell puede abrir
- * el panel con un tipo concreto desde el menú «Importar» sin pasarle nada.
+ * El shell lo abre con un tipo concreto desde el menú «Importar» sin pasarle
+ * nada.
  */
 @Component({
   selector: 'app-importar-panel',
@@ -176,6 +185,20 @@ const LIMITE_VISIBLE = 40;
 export class ImportarPanelComponent {
   readonly importacion = inject(ImportacionService);
 
+  private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
+  private readonly destruccion = inject(DestroyRef);
+
+  constructor() {
+    // Escape cierra el asistente aunque el foco esté en un campo del paso actual.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      evento.preventDefault();
+      this.cerrar();
+    };
+    document.addEventListener('keydown', alEscape);
+    this.destruccion.onDestroy(() => document.removeEventListener('keydown', alEscape));
+  }
+
   readonly grupos = tiposPorGrupo();
   readonly tipos = TIPOS_IMPORTACION;
   readonly limiteVisible = LIMITE_VISIBLE;
@@ -240,6 +263,13 @@ export class ImportarPanelComponent {
   }
 
   cerrar(): void {
-    this.importacion.cerrar();
+    // El estado vive en el servicio; se espera la salida para que la animación
+    // se vea antes de que el shell desmonte el panel.
+    salirModal(this.panel()?.nativeElement, () => this.importacion.cerrar());
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrar();
   }
 }

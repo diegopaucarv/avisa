@@ -16,11 +16,11 @@
       </div>
       <button
         type="button"
-        class="button-secondary"
+        class="icon-button"
         aria-label="Cerrar el panel del compromiso"
         (click)="cerrar()"
       >
-        <app-icono nombre="cerrar" [tamano]="14" />
+        <app-icono nombre="cerrar" [tamano]="18" />
       </button>
     </header>
 
@@ -997,7 +997,6 @@
           {{ guardando() ? 'Guardando…' : modoAlta() ? 'Registrar compromiso' : 'Guardar cambios' }}
         </button>
       } @else {
-        <button type="button" class="button-secondary" (click)="cerrar()">Cerrar</button>
         @if (puedeAnular()) {
           <button type="button" class="button-danger" (click)="anular.emit()">
             Anular compromiso

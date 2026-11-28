@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -28,6 +30,7 @@ import {
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 import { BotonAccionComponent } from '../../shared/ui/boton-accion.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { esDialogoSuperior } from '../../shared/ui/modal-salida';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
 import { ActorPanelComponent } from './actor-panel.component';
@@ -296,6 +299,9 @@ export class AutoridadesPage {
   private readonly http = inject(HttpClient);
   private readonly destruccion = inject(DestroyRef);
 
+  /** Ficha lateral: la guarda de Escape distingue si está debajo de otro modal. */
+  private readonly fichaPanel = viewChild<ElementRef<HTMLElement>>('fichaPanel');
+
   /** Permisos de la sesión: sólo se muestra PII a quien puede descifrarla. */
   readonly capacidades = inject(CapacidadesService);
 
@@ -449,6 +455,18 @@ export class AutoridadesPage {
   cerrarFicha(): void {
     this.reiniciarPii();
     this.seleccionada.set(null);
+  }
+
+  /** Escape sólo cierra la ficha si no hay un panel abierto encima. */
+  cerrarFichaConEscape(): void {
+    if (!this.seleccionada()) return;
+    if (!esDialogoSuperior(this.fichaPanel()?.nativeElement)) return;
+    this.cerrarFicha();
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarFicha();
   }
 
   /** Ids de la página visible, para «seleccionar todos». */

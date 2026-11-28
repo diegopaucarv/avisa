@@ -21,17 +21,6 @@
         </span>
         <span class="brand-name">AVISA</span>
       </a>
-      <span class="brand-divider"></span>
-      <small
-        class="brand-org"
-        title=">App de Vigilancia y Sistematización de Información de Conflictos Sociales"
-      >
-        <span class="brand-org-largo"
-          >App de Vigilancia y Sistematización de Información de Conflictos Sociales</span
-        >
-
-        <span class="brand-org-corta">Gestión de conflictos sociales</span>
-      </small>
     </div>
 
     <div class="header-right">
@@ -93,7 +82,6 @@
                 }
               </button>
             }
-            <p class="ambito-nota">Recorta lo que muestra la interfaz; tus permisos no cambian.</p>
           </div>
         }
       </div>
@@ -172,6 +160,14 @@
 
               <div class="registrar-separador"></div>
               <p class="registrar-titulo">Directorio</p>
+              <button
+                type="button"
+                role="menuitem"
+                class="registrar-opcion"
+                (click)="abrirAltaActor('persona')"
+              >
+                <span>Actor</span><span class="registrar-ayuda">persona</span>
+              </button>
               <button
                 type="button"
                 role="menuitem"
@@ -355,10 +351,10 @@
       <router-outlet />
       <footer class="app-footer">
         <span
-          >AVISA · Oficina de Articulación Intergubernamental y Prevención de Conflictos
+          >AVISA · Aplicación de Vigilancia y Sistematización de Información de Conflictos
           Sociales</span
         >
-        <span>PRODUCE</span>
+        <span>OAIPCS · PRODUCE</span>
       </footer>
     </main>
   </div>
@@ -369,7 +365,7 @@
   -->
   @if (altaActor(); as naturaleza) {
     <app-actor-panel-alta
-      naturalezaInicial="organizacion"
+      [naturalezaInicial]="naturaleza === 'persona' ? 'persona' : 'organizacion'"
       [tipoInicial]="naturaleza === 'institucion' ? tipoActorPublico : ''"
       (cerrar)="altaActor.set(null)"
       (creado)="alCrearActorDesdeShell()"

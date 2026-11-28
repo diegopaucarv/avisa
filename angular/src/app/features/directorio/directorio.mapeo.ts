@@ -272,6 +272,60 @@ export function aMembresiaActor(bruto: unknown): MembresiaActor | null {
   };
 }
 
+/** Caso donde participa el actor (`GET /api/v1/actors/:uid/casos`). */
+export type CasoVinculadoActor = {
+  codigo: string;
+  nombre: string;
+  /** Región del caso; `null` cuando ni el caso ni su distrito la resuelven. */
+  region: string | null;
+};
+
+function aCasoVinculadoActor(bruto: unknown): CasoVinculadoActor | null {
+  if (!esRegistro(bruto)) return null;
+  const codigo = texto(bruto, ['codigo', 'code', 'codigoCaso', 'codigo_caso']);
+  if (!codigo) return null;
+
+  return {
+    codigo,
+    nombre: texto(bruto, ['nombre', 'nombreCaso', 'nombre_caso', 'title']) ?? 'Sin nombre',
+    region: texto(bruto, ['region']),
+  };
+}
+
+/**
+ * `GET /api/v1/actors/:uid/casos` → casos del actor.
+ *
+ * El endpoint devuelve `{ casos: [...] }`; se acepta también un array directo o
+ * `{ items: [...] }` (el sobre de los listados) para no atarse a un detalle del
+ * transporte. Las filas sin código se descartan: no se puede enlazar un caso
+ * que no tiene identificador.
+ */
+export function aCasosDeActor(bruto: unknown): CasoVinculadoActor[] {
+  const filas = Array.isArray(bruto)
+    ? bruto
+    : esRegistro(bruto)
+      ? lista(bruto, ['casos', 'items'])
+      : [];
+
+  return filas.map(aCasoVinculadoActor).filter((caso): caso is CasoVinculadoActor => caso !== null);
+}
+
+/**
+ * Regiones de los casos del actor, sin repetir y en el orden en que aparecen.
+ *
+ * La mayoría de actores no declara región; la ficha muestra estas regiones con
+ * la nota «Derivada de sus casos» en lugar de inventar una. Si ningún caso
+ * resuelve región, la lista queda vacía y el campo se pinta como ausente.
+ */
+export function regionesDerivadasDeCasos(casos: readonly CasoVinculadoActor[]): string[] {
+  const regiones: string[] = [];
+  for (const caso of casos) {
+    const region = caso.region?.trim();
+    if (region && !regiones.includes(region)) regiones.push(region);
+  }
+  return regiones;
+}
+
 function aOpciones(bruto: unknown): OpcionCatalogo[] {
   if (!Array.isArray(bruto)) return [];
 

@@ -159,65 +159,6 @@ type PiiActorPadron = { dni: string | null; telefono: string | null };
       flex-wrap: wrap;
     }
 
-    /* Menú «Nuevo»: alta no disponible en este entorno. */
-    .menu-nuevo {
-      position: relative;
-    }
-
-    .menu-nuevo summary {
-      list-style: none;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    /* «Nuevo» es un <summary>: se iguala al alto del resto de botones. */
-    .menu-nuevo-toggle {
-      padding: 0 11px;
-      line-height: 1;
-      font-size: 12.5px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .menu-nuevo summary::-webkit-details-marker {
-      display: none;
-    }
-
-    .menu-nuevo-lista {
-      position: absolute;
-      right: 0;
-      z-index: 30;
-      display: grid;
-      gap: 2px;
-      min-width: 190px;
-      margin-top: 4px;
-      padding: 6px;
-      border: 1px solid #dce5ef;
-      border-radius: 8px;
-      background: #fff;
-      box-shadow: 0 12px 32px rgb(25 45 68 / 14%);
-    }
-
-    .menu-nuevo-lista button {
-      padding: 7px 10px;
-      border: 0;
-      border-radius: 6px;
-      background: transparent;
-      color: #465a6c;
-      font: inherit;
-      text-align: left;
-    }
-
-    .menu-nuevo-lista button:disabled {
-      color: #aab4bd;
-      cursor: not-allowed;
-    }
-
-    .menu-nuevo-lista button:not(:disabled):hover {
-      background: #f5f7f8;
-    }
-
     .actor-nombre {
       display: -webkit-box;
       width: 100%;

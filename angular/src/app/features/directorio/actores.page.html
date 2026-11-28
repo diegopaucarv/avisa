@@ -2,34 +2,9 @@
   <header class="view-head">
     <h1 id="titulo-actores">{{ titulo() }}</h1>
     <div class="view-actions">
-      <details class="menu-nuevo">
-        <summary class="button-primary menu-nuevo-toggle">Nuevo</summary>
-        <div class="menu-nuevo-lista" role="menu" aria-label="Crear registro">
-          <button
-            type="button"
-            role="menuitem"
-            [disabled]="!capacidades.puedeEditar()"
-            [title]="capacidades.puedeEditar() ? 'Registrar un actor persona' : 'Su rol no permite crear actores'"
-            (click)="abrirAlta('persona')"
-          >
-            Nuevo actor
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            [disabled]="!capacidades.puedeEditar()"
-            [title]="capacidades.puedeEditar() ? 'Registrar una organización' : 'Su rol no permite crear organizaciones'"
-            (click)="abrirAlta('organizacion')"
-          >
-            Nueva organización
-          </button>
-        </div>
-      </details>
-
       <!--
-        La fusión de duplicados y la baja lógica masiva se retiraron del
-        encabezado; la baja y la restauración siguen accesibles desde la ficha
-        del actor seleccionado.
+        El alta se ofrece desde el encabezado del shell («+ Nuevo»): aquí no se
+        repite un menú que compita con esas acciones.
       -->
 
       <app-barra-seleccion
@@ -116,7 +91,7 @@
     class="drawer-scrim"
     role="presentation"
     (click)="cerrarListaTemporal($event)"
-    (keydown.escape)="listaTemporalAbierta.set(false)"
+    (document:keydown.escape)="listaTemporalAbierta.set(false)"
   >
     <aside
       class="drawer lista-temporal-drawer"

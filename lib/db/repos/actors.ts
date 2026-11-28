@@ -2071,3 +2071,66 @@ export async function getActorById(
     generatedAt: new Date().toISOString(),
   };
 }
+
+/** Caso en el que participa un actor, con la región que pinta la ficha del caso. */
+export type ActorCasoVinculado = {
+  codigo: string;
+  nombre: string;
+  region: string | null;
+};
+
+/**
+ * Casos donde participa el actor (`core.casos_actores`).
+ *
+ * La región se resuelve con el mismo criterio que la ficha del caso y la
+ * búsqueda global: primero las regiones de `core.caso_regiones` (la principal
+ * por delante), luego `core.casos.region_principal_id` y por último la región
+ * del distrito principal. El directorio la usa sólo cuando el actor no declara
+ * región propia; nunca se escribe en la base.
+ *
+ * Devuelve `null` cuando el actor no existe, para que la ruta responda 404.
+ */
+export async function listCasosDeActor(
+  client: PoolClient,
+  uid: string,
+): Promise<ActorCasoVinculado[] | null> {
+  const actor = await client.query(
+    `select actor_uid::text as id
+       from core.actores
+      where actor_uid::text = $1 or codigo_legado = $1`,
+    [uid],
+  );
+  const actorId = actor.rows[0]?.id as string | undefined;
+  if (!actorId) return null;
+
+  const result = await client.query(
+    `select c.codigo_caso as codigo,
+            c.nombre_caso as nombre,
+            coalesce(reg.nombre, rp.nombre, cpr.nombre) as region
+       from core.casos_actores ca
+       join core.casos c on c.id = ca.caso_id
+       left join core.regiones rp on rp.id = c.region_principal_id
+       left join core.distritos cd on cd.id = c.distrito_principal_id
+       left join core.provincias cpv on cpv.id = cd.provincia_id
+       left join core.regiones cpr on cpr.id = cpv.region_id
+       left join lateral (
+         select rg.nombre
+           from core.caso_regiones cr
+           join core.regiones rg on rg.id = cr.region_id
+          where cr.caso_id = c.id
+          order by cr.es_principal desc, rg.nombre
+          limit 1
+       ) reg on true
+      where ca.actor_id = $1::uuid
+        and ca.anulado_en is null
+        and c.anulado_en is null
+      order by c.codigo_caso`,
+    [actorId],
+  );
+
+  return result.rows.map((row) => ({
+    codigo: row.codigo as string,
+    nombre: row.nombre as string,
+    region: (row.region as string | null) ?? null,
+  }));
+}

@@ -13,10 +13,10 @@
     </div>
 
     @if (sesionExpirada) {
-      <div class="demo-notice" role="status">
-        <app-icono nombre="reloj" [tamano]="15" />
-        <span>Tu sesión se cerró por inactividad. Vuelve a iniciar sesión.</span>
-      </div>
+    <div class="demo-notice" role="status">
+      <app-icono nombre="reloj" [tamano]="15" />
+      <span>Tu sesión se cerró por inactividad. Vuelve a iniciar sesión.</span>
+    </div>
     }
 
     <form [formGroup]="formulario" (ngSubmit)="enviar()">
@@ -44,7 +44,7 @@
       </div>
 
       @if (error()) {
-        <p class="form-error" role="alert">{{ error() }}</p>
+      <p class="form-error" role="alert">{{ error() }}</p>
       }
 
       <button class="login-button" type="submit" [disabled]="enviando()">

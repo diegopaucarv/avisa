@@ -207,8 +207,12 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
   },
 ];
 
-/** Variante del alta de actor que ofrece el menú «Nuevo». */
-type AltaDesdeMenu = 'organizacion' | 'institucion';
+/**
+ * Variante del alta de actor que ofrece el menú «Nuevo»: «Persona» y
+ * «Organización» son naturalezas; «Institución» es una organización pública
+ * (se abre con tipo y nivel de gobierno preseleccionados).
+ */
+type AltaDesdeMenu = 'persona' | 'organizacion' | 'institucion';
 
 @Component({
   selector: 'app-shell',

@@ -520,3 +520,259 @@ export function poblacionDeRegion(
 ): number | null {
   return indice.get(normalizarRegion(region))?.poblacion ?? null;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Panorama · distribución por sectorista y coropléticos (2026-11-28)          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Eje de la distribución: los casos abiertos o las alertas del último trimestre.
+ *
+ * El gráfico por sectorista y el coroplético del mapa comparten esta decisión,
+ * de modo que la barra y el polígono siempre miden lo mismo.
+ */
+export type VariableDistribucion = 'casos' | 'alertas';
+
+/** Medidas disponibles por sectorista dentro del eje de casos. */
+export type MetricaCasos = 'total' | 'manifiestos' | 'riesgoAlto';
+
+/** Medidas disponibles por sectorista dentro del eje de alertas. */
+export type MetricaAlertas = 'total' | 'riesgoAlto';
+
+export type MetricaDistribucion = MetricaCasos | MetricaAlertas;
+
+/**
+ * Medidas de una región tal como las entrega `GET /api/v1/panorama/indicadores`.
+ *
+ * `casos`, `manifiestos` y `riesgoAlto` ya son calculables con las filas de
+ * `/v1/cases`; `alertas90d` y `alertasRiesgoAlto` sólo llegan del endpoint de
+ * indicadores. La vista une ambas fuentes por `ubigeo` (o nombre normalizado)
+ * sin inventar el dato que falte.
+ */
+export type MedidaRegion = {
+  region: string;
+  ubigeo: string | null;
+  casos: number;
+  manifiestos: number;
+  riesgoAlto: number;
+  alertas90d: number;
+  alertasRiesgoAlto: number;
+};
+
+/** Un sectorista con las medidas de sus regiones asignadas. */
+export type SectoristaMedidas = {
+  id: string;
+  nombre: string;
+  regiones: readonly MedidaRegion[];
+};
+
+/** Fila del gráfico de distribución: una barra y los chips de sus regiones. */
+export type FilaDistribucion = {
+  clave: string;
+  titulo: string;
+  valor: number;
+  /** Participación sobre el total de la medida (0–100). */
+  proporcion: number;
+  /** Regiones del grupo con su valor en la medida elegida. */
+  regiones: readonly { region: string; valor: number }[];
+};
+
+/** Proporción `parte / total` en 0..1; 0 cuando el denominador no sirve. */
+export function proporcionDe(parte: number, total: number): number {
+  if (!Number.isFinite(parte) || !Number.isFinite(total) || total <= 0) return 0;
+  return Math.min(1, Math.max(0, parte / total));
+}
+
+/** Numerador de la medida elegida sobre una región. */
+export function valorMedida(
+  medida: MedidaRegion,
+  variable: VariableDistribucion,
+  metrica: MetricaDistribucion,
+): number {
+  if (variable === 'alertas') {
+    return metrica === 'riesgoAlto' ? medida.alertasRiesgoAlto : medida.alertas90d;
+  }
+  if (metrica === 'manifiestos') return medida.manifiestos;
+  if (metrica === 'riesgoAlto') return medida.riesgoAlto;
+  return medida.casos;
+}
+
+/**
+ * Intensidad 0..1 de una región para el coroplético.
+ *
+ * Las medidas de proporción (manifiestos, riesgo alto sobre casos, alertas con
+ * riesgo alto sobre alertas) se leen dentro de la región; las de volumen
+ * (casos y alertas totales) se normalizan contra la región con más valor, que es
+ * el `maximo` que calcula el mapa. `null` significa «sin denominador»: el
+ * polígono no se rellena en vez de pintarse como cero.
+ */
+export function intensidadMedida(
+  medida: MedidaRegion,
+  variable: VariableDistribucion,
+  metrica: MetricaDistribucion,
+  maximo: number,
+): number | null {
+  if (variable === 'casos') {
+    if (metrica === 'manifiestos') {
+      return medida.casos > 0 ? proporcionDe(medida.manifiestos, medida.casos) : null;
+    }
+    if (metrica === 'riesgoAlto') {
+      return medida.casos > 0 ? proporcionDe(medida.riesgoAlto, medida.casos) : null;
+    }
+    return maximo > 0 ? proporcionDe(medida.casos, maximo) : null;
+  }
+
+  if (metrica === 'riesgoAlto') {
+    return medida.alertas90d > 0 ? proporcionDe(medida.alertasRiesgoAlto, medida.alertas90d) : null;
+  }
+  return maximo > 0 ? proporcionDe(medida.alertas90d, maximo) : null;
+}
+
+/**
+ * Medidas por región derivadas de los casos visibles.
+ *
+ * El ubigeo se resuelve al cruzar con la capa de regiones (o su centroide); aquí
+ * queda nulo porque este módulo es puro y no conoce la geografía. Las alertas no
+ * se pueden derivar de los casos: quedan en 0 y la vista no las usa como si
+ * fueran reales.
+ */
+export function medidasDeCasos(filas: readonly FilaRegion[]): MedidaRegion[] {
+  return filas.map((fila) => ({
+    region: fila.region,
+    ubigeo: null,
+    casos: fila.total,
+    manifiestos: fila.manifiestos,
+    riesgoAlto: fila.riesgoAlto,
+    alertas90d: 0,
+    alertasRiesgoAlto: 0,
+  }));
+}
+
+function filaDeGrupo(
+  clave: string,
+  titulo: string,
+  medidas: readonly MedidaRegion[],
+  variable: VariableDistribucion,
+  metrica: MetricaDistribucion,
+  totalGlobal: number,
+): FilaDistribucion {
+  const valor = medidas.reduce(
+    (acumulado, medida) => acumulado + valorMedida(medida, variable, metrica),
+    0,
+  );
+  const regiones = medidas
+    .map((medida) => ({
+      region: medida.region,
+      valor: valorMedida(medida, variable, metrica),
+    }))
+    .sort((a, b) => b.valor - a.valor || compararTexto(a.region, b.region));
+
+  return {
+    clave,
+    titulo,
+    valor,
+    proporcion: Math.round(totalGlobal > 0 ? (valor / totalGlobal) * 100 : 0),
+    regiones,
+  };
+}
+
+/**
+ * Distribución por sectorista: una barra por responsable con los chips de sus
+ * regiones. La barra representa la participación en el total de la medida, así
+ * que la suma de todas las barras cierra en 100 % (o en 0 si no hay datos).
+ */
+export function distribuirPorSectorista(
+  sectoristas: readonly SectoristaMedidas[],
+  variable: VariableDistribucion,
+  metrica: MetricaDistribucion,
+): FilaDistribucion[] {
+  const totalGlobal = sectoristas.reduce(
+    (acumulado, sectorista) =>
+      acumulado +
+      sectorista.regiones.reduce(
+        (suma, medida) => suma + valorMedida(medida, variable, metrica),
+        0,
+      ),
+    0,
+  );
+
+  return sectoristas
+    .map((sectorista) =>
+      filaDeGrupo(
+        sectorista.id,
+        sectorista.nombre,
+        sectorista.regiones,
+        variable,
+        metrica,
+        totalGlobal,
+      ),
+    )
+    .sort((a, b) => b.valor - a.valor || compararTexto(a.titulo, b.titulo));
+}
+
+/**
+ * Distribución por región: reemplazo del gráfico cuando el endpoint de
+ * indicadores no está disponible y sólo se puede medir con los casos locales.
+ * Sólo tiene sentido en el eje de casos; las alertas se declaran ausentes.
+ */
+export function distribuirPorRegion(
+  filas: readonly FilaRegion[],
+  metrica: MetricaDistribucion,
+): FilaDistribucion[] {
+  const medidas = medidasDeCasos(filas);
+  const totalGlobal = medidas.reduce(
+    (acumulado, medida) => acumulado + valorMedida(medida, 'casos', metrica),
+    0,
+  );
+
+  return medidas
+    .map((medida, indice) =>
+      filaDeGrupo(
+        normalizarRegion(medida.region),
+        filas[indice]?.region ?? medida.region,
+        [medida],
+        'casos',
+        metrica,
+        totalGlobal,
+      ),
+    )
+    .sort((a, b) => b.valor - a.valor || compararTexto(a.titulo, b.titulo));
+}
+
+/** Rampa monocromática roja para el coroplético de alertas (claro → oscuro). */
+export const ESCALA_COROPLETA_ALERTAS: readonly string[] = [
+  '#f7e4e2',
+  '#eab7b2',
+  '#d98a83',
+  '#c06a62',
+  '#ad4d46',
+];
+
+/** Rampa monocromática azul para el coroplético de manifiestos (claro → oscuro). */
+export const ESCALA_COROPLETA_MANIFIESTOS: readonly string[] = [
+  '#eaf1fb',
+  '#c3d7ef',
+  '#93b6dd',
+  '#5f8ec6',
+  '#2455a2',
+];
+
+/**
+ * Tramo de una rampa secuencial (0..tramos-1) para una intensidad 0..1.
+ * Devuelve -1 cuando no hay intensidad: el polígono se queda sin relleno.
+ */
+export function tramoChoropleta(proporcion: number | null, tramos = 5): number {
+  if (proporcion === null || !Number.isFinite(proporcion) || tramos <= 0) return -1;
+  const valor = Math.min(1, Math.max(0, proporcion));
+  if (valor <= 0) return 0;
+  return Math.min(tramos - 1, Math.ceil(valor * tramos) - 1);
+}
+
+/** Color de la rampa para una intensidad; `null` cuando no hay dato. */
+export function colorChoropleta(
+  proporcion: number | null,
+  escala: readonly string[],
+): string | null {
+  const tramo = tramoChoropleta(proporcion, escala.length);
+  return tramo < 0 ? null : (escala[tramo] ?? null);
+}

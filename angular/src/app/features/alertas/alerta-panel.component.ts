@@ -33,7 +33,7 @@ import {
 import type { Riesgo } from '../../dominio/modelos';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { salirModal } from '../../shared/ui/modal-salida';
+import { esDialogoSuperior, salirModal } from '../../shared/ui/modal-salida';
 import {
   TerritorioBuscadorComponent,
   type OpcionTerritorio,
@@ -1057,6 +1057,18 @@ export class AlertaPanelComponent {
 
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
+
+    // Escape cierra la ficha aunque el foco esté dentro de un campo de texto.
+    // La guarda de pila evita cerrar la ficha cuando encima hay WhatsApp,
+    // triaje, archivo o la anulación.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      if (!esDialogoSuperior(this.panel()?.nativeElement)) return;
+      evento.preventDefault();
+      this.cerrarConSalida();
+    };
+    document.addEventListener('keydown', alEscape);
+    this.destruccion.onDestroy(() => document.removeEventListener('keydown', alEscape));
 
     this.destruccion.onDestroy(() => {
       this.focoPrevio?.focus?.();
@@ -2119,6 +2131,11 @@ export class AlertaPanelComponent {
 
   alTecla(evento: KeyboardEvent): void {
     if (evento.key === 'Tab') this.atraparFoco(evento);
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
   }
 
   /** El panel es modal: Tab y Shift+Tab ciclan dentro de él. */

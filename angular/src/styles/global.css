@@ -3276,6 +3276,7 @@ textarea {
    */
   .side-nav span,
   .sidebar-version,
+  .sidebar-rule,
   .sidebar-context strong,
   .sidebar-context small {
     white-space: nowrap;
@@ -3286,7 +3287,7 @@ textarea {
    * Encabezados de grupo (`.sidebar-label`).
    *
    * Colapsado: no ocupan nada —ni alto ni márgenes—, así que entre bloques de
-   * íconos no queda ningún hueco; sólo los separa una línea de 1 px. El rótulo
+   * íconos no queda ningún hueco; sólo los separa un margen de 6 px. El rótulo
    * NO se oculta con `display: none` porque entonces su reaparición no podría
    * retrasarse: se fija un alto de una línea (el mismo que ocupa desplegado) y
    * se anima de 0 a esa altura, que sí admite `transition-delay`.
@@ -3305,10 +3306,11 @@ textarea {
     line-height: 19px;
   }
 
-  /* Separador de grupo mientras están ocultos: 1 px, sin huecos. */
+  /* Separación entre grupos mientras los rótulos están ocultos: sólo el margen.
+     Sin línea ni borde, para que el riel colapsado se vea idéntico al instante
+     0 del hover (que antes quitaba el borde de golpe). */
   .sidebar-scroll > nav:not(:first-of-type) {
     margin-top: 6px;
-    border-top: 1px solid #eef2f6;
   }
 
   .avisa-sidebar:hover .sidebar-label,
@@ -3326,13 +3328,6 @@ textarea {
     margin-top: 24px;
   }
 
-  /* Con el rótulo visible, el separador sobra. */
-  .avisa-sidebar:hover .sidebar-scroll > nav:not(:first-of-type),
-  .avisa-sidebar:has(:focus-visible) .sidebar-scroll > nav:not(:first-of-type) {
-    margin-top: 0;
-    border-top: 0;
-  }
-
   /* Sin esto, el texto `nowrap` de la franja deja una barra de desplazamiento
      horizontal dentro del menú (se veían las flechas al pie). */
   .sidebar-scroll {
@@ -3341,6 +3336,7 @@ textarea {
 
   .avisa-sidebar:hover .side-nav span,
   .avisa-sidebar:hover .sidebar-version,
+  .avisa-sidebar:hover .sidebar-rule,
   .avisa-sidebar:hover .sidebar-context strong,
   .avisa-sidebar:hover .sidebar-context small {
     opacity: 1;
@@ -3351,6 +3347,7 @@ textarea {
   /* Con el teclado no hay espera: el foco despliega y muestra rótulos ya. */
   .avisa-sidebar:has(:focus-visible) .side-nav span,
   .avisa-sidebar:has(:focus-visible) .sidebar-version,
+  .avisa-sidebar:has(:focus-visible) .sidebar-rule,
   .avisa-sidebar:has(:focus-visible) .sidebar-context strong,
   .avisa-sidebar:has(:focus-visible) .sidebar-context small {
     opacity: 1;

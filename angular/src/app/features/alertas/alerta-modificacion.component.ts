@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   afterNextRender,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -186,6 +188,7 @@ export class AlertaModificacionComponent {
   readonly maximo = MAXIMO_MOTIVO;
 
   private readonly dialogo = viewChild<ElementRef<HTMLElement>>('dialogo');
+  private readonly destruccion = inject(DestroyRef);
 
   readonly motivo = signal('');
   readonly restantes = computed(() => MAXIMO_MOTIVO - this.motivo().length);
@@ -193,6 +196,20 @@ export class AlertaModificacionComponent {
 
   constructor() {
     afterNextRender(() => this.dialogo()?.nativeElement.focus({ preventScroll: true }));
+
+    // Escape cierra la ventana aunque el foco esté dentro del motivo escrito.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      evento.preventDefault();
+      this.cerrarConSalida();
+    };
+    document.addEventListener('keydown', alEscape);
+    this.destruccion.onDestroy(() => document.removeEventListener('keydown', alEscape));
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
   }
 
   campo(evento: Event): void {

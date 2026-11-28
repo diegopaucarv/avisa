@@ -11,6 +11,7 @@ import {
   esTipoInfraestructuraValido,
   listarAuditoriosMapa,
   listarInfraestructurasPuntos,
+  listarInstitucionalesPorIdentidad,
   type TipoInfraestructura,
 } from "@/lib/db/repos/territorio";
 import { withSession } from "@/lib/db/tenant";
@@ -52,6 +53,21 @@ export const dynamic = "force-dynamic";
  *   precisión es «distrito», nunca «dirección»: es una ubicación referencial y
  *   el mapa no inventa un punto cuando el distrito carece de centroide.
  *   `sinCentroide` y `sinDistrito` se declaran en vez de descartarse en silencio.
+ *
+ * `GET /api/v1/territorio/capas?recurso=fondepes`
+ * `GET /api/v1/territorio/capas?recurso=desembarcaderos`
+ *   Dos cortes de la capa institucional, con la MISMA forma que
+ *   `recurso=infraestructuras` para que el cliente reutilice su renderer:
+ *
+ *     { recurso: "fondepes" | "desembarcaderos", tipo: "institucional", items:
+ *       [ { id, tipo, lat, lon, ubigeo, distrito, provincia, region, identi,
+ *       nombreInfraestructura } ], total, page, pageSize, pagina, tamanoPagina,
+ *       resumen: { total, derechosAcuicolas, sedes, sinCoordenada }, generadoEn }
+ *
+ *   `fondepes` = `identi = 'FONDEPES'` (27 puntos); `desembarcaderos` =
+ *   `identi like 'DPA%'` (31: «DPA - GORE» y la errata «DPA -GORE»). El
+ *   `resumen` se acota al grupo (no a la tabla entera): describe lo que se está
+ *   mirando. Paginación idéntica a `infraestructuras`.
  *
  * `recurso` es obligatorio; ausente o distinto responde 400 `RECURSO_INVALIDO`.
  * Sólo lectura, con sesión obligatoria aunque las tablas no tengan RLS. Si
@@ -105,9 +121,34 @@ export async function GET(request: Request) {
       return jsonOk(result);
     }
 
+    if (recurso === "fondepes" || recurso === "desembarcaderos") {
+      // `recurso` ya está estrechado al grupo: es el mismo valor que el repo
+      // espera, sin traducción de nombres.
+      const page = enteroDe(
+        params.get("pagina") ?? params.get("page"),
+        1,
+        1_000_000,
+      );
+      const pageSize = enteroDe(
+        params.get("tamano") ?? params.get("pageSize"),
+        CAPAS_PAGE_SIZE,
+        CAPAS_PAGE_SIZE_MAX,
+      );
+
+      const result = await withSession(scope, (client) =>
+        listarInstitucionalesPorIdentidad(client, {
+          grupo: recurso,
+          page,
+          pageSize,
+        }),
+      );
+
+      return jsonOk(conAliasDePagina(result));
+    }
+
     throw new ApiError(
       400,
-      `Recurso no soportado: ${recurso ?? "(ausente)"}. Usá recurso=infraestructuras o recurso=auditorios.`,
+      `Recurso no soportado: ${recurso ?? "(ausente)"}. Usá recurso=infraestructuras, recurso=auditorios, recurso=fondepes o recurso=desembarcaderos.`,
       "RECURSO_INVALIDO",
     );
   } catch (error) {

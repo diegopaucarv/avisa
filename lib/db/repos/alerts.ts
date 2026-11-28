@@ -24,6 +24,11 @@ export const ALERT_STATE = `case
 
 const ALERT_ATENDIDA = `(a.paso_actual >= 5)`;
 
+// Complemento binario de «Atendida». No basta negar `ALERT_ATENDIDA`: con
+// `paso_actual` nulo la comparación da NULL y la fila se caería; el coalesce la
+// cuenta como no atendida, igual que hace `ALERT_STATE` al clasificarla.
+const ALERT_PENDIENTE = `coalesce(a.paso_actual, 0) < 5`;
+
 /**
  * Eje de riesgo de la alerta: el declarado en `nivel_riesgo_id` y, si falta, el
  * del caso vinculado ("riesgo heredado del caso"). La SPA pinta esta etiqueta
@@ -383,8 +388,10 @@ const SORTS: Record<string, string> = {
   riesgo: `${ALERT_RIESGO_ORDEN} desc nulls last, a.fecha_reporte desc nulls last, a.codigo_alerta asc`,
 };
 
-// Sólo estos estados derivados se pueden filtrar; cualquier otro valor se ignora.
-// «En revisión» se emite desde `ALERT_STATE`, así que también se ofrece.
+// Estos cinco estados derivados se pueden filtrar por su valor canónico;
+// cualquier otro texto se ignora. «En revisión» se emite desde `ALERT_STATE`,
+// así que también se ofrece. Además se acepta `Pendiente` (ver más abajo), que
+// no es una etiqueta del flujo sino el complemento binario de «Atendida».
 const ESTADOS = new Set([
   "Atendida",
   "Aprobada",
@@ -572,7 +579,11 @@ export async function listAlerts(
     where.push(`a.distrito_id = ${bind(id)}`);
   }
   const estado = query.estado?.trim();
-  if (estado && ESTADOS.has(estado)) {
+  if (estado === "Pendiente") {
+    // Filtro binario: «Pendiente» es todo lo que no está atendida, no sólo
+    // «Pendiente de revisión».
+    where.push(ALERT_PENDIENTE);
+  } else if (estado && ESTADOS.has(estado)) {
     where.push(`${ALERT_STATE} = ${bind(estado)}`);
   }
 

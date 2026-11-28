@@ -14,6 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router, RouterLink } from '@angular/router';
 import { from, switchMap } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
@@ -24,9 +25,10 @@ import { resolverUrlMedia } from '../../core/http/url-media';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aFoto, esFotoPintable, fotoPrincipal, urlFoto, type Foto } from '../../dominio/medios';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { salirModal } from '../../shared/ui/modal-salida';
+import { esDialogoSuperior, salirModal } from '../../shared/ui/modal-salida';
 import {
   aActorDirectorio,
+  aCasosDeActor,
   aDatosPersonales,
   errorDeCorreo,
   errorDeDni,
@@ -38,9 +40,11 @@ import {
   MASCARA_CORREO,
   MASCARA_DNI,
   POSICIONAMIENTOS_ACTOR,
+  regionesDerivadasDeCasos,
   SIN_DATO,
   TIPOS_ACTOR,
   type ActorDirectorio,
+  type CasoVinculadoActor,
   type DatosPersonales,
   type MembresiaActor,
   type OpcionCatalogo,
@@ -131,7 +135,7 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
  */
 @Component({
   selector: 'app-actor-panel',
-  imports: [IconoComponent],
+  imports: [IconoComponent, RouterLink],
   templateUrl: './actor-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
@@ -425,7 +429,7 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       color: #657684;
     }
 
-    /* Pie: «Agregar a lista temporal» a la izquierda, Cerrar/Editar a la derecha. */
+    /* Pie: «Agregar a lista temporal» a la izquierda, acciones y «Editar» a la derecha. */
     .panel-pie {
       align-items: center;
       justify-content: space-between;
@@ -528,6 +532,228 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       gap: 8px;
     }
 
+    /* Combobox de organización: cabecera y pie fijos; la lista es la que hace scroll. */
+    .combo-org-campo {
+      min-width: 0;
+    }
+
+    .combo-org-etiqueta {
+      display: block;
+      margin-bottom: 5px;
+      color: #596c7e;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .combo-org {
+      position: relative;
+      min-width: 0;
+    }
+
+    .combo-org-disparador {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      min-height: 34px;
+      padding: 6px 9px;
+      border: 1px solid #dce3e8;
+      border-radius: 6px;
+      background: #fff;
+      color: #33475b;
+      font: inherit;
+      font-weight: 400;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .combo-org-disparador:hover {
+      border-color: #1f5597;
+    }
+
+    .combo-org-valor {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+
+    .combo-org-panel {
+      position: absolute;
+      right: 0;
+      left: 0;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      max-height: 320px;
+      margin-top: 4px;
+      padding: 6px;
+      border: 1px solid #dce5ef;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 12px 32px rgb(25 45 68 / 14%);
+    }
+
+    .combo-org-buscador {
+      display: flex;
+      flex: none;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 7px;
+      border: 1px solid #e0e6ec;
+      border-radius: 6px;
+      background: #f9fbfd;
+      color: #8b97a1;
+    }
+
+    .combo-org-buscador input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      color: #17283a;
+      font: inherit;
+      font-size: 13px;
+      outline: none;
+    }
+
+    /* Altura máxima fija con scroll: el pie con «Añadir nueva» queda siempre a la vista. */
+    .combo-org-lista {
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: 220px;
+      overflow-y: auto;
+      margin: 4px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .combo-org-opcion {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      padding: 6px 8px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #17283a;
+      font: inherit;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .combo-org-opcion-lectura {
+      cursor: default;
+    }
+
+    .combo-org-opcion:hover,
+    .combo-org-opcion.combo-org-resaltado {
+      background: #eef3fa;
+    }
+
+    .combo-org-opcion[aria-selected='true'] {
+      background: #e3edf9;
+    }
+
+    .combo-org-nombre {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .combo-org-abrev {
+      flex: none;
+      color: #8b97a1;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    .combo-org-vacio {
+      padding: 8px 6px;
+      color: #99a3aa;
+      font-size: 12.5px;
+      font-style: italic;
+    }
+
+    .combo-org-pie {
+      flex: none;
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px solid #eef2f6;
+    }
+
+    .combo-org-nueva {
+      width: 100%;
+      padding: 7px 8px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: #1f5597;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .combo-org-nueva:hover {
+      background: #eef3fa;
+    }
+
+    /* Casos vinculados: enlace a la ficha del caso, en la sección de actores. */
+    .panel-casos {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .panel-caso {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 6px 8px;
+      border: 1px solid #eef2f6;
+      border-radius: 6px;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .panel-caso:hover {
+      border-color: #cddbe9;
+      background: #f8fafc;
+    }
+
+    .panel-caso-codigo {
+      flex: none;
+      color: #8b97a1;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .panel-caso-nombre {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      color: #33475b;
+      font-size: 13px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .panel-caso-region {
+      flex: none;
+      color: #7d8b98;
+      font-size: 11.5px;
+    }
+
     @media (max-width: 520px) {
       .panel-grid,
       .actor-bloque {
@@ -567,6 +793,7 @@ export class ActorPanelComponent {
 
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
+  private readonly router = inject(Router);
   private readonly destruccion = inject(DestroyRef);
 
   /** El botón de PII sólo existe si el rol tiene el permiso. */
@@ -657,6 +884,144 @@ export class ActorPanelComponent {
       .map((parte) => parte[0]?.toUpperCase() ?? '')
       .join('');
   });
+
+  /* ------------------------------------------------------------------ */
+  /* Organización: buscador de organizaciones del directorio             */
+  /* ------------------------------------------------------------------ */
+
+  /** Desplegable de organizaciones abierto (en lectura y en edición). */
+  readonly comboOrgAbierto = signal(false);
+  /** Texto visible del buscador, sin debounce. */
+  readonly comboOrgBusqueda = signal('');
+  /** Término ya debounced que alimenta la consulta. */
+  private readonly comboOrgTermino = signal('');
+  /** Índice resaltado para el recorrido con flechas. */
+  readonly comboOrgIndice = signal(-1);
+  private temporizadorOrg?: ReturnType<typeof setTimeout>;
+
+  /**
+   * Organizaciones del directorio para el combobox. Se consulta al abrir (no
+   * antes) para no pedir el listado en cada ficha; `q` filtra en servidor con el
+   * mismo endpoint del directorio de organizaciones.
+   */
+  private readonly organizacionesCombo = consulta<ActorDirectorio[]>({
+    fuente: () => {
+      if (!this.comboOrgAbierto()) return null;
+      return urlConParametros(urlApi('/v1/actors'), {
+        naturaleza: 'organizacion',
+        q: this.comboOrgTermino(),
+        pageSize: '25',
+      });
+    },
+    esquema: (bruto) => {
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      return coleccion.elementos.map(aActorDirectorio).filter((org) => !!org.id);
+    },
+  });
+
+  /** Opciones visibles ahora mismo en el combobox. */
+  readonly orgOpciones = computed(() => this.organizacionesCombo.valor() ?? []);
+  readonly orgCargando = computed(() => this.organizacionesCombo.estado() === 'cargando');
+
+  /* ------------------------------------------------------------------ */
+  /* Casos en los que participa el actor                                 */
+  /* ------------------------------------------------------------------ */
+
+  private readonly casosVinculados = consulta<CasoVinculadoActor[]>({
+    fuente: () => {
+      const id = this.actor()?.id;
+      return id ? urlApi(`/v1/actors/${encodeURIComponent(id)}/casos`) : null;
+    },
+    esquema: aCasosDeActor,
+  });
+
+  readonly casos = computed(() => this.casosVinculados.valor() ?? []);
+
+  /**
+   * Regiones de los casos del actor. La ficha las muestra sólo cuando el actor
+   * no declara región: es un dato derivado, nunca una región asignada.
+   */
+  readonly regionesDerivadas = computed(() => regionesDerivadasDeCasos(this.casos()));
+  readonly regionDerivadaTexto = computed(() => this.regionesDerivadas().join(', '));
+
+  alternarComboOrganizacion(): void {
+    if (this.comboOrgAbierto()) {
+      this.cerrarComboOrganizacion();
+      return;
+    }
+    clearTimeout(this.temporizadorOrg);
+    this.comboOrgBusqueda.set('');
+    this.comboOrgTermino.set('');
+    this.comboOrgIndice.set(0);
+    this.comboOrgAbierto.set(true);
+  }
+
+  cerrarComboOrganizacion(): void {
+    clearTimeout(this.temporizadorOrg);
+    this.comboOrgAbierto.set(false);
+    this.comboOrgBusqueda.set('');
+    this.comboOrgTermino.set('');
+    this.comboOrgIndice.set(-1);
+  }
+
+  alBuscarOrganizacion(evento: Event): void {
+    const valor = (evento.target as HTMLInputElement).value;
+    this.comboOrgBusqueda.set(valor);
+    clearTimeout(this.temporizadorOrg);
+    this.temporizadorOrg = setTimeout(() => {
+      this.comboOrgTermino.set(valor.trim());
+      this.comboOrgIndice.set(0);
+    }, 250);
+  }
+
+  /**
+   * Teclado del combobox: flechas para recorrer, Enter para elegir (sólo en
+   * edición) y Escape para cerrar la lista sin cerrar la ficha. El
+   * `stopPropagation` evita que el atajo global del panel cierre el drawer.
+   */
+  alTeclaOrganizacion(evento: KeyboardEvent): void {
+    if (evento.key === 'Escape') {
+      if (this.comboOrgAbierto()) {
+        evento.stopPropagation();
+        this.cerrarComboOrganizacion();
+      }
+      return;
+    }
+
+    if (!this.comboOrgAbierto()) return;
+    const total = this.orgOpciones().length;
+    if (total === 0) return;
+
+    if (evento.key === 'ArrowDown' || evento.key === 'ArrowUp') {
+      evento.preventDefault();
+      const paso = evento.key === 'ArrowDown' ? 1 : -1;
+      this.comboOrgIndice.set((this.comboOrgIndice() + paso + total) % total);
+      return;
+    }
+
+    if (evento.key === 'Enter' && this.editando()) {
+      const org = this.orgOpciones()[this.comboOrgIndice()];
+      if (org) {
+        evento.preventDefault();
+        this.elegirOrganizacion(org);
+      }
+    }
+  }
+
+  /** Elige una organización del directorio para la membresía del actor. */
+  elegirOrganizacion(org: ActorDirectorio): void {
+    if (!this.editando()) return;
+    this.borrador.update((actual) => ({ ...actual, organizacion: org.nombre }));
+    this.cerrarComboOrganizacion();
+  }
+
+  /** Pie del combo: el alta de organización la abre la pantalla de organizaciones. */
+  irNuevaOrganizacion(): void {
+    this.cerrarComboOrganizacion();
+    void this.router.navigate(['/directorio/organizaciones'], {
+      queryParams: { alta: 'organizacion' },
+    });
+  }
 
   /** `true` cuando el DNI y el teléfono auditados ya están en pantalla. */
   readonly piiVisible = computed(() => this.estadoPii() === 'listo');
@@ -827,6 +1192,16 @@ export class ActorPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
+    // Escape cierra la ficha aunque el foco esté en un campo de texto. La guarda
+    // de pila evita cerrarla cuando la anulación o el alta están encima.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      if (!esDialogoSuperior(this.panel()?.nativeElement)) return;
+      evento.preventDefault();
+      this.cerrarConSalida();
+    };
+    document.addEventListener('keydown', alEscape);
+
     // Al cambiar de fila se descarta cualquier PII del actor anterior: la ficha
     // no debe arrastrar datos de una selección previa.
     effect(() => {
@@ -834,6 +1209,7 @@ export class ActorPanelComponent {
       if (id === this.actorVigente) return;
       this.actorVigente = id;
       this.reiniciarPii();
+      this.cerrarComboOrganizacion();
     });
 
     // «Editar» desde la tabla abre la ficha ya en modo edición.
@@ -849,10 +1225,11 @@ export class ActorPanelComponent {
       this.iniciarEdicion();
     });
 
-    // El panel sólo se cierra con Cancelar o Confirmar: Escape no lo descarta.
+    // El panel se cierra con Escape, con el clic fuera o con la ✕.
     this.destruccion.onDestroy(() => {
       clearTimeout(this.temporizadorCopiado);
       clearTimeout(this.temporizadorPlantilla);
+      clearTimeout(this.temporizadorOrg);
       this.focoPrevio?.focus?.();
       this.reiniciarPii();
     });
@@ -1150,6 +1527,11 @@ export class ActorPanelComponent {
 
   alTecla(evento: KeyboardEvent): void {
     if (evento.key === 'Tab') this.atraparFoco(evento);
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
   }
 
   private reiniciarPii(): void {

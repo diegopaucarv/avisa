@@ -6,10 +6,13 @@ import { urlApi } from '../config/entorno';
 import { urlConParametros } from '../http/coleccion';
 import { aErrorApi, type ErrorApi } from '../http/errores';
 import type {
+  AnpGeo,
   CentroideDistrito,
   DistritoGeo,
   EstadoCapa,
   PoblacionRegion,
+  ProvinciaGeo,
+  RegionGeo,
 } from './territorio.tipos';
 
 /**
@@ -25,10 +28,13 @@ import type {
  */
 
 export type {
+  AnpGeo,
   CentroideDistrito,
   DistritoGeo,
   EstadoCapa,
   PoblacionRegion,
+  ProvinciaGeo,
+  RegionGeo,
 } from './territorio.tipos';
 
 /** Tolerancia de simplificación por defecto: la misma que aplica el servidor. */
@@ -91,6 +97,45 @@ function aDistrito(bruto: unknown): DistritoGeo | null {
   };
 }
 
+/**
+ * Región o provincia. Comparten contrato (`ubigeo|nombre|region|alcance|poblacion`),
+ * así que el mismo lector sirve a las dos capas y a la vista no le importa cuál
+ * respondió.
+ */
+function aRegionOProvincia(bruto: unknown): RegionGeo | null {
+  if (!esRegistro(bruto)) return null;
+  const propiedades = esRegistro(bruto['properties']) ? bruto['properties'] : {};
+  const geometria = geometriaDe(bruto['geometry']);
+  const ubigeo = texto(propiedades['ubigeo']) ?? texto(bruto['id']);
+  const nombre = texto(propiedades['nombre']);
+  if (!ubigeo || !nombre || !geometria) return null;
+
+  return {
+    ubigeo,
+    nombre,
+    region: texto(propiedades['region']) ?? nombre,
+    alcance: texto(propiedades['alcance']),
+    poblacion: numero(propiedades['poblacion']),
+    geometria,
+  };
+}
+
+function aAnp(bruto: unknown): AnpGeo | null {
+  if (!esRegistro(bruto)) return null;
+  const propiedades = esRegistro(bruto['properties']) ? bruto['properties'] : {};
+  const geometria = geometriaDe(bruto['geometry']);
+  const codigo = texto(propiedades['codigo']) ?? texto(bruto['id']);
+  const nombre = texto(propiedades['nombre']);
+  if (!codigo || !nombre || !geometria) return null;
+
+  return {
+    codigo,
+    nombre,
+    categoria: texto(propiedades['categoria']),
+    geometria,
+  };
+}
+
 function aPoblacionRegion(bruto: unknown): PoblacionRegion | null {
   if (!esRegistro(bruto)) return null;
   const clave = texto(bruto['clave']);
@@ -128,6 +173,34 @@ export class TerritorioService {
   readonly estadoPoblacion = this._estadoPoblacion.asReadonly();
   readonly errorPoblacion = this._errorPoblacion.asReadonly();
 
+  // ── Capas territoriales (regiones permanentes; provincias y ANP opcionales) ──
+  // Se cargan con señal y no con promesa porque el mapa las repinta cada vez
+  // que cambia el ámbito o el coroplético: el componente necesita observar los
+  // datos ya resueltos, no volver a suscribirse a la petición.
+  private readonly _regiones = signal<readonly RegionGeo[]>([]);
+  private readonly _estadoRegiones = signal<EstadoCapa>('inactivo');
+  private readonly _errorRegiones = signal<ErrorApi | null>(null);
+
+  private readonly _provincias = signal<readonly ProvinciaGeo[]>([]);
+  private readonly _estadoProvincias = signal<EstadoCapa>('inactivo');
+  private readonly _errorProvincias = signal<ErrorApi | null>(null);
+
+  private readonly _anp = signal<readonly AnpGeo[]>([]);
+  private readonly _estadoAnp = signal<EstadoCapa>('inactivo');
+  private readonly _errorAnp = signal<ErrorApi | null>(null);
+
+  readonly regiones = this._regiones.asReadonly();
+  readonly estadoRegiones = this._estadoRegiones.asReadonly();
+  readonly errorRegiones = this._errorRegiones.asReadonly();
+
+  readonly provincias = this._provincias.asReadonly();
+  readonly estadoProvincias = this._estadoProvincias.asReadonly();
+  readonly errorProvincias = this._errorProvincias.asReadonly();
+
+  readonly anp = this._anp.asReadonly();
+  readonly estadoAnp = this._estadoAnp.asReadonly();
+  readonly errorAnp = this._errorAnp.asReadonly();
+
   /**
    * Distritos de la capa GIS, opcionalmente acotados a una región.
    *
@@ -163,23 +236,114 @@ export class TerritorioService {
     region: string | null | undefined,
     tolerancia: number | undefined,
   ): Promise<DistritoGeo[]> {
-    const parametros: Record<string, string | number> = {
-      recurso: 'distritos',
-      geometria: 1,
-      tolerancia: tolerancia ?? TOLERANCIA_POR_DEFECTO,
-    };
+    const parametros: Record<string, string | number> = {};
     if (region?.trim()) parametros['region'] = region.trim();
 
+    const rasgos = await this.leerRasgos('distritos', parametros, tolerancia);
+    return rasgos.map(aDistrito).filter((distrito): distrito is DistritoGeo => distrito !== null);
+  }
+
+  /**
+   * Rasgos GeoJSON de `GET /api/v1/territorio`. Un solo punto de validación del
+   * sobre: si el servidor no devuelve `features`, se falla en vez de dibujar un
+   * mapa vacío que parecería un cero real.
+   */
+  private async leerRasgos(
+    recurso: string,
+    extra: Record<string, string | number> = {},
+    tolerancia: number = TOLERANCIA_POR_DEFECTO,
+  ): Promise<unknown[]> {
     const bruto = await firstValueFrom(
-      this.http.get<unknown>(urlConParametros(urlApi('/v1/territorio'), parametros)),
+      this.http.get<unknown>(
+        urlConParametros(urlApi('/v1/territorio'), {
+          recurso,
+          geometria: 1,
+          tolerancia,
+          ...extra,
+        }),
+      ),
     );
     if (!esRegistro(bruto) || !Array.isArray(bruto['features'])) {
-      throw new Error('La capa distrital no devolvió una colección de elementos.');
+      throw new Error('La capa territorial no devolvió una colección de elementos.');
     }
+    return bruto['features'];
+  }
 
-    return bruto['features']
-      .map(aDistrito)
-      .filter((distrito): distrito is DistritoGeo => distrito !== null);
+  /**
+   * Regiones del país (`recurso=regiones`). Se piden una sola vez al montar el
+   * mapa: la capa de departamentos es permanente y también alimenta el
+   * coroplético y el encuadre por ámbito.
+   */
+  async cargarRegiones(): Promise<void> {
+    const estadoActual = this._estadoRegiones();
+    if (estadoActual === 'cargando' || estadoActual === 'listo') return;
+
+    this._estadoRegiones.set('cargando');
+    this._errorRegiones.set(null);
+    try {
+      const rasgos = await this.leerRasgos('regiones');
+      this._regiones.set(
+        rasgos.map(aRegionOProvincia).filter((region): region is RegionGeo => region !== null),
+      );
+      this._estadoRegiones.set('listo');
+    } catch (fallo) {
+      this._errorRegiones.set(aErrorApi(fallo));
+      this._estadoRegiones.set('error');
+    }
+  }
+
+  /** Provincias: capa opcional, se pide al encenderse. */
+  async cargarProvincias(): Promise<void> {
+    const estadoActual = this._estadoProvincias();
+    if (estadoActual === 'cargando' || estadoActual === 'listo') return;
+
+    this._estadoProvincias.set('cargando');
+    this._errorProvincias.set(null);
+    try {
+      const rasgos = await this.leerRasgos('provincias');
+      this._provincias.set(
+        rasgos
+          .map(aRegionOProvincia)
+          .filter((provincia): provincia is ProvinciaGeo => provincia !== null),
+      );
+      this._estadoProvincias.set('listo');
+    } catch (fallo) {
+      this._errorProvincias.set(aErrorApi(fallo));
+      this._estadoProvincias.set('error');
+    }
+  }
+
+  /** Áreas naturales protegidas: capa opcional, se pide al encenderse. */
+  async cargarAnp(): Promise<void> {
+    const estadoActual = this._estadoAnp();
+    if (estadoActual === 'cargando' || estadoActual === 'listo') return;
+
+    this._estadoAnp.set('cargando');
+    this._errorAnp.set(null);
+    try {
+      const rasgos = await this.leerRasgos('anp');
+      this._anp.set(rasgos.map(aAnp).filter((anp): anp is AnpGeo => anp !== null));
+      this._estadoAnp.set('listo');
+    } catch (fallo) {
+      this._errorAnp.set(aErrorApi(fallo));
+      this._estadoAnp.set('error');
+    }
+  }
+
+  /** Reintento de una capa: se limpia el estado y se vuelve a pedir. */
+  reintentarRegiones(): void {
+    this._estadoRegiones.set('inactivo');
+    void this.cargarRegiones();
+  }
+
+  reintentarProvincias(): void {
+    this._estadoProvincias.set('inactivo');
+    void this.cargarProvincias();
+  }
+
+  reintentarAnp(): void {
+    this._estadoAnp.set('inactivo');
+    void this.cargarAnp();
   }
 
   /** Población agregada por región, indexada por ubigeo de dos dígitos. */

@@ -129,9 +129,6 @@ import type { ResultadoEnlazado } from './busqueda.mapeo';
             >
               {{ fila().abreFicha ? 'Abrir ficha' : 'Ver en el listado' }}
             </a>
-            <button type="button" class="button-secondary" (click)="cerrarConSalida()">
-              Cerrar
-            </button>
           </div>
         </div>
       </aside>

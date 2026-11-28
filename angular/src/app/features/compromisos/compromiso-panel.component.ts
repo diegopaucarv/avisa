@@ -30,7 +30,7 @@ import { aCaso, aDetalleCaso, type DemandaCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { salirModal } from '../../shared/ui/modal-salida';
+import { esDialogoSuperior, salirModal } from '../../shared/ui/modal-salida';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { codigoHitoCorto, etiquetaHito as etiquetaHitoDe } from '../../shared/hito-texto';
@@ -769,8 +769,11 @@ export class CompromisoPanelComponent {
     });
 
     // Escape cierra el panel aunque el foco esté dentro de un campo de texto.
+    // La guarda de pila evita cerrar el compromiso cuando la anulación está
+    // encima.
     const alEscape = (evento: KeyboardEvent): void => {
       if (evento.key !== 'Escape') return;
+      if (!esDialogoSuperior(this.panel()?.nativeElement)) return;
       evento.preventDefault();
       this.cerrar();
     };
@@ -1386,11 +1389,8 @@ export class CompromisoPanelComponent {
   }
 
   alFondo(evento: MouseEvent): void {
-    if (evento.target !== evento.currentTarget) return;
-    // En edición o alta el clic fuera no cierra: evita perder lo escrito. Para
-    // salir hay botones explícitos («Cancelar» / «Cerrar»).
-    if (this.formularioVisible()) return;
-    this.cerrar();
+    // Sin guarda por cambios: el clic fuera cierra también en edición y alta.
+    if (evento.target === evento.currentTarget) this.cerrar();
   }
 
   alTecla(evento: KeyboardEvent): void {

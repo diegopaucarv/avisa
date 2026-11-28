@@ -14,7 +14,7 @@ import {
 
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { salirModal } from '../../shared/ui/modal-salida';
+import { esDialogoSuperior, salirModal } from '../../shared/ui/modal-salida';
 import {
   formatearFecha as formatearFechaDocumento,
   type Documento,
@@ -315,6 +315,7 @@ export class ProductoPanelComponent {
 
     const alEscape = (evento: KeyboardEvent): void => {
       if (evento.key !== 'Escape') return;
+      if (!esDialogoSuperior(this.panel()?.nativeElement)) return;
       evento.preventDefault();
       if (this.guardando()) return;
       if (this.accionPendiente()) {
@@ -369,5 +370,16 @@ export class ProductoPanelComponent {
 
   cerrarConSalida(): void {
     salirModal(this.panel()?.nativeElement, () => this.cerrar.emit());
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target !== evento.currentTarget) return;
+    // Una confirmación de flujo abierta se descarta antes de cerrar la ficha.
+    if (this.accionPendiente()) {
+      this.cancelarAccion();
+      return;
+    }
+    this.cerrarConSalida();
   }
 }

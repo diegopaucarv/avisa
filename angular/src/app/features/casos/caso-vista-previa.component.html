@@ -1,4 +1,4 @@
-<div class="drawer-scrim" (keydown)="alTecla($event)">
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
   <aside
     #panel
     class="drawer"
@@ -135,7 +135,6 @@
     </div>
 
     <footer class="drawer-foot">
-      <button type="button" class="button-secondary" (click)="cerrarConSalida()">Cerrar</button>
       <a class="button-primary" [routerLink]="['/casos', caso().codigo]">
         Abrir expediente completo
       </a>

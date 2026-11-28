@@ -22,28 +22,29 @@
 
 ### 2.1 Aplicadas
 
-| Clave en `migracion_log`                                          | Tema                                                            |
-| ----------------------------------------------------------------- | --------------------------------------------------------------- |
-| `40_casos_naturaleza` … `70_sembrar_secuencia_codigos_2026_11_26` | Serie histórica (ver tabla completa abajo)                      |
-| `73_alerta_hechos_2026_11_26`                                     | Tabla `core.alerta_hechos`                                      |
-| `74_usuarios_sectoristas_lectura_2026_11_27`                      | Lectura de usuarios sectoristas                                 |
-| `75_unificar_territorio_gis_2026_11_27`                           | Unificación de territorio/GIS                                   |
-| `76_caso_priorizado_2026_11_26`                                   | `core.casos.priorizado`                                         |
-| `77_casos_actores_posicion_guia_2026_11_26`                       | `posicion` con el vocabulario de la Guía                        |
-| `78_alertas_anulacion_direccion_2026_11_27`                       | Anulación de alertas por Dirección                              |
-| `79_alerta_hechos_fechas_2026_11_27`                              | Fechas de los hechos                                            |
-| `80_alerta_hechos_sin_anio_2026_11_27`                            | Hechos sin año                                                  |
-| `81_mesas_como_casos_2026_11_27`                                  | Mesas como casos                                                |
-| `82_porteo_campos_mesas_2026_11_27`                               | Satélite `core.mesa_ficha` y porteo de la ficha de mesas        |
-| `83_alerta_hechos_lineas_heredadas_2026_11_27`                    | Reinserta líneas de `hechos_recientes` que la 73 descartó       |
-| `84_indices_rendimiento_2026_11_27`                               | Índices de listados y panel de alertas                          |
-| `85_c8_hechos_fecha_compacta_2026_11_27`                          | Mueve la fecha compacta (`* 05NOV2026`) a `alerta_hechos.fecha` |
-| `86_c8_hechos_vineta_asterisco_2026_11_27`                        | Quita la viñeta `*` inicial de los hechos                       |
-| `87_ampliar_textos_carga_historica_2026_11_27`                    | `cargo_actual` y `reuniones_dialogo.titulo` pasan a `text`      |
-| `88_auditoria_descargas_2026_11_28`                               | Tabla `audit.descargas` (auditoría de exportaciones)            |
-| `89_mesas_nacionales_2026_11_29`                                  | Marca de mesas nacionales y `core.casos.alcance_override`       |
-| `90_trigger_mesa_nacional_2026_11_29`                             | Trigger que deriva `es_nacional` y propaga el alcance al caso   |
-| `91_ambito_mesas_nacionales_2026_11_29`                           | Ámbito de las mesas 004/005/012 y registro de la clave 54       |
+| Clave en `migracion_log`                                          | Tema                                                                                  |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `40_casos_naturaleza` … `70_sembrar_secuencia_codigos_2026_11_26` | Serie histórica (ver tabla completa abajo)                                            |
+| `73_alerta_hechos_2026_11_26`                                     | Tabla `core.alerta_hechos`                                                            |
+| `74_usuarios_sectoristas_lectura_2026_11_27`                      | Lectura de usuarios sectoristas                                                       |
+| `75_unificar_territorio_gis_2026_11_27`                           | Unificación de territorio/GIS                                                         |
+| `76_caso_priorizado_2026_11_26`                                   | `core.casos.priorizado`                                                               |
+| `77_casos_actores_posicion_guia_2026_11_26`                       | `posicion` con el vocabulario de la Guía                                              |
+| `78_alertas_anulacion_direccion_2026_11_27`                       | Anulación de alertas por Dirección                                                    |
+| `79_alerta_hechos_fechas_2026_11_27`                              | Fechas de los hechos                                                                  |
+| `80_alerta_hechos_sin_anio_2026_11_27`                            | Hechos sin año                                                                        |
+| `81_mesas_como_casos_2026_11_27`                                  | Mesas como casos                                                                      |
+| `82_porteo_campos_mesas_2026_11_27`                               | Satélite `core.mesa_ficha` y porteo de la ficha de mesas                              |
+| `83_alerta_hechos_lineas_heredadas_2026_11_27`                    | Reinserta líneas de `hechos_recientes` que la 73 descartó                             |
+| `84_indices_rendimiento_2026_11_27`                               | Índices de listados y panel de alertas                                                |
+| `85_c8_hechos_fecha_compacta_2026_11_27`                          | Mueve la fecha compacta (`* 05NOV2026`) a `alerta_hechos.fecha`                       |
+| `86_c8_hechos_vineta_asterisco_2026_11_27`                        | Quita la viñeta `*` inicial de los hechos                                             |
+| `87_ampliar_textos_carga_historica_2026_11_27`                    | `cargo_actual` y `reuniones_dialogo.titulo` pasan a `text`                            |
+| `88_auditoria_descargas_2026_11_28`                               | Tabla `audit.descargas` (auditoría de exportaciones)                                  |
+| `89_mesas_nacionales_2026_11_29`                                  | Marca de mesas nacionales y `core.casos.alcance_override`                             |
+| `90_trigger_mesa_nacional_2026_11_29`                             | Trigger que deriva `es_nacional` y propaga el alcance al caso                         |
+| `91_ambito_mesas_nacionales_2026_11_29`                           | Ámbito de las mesas 004/005/012 y registro de la clave 54                             |
+| `92_capas_mapa_2026_11_29`                                        | Capas `territorio.region`, `territorio.provincia` y `territorio.anp_reserva_nacional` |
 
 Claves históricas fuera de la serie numérica, también aplicadas:
 `casos_tematica_anulable`, `distritos_inei_2025` y
@@ -56,8 +57,26 @@ Claves históricas fuera de la serie numérica, también aplicadas:
 
 ### 2.2 Pendientes de aplicar
 
-No hay migraciones pendientes de aplicar. La `88` (auditoría de descargas) se
-llevó a producción el 28/11/2026 y la `90`/`91` el 29/11/2026.
+No hay migraciones pendientes de aplicar.
+
+La `92_capas_mapa_2026_11_29` se aplicó el 29/11/2026 y **no introduce datos**: crea
+`territorio.region` (25 filas, unión de los distritos por prefijo de ubigeo con
+`ST_MakeValid` + `ST_SimplifyPreserveTopology`), `territorio.provincia` (196) y la
+tabla vacía `territorio.anp_reserva_nacional`. Las 42 Reservas Nacionales se
+cargaron aparte con `scripts/_cargar_anp_reserva_nacional.mjs --apply` desde
+`gis/derived/anp_reserva_nacional.geojson` (48 features disueltas por `codigo`).
+Verificado: 25 regiones, 196 provincias, 42 ANP válidas (MultiPolygon), todas
+`categoria = 'Reserva Nacional'`.
+
+> **Priorización de la demo (datos, no migración).** El 29/11/2026 se marcaron
+> como `priorizado = true` los cuatro casos abiertos más recientes para que la
+> tabla «Casos priorizados» del panorama no salga vacía: `CS-2026-0003`,
+> `CS-2026-0015`, `CS-2026-0010` y `CS-2026-0014`. Lo hace
+> `scripts/_priorizar_ultimos_casos_2026-11-29.mjs` (simulación por defecto,
+> `--apply` escribe). Es reversible con un `update ... set priorizado = false`.
+
+La `88` (auditoría de descargas) se llevó a producción el 28/11/2026 y la
+`90`/`91` el 29/11/2026.
 
 La `82_porteo_campos_mesas` se aplicó el 27/11/2026 en una única transacción
 con `COMMIT`: creó `core.mesa_ficha` (satélite 1:1 del caso espejo) y portó la

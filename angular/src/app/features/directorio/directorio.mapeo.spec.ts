@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { resolverUrlMedia } from '../../core/http/url-media';
-import { aActorDirectorio, aMembresiaActor, aPiiLote } from './directorio.mapeo';
+import {
+  aActorDirectorio,
+  aCasosDeActor,
+  aMembresiaActor,
+  aPiiLote,
+  regionesDerivadasDeCasos,
+} from './directorio.mapeo';
 
 describe('aActorDirectorio', () => {
   it('preserva la clasificación que controla la acción de edición', () => {
@@ -123,5 +129,58 @@ describe('aPiiLote', () => {
       dni: '12345678',
       telefono: null,
     });
+  });
+});
+
+describe('aCasosDeActor', () => {
+  it('lee el sobre `{ casos }` del endpoint de casos del actor', () => {
+    const casos = aCasosDeActor({
+      casos: [
+        { codigo: 'C-001', nombre: 'Pesca informal', region: 'Piura' },
+        { codigo: 'C-002', nombre: 'Río contaminado', region: null },
+      ],
+      total: 2,
+    });
+
+    expect(casos).toEqual([
+      { codigo: 'C-001', nombre: 'Pesca informal', region: 'Piura' },
+      { codigo: 'C-002', nombre: 'Río contaminado', region: null },
+    ]);
+  });
+
+  it('acepta un array directo y el sobre `{ items }` de los listados', () => {
+    const directo = aCasosDeActor([{ codigo: 'C-100', nombre: 'Caso' }]);
+    expect(directo).toEqual([{ codigo: 'C-100', nombre: 'Caso', region: null }]);
+
+    const conItems = aCasosDeActor({ items: [{ code: 'C-200', title: 'Otro caso' }] });
+    expect(conItems).toEqual([{ codigo: 'C-200', nombre: 'Otro caso', region: null }]);
+  });
+
+  it('descarta filas sin código y tolera una respuesta vacía o nula', () => {
+    expect(
+      aCasosDeActor({ casos: [{ nombre: 'Sin código' }, { codigo: 'C-001', nombre: 'Válido' }] }),
+    ).toEqual([{ codigo: 'C-001', nombre: 'Válido', region: null }]);
+    expect(aCasosDeActor(null)).toEqual([]);
+    expect(aCasosDeActor({})).toEqual([]);
+  });
+});
+
+describe('regionesDerivadasDeCasos', () => {
+  it('devuelve las regiones de los casos sin repetir y en orden', () => {
+    const regiones = regionesDerivadasDeCasos([
+      { codigo: 'C-001', nombre: 'Uno', region: 'Piura' },
+      { codigo: 'C-002', nombre: 'Dos', region: 'Lambayeque' },
+      { codigo: 'C-003', nombre: 'Tres', region: 'Piura' },
+      { codigo: 'C-004', nombre: 'Cuatro', region: null },
+    ]);
+
+    expect(regiones).toEqual(['Piura', 'Lambayeque']);
+  });
+
+  it('queda vacío cuando ningún caso resuelve región', () => {
+    expect(regionesDerivadasDeCasos([{ codigo: 'C-001', nombre: 'Uno', region: null }])).toEqual(
+      [],
+    );
+    expect(regionesDerivadasDeCasos([])).toEqual([]);
   });
 });

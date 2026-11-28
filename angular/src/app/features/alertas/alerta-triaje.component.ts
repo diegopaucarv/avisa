@@ -42,9 +42,9 @@ export type ResultadoTriaje = {
  * `/v1/red-radar/{id}/triaje`. El modal sólo valida el motivo (mínimo 5
  * caracteres, que exige la API) y, en modo duplicada, el código de la original.
  *
- * Regla G3 del proyecto: al haber cambios escritos, un clic fuera del diálogo
- * no cierra y Escape tampoco. Sin cambios, Escape sí cierra; los botones de
- * «Cancelar» y la ✕ cierran siempre porque son acciones explícitas.
+ * Regla G3 del proyecto, revisada: el modal se cierra con Escape, con el clic
+ * fuera o con la ✕, haya o no texto escrito. Cerrar es seguro porque la salida
+ * es animada y el contenedor conserva los datos hasta que termina.
  */
 @Component({
   selector: 'app-alerta-triaje',
@@ -292,19 +292,12 @@ export class AlertaTriajeComponent {
       (!this.esDuplicada() || !!this.codigoOriginal().trim()),
   );
 
-  /** `true` en cuanto el usuario escribió algo: activa el bloqueo de G3. */
-  readonly hayCambios = computed(
-    () => this.motivo().trim().length > 0 || this.codigoOriginal().trim().length > 0,
-  );
-
   constructor() {
     afterNextRender(() => this.dialogo()?.nativeElement.focus({ preventScroll: true }));
 
     const alEscape = (evento: KeyboardEvent): void => {
       if (evento.key !== 'Escape') return;
       evento.preventDefault();
-      // Con cambios escritos, Escape no descarta: regla G3.
-      if (this.hayCambios()) return;
       this.cerrarConSalida();
     };
     document.addEventListener('keydown', alEscape);
@@ -341,9 +334,9 @@ export class AlertaTriajeComponent {
     this.buscar.emit();
   }
 
-  /** El clic fuera nunca cierra; el scrim sólo absorbe el evento. */
-  alFondo(): void {
-    /* intencionalmente vacío: G3 prohíbe cerrar con clic fuera */
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
   }
 
   /** Cierra con la animación de salida y luego avisa al contenedor. */

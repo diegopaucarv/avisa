@@ -104,9 +104,9 @@
       Estado
       <select aria-label="Filtrar por estado de la alerta" (change)="cambiarEstado($event)">
         <option value="" [selected]="filtros().estado === ''">Todos</option>
-        @for (estado of estados; track estado) {
-        <option [value]="estado" [selected]="filtros().estado === estado">
-          {{ etiquetaEstadoFiltro(estado) }}
+        @for (filtro of filtrosEstado; track filtro.valor) {
+        <option [value]="filtro.valor" [selected]="filtros().estado === filtro.valor">
+          {{ filtro.etiqueta }}
         </option>
         }
       </select>
@@ -349,7 +349,6 @@
     <ng-template appCeldaTabla="revisor" let-fila>
       <div class="alerta-revisor">
         <strong>{{ fila.ultimoRevisor || '—' }}</strong>
-        <small>{{ fechaReporte(fila.ultimaModificacion) }}</small>
       </div>
     </ng-template>
 

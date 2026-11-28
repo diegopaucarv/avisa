@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 
 import { IconoComponent } from './icono.component';
-import { salirModal } from './modal-salida';
+import { esDialogoSuperior, salirModal } from './modal-salida';
 
 /** `anular` escribe el borrado lógico; `restaurar` lo revierte. */
 export type ModoAnulacion = 'anular' | 'restaurar';
@@ -177,8 +177,19 @@ export class AnularPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
-    // El panel sólo se cierra con Cancelar o Confirmar: Escape no lo descarta.
-    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
+    // Escape cierra el panel aunque el foco esté en el motivo. La guarda de pila
+    // evita cerrar la ficha de debajo cuando hay otro modal encima.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      if (!esDialogoSuperior(this.panel()?.nativeElement)) return;
+      evento.preventDefault();
+      this.cerrarConSalida();
+    };
+    document.addEventListener('keydown', alEscape);
+    this.destruccion.onDestroy(() => {
+      document.removeEventListener('keydown', alEscape);
+      this.focoPrevio?.focus?.();
+    });
   }
 
   alEscribir(evento: Event): void {
@@ -207,6 +218,11 @@ export class AnularPanelComponent {
 
   alTecla(evento: KeyboardEvent): void {
     if (evento.key === 'Tab') this.atraparFoco(evento);
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
   }
 
   /** El panel es modal: Tab y Shift+Tab ciclan dentro de él. */

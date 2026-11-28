@@ -353,6 +353,17 @@ export class DemandasSinCasoPage {
       clearTimeout(this.temporizador);
       clearTimeout(this.temporizadorCaso);
     });
+
+    // Escape cierra la vinculación sólo si está abierta: la página vive siempre
+    // montada, así que la señal de estado es la que manda.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      if (!this.demandaElegida()) return;
+      evento.preventDefault();
+      this.cerrarVinculo();
+    };
+    document.addEventListener('keydown', alEscape);
+    this.destruccion.onDestroy(() => document.removeEventListener('keydown', alEscape));
   }
 
   /* ------------------------------------------------------------------ *
@@ -425,6 +436,11 @@ export class DemandasSinCasoPage {
       this.paginaCasos.set(1);
       this.errorVinculo.set(null);
     });
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarVinculo();
   }
 
   buscarCaso(evento: Event): void {

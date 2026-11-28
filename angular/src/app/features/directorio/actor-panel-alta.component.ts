@@ -383,7 +383,16 @@ export class ActorPanelAltaComponent {
 
     afterNextRender(() => this.modal()?.nativeElement.focus({ preventScroll: true }));
 
+    // Escape cierra el alta aunque el foco esté en un campo de texto.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      evento.preventDefault();
+      this.cerrarConSalida();
+    };
+    document.addEventListener('keydown', alEscape);
+
     this.destruccion.onDestroy(() => {
+      document.removeEventListener('keydown', alEscape);
       clearTimeout(this.temporizadorDuplicados);
       this.focoPrevio?.focus?.();
     });
@@ -541,6 +550,11 @@ export class ActorPanelAltaComponent {
 
   alTecla(evento: KeyboardEvent): void {
     if (evento.key === 'Tab') this.atraparFoco(evento);
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
   }
 
   private atraparFoco(evento: KeyboardEvent): void {

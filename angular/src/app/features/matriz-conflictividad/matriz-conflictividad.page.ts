@@ -685,6 +685,11 @@ export class MatrizConflictividadPage {
     if (this.codigoDetalle()) this.codigoDetalle.set(null);
   }
 
+  /** El clic fuera cierra; arrastrar dentro de la ficha no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarDetalle();
+  }
+
   async descargarCsv(): Promise<void> {
     if (this.descargando()) return;
     this.descargando.set(true);

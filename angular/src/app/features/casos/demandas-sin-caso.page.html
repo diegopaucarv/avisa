@@ -169,7 +169,7 @@
 </section>
 
 @if (demandaElegida(); as demandaActual) {
-<div class="drawer-scrim" #vinculoScrim (click)="cerrarVinculo()">
+<div class="drawer-scrim" #vinculoScrim (click)="alFondo($event)">
   <aside
     class="drawer drawer-narrow"
     role="dialog"
@@ -185,11 +185,11 @@
       </div>
       <button
         type="button"
-        class="button-secondary"
+        class="icon-button"
         aria-label="Cerrar el panel de vinculación"
         (click)="cerrarVinculo()"
       >
-        Cerrar
+        <app-icono nombre="cerrar" [tamano]="18" />
       </button>
     </header>
 

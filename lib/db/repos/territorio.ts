@@ -920,3 +920,350 @@ export async function listarAuditoriosMapa(
     generadoEn: new Date().toISOString(),
   };
 }
+
+/* -------------------------------------------------------------------------- */
+/* Institucionales agrupados por identidad (FONDEPES y desembarcaderos)       */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Grupos de la capa institucional que el mapa enciende por separado:
+ *
+ *   `fondepes`        → `identi = 'FONDEPES'` (27 puntos en la carga vigente)
+ *   `desembarcaderos` → `identi like 'DPA%'` (31: «DPA - GORE» y la errata
+ *                        «DPA -GORE», que el `like` recoge igual)
+ *
+ * No son capas nuevas de datos: son filtros sobre
+ * `territorio.infraestructura_punto`. Devuelven la MISMA forma que
+ * `listarInfraestructurasPuntos` para que el cliente reutilice el renderer.
+ */
+export type GrupoInstitucional = "fondepes" | "desembarcaderos";
+
+export function esGrupoInstitucionalValido(
+  valor: string,
+): valor is GrupoInstitucional {
+  return valor === "fondepes" || valor === "desembarcaderos";
+}
+
+export type InstitucionalesQuery = {
+  grupo: GrupoInstitucional;
+  page?: number;
+  pageSize?: number;
+};
+
+/** Misma forma que `InfraestructurasResult`, con `recurso` = el grupo pedido. */
+export type InfraestructurasGrupoResult = {
+  recurso: GrupoInstitucional;
+  tipo: TipoInfraestructura | null;
+  items: InfraestructuraPunto[];
+  total: number;
+  page: number;
+  pageSize: number;
+  resumen: InfraestructurasResumen;
+  generadoEn: string;
+};
+
+/**
+ * Puntos institucionales de un grupo, con la misma forma que la capa completa.
+ *
+ * Se pagina igual que `listarInfraestructurasPuntos` (orden estable por `id`) y
+ * `resumen` se calcula ACOTADO al grupo: `total` es el total del grupo con y sin
+ * coordenada, `sedes` sus filas institucionales, `derechosAcuicolas` 0 (el grupo
+ * es institucional por definición) y `sinCoordenada` las no dibujables. Así las
+ * cifras describen lo que se está mirando y no la tabla entera.
+ *
+ * `identi` y `nombre_infraestructura` se proyectan: en ambos grupos son sedes
+ * institucionales, no derechos acuícolas con titular (Ley 29733).
+ */
+export async function listarInstitucionalesPorIdentidad(
+  client: PoolClient,
+  query: InstitucionalesQuery,
+): Promise<InfraestructurasGrupoResult> {
+  const page = Math.max(1, Math.trunc(query.page ?? 1));
+  const pageSize = Math.min(
+    CAPAS_PAGE_SIZE_MAX,
+    Math.max(1, Math.trunc(query.pageSize ?? CAPAS_PAGE_SIZE)),
+  );
+  // Predicado constante de este módulo (nunca entrada del usuario): se
+  // interpola porque un identificador/condición no se pasa como parámetro.
+  const predicado =
+    query.grupo === "fondepes"
+      ? "i.identi = 'FONDEPES'"
+      : "i.identi like 'DPA%'";
+  const tabla = INFRAESTRUCTURAS_CANONICA;
+
+  const resumen = await client.query<{
+    total: number | string;
+    sedes: number | string;
+    derechos: number | string;
+    sin_coordenada: number | string;
+  }>(
+    `select count(*)::int as total,
+            count(*) filter (where i.tipo_registro = 'institucional')::int as sedes,
+            count(*) filter (where i.tipo_registro = 'derecho_acuicola')::int as derechos,
+            count(*) filter (where i.latitud is null or i.longitud is null)::int as sin_coordenada
+       from ${tabla} i
+      where ${predicado}`,
+  );
+
+  const conteo = await client.query<{ total: number | string }>(
+    `select count(*)::int as total
+       from ${tabla} i
+      where i.latitud is not null
+        and i.longitud is not null
+        and ${predicado}`,
+  );
+
+  const resultado = await client.query<InfraestructuraFila>(
+    `select i.id,
+            i.tipo_registro,
+            i.latitud,
+            i.longitud,
+            i.ubigeo::text as ubigeo,
+            i.distrito,
+            i.provincia,
+            i.departamento,
+            i.identi,
+            case when i.tipo_registro = 'institucional'
+                 then i.nombre_infraestructura
+            end as nombre_infraestructura
+       from ${tabla} i
+      where i.latitud is not null
+        and i.longitud is not null
+        and ${predicado}
+      order by i.id asc
+      limit $1 offset $2`,
+    [pageSize, (page - 1) * pageSize],
+  );
+
+  const items: InfraestructuraPunto[] = [];
+  for (const fila of resultado.rows) {
+    const lat = aNumero(fila.latitud);
+    const lon = aNumero(fila.longitud);
+    if (lat === null || lon === null) continue;
+    items.push({
+      id: fila.id,
+      tipo:
+        fila.tipo_registro === "institucional"
+          ? "institucional"
+          : "derecho_acuicola",
+      lat,
+      lon,
+      ubigeo: fila.ubigeo,
+      distrito: fila.distrito,
+      provincia: fila.provincia,
+      region: fila.departamento,
+      identi: fila.identi,
+      nombreInfraestructura: fila.nombre_infraestructura,
+    });
+  }
+
+  const resumenFila = resumen.rows[0];
+
+  return {
+    recurso: query.grupo,
+    tipo: "institucional",
+    items,
+    total: Number(conteo.rows[0]?.total ?? 0),
+    page,
+    pageSize,
+    resumen: {
+      total: Number(resumenFila?.total ?? 0),
+      derechosAcuicolas: Number(resumenFila?.derechos ?? 0),
+      sedes: Number(resumenFila?.sedes ?? 0),
+      sinCoordenada: Number(resumenFila?.sin_coordenada ?? 0),
+    },
+    generadoEn: new Date().toISOString(),
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Capas agregadas de región, provincia y Reserva Nacional (coropletas)        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Filtro y tolerancia de las capas coropléticas. `tolerancia` se acota con
+ * `acotarTolerancia` (0,01 por defecto, 0,05 máximo): es un payload para pintar,
+ * no para medir. `alcance` sólo aplica a región; `region` (nombre de región)
+ * sólo aplica a provincia. Se separan en dos campos para no confundir el
+ * alcance geográfico (Norte/Centro/Sur/Oriente/Nacional) con una región concreta.
+ */
+export type CapaGeometriaQuery = {
+  alcance?: string;
+  region?: string;
+  tolerancia?: number;
+};
+
+export type RegionCapaItem = {
+  ubigeo: string;
+  nombre: string;
+  /** `territorio.region.region_id` → `core.regiones.id`; `null` sin match. */
+  regionId: number | null;
+  /**
+   * Código de alcance geográfico (`Norte`, `Centro`, `Sur`, `Oriente`…), tomado
+   * de `core.cat_alcances_geograficos.codigo`. La SPA lo usa para encuadrar y
+   * resaltar las regiones del ámbito vigente. `null` si la región no lo declara.
+   */
+  alcance: string | null;
+  /** Denominador (suma de la población distrital). `null` si no hay dato. */
+  poblacion: number | null;
+  geometria: { type: string; coordinates: unknown } | null;
+};
+
+export type ProvinciaCapaItem = {
+  ubigeo: string;
+  nombre: string;
+  /** `left(distrito.ubigeo,2)`: ubigeo de la región a la que pertenece. */
+  regionUbigeo: string | null;
+  poblacion: number | null;
+  geometria: { type: string; coordinates: unknown } | null;
+};
+
+export type AnpReservaItem = {
+  codigo: string;
+  nombre: string;
+  categoria: string;
+  geometria: { type: string; coordinates: unknown } | null;
+};
+
+type RegionCapaFila = {
+  ubigeo: string;
+  nombre: string;
+  region_id: number | null;
+  alcance: string | null;
+  poblacion: string | number | null;
+  geojson: string | null;
+};
+
+type ProvinciaCapaFila = {
+  ubigeo: string;
+  nombre: string;
+  region_ubigeo: string | null;
+  poblacion: string | number | null;
+  geojson: string | null;
+};
+
+type AnpReservaFila = {
+  codigo: string;
+  nombre: string;
+  categoria: string;
+  geojson: string | null;
+};
+
+function geometriaDe(geojson: string | null): {
+  type: string;
+  coordinates: unknown;
+} | null {
+  return geojson
+    ? (JSON.parse(geojson) as { type: string; coordinates: unknown })
+    : null;
+}
+
+/**
+ * Capa de región como lista GeoJSON-ready. La simplificación ocurre SIEMPRE en
+ * servidor con `ST_SimplifyPreserveTopology` y `ST_Multi` restaura el
+ * MultiPolygon declarado (igual que la capa distrital). El filtro `alcance`
+ * compara sin tildes ni mayúsculas contra `core.cat_alcances_geograficos.codigo`,
+ * alcanzado vía `core.regiones.alcance_id`; por eso `territorio.region` no
+ * duplica el alcance: la fuente es el catálogo.
+ *
+ * Si `territorio.region` no existe, la consulta falla con 42P01 y la API
+ * responde 503 («capa de datos no inicializada»): no se devuelven filas falsas.
+ */
+export async function listarRegionesCapa(
+  client: PoolClient,
+  query: CapaGeometriaQuery,
+): Promise<RegionCapaItem[]> {
+  const alcance = query.alcance?.trim() || null;
+  const tolerancia = acotarTolerancia(query.tolerancia);
+
+  const resultado = await client.query<RegionCapaFila>(
+    `select r.ubigeo::text as ubigeo,
+            r.nombre,
+            r.region_id,
+            a.codigo as alcance,
+            r.poblacion_total as poblacion,
+            case
+              when $2::float8 > 0
+                then ST_AsGeoJSON(ST_Multi(ST_SimplifyPreserveTopology(r.geom, $2::float8)))
+              else ST_AsGeoJSON(r.geom)
+            end as geojson
+       from territorio.region r
+       left join core.regiones cr on cr.id = r.region_id
+       left join core.cat_alcances_geograficos a on a.id = cr.alcance_id
+      where ($1::text is null or core.normalizar_ref(a.codigo) = core.normalizar_ref($1))
+      order by r.ubigeo asc`,
+    [alcance, tolerancia],
+  );
+
+  return resultado.rows.map((fila) => ({
+    ubigeo: fila.ubigeo,
+    nombre: fila.nombre,
+    regionId: fila.region_id === null ? null : Number(fila.region_id),
+    alcance: fila.alcance,
+    poblacion: aNumero(fila.poblacion),
+    geometria: geometriaDe(fila.geojson),
+  }));
+}
+
+/**
+ * Análoga a `listarRegionesCapa`, para `territorio.provincia`. El filtro
+ * `region` es el NOMBRE de la región (no su ubigeo): se resuelve contra
+ * `core.regiones` por `region_ubigeo`, sin tildes ni mayúsculas.
+ */
+export async function listarProvinciasCapa(
+  client: PoolClient,
+  query: CapaGeometriaQuery,
+): Promise<ProvinciaCapaItem[]> {
+  const region = query.region?.trim() || null;
+  const tolerancia = acotarTolerancia(query.tolerancia);
+
+  const resultado = await client.query<ProvinciaCapaFila>(
+    `select p.ubigeo::text as ubigeo,
+            p.nombre,
+            p.region_ubigeo::text as region_ubigeo,
+            p.poblacion_total as poblacion,
+            case
+              when $2::float8 > 0
+                then ST_AsGeoJSON(ST_Multi(ST_SimplifyPreserveTopology(p.geom, $2::float8)))
+              else ST_AsGeoJSON(p.geom)
+            end as geojson
+       from territorio.provincia p
+       left join core.regiones cr on cr.ubigeo = p.region_ubigeo
+      where ($1::text is null or core.normalizar_ref(cr.nombre) = core.normalizar_ref($1))
+      order by p.ubigeo asc`,
+    [region, tolerancia],
+  );
+
+  return resultado.rows.map((fila) => ({
+    ubigeo: fila.ubigeo,
+    nombre: fila.nombre,
+    regionUbigeo: fila.region_ubigeo,
+    poblacion: aNumero(fila.poblacion),
+    geometria: geometriaDe(fila.geojson),
+  }));
+}
+
+/**
+ * Reservas Nacionales (48 features disueltas en 42 reservas por `codigo`).
+ * Son pocas y ya vienen simplificadas en la fuente, así que se sirve la
+ * geometría cruda sin tolerancia: no pesa como las 1 892 distritales.
+ */
+export async function listarAnpReservaNacional(
+  client: PoolClient,
+): Promise<AnpReservaItem[]> {
+  const resultado = await client.query<AnpReservaFila>(
+    `select a.codigo,
+            a.nombre,
+            a.categoria,
+            ST_AsGeoJSON(a.geom) as geojson
+       from territorio.anp_reserva_nacional a
+      order by a.codigo asc`,
+  );
+
+  return resultado.rows.map((fila) => ({
+    codigo: fila.codigo,
+    nombre: fila.nombre,
+    categoria: fila.categoria,
+    geometria: geometriaDe(fila.geojson),
+  }));
+}

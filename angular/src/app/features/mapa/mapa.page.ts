@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import * as L from 'leaflet';
 import type { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import { map } from 'rxjs';
@@ -18,7 +18,7 @@ import { map } from 'rxjs';
 import { AlcanceService, esAlcance } from '../../core/alcance/alcance.service';
 import { SesionStore } from '../../core/auth/sesion.store';
 import { TerritorioService } from '../../core/territorio/territorio.service';
-import type { DistritoGeo, PoblacionRegion } from '../../core/territorio/territorio.tipos';
+import type { AnpGeo, DistritoGeo, RegionGeo } from '../../core/territorio/territorio.tipos';
 import { formatearFechaHora } from '../../shared/formato-fecha';
 import { GlosarioComponent } from '../../shared/ui/glosario.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
@@ -28,35 +28,36 @@ import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import { formatearFechaCorta } from '../../dominio/mapeo';
 import type { Alcance, Caso, PrioridadAtencion, Riesgo } from '../../dominio/modelos';
 import { coordenadaDeRegion } from './centroides.regiones';
+import { CapasMapaService, type AuditorioMapa, type PuntoInfraestructura } from './capas.service';
 import {
-  CapasMapaService,
-  type PuntoInfraestructura,
-  type TipoInfraestructura,
-} from './capas.service';
-import {
-  bandasPorAlcance,
-  casosDeRegion,
   casosPorDistritoUbigeo,
-  casosSinDistrito,
   claseCoropleta,
   claseManifiesto,
-  conteosPorAlcance,
+  colorChoropleta,
   conteosPorSituacion,
   contarRegiones,
   contarRiesgoAlto,
-  contarRiesgoAltoSinRegion,
-  contarSinRegion,
-  ESCALA_COROPLETA,
+  distribuirPorRegion,
+  distribuirPorSectorista,
+  ESCALA_COROPLETA_ALERTAS,
+  ESCALA_COROPLETA_MANIFIESTOS,
   ESCALA_MANIFIESTO,
   filasPorRegion,
-  indicePoblacionPorRegion,
+  intensidadMedida,
+  medidasDeCasos,
   normalizarRegion,
   regionDe,
-  situacionDe,
   tasaPor100k,
+  valorMedida,
   type ConteoDistrito,
+  type FilaDistribucion,
   type FilaRegion,
+  type MedidaRegion,
+  type MetricaDistribucion,
+  type VariableDistribucion,
 } from './panorama.agregados';
+import { PanoramaDistribucionComponent } from './panorama-distribucion.component';
+import { PanoramaIndicadoresService } from './panorama.indicadores.service';
 import { PanoramaService } from './panorama.service';
 
 /** Teselas públicas de OpenStreetMap: el mapa es referencial, no oficial. */
@@ -88,7 +89,7 @@ function estiloCirculo(fila: FilaRegion, activa: boolean): L.PathOptions {
   };
 }
 
-/** Relleno de la coropleta: un tono por tramo de `ESCALA_COROPLETA`. */
+/** Relleno de la coropleta distrital: un tono por tramo de `ESCALA_COROPLETA`. */
 const COLORES_COROPLETA = ['#e3e9f0', '#cfe0f5', '#9dc0e8', '#5f92cd', '#2455a2'];
 
 /** Borde fino para el distrito con casos; «Sin casos» queda transparente. */
@@ -120,15 +121,49 @@ const FORMATO_TASA = new Intl.NumberFormat('es-PE', {
 });
 
 type PropiedadesDistrito = { ubigeo: string; nombre: string };
+
+/** Propiedades de la capa de regiones: ubigeo, nombre, región y ámbito. */
+type PropsRegion = {
+  ubigeo: string;
+  nombre: string;
+  region: string;
+  alcance: string | null;
+};
+
 type RasgoDistrital = L.Path & { feature?: { properties?: unknown } };
 
-/** Ubigeo del rasgo GeoJSON, sin confiar en el tipo de `properties`. */
-function ubigeoDelRasgo(rasgo: { properties?: unknown } | null | undefined): string | null {
+/** Lee una propiedad de texto de un rasgo GeoJSON sin confiar en su tipo. */
+function propiedadDelRasgo(
+  rasgo: { properties?: unknown } | null | undefined,
+  clave: string,
+): string | null {
   const propiedades = rasgo?.properties;
   if (typeof propiedades !== 'object' || propiedades === null) return null;
-  const valor = (propiedades as Record<string, unknown>)['ubigeo'];
+  const valor = (propiedades as Record<string, unknown>)[clave];
   return typeof valor === 'string' ? valor : null;
 }
+
+/** Ubigeo del rasgo GeoJSON. */
+function ubigeoDelRasgo(rasgo: { properties?: unknown } | null | undefined): string | null {
+  return propiedadDelRasgo(rasgo, 'ubigeo');
+}
+
+/** Nombre de región del rasgo: `region` si viene, si no `nombre`. */
+function regionDelRasgo(rasgo: { properties?: unknown } | null | undefined): string | null {
+  return propiedadDelRasgo(rasgo, 'region') ?? propiedadDelRasgo(rasgo, 'nombre');
+}
+
+/** Los siete conmutadores del panel de capas opcionales. */
+type ClaveCapa =
+  | 'auditorios'
+  | 'fondepes'
+  | 'dpa'
+  | 'provincias'
+  | 'distritos'
+  | 'derechos'
+  | 'anp';
+
+type CapasOpcionales = Record<ClaveCapa, boolean>;
 
 function radioCirculo(total: number, maximo: number): number {
   if (maximo <= 1) return RADIO_MIN;
@@ -162,25 +197,22 @@ function compararInicio(a: string | null, b: string | null): number {
  * situación latente (Diferencia + Controversia) y manifiesta (Conflicto social +
  * Crisis social), según la Guía §7.5.1. OVERRIDE (decisión expresa del usuario,
  * 2026-11-24): los casos sin nivel declarado cuentan como latentes, de modo que
- * latente + manifiesto siempre suma el total. El conteo de «sin nivel» se
- * conserva como declaración, no como tercera situación. La cabecera resume la
- * situación con cuatro tarjetas fijas —latentes, manifiestos, regiones con casos
- * y riesgo alto— más la de casos sin nivel declarado cuando existe, y el panel
- * «Casos por región» abre un cajón lateral «Ver
- * casos» (item 109) con el territorio de la fila y el ámbito vigente, enlazado
- * al listado completo. El esquema usa
- * bandas, chips y una tabla derivados del conteo, y suma un mapa referencial de
- * OpenStreetMap con dos capas: un círculo por región con casos visibles, ubicado
- * en su centroide referencial (`centroides.regiones.ts`), y los límites
- * distritales coropléticos de `territorio.distrito` (item 129), cuyo relleno es
- * el número de casos abiertos por ubigeo. El radio del círculo representa el
- * volumen y el color, la proporción latente/manifiesta (`ESCALA_MANIFIESTO`); no
- * codifica el nivel de conflicto de un caso suelto. Sobre el mismo mapa se
- * encienden capas opcionales de infraestructuras y auditorios. Al pulsar un
- * polígono se abre su ficha
- * territorial con población, casos y tasa por 100 000 habitantes. La tabla suma
- * esa tasa por región (item 131); la población sólo es denominador y nunca
- * interviene en el riesgo ni en la prioridad (Guía §7.5.2, Tabla 3).
+ * latente + manifiesto siempre suma el total. La cabecera resume la situación con
+ * cuatro tarjetas —manifiestos, latentes, regiones afectadas y riesgo alto— y el
+ * ámbito sólo se cambia desde la cabecera del shell (`?alcance=`).
+ *
+ * El mapa es referencial de OpenStreetMap y mantiene siempre la capa de
+ * departamentos; encima se encienden dos coropléticos mutuamente excluyentes
+ * (riesgo en alertas del último trimestre, en rojo, y % de casos manifiestos, en
+ * azul) y siete capas opcionales que se piden al encenderse. Al cambiar el ámbito
+ * el mapa encuadra las regiones de ese alcance y destaca sus bordes, salvo que
+ * haya una región seleccionada. Un clic en un polígono de distrito abre su ficha
+ * territorial; el cajón se cierra con Escape o con un clic fuera.
+ *
+ * El panel derecho distribuye la misma medida que el coroplético: una barra por
+ * sectorista con los chips de sus regiones, o por región cuando el endpoint de
+ * indicadores no está disponible. Las cifras que faltan se declaran; nunca se
+ * inventan.
  *
  * El recorte por `usuario().regiones` es de presentación: hoy la RLS entrega el
  * conjunto completo y `lib/db/scope.ts` documenta que el bloqueo por territorio
@@ -189,29 +221,32 @@ function compararInicio(a: string | null, b: string | null): number {
  */
 @Component({
   selector: 'app-mapa',
-  imports: [RouterLink, IconoComponent, ThOrdenDirective, GlosarioComponent],
+  imports: [
+    RouterLink,
+    IconoComponent,
+    ThOrdenDirective,
+    GlosarioComponent,
+    PanoramaDistribucionComponent,
+  ],
   templateUrl: './mapa.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [PanoramaService, CapasMapaService],
+  providers: [PanoramaService, CapasMapaService, PanoramaIndicadoresService],
   styles: `
     :host {
       display: block;
     }
 
-    /* Hasta cinco tarjetas (latentes, manifiestos, sin nivel declarado, regiones
-       con casos y riesgo alto); la rejilla global es de cuatro y aquí se fija.
-       Con auto-fit las cinco reparten el ancho sin dejar un hueco. */
+    /* Cuatro tarjetas fijas (manifiestos, latentes, regiones afectadas y riesgo
+       alto); la rejilla global es de cuatro y aquí se fija para repartir el ancho
+       sin dejar hueco. */
     .executive-kpis {
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      /* Sin la nota que iba bajo los indicadores, los chips quedan pegados a las
-         tarjetas. Su banda sticky suma 8 px de aire, así que 8 px aquí dejan el
-         ritmo habitual de 16 px del resto de la vista. */
       margin-bottom: 8px;
     }
 
     @media (max-width: 980px) {
       .executive-kpis {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
@@ -242,40 +277,25 @@ function compararInicio(a: string | null, b: string | null): number {
       font-weight: 700;
     }
 
-    .ambito-chips {
-      flex-wrap: wrap;
-      /* El selector de ámbito queda fijo bajo la cabecera (64 px; 58 px en móvil). */
-      position: sticky;
-      top: 64px;
-      z-index: 20;
-      margin: 0;
-      padding: 8px 0;
-      background: var(--canvas);
-    }
-
-    .chip-count {
-      margin-left: 4px;
-      padding: 0 5px;
-      border-radius: 999px;
-      background: rgba(100, 116, 135, 0.14);
-      font-size: 12.5px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .segmented > button[aria-pressed='true'] .chip-count {
-      background: rgba(29, 75, 134, 0.14);
-    }
-
     .panel {
       padding: 17px;
     }
 
-    /* Primera fila: mapa a la izquierda y casos por región a la derecha. */
+    /* Mapa y distribución comparten una altura fija para que el coroplético y
+       las barras se lean en paralelo. Ninguna de las dos depende del contenido:
+       es la misma regla, en porcentaje del contenedor. */
     .panel-doble {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      grid-template-columns: 1fr 1fr;
       gap: 14px;
-      align-items: start;
+      height: min(62vh, 520px);
+      align-items: stretch;
+    }
+
+    .panel-mapa {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
     }
 
     .panel-nota {
@@ -331,61 +351,6 @@ function compararInicio(a: string | null, b: string | null): number {
       line-height: 1.6;
     }
 
-    .ambitos {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .ambito {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-      padding: 11px 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--paper);
-    }
-
-    .ambito-cabeza {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .ambito-nombre {
-      color: var(--ink);
-      font: 700 14px/1.3 var(--font-display);
-    }
-
-    .ambito-total {
-      color: var(--muted);
-      font-size: 12.5px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .ambito-barra {
-      height: 5px;
-      border-radius: 999px;
-      background: var(--canvas);
-      overflow: hidden;
-    }
-
-    .ambito-barra > span {
-      display: block;
-      height: 100%;
-      border-radius: 999px;
-      background: var(--blue);
-    }
-
-    .ambito-regiones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
     .region-chip {
       display: inline-flex;
       align-items: center;
@@ -410,11 +375,13 @@ function compararInicio(a: string | null, b: string | null): number {
       color: var(--muted);
     }
 
-    .mapa-cabeza {
-      flex-wrap: wrap;
+    .region-chip-activa {
+      border-color: var(--blue);
+      background: var(--blue-pale);
+      color: var(--blue-dark);
     }
 
-    .regiones-cabeza {
+    .mapa-cabeza {
       flex-wrap: wrap;
     }
 
@@ -426,93 +393,143 @@ function compararInicio(a: string | null, b: string | null): number {
       line-height: 1.4;
     }
 
-    /*
-     * La primera celda de .data-table mide 205px por regla global; aquí la
-     * Región va un 40 % más estrecha y el Caso, un 30 %.
-     */
-    .data-table th.col-region,
-    .data-table td:first-child.col-region {
-      width: 17%;
-      min-width: 0;
-    }
-
+    /* La columna Caso de «Casos priorizados» va más estrecha que la regla global
+       de la primera celda. */
     .data-table td:first-child.celda-caso {
       width: 28%;
       min-width: 0;
     }
 
-    /* Riesgo alto, % latente y Total son cifras de columna: se centran para
-       compararlas de un vistazo. La tabla global alinea a la izquierda. */
-    .data-table th.col-num,
-    .data-table td.col-num {
-      text-align: center;
-    }
-
-    .mapa-rotulo {
-      display: inline-flex;
-      align-items: center;
-      margin: 9px 0 0;
-      padding: 2px 8px;
-      border: 1px dashed var(--line);
-      border-radius: 999px;
-      color: var(--ink-2);
-      font-size: 12px;
-      font-weight: 600;
+    .mapa-marco {
+      position: relative;
+      flex: 1 1 auto;
+      min-height: 0;
+      margin-top: 10px;
     }
 
     .mapa-lienzo {
-      height: 360px;
-      min-height: 320px;
-      margin-top: 10px;
+      height: 100%;
+      min-height: 0;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--canvas);
       overflow: hidden;
-      isolation: isolate;
     }
 
-    .mapa-leyenda {
+    .mapa-lienzo:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px;
+    }
+
+    /* Botones flotantes dentro del mapa: arrancan debajo de los controles de
+       zoom (que quedan arriba a la izquierda) para no taparlos. */
+    .mapa-flotantes {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      z-index: 960;
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px 14px;
-      margin: 8px 0 0;
-      padding: 0;
-      list-style: none;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .mapa-leyenda li {
-      display: inline-flex;
-      align-items: center;
+      flex-direction: column;
       gap: 6px;
     }
 
-    .leyenda-punto,
-    .leyenda-anillo {
-      flex: none;
-      width: 10px;
-      height: 10px;
-      border: 1.5px solid var(--blue);
-      border-radius: 50%;
-      background: var(--blue-pale);
-    }
-
-    .leyenda-anillo {
-      border: 2px solid var(--blue-dark);
-    }
-
-    .mapa-controles {
+    .mapa-flotante {
       display: inline-flex;
-      flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: 1px solid #cfd8e3;
+      border-radius: 7px;
+      background: #fff;
+      color: #33475b;
+      box-shadow: 0 1px 4px rgba(17, 32, 45, 0.18);
+      cursor: pointer;
     }
 
-    .mapa-estado {
-      color: var(--muted);
-      font-size: 12px;
+    .mapa-flotante:hover {
+      background: #f1f5f9;
+      color: #1d427f;
+    }
+
+    .mapa-flotante[aria-pressed='true'] {
+      border-color: #1d427f;
+      background: #1d427f;
+      color: #fff;
+    }
+
+    .mapa-flotante-alerta[aria-pressed='true'] {
+      border-color: #ad4d46;
+      background: #ad4d46;
+    }
+
+    .mapa-flotante-manifiesto[aria-pressed='true'] {
+      border-color: #2455a2;
+      background: #2455a2;
+    }
+
+    /* Velo tenue bajo el panel de capas: un clic fuera cierra, como el resto de
+       paneles de la casa. Los botones flotantes quedan por encima para poder
+       cerrar también desde el disparador. */
+    .mapa-panel-scrim {
+      position: absolute;
+      inset: 0;
+      z-index: 920;
+      background: rgba(17, 32, 45, 0.08);
+    }
+
+    .mapa-panel-capas {
+      position: absolute;
+      top: 70px;
+      bottom: 10px;
+      left: 54px;
+      z-index: 950;
+      display: flex;
+      flex-direction: column;
+      width: min(330px, calc(100% - 66px));
+      border: 1px solid #dbe3ea;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 12px 32px rgba(17, 32, 45, 0.24);
+      outline: none;
+      animation: panel-capas-entra 160ms ease-out;
+    }
+
+    @keyframes panel-capas-entra {
+      from {
+        opacity: 0;
+        transform: translateX(-12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .mapa-panel-cabeza {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid #eef2f6;
+    }
+
+    .mapa-panel-cabeza h4 {
+      margin: 0;
+      color: #17283a;
+      font: 700 13.5px/1.3 var(--font-display);
+    }
+
+    .mapa-panel-lista {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+      padding: 4px 14px 14px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
 
     .mapa-aviso {
@@ -535,36 +552,6 @@ function compararInicio(a: string | null, b: string | null): number {
       margin: 0;
     }
 
-    .mapa-nota {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
-    }
-
-    .mapa-leyenda-coropleta {
-      margin-top: 4px;
-    }
-
-    .leyenda-titulo {
-      color: var(--ink-2);
-      font-weight: 600;
-    }
-
-    .leyenda-tramo {
-      flex: none;
-      width: 14px;
-      height: 8px;
-      border: 1px solid rgba(34, 69, 111, 0.35);
-      border-radius: 2px;
-      background: var(--canvas);
-    }
-
-    .mapa-lienzo:focus-visible {
-      outline: 2px solid var(--blue);
-      outline-offset: 2px;
-    }
-
     .ficha-tabla th {
       width: 42%;
       text-align: left;
@@ -578,17 +565,6 @@ function compararInicio(a: string | null, b: string | null): number {
     .ficha-motivo {
       color: var(--muted);
       font-size: 12px;
-    }
-
-    .celda-tasa {
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
-
-    .region-chip-activa {
-      border-color: var(--blue);
-      background: var(--blue-pale);
-      color: var(--blue-dark);
     }
 
     .quitar-seleccion {
@@ -607,11 +583,8 @@ function compararInicio(a: string | null, b: string | null): number {
       color: var(--red);
     }
 
-    /* Cajón «Ver casos» (item 109): entra de izquierda a derecha. */
-    /*
-     * Cajón «Ver casos»: entra desde el borde derecho como el resto de modales
-     * (antes venía de la izquierda y era el único que iba al revés).
-     */
+    /* Cajón de la ficha distrital: entra desde el borde derecho, como el resto
+       de modales de la aplicación. */
     .casos-drawer-scrim {
       position: fixed;
       inset: 0;
@@ -661,102 +634,6 @@ function compararInicio(a: string | null, b: string | null): number {
       overscroll-behavior: contain;
     }
 
-    .casos-drawer-vacio {
-      margin: 0;
-      padding: 24px 4px;
-      color: #59697a;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    /* Tabla del cajón «Ver casos»: seis columnas en un panel estrecho; las de
-       texto se recortan y «table-wrap» desplaza en horizontal. */
-    .data-table.cajon-casos-tabla .cajon-caso,
-    .data-table.cajon-casos-tabla .cajon-caso-texto {
-      max-width: 220px;
-      white-space: normal;
-    }
-
-    .cajon-caso-codigo {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .cajon-caso-codigo:hover,
-    .cajon-caso-codigo:focus-visible {
-      color: var(--blue);
-      text-decoration: underline;
-    }
-
-    .cajon-caso-titulo {
-      display: block;
-      color: var(--ink);
-      font-size: 12.5px;
-    }
-
-    .data-table.cajon-casos-tabla .cajon-caso-texto > span {
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .casos-drawer-pie {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 8px;
-      padding: 12px 20px;
-      border-top: 1px solid #eef2f6;
-      background: #fafbfc;
-    }
-
-    .casos-drawer-pie a {
-      text-decoration: none;
-    }
-
-    @media (max-width: 760px) {
-      .executive-kpis {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .ambito-chips {
-        top: 58px;
-      }
-
-      .casos-drawer {
-        width: 100%;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .executive-kpis {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* ── Escala de color y capas opcionales ── */
-    .leyenda-escala {
-      align-items: center;
-    }
-
-    .leyenda-escala-tramo {
-      display: inline-block;
-      width: 16px;
-      height: 10px;
-      margin-right: 5px;
-      border-radius: 2px;
-      vertical-align: middle;
-    }
-
-    .leyenda-extremos {
-      color: #33475b;
-    }
-
     .punto-situacion {
       display: inline-block;
       width: 9px;
@@ -766,23 +643,7 @@ function compararInicio(a: string | null, b: string | null): number {
       vertical-align: baseline;
     }
 
-    .mapa-capas {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin: 12px 0 4px;
-      padding: 12px 14px;
-      border: 1px solid #e6ebef;
-      border-radius: 10px;
-      background: #fafbfc;
-    }
-
-    .mapa-capas h4 {
-      margin: 0;
-      font-size: 13px;
-      color: #33475b;
-    }
-
+    /* Filas del panel de capas: reutiliza el lenguaje de las antiguas capas. */
     .capa-fila {
       display: flex;
       align-items: flex-start;
@@ -790,6 +651,10 @@ function compararInicio(a: string | null, b: string | null): number {
       padding: 9px 0;
       border-top: 1px solid #eef2f6;
       cursor: pointer;
+    }
+
+    .capa-fila:first-child {
+      border-top: 0;
     }
 
     .capa-fila input {
@@ -820,31 +685,9 @@ function compararInicio(a: string | null, b: string | null): number {
       color: #33475b;
     }
 
-    .capa-filtro {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 2px 0 0 24px;
-    }
-
-    .capa-filtro button {
-      border: 1px solid #e6ebef;
-      border-radius: 999px;
-      background: #fff;
-      color: #33475b;
-      font-size: 12px;
-      padding: 3px 10px;
-      cursor: pointer;
-    }
-
-    .capa-filtro button[aria-pressed='true'] {
-      border-color: #2455a2;
-      background: #eaf1fb;
-      color: #1d427f;
-    }
-
     .mapa-estado-capas {
       margin: 0;
+      padding: 4px 0 8px;
       font-size: 12px;
       color: #778797;
     }
@@ -852,71 +695,151 @@ function compararInicio(a: string | null, b: string | null): number {
     .mapa-estado-capas[role='alert'] {
       color: #ad4d46;
     }
+
+    /* Responsive: un panel debajo del otro, cada uno con la misma altura fija. */
+    @media (max-width: 980px) {
+      .panel-doble {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .panel-doble > .panel-mapa {
+        height: min(62vh, 520px);
+      }
+
+      .mapa-panel-capas {
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-height: 72%;
+        border-radius: 12px 12px 0 0;
+        animation-name: panel-capas-sube;
+      }
+    }
+
+    @keyframes panel-capas-sube {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .executive-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .casos-drawer {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .executive-kpis {
+        grid-template-columns: 1fr;
+      }
+    }
   `,
 })
 export class MapaPage {
   private readonly ruta = inject(ActivatedRoute);
-  private readonly router = inject(Router);
   private readonly sesion = inject(SesionStore);
   private readonly alcanceService = inject(AlcanceService);
   private readonly panorama = inject(PanoramaService);
   private readonly territorio = inject(TerritorioService);
   private readonly capas = inject(CapasMapaService);
+  private readonly indicadores = inject(PanoramaIndicadoresService);
   private readonly destruccion = inject(DestroyRef);
 
   private readonly lienzo = viewChild<ElementRef<HTMLElement>>('lienzo');
-  private readonly cajon = viewChild<ElementRef<HTMLElement>>('cajon');
+  private readonly panelCapas = viewChild<ElementRef<HTMLElement>>('panelCapas');
   private readonly ficha = viewChild<ElementRef<HTMLElement>>('ficha');
 
   /** Clave normalizada de la región seleccionada en el mapa. */
   private readonly claveSeleccionada = signal<string | null>(null);
-  /** Cambia en cada montaje para redibujar los círculos sobre el mapa nuevo. */
+  /** Cambia en cada montaje para redibujar las capas sobre el mapa nuevo. */
   private readonly versionMapa = signal(0);
 
-  /** Cajón lateral «Ver casos» (item 109). */
-  readonly cajonAbierto = signal(false);
+  /** Panel deslizante de capas opcionales. */
+  readonly panelCapasAbierto = signal(false);
+  private focoPanelPrevio: HTMLElement | null = null;
   private cerrandoFicha = false;
-  private cerrandoCajon = false;
-  private focoCajonPrevio: HTMLElement | null = null;
+  private focoFichaPrevio: HTMLElement | null = null;
 
-  /**
-   * Orden local de la tabla de regiones. Sin columna activa rige el orden de
-   * `filasPorRegion`: total de mayor a menor.
-   */
-  readonly ordenRegiones = new OrdenTabla<FilaRegion>();
+  /** Conmutadores del panel de capas; todo apagado por omisión. */
+  readonly capasOpcionales = signal<CapasOpcionales>({
+    derechos: false,
+    fondepes: false,
+    dpa: false,
+    auditorios: false,
+    provincias: false,
+    distritos: false,
+    anp: false,
+  });
+
+  /** Eje y medida compartidos por el gráfico de distribución y el coroplético. */
+  readonly variableDistribucion = signal<VariableDistribucion>('casos');
+  readonly metricaDistribucion = signal<MetricaDistribucion>('manifiestos');
+  readonly coropletaVisible = signal(false);
 
   private mapa: L.Map | null = null;
   private readonly capasRegion = new Map<string, L.CircleMarker>();
 
-  /** Capa coroplética de límites distritales (item 129) y su control. */
-  readonly capaDistritosVisible = signal(true);
-  readonly escalaCoropleta = ESCALA_COROPLETA;
-  readonly coloresCoropleta = COLORES_COROPLETA;
   readonly estadoDistritos = this.territorio.estadoDistritos;
   readonly errorDistritos = this.territorio.errorDistritos;
-  readonly estadoPoblacion = this.territorio.estadoPoblacion;
   readonly casosPorUbigeo = computed(() => casosPorDistritoUbigeo(this.visibles()));
-  readonly casosSinDistritoTotal = computed(() => casosSinDistrito(this.visibles()));
 
-  /** Escala del color de los círculos: verde (latente) → rojo (manifiesto). */
-  readonly escalaManifiesto = ESCALA_MANIFIESTO;
-
-  // ── Capas opcionales (se encienden sobre el mapa principal) ──
-  readonly capaInfraVisible = signal(false);
-  readonly capaAuditoriosVisible = signal(false);
-  readonly filtroInfra = signal<'todos' | TipoInfraestructura>('todos');
+  // Capas opcionales: estado publicado por sus servicios.
   readonly estadoInfra = this.capas.estadoInfra;
   readonly errorInfra = this.capas.errorInfra;
   readonly resumenInfra = this.capas.resumenInfra;
+  readonly estadoFondepes = this.capas.estadoFondepes;
+  readonly errorFondepes = this.capas.errorFondepes;
+  readonly resumenFondepes = this.capas.resumenFondepes;
+  readonly estadoDpa = this.capas.estadoDpa;
+  readonly errorDpa = this.capas.errorDpa;
+  readonly resumenDpa = this.capas.resumenDpa;
   readonly estadoAuditorios = this.capas.estadoAuditorios;
   readonly errorAuditorios = this.capas.errorAuditorios;
   readonly resumenAuditorios = this.capas.resumenAuditorios;
 
-  private infraDerechos: L.LayerGroup | null = null;
-  private infraSedes: L.LayerGroup | null = null;
+  readonly estadoRegiones = this.territorio.estadoRegiones;
+  readonly errorRegiones = this.territorio.errorRegiones;
+  readonly estadoProvincias = this.territorio.estadoProvincias;
+  readonly errorProvincias = this.territorio.errorProvincias;
+  readonly estadoAnp = this.territorio.estadoAnp;
+  readonly errorAnp = this.territorio.errorAnp;
+
+  readonly provinciasTotal = computed(() => this.territorio.provincias().length);
+  readonly anpTotal = computed(() => this.territorio.anp().length);
+  /** Distritos dibujados; `null` mientras la capa no se pidió o falló. */
+  readonly distritosCargados = signal<number | null>(null);
+
+  private capaRegiones: L.GeoJSON | null = null;
+  private regionesFuente: readonly RegionGeo[] | null = null;
+  private capaProvincias: L.GeoJSON | null = null;
+  private capaAnp: L.GeoJSON | null = null;
+  private capaDerechos: L.LayerGroup | null = null;
+  private capaFondepes: L.LayerGroup | null = null;
+  private capaDpa: L.LayerGroup | null = null;
   private capaAuditorios: L.LayerGroup | null = null;
 
-  /** Ficha territorial del distrito pulsado (paso 3). */
+  private capaDistritos: L.GeoJSON | null = null;
+  private claveDistritos = '';
+  private distritosEnCurso: string | null = null;
+  private distritoSeleccionadoUbigeo: string | null = null;
+  /** Último encuadre aplicado; evita repetir `fitBounds` en cada repintado. */
+  private ultimoEncuadre: string | null = null;
+  /** Fuerza un nuevo intento de la capa tras un 503 o un fallo de red. */
+  private readonly reintentoDistritos = signal(0);
+
+  /** Ficha territorial del distrito pulsado. */
   private readonly distritoActivo = signal<DistritoGeo | null>(null);
   readonly fichaDistrito = this.distritoActivo.asReadonly();
   readonly fichaConteo = computed<ConteoDistrito | null>(() => {
@@ -928,22 +851,11 @@ export class MapaPage {
   readonly fichaTasa = computed(() =>
     tasaPor100k(this.fichaCasos(), this.distritoActivo()?.poblacion ?? null),
   );
-  private focoFichaPrevio: HTMLElement | null = null;
-
-  /** Población por región, indexada por nombre normalizado (sólo denominador). */
-  private readonly poblacionIndice = signal<ReadonlyMap<string, PoblacionRegion> | null>(null);
-
-  private capaDistritos: L.GeoJSON | null = null;
-  private claveDistritos = '';
-  private distritosEnCurso: string | null = null;
-  private distritoSeleccionadoUbigeo: string | null = null;
-  /** Fuerza un nuevo intento de la capa tras un 503 o un fallo de red. */
-  private readonly reintentoDistritos = signal(0);
 
   constructor() {
     // Leaflet necesita el contenedor ya en el DOM. El `@if` de la plantilla lo
-    // crea al haber datos; si la sección desaparece (recarga o cambio de
-    // ámbito), el mismo efecto desmonta el mapa.
+    // crea al haber datos; si la sección desaparece (recarga), este mismo efecto
+    // desmonta el mapa.
     effect((onCleanup) => {
       const contenedor = this.lienzo()?.nativeElement;
       if (!contenedor) return;
@@ -959,74 +871,171 @@ export class MapaPage {
       this.sincronizarCirculos(this.filasRegion(), this.claveSeleccionada());
     });
 
-    // Capa distrital (item 129): se pide al montar —acotada a la región de la
-    // fila seleccionada— y se recarga cuando esa región cambia. El relleno se
-    // recalcula con los casos visibles; un 503 deja la capa fuera y conserva
-    // los círculos por región.
+    // Capa de departamentos permanente y coroplético. El estilo lee las señales
+    // del eje, la medida y el ámbito, así que este efecto basta para repintar
+    // los 26 polígonos cuando cambia cualquiera de ellas.
+    effect(() => {
+      this.versionMapa();
+      const mapa = this.mapa;
+      const regiones = this.territorio.regiones();
+      if (!mapa) return;
+
+      this.sincronizarRegiones(mapa, regiones);
+      this.aplicarEstiloRegiones();
+    });
+
+    // Encuadre por ámbito: `fitBounds` a las regiones del alcance vigente. Se
+    // respeta la selección de una región (no se mueve el mapa bajo los pies) y
+    // «todos» vuelve al encuadre nacional.
+    effect(() => {
+      this.versionMapa();
+      const mapa = this.mapa;
+      const regiones = this.territorio.regiones();
+      const alcance = this.alcanceActivo();
+      const seleccion = this.claveSeleccionada();
+      if (!mapa) return;
+
+      if (seleccion !== null) {
+        // Al limpiar la selección, el encuadre vuelve a aplicarse.
+        this.ultimoEncuadre = null;
+        return;
+      }
+
+      const clave = `${alcance ?? 'todos'}|${regiones.length}`;
+      if (this.ultimoEncuadre === clave) return;
+      this.ultimoEncuadre = clave;
+
+      if (alcance === null) {
+        mapa.fitBounds(LIMITES_PERU, { padding: [12, 12] });
+        return;
+      }
+
+      const claveAlcance = normalizarRegion(alcance);
+      const delAlcance = regiones.filter(
+        (region) => normalizarRegion(region.alcance ?? '') === claveAlcance,
+      );
+      const limites = this.limitesDe(delAlcance);
+      mapa.fitBounds(limites ?? L.latLngBounds(LIMITES_PERU), { padding: [16, 16] });
+    });
+
+    // Capa distrital: opcional y apagada por omisión. Al encenderse se pide una
+    // vez —acotada a la región seleccionada— y su relleno se recalcula con los
+    // casos visibles.
     effect(() => {
       this.versionMapa();
       this.reintentoDistritos();
       const mapa = this.mapa;
-      const visible = this.capaDistritosVisible();
-      const region = this.filaSeleccionada()?.region ?? null;
-      const conteo = this.casosPorUbigeo();
       if (!mapa) return;
 
-      this.aplicarVisibilidadDistritos(mapa, visible);
-      this.refrescarDistritos(conteo);
+      if (!this.capasOpcionales()['distritos']) {
+        this.quitarCapaDistritos();
+        this.claveDistritos = '';
+        this.distritosEnCurso = null;
+        this.distritosCargados.set(null);
+        return;
+      }
+
+      const region = this.filaSeleccionada()?.region ?? null;
+      this.refrescarDistritos(this.casosPorUbigeo());
       void this.asegurarDistritos(mapa, region);
     });
 
-    // Capa de infraestructuras: se pide la primera vez que se enciende y se
-    // dibuja con renderer canvas, porque son ~13 456 puntos. El filtro por tipo
-    // oculta un grupo sin volver a pedir los datos.
+    // Capas de puntos: se dibujan sólo cuando están encendidas. Los derechos
+    // acuícolas son miles de puntos y van sobre canvas; las sedes y auditorios,
+    // con tooltip.
     effect(() => {
       this.versionMapa();
       const mapa = this.mapa;
-      const visible = this.capaInfraVisible();
-      const filtro = this.filtroInfra();
-      const puntos = this.capas.puntosInfra();
       if (!mapa) return;
-
-      if (!visible) {
-        this.infraDerechos?.remove();
-        this.infraSedes?.remove();
-        return;
-      }
-
-      if (puntos.length > 0 && !this.infraDerechos) this.construirInfra();
-
-      this.alternarGrupo(mapa, this.infraDerechos, filtro !== 'institucional');
-      this.alternarGrupo(mapa, this.infraSedes, filtro !== 'derecho_acuicola');
+      this.capaDerechos = this.sincronizarGrupo(
+        mapa,
+        this.capasOpcionales()['derechos'],
+        this.capas.puntosInfra(),
+        this.capaDerechos,
+        (puntos) => this.construirDerechos(puntos),
+      );
     });
 
-    // Capa de auditorios: un marcador por distrito en su centroide, rotulado con
-    // el nombre del distrito. Se agrupa para no dibujar 27 chinchetas encimadas.
     effect(() => {
       this.versionMapa();
       const mapa = this.mapa;
-      const visible = this.capaAuditoriosVisible();
+      if (!mapa) return;
+      this.capaFondepes = this.sincronizarGrupo(
+        mapa,
+        this.capasOpcionales()['fondepes'],
+        this.capas.puntosFondepes(),
+        this.capaFondepes,
+        (puntos) => this.construirAnillos(puntos, '#1d427f', (punto) => this.etiquetaSede(punto)),
+      );
+    });
+
+    effect(() => {
+      this.versionMapa();
+      const mapa = this.mapa;
+      if (!mapa) return;
+      this.capaDpa = this.sincronizarGrupo(
+        mapa,
+        this.capasOpcionales()['dpa'],
+        this.capas.puntosDpa(),
+        this.capaDpa,
+        (puntos) => this.construirAnillos(puntos, '#b5651d', (punto) => this.etiquetaDpa(punto)),
+      );
+    });
+
+    effect(() => {
+      this.versionMapa();
+      const mapa = this.mapa;
       const auditorios = this.capas.auditorios();
       if (!mapa) return;
 
-      if (!visible) {
+      if (!this.capasOpcionales()['auditorios'] || auditorios.length === 0) {
         this.capaAuditorios?.remove();
+        this.capaAuditorios = null;
         return;
       }
-
-      if (auditorios.length > 0 && !this.capaAuditorios) this.construirAuditorios();
-      this.alternarGrupo(mapa, this.capaAuditorios, true);
+      if (!this.capaAuditorios) this.capaAuditorios = this.construirAuditorios(auditorios);
+      if (!mapa.hasLayer(this.capaAuditorios)) this.capaAuditorios.addTo(mapa);
     });
 
-    // El cajón de «Ver casos» se enfoca en cuanto `viewChild` resuelve el panel
-    // recién renderizado; Escape lo cierra y devuelve el foco al disparador.
+    // Provincias y ANP: contornos que no capturan clics para no robarle el clic
+    // a los polígonos de distrito.
     effect(() => {
-      const panel = this.cajon()?.nativeElement;
-      if (panel && this.cajonAbierto()) panel.focus();
+      this.versionMapa();
+      const mapa = this.mapa;
+      const provincias = this.territorio.provincias();
+      if (!mapa) return;
+
+      if (!this.capasOpcionales()['provincias'] || provincias.length === 0) {
+        this.capaProvincias?.remove();
+        this.capaProvincias = null;
+        return;
+      }
+      if (!this.capaProvincias) this.capaProvincias = this.construirProvincias(provincias);
+      if (!mapa.hasLayer(this.capaProvincias)) this.capaProvincias.addTo(mapa);
     });
 
-    // Misma pauta para la ficha distrital: se enfoca al abrirse y Escape la
-    // cierra devolviendo el foco al mapa, que es el disparador.
+    effect(() => {
+      this.versionMapa();
+      const mapa = this.mapa;
+      const anp = this.territorio.anp();
+      if (!mapa) return;
+
+      if (!this.capasOpcionales()['anp'] || anp.length === 0) {
+        this.capaAnp?.remove();
+        this.capaAnp = null;
+        return;
+      }
+      if (!this.capaAnp) this.capaAnp = this.construirAnp(anp);
+      if (!mapa.hasLayer(this.capaAnp)) this.capaAnp.addTo(mapa);
+    });
+
+    // El panel de capas se enfoca al abrirse; el foco vuelve al disparador al
+    // cerrar. La ficha distrital sigue la misma pauta.
+    effect(() => {
+      const panel = this.panelCapas()?.nativeElement;
+      if (panel && this.panelCapasAbierto()) panel.focus();
+    });
+
     effect(() => {
       const panel = this.ficha()?.nativeElement;
       if (panel && this.distritoActivo()) panel.focus();
@@ -1035,9 +1044,9 @@ export class MapaPage {
     if (typeof document !== 'undefined') {
       const alEscape = (evento: KeyboardEvent): void => {
         if (evento.key !== 'Escape') return;
-        if (this.cajonAbierto()) {
+        if (this.panelCapasAbierto()) {
           evento.preventDefault();
-          this.cerrarCajon();
+          this.cerrarPanelCapas();
           return;
         }
         if (this.distritoActivo()) {
@@ -1049,7 +1058,7 @@ export class MapaPage {
       this.destruccion.onDestroy(() => document.removeEventListener('keydown', alEscape));
     }
 
-    void this.cargarPoblacion();
+    void this.territorio.cargarRegiones();
 
     this.destruccion.onDestroy(() => this.desmontarMapa());
   }
@@ -1108,32 +1117,14 @@ export class MapaPage {
     () => this.base().length > 0 && this.visibles().length === 0,
   );
 
-  readonly conteos = computed(() => conteosPorAlcance(this.base()));
-  readonly bandas = computed(() => bandasPorAlcance(this.visibles()));
-  readonly filasRegion = computed(() =>
-    this.ordenRegiones.ordenar(filasPorRegion(this.visibles()), this.accesoresRegiones),
-  );
+  /** Filas por región de los casos visibles, sin tabla: alimenta el mapa. */
+  readonly filasRegion = computed(() => filasPorRegion(this.visibles()));
 
   /**
-   * Claves de orden de la tabla de regiones. «Lat/Man» usa una clave compuesta:
-   * primero los latentes y, a igualdad, los manifiestos. La tasa llega vacía
-   * cuando falta el denominador y esos huecos quedan al final, se ordene como
-   * se ordene.
-   */
-  private readonly accesoresRegiones: Record<string, (fila: FilaRegion) => unknown> = {
-    region: (fila) => fila.region,
-    situacion: (fila) => [fila.latentes, fila.manifiestos],
-    proporcion: (fila) => fila.proporcionLatente,
-    total: (fila) => fila.total,
-    riesgoAlto: (fila) => fila.riesgoAlto,
-  };
-
-  /**
-   * Entrada de conflictividad (item 118): los casos visibles antes que el
-   * desglose territorial, ordenados por gravedad del riesgo propio y, dentro de
-   * cada nivel, por la prioridad de atención (Urgente → Bajo); a igualdad de
-   * ambas, por el inicio más antiguo. Los casos sin `fecha_inicio` se declaran y
-   * se ordenan al final; no se inventa una fecha.
+   * Entrada de conflictividad: los casos visibles ordenados por gravedad del
+   * riesgo propio y, dentro de cada nivel, por la prioridad de atención
+   * (Urgente → Bajo); a igualdad de ambas, por el inicio más antiguo. Los casos
+   * sin `fecha_inicio` se ordenan al final; no se inventa una fecha.
    */
   private readonly casosOrdenados = computed<Caso[]>(() =>
     [...this.visibles()].sort(
@@ -1154,7 +1145,7 @@ export class MapaPage {
     this.casosOrdenados().filter((caso) => caso.priorizado),
   );
 
-  /** Orden local de la tabla «Casos priorizados» (independiente de la de regiones). */
+  /** Orden local de la tabla «Casos priorizados». */
   readonly ordenPrioritarios = new OrdenTabla<Caso>();
 
   private readonly accesoresPrioritarios: Record<string, (caso: Caso) => unknown> = {
@@ -1169,7 +1160,6 @@ export class MapaPage {
   readonly casosPrioritariosVisibles = computed(() =>
     this.ordenPrioritarios.ordenar(this.casosPrioritarios(), this.accesoresPrioritarios),
   );
-  readonly sinInicio = computed(() => this.visibles().filter((caso) => !caso.inicio).length);
 
   /** Región resaltada por el mapa, sólo si sigue teniendo casos visibles. */
   readonly filaSeleccionada = computed<FilaRegion | null>(() => {
@@ -1178,47 +1168,11 @@ export class MapaPage {
     return this.filasRegion().find((fila) => normalizarRegion(fila.region) === clave) ?? null;
   });
 
-  /**
-   * Casos del cajón «Ver casos»: los de la región seleccionada o, si no hay
-   * fila activa, todos los visibles del ámbito vigente. Conserva el orden de
-   * gravedad y prioridad del resto de la vista.
-   */
-  readonly cajonCasos = computed(() =>
-    casosDeRegion(this.casosOrdenados(), this.filaSeleccionada()?.region ?? null),
-  );
-
-  readonly cajonTerritorio = computed(
-    () => this.filaSeleccionada()?.region ?? 'Todas las regiones',
-  );
-
-  /** Rótulo del cajón: territorio de la fila y ámbito aplicado. */
-  readonly cajonTitulo = computed(() => {
-    const fila = this.filaSeleccionada();
-    const ambito = this.alcanceActivo() ?? 'Todos';
-    // La región manda en el título porque el cajón se abre desde su fila.
-    return fila === null
-      ? `${this.cajonTerritorio()} · ${ambito}`
-      : `Casos de ${fila.region} · ${ambito}`;
-  });
-
-  /** Mismos queryParams que la fila de la tabla, para que el listado coincida. */
-  readonly cajonEnlace = computed<Record<string, string>>(() => {
-    const fila = this.filaSeleccionada();
-    return fila ? this.verCasos(fila) : this.recorteListado();
-  });
-
   readonly regionesConCasos = computed(() => contarRegiones(this.visibles()));
-  readonly sinRegion = computed(() => contarSinRegion(this.visibles()));
-  readonly riesgoAltoSinRegion = computed(() => contarRiesgoAltoSinRegion(this.visibles()));
   readonly riesgoAlto = computed(() => contarRiesgoAlto(this.visibles()));
 
-  /** Conteo latente/manifiesto de los casos visibles; los sin nivel se declaran. */
+  /** Conteo latente/manifiesto de los casos visibles; los sin nivel se suman a latentes. */
   readonly conteoSituacion = computed(() => conteosPorSituacion(this.visibles()));
-
-  /** Mismo conteo para la fila «Sin región» de la tabla de regiones. */
-  readonly situacionSinRegion = computed(() =>
-    conteosPorSituacion(this.visibles().filter((caso) => regionDe(caso) === null)),
-  );
 
   readonly alcanceTexto = computed(() => this.alcanceActivo() ?? 'Todos los ámbitos');
 
@@ -1228,59 +1182,253 @@ export class MapaPage {
     return valor ? formatearFechaHora(valor) : null;
   });
 
-  elegirAlcance(alcance: Alcance | null): void {
-    // `todos` es la limpieza explícita: `null` dejaría que la preferencia vuelva
-    // a imponerse al recargar o al compartir el enlace.
-    void this.router.navigate([], {
-      relativeTo: this.ruta,
-      queryParams: { alcance: alcance ?? 'todos' },
-      queryParamsHandling: 'merge',
-    });
-  }
+  // ── Distribución por sectorista (panel derecho) ───────────────────────────
+
+  /** El eje de alertas sólo existe si el endpoint de indicadores respondió. */
+  readonly alertasDisponibles = computed(() => this.indicadores.disponible());
+  readonly ventanaDias = computed(() => this.indicadores.ventana().dias);
+  readonly cargandoDistribucion = computed(() => this.indicadores.estado() === 'cargando');
 
   /**
-   * Recorte común a los enlaces al listado («Ver casos» de la fila y «Abrir
-   * listado completo» del cajón): el ámbito bajo el que se contaron los casos y
-   * «Abiertos». Cuando no hay ámbito vigente se envía `todos` de forma
-   * explícita, porque si se omitiera el listado reaplicaría la preferencia
-   * guardada y los números de la fila y del listado dejarían de coincidir.
+   * Aviso discreto cuando el endpoint opcional no está: la vista sigue midiendo
+   * con los casos que ya cargó y nunca rellena las alertas que faltan.
    */
-  private recorteListado(): Record<string, string> {
-    return { abiertos: 'true', alcance: this.alcanceActivo() ?? 'todos' };
-  }
+  readonly avisoIndicadores = computed<string | null>(() => {
+    if (this.indicadores.estado() !== 'error') return null;
+    return this.variableDistribucion() === 'alertas'
+      ? 'Las alertas del último trimestre requieren los indicadores por sectorista, que no están disponibles.'
+      : 'Los indicadores por sectorista no están disponibles; se muestra la distribución por región con los casos cargados.';
+  });
+
+  readonly tituloDistribucion = computed(() =>
+    this.indicadores.disponible() ? 'Distribución por sectorista' : 'Distribución por región',
+  );
+
+  readonly subtituloDistribucion = computed(() => {
+    if (this.variableDistribucion() === 'alertas') {
+      return `Alertas de los últimos ${this.indicadores.ventana().dias} días.`;
+    }
+    return this.indicadores.disponible()
+      ? 'Participación de cada responsable en la medida elegida.'
+      : 'Medido sobre los casos cargados en el panorama.';
+  });
+
+  readonly filasDistribucion = computed<FilaDistribucion[]>(() => {
+    if (this.indicadores.disponible()) {
+      // Se descartan los sectoristas sin ninguna actividad: aparecen en el
+      // contrato con ceros por tener el rol vigente, pero una barra a 0 % en la
+      // distribución sólo es ruido. Se conserva quien tenga regiones con dato o
+      // algún valor en la medida elegida.
+      return distribuirPorSectorista(
+        this.indicadores.sectoristas(),
+        this.variableDistribucion(),
+        this.metricaDistribucion(),
+      ).filter((fila) => fila.regiones.length > 0 || fila.valor > 0);
+    }
+    if (this.variableDistribucion() === 'casos') {
+      return distribuirPorRegion(this.filasRegion(), this.metricaDistribucion());
+    }
+    return [];
+  });
+
+  // ── Coroplético del mapa (misma variable que el gráfico) ──────────────────
+
+  readonly coropletaAlertas = computed(
+    () => this.coropletaVisible() && this.variableDistribucion() === 'alertas',
+  );
+  readonly coropletaManifiestos = computed(
+    () => this.coropletaVisible() && this.variableDistribucion() === 'casos',
+  );
 
   /**
-   * El enlace de la fila (y «Abrir listado completo» del cajón) abre el listado
-   * con el mismo recorte que esta tabla: la región principal de la fila y el
-   * ámbito bajo el que se contaron sus casos.
+   * Medidas por región para el coroplético. Con el eje de casos se derivan de
+   * las filas y se les adjunta el ubigeo de la capa de regiones; con el eje de
+   * alertas vienen del endpoint de indicadores.
    */
-  verCasos(fila: FilaRegion): Record<string, string> {
-    return { ...this.recorteListado(), region: fila.region };
-  }
+  private readonly medidasCoropleta = computed<readonly MedidaRegion[]>(() => {
+    if (this.variableDistribucion() === 'alertas') return this.indicadores.regiones();
 
-  /**
-   * La fila «Sin región» usa el complemento `sinregion`, no un nombre de región:
-   * no existe en `core.regiones` y el listado lo resuelve como ausencia de
-   * región principal.
-   */
-  verCasosSinRegion(): Record<string, string> {
-    return { ...this.recorteListado(), sinregion: 'true' };
-  }
+    const ubigeoPorNombre = new Map<string, string>();
+    for (const region of this.territorio.regiones()) {
+      ubigeoPorNombre.set(normalizarRegion(region.region ?? region.nombre), region.ubigeo);
+    }
 
-  etiquetaAmbitos(ambitos: readonly string[]): string {
-    return ambitos.length ? ambitos.join(' · ') : '—';
-  }
+    return medidasDeCasos(this.filasRegion()).map((medida) => ({
+      ...medida,
+      ubigeo: ubigeoPorNombre.get(normalizarRegion(medida.region)) ?? null,
+    }));
+  });
 
-  esSeleccionada(fila: FilaRegion): boolean {
-    const seleccion = this.filaSeleccionada();
-    return (
-      seleccion !== null && normalizarRegion(seleccion.region) === normalizarRegion(fila.region)
+  private readonly maximoCoropleta = computed(() => {
+    const variable = this.variableDistribucion();
+    const metrica = this.metricaDistribucion();
+    return this.medidasCoropleta().reduce(
+      (tope, medida) => Math.max(tope, valorMedida(medida, variable, metrica)),
+      0,
     );
+  });
+
+  private readonly intensidades = computed<{
+    porUbigeo: ReadonlyMap<string, number | null>;
+    porNombre: ReadonlyMap<string, number | null>;
+  }>(() => {
+    const variable = this.variableDistribucion();
+    const metrica = this.metricaDistribucion();
+    const maximo = this.maximoCoropleta();
+    const porUbigeo = new Map<string, number | null>();
+    const porNombre = new Map<string, number | null>();
+
+    for (const medida of this.medidasCoropleta()) {
+      const intensidad = intensidadMedida(medida, variable, metrica, maximo);
+      if (medida.ubigeo) porUbigeo.set(medida.ubigeo, intensidad);
+      porNombre.set(normalizarRegion(medida.region), intensidad);
+    }
+    return { porUbigeo, porNombre };
+  });
+
+  /** Ubigeos de las regiones del alcance vigente, para destacar sus bordes. */
+  private readonly alcanceUbigeos = computed<ReadonlySet<string>>(() => {
+    const alcance = this.alcanceActivo();
+    const ubigeos = new Set<string>();
+    if (alcance === null) return ubigeos;
+
+    const clave = normalizarRegion(alcance);
+    for (const region of this.territorio.regiones()) {
+      if (normalizarRegion(region.alcance ?? '') === clave) ubigeos.add(region.ubigeo);
+    }
+    return ubigeos;
+  });
+
+  // ── Acciones de la distribución y del coroplético ─────────────────────────
+
+  elegirVariable(variable: VariableDistribucion): void {
+    let metrica = this.metricaDistribucion();
+    // «% manifiestos» no existe en el eje de alertas: se cae a riesgo alto.
+    if (variable === 'alertas' && metrica === 'manifiestos') metrica = 'riesgoAlto';
+
+    this.variableDistribucion.set(variable);
+    this.metricaDistribucion.set(metrica);
   }
 
-  quitarSeleccion(): void {
-    this.claveSeleccionada.set(null);
+  elegirMetrica(metrica: MetricaDistribucion): void {
+    this.metricaDistribucion.set(metrica);
   }
+
+  /** Botón rojo: riesgo en alertas del último trimestre. */
+  alternarCoropletaAlertas(): void {
+    if (this.variableDistribucion() === 'alertas' && this.coropletaVisible()) {
+      this.coropletaVisible.set(false);
+      return;
+    }
+    this.variableDistribucion.set('alertas');
+    this.metricaDistribucion.set('riesgoAlto');
+    this.coropletaVisible.set(true);
+  }
+
+  /** Botón azul: % de casos manifiestos por región. */
+  alternarCoropletaManifiestos(): void {
+    if (this.variableDistribucion() === 'casos' && this.coropletaVisible()) {
+      this.coropletaVisible.set(false);
+      return;
+    }
+    this.variableDistribucion.set('casos');
+    this.metricaDistribucion.set('manifiestos');
+    this.coropletaVisible.set(true);
+  }
+
+  // ── Panel deslizante de capas ─────────────────────────────────────────────
+
+  alternarPanelCapas(): void {
+    if (this.panelCapasAbierto()) {
+      this.cerrarPanelCapas();
+      return;
+    }
+    const activo = typeof document !== 'undefined' ? document.activeElement : null;
+    this.focoPanelPrevio = activo instanceof HTMLElement ? activo : null;
+    this.panelCapasAbierto.set(true);
+  }
+
+  cerrarPanelCapas(): void {
+    if (!this.panelCapasAbierto()) return;
+    this.panelCapasAbierto.set(false);
+    this.focoPanelPrevio?.focus?.();
+    this.focoPanelPrevio = null;
+  }
+
+  alFondoPanel(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarPanelCapas();
+  }
+
+  alTeclaPanel(evento: KeyboardEvent): void {
+    if (evento.key === 'Tab') this.atraparFoco(this.panelCapas()?.nativeElement, evento);
+  }
+
+  /** Enciende/apaga una capa opcional y pide sus datos la primera vez. */
+  alternarCapa(clave: ClaveCapa): void {
+    const siguiente = !this.capasOpcionales()[clave];
+    this.capasOpcionales.update((capas) => ({ ...capas, [clave]: siguiente }));
+    if (!siguiente) return;
+
+    switch (clave) {
+      case 'derechos':
+        void this.capas.cargarInfraestructuras();
+        break;
+      case 'fondepes':
+        void this.capas.cargarFondepes();
+        break;
+      case 'dpa':
+        void this.capas.cargarDesembarcaderos();
+        break;
+      case 'auditorios':
+        void this.capas.cargarAuditorios();
+        break;
+      case 'provincias':
+        void this.territorio.cargarProvincias();
+        break;
+      case 'anp':
+        void this.territorio.cargarAnp();
+        break;
+      case 'distritos':
+        // La pide el efecto de distritos, que conoce la región seleccionada.
+        break;
+    }
+  }
+
+  reintentarDistritos(): void {
+    this.claveDistritos = '';
+    this.distritosEnCurso = null;
+    this.reintentoDistritos.update((valor) => valor + 1);
+  }
+
+  reintentarRegiones(): void {
+    this.territorio.reintentarRegiones();
+  }
+
+  reintentarInfraestructura(): void {
+    void this.capas.cargarInfraestructuras();
+  }
+
+  reintentarFondepes(): void {
+    void this.capas.cargarFondepes();
+  }
+
+  reintentarDpa(): void {
+    void this.capas.cargarDesembarcaderos();
+  }
+
+  reintentarAuditorios(): void {
+    void this.capas.cargarAuditorios();
+  }
+
+  reintentarProvincias(): void {
+    this.territorio.reintentarProvincias();
+  }
+
+  reintentarAnp(): void {
+    this.territorio.reintentarAnp();
+  }
+
+  // ── Ficha distrital ───────────────────────────────────────────────────────
 
   cerrarFichaDistrito(): void {
     if (!this.distritoActivo() || this.cerrandoFicha) return;
@@ -1304,52 +1452,11 @@ export class MapaPage {
     if (evento.key === 'Tab') this.atraparFoco(this.ficha()?.nativeElement, evento);
   }
 
-  /**
-   * Abre el cajón de casos al pulsar una fila de «Casos por región». La fila
-   * fija antes la región seleccionada —el mismo estado que un clic en un
-   * círculo del mapa— y `cajonCasos` se alimenta de `filaSeleccionada`: así el
-   * disparador no necesita un segundo estado que mantener en sincronía.
-   */
-  abrirCasosRegion(fila: FilaRegion, evento?: Event): void {
-    this.claveSeleccionada.set(normalizarRegion(fila.region));
-    this.abrirCajon(evento);
+  quitarSeleccion(): void {
+    this.claveSeleccionada.set(null);
   }
 
-  abrirCajon(evento?: Event): void {
-    if (this.cajonAbierto()) return;
-    const disparador = evento?.currentTarget;
-    this.focoCajonPrevio =
-      disparador instanceof HTMLElement
-        ? disparador
-        : ((document.activeElement as HTMLElement | null) ?? null);
-    this.cajonAbierto.set(true);
-  }
-
-  cerrarCajon(): void {
-    if (!this.cajonAbierto() || this.cerrandoCajon) return;
-    this.cerrandoCajon = true;
-    salirModal(this.cajon()?.nativeElement, () => {
-      this.cerrandoCajon = false;
-      this.cajonAbierto.set(false);
-      this.focoCajonPrevio?.focus?.();
-      this.focoCajonPrevio = null;
-    });
-  }
-
-  alFondoCajon(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrarCajon();
-  }
-
-  alTeclaCajon(evento: KeyboardEvent): void {
-    if (evento.key === 'Tab') this.atraparFocoCajon(evento);
-  }
-
-  /** Mantiene el tabulador dentro del cajón mientras está abierto. */
-  private atraparFocoCajon(evento: KeyboardEvent): void {
-    this.atraparFoco(this.cajon()?.nativeElement, evento);
-  }
-
-  /** Mantiene el tabulador dentro del panel abierto (cajón o ficha). */
+  /** Mantiene el tabulador dentro del panel abierto (capas o ficha). */
   private atraparFoco(panel: HTMLElement | null | undefined, evento: KeyboardEvent): void {
     if (!panel) return;
 
@@ -1391,183 +1498,14 @@ export class MapaPage {
     return valor === null ? '—' : FORMATO_ENTERO.format(valor);
   }
 
-  /**
-   * Situación del caso para el cajón: `situacionDe` agrupa los cuatro niveles,
-   * pero el caso sin nivel declarado se muestra «—» y no se estima.
-   */
-  situacionCaso(caso: Caso): string {
-    if (caso.nivelConflicto === null) return '—';
-    return situacionDe(caso.nivelConflicto) === 'manifiesto' ? 'Manifiesto' : 'Latente';
-  }
-
-  /**
-   * Píldora del riesgo con las clases globales `status-badge` + `risk-*`, las
-   * mismas del listado de casos: el color del nivel no se reimplementa aquí.
-   */
-  claseRiesgo(caso: Caso): string {
-    return 'status-badge risk-' + caso.riesgo.toLowerCase();
-  }
-
-  alternarCapaDistritos(): void {
-    this.capaDistritosVisible.update((valor) => !valor);
-  }
-
-  reintentarDistritos(): void {
-    this.claveDistritos = '';
-    this.distritosEnCurso = null;
-    this.reintentoDistritos.update((valor) => valor + 1);
-  }
-
-  /** Enciende/apaga la capa de infraestructuras y pide los puntos la 1.ª vez. */
-  alternarCapaInfraestructura(): void {
-    const siguiente = !this.capaInfraVisible();
-    this.capaInfraVisible.set(siguiente);
-    if (siguiente) void this.capas.cargarInfraestructuras();
-  }
-
-  /** Enciende/apaga la capa de auditorios y pide la lista la 1.ª vez. */
-  alternarCapaAuditorios(): void {
-    const siguiente = !this.capaAuditoriosVisible();
-    this.capaAuditoriosVisible.set(siguiente);
-    if (siguiente) void this.capas.cargarAuditorios();
-  }
-
-  elegirFiltroInfra(filtro: 'todos' | TipoInfraestructura): void {
-    this.filtroInfra.set(filtro);
-  }
-
-  /** El servicio no cachea los fallos: un reintento vuelve a pedir la capa. */
-  reintentarInfraestructura(): void {
-    void this.capas.cargarInfraestructuras();
-  }
-
-  reintentarAuditorios(): void {
-    void this.capas.cargarAuditorios();
-  }
-
-  /** Porcentaje latente redondeado, para leyenda y tabla («60 %»). */
-  porcentajeLatente(proporcion: number): string {
-    return `${Math.round(proporcion * 100)} %`;
-  }
-
-  /** Color del tramo de `ESCALA_MANIFIESTO` para una proporción latente (0..1). */
-  colorManifiesto(proporcion: number): string {
-    return ESCALA_MANIFIESTO[claseManifiesto(proporcion)].relleno;
-  }
-
-  /**
-   * Puntos de infraestructuras en dos grupos: derechos acuícolas (miles, sin
-   * interacción y sobre canvas) y sedes (pocas, con tooltip). Construir una vez
-   * y alternar grupos evita rehacer 13 456 marcadores al cambiar el filtro.
-   */
-  private construirInfra(): void {
-    const derechos = L.layerGroup();
-    const sedes = L.layerGroup();
-    const renderer = L.canvas({ padding: 0.3 });
-
-    for (const punto of this.capas.puntosInfra()) {
-      if (punto.tipo === 'institucional') {
-        L.circleMarker([punto.lat, punto.lon], {
-          radius: 4,
-          color: '#1d427f',
-          weight: 1.6,
-          fillColor: '#eaf1fb',
-          fillOpacity: 0.95,
-        })
-          .bindTooltip(this.etiquetaSede(punto), { direction: 'top', sticky: true })
-          .addTo(sedes);
-        continue;
-      }
-
-      L.circleMarker([punto.lat, punto.lon], {
-        radius: 2.4,
-        color: '#397c79',
-        weight: 0,
-        fillColor: '#397c79',
-        fillOpacity: 0.55,
-        interactive: false,
-        renderer,
-      }).addTo(derechos);
-    }
-
-    this.infraDerechos = derechos;
-    this.infraSedes = sedes;
-  }
-
-  /**
-   * Auditorios agrupados por distrito: un marcador por centroide, rotulado con
-   * el nombre del distrito y cuántos auditorios contiene. La precisión es
-   * «distrito», nunca la puerta del local.
-   */
-  private construirAuditorios(): void {
-    const grupo = L.layerGroup();
-    const porDistrito = new Map<
-      string,
-      { nombre: string; lat: number; lon: number; total: number }
-    >();
-
-    for (const auditorio of this.capas.auditorios()) {
-      const centroide = auditorio.centroide;
-      if (!centroide) continue;
-
-      const clave = auditorio.ubigeo ?? `${centroide.lat},${centroide.lon}`;
-      const actual = porDistrito.get(clave);
-      if (actual) {
-        actual.total += 1;
-        continue;
-      }
-      porDistrito.set(clave, {
-        nombre: auditorio.distrito ?? 'Distrito sin declarar',
-        lat: centroide.lat,
-        lon: centroide.lon,
-        total: 1,
-      });
-    }
-
-    for (const distrito of porDistrito.values()) {
-      const etiqueta = `${distrito.nombre} · ${distrito.total} ${
-        distrito.total === 1 ? 'auditorio' : 'auditorios'
-      }`;
-      L.circleMarker([distrito.lat, distrito.lon], {
-        radius: 6,
-        color: '#1d427f',
-        weight: 2,
-        fillColor: '#ffffff',
-        fillOpacity: 0.95,
-      })
-        .bindTooltip(etiqueta, {
-          permanent: true,
-          direction: 'right',
-          className: 'etiqueta-auditorio',
-        })
-        .addTo(grupo);
-    }
-
-    this.capaAuditorios = grupo;
-  }
-
-  private etiquetaSede(punto: PuntoInfraestructura): string {
-    const nombre = punto.nombreInfraestructura ?? 'Sede institucional';
-    const institucion = punto.identi ?? 'Sin IDENTI';
-    const distrito = punto.distrito ?? 'distrito sin declarar';
-    return `${nombre} · ${institucion} · ${distrito}`;
-  }
-
-  private alternarGrupo(mapa: L.Map, grupo: L.LayerGroup | null, visible: boolean): void {
-    if (!grupo) return;
-    if (visible) {
-      if (!mapa.hasLayer(grupo)) grupo.addTo(mapa);
-    } else if (mapa.hasLayer(grupo)) {
-      grupo.remove();
-    }
-  }
-
   fechaInicio(valor: string | null): string {
     return formatearFechaCorta(valor);
   }
 
   recargar(): void {
     this.panorama.recargar();
+    this.indicadores.recargar();
+    if (this.territorio.estadoRegiones() === 'error') this.territorio.reintentarRegiones();
   }
 
   private seleccionarRegion(region: string): void {
@@ -1589,9 +1527,9 @@ export class MapaPage {
       attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>',
     }).addTo(mapa);
 
-    // La capa distrital vive en un panel propio por debajo del `overlayPane`:
-    // así los círculos por región conservan sus clics y su relieve sobre el
-    // relleno, aunque los polígonos se añadan después.
+    // Las capas territoriales viven en un panel propio por debajo del
+    // `overlayPane`: así los círculos por región conservan sus clics y su
+    // relieve sobre el relleno, aunque los polígonos se añadan después.
     mapa.createPane('distritos');
     const panelDistritos = mapa.getPane('distritos');
     if (panelDistritos) panelDistritos.style.zIndex = '390';
@@ -1603,34 +1541,131 @@ export class MapaPage {
 
   private desmontarMapa(): void {
     this.capasRegion.clear();
+    this.capaRegiones = null;
+    this.regionesFuente = null;
+    this.capaProvincias = null;
+    this.capaAnp = null;
+    this.capaDerechos = null;
+    this.capaFondepes = null;
+    this.capaDpa = null;
+    this.capaAuditorios = null;
     this.capaDistritos = null;
     this.claveDistritos = '';
     this.distritosEnCurso = null;
     this.distritoSeleccionadoUbigeo = null;
-    this.infraDerechos = null;
-    this.infraSedes = null;
-    this.capaAuditorios = null;
+    this.distritosCargados.set(null);
+    this.ultimoEncuadre = null;
     const mapa = this.mapa;
     this.mapa = null;
     mapa?.remove();
   }
 
-  /**
-   * Denominadores por región. Se piden una vez y se indexan por nombre
-   * normalizado; un fallo deja las tasas en «—» sin inventar población.
-   */
-  private async cargarPoblacion(): Promise<void> {
-    try {
-      const porClave = await this.territorio.poblacionPorRegion();
-      this.poblacionIndice.set(indicePoblacionPorRegion([...porClave.values()]));
-    } catch {
-      this.poblacionIndice.set(null);
-    }
+  // ── Capa de regiones y coroplético ────────────────────────────────────────
+
+  private sincronizarRegiones(mapa: L.Map, regiones: readonly RegionGeo[]): void {
+    if (this.capaRegiones && this.regionesFuente === regiones) return;
+
+    this.quitarRegiones();
+    if (regiones.length === 0) return;
+
+    const coleccion: FeatureCollection<Polygon | MultiPolygon, PropsRegion> = {
+      type: 'FeatureCollection',
+      features: regiones.map((region) => ({
+        type: 'Feature',
+        properties: {
+          ubigeo: region.ubigeo,
+          nombre: region.nombre,
+          region: region.region ?? region.nombre,
+          alcance: region.alcance,
+        },
+        geometry: region.geometria,
+      })),
+    };
+
+    const capa = L.geoJSON(coleccion, {
+      pane: 'distritos',
+      interactive: false,
+      style: (rasgo) => this.estiloRegion(rasgo),
+    });
+    capa.addTo(mapa);
+
+    this.capaRegiones = capa;
+    this.regionesFuente = regiones;
   }
 
+  private quitarRegiones(): void {
+    this.capaRegiones?.remove();
+    this.capaRegiones = null;
+    this.regionesFuente = null;
+  }
+
+  /** Reaplica relleno y borde sin reconstruir la geometría (26 polígonos). */
+  private aplicarEstiloRegiones(): void {
+    const capa = this.capaRegiones;
+    if (!capa) return;
+
+    capa.eachLayer((subcapa) => {
+      const ruta = subcapa as RasgoDistrital;
+      ruta.setStyle(this.estiloRegion(ruta.feature));
+    });
+  }
+
+  private estiloRegion(rasgo: { properties?: unknown } | null | undefined): L.PathOptions {
+    const ubigeo = ubigeoDelRasgo(rasgo);
+    const region = regionDelRasgo(rasgo);
+    const destacada = ubigeo !== null && this.alcanceUbigeos().has(ubigeo);
+
+    let fillColor = '#eef3f8';
+    let fillOpacity = 0.18;
+
+    if (this.coropletaVisible()) {
+      const escala =
+        this.variableDistribucion() === 'alertas'
+          ? ESCALA_COROPLETA_ALERTAS
+          : ESCALA_COROPLETA_MANIFIESTOS;
+      const color = colorChoropleta(this.intensidadDeRegion(ubigeo, region), escala);
+      if (color) {
+        fillColor = color;
+        fillOpacity = 0.82;
+      }
+    }
+
+    return {
+      color: destacada ? '#1d427f' : '#8a98a5',
+      weight: destacada ? 1.8 : 0.6,
+      fillColor,
+      fillOpacity,
+    };
+  }
+
+  private intensidadDeRegion(ubigeo: string | null, region: string | null): number | null {
+    const { porUbigeo, porNombre } = this.intensidades();
+    if (ubigeo !== null && porUbigeo.has(ubigeo)) return porUbigeo.get(ubigeo) ?? null;
+    if (region !== null) return porNombre.get(normalizarRegion(region)) ?? null;
+    return null;
+  }
+
+  /** Límites de un conjunto de regiones; `null` si no hay geometría válida. */
+  private limitesDe(regiones: readonly RegionGeo[]): L.LatLngBounds | null {
+    if (regiones.length === 0) return null;
+
+    const coleccion: FeatureCollection<Polygon | MultiPolygon> = {
+      type: 'FeatureCollection',
+      features: regiones.map((region) => ({
+        type: 'Feature',
+        properties: {},
+        geometry: region.geometria,
+      })),
+    };
+    const limites = L.geoJSON(coleccion).getBounds();
+    return limites.isValid() ? limites : null;
+  }
+
+  // ── Capa distrital y ficha ────────────────────────────────────────────────
+
   /**
-   * Pide la capa distrital una vez por ámbito: nacional al montar y acotada a la
-   * región cuando hay una fila seleccionada. El servicio cachea por región.
+   * Pide la capa distrital una vez por ámbito: nacional al encenderla y acotada a
+   * la región cuando hay una fila seleccionada. El servicio cachea por región.
    */
   private async asegurarDistritos(mapa: L.Map, region: string | null): Promise<void> {
     const clave = region ?? '';
@@ -1646,9 +1681,10 @@ export class MapaPage {
     } catch {
       if (this.mapa !== mapa || this.claveDistritos !== clave) return;
       // El servicio ya publica el 503 o el fallo de red en `errorDistritos`:
-      // la capa no se dibuja y los círculos por región siguen intactos.
+      // la capa no se dibuja y el resto del mapa sigue intacto.
       this.claveDistritos = '';
       this.quitarCapaDistritos();
+      this.distritosCargados.set(null);
     } finally {
       if (this.distritosEnCurso === clave) this.distritosEnCurso = null;
     }
@@ -1704,7 +1740,8 @@ export class MapaPage {
 
     this.capaDistritos = capa;
     this.claveDistritos = region ?? '';
-    if (this.capaDistritosVisible()) capa.addTo(mapa);
+    this.distritosCargados.set(distritos.length);
+    capa.addTo(mapa);
 
     const limites = capa.getBounds();
     if (region !== null && limites.isValid()) {
@@ -1715,16 +1752,6 @@ export class MapaPage {
   private quitarCapaDistritos(): void {
     this.capaDistritos?.remove();
     this.capaDistritos = null;
-  }
-
-  private aplicarVisibilidadDistritos(mapa: L.Map, visible: boolean): void {
-    const capa = this.capaDistritos;
-    if (!capa) return;
-    if (visible) {
-      if (!mapa.hasLayer(capa)) capa.addTo(mapa);
-    } else if (mapa.hasLayer(capa)) {
-      capa.remove();
-    }
   }
 
   /** Reaplica el relleno y el resaltado sin reconstruir la geometría. */
@@ -1756,6 +1783,196 @@ export class MapaPage {
     ruta.bringToFront();
     this.refrescarDistritos(this.casosPorUbigeo());
     this.distritoActivo.set(distrito);
+  }
+
+  // ── Construcción de capas opcionales ──────────────────────────────────────
+
+  /**
+   * Alterna un grupo de puntos según su conmutador. Cuando la capa está apagada
+   * no se construye nada: pedir 13 456 marcadores para ocultarlos sería tirar
+   * memoria y CPU.
+   */
+  private sincronizarGrupo(
+    mapa: L.Map,
+    visible: boolean,
+    puntos: readonly PuntoInfraestructura[],
+    actual: L.LayerGroup | null,
+    construir: (puntos: readonly PuntoInfraestructura[]) => L.LayerGroup,
+  ): L.LayerGroup | null {
+    if (!visible || puntos.length === 0) {
+      actual?.remove();
+      return null;
+    }
+    const grupo = actual ?? construir(puntos);
+    if (!mapa.hasLayer(grupo)) grupo.addTo(mapa);
+    return grupo;
+  }
+
+  /**
+   * Derechos acuícolas: miles de puntos, sin interacción y sobre canvas. Se
+   * dibujan sólo mientras la capa está encendida.
+   */
+  private construirDerechos(puntos: readonly PuntoInfraestructura[]): L.LayerGroup {
+    const grupo = L.layerGroup();
+    const renderer = L.canvas({ padding: 0.3 });
+
+    for (const punto of puntos) {
+      if (punto.tipo !== 'derecho_acuicola') continue;
+      L.circleMarker([punto.lat, punto.lon], {
+        radius: 2.4,
+        color: '#397c79',
+        weight: 0,
+        fillColor: '#397c79',
+        fillOpacity: 0.55,
+        interactive: false,
+        renderer,
+      }).addTo(grupo);
+    }
+
+    return grupo;
+  }
+
+  /** Sedes y desembarcaderos: anillos pocos y con tooltip. */
+  private construirAnillos(
+    puntos: readonly PuntoInfraestructura[],
+    color: string,
+    etiqueta: (punto: PuntoInfraestructura) => string,
+  ): L.LayerGroup {
+    const grupo = L.layerGroup();
+
+    for (const punto of puntos) {
+      L.circleMarker([punto.lat, punto.lon], {
+        radius: 4,
+        color,
+        weight: 1.6,
+        fillColor: '#eaf1fb',
+        fillOpacity: 0.95,
+      })
+        .bindTooltip(etiqueta(punto), { direction: 'top', sticky: true })
+        .addTo(grupo);
+    }
+
+    return grupo;
+  }
+
+  /**
+   * Auditorios agrupados por distrito: un marcador por centroide, rotulado con
+   * el nombre del distrito y cuántos auditorios contiene. La precisión es
+   * «distrito», nunca la puerta del local.
+   */
+  private construirAuditorios(auditorios: readonly AuditorioMapa[]): L.LayerGroup {
+    const grupo = L.layerGroup();
+    const porDistrito = new Map<
+      string,
+      { nombre: string; lat: number; lon: number; total: number }
+    >();
+
+    for (const auditorio of auditorios) {
+      const centroide = auditorio.centroide;
+      if (!centroide) continue;
+
+      const clave = auditorio.ubigeo ?? `${centroide.lat},${centroide.lon}`;
+      const actual = porDistrito.get(clave);
+      if (actual) {
+        actual.total += 1;
+        continue;
+      }
+      porDistrito.set(clave, {
+        nombre: auditorio.distrito ?? 'Distrito sin declarar',
+        lat: centroide.lat,
+        lon: centroide.lon,
+        total: 1,
+      });
+    }
+
+    for (const distrito of porDistrito.values()) {
+      const etiqueta = `${distrito.nombre} · ${distrito.total} ${
+        distrito.total === 1 ? 'auditorio' : 'auditorios'
+      }`;
+      L.circleMarker([distrito.lat, distrito.lon], {
+        radius: 6,
+        color: '#1d427f',
+        weight: 2,
+        fillColor: '#ffffff',
+        fillOpacity: 0.95,
+      })
+        .bindTooltip(etiqueta, {
+          permanent: true,
+          direction: 'right',
+          className: 'etiqueta-auditorio',
+        })
+        .addTo(grupo);
+    }
+
+    return grupo;
+  }
+
+  /** Provincias: sólo contorno fino, transparente, para no tapar el relleno. */
+  private construirProvincias(provincias: readonly RegionGeo[]): L.GeoJSON {
+    const coleccion: FeatureCollection<Polygon | MultiPolygon, PropsRegion> = {
+      type: 'FeatureCollection',
+      features: provincias.map((provincia) => ({
+        type: 'Feature',
+        properties: {
+          ubigeo: provincia.ubigeo,
+          nombre: provincia.nombre,
+          region: provincia.region ?? provincia.nombre,
+          alcance: provincia.alcance,
+        },
+        geometry: provincia.geometria,
+      })),
+    };
+
+    return L.geoJSON(coleccion, {
+      pane: 'distritos',
+      interactive: false,
+      style: { color: '#5d6d7c', weight: 0.5, fillOpacity: 0 },
+    });
+  }
+
+  /** ANP Reservas Nacionales: contorno verde discontinuo y relleno tenue. */
+  private construirAnp(anp: readonly AnpGeo[]): L.GeoJSON {
+    const coleccion: FeatureCollection<
+      Polygon | MultiPolygon,
+      { codigo: string; nombre: string; categoria: string | null }
+    > = {
+      type: 'FeatureCollection',
+      features: anp.map((area) => ({
+        type: 'Feature',
+        properties: {
+          codigo: area.codigo,
+          nombre: area.nombre,
+          categoria: area.categoria,
+        },
+        geometry: area.geometria,
+      })),
+    };
+
+    return L.geoJSON(coleccion, {
+      pane: 'distritos',
+      interactive: false,
+      style: {
+        color: '#2f6b4f',
+        weight: 1,
+        dashArray: '4 3',
+        fillColor: '#2f6b4f',
+        fillOpacity: 0.12,
+      },
+    });
+  }
+
+  private etiquetaSede(punto: PuntoInfraestructura): string {
+    const nombre = punto.nombreInfraestructura ?? 'Sede FONDEPES';
+    const institucion = punto.identi ?? 'Sin IDENTI';
+    const distrito = punto.distrito ?? 'distrito sin declarar';
+    return `${nombre} · ${institucion} · ${distrito}`;
+  }
+
+  private etiquetaDpa(punto: PuntoInfraestructura): string {
+    const nombre = punto.nombreInfraestructura ?? 'Desembarcadero';
+    const distrito = punto.distrito ?? 'distrito sin declarar';
+    const region = punto.region ?? 'región sin declarar';
+    return `${nombre} · ${distrito} · ${region}`;
   }
 
   private sincronizarCirculos(filas: readonly FilaRegion[], seleccion: string | null): void {

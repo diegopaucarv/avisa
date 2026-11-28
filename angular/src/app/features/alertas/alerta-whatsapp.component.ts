@@ -1,10 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   afterNextRender,
   computed,
   effect,
+  inject,
   input,
   output,
   signal,
@@ -202,7 +204,13 @@ export class AlertaWhatsappComponent {
     salirModal(this.dialogo()?.nativeElement, () => this.cerrar.emit());
   }
 
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
+  }
+
   private readonly dialogo = viewChild<ElementRef<HTMLElement>>('dialogo');
+  private readonly destruccion = inject(DestroyRef);
 
   readonly texto = signal('');
   readonly copiado = signal(false);
@@ -218,6 +226,15 @@ export class AlertaWhatsappComponent {
 
   constructor() {
     afterNextRender(() => this.dialogo()?.nativeElement.focus({ preventScroll: true }));
+
+    // Escape cierra la ventana aunque el foco esté dentro del cuerpo del mensaje.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      evento.preventDefault();
+      this.cerrarConSalida();
+    };
+    document.addEventListener('keydown', alEscape);
+    this.destruccion.onDestroy(() => document.removeEventListener('keydown', alEscape));
 
     // Sólo se resiembra cuando el mensaje de entrada cambia de verdad: el
     // cuerpo es de sólo lectura y la confirmación de copia caduca con el texto.

@@ -28,7 +28,7 @@ import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { aCaso } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { salirModal } from '../../shared/ui/modal-salida';
+import { esDialogoSuperior, salirModal } from '../../shared/ui/modal-salida';
 import { AdjuntosPanelComponent } from '../../shared/ui/adjuntos-panel.component';
 import {
   ACEPTADOS_DOCUMENTO,
@@ -820,6 +820,8 @@ export class DocumentoPanelComponent {
       // Escape cierra el panel aunque el foco se haya ido a un bloque de texto.
       const alEscape = (evento: KeyboardEvent): void => {
         if (evento.key !== 'Escape') return;
+        // La guarda de pila evita cerrar el panel cuando la anulación está encima.
+        if (!esDialogoSuperior(this.panel()?.nativeElement)) return;
         evento.preventDefault();
         this.cerrarConSalida();
       };

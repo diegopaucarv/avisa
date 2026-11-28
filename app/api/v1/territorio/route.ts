@@ -10,9 +10,13 @@ import {
 import {
   buscarTerritorio,
   DISTRITO_TOLERANCIA_MAX,
+  listarAnpReservaNacional,
   listarDistritos,
   listarDistritosGeoJson,
+  listarProvinciasCapa,
+  listarRegionesCapa,
   poblacionPorRegion,
+  type CapaGeometriaQuery,
   type DistritoGeometriaQuery,
   type DistritoListQuery,
   type TerritorioQuery,
@@ -69,6 +73,27 @@ export const dynamic = "force-dynamic";
  *   `distritosConPoblacion` permiten declarar cobertura sin inventar. Otro
  *   `agrupar` (o su ausencia) responde 400 `RECURSO_INVALIDO`. La población es
  *   SÓLO denominador de tasas por 100 000 hab.; nunca entra en el riesgo.
+ *
+ * `GET /api/v1/territorio?recurso=regiones[&alcance=Norte][&tolerancia=0.01]`
+ * `GET /api/v1/territorio?recurso=provincias[&region=Lima][&tolerancia=0.01]`
+ * `GET /api/v1/territorio?recurso=anp`
+ *   Capas coropléticas agregadas como `FeatureCollection` (no se pagina: son 25
+ *   regiones, ~196 provincias y 42 reservas):
+ *
+ *     regiones   · `properties` = { ubigeo, nombre, regionId, poblacion }
+ *     provincias · `properties` = { ubigeo, nombre, regionUbigeo, poblacion }
+ *     anp        · `properties` = { codigo, nombre, categoria }
+ *
+ *   `regionId` es `core.regiones.id` (o `null` si no hubo match) y `poblacion`
+ *   es `territorio.region.poblacion_total` (denominador; nunca 0 inventado). El
+ *   filtro `alcance` (Norte/Centro/Sur/Oriente/Nacional) se resuelve con
+ *   `core.cat_alcances_geograficos` vía `core.regiones.alcance_id`. En
+ *   `provincias`, `regionUbigeo` es `left(ubigeo,2)` y el filtro `region` es el
+ *   NOMBRE de la región, comparado sin tildes ni mayúsculas. `anp` son las
+ *   Reservas Nacionales del SERNANP (48 features disueltas en 42 por `codigo`).
+ *   La simplificación es del servidor con `ST_SimplifyPreserveTopology`; la
+ *   `tolerancia` se acota a [0, 0,05] y un valor no numérico responde 422
+ *   `TOLERANCIA_INVALIDA` (`anp` no usa tolerancia).
  *
  * Sólo lectura: no hay POST/PATCH/DELETE. Los catálogos no tienen RLS, pero se
  * exige sesión para que la interfaz tenga un único contrato y no dependa de
@@ -134,10 +159,92 @@ export async function GET(request: Request) {
 
       return jsonOk(result);
     }
+    if (recurso === "regiones" || recurso === "provincias") {
+      const query: CapaGeometriaQuery = {};
+      if (recurso === "regiones") {
+        // `alcance` es un corte geográfico agregado, propio de región.
+        const alcance = params.get("alcance")?.trim();
+        if (alcance) query.alcance = alcance;
+      } else {
+        // En provincia el corte es por NOMBRE de región, no por alcance.
+        const region = params.get("region")?.trim();
+        if (region) query.region = region;
+      }
+      const tolerancia = leerTolerancia(params);
+      if (tolerancia !== undefined) query.tolerancia = tolerancia;
+
+      const generadoEn = new Date().toISOString();
+
+      if (recurso === "regiones") {
+        const items = await withSession(scope, (client) =>
+          listarRegionesCapa(client, query),
+        );
+        const features = items.map((item) => ({
+          type: "Feature" as const,
+          id: item.ubigeo,
+          geometry: item.geometria,
+          properties: {
+            ubigeo: item.ubigeo,
+            nombre: item.nombre,
+            regionId: item.regionId,
+            alcance: item.alcance,
+            poblacion: item.poblacion,
+          },
+        }));
+        return jsonOk({
+          type: "FeatureCollection",
+          features,
+          total: features.length,
+          generadoEn,
+        });
+      }
+
+      const items = await withSession(scope, (client) =>
+        listarProvinciasCapa(client, query),
+      );
+      const features = items.map((item) => ({
+        type: "Feature" as const,
+        id: item.ubigeo,
+        geometry: item.geometria,
+        properties: {
+          ubigeo: item.ubigeo,
+          nombre: item.nombre,
+          regionUbigeo: item.regionUbigeo,
+          poblacion: item.poblacion,
+        },
+      }));
+      return jsonOk({
+        type: "FeatureCollection",
+        features,
+        total: features.length,
+        generadoEn,
+      });
+    }
+    if (recurso === "anp") {
+      const items = await withSession(scope, (client) =>
+        listarAnpReservaNacional(client),
+      );
+      const features = items.map((item) => ({
+        type: "Feature" as const,
+        id: item.codigo,
+        geometry: item.geometria,
+        properties: {
+          codigo: item.codigo,
+          nombre: item.nombre,
+          categoria: item.categoria,
+        },
+      }));
+      return jsonOk({
+        type: "FeatureCollection",
+        features,
+        total: features.length,
+        generadoEn: new Date().toISOString(),
+      });
+    }
     if (recurso) {
       throw new ApiError(
         400,
-        `Recurso no soportado: ${recurso}. Usá recurso=distritos o recurso=poblacion.`,
+        `Recurso no soportado: ${recurso}. Usá recurso=distritos, recurso=poblacion, recurso=regiones, recurso=provincias o recurso=anp.`,
         "RECURSO_INVALIDO",
       );
     }

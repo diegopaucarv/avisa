@@ -184,8 +184,18 @@ export class EventoPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
-    // El panel sólo se cierra con Cancelar o Registrar: Escape no lo descarta.
-    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
+    // El panel se cierra con Escape, con el clic fuera o con la ✕: ya no hay
+    // guarda por cambios escritos.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      evento.preventDefault();
+      this.cerrarConSalida();
+    };
+    document.addEventListener('keydown', alEscape);
+    this.destruccion.onDestroy(() => {
+      document.removeEventListener('keydown', alEscape);
+      this.focoPrevio?.focus?.();
+    });
 
     // El borrador se precarga con el hecho abierto (vacío en el alta) y se
     // reinicia si el contenedor cambia de hecho.
@@ -256,6 +266,11 @@ export class EventoPanelComponent {
 
   alTecla(evento: KeyboardEvent): void {
     if (evento.key === 'Tab') this.atraparFoco(evento);
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
   }
 
   /** El panel es modal: Tab y Shift+Tab ciclan dentro de él. */

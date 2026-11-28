@@ -1,5 +1,5 @@
-<div class="drawer-scrim">
-  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="importar-titulo">
+<div class="drawer-scrim" (click)="alFondo($event)">
+  <aside #panel class="drawer" role="dialog" aria-modal="true" aria-labelledby="importar-titulo">
     <header class="drawer-head">
       <div>
         <h2 id="importar-titulo">Importar</h2>
@@ -274,9 +274,5 @@
         </div>
       }
     </div>
-
-    <footer class="drawer-foot">
-      <button type="button" class="button-secondary" (click)="cerrar()">Cerrar</button>
-    </footer>
   </aside>
 </div>

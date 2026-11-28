@@ -63,7 +63,7 @@ import {
 } from './alerta-triaje.component';
 import { ExportarAlertasMenuComponent } from './exportar-alertas-menu.component';
 import {
-  ESTADOS_ALERTA,
+  FILTROS_ESTADO_ALERTA,
   ORDENES_ALERTA,
   PASO_APROBACION_DEFINITIVA,
   PASO_ARCHIVO,
@@ -400,11 +400,6 @@ function totalDe(bruto: unknown): number {
       font-weight: 600;
     }
 
-    .alerta-revisor small {
-      color: var(--muted);
-      font-size: 11.5px;
-    }
-
     .table-link {
       cursor: pointer;
       font-family: inherit;
@@ -478,7 +473,7 @@ export class AlertasPage {
   private readonly destruccion = inject(DestroyRef);
   private readonly capacidades = inject(CapacidadesService);
 
-  readonly estados = ESTADOS_ALERTA;
+  readonly filtrosEstado = FILTROS_ESTADO_ALERTA;
   readonly ordenes = ORDENES_ALERTA;
   readonly riesgos = RIESGOS;
 
@@ -564,7 +559,9 @@ export class AlertasPage {
   }
 
   private readonly atendidasRec = this.contar({ estado: 'Atendida' });
-  private readonly pendientesRec = this.contar({ estado: 'Pendiente de revisión' });
+  // «Pendientes» usa el mismo filtro binario que el `<select>`: todo lo que no
+  // ha llegado a `paso_actual >= 5`, no sólo la etapa «Pendiente de revisión».
+  private readonly pendientesRec = this.contar({ estado: 'Pendiente' });
 
   // Segmento «Con caso» / «Sin caso»: respeta el resto de filtros y el archivo
   // vigente; el propio segmento se ignora para que los conteos sean comparables.
@@ -893,11 +890,6 @@ export class AlertasPage {
 
   etiquetaEstadoAlerta(alerta: Alerta): string {
     return etiquetaEstado(alerta.estado);
-  }
-
-  /** Rótulo corto del estado en el filtro; el valor sigue siendo el canónico. */
-  etiquetaEstadoFiltro(estado: string): string {
-    return etiquetaEstado(estado);
   }
 
   claseEstadoAlerta(alerta: Alerta): string {

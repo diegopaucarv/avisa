@@ -250,7 +250,17 @@ export class CasoVistaPreviaComponent {
       this.panel()?.nativeElement.focus({ preventScroll: true });
     });
 
-    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
+    // Escape cierra la vista previa aunque el foco esté en un enlace interno.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      evento.preventDefault();
+      this.cerrarConSalida();
+    };
+    document.addEventListener('keydown', alEscape);
+    this.destruccion.onDestroy(() => {
+      document.removeEventListener('keydown', alEscape);
+      this.focoPrevio?.focus?.();
+    });
   }
 
   /** Fecha en formato compacto (`02NOV2025`). */
@@ -286,6 +296,11 @@ export class CasoVistaPreviaComponent {
 
   alTecla(evento: KeyboardEvent): void {
     if (evento.key === 'Tab') this.atraparFoco(evento);
+  }
+
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
   }
 
   /** Mantiene el tabulador dentro del panel mientras está abierto. */

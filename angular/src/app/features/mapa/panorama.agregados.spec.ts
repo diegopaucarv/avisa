@@ -9,15 +9,27 @@ import {
   casosSinDistrito,
   claseCoropleta,
   claseManifiesto,
+  colorChoropleta,
   conteosPorAlcance,
   conteosPorSituacion,
+  distribuirPorRegion,
+  distribuirPorSectorista,
+  ESCALA_COROPLETA_ALERTAS,
+  ESCALA_COROPLETA_MANIFIESTOS,
   ESCALA_MANIFIESTO,
   filasPorRegion,
   indicePoblacionPorRegion,
+  intensidadMedida,
+  medidasDeCasos,
   poblacionDeRegion,
+  proporcionDe,
   proporcionLatenteDe,
   situacionDe,
   tasaPor100k,
+  tramoChoropleta,
+  valorMedida,
+  type MedidaRegion,
+  type SectoristaMedidas,
 } from './panorama.agregados';
 
 function caso(overrides: Partial<Caso> = {}): Caso {
@@ -346,5 +358,204 @@ describe('indicePoblacionPorRegion', () => {
   it('devuelve null cuando la capa no trae población para la región', () => {
     expect(poblacionDeRegion('Piura', indice)).toBeNull();
     expect(poblacionDeRegion('Loreto', indice)).toBeNull();
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* Distribución por sectorista y coropléticos                                  */
+/* -------------------------------------------------------------------------- */
+
+function medida(overrides: Partial<MedidaRegion> = {}): MedidaRegion {
+  return {
+    region: 'Piura',
+    ubigeo: '20',
+    casos: 4,
+    manifiestos: 1,
+    riesgoAlto: 2,
+    alertas90d: 10,
+    alertasRiesgoAlto: 3,
+    ...overrides,
+  };
+}
+
+describe('proporcionDe', () => {
+  it('divide parte entre total en 0..1', () => {
+    expect(proporcionDe(2, 8)).toBe(0.25);
+    expect(proporcionDe(8, 8)).toBe(1);
+  });
+
+  it('devuelve 0 con denominador ausente o no finito', () => {
+    expect(proporcionDe(3, 0)).toBe(0);
+    expect(proporcionDe(3, -1)).toBe(0);
+    expect(proporcionDe(Number.NaN, 10)).toBe(0);
+  });
+
+  it('recorta valores fuera del rango', () => {
+    expect(proporcionDe(12, 10)).toBe(1);
+    expect(proporcionDe(-2, 10)).toBe(0);
+  });
+});
+
+describe('valorMedida', () => {
+  it('lee el numerador correspondiente en el eje de casos', () => {
+    const fila = medida();
+    expect(valorMedida(fila, 'casos', 'total')).toBe(4);
+    expect(valorMedida(fila, 'casos', 'manifiestos')).toBe(1);
+    expect(valorMedida(fila, 'casos', 'riesgoAlto')).toBe(2);
+  });
+
+  it('lee el numerador correspondiente en el eje de alertas', () => {
+    const fila = medida();
+    expect(valorMedida(fila, 'alertas', 'total')).toBe(10);
+    expect(valorMedida(fila, 'alertas', 'riesgoAlto')).toBe(3);
+  });
+});
+
+describe('intensidadMedida', () => {
+  it('usa la proporción interna de la región para manifiestos y riesgo', () => {
+    const fila = medida({ casos: 10, manifiestos: 4, riesgoAlto: 3 });
+    expect(intensidadMedida(fila, 'casos', 'manifiestos', 0)).toBe(0.4);
+    expect(intensidadMedida(fila, 'casos', 'riesgoAlto', 0)).toBe(0.3);
+  });
+
+  it('normaliza los volúmenes contra el máximo recibido', () => {
+    expect(intensidadMedida(medida({ casos: 5 }), 'casos', 'total', 10)).toBe(0.5);
+    expect(intensidadMedida(medida({ alertas90d: 4 }), 'alertas', 'total', 8)).toBe(0.5);
+  });
+
+  it('usa la proporción de alertas con riesgo alto sobre las alertas', () => {
+    expect(
+      intensidadMedida(
+        medida({ alertas90d: 10, alertasRiesgoAlto: 2 }),
+        'alertas',
+        'riesgoAlto',
+        0,
+      ),
+    ).toBe(0.2);
+  });
+
+  it('devuelve null cuando el denominador de la región no existe', () => {
+    expect(intensidadMedida(medida({ casos: 0 }), 'casos', 'manifiestos', 0)).toBeNull();
+    expect(intensidadMedida(medida({ alertas90d: 0 }), 'alertas', 'riesgoAlto', 0)).toBeNull();
+    expect(intensidadMedida(medida({ casos: 0 }), 'casos', 'total', 0)).toBeNull();
+  });
+});
+
+describe('medidasDeCasos', () => {
+  it('traslada los conteos de la región y deja las alertas en cero', () => {
+    const [fila] = medidasDeCasos([
+      {
+        region: 'Piura',
+        latentes: 2,
+        manifiestos: 1,
+        total: 3,
+        proporcionLatente: 2 / 3,
+        sinNivel: 0,
+        riesgoAlto: 2,
+        ambitos: ['Norte'],
+      },
+    ]);
+
+    expect(fila).toEqual({
+      region: 'Piura',
+      ubigeo: null,
+      casos: 3,
+      manifiestos: 1,
+      riesgoAlto: 2,
+      alertas90d: 0,
+      alertasRiesgoAlto: 0,
+    });
+  });
+});
+
+describe('distribuirPorSectorista', () => {
+  const sectoristas: SectoristaMedidas[] = [
+    {
+      id: 's1',
+      nombre: 'Ana',
+      regiones: [medida({ region: 'Piura', casos: 6, manifiestos: 3 })],
+    },
+    {
+      id: 's2',
+      nombre: 'Beto',
+      regiones: [
+        medida({ region: 'Lima', casos: 2, manifiestos: 1 }),
+        medida({ region: 'Ica', casos: 2, manifiestos: 0 }),
+      ],
+    },
+  ];
+
+  it('comparte el total de la medida y ordena de mayor a menor', () => {
+    const filas = distribuirPorSectorista(sectoristas, 'casos', 'total');
+
+    expect(filas.map((fila) => fila.titulo)).toEqual(['Ana', 'Beto']);
+    expect(filas.map((fila) => fila.valor)).toEqual([6, 4]);
+    expect(filas.map((fila) => fila.proporcion)).toEqual([60, 40]);
+  });
+
+  it('respeta la medida elegida y ordena los chips de región', () => {
+    const filas = distribuirPorSectorista(sectoristas, 'casos', 'manifiestos');
+
+    expect(filas[0]).toMatchObject({ titulo: 'Ana', valor: 3, proporcion: 75 });
+    expect(filas[1]?.regiones).toEqual([
+      { region: 'Lima', valor: 1 },
+      { region: 'Ica', valor: 0 },
+    ]);
+  });
+
+  it('declara proporción 0 cuando no hay medida', () => {
+    const vacio = distribuirPorSectorista(
+      [{ id: 's', nombre: 'Sin datos', regiones: [medida({ alertas90d: 0 })] }],
+      'alertas',
+      'total',
+    );
+    expect(vacio[0]?.proporcion).toBe(0);
+  });
+});
+
+describe('distribuirPorRegion', () => {
+  it('agrupa por región cuando sólo hay casos locales', () => {
+    const filas = distribuirPorRegion(
+      filasPorRegion([caso({ region: 'Piura' }), caso({ region: 'Lima' })]),
+      'total',
+    );
+
+    expect(filas.map((fila) => fila.titulo)).toEqual(['Lima', 'Piura']);
+    expect(filas.map((fila) => fila.proporcion)).toEqual([50, 50]);
+    expect(filas[0]?.regiones).toEqual([{ region: 'Lima', valor: 1 }]);
+  });
+});
+
+describe('tramoChoropleta', () => {
+  it('reparte la intensidad en cinco tramos', () => {
+    expect(tramoChoropleta(0)).toBe(0);
+    expect(tramoChoropleta(0.19)).toBe(0);
+    expect(tramoChoropleta(0.2)).toBe(0);
+    expect(tramoChoropleta(0.21)).toBe(1);
+    expect(tramoChoropleta(0.5)).toBe(2);
+    expect(tramoChoropleta(1)).toBe(4);
+  });
+
+  it('responde -1 cuando no hay dato', () => {
+    expect(tramoChoropleta(null)).toBe(-1);
+    expect(tramoChoropleta(Number.NaN)).toBe(-1);
+  });
+});
+
+describe('colorChoropleta', () => {
+  it('toma el color del tramo de la rampa', () => {
+    expect(colorChoropleta(0, ESCALA_COROPLETA_MANIFIESTOS)).toBe(ESCALA_COROPLETA_MANIFIESTOS[0]);
+    expect(colorChoropleta(1, ESCALA_COROPLETA_ALERTAS)).toBe(
+      ESCALA_COROPLETA_ALERTAS[ESCALA_COROPLETA_ALERTAS.length - 1],
+    );
+  });
+
+  it('deja sin color el polígono sin dato', () => {
+    expect(colorChoropleta(null, ESCALA_COROPLETA_ALERTAS)).toBeNull();
+  });
+
+  it('declara cinco pasos en cada rampa', () => {
+    expect(ESCALA_COROPLETA_ALERTAS).toHaveLength(5);
+    expect(ESCALA_COROPLETA_MANIFIESTOS).toHaveLength(5);
   });
 });

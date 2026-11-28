@@ -260,8 +260,12 @@
 </section>
 
 @if (seleccionada(); as ficha) {
-<div class="drawer-scrim" (document:keydown.escape)="cerrarFicha()">
-  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="ficha-titulo">
+<div
+  class="drawer-scrim"
+  (click)="alFondo($event)"
+  (document:keydown.escape)="cerrarFichaConEscape()"
+>
+  <aside #fichaPanel class="drawer" role="dialog" aria-modal="true" aria-labelledby="ficha-titulo">
     <header class="drawer-head">
       <div class="ficha-cabecera">
         <span class="ficha-avatar" aria-hidden="true">{{ inicialesDe(ficha.nombre) }}</span>
@@ -479,10 +483,6 @@
         }
       </section>
     </div>
-
-    <footer class="drawer-foot">
-      <button type="button" class="button-secondary" (click)="cerrarFicha()">Cerrar</button>
-    </footer>
   </aside>
 </div>
 } @if (cargandoEdicion()) {

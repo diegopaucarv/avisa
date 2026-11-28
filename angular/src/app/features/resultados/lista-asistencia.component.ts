@@ -505,10 +505,6 @@ type Fila = {
                 >
                   {{ confirmando() ? 'Vinculando…' : 'Confirmar y vincular' }}
                 </button>
-              } @else {
-                <button type="button" class="button-secondary" (click)="cerrarModal()">
-                  {{ resultado() ? 'Cerrar' : 'Cancelar' }}
-                </button>
               }
             </div>
           </footer>

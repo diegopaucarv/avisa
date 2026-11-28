@@ -59,3 +59,19 @@ export function salirModal(panel: Element | null | undefined, alTerminar: () => 
     alTerminar();
   }, DURACION_SALIDA_MS + MARGEN_MS);
 }
+
+/**
+ * `true` cuando `panel` pertenece al diálogo abierto más alto de la pila.
+ *
+ * Los paneles se apilan: una ficha puede abrir su envío por WhatsApp, su
+ * triaje o su anulación encima. Como todos escuchan Escape en `document`, sin
+ * esta comprobación una sola pulsación cerraría la pila entera. Gana el último
+ * scrim del documento, que es el que queda encima y tiene el foco.
+ */
+export function esDialogoSuperior(panel: Element | null | undefined): boolean {
+  if (!panel) return false;
+  const scrim = panel.closest(SELECTOR_SCRIM);
+  if (!scrim) return true;
+  const abiertos = document.querySelectorAll(SELECTOR_SCRIM);
+  return abiertos.length === 0 || abiertos[abiertos.length - 1] === scrim;
+}

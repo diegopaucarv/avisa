@@ -165,12 +165,6 @@ const PESO_RIESGO: Record<Caso['riesgo'], number> = { Alto: 0, Medio: 1, Bajo: 2
 const CLAVE_ALCANCE = 'avisa-alcance';
 
 /**
- * Centinela de la lista de regiones para «sin región principal». No es un valor
- * de `core.regiones`: la barra lo traduce a `sinregion=true`.
- */
-const SIN_REGION = '__sin_region__';
-
-/**
  * Jerarquía con la que `core.autenticar_usuario` elige el rol vigente de la
  * cuenta. El alcance territorial sólo se recorta en el escalón `sectorista`; se
  * replica aquí para que el cliente preseleccione la Región con el mismo
@@ -224,7 +218,6 @@ type CatalogosCasos = {
   conflictividades: OpcionFiltro[];
   riesgos: OpcionFiltro[];
   alcances: OpcionFiltro[];
-  regiones: OpcionFiltro[];
 };
 
 function opcionesDe(catalogo: Record<string, unknown>, clave: string): OpcionFiltro[] {
@@ -245,9 +238,9 @@ function opcionesDe(catalogo: Record<string, unknown>, clave: string): OpcionFil
  * `GET /api/v1/catalogs` reducido a los selects del listado.
  *
  * No se codifican etiquetas en el cliente: el mismo valor que ofrece el
- * catálogo es el que valida la API. El estado ya no sale del catálogo: la
- * barra usa un interruptor `Abiertos`/`Archivados`, donde `Abiertos` viaja
- * como `abiertos=true` (el estado se define por `es_activo`).
+ * catálogo es el que valida la API. El estado no sale del catálogo: el listado
+ * abre en «Abiertos» (`abiertos=true`, definido por `es_activo`) y «Resueltos»
+ * se filtra desde la búsqueda avanzada.
  */
 function aCatalogosCasos(bruto: unknown): CatalogosCasos {
   const registro = esRegistro(bruto) ? bruto : {};
@@ -258,7 +251,6 @@ function aCatalogosCasos(bruto: unknown): CatalogosCasos {
     conflictividades: opcionesDe(catalogo, 'nivelesConflicto'),
     riesgos: opcionesDe(catalogo, 'nivelesRiesgo'),
     alcances: opcionesDe(catalogo, 'alcances'),
-    regiones: opcionesDe(catalogo, 'regiones'),
   };
 }
 
@@ -344,74 +336,6 @@ function aConteos(bruto: unknown): ConteosCasos {
       padding: 6px 10px;
     }
 
-    /*
-     * Interruptor Abiertos/Archivados. Replica la lengua visual del
-     * edit-switch de la ficha (que es encapsulado y no aplica aquí), con
-     * variables de tema para no depender de literales en modo noche.
-     */
-    .edit-switch {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-      font: 600 13px var(--font-sans);
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .edit-switch input {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      margin: -1px;
-      padding: 0;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .edit-switch-track {
-      position: relative;
-      display: inline-block;
-      flex: none;
-      width: 38px;
-      height: 22px;
-      border-radius: 999px;
-      background: var(--line);
-      transition: background 0.15s ease;
-    }
-
-    .edit-switch-thumb {
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--muted);
-      transition: transform 0.15s ease;
-    }
-
-    .edit-switch.activo .edit-switch-track {
-      background: var(--blue);
-    }
-
-    .edit-switch.activo .edit-switch-thumb {
-      transform: translateX(16px);
-      background: var(--paper);
-    }
-
-    .edit-switch span.activo {
-      color: var(--ink);
-      font-weight: 700;
-    }
-
-    .edit-switch input:focus-visible + .edit-switch-track {
-      outline: 2px solid var(--blue);
-      outline-offset: 2px;
-    }
-
     /* Enlace discreto de búsqueda avanzada, más pequeño que los filtros. */
     .avanzado-enlace {
       white-space: nowrap;
@@ -420,12 +344,12 @@ function aConteos(bruto: unknown): ConteosCasos {
     /*
      * Barra principal de filtros (barra-filtros-casos).
      *
-     * El requisito es una sola fila: búsqueda, chips de riesgo, Región,
-     * Abiertos/Archivados, el switch Casos/Mesas y «Búsqueda avanzada». Por eso
-     * la barra no envuelve (nowrap): si la ventana no alcanza, se desplaza en
-     * horizontal en lugar de repartirse en una rejilla de varias filas. El campo
-     * de búsqueda es el único elástico —absorbe el espacio sobrante y se encoge
-     * hasta 130 px—; el resto de controles conserva su ancho natural.
+     * El requisito es una sola fila: búsqueda, chips de riesgo, el switch
+     * Casos/Mesas y «Búsqueda avanzada». La barra no envuelve (nowrap): si la
+     * ventana no alcanza, se desplaza en horizontal en lugar de repartirse en
+     * una rejilla de varias filas. El campo de búsqueda es el único elástico
+     * —absorbe el espacio sobrante y se encoge hasta 130 px—; los grupos de
+     * chips llevan un ancho máximo en % para que no compriman la búsqueda.
      *
      * Estos estilos viven aquí, y no en la hoja global, porque los del
      * componente ganan por especificidad.
@@ -452,8 +376,40 @@ function aConteos(bruto: unknown): ConteosCasos {
       flex: none;
     }
 
+    /* Anchos máximos en %: ningún grupo de chips debe empujar la búsqueda.
+       Los chips de riesgo necesitan más sitio (hay uno por nivel) que el
+       interruptor Casos/Mesas. */
+    .barra-filtros-casos > .tab-bar {
+      max-width: 34%;
+    }
+
+    .barra-filtros-casos > .chips-riesgo {
+      max-width: 40%;
+    }
+
+    .barra-filtros-casos > .chips-espacio {
+      max-width: 22%;
+    }
+
+    .barra-filtros-casos > .avanzado-enlace {
+      max-width: 22%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .barra-filtros-casos .avanzado-enlace {
       flex: none;
+    }
+
+    /* En móvil los topes se anulan: la barra sigue desplazándose en horizontal
+       y cada control conserva todo su texto. */
+    @media (max-width: 760px) {
+      .barra-filtros-casos > .tab-bar,
+      .barra-filtros-casos > .chips-riesgo,
+      .barra-filtros-casos > .chips-espacio,
+      .barra-filtros-casos > .avanzado-enlace {
+        max-width: none;
+      }
     }
 
     /* Búsqueda avanzada: no lleva la clase de la barra principal. */
@@ -699,9 +655,10 @@ export class CasosPage {
         return {
           q: params.get('q') ?? '',
           estado,
-          // El interruptor Abiertos/Archivados sustituye al desplegable de
-          // estado: sin estado explícito la lista se abre en «Abiertos». En la
-          // papelera no se aplica, porque `anulados` ya define el conjunto.
+          // Sin estado explícito la lista se abre en «Abiertos». `abiertos`
+          // sólo llega por URL (enlaces heredados): ya no hay interruptor en la
+          // barra. En la papelera no se aplica, porque `anulados` ya define el
+          // conjunto.
           abiertos:
             ver === 'activos' &&
             (abiertosParam === 'true' || (!estado && abiertosParam !== 'false')),
@@ -740,13 +697,6 @@ export class CasosPage {
   );
 
   readonly filtros = computed(() => this.parametros());
-
-  /**
-   * Interruptor Abiertos/Archivados. «Abiertos» viaja como `abiertos=true`
-   * (por `es_activo` del catálogo) y «Archivados» como `estado=Archivado`.
-   * «Resueltos» dejó la barra principal: se filtra desde la búsqueda avanzada.
-   */
-  readonly archivados = computed(() => this.filtros().estado === ESTADO_ARCHIVADO);
 
   /** Chip «Resueltos» de la búsqueda avanzada. */
   readonly resueltosActivo = computed(() => this.filtros().estado === ESTADO_RESUELTO);
@@ -790,13 +740,6 @@ export class CasosPage {
   /** `?ver=anulados`: la vista pinta la papelera de casos. */
   readonly verPapelera = computed(() => this.filtros().ver === 'anulados');
 
-  /**
-   * Valor centinela de la lista de regiones para «sin región principal».
-   * `core.regiones` no tiene un nombre vacío, así que no colisiona con ninguna
-   * región real; el enlace del panorama territorial envía `sinregion`.
-   */
-  readonly valorSinRegion = SIN_REGION;
-
   /** Opciones de los selects; si el catálogo falla, se muestran sólo «Todos». */
   private readonly catalogoRecurso = consulta<CatalogosCasos>({
     fuente: () => urlApi('/v1/catalogs'),
@@ -806,7 +749,6 @@ export class CasosPage {
   readonly riesgos = computed(() => this.catalogoRecurso.valor()?.riesgos ?? []);
   readonly conflictividades = computed(() => this.catalogoRecurso.valor()?.conflictividades ?? []);
   readonly alcances = computed(() => this.catalogoRecurso.valor()?.alcances ?? []);
-  readonly regiones = computed(() => this.catalogoRecurso.valor()?.regiones ?? []);
 
   /**
    * Aviso del ámbito cuando el sectorista tiene varias regiones: no se puede
@@ -947,20 +889,6 @@ export class CasosPage {
   }
 
   /**
-   * Interruptor Abiertos/Archivados. «Abiertos» viaja como `abiertos=true`
-   * porque el estado abierto se define por `es_activo`, no por etiqueta;
-   * «Archivados» viaja como `estado=Archivado`.
-   */
-  cambiarArchivados(evento: Event): void {
-    const archivados = (evento.target as HTMLInputElement).checked;
-    this.actualizar({
-      estado: archivados ? ESTADO_ARCHIVADO : '',
-      abiertos: !archivados,
-      pagina: 1,
-    });
-  }
-
-  /**
    * Nivel de conflictividad (item 100). Viaja como `nivel=<codigo>` y lo valida
    * el repositorio contra `core.cat_niveles_conflicto`: no se filtra en cliente,
    * así los conteos y la paginación siguen siendo ciertos.
@@ -1028,24 +956,6 @@ export class CasosPage {
   cambiarAlcance(evento: Event): void {
     const valor = (evento.target as HTMLSelectElement).value;
     void this.actualizar({ alcance: valor, pagina: 1 });
-  }
-
-  /**
-   * Región principal del caso. Es el filtro que aplica «Ver casos» en el
-   * panorama territorial, así que la barra lo muestra y lo deja limpiar: sin
-   * esto el listado llegaría recortado sin un control visible que lo explique.
-   *
-   * «Sin región» es el complemento, no una región: se elige en el mismo control
-   * y al cambiar de opción se limpia el otro criterio para que nunca viajen
-   * juntos (el repositorio daría prioridad a `sinRegion`).
-   */
-  cambiarRegion(evento: Event): void {
-    const valor = (evento.target as HTMLSelectElement).value;
-    if (valor === SIN_REGION) {
-      void this.actualizar({ region: '', sinRegion: true, pagina: 1 });
-      return;
-    }
-    void this.actualizar({ region: valor, sinRegion: false, pagina: 1 });
   }
 
   cambiarOrden(evento: Event): void {

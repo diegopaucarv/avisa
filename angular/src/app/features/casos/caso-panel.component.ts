@@ -33,7 +33,6 @@ import {
 export type CuerpoCasoAlta = {
   titulo: string;
   regiones: string[];
-  tematica?: string;
   subsector?: string;
   riesgo?: string;
   /** Texto libre: qué riesgo se observa hoy en el caso. */
@@ -41,11 +40,6 @@ export type CuerpoCasoAlta = {
   unidadResponsable?: string;
   resumen?: string;
   fechaInicio?: string;
-  /**
-   * Naturaleza declarada (`Territorial` / `Nacional o sectorial`). Omitirla
-   * guarda NULL («sin declarar»).
-   */
-  naturaleza?: string;
   /** `core.distritos.id`: distrito principal del catálogo INEI. */
   distritoPrincipalId?: number;
   /** `territorio.lugares.id`: puerto, caleta o desembarcadero, no un distrito. */
@@ -58,31 +52,16 @@ type OpcionCatalogo = {
   etiqueta: string;
 };
 
-/** Región del catálogo, con su alcance para derivar el del caso. */
-type OpcionRegion = OpcionCatalogo & {
-  alcanceId: number | null;
-};
-
-type AlcanceCatalogo = {
-  id: number;
-  etiqueta: string;
-};
-
 type CatalogosAlta = {
-  regiones: OpcionRegion[];
-  tematicas: OpcionCatalogo[];
-  naturalezas: OpcionCatalogo[];
+  regiones: OpcionCatalogo[];
   subsectores: OpcionCatalogo[];
   riesgos: OpcionCatalogo[];
   unidades: OpcionCatalogo[];
-  alcances: AlcanceCatalogo[];
 };
 
 type BorradorCaso = {
   titulo: string;
   regiones: string[];
-  tematica: string;
-  naturaleza: string;
   subsector: string;
   riesgo: string;
   descripcionRiesgo: string;
@@ -104,58 +83,25 @@ function opcionesDe(catalogo: Record<string, unknown>, clave: string): OpcionCat
   return opciones;
 }
 
-function numeroId(valor: unknown): number | null {
-  if (typeof valor === 'number') return Number.isInteger(valor) ? valor : null;
-  if (typeof valor === 'string' && valor.trim()) {
-    const numero = Number(valor);
-    return Number.isInteger(numero) ? numero : null;
-  }
-  return null;
-}
-
 /** `GET /api/v1/catalogs` reducido a los selects del alta. */
 export function aCatalogosAlta(bruto: unknown): CatalogosAlta {
   const registro = esRegistro(bruto) ? bruto : {};
   const crudo = leer(registro, ['catalogs', 'catalogos']);
   const catalogo = esRegistro(crudo) ? crudo : {};
 
-  const regiones: OpcionRegion[] = [];
-  for (const item of lista(catalogo, ['regiones'])) {
-    const fila = esRegistro(item) ? item : {};
-    const valor = texto(fila, ['codigo', 'etiqueta', 'nombre']);
-    const etiqueta = texto(fila, ['etiqueta', 'nombre']) ?? valor;
-    if (valor && etiqueta) {
-      regiones.push({ valor, etiqueta, alcanceId: numeroId(fila['alcance_id']) });
-    }
-  }
-
-  const alcances: AlcanceCatalogo[] = [];
-  for (const item of lista(catalogo, ['alcances'])) {
-    const fila = esRegistro(item) ? item : {};
-    const id = numeroId(fila['id']);
-    const etiqueta = texto(fila, ['etiqueta', 'codigo']);
-    if (id !== null && etiqueta) alcances.push({ id, etiqueta });
-  }
-
   return {
-    regiones,
-    tematicas: opcionesDe(catalogo, 'tematicas'),
-    naturalezas: opcionesDe(catalogo, 'naturalezasCaso'),
+    regiones: opcionesDe(catalogo, 'regiones'),
     subsectores: opcionesDe(catalogo, 'subsectores'),
     riesgos: opcionesDe(catalogo, 'nivelesRiesgo'),
     unidades: opcionesDe(catalogo, 'unidades'),
-    alcances,
   };
 }
 
 const CATALOGOS_VACIOS: CatalogosAlta = {
   regiones: [],
-  tematicas: [],
-  naturalezas: [],
   subsectores: [],
   riesgos: [],
   unidades: [],
-  alcances: [],
 };
 
 /**
@@ -295,16 +241,21 @@ const CATALOGOS_VACIOS: CatalogosAlta = {
       margin: 0;
     }
 
-    .caso-alcance {
-      margin: 0;
-      padding: 8px 10px;
-      border: 1px dashed #dbe3ea;
+    /* «Nacional» no es una región más: cubre todo el país y anula la elección
+       territorial, así que ocupa la fila entera y se distingue del resto. */
+    .caso-region-nacional {
+      grid-column: 1 / -1;
+      padding: 4px 6px;
+      border: 1px solid #dbe3ea;
       border-radius: 6px;
       background: rgba(100, 116, 135, 0.06);
-      color: #47566a;
-      font-size: 14px;
       font-weight: 600;
-      text-align: center;
+    }
+
+    /* Con «Nacional» marcado las regiones quedan inertes: se atenúan para que
+       se vea que no cuentan. */
+    .caso-region-opcion input:disabled ~ span {
+      opacity: 0.45;
     }
 
     .caso-formulario-acciones {
@@ -417,8 +368,6 @@ export class CasoPanelComponent {
   readonly borrador = signal<BorradorCaso>({
     titulo: '',
     regiones: [],
-    tematica: '',
-    naturaleza: '',
     subsector: '',
     riesgo: '',
     descripcionRiesgo: '',
@@ -427,6 +376,13 @@ export class CasoPanelComponent {
     fechaInicio: '',
   });
   readonly mensajeLocal = signal<string | null>(null);
+
+  /**
+   * Cobertura nacional: la API exige al menos una región y deriva el alcance de
+   * ellas, así que «Nacional» se representa enviando todo el catálogo de
+   * regiones (ver `guardarCambios`). La marca sólo vive en el formulario.
+   */
+  readonly nacional = signal(false);
 
   /**
    * Ubicación elegida: distrito del INEI o lugar operativo. Se guarda aparte
@@ -443,37 +399,13 @@ export class CasoPanelComponent {
   private readonly catalogos = computed(() => this.catalogoRecurso.valor() ?? CATALOGOS_VACIOS);
 
   readonly regiones = computed(() => this.catalogos().regiones);
-  readonly tematicas = computed(() => this.catalogos().tematicas);
-  readonly naturalezas = computed(() => this.catalogos().naturalezas);
   readonly subsectores = computed(() => this.catalogos().subsectores);
   readonly riesgos = computed(() => this.catalogos().riesgos);
   readonly unidades = computed(() => this.catalogos().unidades);
   readonly cargandoCatalogos = computed(() => this.catalogoRecurso.estado() === 'cargando');
 
-  /**
-   * Alcance derivado, de sólo lectura. Replica `core.alcance_caso`: un único
-   * alcance entre las regiones elegidas toma su nombre; alcances distintos
-   * pasan a `Nacional`. Sin regiones no hay alcance.
-   */
-  readonly alcanceDerivado = computed(() => {
-    const elegidas = this.borrador().regiones;
-    if (elegidas.length === 0) return '—';
-
-    const porNombre = new Map(this.regiones().map((region) => [region.valor, region]));
-    const alcances = new Set<number>();
-    for (const nombre of elegidas) {
-      const alcanceId = porNombre.get(nombre)?.alcanceId;
-      if (alcanceId !== null && alcanceId !== undefined) alcances.add(alcanceId);
-    }
-
-    if (alcances.size === 0) return '—';
-    if (alcances.size > 1) return 'Nacional';
-
-    const [unico] = [...alcances];
-    return this.catalogos().alcances.find((alcance) => alcance.id === unico)?.etiqueta ?? '—';
-  });
-
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
+  private readonly buscadorTerritorio = viewChild(TerritorioBuscadorComponent);
   private readonly destruccion = inject(DestroyRef);
 
   /** Elemento que tenía el foco al abrir, para devolvérselo al cerrar. */
@@ -483,8 +415,18 @@ export class CasoPanelComponent {
   constructor() {
     afterNextRender(() => this.panel()?.nativeElement.focus({ preventScroll: true }));
 
-    // El panel sólo se cierra con Cancelar o Guardar: Escape no lo descarta.
-    this.destruccion.onDestroy(() => this.focoPrevio?.focus?.());
+    // El panel se cierra con Escape, con el clic fuera o con la ✕: ya no hay
+    // guarda por cambios escritos, que dejaría el alta sin salida rápida.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      evento.preventDefault();
+      this.cerrarConSalida();
+    };
+    document.addEventListener('keydown', alEscape);
+    this.destruccion.onDestroy(() => {
+      document.removeEventListener('keydown', alEscape);
+      this.focoPrevio?.focus?.();
+    });
   }
 
   campo(clave: CampoBorrador, evento: Event): void {
@@ -507,6 +449,24 @@ export class CasoPanelComponent {
         : actual.regiones.filter((region) => region !== valor),
     }));
     this.mensajeLocal.set(null);
+  }
+
+  /**
+   * Marcar «Nacional» limpia territorios y regiones: el alcance deja de venir
+   * de una selección concreta. Desmarcarlo devuelve la elección a las regiones.
+   */
+  alternarNacional(evento: Event): void {
+    const marcado = (evento.target as HTMLInputElement).checked;
+    this.nacional.set(marcado);
+    this.mensajeLocal.set(null);
+    if (!marcado) return;
+
+    // Limpia la ubicación elegida también en el buscador (mantiene su propio
+    // estado visual); su `limpiar()` emite `elegido(null)`, que aquí no rearma
+    // «Nacional» porque el handler sale antes con `!opcion`.
+    this.buscadorTerritorio()?.limpiar();
+    this.territorio.set(null);
+    this.borrador.update((actual) => ({ ...actual, regiones: [] }));
   }
 
   /**
@@ -542,23 +502,28 @@ export class CasoPanelComponent {
       return;
     }
 
-    if (borrador.regiones.length === 0) {
-      this.mensajeLocal.set('Seleccione al menos una región.');
+    if (!this.nacional() && borrador.regiones.length === 0) {
+      this.mensajeLocal.set('Seleccione al menos una región o marque «Nacional».');
       return;
     }
 
     // El código no se pide ni se valida: lo emite `core.siguiente_codigo_caso`.
     // Los opcionales vacíos se omiten para que el servidor aplique su valor por
     // defecto en vez de recibir una cadena vacía (que rechazaría con 422).
+    //
+    // «Nacional» no se envía como tal: el alcance es derivado y la API rechaza
+    // cualquier `alcance`/`alcanceId` (422 ALCANCE_DERIVADO) además de exigir
+    // regiones. La única vía para que `core.alcance_caso` devuelva «Nacional»
+    // es enviar regiones que cubran más de un alcance, así que se envía todo el
+    // catálogo de regiones. Requiere confirmación de producto: el caso queda
+    // vinculado a las 25 regiones.
+    const regiones = this.nacional()
+      ? this.regiones().map((region) => region.valor)
+      : [...borrador.regiones];
     const cuerpo: CuerpoCasoAlta = {
       titulo,
-      regiones: [...borrador.regiones],
+      regiones,
     };
-    // La temática es opcional (migración 0003): vacía se omite y el servidor
-    // guarda NULL, con el sufijo `GEN` en el código del caso.
-    if (borrador.tematica) cuerpo.tematica = borrador.tematica;
-    // Naturaleza declarada: opcional. Vacía se omite y el servidor guarda NULL.
-    if (borrador.naturaleza) cuerpo.naturaleza = borrador.naturaleza;
     if (borrador.subsector) cuerpo.subsector = borrador.subsector;
     if (borrador.riesgo) cuerpo.riesgo = borrador.riesgo;
     if (borrador.descripcionRiesgo.trim()) {
@@ -580,6 +545,11 @@ export class CasoPanelComponent {
     if (evento.key === 'Tab') this.atraparFoco(evento);
   }
 
+  /** El clic fuera cierra; arrastrar dentro del contenido no. */
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrarConSalida();
+  }
+
   /**
    * Elegir un distrito marca su región si no estaba: un caso no debería quedar
    * con un distrito de una región que no figura entre las regiones del
@@ -589,6 +559,10 @@ export class CasoPanelComponent {
     this.territorio.set(opcion);
     this.mensajeLocal.set(null);
     if (!opcion) return;
+
+    // Elegir un territorio concreto implica alcance territorial: se deja de
+    // estar en «Nacional» para que la selección de regiones vuelva a mandar.
+    this.nacional.set(false);
 
     const region = opcion.region.trim();
     if (!region || this.borrador().regiones.includes(region)) return;

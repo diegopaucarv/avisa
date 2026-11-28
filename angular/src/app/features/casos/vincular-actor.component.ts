@@ -156,9 +156,21 @@ export class VincularActorComponent {
   private turno = 0;
 
   constructor() {
+    // Escape cierra el panel aunque el foco esté en el buscador de actores.
+    const alEscape = (evento: KeyboardEvent): void => {
+      if (evento.key !== 'Escape') return;
+      evento.preventDefault();
+      this.cerrar.emit();
+    };
+    document.addEventListener('keydown', alEscape);
     this.destruir.onDestroy(() => {
+      document.removeEventListener('keydown', alEscape);
       if (this.temporizador) clearTimeout(this.temporizador);
     });
+  }
+
+  alFondo(evento: MouseEvent): void {
+    if (evento.target === evento.currentTarget) this.cerrar.emit();
   }
 
   // Guía §8.2.4: Dialogante, Legitimante o Conflictivo. Es el mismo vocabulario

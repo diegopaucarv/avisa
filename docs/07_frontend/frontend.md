@@ -166,6 +166,48 @@ bajo el mapa y sus enlaces a Casos (con `region`/`sinregion`, ámbito vigente y
 `abiertos=true`); el cajón lateral «Ver casos»; el vocabulario **latente / manifiesto**
 en tarjetas y columnas; la tabla de casos priorizados del item 118.
 
+**Rediseño (2026-11-29).** El panorama se reorganizó en torno a cuatro decisiones:
+
+1. **Cabecera de indicadores.** Las tarjetas quedan en este orden: **Casos
+   manifiestos · Casos latentes · Regiones afectadas · Casos con riesgo alto**.
+   Se eliminó la tarjeta «Sin nivel declarado»: esos casos ya se suman a
+   `latentes` en `conteosPorSituacion`, así que una cifra aparte los contaba dos
+   veces. «Regiones con al menos un caso» pasó a llamarse **«Regiones afectadas»**.
+   Se retiró el bloque de chips de ámbito (`Todos / Norte / Centro / Sur`): el
+   ámbito manda desde la cabecera del shell (`?alcance=` + `AlcanceService`).
+2. **Mapa.** Dos bloques de igual alto fijo (`min(62vh, 520px)`): mapa y panel
+   derecho. La capa de **departamentos** (`territorio.region`) es permanente,
+   tenue (`#eef3f8` al 18 %) y suave. Se retiraron el botón «Límites distritales»
+   y el bloque «Capas» de debajo del mapa; en su lugar hay **tres botones
+   flotantes** dentro del mapa, a la izquierda y bajo el zoom:
+   - rojo → coropleta del **riesgo en alertas de los últimos 90 días**;
+   - azul → coropleta del **% de casos manifiestos** por región;
+   - cuadrícula → panel deslizante con los checks de capas opcionales
+     (derechos acuícolas, FONDEPES, desembarcaderos DPA, auditorios, provincias,
+     distritos y **ANP · Reservas Nacionales**).
+     Las dos coropletas son monocromáticas (rampas roja y azul) y mutuamente
+     excluyentes. Al cambiar el **ámbito del shell**, el mapa hace `fitBounds` de
+     sus regiones y **resalta sus bordes** (`alcanceUbigeos`); para eso el endpoint
+     `GET /v1/territorio?recurso=regiones` ahora expone `properties.alcance`
+     (`core.cat_alcances_geograficos.codigo`).
+3. **Panel derecho.** La tabla de regiones se sustituyó por
+   `<app-panorama-distribucion>`: una barra por **sectorista** con los chips de
+   sus regiones (mismo lenguaje que «Casos abiertos»). Los conmutadores cambian
+   la variable y la medida: casos → % total · % manifiestos · % riesgo alto;
+   alertas del trimestre → % alertas · % alertas con riesgo alto. El conmutador
+   **gobierna también la coropleta del mapa** (misma variable y medida). Los
+   datos salen de `GET /api/v1/panorama/indicadores`, que ahora entrega
+   `sectoristas[].regionesDetalle` (una medida por región del sectorista); si el
+   endpoint no responde, el panel cae a distribución por región con los casos
+   locales y declara las alertas como ausentes.
+4. **Casos priorizados.** Debajo quedan sólo los casos con `core.casos.priorizado`
+   (migración 76), no los primeros por riesgo. Para la demo se marcaron a mano
+   los cuatro casos abiertos más recientes (`scripts/_priorizar_ultimos_casos_2026-11-29.mjs`).
+
+**Migración 92.** `territorio.region` (25), `territorio.provincia` (196) y
+`territorio.anp_reserva_nacional` (42 Reservas Nacionales del SERNANP). Las capas
+se sirven como `FeatureCollection` desde `/v1/territorio?recurso=regiones|provincias|anp`.
+
 **Capa distrital (2026-11-24).** El item **128 está hecho** (`migration/47_gis_distritos.sql`
 
 - `scripts/cargar-gis-neon.mjs`, **1 892** filas en `territorio.distrito` con

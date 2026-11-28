@@ -1,4 +1,4 @@
-<div class="drawer-scrim" (keydown)="alTecla($event)">
+<div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
   <aside
     #panel
     class="drawer"
@@ -110,11 +110,16 @@
             <p class="form-error" role="alert">No se pudieron cargar las regiones del catálogo.</p>
           } @else {
             <div class="caso-regiones-lista" role="group" aria-label="Regiones del caso">
+              <label class="caso-region-opcion caso-region-nacional">
+                <input type="checkbox" [checked]="nacional()" (change)="alternarNacional($event)" />
+                <span>Nacional</span>
+              </label>
               @for (region of regiones(); track region.valor) {
                 <label class="caso-region-opcion">
                   <input
                     type="checkbox"
                     [checked]="estaRegion(region.valor)"
+                    [disabled]="nacional()"
                     (change)="alternarRegion(region.valor, $event)"
                   />
                   <span>{{ region.etiqueta }}</span>
@@ -122,65 +127,19 @@
               }
             </div>
           }
-          <p class="form-hint">Obligatorio: seleccione al menos una región.</p>
+          <p class="form-hint">
+            @if (nacional()) {
+              Caso de cobertura nacional: no se elige región ni ubicación.
+            } @else {
+              Obligatorio: seleccione al menos una región, o marque «Nacional».
+            }
+          </p>
         </fieldset>
 
         <app-territorio-buscador
           etiqueta="Ubicación (distrito o lugar)"
           (elegido)="alElegirTerritorio($event)"
         />
-
-        <div class="form-field">
-          <span class="form-label">Alcance (derivado)</span>
-          <p class="caso-alcance" aria-live="polite">{{ alcanceDerivado() }}</p>
-          <p class="form-hint">
-            El alcance se deriva de las regiones y no se elige: una región toma su alcance; varias
-            regiones de alcances distintos pasan a Nacional.
-          </p>
-        </div>
-
-        <div class="form-field">
-          <label class="form-campo">
-            <span>Temática</span>
-            <select
-              id="caso-campo-tematica"
-              class="form-select"
-              [value]="borrador().tematica"
-              (change)="campo('tematica', $event)"
-            >
-              <option value="">Sin especificar</option>
-              @for (opcion of tematicas(); track opcion.valor) {
-                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-              }
-            </select>
-          </label>
-          <p class="form-hint">
-            Opcional. Si queda «Sin especificar», el código del caso usa el sufijo GEN y la temática
-            podrá completarse después.
-          </p>
-        </div>
-
-        <div class="form-field">
-          <label class="form-campo">
-            <span>Naturaleza del caso</span>
-            <select
-              id="caso-campo-naturaleza"
-              class="form-select"
-              [value]="borrador().naturaleza"
-              (change)="campo('naturaleza', $event)"
-            >
-              <option value="">Sin declarar</option>
-              @for (opcion of naturalezas(); track opcion.valor) {
-                <option [value]="opcion.valor">{{ opcion.etiqueta }}</option>
-              }
-            </select>
-          </label>
-          <p class="form-hint">
-            Eje declarado, distinto del alcance. «Territorial» si la causa nace en un territorio;
-            «Nacional o sectorial» si es una norma, cuota, temporada u otra medida sectorial.
-            Opcional: «Sin declarar» se guarda como pendiente.
-          </p>
-        </div>
 
         <label class="form-campo">
           <span>Subsector</span>

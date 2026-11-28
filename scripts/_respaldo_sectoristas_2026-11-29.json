@@ -1,0 +1,369 @@
+{
+  "generadoEn": "2026-11-28T08:29:17.625Z",
+  "modo": "apply",
+  "usuariosAntes": [
+    {
+      "id": "7a7227e1-757b-42a2-ab02-de55f066f5ec",
+      "nombre": "Ivan Enrique Ascurra Santillan",
+      "dni": "72022099",
+      "activo": true,
+      "codigo": "SEC-03"
+    },
+    {
+      "id": "935b8363-f8bf-422d-9504-e4eee965aee3",
+      "nombre": "Peggy Contreras Montes",
+      "dni": "10654038",
+      "activo": true,
+      "codigo": "SEC-02"
+    },
+    {
+      "id": "d84955ca-a44a-425a-a056-f4f95dd7e108",
+      "nombre": "Esteban Vidal Saldarriaga",
+      "dni": "72898083",
+      "activo": true,
+      "codigo": "SEC-04"
+    },
+    {
+      "id": "8aa33ddf-f61b-41fe-9463-5f8f389d9e65",
+      "nombre": "Ayli Medina",
+      "dni": null,
+      "activo": true,
+      "codigo": "SEC-13"
+    },
+    {
+      "id": "2a679f7f-71e5-4c5b-a19e-ea3d36ae9275",
+      "nombre": "Karen Benito",
+      "dni": "47261150",
+      "activo": true,
+      "codigo": "SEC-10"
+    }
+  ],
+  "focales": [
+    {
+      "id": "86040c3a-e81e-46ba-a564-f5d7e351c78c",
+      "codigo_caso": "CS-2025-0001",
+      "region_principal_id": 15,
+      "provincia_ubigeo": "1501",
+      "focal": "7a7227e1-757b-42a2-ab02-de55f066f5ec",
+      "destinoCodigo": "SEC-10",
+      "destino": "2a679f7f-71e5-4c5b-a19e-ea3d36ae9275"
+    },
+    {
+      "id": "781a2eab-79b3-4b60-85a8-9598ec25a81f",
+      "codigo_caso": "CS-2024-0002",
+      "region_principal_id": 15,
+      "provincia_ubigeo": "1501",
+      "focal": "7a7227e1-757b-42a2-ab02-de55f066f5ec",
+      "destinoCodigo": "SEC-10",
+      "destino": "2a679f7f-71e5-4c5b-a19e-ea3d36ae9275"
+    },
+    {
+      "id": "8676ce35-2456-4754-b37b-01ab44427886",
+      "codigo_caso": "CS-2017-0001",
+      "region_principal_id": 15,
+      "provincia_ubigeo": "1502",
+      "focal": "7a7227e1-757b-42a2-ab02-de55f066f5ec",
+      "destinoCodigo": "SEC-02",
+      "destino": "935b8363-f8bf-422d-9504-e4eee965aee3"
+    },
+    {
+      "id": "1156293b-8158-42f8-b804-5c607cf6527e",
+      "codigo_caso": "CS-2026-0003",
+      "region_principal_id": 15,
+      "provincia_ubigeo": "1505",
+      "focal": "7a7227e1-757b-42a2-ab02-de55f066f5ec",
+      "destinoCodigo": "SEC-02",
+      "destino": "935b8363-f8bf-422d-9504-e4eee965aee3"
+    },
+    {
+      "id": "710f2bb1-374b-4603-869d-dd65f225e930",
+      "codigo_caso": "CS-2025-0005",
+      "region_principal_id": 16,
+      "provincia_ubigeo": "1601",
+      "focal": "935b8363-f8bf-422d-9504-e4eee965aee3",
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "43629500-8c6d-4521-b448-84636150067c",
+      "codigo_caso": "CS-2025-0002",
+      "region_principal_id": 16,
+      "provincia_ubigeo": "1601",
+      "focal": "935b8363-f8bf-422d-9504-e4eee965aee3",
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "4011eff5-dce8-4cdb-82da-d50d4fb31266",
+      "codigo_caso": "CS-2026-0016",
+      "region_principal_id": 7,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-02",
+      "destino": "935b8363-f8bf-422d-9504-e4eee965aee3"
+    },
+    {
+      "id": "29e86bcf-e3ed-4657-99ea-2be454aaa611",
+      "codigo_caso": "CS-2026-0013",
+      "region_principal_id": 2,
+      "provincia_ubigeo": null,
+      "focal": "7c62121d-271e-45c6-95ac-273e88bb8446",
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "9373ad12-ded1-4484-b33f-05228422f24d",
+      "codigo_caso": "CS-2026-0012",
+      "region_principal_id": 2,
+      "provincia_ubigeo": null,
+      "focal": "7c62121d-271e-45c6-95ac-273e88bb8446",
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "75f1de99-b8fa-49f5-bf48-3330c444993f",
+      "codigo_caso": "CS-2026-0014",
+      "region_principal_id": 2,
+      "provincia_ubigeo": null,
+      "focal": "7c62121d-271e-45c6-95ac-273e88bb8446",
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "5230ec2a-debf-4dab-a856-a3a0e0a9281d",
+      "codigo_caso": "CS-2026-0015",
+      "region_principal_id": 2,
+      "provincia_ubigeo": null,
+      "focal": "7c62121d-271e-45c6-95ac-273e88bb8446",
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "21b43ede-6348-4330-baa4-a1166c00e1f0",
+      "codigo_caso": "CS-2025-0011",
+      "region_principal_id": 2,
+      "provincia_ubigeo": null,
+      "focal": "7c62121d-271e-45c6-95ac-273e88bb8446",
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "807971bd-733a-4aa2-aa67-5f56a5e0a3cf",
+      "codigo_caso": "CS-2026-0009",
+      "region_principal_id": 2,
+      "provincia_ubigeo": null,
+      "focal": "7c62121d-271e-45c6-95ac-273e88bb8446",
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "34cea09c-6fdf-4da2-8732-1f40ed51fa26",
+      "codigo_caso": "CS-2025-0006",
+      "region_principal_id": 2,
+      "provincia_ubigeo": null,
+      "focal": "7a7227e1-757b-42a2-ab02-de55f066f5ec",
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "6e53ff24-4513-4469-b469-008c945ec7a7",
+      "codigo_caso": "CS-2022-0002",
+      "region_principal_id": 15,
+      "provincia_ubigeo": null,
+      "focal": "7a7227e1-757b-42a2-ab02-de55f066f5ec",
+      "destinoCodigo": "SEC-02",
+      "destino": "935b8363-f8bf-422d-9504-e4eee965aee3"
+    },
+    {
+      "id": "cb0168e4-ed75-4157-8001-6dede3279fe4",
+      "codigo_caso": "MD-2026-0006",
+      "region_principal_id": 16,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "d6971147-329e-46ad-9c20-144924e41593",
+      "codigo_caso": "CS-2025-0008",
+      "region_principal_id": 15,
+      "provincia_ubigeo": null,
+      "focal": "7a7227e1-757b-42a2-ab02-de55f066f5ec",
+      "destinoCodigo": "SEC-02",
+      "destino": "935b8363-f8bf-422d-9504-e4eee965aee3"
+    },
+    {
+      "id": "cf40366b-1fd1-44a0-acbd-fb67dbdb5c51",
+      "codigo_caso": "MD-2026-0007",
+      "region_principal_id": 1,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-03",
+      "destino": "7a7227e1-757b-42a2-ab02-de55f066f5ec"
+    },
+    {
+      "id": "86c86f5e-6783-4bff-9ecb-546b957fa64b",
+      "codigo_caso": "MD-2026-0008",
+      "region_principal_id": 21,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-04",
+      "destino": "d84955ca-a44a-425a-a056-f4f95dd7e108"
+    },
+    {
+      "id": "15b1e61f-2da2-42df-b204-e11b89a0a30e",
+      "codigo_caso": "MD-2026-0009",
+      "region_principal_id": 3,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-13",
+      "destino": "8aa33ddf-f61b-41fe-9463-5f8f389d9e65"
+    },
+    {
+      "id": "7d30cb36-46aa-4b78-90ac-0ac79b013f9e",
+      "codigo_caso": "CS-2024-0005",
+      "region_principal_id": 4,
+      "provincia_ubigeo": null,
+      "focal": "7c62121d-271e-45c6-95ac-273e88bb8446",
+      "destinoCodigo": "SEC-04",
+      "destino": "d84955ca-a44a-425a-a056-f4f95dd7e108"
+    },
+    {
+      "id": "00c0b70d-92c7-4dbf-9940-d137a799d6a8",
+      "codigo_caso": "MD-2026-0010",
+      "region_principal_id": 13,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "8eb4ae56-b897-42e8-a5aa-b5532272c2af",
+      "codigo_caso": "MD-2026-0011",
+      "region_principal_id": 18,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-04",
+      "destino": "d84955ca-a44a-425a-a056-f4f95dd7e108"
+    },
+    {
+      "id": "8c26e073-4b1d-4850-b803-836df986493a",
+      "codigo_caso": "MD-2026-0014",
+      "region_principal_id": 16,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "2471fb5a-b928-4fd3-93fb-1ee58bfc9226",
+      "codigo_caso": "MD-2026-0016",
+      "region_principal_id": 16,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "63e8a7b6-f0eb-41b0-87c2-9c2318d021ef",
+      "codigo_caso": "MD-2026-0017",
+      "region_principal_id": 13,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "48af7e4e-9453-422c-b920-f66465b047a3",
+      "codigo_caso": "MD-2026-0018",
+      "region_principal_id": 25,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-13",
+      "destino": "8aa33ddf-f61b-41fe-9463-5f8f389d9e65"
+    },
+    {
+      "id": "921dab54-8c83-4f28-8169-240768c1a4f3",
+      "codigo_caso": "MD-2026-0019",
+      "region_principal_id": 11,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-02",
+      "destino": "935b8363-f8bf-422d-9504-e4eee965aee3"
+    },
+    {
+      "id": "3435e111-ffe7-4c01-b3be-f0fd796f150f",
+      "codigo_caso": "MD-2026-0020",
+      "region_principal_id": 19,
+      "provincia_ubigeo": null,
+      "focal": null,
+      "destinoCodigo": "SEC-16",
+      "destino": "0d54bebd-0e82-4394-8cbd-000be32cb5e3"
+    },
+    {
+      "id": "39c091af-b98b-4a38-aa17-8914923560cd",
+      "codigo_caso": "CS-2026-0010",
+      "region_principal_id": 12,
+      "provincia_ubigeo": null,
+      "focal": "7a7227e1-757b-42a2-ab02-de55f066f5ec",
+      "destinoCodigo": "SEC-02",
+      "destino": "935b8363-f8bf-422d-9504-e4eee965aee3"
+    }
+  ],
+  "sectoristasCerrados": [
+    {
+      "id": "7c62121d-271e-45c6-95ac-273e88bb8446",
+      "codigo_legado": "SEC-01",
+      "nombre": "André Jiménez Agapito",
+      "activo": true
+    },
+    {
+      "id": "51769946-136d-4d33-84a0-1fb7384c75a1",
+      "codigo_legado": "SEC-05",
+      "nombre": "Luis",
+      "activo": false
+    },
+    {
+      "id": "7c766914-7939-45e3-98b8-cc70d86cbf5d",
+      "codigo_legado": "SEC-06",
+      "nombre": "Angeles Arenas",
+      "activo": false
+    },
+    {
+      "id": "d2baac6b-8336-40e6-8cd1-17e1d29518f1",
+      "codigo_legado": "SEC-07",
+      "nombre": "Mariella La Torre Tassara",
+      "activo": true
+    },
+    {
+      "id": "37e57540-8737-4908-b05a-083b4336ad3a",
+      "codigo_legado": "SEC-08",
+      "nombre": "Fredy Rafael Llanos Gonzales",
+      "activo": true
+    },
+    {
+      "id": "1804db03-03d0-4ded-a97c-f006209be837",
+      "codigo_legado": "SEC-09",
+      "nombre": "Hilda Barreto",
+      "activo": true
+    },
+    {
+      "id": "d509dc8c-d799-41d5-9600-c2a1d816c84a",
+      "codigo_legado": "SEC-12",
+      "nombre": "Mercedes Ubillus",
+      "activo": false
+    },
+    {
+      "id": "4358bab4-b881-4514-ac45-4027b41d5bfe",
+      "codigo_legado": "SEC-14",
+      "nombre": "Lesli Risco",
+      "activo": false
+    },
+    {
+      "id": "57802e48-82d0-490b-8f6f-35e6dcc96475",
+      "codigo_legado": "SEC-15",
+      "nombre": "Javier Alegre Paredes",
+      "activo": true
+    }
+  ]
+}
