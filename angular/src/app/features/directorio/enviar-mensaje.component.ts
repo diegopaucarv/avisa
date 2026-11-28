@@ -135,7 +135,10 @@ import { EnviarMensajeService } from './enviar-mensaje.service';
 export class EnviarMensajeComponent {
   private readonly lista = inject(EnviarMensajeService);
 
-  /** Destinatarios iniciales propuestos por la página (la selección de la tabla). */
+  /**
+   * Selección de la tabla de la vista (actores, organizaciones, autoridades).
+   * Es la fuente de los destinatarios hasta que el panel se edita a mano.
+   */
   readonly semilla = input<DestinatarioMensaje[]>([]);
   /** Texto del encabezado del cajón: «Lista de actores», nombre del local, etc. */
   readonly contexto = input<string | null>(null);
