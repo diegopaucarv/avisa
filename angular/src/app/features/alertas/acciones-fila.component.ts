@@ -21,7 +21,6 @@ export type IdAccionAlerta =
   | 'remitir'
   | 'devolver-elaboracion'
   | 'modificar'
-  | 'historial'
   | 'whatsapp'
   | 'archivar'
   | 'archivar-flujo';

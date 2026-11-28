@@ -6,8 +6,10 @@
  * resulta de seleccionar celdas en Excel y pegarlas aquí (separado por tabulador
  * y con celdas entrecomilladas si contienen saltos de línea).
  *
- * Un `.xlsx` es un ZIP con XML dentro: no se intenta adivinar. Se detecta y se
- * responde con una instrucción concreta en vez de un error de formato genérico.
+ * Un `.xlsx` es un ZIP con XML dentro. Se detecta por extensión o por la firma
+ * del archivo y se entrega a `importacion.xlsx.ts`, que lo lee con `exceljs`
+ * cargado bajo demanda. El `.xls` binario antiguo no se puede leer: se reconoce
+ * aquí para responder con una instrucción concreta en vez de un error genérico.
  */
 
 export type Delimitador = '\t' | ';' | ',';
@@ -124,11 +126,18 @@ export function quitarBom(texto: string): string {
 /**
  * Nombre del archivo con extensión de Excel binario. Se comprueba por extensión
  * y por la firma `PK\u0003\u0004` (lo que devuelve `File` al leer los bytes).
+ * Un `.xls` también entra aquí, pero el llamador debe descartarlo antes con
+ * `esExcelAntiguo()`: no es un ZIP y `exceljs` no lo lee.
  */
 export function esExcelBinario(nombre: string, firma?: string): boolean {
   const extension = nombre.toLowerCase().split('.').pop() ?? '';
   if (extension === 'xlsx' || extension === 'xls' || extension === 'xlsm') return true;
   return firma === 'PK\u0003\u0004';
+}
+
+/** `.xls` binario antiguo (BIFF): `exceljs` no lo soporta y no se adivina. */
+export function esExcelAntiguo(nombre: string): boolean {
+  return (nombre.toLowerCase().split('.').pop() ?? '') === 'xls';
 }
 
 /** Texto listo para `parsearTexto`, con BOM fuera y delimitador detectado. */

@@ -1,4 +1,5 @@
 import { urlApi } from '../config/entorno';
+import { hoyIso } from '../fecha/zona-horaria';
 import { ErrorApi } from './errores';
 
 /** Formatos que entiende `GET /api/v1/export`. */
@@ -32,7 +33,9 @@ const ACEPTADOS: Record<FormatoExportacion, string> = {
 };
 
 function fechaDeHoy(): string {
-  return new Date().toISOString().slice(0, 10);
+  // Día de Lima, no de UTC: `toISOString()` devolvía el día siguiente desde las
+  // 19:00 y el archivo exportado quedaba fechado mañana.
+  return hoyIso();
 }
 
 /**

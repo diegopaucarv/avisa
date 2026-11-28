@@ -34,6 +34,7 @@ import {
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import { MapaLocalComponent } from '../../shared/ui/mapa-local.component';
 import { salirModal } from '../../shared/ui/modal-salida';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -48,11 +49,13 @@ import {
 import {
   aLocalDirectorio,
   contactoDeLocal,
+  coordenadasDeLocal,
   enlaceMapaLocal,
+  territorioDeLocal,
   ubicacionDeLocal,
   type LocalDirectorio,
 } from './local.mapeo';
-import { parsearNotasLocal } from './local-notas';
+import { leerRiesgosMarkdown, parsearNotasLocal, unirRiesgos } from './local-notas';
 import { parsearFicha } from './ficha-plantilla';
 
 type FiltrosLocales = {
@@ -89,6 +92,7 @@ const FILTROS_INICIALES: FiltrosLocales = {
   selector: 'app-locales',
   imports: [
     IconoComponent,
+    MapaLocalComponent,
     PaginacionComponent,
     BarraSeleccionComponent,
     GaleriaFotosComponent,
@@ -760,6 +764,33 @@ export class LocalesPage {
     parsearNotasLocal(this.seleccionado()?.recomendacion),
   );
 
+  /** Riesgos leídos de las secciones markdown de la recomendación. */
+  private readonly riesgosMarkdown = computed(() =>
+    leerRiesgosMarkdown(this.seleccionado()?.recomendacion),
+  );
+
+  /**
+   * Riesgos que pinta la ficha. Accesibilidad y ventilación unen las notas
+   * estructuradas con el parseo markdown sin repetir texto normalizado; «otros»
+   * sale sólo del markdown porque «Otras observaciones» no son riesgos.
+   */
+  readonly riesgosSeleccionado = computed(() => {
+    const notas = this.notasSeleccionado();
+    const markdown = this.riesgosMarkdown();
+
+    return {
+      accesibilidad: unirRiesgos(notas.accesibilidad, markdown.accesibilidad),
+      ventilacion: unirRiesgos(notas.ventilacion, markdown.ventilacion),
+      otros: markdown.otros,
+    };
+  });
+
+  /** Coordenadas exactas del local abierto; `null` si no hay ninguna. */
+  readonly coordenadasSeleccionado = computed(() => {
+    const local = this.seleccionado();
+    return local ? coordenadasDeLocal(local) : null;
+  });
+
   /**
    * Campos de la ficha de texto que no son columnas del local (ámbito, dirección
    * y enlace de mapa cuando faltan en la tabla). Reutiliza el mismo parser que la
@@ -777,10 +808,14 @@ export class LocalesPage {
     return enlace === enlaceMapaLocal(local) ? null : enlace;
   });
 
-  /** El local abierto no tiene riesgos de accesibilidad ni ventilación. */
+  /** El local abierto no tiene riesgos de ningún tipo declarados. */
   readonly sinRiesgos = computed(() => {
-    const notas = this.notasSeleccionado();
-    return notas.accesibilidad.length === 0 && notas.ventilacion.length === 0;
+    const riesgos = this.riesgosSeleccionado();
+    return (
+      riesgos.accesibilidad.length === 0 &&
+      riesgos.ventilacion.length === 0 &&
+      riesgos.otros.length === 0
+    );
   });
 
   /** Hay evaluación estructurada: se ofrece el texto completo como respaldo. */
@@ -913,6 +948,11 @@ export class LocalesPage {
   /** Dirección, distrito, provincia y región en una sola línea. */
   ubicacion(local: LocalDirectorio): string | null {
     return ubicacionDeLocal(local);
+  }
+
+  /** Distrito, provincia y región, sin la dirección (que tiene su propia línea). */
+  territorio(local: LocalDirectorio): string | null {
+    return territorioDeLocal(local);
   }
 
   /** Enlace a Google Maps: URL de referencia o búsqueda por dirección. */

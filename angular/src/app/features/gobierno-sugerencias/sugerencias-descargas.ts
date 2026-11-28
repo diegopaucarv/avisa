@@ -1,5 +1,6 @@
 import { parametrosConValor } from '../../core/http/coleccion';
 import { urlApi } from '../../core/config/entorno';
+import { hoyIso } from '../../core/fecha/zona-horaria';
 import { ErrorApi } from '../../core/http/errores';
 
 export type FormatoSugerencias = 'csv' | 'pdf';
@@ -18,9 +19,7 @@ export async function descargarSugerencias(
   filtros: Record<string, string | number | null | undefined>,
 ): Promise<void> {
   const parametros = parametrosConValor({ ...filtros, formato });
-  const url = `${urlApi('/v1/sugerencias/export')}?${new URLSearchParams(
-    parametros,
-  ).toString()}`;
+  const url = `${urlApi('/v1/sugerencias/export')}?${new URLSearchParams(parametros).toString()}`;
 
   let respuesta: Response;
   try {
@@ -86,5 +85,5 @@ function nombreDesdeCabecera(valor: string | null): string | null {
 }
 
 function fechaDeHoy(): string {
-  return new Date().toISOString().slice(0, 10);
+  return hoyIso();
 }

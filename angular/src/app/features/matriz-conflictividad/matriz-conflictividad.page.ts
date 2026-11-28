@@ -11,6 +11,7 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { urlApi } from '../../core/config/entorno';
+import { hoyIso } from '../../core/fecha/zona-horaria';
 import { TAMANO_PAGINA, paramsDePagina, urlConParametros } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
@@ -492,7 +493,7 @@ export class MatrizConflictividadPage {
   readonly errorDescarga = signal<string | null>(null);
 
   /** Fecha de corte de la hoja; se fija al abrir la pantalla. */
-  readonly fechaCorte = formatearFechaDdMmAaaa(new Date().toISOString().slice(0, 10));
+  readonly fechaCorte = formatearFechaDdMmAaaa(hoyIso());
 
   private temporizador?: ReturnType<typeof setTimeout>;
 

@@ -1,6 +1,6 @@
 import { normalizarColeccion } from '../../core/http/coleccion';
 import { esRegistro, leer, numero, texto } from '../../dominio/mapeo';
-import { partesFecha } from '../../shared/formato-fecha';
+import { formatearFecha } from '../../shared/formato-fecha';
 
 /**
  * Contrato de lectura y presentación de la matriz de conflictividad (Anexo 15).
@@ -257,13 +257,9 @@ export function aCatalogos(bruto: unknown): CatalogosConflictividad {
   };
 }
 
-/** `2026-05-01` → `01/05/2026`; sin fecha → `—`. */
+/** `2026-11-24` → `24NOV2026`; sin fecha → `—`. Nombre legado. */
 export function formatearFechaDdMmAaaa(valor: string | null | undefined): string {
-  const partes = partesFecha(valor);
-  if (!partes) return '—';
-
-  const [anio, mes, dia] = partes;
-  return `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${anio}`;
+  return formatearFecha(valor);
 }
 
 /** Texto visible de una celda; faltante = `—`, nunca un cero ni un texto estimado. */

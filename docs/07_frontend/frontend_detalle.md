@@ -1773,3 +1773,102 @@ El encargo propone A2 → A1 → A3 → A4 → A5 → B1–B5 → **B6** → B7�
 puede ir antes de terminar A2–A5 y B1–B5 **en el importador**, o se cargaría dos veces el mismo
 trabajo. Y B6 es además la única prueba real de A1, A3, A4 y A5: sin la matriz cargada no hay
 forma de verificar «los 10 casos con su sectorista» ni «los 10 con su descripción del riesgo».
+
+---
+
+## Verificación 2026-11-28 · ronda de datos, migraciones y exportaciones
+
+Evidencia de archivo y línea de lo cerrado en esta ronda. Complementa la tabla
+«Cierre del 2026-11-28» de [`frontend.md`](frontend.md).
+
+### C8 · cronología con fecha compacta dentro del texto
+
+- `core.caso_cronologia` **no** tenía el patrón: 0 filas con fecha compacta
+  dentro de `descripcion_hecho`. Los 12 casos con «mes embebido» son normas
+  citadas (p. ej. «DS 023-2026»), legítimas.
+- El defecto estaba en `core.alerta_hechos`: 12 filas con `* 01ABR2026 — …` y
+  `fecha` nula, heredadas de la 83 (que sólo limpiaba viñetas `-` con
+  `dd/mm/aaaa`).
+- `85_c8_hechos_fecha_compacta_2026_11_27.sql` mueve la fecha a
+  `alerta_hechos.fecha` y recompone `hechos_recientes` como
+  `- 05NOV2026 — texto`; `86_c8_hechos_vineta_asterisco_2026_11_27.sql` quita la
+  viñeta `*`. Verificado: 0 descripciones con `*` + fecha y 0 duplicados.
+- Respaldo: `scripts/_respaldo_c8_2026-11-27.json` (3 alertas, 12 hechos).
+
+### E4 · alias `gis.*`
+
+`schema-qualified` `gis.` sólo aparece en **comentarios** de
+`app/api/v1/territorio/**` y `lib/db/repos/territorio.ts`. No hay referencia de
+esquema que retirar; la 75 dejó el territorio en `core`.
+
+### Fotos de actor (`tieneContenido`)
+
+- `angular/src/app/dominio/medios.ts`: `Foto.tieneContenido` (mapeado desde
+  `tieneContenido`/`tiene_contenido`) y helper `urlFoto(foto)`, que prefiere
+  `/api/v1/media/<id>/contenido` cuando hay bytes y respeta URL externas.
+- Consumido en `features/directorio/actores.page.ts#fotoDe` y
+  `actor-panel.component.ts#foto`.
+- Importación: `features/importacion/importacion.xlsx.ts` (lee `.xlsx`/`.xlsm`
+  con `await import('exceljs')`), columna opcional **Foto** en `COLUMNAS_ACTOR` y
+  `registrarFoto()` en `importacion.service.ts` (`POST /v1/media`,
+  `entidadTipo: 'actor'`; sin bytes ⇒ `tieneContenido=false`; un fallo de foto es
+  aviso, no rechazo de la fila).
+
+### Alertas · exportación y herencia del caso
+
+- `app/api/v1/export/alertas/route.ts`: `GET /api/v1/export/alertas?formato=csv|xlsx`,
+  reenvía `q`, `caso`, `sinCaso`, `prioridad`, `riesgo`, `nivel`, `estado`,
+  `distritoId`, `sort` y `archivados`; tope `5000` filas con `422`
+  `EXPORTACION_DEMASIADO_GRANDE`; columnas Código · Título · Fecha de reporte ·
+  Nivel de riesgo · Estado · Revisor · Caso vinculado · Título del caso · Región ·
+  Provincia.
+- `angular/src/app/features/alertas/exportar-alertas.ts` +
+  `exportar-alertas-menu.component.*`: botón «Exportar todo» con los filtros
+  vigentes (`filtrosExportacion` en `alertas.page.ts`).
+- Herencia: `lib/db/repos/alerts.ts` (`AlertItem.casoResumen`, `casoActores`,
+  `casoDemandas`), `alerta.mapeo.ts` y la sección «📁 Caso vinculado» de
+  `alerta-panel.component.html`, que ahora pinta `casoResumenVisible()`,
+  `casoActoresVisibles()` y `casoDemandasVisibles()` (antes los cómputos existían
+  sin usar y la vista sólo leía el respaldo de `GET /cases/{codigo}`).
+- Reporte pegado: `<details class="reporte-pegado">` en `alerta-panel.component.html`
+  con `editarReporte`, `aplicarReporte` y `copiarPlantillaAlerta`; el parser es
+  `features/alertas/alerta-plantilla.ts` (`parsearPlantillaAlerta`,
+  `PLANTILLA_ALERTA_TEMPRANA`). Se eliminó el duplicado en `dominio/`.
+
+### Compromisos
+
+`compromisos.page.*` con Redacción · Fuente · Fecha · Plazo · Oficina
+responsable · Estado de cumplimiento. `compromiso-panel` muestra Institución.
+`compromiso.mapeo.ts` añade `institucionSiglas`/`institucionNombre`.
+**Diagnóstico:** `cat_unidades_organicas.entidad_id → entidades` existe, pero la
+API no la expone: falta un `JOIN` en `lib/db/repos/commitments.ts`; **no** hace
+falta migración.
+
+### Locales
+
+- `features/directorio/local-notas.ts`: `leerRiesgosMarkdown()` (
+  `## Accesibilidad`, `## Ventilación`, `## Otros riesgos`) y `unirRiesgos()`.
+- `local.mapeo.ts`: `latitud`/`longitud`, `coordenadasEnUbicacion()`,
+  `coordenadasDeLocal()`, `territorioDeLocal()`.
+- `shared/ui/mapa-local.component.ts` (Leaflet) y `mapa-local.centroides.ts`
+  (marcador exacto o centroide regional con nota de aproximación).
+- **La base no tiene coordenadas en `core.locales`** (verificado por
+  `information_schema`).
+
+### Datos
+
+- **B1:** `CS-2026-0003` tiene **0 demandas** (la 54 ya las desvinculó) y **4
+  alertas**, las cuatro citan el caso ⇒ se conservan. Nada que limpiar.
+- **B2:** 10 documentos vinculados a caso con alta confianza (`AT-2026-37/40/62/67/70/72/76/90`,
+  `RED-2026-025/030`); documentos con caso **83 → 93**, sin caso **70 → 60**.
+  Idempotente. Cola de revisión:
+  `scripts/b2_cola_revision_2026-11-27.csv`; respaldos `scripts/_respaldo_b1_2026-11-27.json`
+  y `scripts/_respaldo_b2_2026-11-27.json`.
+
+### Decisiones pendientes que se detectaron
+
+1. C12 (vincular una demanda con un hecho) **no se puede** sin migración:
+   `core.demandas` no tiene columna de hecho. Diseñar, no aplicar.
+2. Clon SESIGUE y «usuarios de PRODUCE sin login»: diagnóstico únicamente; exige
+   decisión de seguridad.
+3. `valid_to` exclusivo: ratificar el criterio (ya aplicado en 4 predicados).

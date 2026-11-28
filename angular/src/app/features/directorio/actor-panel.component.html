@@ -302,9 +302,9 @@
             </section>
 
             <section class="actor-bloque" aria-labelledby="bloque-perfil">
-              <h3 id="bloque-perfil">Descripción del perfil</h3>
+              <h3 id="bloque-perfil">Ámbito de acción</h3>
               <label class="ancho">
-                Descripción
+                Ámbito de acción
                 <textarea
                   rows="4"
                   maxlength="5000"
@@ -312,6 +312,17 @@
                   (input)="actualizarTexto('perfilDescripcion', $event)"
                 ></textarea>
               </label>
+              <p class="actor-pista ancho">
+                Para llenar los datos que no tienen columna (artes de pesca, inscripción, afiliados,
+                cercanía a PRODUCE, redes), use las secciones «## Organización e inscripción», «##
+                Perfil político y redes» y «## Local», con una línea «- Clave: valor» por dato.
+              </p>
+              <div class="actor-pista-acciones ancho">
+                <button type="button" class="button-secondary" (click)="copiarPlantillaFicha()">
+                  <app-icono nombre="copiar" [tamano]="13" />
+                  {{ plantillaCopiada() ? 'Plantilla copiada' : 'Copiar plantilla' }}
+                </button>
+              </div>
             </section>
 
             @if (errorEdicion(); as error) {
@@ -509,14 +520,6 @@
                 <span class="panel-etiqueta">Validación humana</span>
                 <span class="panel-valor">{{ a.validado ? 'Sí' : 'No' }}</span>
               </div>
-              <div class="panel-campo">
-                <span class="panel-etiqueta">Clasificación de la información</span>
-                @if (clasificacionTexto(); as clasificacion) {
-                  <span class="panel-valor">{{ clasificacion }}</span>
-                } @else {
-                  <span class="panel-vacio">{{ sinDato }}</span>
-                }
-              </div>
             </div>
           </div>
 
@@ -588,11 +591,11 @@
           -->
 
           <section class="panel-seccion" aria-labelledby="actor-panel-perfil">
-            <h3 id="actor-panel-perfil">Descripción del perfil</h3>
+            <h3 id="actor-panel-perfil">Ámbito de acción</h3>
             @if (a.perfil) {
               <p class="panel-perfil">{{ a.perfil }}</p>
             } @else {
-              <p class="panel-vacio">Sin descripción de perfil registrada.</p>
+              <p class="panel-vacio">Sin ámbito de acción registrado.</p>
             }
           </section>
 

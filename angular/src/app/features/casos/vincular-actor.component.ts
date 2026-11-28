@@ -12,11 +12,8 @@ import {
 import { urlApi } from '../../core/config/entorno';
 import { aErrorApi } from '../../core/http/errores';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import {
-  CuerpoVincularActor,
-  POSICIONES_ACTOR,
-  type CasoActorVinculoFlags,
-} from './nudos-matriz.mapeo';
+import { POSICIONAMIENTOS_ACTOR } from '../directorio/directorio.mapeo';
+import { CuerpoVincularActor, type CasoActorVinculoFlags } from './nudos-matriz.mapeo';
 
 /** Actor del Directorio tal como lo devuelve `GET /api/v1/actors`. */
 export type ActorOpcion = {
@@ -152,7 +149,6 @@ export class VincularActorComponent {
   readonly buscandoAlgo = signal(false);
   readonly seleccionado = signal<ActorOpcion | null>(null);
   readonly posicion = signal('');
-  readonly rolEnCaso = signal('');
   readonly vigenteDesde = signal('');
   readonly errorLocal = signal<string | null>(null);
 
@@ -165,7 +161,9 @@ export class VincularActorComponent {
     });
   }
 
-  readonly posiciones = POSICIONES_ACTOR;
+  // Guía §8.2.4: Dialogante, Legitimante o Conflictivo. Es el mismo vocabulario
+  // que valida `vincularActorCaso` en la API (migración 77).
+  readonly posiciones = POSICIONAMIENTOS_ACTOR;
 
   alBuscar(evento: Event): void {
     const valor = (evento.target as HTMLInputElement).value;
@@ -219,10 +217,6 @@ export class VincularActorComponent {
     this.posicion.set((evento.target as HTMLSelectElement).value);
   }
 
-  alCambiarRol(evento: Event): void {
-    this.rolEnCaso.set((evento.target as HTMLInputElement).value);
-  }
-
   alCambiarVigencia(evento: Event): void {
     this.vigenteDesde.set((evento.target as HTMLInputElement).value);
   }
@@ -248,7 +242,6 @@ export class VincularActorComponent {
 
     const cuerpo: CuerpoVincularActor = { actorId: actor.id };
     if (this.posicion()) cuerpo.posicion = this.posicion();
-    if (this.rolEnCaso().trim()) cuerpo.rolEnCaso = this.rolEnCaso().trim();
     if (this.vigenteDesde().trim()) {
       cuerpo.vigenteDesde = this.vigenteDesde().trim();
     }

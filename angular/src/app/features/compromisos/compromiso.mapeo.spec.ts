@@ -53,6 +53,8 @@ function compromiso(parcial: Partial<Compromiso> = {}): Compromiso {
     fechaVencimientoEfectiva: null,
     origenVencimiento: null,
     unidad: null,
+    institucionSiglas: null,
+    institucionNombre: null,
     alcance: null,
     tematica: null,
     atiendeGenero: false,
@@ -644,5 +646,38 @@ describe('espacio de diálogo del compromiso', () => {
 
     expect(leido.mesaCodigo).toBe('OAIPCS-002');
     expect(leido.mesaTitulo).toBe('Otra mesa');
+  });
+});
+
+describe('institución de la oficina responsable', () => {
+  it('lee siglas y nombre de la entidad en camelCase', () => {
+    const leido = aCompromiso({
+      id: 'comp-entidad',
+      unidad: 'OAIPCS',
+      institucionSiglas: 'PRODUCE',
+      institucionNombre: 'Ministerio de la Producción',
+    });
+
+    expect(leido.unidad).toBe('OAIPCS');
+    expect(leido.institucionSiglas).toBe('PRODUCE');
+    expect(leido.institucionNombre).toBe('Ministerio de la Producción');
+  });
+
+  it('acepta snake_case y las grafas entidad/entidad_nombre', () => {
+    const leido = aCompromiso({
+      id: 'comp-entidad-2',
+      entidad_siglas: 'PCM',
+      entidad_nombre: 'Presidencia del Consejo de Ministros',
+    });
+
+    expect(leido.institucionSiglas).toBe('PCM');
+    expect(leido.institucionNombre).toBe('Presidencia del Consejo de Ministros');
+  });
+
+  it('deja null cuando la API no la envía: la ficha pinta «—»', () => {
+    const leido = aCompromiso({ id: 'comp-sin-entidad', unidad: 'OAIPCS' });
+
+    expect(leido.institucionSiglas).toBeNull();
+    expect(leido.institucionNombre).toBeNull();
   });
 });

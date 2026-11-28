@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { parametrosConValor } from '../../core/http/coleccion';
 import { ErrorApi } from '../../core/http/errores';
 import { urlApi } from '../../core/config/entorno';
+import { hoyIso } from '../../core/fecha/zona-horaria';
 
 /**
  * Descarga de la matriz de conflictividad (Anexo 15).
@@ -20,9 +21,7 @@ export class MatrizConflictividadService {
    * y devuelve todas las filas que coinciden; si el conjunto excede el tope
    * responde 413 y se propaga como `ErrorApi` para que la página lo muestre.
    */
-  async descargarCsv(
-    filtros: Record<string, string | number | null | undefined>,
-  ): Promise<void> {
+  async descargarCsv(filtros: Record<string, string | number | null | undefined>): Promise<void> {
     const parametros = parametrosConValor({ ...filtros, todas: '1' });
     const url = `${urlApi('/v1/conflictividad/export')}?${new URLSearchParams(
       parametros,
@@ -100,5 +99,5 @@ export class MatrizConflictividadService {
 }
 
 function fechaDeHoy(): string {
-  return new Date().toISOString().slice(0, 10);
+  return hoyIso();
 }

@@ -96,7 +96,7 @@
       </select>
     </label>
 
-    @if (mesas().length > 0) {
+    @if (mesas().length > 0 && !vistaMesas()) {
     <label class="select-filter">
       Espacio de diálogo
       <select aria-label="Filtrar por espacio de diálogo" (change)="filtrarMesa($event)">
@@ -116,6 +116,8 @@
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
   </div>
+  } @if (vistaTabla()) {
+  <app-compromisos-graficos [soloMesas]="vistaMesas()" />
   }
 
   <div class="view-toolbar">
@@ -139,6 +141,9 @@
         (click)="cambiarModo('calendario')"
       >
         Calendario
+      </button>
+      <button type="button" [attr.aria-pressed]="modo() === 'mesas'" (click)="cambiarModo('mesas')">
+        Mesas de diálogo
       </button>
       <button
         type="button"
@@ -338,7 +343,7 @@
   </div>
   } @else {
   <app-tabla
-    [columnas]="columnasListado"
+    [columnas]="vistaMesas() ? columnasMesas : columnasListado"
     [filas]="filasVisibles()"
     [orden]="ordenTabla()"
     [ordenServidor]="true"
@@ -346,39 +351,15 @@
     [seleccion]="idsSeleccionados()"
     [cargando]="estado() === 'inactivo' || estado() === 'cargando'"
     [clicable]="true"
-    vacio="No hay compromisos para los filtros seleccionados."
+    [vacio]="
+      vistaMesas()
+        ? 'Aún no hay compromisos registrados en mesas de diálogo.'
+        : 'No hay compromisos para los filtros seleccionados.'
+    "
     (ordenCambio)="alCambiarOrden($event)"
     (seleccionCambio)="alCambiarSeleccion($event)"
     (filaClic)="alClicFila($event)"
   >
-    <ng-template appCeldaTabla="caso" let-fila>
-      @if (fila.mesaCodigo) {
-      <span class="celda-caso" [attr.title]="tituloCeldaCaso(fila)">
-        {{ fila.mesaCodigo }} @if (fila.mesaTitulo || fila.casoTitulo) {
-        <small>{{ fila.mesaTitulo || fila.casoTitulo }}</small>
-        } @if (fila.casoCodigo) {
-        <small class="celda-caso-ref">{{ fila.casoCodigo }}</small>
-        }
-      </span>
-      } @else {
-      <span class="celda-caso" [attr.title]="fila.casoTitulo || 'Sin caso asociado'">
-        {{ fila.casoCodigo || '—' }} @if (fila.casoTitulo) {
-        <small>{{ fila.casoTitulo }}</small>
-        }
-      </span>
-      }
-    </ng-template>
-
-    <ng-template appCeldaTabla="puntoFocal" let-fila>
-      @if (fila.puntoFocal || fila.puntoFocalTexto) {
-      <span class="celda-punto-focal" [attr.title]="puntoFocalTexto(fila)">
-        {{ puntoFocalTexto(fila) }}
-      </span>
-      } @else {
-      <span aria-hidden="true">—</span>
-      }
-    </ng-template>
-
     <ng-template appCeldaTabla="redaccion" let-fila>
       <div class="celda-compromiso">
         <button
@@ -390,6 +371,18 @@
           {{ fila.codigo }}
         </button>
         <span class="compromiso-accion">{{ fila.accion }}</span>
+      </div>
+    </ng-template>
+
+    <ng-template appCeldaTabla="mesa" let-fila>
+      <div class="celda-mesa">
+        @if (fila.mesaCodigo || fila.mesaTitulo) { @if (fila.mesaCodigo) {
+        <span>{{ fila.mesaCodigo }}</span>
+        } @if (fila.mesaTitulo) {
+        <small>{{ fila.mesaTitulo }}</small>
+        } } @else {
+        <span>—</span>
+        }
       </div>
     </ng-template>
 
@@ -417,32 +410,8 @@
       </span>
     </ng-template>
 
-    <ng-template appCeldaTabla="hitos" let-fila>
-      <div class="celda-hitos">
-        @if (fila.hitos.length > 0) {
-        <span
-          class="hitos-franja"
-          role="img"
-          [attr.title]="resumenHitos(fila)"
-          [attr.aria-label]="resumenHitos(fila)"
-        >
-          @for (hito of hitosOrdenados(fila); track hito.id) {
-          <span [class]="clasesHito(hito)"></span>
-          }
-        </span>
-        }
-        <span class="celda-hitos-texto">{{ hitosTexto(fila) }}</span>
-      </div>
-    </ng-template>
-
-    <ng-template appCeldaTabla="evidencia" let-fila>
-      @if (fila.evidenciaUri; as evidencia) { @if (esEnlace(evidencia)) {
-      <a class="table-link" [href]="evidencia" target="_blank" rel="noopener">Ver evidencia</a>
-      } @else {
-      <span class="celda-evidencia" [attr.title]="evidencia">{{ evidencia }}</span>
-      } } @else {
-      <span aria-hidden="true">—</span>
-      }
+    <ng-template appCeldaTabla="avance" let-fila>
+      <span class="celda-avance">{{ avanceTexto(fila) }}</span>
     </ng-template>
   </app-tabla>
   } @if (total() > 0) {

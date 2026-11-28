@@ -1,0 +1,119 @@
+{
+  "generado": "2026-11-27T22:28:02.948Z",
+  "motivo": "respaldo previo a migration/85_c8_hechos_fecha_compacta",
+  "alertas": [
+    {
+      "id": "103821bc-9572-43e4-9e1a-76160839f73c",
+      "codigo_alerta": "AT-2026-17",
+      "hechos_recientes": "* 24ABR2026 — Publicación de RM N° 000102-2026-PRODUCE modificando límites de captura de bonito para ene–dic 2026.\n* 25ABR2026 — DGPA-PRODUCE convocó reunión con armadores y pescadores para el 27ABRI2026 a las 16:00 h.\n* 27ABR2026 — Secretario del Gremio Parachique confirma plantón coordinado previamente en sede PRODUCE.\n* 27ABR2026 — PRODUCE convocó reunión con armadores y pescadores para las 16:00 h (mismo día)."
+    },
+    {
+      "id": "0f4a5d69-aead-4c93-a453-9e530a7ae5f7",
+      "codigo_alerta": "AT-2026-21",
+      "hechos_recientes": "* 23-29MAR2026 — COP15 de la CMS en Brasil incorpora al Apéndice I tres especies de tiburón zorro (Alopias pelagicus, A. superciliosus, A. vulpinus), el tiburón martillo festoneado (Sphyrna lewini) y el tiburón martillo gigante (Sphyrna mokarran). Resultado de la votación: 49 a favor, 1 en contra (Perú), 6 abstenciones.\n* 01ABR2026 — MINAM remite a PRODUCE el Oficio N° D000085-2026-MINAM-VMDERN-DGDB comunicando los resultados de la COP15 y la entrada en vigor de las obligaciones el 27JUN2026.\n* 25ABR2026 — Pescadores artesanales de Máncora (Talara, Piura) se concentran en el Desembarcadero Pesquero Artesanal para protestar contra la prohibición. Raúl Querevalú (AGREPESAR) convoca a toda la cadena productiva local.\n* 30ABR2026 — Reunión sectorial con el Ministro de la Producción. Representantes de la Macrorregión Sur plantean: (i) demoras en certificados CITES superiores a un año; (ii) solidaridad con gremios del norte; (iii) inquietud por una eventual extensión de la prohibición a tiburón azul, diamante y marrajo sardinero. \n* 04MAY2026 — Armadores artesanales de Santa Rosa (Chiclayo, Lambayeque), liderados por Santos Marchena Marchena, celebran asamblea macrorregional. Exigen mesa de diálogo técnico con PRODUCE y dan plazo de 20 días al Ministro.\n* 04MAY2026 — Familiares de pescadores (Leslie Lizana Choquehuanca, tesorera) y sector gastronómico (José Fernando, restaurantero) advierten movilizaciones si no hay respuesta."
+    },
+    {
+      "id": "8c854cee-6e7c-44c7-a7e5-ab568b7b5478",
+      "codigo_alerta": "AT-2026-22",
+      "hechos_recientes": "* El pasado 16ABR2026 se reportó la construcción ilegal de un silo (baño rústico) en el terreno de SANIPES.\n* 17ABR2026 Municipalidad informó que se activó fiscalización y procedió con el área respectiva para intervenir."
+    }
+  ],
+  "hechos": [
+    {
+      "id": "f17e04e5-daa4-4008-b413-d7e4cfbc2c82",
+      "alerta_id": "0f4a5d69-aead-4c93-a453-9e530a7ae5f7",
+      "fecha": null,
+      "descripcion": "* 23-29MAR2026 — COP15 de la CMS en Brasil incorpora al Apéndice I tres especies de tiburón zorro (Alopias pelagicus, A. superciliosus, A. vulpinus), el tiburón martillo festoneado (Sphyrna lewini) y el tiburón martillo gigante (Sphyrna mokarran). Resultado de la votación: 49 a favor, 1 en contra (Perú), 6 abstenciones.",
+      "orden": 0,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "3a080793-1c83-4b29-98f2-b51b71595b5a",
+      "alerta_id": "0f4a5d69-aead-4c93-a453-9e530a7ae5f7",
+      "fecha": null,
+      "descripcion": "* 01ABR2026 — MINAM remite a PRODUCE el Oficio N° D000085-2026-MINAM-VMDERN-DGDB comunicando los resultados de la COP15 y la entrada en vigor de las obligaciones el 27JUN2026.",
+      "orden": 1,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "f6201996-b572-413c-a35c-c812bd7a6f81",
+      "alerta_id": "0f4a5d69-aead-4c93-a453-9e530a7ae5f7",
+      "fecha": null,
+      "descripcion": "* 25ABR2026 — Pescadores artesanales de Máncora (Talara, Piura) se concentran en el Desembarcadero Pesquero Artesanal para protestar contra la prohibición. Raúl Querevalú (AGREPESAR) convoca a toda la cadena productiva local.",
+      "orden": 2,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "35971d0d-27af-4023-907b-7457e8e6a50d",
+      "alerta_id": "0f4a5d69-aead-4c93-a453-9e530a7ae5f7",
+      "fecha": null,
+      "descripcion": "* 30ABR2026 — Reunión sectorial con el Ministro de la Producción. Representantes de la Macrorregión Sur plantean: (i) demoras en certificados CITES superiores a un año; (ii) solidaridad con gremios del norte; (iii) inquietud por una eventual extensión de la prohibición a tiburón azul, diamante y marrajo sardinero.",
+      "orden": 3,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "404254bc-0eab-4399-ae55-cf80854967a4",
+      "alerta_id": "0f4a5d69-aead-4c93-a453-9e530a7ae5f7",
+      "fecha": null,
+      "descripcion": "* 04MAY2026 — Armadores artesanales de Santa Rosa (Chiclayo, Lambayeque), liderados por Santos Marchena Marchena, celebran asamblea macrorregional. Exigen mesa de diálogo técnico con PRODUCE y dan plazo de 20 días al Ministro.",
+      "orden": 4,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "c304d586-197c-4f94-ba8e-cb60281804a5",
+      "alerta_id": "0f4a5d69-aead-4c93-a453-9e530a7ae5f7",
+      "fecha": null,
+      "descripcion": "* 04MAY2026 — Familiares de pescadores (Leslie Lizana Choquehuanca, tesorera) y sector gastronómico (José Fernando, restaurantero) advierten movilizaciones si no hay respuesta.",
+      "orden": 5,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "74e49d70-16d6-454b-8e92-985617bcc76b",
+      "alerta_id": "103821bc-9572-43e4-9e1a-76160839f73c",
+      "fecha": null,
+      "descripcion": "* 24ABR2026 — Publicación de RM N° 000102-2026-PRODUCE modificando límites de captura de bonito para ene–dic 2026.",
+      "orden": 0,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "39833093-55dd-4d23-951f-bdc26730c4a5",
+      "alerta_id": "103821bc-9572-43e4-9e1a-76160839f73c",
+      "fecha": null,
+      "descripcion": "* 25ABR2026 — DGPA-PRODUCE convocó reunión con armadores y pescadores para el 27ABRI2026 a las 16:00 h.",
+      "orden": 1,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "3867734c-7f26-4d50-8a91-59822ba027e4",
+      "alerta_id": "103821bc-9572-43e4-9e1a-76160839f73c",
+      "fecha": null,
+      "descripcion": "* 27ABR2026 — Secretario del Gremio Parachique confirma plantón coordinado previamente en sede PRODUCE.",
+      "orden": 2,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "02e0b317-6a0c-47db-b12e-cf154423034e",
+      "alerta_id": "103821bc-9572-43e4-9e1a-76160839f73c",
+      "fecha": null,
+      "descripcion": "* 27ABR2026 — PRODUCE convocó reunión con armadores y pescadores para las 16:00 h (mismo día).",
+      "orden": 3,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "3a6f5c43-521d-4535-849a-082726dc71d9",
+      "alerta_id": "8c854cee-6e7c-44c7-a7e5-ab568b7b5478",
+      "fecha": null,
+      "descripcion": "* El pasado 16ABR2026 se reportó la construcción ilegal de un silo (baño rústico) en el terreno de SANIPES.",
+      "orden": 0,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    },
+    {
+      "id": "8c422078-0643-460a-886a-ddcd8bf0fe09",
+      "alerta_id": "8c854cee-6e7c-44c7-a7e5-ab568b7b5478",
+      "fecha": null,
+      "descripcion": "* 17ABR2026 Municipalidad informó que se activó fiscalización y procedió con el área respectiva para intervenir.",
+      "orden": 1,
+      "created_at": "2026-11-27T22:24:15.756Z"
+    }
+  ]
+}

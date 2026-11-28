@@ -1,14 +1,14 @@
 import { esRegistro, leer, numero, texto, type Registro } from '../../dominio/mapeo';
-import { partesFecha } from '../../shared/formato-fecha';
+import { formatearFecha, formatearFechaHora, partesFecha } from '../../shared/formato-fecha';
 
 /**
  * Contrato local del dashboard analítico (item 57).
  *
  * Todo lo que la pantalla necesita de `GET /api/v1/analitica` se declara aquí y
  * se normaliza de forma defensiva: si el servidor cambia una clave o llega un
- * `null`, la vista degrada a «sin dato» en vez de romper. El formateo de fechas
- * y horas se implementa en este archivo, en zona `America/Lima`, porque la tarea
- * no permite crear utilidades compartidas.
+ * `null`, la vista degrada a «sin dato» en vez de romper. El formato de fecha y
+ * hora es el único del proyecto (`shared/formato-fecha.ts`, `02NOV2025`); aquí
+ * solo quedan los rótulos de periodo («ene 2026», «semana del …»).
  */
 
 export type Granularidad = 'mes' | 'semana';
@@ -249,9 +249,7 @@ function subregistro(objeto: Registro, clave: string): Registro {
 
 function listaRegistros(objeto: Registro, clave: string): Registro[] {
   const valor = leer(objeto, [clave]);
-  return Array.isArray(valor)
-    ? valor.filter((item): item is Registro => esRegistro(item))
-    : [];
+  return Array.isArray(valor) ? valor.filter((item): item is Registro => esRegistro(item)) : [];
 }
 
 function listaTextos(objeto: Registro, clave: string): string[] {
@@ -444,12 +442,9 @@ function dosDigitos(valor: number): string {
   return String(valor).padStart(2, '0');
 }
 
-/** `2026-05-01` → `01/05/2026`; vacío o ilegible → `—`. */
+/** `2026-05-01` → `01MAY2026`; vacío o ilegible → `—`. Nombre legado. */
 export function formatearFechaDdMmAaaa(valor: string | null | undefined): string {
-  const partes = partesFecha(valor);
-  if (!partes) return '—';
-  const [anio, mes, dia] = partes;
-  return `${dosDigitos(dia)}/${dosDigitos(mes)}/${anio}`;
+  return formatearFecha(valor);
 }
 
 /** Enteros con espacio fino (U+2009) como separador de miles. */
@@ -473,28 +468,10 @@ export function formatearDias(valor: number | null | undefined): string {
   return `${valor.toFixed(1).replace('.', ',')} días`;
 }
 
-/** Instante ISO → `dd/mm/aaaa hh:mm` en zona de Lima. */
+/** Instante ISO → `02NOV2026 16:00` en zona de Lima. Sin valor → «sin dato». */
 export function formatearFechaHoraLima(valor: string | null | undefined): string {
   if (!valor) return 'sin dato';
-  const fecha = new Date(valor);
-  if (Number.isNaN(fecha.getTime())) return 'sin dato';
-
-  const partes = new Intl.DateTimeFormat('en-CA', {
-    timeZone: ZONA_HORARIA,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  }).formatToParts(fecha);
-
-  const mapa: Record<string, string> = {};
-  for (const parte of partes) mapa[parte.type] = parte.value;
-
-  return `${mapa['day'] ?? '—'}/${mapa['month'] ?? '—'}/${mapa['year'] ?? '—'} ${
-    mapa['hour'] ?? '--'
-  }:${mapa['minute'] ?? '--'}`;
+  return formatearFechaHora(valor);
 }
 
 /** `ene 2026` para meses y `semana del 05/01/2026` para semanas. */
@@ -511,10 +488,7 @@ export function etiquetaPeriodo(periodo: PeriodoAnalitica, granularidad: Granula
 }
 
 /** Etiqueta corta del eje X: `ene 26` o `05/01`. */
-export function etiquetaEjePeriodo(
-  periodo: PeriodoAnalitica,
-  granularidad: Granularidad,
-): string {
+export function etiquetaEjePeriodo(periodo: PeriodoAnalitica, granularidad: Granularidad): string {
   const partes = partesFecha(periodo.inicio);
   if (!partes) return '—';
   const [anio, mes, dia] = partes;

@@ -78,6 +78,11 @@ function leerFecha(
  * acota a los compromisos que cuelgan del caso espejo `MD-AAAA-NNNN` enlazado a
  * `core.mesas_dialogo`. Un código inexistente devuelve la lista vacía.
  *
+ * `soloMesas=1` devuelve únicamente los compromisos cuyo caso está enlazado a
+ * una mesa de diálogo (`core.mesas_dialogo.caso_id`, migración 81). Acepta el
+ * mismo booleano tolerante que `anulados`; sin el parámetro el resultado no
+ * cambia.
+ *
  * Para la vista de calendario se añaden `vencimiento_desde` y
  * `vencimiento_hasta` (ISO `YYYY-MM-DD`, ambos inclusivos). El rango se
  * aplica sobre el **vencimiento efectivo** —la fecha manual y, si falta, la
@@ -140,6 +145,11 @@ export async function GET(request: Request) {
     }
     if (leerBooleano(params.get("excluir_terminales"))) {
       query.excluirTerminales = true;
+    }
+    // «Solo mesas»: restringe a los compromisos cuyo caso está enlazado a una
+    // mesa de diálogo. Sin el parámetro, el listado no cambia.
+    if (leerBooleano(params.get("soloMesas"))) {
+      query.soloMesas = true;
     }
 
     const result = await withSession(

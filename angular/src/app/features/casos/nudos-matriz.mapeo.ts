@@ -425,13 +425,6 @@ export type CuerpoVincularActor = {
   vigenteDesde?: string;
 };
 
-export const POSICIONES_ACTOR: readonly string[] = [
-  'Apoyo',
-  'Oposición',
-  'Neutral',
-  'No dialogante',
-];
-
 /** Etiqueta visible de la posición guardada en la base. */
 export function etiquetaPosicion(valor: string | null): string {
   if (!valor) return '—';

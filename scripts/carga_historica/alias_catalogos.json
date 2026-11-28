@@ -1,0 +1,16 @@
+{
+  "perfil": {
+    "Disruptivo": "Conflictivo"
+  },
+  "nivel_riesgo": {
+    "Moderado": "Medio",
+    "Intermedio": "Medio",
+    "Critico": "Alto",
+    "Moderado-Alto": "Alto"
+  },
+  "subsector": {
+    "Mype e Industria": "MYPE e Industria"
+  },
+  "tipo_actor": {},
+  "tipo_documento": {}
+}

@@ -1,17 +1,20 @@
 -- =============================================================================
 -- 82 · Porteo de la ficha de mesas de diálogo a un satélite del caso
 --
--- **BORRADOR — NO EJECUTADO**
--- Fecha: 2026-11-27
+-- **APLICADA el 2026-11-27** (una transacción, con COMMIT; ver
+-- docs/06_operacion/migraciones-neon-estado.md §2.1)
+-- Fecha de diseño: 2026-11-27
 -- Autor: agente de base de datos (análisis y DDL; sin ejecución)
 --
 -- ESTADO
 -- ------
--- Este fichero NO se ha ejecutado: ni en Neon ni en local. `core.mesa_ficha`
--- no existe todavía (verificado por catálogo el 2026-11-27). La migración 81 sí
--- está aplicada: 21 casos `MD-2026-0001..0021`, 59 casos en total, 21 mesas y
--- 62 integrantes. Los datos de este borrador se contrastaron contra el catálogo
--- real de Neon (tipos, nulos, CHECKs y valores distintos), no contra supuestos.
+-- Este fichero se aplicó en Neon el 2026-11-27 con el rol propietario
+-- (`neondb_owner`, BYPASSRLS) en una única transacción: `core.mesa_ficha`
+-- existe con 21 fichas alineadas a los casos `MD-2026-0001..0021` y la clave
+-- `82_porteo_campos_mesas_2026_11_27` está en `core.migracion_log`. Antes de
+-- aplicarlo se hizo un ensayo con `ROLLBACK` que pasó con los mismos conteos.
+-- Los datos de este fichero se contrastaron contra el catálogo real de Neon
+-- (tipos, nulos, CHECKs y valores distintos), no contra supuestos.
 --
 -- Por qué
 -- -------

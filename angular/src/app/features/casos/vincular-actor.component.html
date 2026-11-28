@@ -87,22 +87,9 @@
               }
             </select>
             <span class="form-hint">
-              Apoyo, Oposición, Neutral o No dialogante. No se asume un valor.
+              Dialogante, Legitimante o Conflictivo. No se asume un valor.
             </span>
           </label>
-
-          @if (vinculo()?.rolEnCaso) {
-            <label class="form-campo">
-              <span>Rol en el caso</span>
-              <input
-                class="form-input"
-                type="text"
-                maxlength="120"
-                [value]="rolEnCaso()"
-                (input)="alCambiarRol($event)"
-              />
-            </label>
-          }
 
           @if (vinculo()?.vigencia) {
             <label class="form-campo">
@@ -116,8 +103,8 @@
             </label>
           } @else {
             <p class="form-hint">
-              El rol en el caso y la vigencia requieren la migración 50 de
-              <code>core.casos_actores</code>; hoy no se capturan.
+              La vigencia requiere la migración 50 de <code>core.casos_actores</code>; hoy no se
+              captura.
             </p>
           }
 

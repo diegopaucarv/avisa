@@ -186,14 +186,33 @@
           <h3 id="local-panel-ubicacion">Ubicación</h3>
           <dl class="ficha-datos">
             <div class="ficha-ancho">
-              <dt>Ubicación</dt>
-              <dd>{{ ubicacion(local) || '—' }}</dd>
+              <dt>Dirección</dt>
+              <dd>
+                @if (local.direccion) { {{ local.direccion }} } @else {
+                <span class="ficha-vacio">Sin dirección registrada</span>
+                }
+              </dd>
+            </div>
+            <div class="ficha-ancho">
+              <dt>Distrito, provincia y región</dt>
+              <dd>{{ territorio(local) || '—' }}</dd>
             </div>
             <div class="ficha-ancho">
               <dt>Referencia de ubicación</dt>
               <dd>{{ local.ubicacionRef || '—' }}</dd>
             </div>
           </dl>
+
+          <!--
+            El mapa nunca inventa precisión: con coordenadas pinta el marcador
+            exacto y, sin ellas, centra en el centroide regional con una nota.
+          -->
+          <app-mapa-local
+            [nombre]="local.nombre"
+            [coordenadas]="coordenadasSeleccionado()"
+            [region]="local.region"
+          />
+
           @if (enlaceMapa(local); as enlace) {
           <a class="ficha-mapa" [href]="enlace" target="_blank" rel="noopener noreferrer">
             <app-icono nombre="pin" [tamano]="14" />
@@ -234,20 +253,29 @@
           <p class="ficha-vacio">Sin riesgos registrados.</p>
           } @else {
           <div class="ficha-riesgos">
-            @if (notasSeleccionado().accesibilidad.length > 0) {
+            @if (riesgosSeleccionado().accesibilidad.length > 0) {
             <div class="ficha-riesgo">
               <h4>Accesibilidad</h4>
               <ul class="ficha-lista">
-                @for (nota of notasSeleccionado().accesibilidad; track $index) {
+                @for (nota of riesgosSeleccionado().accesibilidad; track $index) {
                 <li>{{ nota }}</li>
                 }
               </ul>
             </div>
-            } @if (notasSeleccionado().ventilacion.length > 0) {
+            } @if (riesgosSeleccionado().ventilacion.length > 0) {
             <div class="ficha-riesgo">
               <h4>Ventilación</h4>
               <ul class="ficha-lista">
-                @for (nota of notasSeleccionado().ventilacion; track $index) {
+                @for (nota of riesgosSeleccionado().ventilacion; track $index) {
+                <li>{{ nota }}</li>
+                }
+              </ul>
+            </div>
+            } @if (riesgosSeleccionado().otros.length > 0) {
+            <div class="ficha-riesgo">
+              <h4>Otros riesgos</h4>
+              <ul class="ficha-lista">
+                @for (nota of riesgosSeleccionado().otros; track $index) {
                 <li>{{ nota }}</li>
                 }
               </ul>

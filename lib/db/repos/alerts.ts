@@ -185,6 +185,21 @@ export type AlertRevision = {
   accion: string | null;
 };
 
+/** Actor vigente del caso vinculado; sólo lo puebla el detalle de la alerta. */
+export type AlertCasoActor = {
+  id: string | null;
+  nombre: string;
+  cargo: string | null;
+  rol: string | null;
+};
+
+/** Demanda vigente del caso vinculado; sólo la puebla el detalle de la alerta. */
+export type AlertCasoDemanda = {
+  id: string | null;
+  descripcion: string;
+  estado: string | null;
+};
+
 export type AlertItem = {
   id: string;
   codigo: string;
@@ -192,6 +207,12 @@ export type AlertItem = {
   casoId: string | null;
   casoCode: string | null;
   casoTitulo: string | null;
+  /** Resumen ejecutivo del caso vinculado (`core.casos.resumen_ejecutivo`). */
+  casoResumen: string | null;
+  /** Actores vigentes del caso vinculado (tope 20, orden estable). */
+  casoActores: AlertCasoActor[];
+  /** Demandas vigentes del caso vinculado (tope 20, orden estable). */
+  casoDemandas: AlertCasoDemanda[];
   /** Riesgo declarado o heredado del caso (`core.cat_niveles_riesgo.codigo`). */
   riesgo: string | null;
   /** Granularidad geográfica declarada (`core.cat_alcances_alerta.codigo`). */
@@ -328,6 +349,46 @@ const ESTADOS = new Set([
   "Pendiente de revisión",
 ]);
 
+/** Texto recortado o `null`; tolera que el agregado JSON traiga nulos. */
+function textoONull(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function mapCasoActores(value: unknown): AlertCasoActor[] {
+  if (!Array.isArray(value)) return [];
+  const actores: AlertCasoActor[] = [];
+  for (const raw of value) {
+    if (!raw || typeof raw !== "object") continue;
+    const row = raw as Record<string, unknown>;
+    const nombre = textoONull(row.nombre);
+    if (!nombre) continue;
+    actores.push({
+      id: typeof row.id === "string" ? row.id : null,
+      nombre,
+      cargo: textoONull(row.cargo),
+      rol: textoONull(row.rol),
+    });
+  }
+  return actores;
+}
+
+function mapCasoDemandas(value: unknown): AlertCasoDemanda[] {
+  if (!Array.isArray(value)) return [];
+  const demandas: AlertCasoDemanda[] = [];
+  for (const raw of value) {
+    if (!raw || typeof raw !== "object") continue;
+    const row = raw as Record<string, unknown>;
+    const descripcion = textoONull(row.descripcion);
+    if (!descripcion) continue;
+    demandas.push({
+      id: typeof row.id === "string" ? row.id : null,
+      descripcion,
+      estado: textoONull(row.estado),
+    });
+  }
+  return demandas;
+}
+
 function mapAlert(row: Record<string, any>): AlertItem {
   return {
     id: row.id,
@@ -336,6 +397,9 @@ function mapAlert(row: Record<string, any>): AlertItem {
     casoId: row.caso_id,
     casoCode: row.caso_code,
     casoTitulo: row.caso_titulo,
+    casoResumen: textoONull(row.caso_resumen),
+    casoActores: mapCasoActores(row.caso_actores),
+    casoDemandas: mapCasoDemandas(row.caso_demandas),
     riesgo: row.riesgo,
     alcance: row.alcance,
     region: row.region,
@@ -495,8 +559,74 @@ export async function getAlertById(
 ): Promise<AlertDetail | null> {
   // Se compara como texto para aceptar tanto el uuid como el código legible sin
   // arriesgar un 22P02 al castear cualquier entrada a uuid.
+  //
+  // Los datos heredados del caso vinculado se agregan aquí (y sólo aquí): la
+  // lista no necesita cargar actores ni demandas. Los topes de 20 y los órdenes
+  // se aplican dentro de cada subconsulta para que el resultado sea estable.
   const result = await client.query(
-    `select ${ALERT_SELECT}
+    `select ${ALERT_SELECT},
+            c.resumen_ejecutivo as caso_resumen,
+            (
+              select coalesce(json_agg(
+                       json_build_object(
+                         'id', x.id,
+                         'nombre', x.nombre,
+                         'cargo', x.cargo,
+                         'rol', x.rol
+                       ) order by x.orden
+                     ), '[]'::json)
+                from (
+                  select ac.actor_uid as id,
+                         ac.nombre_actual as nombre,
+                         ac.cargo_actual as cargo,
+                         ca.rol_en_caso as rol,
+                         row_number() over (
+                           order by ca.nivel_influencia desc nulls last,
+                                    ac.nombre_actual asc,
+                                    ac.actor_uid asc
+                         ) as orden
+                    from core.casos_actores ca
+                    join core.actores ac on ac.actor_uid = ca.actor_id
+                   where ca.caso_id = a.caso_id
+                     and ca.anulado_en is null
+                   order by ca.nivel_influencia desc nulls last,
+                            ac.nombre_actual asc,
+                            ac.actor_uid asc
+                   limit 20
+                ) x
+            ) as caso_actores,
+            (
+              select coalesce(json_agg(
+                       json_build_object(
+                         'id', x.id,
+                         'descripcion', x.descripcion,
+                         'estado', x.estado
+                       ) order by x.orden
+                     ), '[]'::json)
+                from (
+                  select d.id,
+                         coalesce(
+                           nullif(btrim(d.descripcion_demanda), ''),
+                           nullif(btrim(d.pedido_3p), ''),
+                           nullif(btrim(d.problema_3p), ''),
+                           nullif(btrim(d.propuesta_3p), '')
+                         ) as descripcion,
+                         replace(d.estado_atencion, '_', ' ') as estado,
+                         row_number() over (
+                           order by d.fecha_registro desc nulls last,
+                                    d.created_at desc,
+                                    d.id asc
+                         ) as orden
+                    from core.demandas d
+                   where d.caso_id = a.caso_id
+                     and d.anulado_en is null
+                   order by d.fecha_registro desc nulls last,
+                            d.created_at desc,
+                            d.id asc
+                   limit 20
+                ) x
+               where x.descripcion is not null
+            ) as caso_demandas
      ${ALERT_FROM}
      where a.id::text = $1 or a.codigo_alerta = $1
      limit 1`,

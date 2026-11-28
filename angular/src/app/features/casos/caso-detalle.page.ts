@@ -412,15 +412,18 @@ export function hechoEnVentana<T extends { fecha: string }>(
 }
 
 /**
- * Tipologías del actor para la tabla: su tipo (rol estructural: público,
- * social o privado) y su función en la intervención (principal, secundario o
- * tercero imparcial). Ambos datos ya vienen del endpoint del caso (`tipo` y
- * `funcion`); no se crea un campo nuevo. Se recortan, se deduplican y, si hay
- * más de uno, se separan con comas.
+ * Tipologías del actor para la tabla: agrega las columnas de categoría que el
+ * modelo ya guarda —tipo (rol estructural: público, social o privado), función
+ * en la intervención (principal, secundario o tercero imparcial) y
+ * posicionamiento (dialogante, legitimante o conflictivo)—. No se crea un campo
+ * nuevo: son las columnas existentes del endpoint del caso. Se recortan, se
+ * deduplican y, si hay más de una, se separan con comas.
  */
-export function textoTipologias(actor: Pick<ActorCaso, 'tipo' | 'funcion'>): string {
+export function textoTipologias(
+  actor: Pick<ActorCaso, 'tipo' | 'funcion' | 'posicionamiento'>,
+): string {
   const valores = new Set<string>();
-  for (const valor of [actor.tipo, actor.funcion]) {
+  for (const valor of [actor.tipo, actor.funcion, actor.posicionamiento]) {
     const limpio = (valor ?? '').trim();
     if (limpio) valores.add(limpio);
   }
@@ -1322,8 +1325,8 @@ export class CasoDetallePage {
     actor: (actor) => this.nombreActor(actor),
     institucion: (actor) => this.institucionActor(actor),
     contacto: (actor) => [this.telefonoActor(actor), actor.correo],
-    // Se ordena por el texto completo (tipo y función) para que el usuario
-    // vea el mismo criterio que la celda «Tipologías».
+    // Se ordena por el texto completo (tipo, función y posicionamiento) para
+    // que el usuario vea el mismo criterio que la celda «Tipologías».
     tipologia: (actor) => textoTipologias(actor),
   };
   readonly filasActores = computed(() =>

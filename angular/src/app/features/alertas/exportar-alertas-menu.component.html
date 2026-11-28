@@ -1,0 +1,38 @@
+<div class="exportar">
+  <button
+    type="button"
+    class="button-secondary exportar-boton"
+    aria-haspopup="menu"
+    [attr.aria-expanded]="abierto()"
+    [disabled]="descargando() !== null"
+    (click)="alternar()"
+  >
+    <app-icono nombre="documentos" [tamano]="14" />
+    <span>{{ descargando() ? 'Generando…' : etiqueta() }}</span>
+    <app-icono nombre="chevron-abajo" [tamano]="14" />
+  </button>
+
+  @if (abierto()) {
+    <div class="menu" role="menu" aria-label="Exportar el listado de alertas">
+      <p class="menu-titulo" role="presentation">Listado filtrado</p>
+      <button
+        type="button"
+        role="menuitem"
+        aria-label="Exportar todas las alertas filtradas en CSV"
+        (click)="descargar('csv')"
+      >
+        CSV
+        <small>Valores separados por comas (.csv)</small>
+      </button>
+      <button
+        type="button"
+        role="menuitem"
+        aria-label="Exportar todas las alertas filtradas en Excel"
+        (click)="descargar('xlsx')"
+      >
+        Excel
+        <small>Hoja de cálculo (.xlsx)</small>
+      </button>
+    </div>
+  }
+</div>

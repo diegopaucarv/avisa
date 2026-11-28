@@ -55,6 +55,7 @@ import {
   type ModoPanelAlerta,
 } from './alerta-panel.component';
 import { AlertaWhatsappComponent } from './alerta-whatsapp.component';
+import { ExportarAlertasMenuComponent } from './exportar-alertas-menu.component';
 import {
   ESTADOS_ALERTA,
   ORDENES_ALERTA,
@@ -150,6 +151,7 @@ function totalDe(bruto: unknown): number {
     AlertaArchivoComponent,
     AlertaModificacionComponent,
     AlertaWhatsappComponent,
+    ExportarAlertasMenuComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
     TablaComponent,

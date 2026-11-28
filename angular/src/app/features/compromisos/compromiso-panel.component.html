@@ -81,6 +81,12 @@
             <div>
               <span>Área responsable</span>
               <strong>{{ cabecera().unidad || '—' }}</strong>
+              <small class="form-hint">
+                Institución: {{ institucionTexto() }}
+                @if (!institucion()) {
+                  · la API aún no expone la entidad de la oficina responsable
+                }
+              </small>
               @if (!cabecera().unidad && (cabecera().puntoFocal || cabecera().puntoFocalTexto)) {
                 <small class="form-hint">Sin área registrada; el punto focal va aparte.</small>
               }
@@ -592,7 +598,9 @@
           @if (proximoHito(); as siguienteHito) {
             @let etiquetaSiguiente = etiquetaHito(siguienteHito.codigo, siguienteHito.descripcion);
             <p class="panel-fecha">
-              <strong [attr.title]="etiquetaSiguiente">{{ etiquetaSiguiente }}</strong>
+              <strong class="hito-etiqueta" [attr.title]="etiquetaSiguiente">{{
+                etiquetaSiguiente
+              }}</strong>
               <span class="commit-status">{{ siguienteHito.estado }}</span>
             </p>
             <p class="form-hint">Planificado para {{ fechaTexto(siguienteHito.fecha) }}.</p>

@@ -9,6 +9,7 @@ import {
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 
 import { urlApi } from '../../core/config/entorno';
+import { hoyIso } from '../../core/fecha/zona-horaria';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { IconoComponent } from '../../shared/ui/icono.component';
@@ -235,7 +236,7 @@ export class ExportacionesPage {
   }
 
   private nombreSugerido(anexo: AnexoDisponible, formato: FormatoAnexo): string {
-    const fecha = new Date().toISOString().slice(0, 10);
+    const fecha = hoyIso();
     return `avisa_anexo_${anexo.numero}_${fecha}.${extensionDe(formato)}`;
   }
 

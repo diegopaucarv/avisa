@@ -1,0 +1,224 @@
+{
+  "generado": "2026-11-27T22:45:29.372Z",
+  "tarea": "B2 · vincular documentos a casos con evidencia de entidad (verificación manual)",
+  "criterio_aplicado": "Solo documentos con entidad/conflicto único y verificable en título+resumen; sin sobrescribir caso_id existente. Código explícito CS-AAAA-NNNN: 0 casos.",
+  "antes": {
+    "total": 153,
+    "con_caso": 83,
+    "sin_caso": 70
+  },
+  "actualizaciones_previstas": [
+    {
+      "doc_codigo": "AT-2026-37_pdf",
+      "doc_id": "d947b2ec-e52d-4329-a6e2-f2b750e0e2c2",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Convocatoria de marcha hacia Huancayo el 18.JUN.2026 por contaminación del río Yurakyacu",
+      "caso_codigo": "CS-2026-0010",
+      "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd",
+      "caso_nombre": "Mortandad masiva de truchas (~2 millones) en Pariahuanca, Junín.",
+      "motivo": "Pariahuanca/Junín/truchas/Yuracyacu: idéntico al caso.",
+      "caso_id_actual": null
+    },
+    {
+      "doc_codigo": "AT-2026-40_pdf",
+      "doc_id": "cd5d3a76-2130-40c4-9245-6990bf6cc9b2",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Movilización hacia Huancayo 18.JUN.2026 – Contaminación río Yuracyacu / intangibilidad de cabeceras de cuenca",
+      "caso_codigo": "CS-2026-0010",
+      "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd",
+      "caso_nombre": "Mortandad masiva de truchas (~2 millones) en Pariahuanca, Junín.",
+      "motivo": "Misma mortandad de truchas y río Yuracyacu.",
+      "caso_id_actual": null
+    },
+    {
+      "doc_codigo": "AT-2026-62_pdf",
+      "doc_id": "5c858085-a0e7-4fe8-9b01-e401588cf172",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "OSPAS de Lomas anuncian movilización por supuesta desidia y discriminación del sector.",
+      "caso_codigo": "CS-2026-0011",
+      "caso_id": "1ddf5690-f24f-47e0-9c3a-e7990ef956bd",
+      "caso_nombre": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "motivo": "Controversia Marcona-Lomas (Tres Hermanas/Yanyarina) y erizo rojo.",
+      "caso_id_actual": null
+    },
+    {
+      "doc_codigo": "AT-2026-70_pdf",
+      "doc_id": "c581e640-fda4-4833-8480-42747ead7e66",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "Pescadores de la COPMAR esperan cumplimiento de los acuerdos asumidos por PRODUCE en reunión con dirigentes pesqueros el 12.04.2023",
+      "caso_codigo": "CS-2026-0011",
+      "caso_id": "1ddf5690-f24f-47e0-9c3a-e7990ef956bd",
+      "caso_nombre": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "motivo": "COPMAR pide veda/erizo en Marcona; conflicto del caso.",
+      "caso_id_actual": null
+    },
+    {
+      "doc_codigo": "AT-2026-72_pdf",
+      "doc_id": "9da23713-3c41-4f81-9586-331182ac6230",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "Afectados por el derrame de petróleo en la costa de Ventanilla y otros distritos, anuncian una movilización para el día 23.05.2023",
+      "caso_codigo": "CS-2022-0002",
+      "caso_id": "6e53ff24-4513-4469-b469-008c945ec7a7",
+      "caso_nombre": "Atención a pescadores afectados por derrame de petróleo (2022-2026)",
+      "motivo": "Damificados por derrame de petróleo en Ventanilla.",
+      "caso_id_actual": null
+    },
+    {
+      "doc_codigo": "AT-2026-76_pdf",
+      "doc_id": "1a00ab1f-06bc-4807-b331-2f5ae43967f2",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "Asociación Paseo Turístico Perla del Pacífico demanda hacer uso del muelle de Chorrillos para sus actividades.",
+      "caso_codigo": "CS-2024-0002",
+      "caso_id": "781a2eab-79b3-4b60-85a8-9598ec25a81f",
+      "caso_nombre": "La OSPA José Olaya Balandra permanece en la administración de la Infraestructura Pesquera Artesanal (IPA) Chorillos, sin convenio vigente.",
+      "motivo": "Disputa por muelle de Chorrillos administrado por OSPA José Olaya Balandra.",
+      "caso_id_actual": null
+    },
+    {
+      "doc_codigo": "AT-2026-90_pdf",
+      "doc_id": "5a5611d4-d43e-4005-b6c9-d6bd0ae4308e",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "🔔REPORTE DE ALERTA TEMPRANA | MESA DE DIALOGO - RÍO CORALAQUE (OMATE)",
+      "caso_codigo": "MD-2026-0011",
+      "caso_id": "8eb4ae56-b897-42e8-a5aa-b5532272c2af",
+      "caso_nombre": "Mesa de Diálogo para atender la problemática de la cuenca del río Coralaque mediante el Plan de Acción Integrado",
+      "motivo": "Mesa de diálogo de la cuenca del río Coralaque (Omate).",
+      "caso_id_actual": null
+    },
+    {
+      "doc_codigo": "RED-2026-025",
+      "doc_id": "db84fbda-c95d-4b9a-a9d7-1fe3b7962682",
+      "tipo": "Ayuda Memoria",
+      "titulo": "REUNIÓN CON REPRESENTANTES CON AH. 15 DE ENERO CHILCA",
+      "caso_codigo": "CS-2026-0003",
+      "caso_id": "1156293b-8158-42f8-b804-5c607cf6527e",
+      "caso_nombre": "Disconformidad ciudadan en Chilca en horarios para de asistencia para mecanismos de participación ciudadana del EIA-d Aceros Americanos",
+      "motivo": "Reunión con representantes del AH 15 de Enero, Chilca.",
+      "caso_id_actual": null
+    },
+    {
+      "doc_codigo": "RED-2026-030",
+      "doc_id": "e558b6e2-94ad-47c8-8771-450d4e9a59d3",
+      "tipo": "Ayuda Memoria",
+      "titulo": "Reunión de trabajo mediante oficio N° 154-2026-COPMAR (erizo rojo y alga palo)",
+      "caso_codigo": "CS-2026-0011",
+      "caso_id": "1ddf5690-f24f-47e0-9c3a-e7990ef956bd",
+      "caso_nombre": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "motivo": "Oficio COPMAR sobre erizo rojo y alga palo (Marcona-Lomas).",
+      "caso_id_actual": null
+    },
+    {
+      "doc_codigo": "AT-2026-67_pdf",
+      "doc_id": "48cd3a4c-f6a7-4530-920f-38fcb9fd5de8",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "Pescadores artesanales de la FIUPAP muestran preocupación por el inicio de las mesas de trabajo de la pesca, en relación a los recursos hidrobiológicos (Jurel, Caballa y Bonito).",
+      "caso_codigo": "CS-2024-0005",
+      "caso_id": "7d30cb36-46aa-4b78-90ac-0ac79b013f9e",
+      "caso_nombre": "Los OSPAS de artes pasivas muestran disconformidad por la emisión de cuotas de los recursos Jurel y Caballa, para las Embarcaciones Pesqueras (EP) de cerco de Boliche.",
+      "motivo": "FIUPAP rechaza RM de cuota de jurel y caballa: conflicto del caso.",
+      "caso_id_actual": null
+    }
+  ],
+  "estado_previo_documentos": [
+    {
+      "id": "d947b2ec-e52d-4329-a6e2-f2b750e0e2c2",
+      "codigo": "AT-2026-37_pdf",
+      "caso_id": null,
+      "tipo_id": 13,
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Convocatoria de marcha hacia Huancayo el 18.JUN.2026 por contaminación del río Yurakyacu",
+      "fecha": "2026-06-08T05:00:00.000Z",
+      "updated_at": "2026-10-31T07:52:56.714Z",
+      "updated_by": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "cd5d3a76-2130-40c4-9245-6990bf6cc9b2",
+      "codigo": "AT-2026-40_pdf",
+      "caso_id": null,
+      "tipo_id": 13,
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Movilización hacia Huancayo 18.JUN.2026 – Contaminación río Yuracyacu / intangibilidad de cabeceras de cuenca",
+      "fecha": "2026-06-17T05:00:00.000Z",
+      "updated_at": "2026-10-31T07:52:56.714Z",
+      "updated_by": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "5c858085-a0e7-4fe8-9b01-e401588cf172",
+      "codigo": "AT-2026-62_pdf",
+      "caso_id": null,
+      "tipo_id": 13,
+      "titulo": "OSPAS de Lomas anuncian movilización por supuesta desidia y discriminación del sector.",
+      "fecha": "2024-09-24T05:00:00.000Z",
+      "updated_at": "2026-10-31T07:52:56.714Z",
+      "updated_by": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "48cd3a4c-f6a7-4530-920f-38fcb9fd5de8",
+      "codigo": "AT-2026-67_pdf",
+      "caso_id": null,
+      "tipo_id": 13,
+      "titulo": "Pescadores artesanales de la FIUPAP muestran preocupación por el inicio de las mesas de trabajo de la pesca, en relación a los recursos hidrobiológicos (Jurel, Caballa y Bonito).",
+      "fecha": "2023-02-08T05:00:00.000Z",
+      "updated_at": "2026-10-31T07:52:56.714Z",
+      "updated_by": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "c581e640-fda4-4833-8480-42747ead7e66",
+      "codigo": "AT-2026-70_pdf",
+      "caso_id": null,
+      "tipo_id": 13,
+      "titulo": "Pescadores de la COPMAR esperan cumplimiento de los acuerdos asumidos por PRODUCE en reunión con dirigentes pesqueros el 12.04.2023",
+      "fecha": "2023-05-02T05:00:00.000Z",
+      "updated_at": "2026-10-31T07:52:56.714Z",
+      "updated_by": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "9da23713-3c41-4f81-9586-331182ac6230",
+      "codigo": "AT-2026-72_pdf",
+      "caso_id": null,
+      "tipo_id": 13,
+      "titulo": "Afectados por el derrame de petróleo en la costa de Ventanilla y otros distritos, anuncian una movilización para el día 23.05.2023",
+      "fecha": "2023-05-21T05:00:00.000Z",
+      "updated_at": "2026-10-31T07:52:56.714Z",
+      "updated_by": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "1a00ab1f-06bc-4807-b331-2f5ae43967f2",
+      "codigo": "AT-2026-76_pdf",
+      "caso_id": null,
+      "tipo_id": 13,
+      "titulo": "Asociación Paseo Turístico Perla del Pacífico demanda hacer uso del muelle de Chorrillos para sus actividades.",
+      "fecha": "2022-06-06T05:00:00.000Z",
+      "updated_at": "2026-10-31T07:52:56.714Z",
+      "updated_by": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "5a5611d4-d43e-4005-b6c9-d6bd0ae4308e",
+      "codigo": "AT-2026-90_pdf",
+      "caso_id": null,
+      "tipo_id": 13,
+      "titulo": "🔔REPORTE DE ALERTA TEMPRANA | MESA DE DIALOGO - RÍO CORALAQUE (OMATE)",
+      "fecha": "2026-01-29T05:00:00.000Z",
+      "updated_at": "2026-10-31T07:52:56.714Z",
+      "updated_by": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "id": "db84fbda-c95d-4b9a-a9d7-1fe3b7962682",
+      "codigo": "RED-2026-025",
+      "caso_id": null,
+      "tipo_id": 10,
+      "titulo": "REUNIÓN CON REPRESENTANTES CON AH. 15 DE ENERO CHILCA",
+      "fecha": "2026-09-14T05:00:00.000Z",
+      "updated_at": "2026-11-18T09:22:57.229Z",
+      "updated_by": null
+    },
+    {
+      "id": "e558b6e2-94ad-47c8-8771-450d4e9a59d3",
+      "codigo": "RED-2026-030",
+      "caso_id": null,
+      "tipo_id": 10,
+      "titulo": "Reunión de trabajo mediante oficio N° 154-2026-COPMAR (erizo rojo y alga palo)",
+      "fecha": "2026-09-03T05:00:00.000Z",
+      "updated_at": "2026-11-18T09:22:57.229Z",
+      "updated_by": null
+    }
+  ]
+}

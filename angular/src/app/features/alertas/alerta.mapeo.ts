@@ -131,6 +131,21 @@ export type RevisionAlerta = {
   accion: string | null;
 };
 
+/** Actor vigente del caso vinculado, tal como lo entrega el detalle de la alerta. */
+export type ActorCaso = {
+  id: string | null;
+  nombre: string;
+  cargo: string | null;
+  rol: string | null;
+};
+
+/** Demanda vigente del caso vinculado, tal como la entrega el detalle de la alerta. */
+export type DemandaCaso = {
+  id: string | null;
+  descripcion: string;
+  estado: string | null;
+};
+
 export type Alerta = {
   id: string;
   codigo: string;
@@ -138,6 +153,12 @@ export type Alerta = {
   casoId: string | null;
   casoCodigo: string | null;
   casoTitulo: string | null;
+  /** Resumen ejecutivo heredado del caso vinculado. */
+  casoResumen: string | null;
+  /** Actores vigentes del caso vinculado (tope 20, orden estable). */
+  casoActores: ActorCaso[];
+  /** Demandas vigentes del caso vinculado (tope 20, orden estable). */
+  casoDemandas: DemandaCaso[];
   /**
    * Riesgo heredado del caso vinculado (o declarado a mano). Es el eje de la
    * tarjeta de riesgo y del filtro `riesgo`.
@@ -444,6 +465,39 @@ function booleanoONull(registro: Registro, claves: readonly string[]): boolean |
   return typeof valor === 'boolean' ? valor : null;
 }
 
+function aActoresCaso(bruto: unknown): ActorCaso[] {
+  if (!Array.isArray(bruto)) return [];
+  const actores: ActorCaso[] = [];
+  for (const item of bruto) {
+    if (!esRegistro(item)) continue;
+    const nombre = texto(item, ['nombre', 'nombreActual', 'nombre_actual']);
+    if (!nombre) continue;
+    actores.push({
+      id: texto(item, ['id', 'actorId', 'actor_id']),
+      nombre,
+      cargo: texto(item, ['cargo', 'cargoActual', 'cargo_actual']),
+      rol: texto(item, ['rol', 'rolEnCaso', 'rol_en_caso']),
+    });
+  }
+  return actores;
+}
+
+function aDemandasCaso(bruto: unknown): DemandaCaso[] {
+  if (!Array.isArray(bruto)) return [];
+  const demandas: DemandaCaso[] = [];
+  for (const item of bruto) {
+    if (!esRegistro(item)) continue;
+    const descripcion = texto(item, ['descripcion', 'descripcionDemanda', 'descripcion_demanda']);
+    if (!descripcion) continue;
+    demandas.push({
+      id: texto(item, ['id']),
+      descripcion,
+      estado: texto(item, ['estado', 'estadoAtencion', 'estado_atencion']),
+    });
+  }
+  return demandas;
+}
+
 /** Alerta de `items[]` o de `alert`. */
 export function aAlerta(bruto: unknown): Alerta {
   const registro = esRegistro(bruto) ? bruto : {};
@@ -466,6 +520,9 @@ export function aAlerta(bruto: unknown): Alerta {
     casoId: texto(registro, ['casoId', 'caso_id']),
     casoCodigo: texto(registro, ['casoCode', 'caso_code']),
     casoTitulo: texto(registro, ['casoTitulo', 'caso_titulo']),
+    casoResumen: texto(registro, ['casoResumen', 'caso_resumen']),
+    casoActores: aActoresCaso(leer(registro, ['casoActores', 'caso_actores'])),
+    casoDemandas: aDemandasCaso(leer(registro, ['casoDemandas', 'caso_demandas'])),
     riesgo,
     alcance:
       aAlcance(texto(registro, ['alcance'])) ??

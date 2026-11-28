@@ -4,10 +4,12 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
+import { hoyIso } from '../../core/fecha/zona-horaria';
 import { aErrorApi } from '../../core/http/errores';
 import { AvisosService } from '../../shared/ui/avisos.service';
 import { crearCsvPadronFilas, type FilaPadron } from '../directorio/padron-asistencia';
-import { esExcelBinario, leerTabla } from './importacion.csv';
+import { esExcelAntiguo, esExcelBinario, leerTabla, type TablaLeida } from './importacion.csv';
+import { leerLibroExcel } from './importacion.xlsx';
 import {
   LIMITE_FILAS,
   validarImportacion,
@@ -29,22 +31,24 @@ export type ResultadoImportacion = {
   readonly creados: number;
   readonly fallidos: number;
   readonly errores: readonly ErrorFila[];
+  /** Filas creadas con un pendiente menor (por ejemplo, la foto no se registró). */
+  readonly advertencias: readonly ErrorFila[];
   /** Para la lista de asistencia: el documento ya se descargó. */
   readonly documento?: string;
 };
 
-const MENSAJE_EXCEL =
-  'Un .xlsx es un archivo comprimido, no una hoja de texto: no se puede leer aquí. ' +
-  'En Excel use «Archivo → Guardar como → CSV UTF-8», o seleccione las celdas, cópielas ' +
-  '(Ctrl+C) y péguenlas en el cuadro de abajo: se leen tabuladores, comas y puntos y coma.';
+const MENSAJE_EXCEL_ANTIGUO =
+  'El formato .xls antiguo no se puede leer. En Excel use «Archivo → Guardar como → ' +
+  'Libro de Excel (.xlsx)» o «CSV UTF-8» y vuelva a elegir el archivo.';
 
 /**
  * Estado y ejecución de una importación.
  *
  * El panel sólo pinta lo que hay aquí; el «ruteo» por tipo de archivo vive en
- * `importacion.tipos.ts` y la lectura del archivo en `importacion.csv.ts`. Este
- * servicio es el único punto que habla con la API, en serie y fila a fila: un
- * archivo de 400 altas no debe abrir 400 conexiones a la vez.
+ * `importacion.tipos.ts` y la lectura en `importacion.csv.ts` (texto) o
+ * `importacion.xlsx.ts` (libro de Excel). Este servicio es el único punto que
+ * habla con la API, en serie y fila a fila: un archivo de 400 altas no debe
+ * abrir 400 conexiones a la vez.
  */
 @Injectable({ providedIn: 'root' })
 export class ImportacionService {
@@ -56,6 +60,8 @@ export class ImportacionService {
   readonly tipo = signal<TipoImportacion>(tipoImportacion(null));
   readonly texto = signal('');
   readonly nombreArchivo = signal<string | null>(null);
+  /** Hoja de un .xlsx ya normalizada; si existe, la previsualización la usa. */
+  readonly tablaArchivo = signal<TablaLeida | null>(null);
   readonly validacion = signal<Validacion | null>(null);
   readonly estado = signal<EstadoImportacion>('inactivo');
   readonly errorArchivo = signal<string | null>(null);
@@ -87,6 +93,8 @@ export class ImportacionService {
 
   escribir(texto: string): void {
     this.texto.set(texto);
+    // Pegar o escribir a mano invalida la hoja binaria ya cargada.
+    this.tablaArchivo.set(null);
     this.validacion.set(null);
     this.resultado.set(null);
     this.estado.set('inactivo');
@@ -95,12 +103,27 @@ export class ImportacionService {
   async elegirArchivo(archivo: File): Promise<void> {
     this.errorArchivo.set(null);
     this.nombreArchivo.set(archivo.name);
+    this.tablaArchivo.set(null);
+    this.validacion.set(null);
+    this.resultado.set(null);
+    this.estado.set('inactivo');
 
     try {
+      if (esExcelAntiguo(archivo.name)) {
+        this.texto.set('');
+        this.errorArchivo.set(MENSAJE_EXCEL_ANTIGUO);
+        return;
+      }
+
       const firma = await leerFirma(archivo);
       if (esExcelBinario(archivo.name, firma)) {
-        this.errorArchivo.set(MENSAJE_EXCEL);
         this.texto.set('');
+        const lectura = await leerLibroExcel(archivo);
+        if (!lectura.ok) {
+          this.errorArchivo.set(lectura.mensaje);
+          return;
+        }
+        this.tablaArchivo.set(lectura.tabla);
         return;
       }
 
@@ -112,15 +135,16 @@ export class ImportacionService {
   }
 
   previsualizar(): void {
+    const tablaArchivo = this.tablaArchivo();
     const texto = this.texto().trim();
-    if (texto === '') {
+    if (!tablaArchivo && texto === '') {
       this.errorArchivo.set('Pegue el contenido de la hoja o elija un archivo.');
       return;
     }
 
     this.errorArchivo.set(null);
     this.resultado.set(null);
-    const tabla = leerTabla(texto);
+    const tabla = tablaArchivo ?? leerTabla(texto);
     if (tabla.filas.length === 0) {
       this.errorArchivo.set('La hoja no tiene filas: sólo cabecera o nada.');
       return;
@@ -153,11 +177,13 @@ export class ImportacionService {
     this.resultado.set(null);
 
     const errores: ErrorFila[] = [];
+    const advertencias: ErrorFila[] = [];
     let creados = 0;
 
     for (const fila of validacion.validas) {
       try {
-        await this.crearRegistro(tipo, fila);
+        const aviso = await this.crearRegistro(tipo, fila);
+        if (aviso) advertencias.push(aviso);
         creados += 1;
       } catch (fallo) {
         const api = aErrorApi(fallo, 'La API rechazó la fila.');
@@ -176,6 +202,7 @@ export class ImportacionService {
       creados,
       fallidos: errores.length,
       errores,
+      advertencias,
     };
     this.resultado.set(resultado);
     this.estado.set('hecho');
@@ -189,7 +216,7 @@ export class ImportacionService {
       return;
     }
 
-    if (errores.length === 0) {
+    if (errores.length === 0 && advertencias.length === 0) {
       this.avisos.exito(
         `${creados} ${creados === 1 ? 'registro creado' : 'registros creados'}`,
         `Importación de «${tipo.etiqueta}» completada.`,
@@ -197,10 +224,21 @@ export class ImportacionService {
       return;
     }
 
+    const detalles: string[] = [];
+    if (errores.length > 0) {
+      detalles.push(
+        `${errores.length} ${errores.length === 1 ? 'fila rechazada' : 'filas rechazadas'}`,
+      );
+    }
+    if (advertencias.length > 0) {
+      detalles.push(
+        `${advertencias.length} ${advertencias.length === 1 ? 'aviso' : 'avisos'} (el registro sí se creó)`,
+      );
+    }
+
     this.avisos.info(
       `Importación parcial: ${creados} de ${creados + errores.length}`,
-      `${errores.length} ${errores.length === 1 ? 'fila rechazada' : 'filas rechazadas'}. ` +
-        'El detalle está en el panel.',
+      `${detalles.join('. ')}. El detalle está en el panel.`,
     );
   }
 
@@ -220,7 +258,7 @@ export class ImportacionService {
       region: String(fila.payload['region'] ?? ''),
     }));
 
-    const hoy = new Date().toISOString().slice(0, 10);
+    const hoy = hoyIso();
     const csv = crearCsvPadronFilas({
       titulo: 'Importado de lista de asistencia',
       lugar: '',
@@ -233,6 +271,7 @@ export class ImportacionService {
       creados: filas.length,
       fallidos: validacion.rechazos.length,
       errores: [],
+      advertencias: [],
       documento: 'avisa_lista_asistencia.csv',
     });
     this.estado.set('hecho');
@@ -242,8 +281,11 @@ export class ImportacionService {
     );
   }
 
-  /** Alta del registro de una fila. Las demandas van después de su caso. */
-  private async crearRegistro(tipo: TipoImportacion, fila: FilaValida): Promise<void> {
+  /**
+   * Alta del registro de una fila. Las demandas van después de su caso. Devuelve
+   * un aviso cuando el registro se creó pero un paso secundario falló (la foto).
+   */
+  private async crearRegistro(tipo: TipoImportacion, fila: FilaValida): Promise<ErrorFila | null> {
     if (tipo.id === 'casos' || tipo.id === 'casos-demandas') {
       const creado = await firstValueFrom(
         this.http.post<unknown>(urlApi('/v1/cases'), fila.payload),
@@ -270,21 +312,76 @@ export class ImportacionService {
           );
         }
       }
-      return;
+      return null;
     }
 
-    await firstValueFrom(this.http.post<unknown>(urlApi('/v1/actors'), fila.payload));
+    const creado = await firstValueFrom(
+      this.http.post<unknown>(urlApi('/v1/actors'), fila.payload),
+    );
+
+    const foto = fila.foto ?? '';
+    if (foto === '') return null;
+
+    // La foto es un paso posterior: si falla, el actor ya existe y la fila no
+    // se marca como rechazada para no invitar a repetir el alta.
+    try {
+      await this.registrarFoto(creado, foto);
+      return null;
+    } catch (fallo) {
+      const api = aErrorApi(fallo, 'La API rechazó la foto.');
+      return {
+        fila: fila.fila,
+        etiqueta: fila.etiqueta,
+        codigo: 'FOTO_NO_REGISTRADA',
+        mensaje: `El actor se creó, pero la foto no se registró: ${api.message}`,
+      };
+    }
+  }
+
+  /** Registra la foto declarada como medio principal del actor recién creado. */
+  private async registrarFoto(actor: unknown, url: string): Promise<void> {
+    const entidadId = idDeActor(actor);
+    if (!entidadId) {
+      throw new Error('La API no devolvió el identificador del actor creado.');
+    }
+
+    await firstValueFrom(
+      this.http.post<unknown>(urlApi('/v1/media'), {
+        entidadTipo: 'actor',
+        entidadId,
+        rol: 'principal',
+        esPrincipal: true,
+        url,
+      }),
+    );
   }
 
   private reiniciar(): void {
     this.texto.set('');
     this.nombreArchivo.set(null);
+    this.tablaArchivo.set(null);
     this.validacion.set(null);
     this.errorArchivo.set(null);
     this.resultado.set(null);
     this.estado.set('inactivo');
     this.progreso.set({ hechos: 0, total: 0 });
   }
+}
+
+/** El alta de actor responde la ficha (`{ id, nombre, … }`); se aceptan alias. */
+function idDeActor(bruto: unknown): string | null {
+  if (!bruto || typeof bruto !== 'object') return null;
+  const objeto = bruto as Record<string, unknown>;
+  const detalle =
+    objeto['actor'] && typeof objeto['actor'] === 'object'
+      ? (objeto['actor'] as Record<string, unknown>)
+      : objeto;
+
+  for (const clave of ['id', 'uid', 'actorUid', 'actor_uid']) {
+    const valor = detalle[clave];
+    if (typeof valor === 'string' && valor.trim() !== '') return valor.trim();
+  }
+  return null;
 }
 
 /** El alta de caso responde `{ case: { codigo } }`; se aceptan alias por si cambia. */

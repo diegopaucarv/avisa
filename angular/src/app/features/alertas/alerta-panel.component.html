@@ -545,38 +545,51 @@
           </section>
 
           <section class="alerta-seccion">
+            <h3 class="alerta-seccion-titulo">📁 Caso vinculado</h3>
             <div class="alerta-seccion-cuerpo">
               <p>
-                Caso vinculado: <b>{{ a.casoCodigo || 'SIN CASO' }}</b>
-                @if (a.casoTitulo) {
-                  · {{ a.casoTitulo }}
+                <b>{{ a.casoCodigo || 'SIN CASO' }}</b>
+                @if (casoTituloVisible(); as tituloCaso) {
+                  · {{ tituloCaso }}
                 }
               </p>
 
               @if (cargandoCaso()) {
                 <p class="alerta-vacio" role="status">Cargando datos del caso…</p>
-              } @else if (casoVinculado(); as caso) {
-                @if (caso.resumen) {
-                  <p>{{ caso.resumen }}</p>
-                }
+              } @else if (errorCaso()) {
+                <p class="alerta-vacio">No se pudieron cargar los datos del caso.</p>
+              }
 
-                @if (caso.actores.length) {
-                  <h4 class="caso-subtitulo">Actores principales</h4>
-                  <ul>
-                    @for (actor of caso.actores; track $index) {
-                      <li>{{ actor }}</li>
-                    }
-                  </ul>
-                }
+              @if (casoResumenVisible(); as resumenCaso) {
+                <p>{{ resumenCaso }}</p>
+              }
 
-                @if (caso.demandas.length) {
-                  <h4 class="caso-subtitulo">Demandas</h4>
-                  <ul>
-                    @for (demanda of caso.demandas; track $index) {
-                      <li>{{ demanda }}</li>
-                    }
-                  </ul>
-                }
+              @if (casoActoresVisibles().length) {
+                <h4 class="caso-subtitulo">Actores principales</h4>
+                <ul>
+                  @for (actorCaso of casoActoresVisibles(); track $index) {
+                    <li>
+                      {{ actorCaso.nombre }}
+                      @if (actorCaso.detalle) {
+                        · {{ actorCaso.detalle }}
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+
+              @if (casoDemandasVisibles().length) {
+                <h4 class="caso-subtitulo">Demandas</h4>
+                <ul>
+                  @for (demandaCaso of casoDemandasVisibles(); track $index) {
+                    <li>
+                      {{ demandaCaso.descripcion }}
+                      @if (demandaCaso.estado) {
+                        <span class="demanda-estado">· {{ demandaCaso.estado }}</span>
+                      }
+                    </li>
+                  }
+                </ul>
               }
             </div>
           </section>
@@ -603,31 +616,6 @@
               >Último revisor: <b>{{ a.ultimoRevisor || '—' }}</b></span
             >
           </div>
-
-          @if (verHistorial()) {
-            <section class="alerta-seccion">
-              <h3 class="alerta-seccion-titulo">Historial de revisiones</h3>
-              <div class="alerta-seccion-cuerpo">
-                @if (a.historial.length) {
-                  <ul class="historial">
-                    @for (revision of a.historial; track $index) {
-                      <li>
-                        <span class="historial-autor">{{ revision.autor }}</span>
-                        <span class="historial-meta">
-                          {{ fecha(revision.fecha) }}
-                          @if (revision.accion) {
-                            · {{ revision.accion }}
-                          }
-                        </span>
-                      </li>
-                    }
-                  </ul>
-                } @else {
-                  <p class="alerta-vacio">Sin revisiones registradas.</p>
-                }
-              </div>
-            </section>
-          }
         }
       }
     </div>

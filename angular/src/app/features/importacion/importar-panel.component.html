@@ -4,8 +4,8 @@
       <div>
         <h2 id="importar-titulo">Importar</h2>
         <p>
-          Lea una hoja (CSV, TSV o celdas pegadas de Excel), revísela y confirme. Nada se escribe en
-          la base hasta que pulse el botón de importar.
+          Lea una hoja (CSV, TSV, .xlsx o celdas pegadas de Excel), revísela y confirme. Nada se
+          escribe en la base hasta que pulse el botón de importar.
         </p>
       </div>
       <button
@@ -97,6 +97,13 @@
         ></textarea>
       }
 
+      @if (importacion.tablaArchivo(); as tabla) {
+        <p class="importar-limite">
+          Hoja leída: {{ tabla.filas.length }} filas y {{ tabla.cabecera.length }} columnas. Pulse
+          «Previsualizar» para validarla.
+        </p>
+      }
+
       @if (importacion.errorArchivo(); as error) {
         <p class="form-error" role="alert">{{ error }}</p>
       }
@@ -139,8 +146,9 @@
 
           @if (validacion.faltantes.length > 0) {
             <p class="form-error" role="alert">
-              Faltan columnas obligatorias en la cabecera:
-              {{ validacion.faltantes.join(', ') }}. Revise la plantilla.
+              No se reconocieron los encabezados. Faltan columnas obligatorias:
+              {{ validacion.faltantes.join(', ') }}. Revise la plantilla o los títulos de la primera
+              fila.
             </p>
           }
 
@@ -231,6 +239,36 @@
             </table>
             @if (erroresRestantes() > 0) {
               <p class="importar-limite">y {{ erroresRestantes() }} más.</p>
+            }
+          }
+
+          @if (advertencias().length > 0) {
+            <p class="importar-subtitulo">Avisos (el registro se creó)</p>
+            <table class="tabla-importar">
+              <caption class="sr-only">
+                Filas creadas con un pendiente menor
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Fila</th>
+                  <th scope="col">Registro</th>
+                  <th scope="col">Código</th>
+                  <th scope="col">Motivo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (aviso of advertencias(); track aviso.fila + aviso.codigo) {
+                  <tr>
+                    <td>{{ aviso.fila }}</td>
+                    <td>{{ aviso.etiqueta }}</td>
+                    <td class="codigo">{{ aviso.codigo }}</td>
+                    <td>{{ aviso.mensaje }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            @if (advertenciasRestantes() > 0) {
+              <p class="importar-limite">y {{ advertenciasRestantes() }} más.</p>
             }
           }
         </div>

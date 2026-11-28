@@ -43,6 +43,15 @@ export type Foto = {
   alto: number | null;
   orden: number;
   esPrincipal: boolean;
+  /**
+   * El medio tiene bytes en `core.medios.contenido`.
+   *
+   * `url` es una ruta estática que puede sobrevivir al archivo original; este
+   * booleano dice si además existe el binario servible por
+   * `/api/v1/media/<id>/contenido`. La galería lo usa para preferir ese endpoint
+   * (ver `urlFoto`) y para no ofrecer «Abrir original» cuando no hay respaldo.
+   */
+  tieneContenido: boolean;
   alt: string | null;
   credito: string | null;
 };
@@ -84,6 +93,7 @@ export function aFoto(bruto: unknown): Foto {
     alto: numero(registro, ['alto']),
     orden: numero(registro, ['orden']) ?? 0,
     esPrincipal: booleano(registro, ['esPrincipal', 'es_principal']),
+    tieneContenido: booleano(registro, ['tieneContenido', 'tiene_contenido']),
     alt: texto(registro, ['alt']),
     credito: texto(registro, ['credito']),
   };
@@ -92,6 +102,20 @@ export function aFoto(bruto: unknown): Foto {
 /** Una foto sólo es pintable si tiene URL; el resto se descarta. */
 export function esFotoPintable(foto: Foto): boolean {
   return !!foto.url.trim();
+}
+
+/**
+ * URL con la que pintar una foto, prefiriendo el binario guardado.
+ *
+ * `url` puede ser una ruta estática heredada que ya no exista en disco; cuando
+ * el medio declara `tieneContenido`, el endpoint de contenido es la fuente
+ * fiable (mismo resultado si el estático sigue ahí). Las URL externas
+ * (`http(s)`, `data:`, `blob:`) se respetan tal cual: no pertenecen a la API.
+ */
+export function urlFoto(foto: Foto): string {
+  if (!foto.tieneContenido || !foto.id) return foto.url;
+  if (/^(https?:|data:|blob:)/i.test(foto.url.trim())) return foto.url;
+  return urlMedio(`/api/v1/media/${foto.id}/contenido`);
 }
 
 /** Foto principal de un conjunto ya ordenado por el servidor. */

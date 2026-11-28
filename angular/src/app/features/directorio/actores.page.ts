@@ -29,6 +29,7 @@ import {
   esFotoPintable,
   fotoPrincipal,
   fotosPorEntidad,
+  urlFoto,
   type Foto,
 } from '../../dominio/medios';
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
@@ -826,9 +827,14 @@ export class ActoresPage {
 
   readonly fotosPorActor = computed(() => this.fotosPagina.valor() ?? new Map<string, Foto[]>());
 
-  /** Foto principal del actor para la columna de la tabla; `null` = sin foto. */
+  /**
+   * Foto principal del actor para la columna de la tabla; `null` = sin foto.
+   * La `url` ya viene resuelta por `urlFoto`, que prefiere el binario cuando el
+   * medio lo declara, de modo que la plantilla sólo pinta `foto.url`.
+   */
   fotoDe(actorId: string): Foto | null {
-    return fotoPrincipal(this.fotosPorActor().get(actorId) ?? []);
+    const principal = fotoPrincipal(this.fotosPorActor().get(actorId) ?? []);
+    return principal ? { ...principal, url: urlFoto(principal) } : null;
   }
 
   /**

@@ -16,6 +16,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
+import { hoyIso } from '../../core/fecha/zona-horaria';
 import {
   normalizarColeccion,
   paramsDePagina,
@@ -169,14 +170,6 @@ function formularioDe(compromiso: Compromiso): FormularioCompromiso {
   };
 }
 
-/** Fecha de hoy en ISO corto (`YYYY-MM-DD`), como la esperan los `<input type="date">`. */
-function hoyIso(): string {
-  const hoy = new Date();
-  const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-  const dia = String(hoy.getDate()).padStart(2, '0');
-  return `${hoy.getFullYear()}-${mes}-${dia}`;
-}
-
 function leerValor(evento: Event): string {
   return (evento.target as HTMLInputElement | HTMLSelectElement).value;
 }
@@ -229,6 +222,17 @@ const COMPROMISO_VACIO: Compromiso = aCompromiso({});
       margin-top: 12px;
       font-size: 12.5px;
       color: #52677a;
+    }
+    /*
+     * «H001 · Nombre» en una sola línea: el NBSP de etiquetaHito ya une el
+     * código al nombre; aquí se impide que la descripción salte de línea y se
+     * recorta con puntos suspensivos cuando no cabe (el title da el texto).
+     */
+    .hito-etiqueta {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .panel-aviso {
       margin: 6px 0 0;
@@ -644,6 +648,16 @@ export class CompromisoPanelComponent {
     fuenteDe(this.detalle()?.documento ?? null, this.detalle()?.reunion ?? null),
   );
   readonly fuenteTexto = computed(() => etiquetaFuente(this.fuente()));
+
+  /**
+   * Institución de la oficina responsable. La API todavía no expone la entidad
+   * (`core.cat_unidades_organicas.entidad_id` → `core.entidades`), de modo que
+   * se pinta el hueco con «—» y se avisa, sin inventar el dato.
+   */
+  readonly institucion = computed<string | null>(
+    () => this.cabecera().institucionNombre ?? this.cabecera().institucionSiglas ?? null,
+  );
+  readonly institucionTexto = computed(() => this.institucion() ?? '—');
 
   /**
    * Caso / espacio de diálogo como «código · título». Se prefiere el caso
@@ -1372,7 +1386,11 @@ export class CompromisoPanelComponent {
   }
 
   alFondo(evento: MouseEvent): void {
-    if (evento.target === evento.currentTarget) this.cerrar();
+    if (evento.target !== evento.currentTarget) return;
+    // En edición o alta el clic fuera no cierra: evita perder lo escrito. Para
+    // salir hay botones explícitos («Cancelar» / «Cerrar»).
+    if (this.formularioVisible()) return;
+    this.cerrar();
   }
 
   alTecla(evento: KeyboardEvent): void {

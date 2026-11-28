@@ -1,0 +1,122 @@
+{
+  "generado": "2026-11-27T22:44:37.102Z",
+  "tarea": "B1 · desvincular de CS-2026-0003 lo que no cita el caso",
+  "criterio": "Solo se desvincula si el texto NO menciona 'Aceros Americanos'/'ACERO AMERICANO', ni el código CS-2026-0003/CS-MI-ITE-2026-03, ni describe el conflicto (Chilca, AH 15 de Enero, EIA, audiencia, participación ciudadana, horarios, chatarra/planta de acero). Si hay duda, se deja intacto y se marca 'revisar a mano'.",
+  "nota_deriva": "El estado actual NO coincide con la premisa de 16 demandas: hay 0 demandas con caso_id = CS-2026-0003. migration/54_demandas_desvinculo_caso_2026_11_24.sql ya desvinculó esas 16 demandas del entonces CS-MI-ITE-2026-03 (hoy recodificado CS-2026-0003) y el dataset se recargó (132 demandas, no 325). Los códigos DEM-2026-0097..0140 no existen en la base.",
+  "caso": {
+    "id": "1156293b-8158-42f8-b804-5c607cf6527e",
+    "codigo_caso": "CS-2026-0003",
+    "codigo_legado": "CS-PRODUCE-2026-031",
+    "nombre_caso": "Disconformidad ciudadan en Chilca en horarios para de asistencia para mecanismos de participación ciudadana del EIA-d Aceros Americanos"
+  },
+  "conteos": {
+    "demandas_vinculadas_antes": 0,
+    "alertas_vinculadas_antes": 4,
+    "demandas_indirectas_por_documento": 0,
+    "a_desvincular": 0,
+    "a_revisar": 0,
+    "a_conservar": 4
+  },
+  "plan": {
+    "desvincular": [],
+    "revisar": [],
+    "conservar": [
+      {
+        "tabla": "core.alertas_tempranas",
+        "id": "69929d28-0a91-4aa1-b9b0-a8b6a8eb7221",
+        "codigo": "AT-2026-36",
+        "razones": [
+          "menciona 'Aceros Americanos'/'ACERO AMERICANO'",
+          "describe el conflicto del caso (Chilca/15 de Enero/EIA/participación)"
+        ],
+        "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Plantón frente al Ministerio de la Producción por oposición al proyecto de planta de tratamiento de chatarra y acero de ACERO AMERICANO S.A.C."
+      },
+      {
+        "tabla": "core.alertas_tempranas",
+        "id": "8d8a042c-6e50-44ef-84ea-d0288af49958",
+        "codigo": "AT-2026-38",
+        "razones": [
+          "menciona 'Aceros Americanos'/'ACERO AMERICANO'",
+          "describe el conflicto del caso (Chilca/15 de Enero/EIA/participación)"
+        ],
+        "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Movilización de pobladores del AA. HH. 15 de Enero a PRODUCE por proceso de audiencia de EIA (Proyecto Aceros Americanos)"
+      },
+      {
+        "tabla": "core.alertas_tempranas",
+        "id": "0b1d7666-e099-48a3-8de6-c243a8e7e909",
+        "codigo": "AT-2026-42",
+        "razones": [
+          "menciona 'Aceros Americanos'/'ACERO AMERICANO'",
+          "describe el conflicto del caso (Chilca/15 de Enero/EIA/participación)"
+        ],
+        "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Movilización de representantes del AA. HH. 15 de Enero a sede Barlovento de PRODUCE – Proyecto Aceros Americanos"
+      },
+      {
+        "tabla": "core.alertas_tempranas",
+        "id": "f23b630c-22a8-460e-b6d3-1ca0b3c14502",
+        "codigo": "AT-2026-84",
+        "razones": [
+          "menciona 'Aceros Americanos'/'ACERO AMERICANO'",
+          "describe el conflicto del caso (Chilca/15 de Enero/EIA/participación)"
+        ],
+        "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | MOVILIZACIÓN DE POBLADORES DEL AA. HH. 15 DE ENERO ANTE SEDE CENTRAL DE PRODUCE POR AUDIENCIA PÚBLICA DE EIA – PROYECTO ACEROS AMERICANOS"
+      }
+    ]
+  },
+  "demandas_previas": [],
+  "alertas_previas": [
+    {
+      "id": "69929d28-0a91-4aa1-b9b0-a8b6a8eb7221",
+      "codigo_alerta": "AT-2026-36",
+      "codigo_legado": "AT-2026-36",
+      "caso_id": "1156293b-8158-42f8-b804-5c607cf6527e",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Plantón frente al Ministerio de la Producción por oposición al proyecto de planta de tratamiento de chatarra y acero de ACERO AMERICANO S.A.C.",
+      "situacion_actual": "Aproximadamente 50 personas del AA. HH. 15 de Enero realizaron un plantón en el frontis del Ministerio de la Producción, expresando su oposición al proyecto de instalación de una planta de tratamiento de chatarra y acero de ACERO AMERICANO S.A.C. Los manifestantes cuestionan el desarrollo del Plan de Participación Ciudadana (PPC), señalando que las actividades informativas y participativas se han programado reiteradamente en días laborables y horarios de mañana, limitando la asistencia de la población. Asimismo manifiestan preocupación por los posibles impactos ambientales del proyecto en la zona.",
+      "descripcion_riesgo": null,
+      "hechos_recientes": "- La población ha presentado comunicaciones ante PRODUCE y la PCM solicitando la reprogramación de talleres y actividades participativas en horarios que faciliten una mayor participación ciudadana; desde el sector se atendió y se cambiaron los horarios previamente.\n- El proyecto de ACERO AMERICANO S.A.C. continúa su proceso de estudio de impacto ambiental detallado y participación ciudadana conforme al procedimiento correspondiente, atendido por PRODUCE.",
+      "origen_dato": "AVISA_HISTORICO",
+      "created_at": "2026-11-26T21:19:08.713Z",
+      "anulado_en": null
+    },
+    {
+      "id": "8d8a042c-6e50-44ef-84ea-d0288af49958",
+      "codigo_alerta": "AT-2026-38",
+      "codigo_legado": "AT-2026-38",
+      "caso_id": "1156293b-8158-42f8-b804-5c607cf6527e",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Movilización de pobladores del AA. HH. 15 de Enero a PRODUCE por proceso de audiencia de EIA (Proyecto Aceros Americanos)",
+      "situacion_actual": "Alrededor de 100 personas del AA. HH. 15 de Enero se movilizan hacia la sede central de PRODUCE (San Isidro, Lima), con llegada prevista entre las 09:30 y 10:30 h, para solicitar reunión con la Directora General de DGAAMI y plantear el aplazamiento del proceso de audiencia pública del proyecto Aceros Americanos. El grupo reporta presiones y coacción del Sindicato de Construcción \"15 de Enero\" para suscribir documentos a favor del proyecto, lo que genera temor a enfrentamientos durante la audiencia y motiva el pedido de reprogramación. Riesgo de alteración al orden público en el frontis del ministerio.",
+      "descripcion_riesgo": null,
+      "hechos_recientes": "- ENE–MAY 2026 — Se modifican las fechas iniciales de las audiencias públicas por considerarse en horario poco accesible para la población.\n- JUN 2026 — Se entregan ejemplares impresos del EIA en la zona. \n- MAY–JUN 2026 — La dirigente Marlene Demarini indica que un sindicato de construcción estaría coaccionando a los pobladores a firmar una carta a favor de la empresa, con amenazas a quienes se oponen.\n- 11.JUN.2026 — El abog. Jorge Palomino y la señora Marlene Demarini, junto con alrededor de 100 personas, se movilizan en bus hacia la sede central de PRODUCE buscando reunión con la Directora María Ysabel Valle Martínez.",
+      "origen_dato": "AVISA_HISTORICO",
+      "created_at": "2026-11-26T21:19:08.713Z",
+      "anulado_en": null
+    },
+    {
+      "id": "0b1d7666-e099-48a3-8de6-c243a8e7e909",
+      "codigo_alerta": "AT-2026-42",
+      "codigo_legado": "AT-2026-42",
+      "caso_id": "1156293b-8158-42f8-b804-5c607cf6527e",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Movilización de representantes del AA. HH. 15 de Enero a sede Barlovento de PRODUCE – Proyecto Aceros Americanos",
+      "situacion_actual": "Representantes del AA. HH. 15 de Enero se movilizan en un bus con 60 pasajeros hacia la sede Barlovento de PRODUCE, con llegada estimada entre las 10:00 y 10:30 h, alegando el incumplimiento de Aceros Americanos SAC de organizar una reunión complementaria a la audiencia pública para dialogar sobre sus dudas. La dirigente Marlene Demarini indica que la empresa se habría reunido con otra directiva del AA. HH. 15 de Enero, mientras que el área de relacionamiento comunitario se niega a dialogar con los representantes que se movilizan.",
+      "descripcion_riesgo": null,
+      "hechos_recientes": "- 12.06.2026 — Aproximadamente 80 personas del AA. HH. 15 de Enero se movilizan a sede Barlovento (PRODUCE) exigiendo la anulación de la audiencia pública del EIA de Aceros Americanos programada para el 13.06.2026.\n- 13.06.2026 — Se suspende la audiencia pública del EIA del proyecto Aceros Americanos, sin nueva fecha reprogramada hasta la actualidad.\n- 03.07.2026 — Representantes del AA. HH. 15 de Enero se movilizan en bus (60 pasajeros) hacia sede Barlovento de PRODUCE, con llegada estimada entre las 10:00 y 10:30 h.",
+      "origen_dato": "AVISA_HISTORICO",
+      "created_at": "2026-11-26T21:19:08.713Z",
+      "anulado_en": null
+    },
+    {
+      "id": "f23b630c-22a8-460e-b6d3-1ca0b3c14502",
+      "codigo_alerta": "AT-2026-84",
+      "codigo_legado": "AT-2026-84",
+      "caso_id": "1156293b-8158-42f8-b804-5c607cf6527e",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | MOVILIZACIÓN DE POBLADORES DEL AA. HH. 15 DE ENERO ANTE SEDE CENTRAL DE PRODUCE POR AUDIENCIA PÚBLICA DE EIA – PROYECTO ACEROS AMERICANOS",
+      "situacion_actual": "Alrededor de 100 personas del AA. HH. 15 de Enero se movilizan en 2 buses hacia la sede central de PRODUCE con llegada prevista entre las 10:00 y 11:00 h, para solicitar reunión con la Directora General de la DGAAMI (Dirección General de Asuntos Ambientales de Industria y Manufactura) y exigir la anulación de la audiencia pública del proyecto Aceros Americanos programada para el 13.06.2026. El grupo reporta coacción del Sindicato de Construcción \"15 de Enero\" para suscribir documentos a favor de la empresa. los dirigentes de la población se movilizan en una camioneta con el abogado a Jorge Palomino relacionado al “equipo asuntos ambientales” de la PUCP. La situación presenta riesgo de alteración al orden público en el frontis del ministerio.",
+      "descripcion_riesgo": null,
+      "hechos_recientes": "- *ENE–MAY 2026* — Se modifican fechas iniciales de audiencias públicas del proyecto por considerarse en horario poco accesible para la población.\n- *JUN 2026* — Se hace entrega de ejemplares impresos del EIA en la zona; la comunidad señala que el volumen técnico impide su comprensión por parte de la población.\n- *MAY–JUN 2026* — Dirigente Marlene Demarini indica que el Sindicato de Construcción \"15 de Enero\" estaría coaccionando a pobladores a suscribir cartas a favor de Aceros Americanos, con amenazas a quienes se oponen al proyecto.\n- *11.06.2026* — Aproximadamente 60 personas del AA. HH. 15 de Enero se movilizan hacia sede central de PRODUCE; el abog. Jorge Palomino y la señora Marlene Demarini coordinan con OAIPCS y solicitan reunión con la Directora General María Ysabel Valle Martínez.\n- *12.06.2026* — Alrededor de 100 personas del AA. HH. 15 de Enero se movilizan nuevamente hacia sede central de PRODUCE con llegada estimada entre las 09:30 y 10:30 h; demanda central es la anulación de la audiencia pública programada para el 13.06.2026.",
+      "origen_dato": "AVISA_HISTORICO",
+      "created_at": "2026-11-26T21:19:08.713Z",
+      "anulado_en": null
+    }
+  ],
+  "demandas_indirectas_por_documento": []
+}

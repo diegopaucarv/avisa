@@ -148,6 +148,13 @@ export type Compromiso = {
   fechaVencimientoEfectiva: string | null;
   origenVencimiento: OrigenVencimiento;
   unidad: string | null;
+  /**
+   * Institución a la que pertenece la unidad responsable (`core.entidades`).
+   * La API todavía no la envía; se mapea por si llega y, si no, la ficha deja
+   * el hueco con «—» en lugar de inventar el nombre.
+   */
+  institucionSiglas: string | null;
+  institucionNombre: string | null;
   alcance: string | null;
   tematica: string | null;
   atiendeGenero: boolean;
@@ -391,6 +398,20 @@ export function aCompromiso(bruto: unknown): Compromiso {
       texto(registro, ['origenVencimiento', 'origen_vencimiento']),
     ),
     unidad: texto(registro, ['unidad']),
+    institucionSiglas: texto(registro, [
+      'institucionSiglas',
+      'institucion_siglas',
+      'entidadSiglas',
+      'entidad_siglas',
+    ]),
+    institucionNombre: texto(registro, [
+      'institucionNombre',
+      'institucion_nombre',
+      'entidadNombre',
+      'entidad_nombre',
+      'institucion',
+      'entidad',
+    ]),
     alcance: texto(registro, ['alcance']),
     tematica: texto(registro, ['tematica']),
     atiendeGenero: booleano(registro, ['atiendeGenero', 'atiende_genero']),

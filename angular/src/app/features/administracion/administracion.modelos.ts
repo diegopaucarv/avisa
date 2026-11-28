@@ -1,14 +1,13 @@
 import { aErrorApi } from '../../core/http/errores';
 import { esRegistro, lista, leer, numero, texto, type Registro } from '../../dominio/mapeo';
+import { formatearFecha, formatearFechaHora } from '../../shared/formato-fecha';
 
 /**
  * Modelos y mapeo de la pantalla de Administración.
  *
- * El formato de fecha es `dd/mm/aaaa`, como pide el encargo. No se reutiliza
- * `shared/formato-fecha.ts` porque ese formateador pinta el formato compacto
- * (`02NOV2025`) del resto de la aplicación: aquí se necesita el día con barras
- * para leer «último acceso» y la bitácora de migraciones. Es una diferencia
- * deliberada y local a esta pantalla.
+ * El formato de fecha es el único del proyecto (`shared/formato-fecha.ts`,
+ * `27NOV2026` y `27NOV2026 16:00` en hora de Lima). Los nombres `…DdMmAaaa` se
+ * conservan por compatibilidad con las plantillas que ya los exponen.
  */
 
 export const ROL_ADMINISTRADOR = 'administrador';
@@ -34,33 +33,14 @@ export function etiquetaRol(codigo: string | null | undefined): string {
 
 /* ── Fechas y tamaños ─────────────────────────────────────────────────────── */
 
-function dos(valor: number): string {
-  return String(valor).padStart(2, '0');
-}
-
-const DIA_ISO = /^(\d{4})-(\d{2})-(\d{2})(?:$|[T ])/;
-
-/** Día literal de una fecha o marca ISO, sin desplazarla por zona horaria. */
+/** Día o marca ISO → `27NOV2026`; sin dato → `—`. Nombre legado. */
 export function fechaDdMmAaaa(valor: string | null | undefined): string {
-  if (!valor) return '—';
-  const coincidencia = DIA_ISO.exec(valor);
-  if (coincidencia) {
-    return `${coincidencia[3]}/${coincidencia[2]}/${coincidencia[1]}`;
-  }
-  const fecha = new Date(valor);
-  if (Number.isNaN(fecha.getTime())) return '—';
-  return `${dos(fecha.getDate())}/${dos(fecha.getMonth() + 1)}/${fecha.getFullYear()}`;
+  return formatearFecha(valor);
 }
 
-/** Marca temporal en hora local (`dd/mm/aaaa hh:mm`). */
+/** Marca temporal → `27NOV2026 16:00` en hora de Lima; sin dato → `—`. */
 export function fechaHoraDdMmAaaa(valor: string | null | undefined): string {
-  if (!valor) return '—';
-  const fecha = new Date(valor);
-  if (Number.isNaN(fecha.getTime())) return '—';
-  return (
-    `${dos(fecha.getDate())}/${dos(fecha.getMonth() + 1)}/${fecha.getFullYear()}` +
-    ` ${dos(fecha.getHours())}:${dos(fecha.getMinutes())}`
-  );
+  return formatearFechaHora(valor);
 }
 
 export function tamanoLegible(bytes: number): string {

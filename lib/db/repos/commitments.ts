@@ -143,6 +143,12 @@ export type CommitmentListQuery = {
   caso?: string;
   /** Código de la mesa de diálogo (`core.mesas_dialogo.codigo`, p. ej. `OAIPCS-001`). */
   mesa?: string;
+  /**
+   * `true` restringe a los compromisos cuyo caso está enlazado a una mesa de
+   * diálogo (`core.mesas_dialogo.caso_id`, migración 81). Es el filtro «solo
+   * mesas»; un caso común sin mesa queda fuera. Sin el campo no se filtra.
+   */
+  soloMesas?: boolean;
   estado?: string;
   unidad?: string;
   tipo?: string;
@@ -415,6 +421,9 @@ export async function listCommitments(
   if (porTexto) where.push(porTexto);
   if (query.caso) where.push(`c.codigo_caso = ${bind(query.caso)}`);
   if (query.mesa) where.push(`m.codigo = ${bind(query.mesa)}`);
+  // «Solo mesas»: el caso tiene que estar enlazado a una mesa. Se apoya en el
+  // left join a `core.mesas_dialogo` que ya forma parte de COMMITMENT_FROM.
+  if (query.soloMesas) where.push("m.id is not null");
   if (query.estado) {
     where.push(
       `core.normalizar_ref(ec.codigo) = core.normalizar_ref(${bind(query.estado)})`,
@@ -1789,6 +1798,18 @@ function porcentajeCumplimiento(cumplidos: number, total: number): number {
 }
 
 /**
+ * Opciones de `getCommitmentsEstadisticas`. Hoy sólo el filtro «solo mesas».
+ */
+export type CommitmentsEstadisticasOpciones = {
+  /**
+   * `true` limita los agregados a los compromisos cuyo caso está enlazado a una
+   * mesa de diálogo (`core.mesas_dialogo.caso_id`, migración 81). Mismo
+   * contrato que `soloMesas` en el listado; sin el campo no se filtra.
+   */
+  soloMesas?: boolean;
+};
+
+/**
  * Estadísticas agregadas de compromisos para la pestaña «Estadísticas».
  *
  * Se resuelve en **una sola consulta** con una CTE `base` que marca, por
@@ -1804,7 +1825,14 @@ function porcentajeCumplimiento(cumplidos: number, total: number): number {
  */
 export async function getCommitmentsEstadisticas(
   client: PoolClient,
+  opciones: CommitmentsEstadisticasOpciones = {},
 ): Promise<CommitmentsEstadisticas> {
+  // El filtro se inyecta como fragmento constante (nunca con datos del usuario)
+  // en la CTE `base` y en el agregado de estados de hito, que consulta
+  // `core.compromisos` por su cuenta y no lee de `base`.
+  const filtroMesas = opciones.soloMesas
+    ? "and exists (select 1 from core.mesas_dialogo m where m.caso_id = c.caso_id)"
+    : "";
   const result = await client.query<CommitmentsEstadisticasRow>(`
     with base as (
       select
@@ -1833,7 +1861,7 @@ export async function getCommitmentsEstadisticas(
         ) as con_plazo
       from core.compromisos c
       join core.cat_estados_compromiso ec on ec.id = c.estado_id
-     where c.anulado_en is null
+     where c.anulado_en is null ${filtroMesas}
     )
     select
       (select count(*)::int from base) as total,
@@ -1900,7 +1928,7 @@ export async function getCommitmentsEstadisticas(
             select hh.estado_id, count(*)::int as total
               from core.hitos_compromiso hh
               join core.compromisos c on c.id = hh.compromiso_id
-             where hh.anulado_en is null and c.anulado_en is null
+             where hh.anulado_en is null and c.anulado_en is null ${filtroMesas}
              group by hh.estado_id
           ) h
           join core.cat_estados_hito eh on eh.id = h.estado_id

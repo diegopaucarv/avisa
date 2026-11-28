@@ -64,6 +64,7 @@ import {
   type Situacion,
 } from './compromiso.mapeo';
 import { CompromisoPanelComponent } from './compromiso-panel.component';
+import { CompromisosGraficosComponent } from './compromisos-graficos.component';
 import { EstadisticasCompromisosComponent } from './estadisticas-compromisos.component';
 import { MatrizEquipoComponent } from './matriz-equipo.component';
 import { aMesa, type Mesa } from '../mesas/mesa.mapeo';
@@ -86,7 +87,14 @@ type FiltrosCompromisos = {
 /** Cifra de la franja de indicadores; cada una filtra la tabla. */
 type IndicadorCompromisos = 'todos' | 'cumplido' | 'enProceso' | 'vencidos';
 
-type ModoVista = 'tabla' | 'calendario' | 'resumen' | 'matriz' | 'anexo14' | 'estadisticas';
+type ModoVista =
+  | 'tabla'
+  | 'mesas'
+  | 'calendario'
+  | 'resumen'
+  | 'matriz'
+  | 'anexo14'
+  | 'estadisticas';
 
 /** Una fila del desglose: la etiqueta agrupada y cuántos compromisos suma. */
 type FilaDesglose = { etiqueta: string; total: number };
@@ -225,6 +233,7 @@ function totalDe(bruto: unknown): number {
     CompromisoPanelComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
+    CompromisosGraficosComponent,
     EstadisticasCompromisosComponent,
     MatrizEquipoComponent,
     TablaComponent,
@@ -394,6 +403,22 @@ function totalDe(bruto: unknown): number {
     .celda-caso .celda-caso-ref {
       font-size: 11px;
       opacity: 0.8;
+    }
+    /* Espacio de diálogo en el modo mesas: código primero, título debajo. */
+    .celda-mesa {
+      display: block;
+      max-width: 220px;
+      white-space: normal;
+    }
+    .celda-mesa small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .celda-avance {
+      color: var(--muted);
+      font-size: 12.5px;
     }
     /* La franja dejó el bloque de redacción: ahora acompaña al resumen de hitos. */
     .celda-hitos {
@@ -686,6 +711,8 @@ export class CompromisosPage {
     plazo: (compromiso) => resolverVencimiento(compromiso).fecha,
     vencimiento: (compromiso) => compromiso.fechaVencimiento,
     anulado: (compromiso) => compromiso.anuladoEn,
+    mesa: (compromiso) => compromiso.mesaCodigo ?? compromiso.mesaTitulo ?? '',
+    avance: (compromiso) => this.avanceTexto(compromiso),
   };
 
   readonly filasVisibles = computed(() =>
@@ -736,15 +763,15 @@ export class CompromisosPage {
   ];
 
   /**
-   * Columnas del listado activo, en el orden que pide la ficha de seguimiento:
-   * caso, área, punto focal, redacción, fuente, fecha, plazo, cumplimiento,
-   * hitos/validación y evidencia. «Estado» y «Cumplimiento» no se duplican:
-   * sólo se muestra el estado derivado de cumplimiento.
+   * Columnas del listado activo, en el orden que pide el seguimiento: redacción,
+   * fuente, fecha, plazo, oficina responsable y estado de cumplimiento.
+   *
+   * El caso/espacio de diálogo, el punto focal, la validación de hitos y la
+   * evidencia viven en la versión ampliada (ficha) para no saturar la tabla.
+   * «Estado» y «Cumplimiento» no se duplican: sólo se muestra el estado
+   * derivado de cumplimiento.
    */
   readonly columnasListado: readonly ColumnaTabla[] = [
-    { clave: 'caso', titulo: 'Caso / Espacio de diálogo', ordenable: true },
-    { clave: 'unidad', titulo: 'Área responsable', ordenable: true },
-    { clave: 'puntoFocal', titulo: 'Punto focal', ordenable: true },
     { clave: 'redaccion', titulo: 'Redacción', ordenable: true },
     {
       clave: 'fuente',
@@ -766,9 +793,43 @@ export class CompromisosPage {
       ordenable: true,
       acceso: (fila) => resolverVencimiento(fila as Compromiso).fecha,
     },
+    {
+      clave: 'unidad',
+      titulo: 'Oficina responsable',
+      ordenable: true,
+    },
     { clave: 'cumplimiento', titulo: 'Estado de cumplimiento', ordenable: true },
-    { clave: 'hitos', titulo: 'Estado de hitos / validación' },
-    { clave: 'evidencia', titulo: 'Evidencia' },
+  ];
+
+  /**
+   * Columnas del modo mesas: compromiso, espacio de diálogo, plazo, estado y
+   * avance. La primera clave reutiliza la plantilla «redaccion» (código y
+   * acción) y las demás sus plantillas de seguimiento; la fila sigue abriendo
+   * el modal de siempre.
+   */
+  readonly columnasMesas: readonly ColumnaTabla[] = [
+    { clave: 'redaccion', titulo: 'Compromiso', ordenable: true },
+    {
+      clave: 'mesa',
+      titulo: 'Espacio de diálogo',
+      ordenable: true,
+      acceso: (fila) => {
+        const compromiso = fila as Compromiso;
+        return compromiso.mesaCodigo ?? compromiso.mesaTitulo ?? '';
+      },
+    },
+    {
+      clave: 'plazo',
+      titulo: 'Plazo',
+      ordenable: true,
+      acceso: (fila) => resolverVencimiento(fila as Compromiso).fecha,
+    },
+    { clave: 'cumplimiento', titulo: 'Estado de cumplimiento', ordenable: true },
+    {
+      clave: 'avance',
+      titulo: 'Avance',
+      acceso: (fila) => this.avanceTexto(fila as Compromiso),
+    },
   ];
 
   /** Orden que pinta `app-tabla`; la página sigue ordenando con `OrdenTabla`. */
@@ -876,6 +937,9 @@ export class CompromisosPage {
       parametros['vencimiento_hasta'] = calendario.hasta;
     }
 
+    // El modo mesas exporta el mismo recorte que lista la tabla.
+    if (this.vistaMesas()) parametros['soloMesas'] = '1';
+
     return parametrosConValor(parametros);
   });
 
@@ -884,6 +948,13 @@ export class CompromisosPage {
 
   /** El calendario no existe para registros anulados. */
   readonly vistaCalendario = computed(() => !this.verPapelera() && this.modo() === 'calendario');
+
+  /**
+   * Modo mesas: la tabla se acota a compromisos con espacio de diálogo
+   * (`soloMesas=1`) y añade las columnas del seguimiento de mesas. La papelera
+   * sigue siendo una tabla aparte de restauración.
+   */
+  readonly vistaMesas = computed(() => !this.verPapelera() && this.modo() === 'mesas');
 
   /** El desglose tampoco: la papelera se lista como tabla de restauración. */
   readonly vistaResumen = computed(() => !this.verPapelera() && this.modo() === 'resumen');
@@ -897,6 +968,11 @@ export class CompromisosPage {
   /** La pestaña de estadísticas agrega el conjunto; tampoco lista la papelera. */
   readonly vistaEstadisticas = computed(
     () => !this.verPapelera() && this.modo() === 'estadisticas',
+  );
+
+  /** Los gráficos acompañan a las vistas que listan la tabla (y su modo mesas). */
+  readonly vistaTabla = computed(
+    () => !this.verPapelera() && (this.modo() === 'tabla' || this.vistaMesas()),
   );
 
   /**
@@ -925,6 +1001,8 @@ export class CompromisosPage {
         mesa: filtros.mesa,
         nivelGobierno: filtros.nivelGobierno,
         atiendeGenero: filtros.atiendeGenero,
+        // El modo mesas acota el listado a compromisos con espacio de diálogo.
+        soloMesas: this.vistaMesas() ? '1' : '',
         // «Vencidos» es el mismo corte que usa el semáforo de la fila:
         // vencimiento efectivo anterior a hoy (la API compara <= hasta).
         vencimiento_hasta: filtros.vencidos ? isoAyer() : '',
@@ -989,6 +1067,7 @@ export class CompromisosPage {
           mesa: filtros.mesa,
           nivelGobierno: filtros.nivelGobierno,
           atiendeGenero: filtros.atiendeGenero,
+          soloMesas: this.vistaMesas() ? '1' : '',
           vencimiento_hasta: filtros.vencidos ? isoAyer() : '',
           ...extra,
         });
@@ -1260,10 +1339,19 @@ export class CompromisosPage {
 
   cambiarModo(modo: ModoVista): void {
     this.modo.set(modo);
-    // «Vencidos» sólo filtra el listado; en calendario, resumen o matriz no aplica.
-    if (modo !== 'tabla' && modo !== 'anexo14' && this.parametros().vencidos) {
-      void this.actualizar({ vencidos: false });
+    const cambios: Partial<FiltrosCompromisos> = {};
+    // «Vencidos» sólo filtra las vistas que listan la tabla; en calendario,
+    // resumen o matriz no aplica.
+    if (modo !== 'tabla' && modo !== 'mesas' && modo !== 'anexo14' && this.parametros().vencidos) {
+      cambios.vencidos = false;
     }
+    // En mesas el espacio de diálogo es la propia vista: el select se oculta y
+    // su filtro no puede quedar activo sin un control visible.
+    if (modo === 'mesas' && this.parametros().mesa) {
+      cambios.mesa = '';
+      cambios.pagina = 1;
+    }
+    if (Object.keys(cambios).length > 0) void this.actualizar(cambios);
   }
 
   /** Cambia entre activos y papelera; reinicia a la primera página. */

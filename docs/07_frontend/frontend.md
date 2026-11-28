@@ -3,7 +3,7 @@
 Este documento responde **una sola pregunta**: de todo lo acordado para la interfaz
 del sistema AVISA, ¿qué sigue pendiente y en qué pantalla se nota?
 
-**Fecha de corte:** 2026-11-24, **verificado contra el código** (no contra el catálogo).
+**Fecha de corte:** 2026-11-28, **verificado contra el código** (no contra el catálogo).
 **Dónde se construye:** la SPA Angular, en `angular/src/app`.
 **Dónde se dibuja:** `docs/07_frontend/mockups/`, con su índice en `mockups/index.html`.
 **De dónde sale:** del catálogo de 131 items. El detalle completo —hallazgos de base,
@@ -872,6 +872,31 @@ un documento, un trabajo en lote o un método.
 **X7 aplicado (2026-11-24).** La matriz demandas–intervenciones de la ficha del caso ya no
 pinta la temática bajo la demanda (`caso-detalle.page.html`); el modelo y el selector de
 alta se conservan, porque el segmento temático compone `codigo_caso`.
+
+---
+
+## Cierre del 2026-11-28
+
+Lo que se construyó y verificó en esta ronda. No es una lista de pendientes: es la
+evidencia de que los ítems correspondientes ya no aparecen arriba.
+
+| Vista               | Qué quedó hecho                                                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Alertas**         | Botón **Exportar todo** (CSV y XLSX) que vuelca el listado completo con los filtros vigentes, vía `GET /api/v1/export/alertas`; tope de 5000 filas con aviso legible al superarlo.               |
+| **Alertas**         | El panel muestra la **herencia del caso vinculado**: resumen, actores (nombre · cargo/rol) y demandas con su estado, tomados del detalle de la alerta y con `GET /cases/{codigo}` como respaldo. |
+| **Alertas**         | Bloque «Pegar reporte completo» en el alta y la edición: copia la plantilla, pega el reporte y lo reparte en los campos con `parsearPlantillaAlerta`.                                            |
+| **Alertas**         | Los hechos ya no guardan la fecha dentro del texto: `85` y `86` la movieron a `alerta_hechos.fecha` y quitaron la viñeta `*`; `hechos_recientes` se recompone como texto derivado.               |
+| **Compromisos**     | Listado con las seis columnas pedidas: Redacción · Fuente · Fecha · Plazo · Oficina responsable · Estado de cumplimiento. El panel muestra la **institución** cuando la API la trae.             |
+| **Directorio**      | Importación de actores desde **`.xlsx`/`.xlsm`** (además del CSV), con columna opcional **Foto** que sube el medio y deja `tieneContenido=false` si no hay bytes.                                |
+| **Directorio**      | `Foto.tieneContenido` en el dominio y helper `urlFoto()`, que prefiere `/api/v1/media/<id>/contenido` y respeta las URL externas.                                                                |
+| **Directorio**      | La ficha de contacto retira «Clasificación de la información» y «Descripción del perfil» pasa a **«Ámbito de acción»**, justificado.                                                             |
+| **Locales**         | Mapa Leaflet por local (marcador exacto o centroide regional con nota de aproximación), dirección explícita cuando falta y sección «Otros riesgos» leída de la descripción en markdown.          |
+| **Casos**           | Cronología y WhatsApp en fecha compacta `02NOV2025`; el formato es único en toda la SPA (`shared/formato-fecha.ts`).                                                                             |
+| **Carga histórica** | `87` amplía a `text` `core.actores.cargo_actual` y `core.reuniones_dialogo.titulo`, para no truncar el libro del sectorista.                                                                     |
+
+**Migraciones aplicadas en la ronda:** `85`, `86`, `87`. Sigue pendiente `82`
+(porteo de mesas). El estado completo está en
+[`../06_operacion/migraciones-neon-estado.md`](../06_operacion/migraciones-neon-estado.md).
 
 ---
 

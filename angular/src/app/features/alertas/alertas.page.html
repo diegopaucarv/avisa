@@ -43,9 +43,14 @@
       </button>
       }
       <!--
-        La barra de selección ya trae el menú de exportación (y pasa a exportar
-        sólo lo marcado cuando hay selección). No se duplica aquí.
+        «Exportar todo» vuelca el listado completo con los filtros vigentes a
+        CSV/XLSX. Es distinto del menú de la barra de selección, que exporta lo
+        marcado con el endpoint genérico cuando hay selección.
       -->
+      <app-exportar-alertas-menu
+        [consulta]="filtrosExportacion()"
+        (fallo)="alFallarExportacion($event)"
+      />
       <app-barra-seleccion
         entidad="alertas"
         anulable="alertas"

@@ -62,7 +62,12 @@ function seccionDeTitulo(titulo: string): SeccionNota | null {
   if (texto.includes('evaluacion')) return 'evaluacion';
   if (texto.includes('accesibilidad') || texto.includes('acceso')) return 'accesibilidad';
   if (texto.includes('ventilacion')) return 'ventilacion';
-  if (texto.includes('otras') || texto.includes('observacion')) return 'otras';
+  // «Otros riesgos» es una sección propia de la plantilla de riesgos: se
+  // reconoce aquí para que sus viñetas no caigan por error en «Ventilación»
+  // (un encabezado desconocido se trata como contenido de la sección vigente).
+  if (texto.includes('otras') || texto.includes('otros') || texto.includes('observacion')) {
+    return 'otras';
+  }
   return null;
 }
 
@@ -76,9 +81,7 @@ function seccionDeLinea(linea: string): SeccionNota | null {
 
 /** Quita encabezados no reconocidos y viñetas; recorta la línea. */
 function contenidoDeLinea(linea: string, seccion: SeccionNota): string {
-  const sinEncabezado = ENCABEZADO.test(linea)
-    ? linea.replace(/^\s{0,3}#{1,6}\s+/, '')
-    : linea;
+  const sinEncabezado = ENCABEZADO.test(linea) ? linea.replace(/^\s{0,3}#{1,6}\s+/, '') : linea;
 
   if (seccion === 'evaluacion') return sinEncabezado.trim();
 
@@ -142,3 +145,98 @@ export function parsearNotasLocal(texto: string | null | undefined): NotasLocal 
     textoLibre: null,
   };
 }
+
+/** Listas de riesgo de la ficha del local. */
+export type RiesgosLocal = {
+  accesibilidad: string[];
+  ventilacion: string[];
+  otros: string[];
+};
+
+type SeccionRiesgo = keyof RiesgosLocal;
+
+/**
+ * Encabezado → sección de riesgo. Sólo reconoce las tres secciones de la
+ * plantilla de riesgos; cualquier otro encabezado devuelve `null` y cierra la
+ * sección vigente, para no arrastrar texto que no sea un riesgo declarado.
+ */
+function seccionDeRiesgo(titulo: string): SeccionRiesgo | null {
+  const texto = normalizar(titulo).replace(/\s+/g, ' ');
+  if (!texto) return null;
+
+  if (texto.includes('accesibilidad') || texto.includes('acceso')) return 'accesibilidad';
+  if (texto.includes('ventilacion')) return 'ventilacion';
+  // «Otros riesgos», «Riesgos» u «Otros riesgos identificados».
+  if (texto.includes('riesgo')) return 'otros';
+  return null;
+}
+
+/**
+ * Texto de `recomendacion` → riesgos de accesibilidad, ventilación y otros.
+ *
+ * Reconoce la plantilla markdown:
+ *
+ * ```
+ * ## Accesibilidad
+ * - …
+ * ## Ventilación
+ * - …
+ * ## Otros riesgos
+ * - …
+ * ```
+ *
+ * Es puro y total: normaliza los saltos de línea (Windows incluido), acepta
+ * `-`, `*` y `•` como viñetas, ignora mayúsculas y tildes en los encabezados y
+ * devuelve listas vacías para las secciones ausentes. No infiere riesgos: sólo
+ * recoge lo que está escrito bajo cada sección; el texto previo al primer
+ * encabezado de riesgo no se considera riesgo.
+ */
+export function leerRiesgosMarkdown(texto: string | null | undefined): RiesgosLocal {
+  const resultado: RiesgosLocal = { accesibilidad: [], ventilacion: [], otros: [] };
+  if (typeof texto !== 'string' || texto.trim() === '') return resultado;
+
+  const normalizado = texto.replace(/\r\n?/g, '\n');
+  let actual: SeccionRiesgo | null = null;
+
+  for (const linea of normalizado.split('\n')) {
+    const encabezado = ENCABEZADO.exec(linea);
+    if (encabezado) {
+      actual = seccionDeRiesgo(encabezado[1].replace(/\s*#+\s*$/, ''));
+      continue;
+    }
+
+    if (!actual) continue;
+
+    const vineta = VINETA.exec(linea);
+    const contenido = (vineta ? vineta[1] : linea).trim();
+    if (contenido) resultado[actual].push(contenido);
+  }
+
+  return resultado;
+}
+
+/**
+ * Une varias listas de riesgos descartando duplicados por texto normalizado
+ * (mayúsculas, tildes y espacios repetidos). Conserva el orden y la forma del
+ * primero que aparece, para no reescribir lo que ya se muestra.
+ */
+export function unirRiesgos(...listas: ReadonlyArray<readonly string[]>): string[] {
+  const vistos = new Set<string>();
+  const salida: string[] = [];
+
+  for (const lista of listas) {
+    for (const elemento of lista) {
+      const texto = elemento.trim();
+      const clave = normalizar(texto).replace(/\s+/g, ' ');
+      if (!clave || vistos.has(clave)) continue;
+      vistos.add(clave);
+      salida.push(texto);
+    }
+  }
+
+  return salida;
+}
+
+// `leerRiesgosMarkdown` es independiente de `parsearNotasLocal`: comparten las
+// constantes `ENCABEZADO` y `VINETA`, pero mantiene su propio mapeo de secciones
+// para no mezclar «Otras observaciones» con «Otros riesgos».

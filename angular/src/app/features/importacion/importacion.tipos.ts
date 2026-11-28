@@ -139,6 +139,14 @@ const COLUMNAS_ACTOR: readonly ColumnaImportacion[] = [
   { clave: 'dni', rotulo: 'DNI', alias: ['dni', 'documento'] },
   { clave: 'telefono', rotulo: 'Teléfono', alias: ['telefono', 'celular', 'movil'] },
   { clave: 'correo', rotulo: 'Correo', alias: ['correo', 'email', 'correo electronico'] },
+  {
+    clave: 'foto',
+    rotulo: 'Foto',
+    alias: ['foto', 'fotografia', 'imagen', 'url foto', 'url de foto'],
+    ayuda:
+      'URL pública de la foto (http o https). Se guarda como foto principal; sin foto, la ' +
+      'ficha sigue mostrando «Sin fotografías».',
+  },
 ];
 
 const COLUMNAS_ORGANIZACION: readonly ColumnaImportacion[] = [

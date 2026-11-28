@@ -1,0 +1,2490 @@
+{
+  "generado": "2026-11-27T22:45:32.341Z",
+  "calibracion": {
+    "totalEstricta": 33,
+    "okEstricta": 25,
+    "tierStats": {
+      "estricta": [
+        33,
+        25
+      ],
+      "sin": [
+        31,
+        1
+      ],
+      "firma_sola": [
+        13,
+        1
+      ],
+      "debil": [
+        3,
+        2
+      ],
+      "nombre": [
+        3,
+        2
+      ]
+    },
+    "fallosEstricta": [
+      {
+        "doc": "AT-2026-09_pdf",
+        "pred": "CS-2025-0006",
+        "real": "CS-2025-0011",
+        "sign": [
+          "ancash",
+          "chimbote"
+        ],
+        "rareName": [
+          "ancash",
+          "chimbote"
+        ],
+        "margin": 11
+      },
+      {
+        "doc": "AT-2026-05_pdf",
+        "pred": "CS-2024-0002",
+        "real": "CS-2026-0015",
+        "sign": [
+          "olaya"
+        ],
+        "rareName": [
+          "jose",
+          "olaya"
+        ],
+        "margin": 5.99
+      },
+      {
+        "doc": "AT-2026-23_pdf",
+        "pred": "CS-2025-0006",
+        "real": "CS-2026-0015",
+        "sign": [
+          "chimbote",
+          "ancash"
+        ],
+        "rareName": [
+          "chimbote",
+          "ancash"
+        ],
+        "margin": 0
+      },
+      {
+        "doc": "AT-2026-41_pdf",
+        "pred": "CS-2024-0002",
+        "real": "CS-2026-0015",
+        "sign": [
+          "olaya",
+          "balandra"
+        ],
+        "rareName": [
+          "jose",
+          "olaya",
+          "balandra"
+        ],
+        "margin": 17
+      },
+      {
+        "doc": "AT-2026-86_pdf",
+        "pred": "CS-2026-0011",
+        "real": "CS-2026-0012",
+        "sign": [
+          "controversia",
+          "extraccion"
+        ],
+        "rareName": [
+          "controversia",
+          "extraccion"
+        ],
+        "margin": 22.01
+      },
+      {
+        "doc": "AT-2026-25_pdf",
+        "pred": "CS-2025-0001",
+        "real": "CS-2022-0001",
+        "sign": [
+          "aamec",
+          "parque",
+          "industrial"
+        ],
+        "rareName": [
+          "aamec",
+          "parque",
+          "industrial",
+          "ancon"
+        ],
+        "margin": 39
+      },
+      {
+        "doc": "AT-2026-43_pdf",
+        "pred": "CS-2025-0001",
+        "real": "CS-2022-0001",
+        "sign": [
+          "parque",
+          "industrial",
+          "aamec"
+        ],
+        "rareName": [
+          "parque",
+          "industrial",
+          "ancon",
+          "aamec"
+        ],
+        "margin": 17
+      },
+      {
+        "doc": "RED-2026-004",
+        "pred": "CS-2024-0004",
+        "real": "CS-2024-0001",
+        "sign": [
+          "delimitacion"
+        ],
+        "rareName": [
+          "organos",
+          "delimitacion"
+        ],
+        "margin": 11
+      }
+    ]
+  },
+  "antes": {
+    "total": 153,
+    "con_caso": 83,
+    "sin_caso": 70
+  },
+  "despues": {
+    "total": 153,
+    "con_caso": 93,
+    "sin_caso": 60
+  },
+  "tocados": [
+    {
+      "doc_codigo": "AT-2026-37_pdf",
+      "doc_id": "d947b2ec-e52d-4329-a6e2-f2b750e0e2c2",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Convocatoria de marcha hacia Huancayo el 18.JUN.2026 por contaminación del río Yurakyacu",
+      "caso_codigo": "CS-2026-0010",
+      "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd",
+      "caso_nombre": "Mortandad masiva de truchas (~2 millones) en Pariahuanca, Junín.",
+      "motivo": "Pariahuanca/Junín/truchas/Yuracyacu: idéntico al caso.",
+      "caso_id_actual": null,
+      "filas": 1
+    },
+    {
+      "doc_codigo": "AT-2026-40_pdf",
+      "doc_id": "cd5d3a76-2130-40c4-9245-6990bf6cc9b2",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Movilización hacia Huancayo 18.JUN.2026 – Contaminación río Yuracyacu / intangibilidad de cabeceras de cuenca",
+      "caso_codigo": "CS-2026-0010",
+      "caso_id": "39c091af-b98b-4a38-aa17-8914923560cd",
+      "caso_nombre": "Mortandad masiva de truchas (~2 millones) en Pariahuanca, Junín.",
+      "motivo": "Misma mortandad de truchas y río Yuracyacu.",
+      "caso_id_actual": null,
+      "filas": 1
+    },
+    {
+      "doc_codigo": "AT-2026-62_pdf",
+      "doc_id": "5c858085-a0e7-4fe8-9b01-e401588cf172",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "OSPAS de Lomas anuncian movilización por supuesta desidia y discriminación del sector.",
+      "caso_codigo": "CS-2026-0011",
+      "caso_id": "1ddf5690-f24f-47e0-9c3a-e7990ef956bd",
+      "caso_nombre": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "motivo": "Controversia Marcona-Lomas (Tres Hermanas/Yanyarina) y erizo rojo.",
+      "caso_id_actual": null,
+      "filas": 1
+    },
+    {
+      "doc_codigo": "AT-2026-70_pdf",
+      "doc_id": "c581e640-fda4-4833-8480-42747ead7e66",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "Pescadores de la COPMAR esperan cumplimiento de los acuerdos asumidos por PRODUCE en reunión con dirigentes pesqueros el 12.04.2023",
+      "caso_codigo": "CS-2026-0011",
+      "caso_id": "1ddf5690-f24f-47e0-9c3a-e7990ef956bd",
+      "caso_nombre": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "motivo": "COPMAR pide veda/erizo en Marcona; conflicto del caso.",
+      "caso_id_actual": null,
+      "filas": 1
+    },
+    {
+      "doc_codigo": "AT-2026-72_pdf",
+      "doc_id": "9da23713-3c41-4f81-9586-331182ac6230",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "Afectados por el derrame de petróleo en la costa de Ventanilla y otros distritos, anuncian una movilización para el día 23.05.2023",
+      "caso_codigo": "CS-2022-0002",
+      "caso_id": "6e53ff24-4513-4469-b469-008c945ec7a7",
+      "caso_nombre": "Atención a pescadores afectados por derrame de petróleo (2022-2026)",
+      "motivo": "Damificados por derrame de petróleo en Ventanilla.",
+      "caso_id_actual": null,
+      "filas": 1
+    },
+    {
+      "doc_codigo": "AT-2026-76_pdf",
+      "doc_id": "1a00ab1f-06bc-4807-b331-2f5ae43967f2",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "Asociación Paseo Turístico Perla del Pacífico demanda hacer uso del muelle de Chorrillos para sus actividades.",
+      "caso_codigo": "CS-2024-0002",
+      "caso_id": "781a2eab-79b3-4b60-85a8-9598ec25a81f",
+      "caso_nombre": "La OSPA José Olaya Balandra permanece en la administración de la Infraestructura Pesquera Artesanal (IPA) Chorillos, sin convenio vigente.",
+      "motivo": "Disputa por muelle de Chorrillos administrado por OSPA José Olaya Balandra.",
+      "caso_id_actual": null,
+      "filas": 1
+    },
+    {
+      "doc_codigo": "AT-2026-90_pdf",
+      "doc_id": "5a5611d4-d43e-4005-b6c9-d6bd0ae4308e",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "🔔REPORTE DE ALERTA TEMPRANA | MESA DE DIALOGO - RÍO CORALAQUE (OMATE)",
+      "caso_codigo": "MD-2026-0011",
+      "caso_id": "8eb4ae56-b897-42e8-a5aa-b5532272c2af",
+      "caso_nombre": "Mesa de Diálogo para atender la problemática de la cuenca del río Coralaque mediante el Plan de Acción Integrado",
+      "motivo": "Mesa de diálogo de la cuenca del río Coralaque (Omate).",
+      "caso_id_actual": null,
+      "filas": 1
+    },
+    {
+      "doc_codigo": "RED-2026-025",
+      "doc_id": "db84fbda-c95d-4b9a-a9d7-1fe3b7962682",
+      "tipo": "Ayuda Memoria",
+      "titulo": "REUNIÓN CON REPRESENTANTES CON AH. 15 DE ENERO CHILCA",
+      "caso_codigo": "CS-2026-0003",
+      "caso_id": "1156293b-8158-42f8-b804-5c607cf6527e",
+      "caso_nombre": "Disconformidad ciudadan en Chilca en horarios para de asistencia para mecanismos de participación ciudadana del EIA-d Aceros Americanos",
+      "motivo": "Reunión con representantes del AH 15 de Enero, Chilca.",
+      "caso_id_actual": null,
+      "filas": 1
+    },
+    {
+      "doc_codigo": "RED-2026-030",
+      "doc_id": "e558b6e2-94ad-47c8-8771-450d4e9a59d3",
+      "tipo": "Ayuda Memoria",
+      "titulo": "Reunión de trabajo mediante oficio N° 154-2026-COPMAR (erizo rojo y alga palo)",
+      "caso_codigo": "CS-2026-0011",
+      "caso_id": "1ddf5690-f24f-47e0-9c3a-e7990ef956bd",
+      "caso_nombre": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "motivo": "Oficio COPMAR sobre erizo rojo y alga palo (Marcona-Lomas).",
+      "caso_id_actual": null,
+      "filas": 1
+    },
+    {
+      "doc_codigo": "AT-2026-67_pdf",
+      "doc_id": "48cd3a4c-f6a7-4530-920f-38fcb9fd5de8",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "titulo": "Pescadores artesanales de la FIUPAP muestran preocupación por el inicio de las mesas de trabajo de la pesca, en relación a los recursos hidrobiológicos (Jurel, Caballa y Bonito).",
+      "caso_codigo": "CS-2024-0005",
+      "caso_id": "7d30cb36-46aa-4b78-90ac-0ac79b013f9e",
+      "caso_nombre": "Los OSPAS de artes pasivas muestran disconformidad por la emisión de cuotas de los recursos Jurel y Caballa, para las Embarcaciones Pesqueras (EP) de cerco de Boliche.",
+      "motivo": "FIUPAP rechaza RM de cuota de jurel y caballa: conflicto del caso.",
+      "caso_id_actual": null,
+      "filas": 1
+    }
+  ],
+  "propuestas": [
+    {
+      "doc": "AT-2026-37_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2026-06-08",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Convocatoria de marcha hacia Huancayo el 18.JUN.2026 por contaminación del río Yurakyacu",
+      "resumen": "El 27.04.2026 se registró en el distrito de Pariahuanca (Junín) la muerte de más de 2 millones de truchas en al menos 7 piscigranjas. Pobladores locales acusan contaminación de la minera \"Oro Negro\", ubicada aguas arriba, basándose en el informe toxicológico d",
+      "sugerido": "CS-2026-0010",
+      "nombre_caso": "Mortandad masiva de truchas (~2 millones) en Pariahuanca, Junín.",
+      "tier": "estricta",
+      "score": 33.01,
+      "margin": 22.01,
+      "sign": [
+        "pariahuanca",
+        "junin",
+        "truchas"
+      ],
+      "rareName": [
+        "pariahuanca",
+        "junin",
+        "truchas"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0011",
+          "score": 11,
+          "sign": [
+            "controversia"
+          ]
+        },
+        {
+          "caso": "MD-2026-0014",
+          "score": 11,
+          "sign": [
+            "comunidades"
+          ]
+        }
+      ],
+      "decision": "aplicada",
+      "nota": "Pariahuanca/Junín/truchas/Yuracyacu: idéntico al caso."
+    },
+    {
+      "doc": "AT-2026-40_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2026-06-17",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Movilización hacia Huancayo 18.JUN.2026 – Contaminación río Yuracyacu / intangibilidad de cabeceras de cuenca",
+      "resumen": "El 27.04.2026 se registró en el distrito de Pariahuanca (Junín) la muerte de más de 2 millones de truchas en al menos 7 piscigranjas. Pobladores locales acusan contaminación por minas en la cabecera de cuenca del río Yuracyacu. El Frente de Defensa y Desarroll",
+      "sugerido": "CS-2026-0010",
+      "nombre_caso": "Mortandad masiva de truchas (~2 millones) en Pariahuanca, Junín.",
+      "tier": "estricta",
+      "score": 33.01,
+      "margin": 22.01,
+      "sign": [
+        "pariahuanca",
+        "junin",
+        "truchas"
+      ],
+      "rareName": [
+        "pariahuanca",
+        "junin",
+        "truchas"
+      ],
+      "alternativas": [
+        {
+          "caso": "MD-2026-0011",
+          "score": 11,
+          "sign": [
+            "cuenca"
+          ]
+        },
+        {
+          "caso": "MD-2026-0014",
+          "score": 11,
+          "sign": [
+            "comunidades"
+          ]
+        }
+      ],
+      "decision": "aplicada",
+      "nota": "Misma mortandad de truchas y río Yuracyacu."
+    },
+    {
+      "doc": "AT-2026-76_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2022-06-06",
+      "titulo": "Asociación Paseo Turístico Perla del Pacífico demanda hacer uso del muelle de Chorrillos para sus actividades.",
+      "resumen": "La Asociación de Paseo Turístico Perla del Pacífico demanda hacer uso de las instalaciones del muelle artesanal de Chorrillos para poder desarrollar sus actividades laborales de paseo turístico con el objetivo de buscar el sustento económico para sus hogares. ",
+      "sugerido": "CS-2024-0002",
+      "nombre_caso": "La OSPA José Olaya Balandra permanece en la administración de la Infraestructura Pesquera Artesanal ",
+      "tier": "estricta",
+      "score": 28,
+      "margin": 17,
+      "sign": [
+        "olaya",
+        "balandra"
+      ],
+      "rareName": [
+        "jose",
+        "olaya",
+        "balandra"
+      ],
+      "alternativas": [
+        {
+          "caso": "MD-2026-0016",
+          "score": 11,
+          "sign": [
+            "promover"
+          ]
+        },
+        {
+          "caso": "CS-2026-0006",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "aplicada",
+      "nota": "Disputa por muelle de Chorrillos administrado por OSPA José Olaya Balandra."
+    },
+    {
+      "doc": "AT-2026-72_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2023-05-21",
+      "titulo": "Afectados por el derrame de petróleo en la costa de Ventanilla y otros distritos, anuncian una movilización para el día 23.05.2023",
+      "resumen": "El sr. Elizar Medina, Pdte. de la Asociación de Pescadores Artesanales no embarcados del Distrito de Ventanilla, a través de una entrevista en el medio de comunicación (Gestión) manifiesta que las organizaciones sociales de todos los damnificados (de varios ru",
+      "sugerido": "CS-2022-0002",
+      "nombre_caso": "Atención a pescadores afectados por derrame de petróleo (2022-2026)",
+      "tier": "estricta",
+      "score": 28,
+      "margin": 22.01,
+      "sign": [
+        "derrame",
+        "petroleo"
+      ],
+      "rareName": [
+        "afectados",
+        "derrame",
+        "petroleo"
+      ],
+      "alternativas": [
+        {
+          "caso": "MD-2026-0021",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "aplicada",
+      "nota": "Damificados por derrame de petróleo en Ventanilla."
+    },
+    {
+      "doc": "AT-2026-52_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2024-02-28",
+      "titulo": "Pescadores de Ilo, Arequipa y Tacna, preparan protesta regional en contra del Ministerio de la Producción, solicitando urgente regulación para la extr",
+      "resumen": "El 28.02.2024, a través del informativo digital Prensa Regional, el señor ex dirigente pesquero Otto Cordero, expresó su preocupación debido a que las embarcaciones pesqueras no saldrán a pescar por la falta de cuotas y dictámenes para la pesca de tiburón azul",
+      "sugerido": "CS-2026-0014",
+      "nombre_caso": "Demandas de las OSPAS de la Macrorregión Sur (Arequipa, Moquegua y Tacna) sobre la regulación, fisca",
+      "tier": "estricta",
+      "score": 22.99,
+      "margin": 11.99,
+      "sign": [
+        "regulacion"
+      ],
+      "rareName": [
+        "tacna",
+        "regulacion",
+        "tiburon"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0006",
+          "score": 11,
+          "sign": [
+            "urgente"
+          ]
+        },
+        {
+          "caso": "CS-2026-0011",
+          "score": 11,
+          "sign": [
+            "extraccion"
+          ]
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": "Tentativa CS-2026-0014. El doc cubre tiburón azul y perico; el caso es de aletas de tiburón. Verificar alcance."
+    },
+    {
+      "doc": "AT-2026-67_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2023-02-08",
+      "titulo": "Pescadores artesanales de la FIUPAP muestran preocupación por el inicio de las mesas de trabajo de la pesca, en relación a los recursos hidrobiológico",
+      "resumen": "El 07.02.2023, el sr. Hilton Guerrero, secretario general de FIUPAP, en medio de una reunión con la directora general de DGPARPA, manifestó que los pescadores artesanales rechazan la RM Nº 000042-2023-PRODUCE, donde se estableció la cuota de pesca del Jurel y ",
+      "sugerido": "CS-2024-0005",
+      "nombre_caso": "Los OSPAS de artes pasivas muestran disconformidad por la emisión de cuotas de los recursos Jurel y ",
+      "tier": "estricta",
+      "score": 22.01,
+      "margin": 22.01,
+      "sign": [
+        "jurel",
+        "caballa"
+      ],
+      "rareName": [
+        "jurel",
+        "caballa"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "aplicada",
+      "nota": "FIUPAP rechaza RM de cuota de jurel y caballa: conflicto del caso."
+    },
+    {
+      "doc": "AT-2026-62_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2024-09-24",
+      "titulo": "OSPAS de Lomas anuncian movilización por supuesta desidia y discriminación del sector.",
+      "resumen": "- En comunicación con la Sra. Ana Morales, vicepresidente de la Asociación de Pescadores Artesanales de Mariscos “La Perla” de Lomas, Arequipa manifiesta que, realizarán una movilización y paralización de actividades económicas en la zona por una supuesta desi",
+      "sugerido": "CS-2026-0011",
+      "nombre_caso": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "tier": "estricta",
+      "score": 22.01,
+      "margin": 16.01,
+      "sign": [
+        "lomas",
+        "controversia"
+      ],
+      "rareName": [
+        "lomas",
+        "controversia"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2025-0009",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "aplicada",
+      "nota": "Controversia Marcona-Lomas (Tres Hermanas/Yanyarina) y erizo rojo."
+    },
+    {
+      "doc": "AT-2026-90_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2026-01-29",
+      "titulo": "🔔REPORTE DE ALERTA TEMPRANA | MESA DE DIALOGO - RÍO CORALAQUE (OMATE)",
+      "resumen": "Se tiene programada una sesión plenaria el 29/01 de la mesa de diálogo convocada por PCM sobre las acciones en relación a la contaminación de la cuenca del río Coralaque. Desde el Gobierno Regional perciben poca claridad sobre los temas a abordar, así como poc",
+      "sugerido": "MD-2026-0011",
+      "nombre_caso": "Mesa de Diálogo para atender la problemática de la cuenca del río Coralaque mediante el Plan de Acci",
+      "tier": "estricta",
+      "score": 22.01,
+      "margin": 16.01,
+      "sign": [
+        "coralaque",
+        "cuenca"
+      ],
+      "rareName": [
+        "coralaque",
+        "cuenca"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2025-0003",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2026-0008",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "aplicada",
+      "nota": "Mesa de diálogo de la cuenca del río Coralaque (Omate)."
+    },
+    {
+      "doc": "RED-2026-030",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-09-03",
+      "titulo": "Reunión de trabajo mediante oficio N° 154-2026-COPMAR (erizo rojo y alga palo)",
+      "resumen": "",
+      "sugerido": "CS-2026-0011",
+      "nombre_caso": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "tier": "estricta",
+      "score": 22.01,
+      "margin": 22.01,
+      "sign": [
+        "erizo",
+        "rojo"
+      ],
+      "rareName": [
+        "erizo",
+        "rojo"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "aplicada",
+      "nota": "Oficio COPMAR sobre erizo rojo y alga palo (Marcona-Lomas)."
+    },
+    {
+      "doc": "RED-2026-008",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-09-23",
+      "titulo": "REUNIÓN CON LA ASOCIACIÓN DE PESCADOES ARTESANALES DE ANCÓN (APESCAA)",
+      "resumen": "Atender las principales preocupaciones planteadas por la Asociación de Pescadores Artesanales de Ancón, relacionadas con la habilitación sanitaria del Molo Muelle de Ancón, situación actual del proyecto DPA Las Conchitas, así como sus propuestas vinculadas a l",
+      "sugerido": "CS-2026-0009",
+      "nombre_caso": "Impacto Fenómeno El Niño (FEN)",
+      "tier": "estricta",
+      "score": 22.01,
+      "margin": 11,
+      "sign": [
+        "fenomeno",
+        "nino"
+      ],
+      "rareName": [
+        "fenomeno",
+        "nino"
+      ],
+      "alternativas": [
+        {
+          "caso": "MD-2026-0017",
+          "score": 11,
+          "sign": [
+            "planteadas"
+          ]
+        },
+        {
+          "caso": "CS-2025-0001",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_alta",
+      "nota": "Firma de nombre compartida; no aplicada por ambigüedad con otro caso."
+    },
+    {
+      "doc": "AT-2026-80_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2022-09-08",
+      "titulo": "Pescadores artesanales e industriales del norte y centro del país se organizan contra posible adhesión del Perú a la CONVEMAR.",
+      "resumen": "1. Tras su designación como Ministro de Relaciones Exteriores (05.08.2022) el Ministro Miguel Ángel Rodríguez Mackay ha manifestado en distintos espacios (sectoriales y televisivos) la posibilidad de “desempolvar el tema de la Convención del Mar y con ello, la",
+      "sugerido": "MD-2026-0009",
+      "nombre_caso": "Grupo de Trabajo de naturaleza temporal denominado \"Espacio de diálogo para el desarrollo de la prov",
+      "tier": "estricta",
+      "score": 17,
+      "margin": 5.99,
+      "sign": [
+        "grau"
+      ],
+      "rareName": [
+        "espacio",
+        "grau"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2025-0006",
+          "score": 11,
+          "sign": [
+            "ancash"
+          ]
+        },
+        {
+          "caso": "CS-2026-0004",
+          "score": 11,
+          "sign": [
+            "tumbes"
+          ]
+        }
+      ],
+      "decision": "revision_alta",
+      "nota": "Firma de nombre compartida; no aplicada por ambigüedad con otro caso."
+    },
+    {
+      "doc": "AT-2026-82_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2022-11-08",
+      "titulo": "Asociaciones de Pescadores manifiestan su rechazo a la aprobación del Proyecto de la Ley N° 196-2021- CR, sobre crimen organizado por delitos contra r",
+      "resumen": "El 06.11.2022, El Presidente de los gremios de la pesca artesanal de Parachique, Provincia de Sechura (Piura), Julio Fiestas Ruiz, se manifestó que en contra de la aprobación del proyecto de ley 196-2021-CR. Según el dirigente, considera que los congresistas h",
+      "sugerido": "MD-2026-0014",
+      "nombre_caso": "Grupo de trabajo para atender la problemática de las comunidades que forman parte del proceso de Con",
+      "tier": "estricta",
+      "score": 17,
+      "margin": 11,
+      "sign": [
+        "previa"
+      ],
+      "rareName": [
+        "previa",
+        "consulta"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2022-0001",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2025-0004",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_alta",
+      "nota": "Firma de nombre compartida; no aplicada por ambigüedad con otro caso."
+    },
+    {
+      "doc": "AT-2026-83_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2022-11-18",
+      "titulo": "OSPAS de Piura acuerdan realizar paro regional ante emisión de la Ley 31622, Ley que modifica los Art. 308-B, 308-D y 309 del Código Penal.",
+      "resumen": "Con fecha 15.11.2022 OSPAS de la provincia de Sechura y Talara realizaron un paro preventivo en contra del Proyecto de Ley Nº 196/2021-CR, Ley que modifica el numeral 15 del Art. 3 de la Ley 30077, Ley Contra el Crimen Organizado, a fin de incorporar en su ámb",
+      "sugerido": "CS-2025-0004",
+      "nombre_caso": "Maricultores de Sechura demandan la habilitación de áreas acuáticas y medidas para el fortalecimient",
+      "tier": "estricta",
+      "score": 17,
+      "margin": 5.99,
+      "sign": [
+        "acuaticas"
+      ],
+      "rareName": [
+        "sechura",
+        "acuaticas"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0011",
+          "score": 11,
+          "sign": [
+            "extraccion"
+          ]
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_alta",
+      "nota": "Firma de nombre compartida; no aplicada por ambigüedad con otro caso."
+    },
+    {
+      "doc": "AT-2026-71_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2023-05-18",
+      "titulo": "Los pescadores muestran malestar porque algunas zonas de tareas previas, cámara frigoríficas y PTAR no estarían funcionando",
+      "resumen": "1. Las OSPAS de Ilo, vienen manifestando su malestar porque el DPA no estaría operando las áreas de tareas previas, cámaras frigoríficas, PTAR, entre otros, pese a que ya se encuentra inaugurado desde el 30 de octubre del 2023. 2. La zona del desembarcadero se",
+      "sugerido": "CS-2025-0004",
+      "nombre_caso": "Maricultores de Sechura demandan la habilitación de áreas acuáticas y medidas para el fortalecimient",
+      "tier": "estricta",
+      "score": 17,
+      "margin": 5.99,
+      "sign": [
+        "acuaticas"
+      ],
+      "rareName": [
+        "areas",
+        "acuaticas"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0011",
+          "score": 11,
+          "sign": [
+            "extraccion"
+          ]
+        },
+        {
+          "caso": "MD-2026-0011",
+          "score": 11,
+          "sign": [
+            "accion"
+          ]
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": "Ambiguo: Ilo/Moquegua, PTAR y cámaras frigoríficas. No hay caso específico claro."
+    },
+    {
+      "doc": "AT-2026-74_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2023-10-09",
+      "titulo": "Reglamentación de las 5 millas y Proyecto de Ley 5496/2022-CR para la de formalización pesquera.",
+      "resumen": "- En las últimas semanas, a través de redes sociales y medios de comunicación del ámbito local, diversos gremios de Organizaciones Pesqueras Artesanales a nivel nacional se han venido pronunciando en contra del sector, porque según manifiestan, hay temas que s",
+      "sugerido": "CS-2026-0005",
+      "nombre_caso": "Pescadores y armadores artesanales de Piura y Lambayeque demandan la ampliación del proceso de forma",
+      "tier": "nombre",
+      "score": 11.99,
+      "margin": 0,
+      "sign": [],
+      "rareName": [
+        "formalizacion",
+        "ampliacion"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0014",
+          "score": 11.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2025-0006",
+          "score": 11,
+          "sign": [
+            "ancash"
+          ]
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-63_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2024-09-30",
+      "titulo": "OSPAS de la MACRO SUR anuncian movilización por emission de RM N° 00396-2024-PRODUCE",
+      "resumen": "La Asociación de la Macro Sur de la Pesca Artesanal, a través de un pronunciamiento, informan que iniciarán una movilización pacífica para los próximos días en cada puerto de Arequipa, Moquegua y Tacna por las disposiciones anunciadas en la RM 00396-2024-PRODU",
+      "sugerido": "CS-2026-0014",
+      "nombre_caso": "Demandas de las OSPAS de la Macrorregión Sur (Arequipa, Moquegua y Tacna) sobre la regulación, fisca",
+      "tier": "nombre",
+      "score": 11.99,
+      "margin": 0.98,
+      "sign": [],
+      "rareName": [
+        "moquegua",
+        "tacna"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2024-0005",
+          "score": 11,
+          "sign": [
+            "jurel"
+          ]
+        },
+        {
+          "caso": "CS-2026-0007",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-77_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2022-07-06",
+      "titulo": "OSPAS de Pisco (Ica) alertan posibles manifestaciones por la suspensión de la emisión de la DER, en acuerdo asumido con COPMAR. Y de la misma manera, ",
+      "resumen": "El 06.07.2022, el sr. Hilton Guerrero, dirigente de la Asociación de Pescadores Artesanales defensores del Mar de San Andrés- Pisco (Secretario Defensa FIUPAP), se comunicó telefónicamente con esta oficina para manifestarse en contra de las declaraciones del s",
+      "sugerido": "CS-2026-0011",
+      "nombre_caso": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "lomas"
+      ],
+      "rareName": [
+        "lomas"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-78_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2022-07-07",
+      "titulo": "Pescadores se agrupan en contra de Proyecto de Ley 0828/2021 CR que propone texto sustitorio para la aprobación de una nueva Ley General de Pesca",
+      "resumen": "El lunes 4 de julio, la Comisión de Producción del Congreso de la República, presidida por el congresista Jaime Quito, aprobó y votó una cuestión previa para el predictamen del Proyecto de Ley 0828/2021 CR, la misma que propone un texto sustitutorio para la ap",
+      "sugerido": "MD-2026-0014",
+      "nombre_caso": "Grupo de trabajo para atender la problemática de las comunidades que forman parte del proceso de Con",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "previa"
+      ],
+      "rareName": [
+        "previa"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-79_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2022-07-10",
+      "titulo": "Manifestaciones sociales contra Proyecto de Ley 0828/2021 CR, que propone texto sustitorio para la aprobación de una nueva Ley General de Pesca y, act",
+      "resumen": "• Con fecha 04.07.2022, mediante ALERTA No 006-2022, se advirtió la oposición contra actividades impulsadas por PERUPETRO, en el marco del proceso participativo para la licitación del Lote Z-69, en la región Piura (provincias de Talara, Paita y Sechura) y con ",
+      "sugerido": "CS-2022-0002",
+      "nombre_caso": "Atención a pescadores afectados por derrame de petróleo (2022-2026)",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 5.01,
+      "sign": [
+        "petroleo"
+      ],
+      "rareName": [
+        "petroleo"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2022-0001",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2025-0004",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-70_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2023-05-02",
+      "titulo": "Pescadores de la COPMAR esperan cumplimiento de los acuerdos asumidos por PRODUCE en reunión con dirigentes pesqueros el 12.04.2023",
+      "resumen": "El presidente de la Comunidad Pesquera Artesanal de Marcona - COPMAR se comunicó con la especialista de la OAIPCS - PRODUCE y manifestó que el sector no estaría cumpliendo los compromisos asumidos por la Viceministra de Pesca y Acuicultura el pasado 12.04.2023",
+      "sugerido": "CS-2026-0011",
+      "nombre_caso": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "erizo"
+      ],
+      "rareName": [
+        "erizo"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "aplicada",
+      "nota": "COPMAR pide veda/erizo en Marcona; conflicto del caso."
+    },
+    {
+      "doc": "AT-2026-73_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2023-09-11",
+      "titulo": "Paro nacional del sector pesquero industrial debido a la desatención del gobierno en aprobar medidas urgentes para evitar la quiebra masiva de  empres",
+      "resumen": "Con fecha 07 de setiembre del 2023, la Asociación Nacional de Armadores Pesqueros - Ley 26920 (en adelante ANAP Ley 26920) y el Comité Multisectorial de las Pesquerías de la Bahía de Sechura convocan a realizar un paro nacional el día martes 12 de setiembre de",
+      "sugerido": "CS-2025-0001",
+      "nombre_caso": "La Asociación Agrupación de Micro Empresarios Confraternidad (AAMEC) se adjudica ser posesionarios d",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 0,
+      "sign": [
+        "industrial"
+      ],
+      "rareName": [
+        "industrial"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0008",
+          "score": 11,
+          "sign": [
+            "bahia"
+          ]
+        },
+        {
+          "caso": "CS-2026-0010",
+          "score": 11,
+          "sign": [
+            "masiva"
+          ]
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-53_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2024-03-08",
+      "titulo": "Asociación de Exportadores y Acopiadores de Productos hidrobiológicos y Artesanales del Perú- AEAPHAP preparan plantón en el frontis del Ministerio de",
+      "resumen": "La Asociación de Exportadores y Acopiadores de Productos hidrobiológicos y Artesanales del Perú- AEAPHAP, representados por el señor Caril Patiño, viene coordinando con el señor Raúl Querevalú Querevalú, presidente de la Asociación Gremio de Pescadores Artesan",
+      "sugerido": "CS-2026-0011",
+      "nombre_caso": "Extracción ilegal del recurso “Erizo Rojo” en zonas de controversia entre Marcona y Lomas.",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 5.01,
+      "sign": [
+        "extraccion"
+      ],
+      "rareName": [
+        "extraccion"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0014",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-64_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2024-09-30",
+      "titulo": "OSPAS de Ilo, Moquegua anuncia movilización por emission de RM N° 00396-2024-PRODUCE",
+      "resumen": "En medio de una conferencia de prensa, el sr. Jorge Hurtado, secretario general del Sindicato Unificado de Pescadores Artesanales y Buzos Civiles del Puerto de Ilo (SUPABCPI), anunció que el día viernes 04.10.2024 realizarán una movilización en el puerto de Il",
+      "sugerido": "CS-2024-0005",
+      "nombre_caso": "Los OSPAS de artes pasivas muestran disconformidad por la emisión de cuotas de los recursos Jurel y ",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 5.01,
+      "sign": [
+        "jurel"
+      ],
+      "rareName": [
+        "jurel"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0007",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2026-0014",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-66_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2024-11-20",
+      "titulo": "OSPAS de San Andrés participan en paro indefinido contra empresa Plus Petrol, y colocan como parte de sus demandas el levantamiento de veda de bonito ",
+      "resumen": "- Con fecha 11.11.2024, mediante Oficio Nº 231-2024 (00088211-2024-E), la FIUPAP solicitó a través del DVPA que el IMARPE realice la operación científica EUREKA con los recursos hidrobiológicos “Jurel” y “Bonito”, a fin de establecer medidas precautorias antes",
+      "sugerido": "CS-2024-0005",
+      "nombre_caso": "Los OSPAS de artes pasivas muestran disconformidad por la emisión de cuotas de los recursos Jurel y ",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "jurel"
+      ],
+      "rareName": [
+        "jurel"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-50_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2025-03-13",
+      "titulo": "PESCADORES PLANTEAN MOVILIZACIÓN COMO MEDIDA DE PROTESTA FRENTE A CONVOCATORIA DE PROCESO DE SELECCIÓN PARA LA ADMINISTRACIÓN DEL DPA CALLAO",
+      "resumen": "Manuel Caminiti, presidente de la Asociación de Pescadores Artesanales Cultivadores y Marisqueros del Callao – APACMC, plantea una movilización como medida de protesta ante la reciente convocatoria a las OSPAS del Callao para que participen en el proceso de se",
+      "sugerido": "CS-2024-0002",
+      "nombre_caso": "La OSPA José Olaya Balandra permanece en la administración de la Infraestructura Pesquera Artesanal ",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "ospa"
+      ],
+      "rareName": [
+        "ospa"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "CS-2026-01",
+      "tipo": "Clima Social General",
+      "fecha": "2025-11-07",
+      "titulo": "El 14 de noviembre de 2025 se realizará en Pisco la II Audiencia Pública Descentralizada de la Comisión de la Producción, Micro y Pequeña Empresa y Co",
+      "resumen": "El 14 de noviembre de 2025 se realizará en Pisco la II Audiencia Pública Descentralizada de la Comisión de la Producción, Micro y Pequeña Empresa y Cooperativas 2025–2026.",
+      "sugerido": "CS-2025-0001",
+      "nombre_caso": "La Asociación Agrupación de Micro Empresarios Confraternidad (AAMEC) se adjudica ser posesionarios d",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "micro"
+      ],
+      "rareName": [
+        "micro"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "CS-2026-01-2",
+      "tipo": "Clima Social Focalizado",
+      "fecha": "2025-11-07",
+      "titulo": "El 14 de noviembre de 2025 se realizará en Pisco la II Audiencia Pública Descentralizada de la Comisión de la Producción, Micro y Pequeña Empresa y Co",
+      "resumen": "El 14 de noviembre de 2025 se realizará en Pisco la II Audiencia Pública Descentralizada de la Comisión de la Producción, Micro y Pequeña Empresa y Cooperativas 2025–2026.",
+      "sugerido": "CS-2025-0001",
+      "nombre_caso": "La Asociación Agrupación de Micro Empresarios Confraternidad (AAMEC) se adjudica ser posesionarios d",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "micro"
+      ],
+      "rareName": [
+        "micro"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "CS-2026-04",
+      "tipo": "Clima Social General",
+      "fecha": "2026-01-28",
+      "titulo": "* La región Piura, particularmente la provincia de Sechura, presenta un nivel de conflictividad social alto en el subsector pesca artesanal y de menor",
+      "resumen": "* La región Piura, particularmente la provincia de Sechura, presenta un nivel de conflictividad social alto en el subsector pesca artesanal y de menor escala, vinculado principalmente a la gestión del recurso calamar gigante (pota) y a la reciente RM N.º 018-2",
+      "sugerido": "MD-2026-0005",
+      "nombre_caso": "Grupo de Trabajo Multisectorial - Política de Descentralización",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 0,
+      "sign": [
+        "politica"
+      ],
+      "rareName": [
+        "politica"
+      ],
+      "alternativas": [
+        {
+          "caso": "MD-2026-0020",
+          "score": 11,
+          "sign": [
+            "crisis"
+          ]
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "CS-2026-04-2",
+      "tipo": "Clima Social Focalizado",
+      "fecha": "2026-01-28",
+      "titulo": "* La región Piura, particularmente la provincia de Sechura, presenta un nivel de conflictividad social alto en el subsector pesca artesanal y de menor",
+      "resumen": "* La región Piura, particularmente la provincia de Sechura, presenta un nivel de conflictividad social alto en el subsector pesca artesanal y de menor escala, vinculado principalmente a la gestión del recurso calamar gigante (pota) y a la reciente RM N.º 018-2",
+      "sugerido": "MD-2026-0005",
+      "nombre_caso": "Grupo de Trabajo Multisectorial - Política de Descentralización",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 0,
+      "sign": [
+        "politica"
+      ],
+      "rareName": [
+        "politica"
+      ],
+      "alternativas": [
+        {
+          "caso": "MD-2026-0020",
+          "score": 11,
+          "sign": [
+            "crisis"
+          ]
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-16_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2026-03-06",
+      "titulo": "🚨 REPORTE DE ALERTA TEMPRANA | PLANTÓN DE PESCADORES ARTESANALES FRENTE AL MINISTERIO DE LA PRODUCCIÓN",
+      "resumen": "Se ha confirmado la convocatoria a un plantón para hoy, 06 de marzo de 2026, a las 15:00 horas, frente a PRODUCE . La movilización es impulsada por dirigente Luis Suclupe con el poyo de algunos pescadores del Callao, Chimbote y Chiclayo, en rechazo a las recie",
+      "sugerido": "CS-2025-0006",
+      "nombre_caso": "DPA Chimbote en Ancash, para el cumplimiento sanitario",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "chimbote"
+      ],
+      "rareName": [
+        "chimbote"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "descartada_falso_positivo",
+      "nota": "DESCARTADO (falso positivo): 'Chimbote' aparece por convocatoria sobre bonito; el caso es infraestructura del DPA Chimbote."
+    },
+    {
+      "doc": "RED-2026-012",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-03-30",
+      "titulo": "REUNIÓN CON PESCADORES CORTINEROS DE PISCO POR RECURSO BONITO.",
+      "resumen": "Atender el pedido de los pescadores artesanales de cortina de Pisco, la problemática que se generaría por el próximo cierre de la cuota de bonito para cortineros, correspondiente al primer semestre de 2026. Asimismo, se buscó revisar los criterios de distribuc",
+      "sugerido": "CS-2026-0002",
+      "nombre_caso": "Descontento de MYPES por denuncias de corrpución y retraso en proceso de Compras MYPErú.",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "denuncias"
+      ],
+      "rareName": [
+        "denuncias"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": "Menciona bonito (Pisco): posible CS-2026-0013, pero sin resumen no es concluyente."
+    },
+    {
+      "doc": "CS-2026-06",
+      "tipo": "Clima Social General",
+      "fecha": "2026-05-26",
+      "titulo": "El clima social en la región Piura presenta una tensión creciente en el marco del Paro Agrario Nacional indefinido acatado por gremios vinculados a CO",
+      "resumen": "El clima social en la región Piura presenta una tensión creciente en el marco del Paro Agrario Nacional indefinido acatado por gremios vinculados a CONVEAGRO desde el 25 de mayo, detonado por la crisis de precios del arroz, altos costos de producción e importa",
+      "sugerido": "MD-2026-0013",
+      "nombre_caso": "Comisión Multisectorial para proponer y fiscalizar la implementación de medidas y acciones estratégi",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 0,
+      "sign": [
+        "estrategicas"
+      ],
+      "rareName": [
+        "estrategicas"
+      ],
+      "alternativas": [
+        {
+          "caso": "MD-2026-0020",
+          "score": 11,
+          "sign": [
+            "crisis"
+          ]
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "CS-2026-06-2",
+      "tipo": "Clima Social Focalizado",
+      "fecha": "2026-05-26",
+      "titulo": "El clima social en la región Piura presenta una tensión creciente en el marco del Paro Agrario Nacional indefinido acatado por gremios vinculados a CO",
+      "resumen": "El clima social en la región Piura presenta una tensión creciente en el marco del Paro Agrario Nacional indefinido acatado por gremios vinculados a CONVEAGRO desde el 25 de mayo, detonado por la crisis de precios del arroz, altos costos de producción e importa",
+      "sugerido": "MD-2026-0013",
+      "nombre_caso": "Comisión Multisectorial para proponer y fiscalizar la implementación de medidas y acciones estratégi",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 0,
+      "sign": [
+        "estrategicas"
+      ],
+      "rareName": [
+        "estrategicas"
+      ],
+      "alternativas": [
+        {
+          "caso": "MD-2026-0020",
+          "score": 11,
+          "sign": [
+            "crisis"
+          ]
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-85_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2026-06-01",
+      "titulo": "🔔 REPORTE RÁPIDO | Productores acuícolas de Puno exigen presencia de PRODUCE y cuestionan operativo de fiscalización",
+      "resumen": "Productores acuícolas realizaron protestas y un plantón en rechazo al operativo de fiscalización ejecutado el 28 de mayo por PRODUCE, SANIPES y Ministerio Público. Los manifestantes cuestionan la legalidad de las intervenciones realizadas, denuncian presuntos ",
+      "sugerido": "MD-2026-0008",
+      "nombre_caso": "Grupo de Trabajo para el desarrollo sostenible de la provincia de Carabaya, departamento de Puno",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "puno"
+      ],
+      "rareName": [
+        "puno"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-46_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2026-08-13",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA | Enfrentamientos entre pescadores artesanales de la caleta El Dorado y embarcaciones de cerco (\"bolichitos de bolsillo\"",
+      "resumen": "Dirigentes de pescadores artesanales de la caleta El Dorado (bahía de Samanco) reportan enfrentamientos en el mar con embarcaciones de cerco mecanizado \"bolichitos de bolsillo\" que estarían operando a menos de media milla de la orilla. En redes sociales se obs",
+      "sugerido": "CS-2026-0008",
+      "nombre_caso": "Presunta contaminación por dragado en la Bahía del Callao",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 0,
+      "sign": [
+        "bahia"
+      ],
+      "rareName": [
+        "bahia"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0011",
+          "score": 11,
+          "sign": [
+            "controversia"
+          ]
+        },
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "RED-2026-006",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-09-04",
+      "titulo": "REUNIÓN CON LA ASOCIACIÓN DE ARMADORES ARTESANALES DE PESCA DE ARRASTRE PARA CHD",
+      "resumen": "Atender las principales preocupaciones planteadas por la Asociación de Armadores Artesanales de Pesca de Arrastre para Consumo Humano Directo de la Región Tumbes, relacionadas con las multas e impedimentos de zarpe de sus embarcaciones, así como sus propuestas",
+      "sugerido": "CS-2026-0004",
+      "nombre_caso": "Demandas de mayor seguridad y control de la actividad pesquera dentro de las cinco millas en Tumbes ",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 0,
+      "sign": [
+        "tumbes"
+      ],
+      "rareName": [
+        "tumbes"
+      ],
+      "alternativas": [
+        {
+          "caso": "MD-2026-0017",
+          "score": 11,
+          "sign": [
+            "planteadas"
+          ]
+        },
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "RED-2026-025",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-09-14",
+      "titulo": "REUNIÓN CON REPRESENTANTES CON AH. 15 DE ENERO CHILCA",
+      "resumen": "",
+      "sugerido": "CS-2026-0003",
+      "nombre_caso": "Disconformidad ciudadan en Chilca en horarios para de asistencia para mecanismos de participación ci",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 11,
+      "sign": [
+        "chilca"
+      ],
+      "rareName": [
+        "chilca"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "aplicada",
+      "nota": "Reunión con representantes del AH 15 de Enero, Chilca."
+    },
+    {
+      "doc": "CT-2026-001",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-09-16",
+      "titulo": "REUNIÓN DE FORTALECIMIENTO DE LA PREVENCIÓN Y GESTIÓN DE CONFLICTOS SOCIALES EN EL SECTOR PRODUCCIÓN – APLICATIVO AVISA",
+      "resumen": "Fortalecer la articulación entre la Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales (OAIPCS), la Oficina de Tecnologías de la Información y las entidades adscritas al Ministerio de la Producción, a partir del intercambio de exper",
+      "sugerido": "CS-2025-0004",
+      "nombre_caso": "Maricultores de Sechura demandan la habilitación de áreas acuáticas y medidas para el fortalecimient",
+      "tier": "firma_sola",
+      "score": 11,
+      "margin": 5.01,
+      "sign": [
+        "fortalecimiento"
+      ],
+      "rareName": [
+        "fortalecimiento"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0003",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "MD-2026-0001",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-81_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2022-09-12",
+      "titulo": "Los pescadores de boliche de cerco de Ilo, Moquegua vienen organizando una movilización para el 13.09.2022, aduciendo un posible rechazo a las gestion",
+      "resumen": "El Sindicato Unificado de Pescadores Artesanales del Puerto de Ilo (SUPAPI) y la asociación de Pescadores Armadores de Pesca Artesanal del Sur (APASUR) vienen convocando a una marcha para el 13.09.2022 en el puerto de Ilo, región Moquegua, manifestando su rech",
+      "sugerido": "CS-2024-0005",
+      "nombre_caso": "Los OSPAS de artes pasivas muestran disconformidad por la emisión de cuotas de los recursos Jurel y ",
+      "tier": "debil",
+      "score": 5.99,
+      "margin": 0,
+      "sign": [],
+      "rareName": [
+        "boliche"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0007",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2026-0014",
+          "score": 5.99,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-61_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2024-09-13",
+      "titulo": "PERMISOS DE PESCA TEMPORAL DE COOPERATIVAS PESQUERA DE PIURA Y LAMBAYEQUE ESTÁN PRÓXIMO A VENCER",
+      "resumen": "Desde el 15.06.2016 cuando se publicó el DS 006-2016-PRODUCE han transcurrido 8 años, en que PRODUCE continua extendiendo la vigencia de permisos provisionales de pesca artesanal para las embarcaciones que estaban en proceso de formalizar. Son 6 las disposicio",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 5.99,
+      "margin": 0,
+      "sign": [],
+      "rareName": [
+        "jose"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0006",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "AT-2026-04_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2025-10-22",
+      "titulo": "🚨 REPORTE DE ALERTA TEMPRANA| Movilización de pescadores en el GORE Tacna por presuntos malos manejos en el DPA Morrosama",
+      "resumen": "A las 10:30 a.m., aproximadamente 80 pescadores artesanales de Morrosama realizan una movilización en los exteriores del Gobierno Regional de Tacna, exigiendo la destitución de la Sra. Bertha Ortega, directora de la DIREPRO Tacna, por presuntos malos manejos e",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 5.99,
+      "margin": 5.99,
+      "sign": [],
+      "rareName": [
+        "tacna"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "CS-2026-02",
+      "tipo": "Clima Social General",
+      "fecha": "2025-11-20",
+      "titulo": "Inauguración del Desembarcadero Pesquero Artesanal (DPA) Chancay con presencia del Presidente de la República, Ministro de la Producción, FONDEPES, au",
+      "resumen": "Inauguración del Desembarcadero Pesquero Artesanal (DPA) Chancay con presencia del Presidente de la República, Ministro de la Producción, FONDEPES, autoridades regionales y comunidad pesquera de Chancay.",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 5.99,
+      "margin": 5.99,
+      "sign": [],
+      "rareName": [
+        "chancay"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "CS-2026-02-2",
+      "tipo": "Clima Social Focalizado",
+      "fecha": "2025-11-20",
+      "titulo": "Inauguración del Desembarcadero Pesquero Artesanal (DPA) Chancay con presencia del Presidente de la República, Ministro de la Producción, FONDEPES, au",
+      "resumen": "Inauguración del Desembarcadero Pesquero Artesanal (DPA) Chancay con presencia del Presidente de la República, Ministro de la Producción, FONDEPES, autoridades regionales y comunidad pesquera de Chancay.",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 5.99,
+      "margin": 5.99,
+      "sign": [],
+      "rareName": [
+        "chancay"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "CS-2026-05",
+      "tipo": "Clima Social General",
+      "fecha": "2025-12-03",
+      "titulo": "Sechura mantiene un nivel de conflictividad alto, con 3 temas principales de tensión en el subsector pesca y  1 tema colateral adicional.",
+      "resumen": "Sechura mantiene un nivel de conflictividad alto, con 3 temas principales de tensión en el subsector pesca y 1 tema colateral adicional.",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 5.99,
+      "margin": 0,
+      "sign": [],
+      "rareName": [
+        "sechura"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2025-0004",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "CS-2026-05-2",
+      "tipo": "Clima Social Focalizado",
+      "fecha": "2025-12-03",
+      "titulo": "Sechura mantiene un nivel de conflictividad alto, con 3 temas principales de tensión en el subsector pesca y  1 tema colateral adicional.",
+      "resumen": "Sechura mantiene un nivel de conflictividad alto, con 3 temas principales de tensión en el subsector pesca y 1 tema colateral adicional.",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 5.99,
+      "margin": 0,
+      "sign": [],
+      "rareName": [
+        "sechura"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2025-0004",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "AT-2026-88_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2026-02-27",
+      "titulo": "Denuncia por presunta irregularidad en autorización de proyecto de investigación de Bacalao de Profundidad (R.D. N° 00627-2025-PRODUCE/DGPCHDI)",
+      "resumen": "La Federación de Integración y Unificación de los Pescadores Artesanales de Moquegua (FIUPAR-MOQUEGUA) denunció ante PCM un presunto favoritismo del Ministerio de la Producción y el IMARPE al autorizar un proyecto de investigación de bacalao a tres embarcacion",
+      "sugerido": "CS-2026-0007",
+      "nombre_caso": "DPA Ilo en Moquegua",
+      "tier": "debil",
+      "score": 5.99,
+      "margin": 0,
+      "sign": [],
+      "rareName": [
+        "moquegua"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0014",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": ""
+    },
+    {
+      "doc": "AT-2026-48_pdf-2",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2026-04-11",
+      "titulo": "🔔 REPORTE DE ALERTA TEMPRANA – ESCALAMIENTO DE CONFLICTO EN DPA MORRO SAMA (TACNA) ASOCIADO A LA GESTIÓN DE DIREPRO TACNA",
+      "resumen": "A finales de marzo e inicios de abril se han realizado intentos de diálogo entre pescadores artesanales y autoridades regionales (DIREPRO / GORE Tacna), sin resultados efectivos ni canales de comunicación consolidados.",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 5.99,
+      "margin": 0,
+      "sign": [],
+      "rareName": [
+        "conflicto"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2026-0014",
+          "score": 5.99,
+          "sign": []
+        },
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-010-2",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-06-10",
+      "titulo": "REUNIÓN CON OSPAS SOBRE RECURSO DE BONITO",
+      "resumen": "Abordar la propuesta de distribución del saldo de cuota de bonito (9.000 toneladas), las medidas complementarias de control (precintos, listados de embarcaciones habilitadas, topes por faena), la problemática de la pesca ilegal, el subregistro, la falta de act",
+      "sugerido": "CS-2026-0005",
+      "nombre_caso": "Pescadores y armadores artesanales de Piura y Lambayeque demandan la ampliación del proceso de forma",
+      "tier": "sin",
+      "score": 5.99,
+      "margin": 5.99,
+      "sign": [],
+      "rareName": [
+        "ampliacion"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "revision_manual",
+      "nota": "Menciona bonito: posible CS-2026-0013, sin resumen. Revisar."
+    },
+    {
+      "doc": "RED-2026-009",
+      "tipo": "Relatoría",
+      "fecha": "2026-09-17",
+      "titulo": "REUNIÓN CON OSPAS DE TACNA",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 5.99,
+      "margin": 5.99,
+      "sign": [],
+      "rareName": [
+        "tacna"
+      ],
+      "alternativas": [
+        {
+          "caso": "CS-2012-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "AT-2026-75_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2022-05-26",
+      "titulo": "Asociación de Productores y Exportadores Pesqueros solicitan audiencia con SM y Viceministro del DVPA",
+      "resumen": "Según la Carta S/N (Exp. N° 00023457-2021) la Asociación de Productores y exportadores Pesqueros (APROEXSUR) refieren que vienen solicitando desde el 20.12.2020 atención a sus problemáticas de extinción o reducción de multas confiscatorias impuestas por PRODUC",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RR-2026-01",
+      "tipo": "Reporte Rápido (RR)",
+      "fecha": "2025-10-28",
+      "titulo": "📍 REPORTE DE AVANZADA | Creación del Servicio del DPA La Islilla | OAIPCS",
+      "resumen": "El 29.10.2025 a las 10 am el SM visitará La Islilla (Paita, Piura) para participar en la demarcación de los hitos del proyecto “Creación del Servicio del DPA La Islilla”. Posteriormente, al mediodía se trasladará al Centro Poblado La Tortuga para dialogar con ",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "CS-2026-03",
+      "tipo": "Clima Social General",
+      "fecha": "2025-11-28",
+      "titulo": "La región Piura mantiene un nivel de conflictividad social moderado a alto, con ocho conflictos socioambientales activos (Defensoría del Pueblo) y 4 t",
+      "resumen": "La región Piura mantiene un nivel de conflictividad social moderado a alto, con ocho conflictos socioambientales activos (Defensoría del Pueblo) y 4 tensiones latentes vinculados al subsector pesca.",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "CS-2026-03-2",
+      "tipo": "Clima Social Focalizado",
+      "fecha": "2025-11-28",
+      "titulo": "La región Piura mantiene un nivel de conflictividad social moderado a alto, con ocho conflictos socioambientales activos (Defensoría del Pueblo) y 4 t",
+      "resumen": "La región Piura mantiene un nivel de conflictividad social moderado a alto, con ocho conflictos socioambientales activos (Defensoría del Pueblo) y 4 tensiones latentes vinculados al subsector pesca.",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-013",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-03-02",
+      "titulo": "REUNIÓN CON FIUPAP POR PROBLEMÁTICA DEL BONITO.",
+      "resumen": "La presente reunión tuvo por objetivo atender las demandas y preocupaciones de la FIUPAP, para abordar la problemática de pesca de recurso bonito que deriva de la reciente normativa emitida por PRODUCE (R.M. N° 053-2026-PRODUCE).",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "AT-2026-07_pdf",
+      "tipo": "Reporte de Alerta Temprana (AT)",
+      "fecha": "2026-03-11",
+      "titulo": "🚨  REPORTE DE ALERTA TEMPRANA | Movilización de pescadores artesanales de La Libertad por temas relacionados a infraestructura de DPAs",
+      "resumen": "Un aproximado de 60 pescadores artesanales de los DPAs de Salaverry; Malabrigo, Pacasmayo y Puerto Morin inician una marcha hacia la sede del Gobierno Regional de La Libertad, partiendo desde el Desembarcadero Pesquero Artesanal de Salaverry con destino a la c",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-033",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-05-12",
+      "titulo": "Régimen especial de Móbula",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-015",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-05-27",
+      "titulo": "REUNIÓN CON OSPAS POR BONITO",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-011",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-06-15",
+      "titulo": "REUNIÓN DE PRODUCE CON FIUPAP SOBRE EL RECURSO BONITO",
+      "resumen": "Reunión con los representantes de la Federación de Integración y Unificación de los Pescadores Artesanales del Perú (FIUPAP) y bases regionales para abordar la problemática de la pesquería del recurso bonito en el marco de la Resolución Ministerial N° 169-2026",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "CT-2026-002",
+      "tipo": "Otro (sin clasificar)",
+      "fecha": "2026-06-22",
+      "titulo": "Proyecto de infraestructura pesquería en la región La Libertad",
+      "resumen": "Reunión sobre el estado actual de los proyectos de modernización de los DPA de Puerto Malabrigo, y Salaverry, de la región La Libertad.",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-017",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-07-09",
+      "titulo": "REUNIÓN CON OSPAS DE PIURA POR POTA",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-016",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-08-06",
+      "titulo": "REUNIÓN CON OSPAS DE PUCUSANA",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-014",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-08-07",
+      "titulo": "REUNIÓN CON COOPERATIVAS DEL NORTE",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-019",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-08-25",
+      "titulo": "REUNIÓN CON OSPAS DEL SUR.",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-020",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-08-26",
+      "titulo": "REUNIÓN CON MACRO SUR",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-018",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-08-27",
+      "titulo": "REUNIÓN CON EMPRESARIOS Y OSPAS",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-021",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-09-17",
+      "titulo": "REUNIÓN CON OSPAS SELECTIVAS Y CERCO",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-022",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-09-17",
+      "titulo": "REUNIÓN CON OSPAS SELECTIVAS Y CERCO",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-026",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-09-24",
+      "titulo": "REUNIÓN CON ASOCIACIONES DE CAMARONEROS EN COCACHACRA",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-031",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-09-28",
+      "titulo": "DPA Morrin - La Libertad",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    },
+    {
+      "doc": "RED-2026-032",
+      "tipo": "Ayuda Memoria",
+      "fecha": "2026-09-28",
+      "titulo": "DPA SALAVERRY",
+      "resumen": "",
+      "sugerido": null,
+      "nombre_caso": null,
+      "tier": "sin",
+      "score": 0,
+      "margin": 0,
+      "sign": [],
+      "rareName": [],
+      "alternativas": [
+        {
+          "caso": "CS-2017-0001",
+          "score": 0,
+          "sign": []
+        },
+        {
+          "caso": "CS-2022-0001",
+          "score": 0,
+          "sign": []
+        }
+      ],
+      "decision": "sin_match",
+      "nota": "Sin entidad compartida con ningún caso (score 0)."
+    }
+  ]
+}

@@ -9,6 +9,7 @@
  * «Exportar» descarga lo que la pantalla ya tiene sin una segunda petición.
  */
 
+import { diaIso } from '../../core/fecha/zona-horaria';
 import { esRegistro, leer, lista, numero, texto } from '../../dominio/mapeo';
 
 export type EstadisticaEstado = {
@@ -225,5 +226,6 @@ export function generarCsvEstadisticas(datos: EstadisticasCompromisos): string {
 
 /** Nombre del archivo descargado, con la fecha del día. */
 export function nombreArchivoEstadisticas(fecha: Date = new Date()): string {
-  return `avisa_estadisticas_compromisos_${fecha.toISOString().slice(0, 10)}.csv`;
+  // Día de Lima: en UTC el archivo de la noche quedaba fechado mañana.
+  return `avisa_estadisticas_compromisos_${diaIso(fecha) ?? ''}.csv`;
 }

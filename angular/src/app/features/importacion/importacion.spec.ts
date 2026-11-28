@@ -71,9 +71,7 @@ describe('validación de importaciones', () => {
   it('separa varias regiones y rechaza duplicados del propio archivo', () => {
     const validacion = validarImportacion(
       casos,
-      leerTabla(
-        'titulo;region\nCaso A;Piura; Tumbes\nCaso A;Piura',
-      ),
+      leerTabla('titulo;region\nCaso A;Piura; Tumbes\nCaso A;Piura'),
     );
 
     expect(validacion.validas).toHaveLength(1);
@@ -100,10 +98,7 @@ describe('validación de importaciones', () => {
 
   it('valida el DNI de las personas y el RUC de las organizaciones', () => {
     const personas = tipoImportacion('actores-personas');
-    const invalido = validarImportacion(
-      personas,
-      leerTabla('nombre;dni\nJuan Pérez;123'),
-    );
+    const invalido = validarImportacion(personas, leerTabla('nombre;dni\nJuan Pérez;123'));
     expect(invalido.rechazos[0].codigo).toBe('DNI_INVALIDO');
 
     const organizaciones = tipoImportacion('actores-organizaciones');
@@ -115,6 +110,49 @@ describe('validación de importaciones', () => {
       naturaleza: 'organizacion',
       ruc: '20123456789',
     });
+  });
+
+  it('rechaza un tipo de actor fuera del catálogo', () => {
+    const personas = tipoImportacion('actores-personas');
+    const validacion = validarImportacion(personas, leerTabla('nombre;tipo\nJuan Pérez;Alcalde'));
+    expect(validacion.rechazos[0]).toMatchObject({ fila: 2, codigo: 'TIPO_ACTOR_INVALIDO' });
+  });
+
+  it('acepta el tipo de actor del catálogo sin distinguir tildes ni mayúsculas', () => {
+    const personas = tipoImportacion('actores-personas');
+    const validacion = validarImportacion(
+      personas,
+      leerTabla('nombre;tipo\nJuan Pérez;ACTOR SOCIAL'),
+    );
+    expect(validacion.rechazos).toHaveLength(0);
+    expect(validacion.validas[0].payload).toMatchObject({ tipo: 'Actor social' });
+  });
+
+  it('rechaza una vigencia OSPA que no es una fecha', () => {
+    const organizaciones = tipoImportacion('actores-organizaciones');
+    const validacion = validarImportacion(
+      organizaciones,
+      leerTabla('razon social;vigencia hasta\nRonda Campesina;31/02/2026'),
+    );
+    expect(validacion.rechazos[0]).toMatchObject({ fila: 2, codigo: 'FECHA_INVALIDA' });
+  });
+
+  it('valida la foto como URL pública y la conserva fuera del payload', () => {
+    const personas = tipoImportacion('actores-personas');
+
+    const invalida = validarImportacion(
+      personas,
+      leerTabla('nombre;foto\nJuan Pérez;no-es-una-url'),
+    );
+    expect(invalida.rechazos[0].codigo).toBe('FOTO_INVALIDA');
+
+    const valida = validarImportacion(
+      personas,
+      leerTabla('nombre;foto\nJuan Pérez;https://cdn.ejemplo.pe/juan.jpg'),
+    );
+    expect(valida.rechazos).toHaveLength(0);
+    expect(valida.validas[0].foto).toBe('https://cdn.ejemplo.pe/juan.jpg');
+    expect(valida.validas[0].payload).not.toHaveProperty('foto');
   });
 
   it('marca como institución pública y exige nivel de gobierno', () => {

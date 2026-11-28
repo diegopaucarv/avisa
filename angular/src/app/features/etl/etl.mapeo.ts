@@ -14,7 +14,7 @@
 
 import { normalizarColeccion, type Coleccion } from '../../core/http/coleccion';
 import { esRegistro, lista, numero, texto } from '../../dominio/mapeo';
-import { partesFecha } from '../../shared/formato-fecha';
+import { formatearFecha, formatearFechaHora } from '../../shared/formato-fecha';
 
 /* ───────────────────────── tipos espejo del contrato ───────────────────── */
 
@@ -224,10 +224,6 @@ export function aEjecucionColeccion(bruto: unknown): Coleccion<Ejecucion> {
 
 const AGRUPACION_MILES = /\B(?=(\d{3})+(?!\d))/g;
 
-function dosDigitos(valor: number): string {
-  return String(valor).padStart(2, '0');
-}
-
 /**
  * Entero con espacio fino como separador de miles (`1160` → `1 160`), el uso
  * de la documentación del proyecto. Sin dato → `—`.
@@ -239,32 +235,17 @@ export function formatearNumero(valor: number | null | undefined): string {
   return `${signo}${entero}`;
 }
 
-/** `2026-11-24` → `24/11/2026`; sin fecha → `—`. */
+/** `2026-11-24` → `24NOV2026`; sin fecha → `—`. Nombre legado. */
 export function formatearFechaDdMmAaaa(valor: string | null | undefined): string {
-  const partes = partesFecha(valor);
-  if (!partes) return '—';
-  const [anio, mes, dia] = partes;
-  return `${dosDigitos(dia)}/${dosDigitos(mes)}/${anio}`;
+  return formatearFecha(valor);
 }
 
 /**
- * `2026-11-24T20:32:46.804Z` → `24/11/2026 15:32` en hora local del navegador.
+ * `2026-11-24T20:32:46.804Z` → `24NOV2026 15:32` en hora de Lima.
  * Si el valor no es un instante válido, cae al formato de sola fecha.
  */
 export function formatearFechaHoraDdMmAaaa(valor: string | null | undefined): string {
-  if (!valor) return '—';
-
-  const fecha = new Date(valor);
-  if (!Number.isNaN(fecha.getTime())) {
-    const partes = `${fecha.getFullYear()}-${dosDigitos(fecha.getMonth() + 1)}-${dosDigitos(
-      fecha.getDate(),
-    )}`;
-    return `${formatearFechaDdMmAaaa(partes)} ${dosDigitos(fecha.getHours())}:${dosDigitos(
-      fecha.getMinutes(),
-    )}`;
-  }
-
-  return formatearFechaDdMmAaaa(valor);
+  return formatearFechaHora(valor);
 }
 
 /* ───────────────────────── etiquetas de integración ────────────────────── */

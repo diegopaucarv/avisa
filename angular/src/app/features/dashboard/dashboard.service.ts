@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { urlConParametros } from '../../core/http/coleccion';
 import { ErrorApi } from '../../core/http/errores';
 import { urlApi } from '../../core/config/entorno';
+import { hoyIso } from '../../core/fecha/zona-horaria';
 
 /**
  * Descarga del dashboard analítico en CSV.
@@ -16,9 +17,7 @@ import { urlApi } from '../../core/config/entorno';
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
   /** Descarga el CSV de resumen y volumen con los filtros vigentes. */
-  async descargarCsv(
-    filtros: Record<string, string | number | null | undefined>,
-  ): Promise<void> {
+  async descargarCsv(filtros: Record<string, string | number | null | undefined>): Promise<void> {
     const url = urlConParametros(urlApi('/v1/analitica/export'), filtros);
 
     let respuesta: Response;
@@ -93,5 +92,5 @@ export class DashboardService {
 }
 
 function fechaDeHoy(): string {
-  return new Date().toISOString().slice(0, 10);
+  return hoyIso();
 }

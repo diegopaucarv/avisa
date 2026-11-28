@@ -273,16 +273,30 @@ describe('cronología del expediente: sólo el último hecho reciente', () => {
 });
 
 describe('tipologías del actor en la tabla', () => {
-  it('une tipo y función separados por coma', () => {
-    expect(textoTipologias({ tipo: 'Actor social', funcion: 'Principal' })).toBe(
-      'Actor social, Principal',
-    );
+  it('une tipo, función y posicionamiento separados por coma', () => {
+    expect(
+      textoTipologias({
+        tipo: 'Actor social',
+        funcion: 'Principal',
+        posicionamiento: 'Dialogante',
+      }),
+    ).toBe('Actor social, Principal, Dialogante');
+  });
+
+  it('omite el posicionamiento cuando falta', () => {
+    expect(
+      textoTipologias({ tipo: 'Actor social', funcion: 'Principal', posicionamiento: null }),
+    ).toBe('Actor social, Principal');
   });
 
   it('recorta, deduplica y omite los vacíos', () => {
-    expect(textoTipologias({ tipo: '  Actor público  ', funcion: null })).toBe('Actor público');
-    expect(textoTipologias({ tipo: 'Principal', funcion: 'Principal' })).toBe('Principal');
-    expect(textoTipologias({ tipo: '', funcion: '   ' })).toBe('');
-    expect(textoTipologias({ tipo: null, funcion: null })).toBe('');
+    expect(
+      textoTipologias({ tipo: '  Actor público  ', funcion: null, posicionamiento: null }),
+    ).toBe('Actor público');
+    expect(
+      textoTipologias({ tipo: 'Principal', funcion: 'Principal', posicionamiento: 'Principal' }),
+    ).toBe('Principal');
+    expect(textoTipologias({ tipo: '', funcion: '   ', posicionamiento: '' })).toBe('');
+    expect(textoTipologias({ tipo: null, funcion: null, posicionamiento: null })).toBe('');
   });
 });

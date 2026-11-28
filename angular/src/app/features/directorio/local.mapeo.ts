@@ -51,6 +51,14 @@ export type LocalDirectorio = {
   region: string | null;
   direccion: string | null;
   ubicacionRef: string | null;
+  /**
+   * Coordenadas si la API llegara a publicarlas. Hoy `core.locales` no tiene
+   * columnas de latitud/longitud ni geometría (verificado en `information_schema`
+   * el 2026-11-27), así que llegan `null`; se conservan para que la ficha use el
+   * punto exacto en cuanto exista sin tocar la vista.
+   */
+  latitud: number | null;
+  longitud: number | null;
   aforo: number | null;
   ingresos: string | null;
   tieneProyector: boolean | null;
@@ -72,6 +80,9 @@ export type LocalDirectorio = {
 };
 
 const CLAVES_RESPONSABLES = ['responsables', 'responsablesLocal', 'responsables_local'];
+
+/** Coordenada geográfica lista para Leaflet. */
+export type Coordenadas = { lat: number; lng: number };
 
 /** Igual que `booleano`, pero distingue «no» de «no registrado» (`null`). */
 function booleanoOpcional(objeto: Registro, claves: readonly string[]): boolean | null {
@@ -112,6 +123,67 @@ export function ubicacionDeLocal(local: LocalDirectorio): string | null {
   );
 
   return partes.length > 0 ? partes.join(', ') : null;
+}
+
+/** Distrito, provincia y región sin la dirección (la dirección tiene su línea). */
+export function territorioDeLocal(
+  local: Pick<LocalDirectorio, 'distrito' | 'provincia' | 'region'>,
+): string | null {
+  const partes = [local.distrito, local.provincia, local.region].filter((parte): parte is string =>
+    Boolean(parte),
+  );
+
+  return partes.length > 0 ? partes.join(', ') : null;
+}
+
+/** Descarta coordenadas incompletas o fuera del rango terrestre. */
+function coordenadaValida(lat: number | null, lng: number | null): Coordenadas | null {
+  if (lat === null || lng === null) return null;
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  return { lat, lng };
+}
+
+/**
+ * Coordenadas embebidas en una URL de Google Maps. Sólo se reconocen las formas
+ * que las incluyen literalmente en la URL (`@lat,lng` y `?q=`/`?ll=`/`?query=`).
+ * Un enlace corto (`maps.app.goo.gl/…`) no las contiene y, por tanto, no se
+ * resuelve aquí: no se hace ninguna petición de red ni se adivina el punto.
+ */
+const COORDENADAS_EN_URL: readonly RegExp[] = [
+  /@(-?\d{1,3}(?:\.\d+)?),(-?\d{1,3}(?:\.\d+)?)/,
+  /[?&](?:q|ll|query|destination|center)=(-?\d{1,3}(?:\.\d+)?),(-?\d{1,3}(?:\.\d+)?)/i,
+];
+
+/** Extrae `lat,lng` de una URL de mapa; `null` si no las incluye o son inválidas. */
+export function coordenadasEnUbicacion(
+  ubicacionRef: string | null | undefined,
+): Coordenadas | null {
+  const referencia = ubicacionRef?.trim() ?? '';
+  if (!referencia) return null;
+
+  for (const patron of COORDENADAS_EN_URL) {
+    const coincidencia = patron.exec(referencia);
+    if (!coincidencia) continue;
+
+    const coordenadas = coordenadaValida(Number(coincidencia[1]), Number(coincidencia[2]));
+    if (coordenadas) return coordenadas;
+  }
+
+  return null;
+}
+
+/**
+ * Coordenadas del local: primero las columnas (si existieran) y luego las que se
+ * puedan leer de `ubicacion_ref`. `null` cuando no hay ninguna: la ficha cae al
+ * centroide regional y, si tampoco hay región, no dibuja un punto inventado.
+ */
+export function coordenadasDeLocal(
+  local: Pick<LocalDirectorio, 'latitud' | 'longitud' | 'ubicacionRef'>,
+): Coordenadas | null {
+  return (
+    coordenadaValida(local.latitud, local.longitud) ?? coordenadasEnUbicacion(local.ubicacionRef)
+  );
 }
 
 /**
@@ -167,6 +239,8 @@ export function aLocalDirectorio(bruto: unknown): LocalDirectorio {
     region: texto(registro, ['region']),
     direccion: texto(registro, ['direccion']),
     ubicacionRef: texto(registro, ['ubicacionRef', 'ubicacion_ref']),
+    latitud: numero(registro, ['latitud', 'lat', 'latitude']),
+    longitud: numero(registro, ['longitud', 'lng', 'lon', 'longitude']),
     aforo: numero(registro, ['aforo']),
     ingresos: texto(registro, ['ingresos']),
     tieneProyector: booleanoOpcional(registro, ['tieneProyector', 'tiene_proyector']),

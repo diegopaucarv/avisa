@@ -69,8 +69,14 @@ import { copiarAlPortapapeles } from './portapapeles';
 /** Opción del combobox de caso: código, título y subsector del caso. */
 export type CasoOpcion = { codigo: string; titulo: string; subsector: string | null };
 
+/** Actor del caso vinculado ya listo para la ficha. */
+type ActorCasoVista = { nombre: string; detalle: string | null };
+
+/** Demanda del caso vinculado ya lista para la ficha. */
+type DemandaCasoVista = { descripcion: string; estado: string | null };
+
 /** Modo con el que se abre el panel desde el listado. */
-export type ModoPanelAlerta = 'ver' | 'editar' | 'historial';
+export type ModoPanelAlerta = 'ver' | 'editar';
 
 /** Una fila editable de las listas del formulario. */
 type Linea = { id: number; texto: string };
@@ -466,6 +472,12 @@ function claveProvincia(nombre: string): number {
       text-transform: uppercase;
     }
 
+    /* Estado de la demanda heredada del caso, en gris y sin competir con el texto. */
+    .demanda-estado {
+      color: #99a3aa;
+      font-size: 12px;
+    }
+
     /* Listas con «＋» del formulario. */
     .bloque-lista {
       display: flex;
@@ -690,36 +702,6 @@ function claveProvincia(nombre: string): number {
       gap: 8px;
     }
 
-    .historial {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    .historial li {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding: 8px 10px;
-      border: 1px solid #eef2f6;
-      border-radius: 8px;
-      background: #fff;
-    }
-
-    .historial .historial-autor {
-      color: #17283a;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .historial .historial-meta {
-      color: #8b97a1;
-      font-size: 12px;
-    }
-
     @media (max-width: 620px) {
       .rejilla-dos {
         grid-template-columns: 1fr;
@@ -773,7 +755,6 @@ export class AlertaPanelComponent {
     typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null);
 
   readonly editando = signal(false);
-  readonly verHistorial = signal(false);
   readonly borradorAlta = signal<BorradorAlta>(borradorAltaVacio());
   readonly distritoAlta = signal<OpcionTerritorio | null>(null);
   readonly mensajeLocal = signal<string | null>(null);
@@ -861,16 +842,23 @@ export class AlertaPanelComponent {
     return codigo ? codigo : null;
   });
 
+  /** `true` si el detalle ya entregó datos del caso y no hace falta pedirlo. */
+  private readonly casoEmbebido = computed(() => {
+    const alerta = this.alerta();
+    if (!alerta) return false;
+    return !!alerta.casoResumen || alerta.casoActores.length > 0 || alerta.casoDemandas.length > 0;
+  });
+
   /**
-   * Datos de lectura del caso vinculado. `GET /cases/{codigo}` ya trae el
-   * resumen, los actores y las demandas, así que no hace falta otro endpoint.
-   * Se piden sólo cuando la ficha los muestra y se recuerdan en una caché
-   * acotada para no repetir la lectura al reabrir la misma alerta.
+   * Datos de lectura del caso vinculado. El detalle de la alerta ya trae el
+   * resumen, los actores y las demandas; `GET /cases/{codigo}` queda como
+   * respaldo para respuestas antiguas que no los incluyan. Se recuerda en una
+   * caché acotada para no repetir la lectura al reabrir la misma alerta.
    */
   private readonly casoVinculadoRecurso = consulta<CasoVinculado>({
     fuente: () => {
       const codigo = this.codigoCaso();
-      if (!codigo || leerCasoVinculado(codigo)) return null;
+      if (!codigo || this.casoEmbebido() || leerCasoVinculado(codigo)) return null;
       return urlApi(`/v1/cases/${encodeURIComponent(codigo)}`);
     },
     esquema: casoVinculadoDesde,
@@ -886,6 +874,44 @@ export class AlertaPanelComponent {
   });
   readonly cargandoCaso = computed(() => this.casoVinculadoRecurso.estado() === 'cargando');
   readonly errorCaso = this.casoVinculadoRecurso.error;
+
+  /** Título del caso: el heredado en la alerta o el del respaldo. */
+  readonly casoTituloVisible = computed(
+    () => this.alerta()?.casoTitulo ?? this.casoVinculado()?.titulo ?? null,
+  );
+
+  /** Resumen del caso: el heredado en la alerta o el del respaldo. */
+  readonly casoResumenVisible = computed(
+    () => this.alerta()?.casoResumen ?? this.casoVinculado()?.resumen ?? null,
+  );
+
+  /** Actores del caso, recortados a nombre + cargo/rol para la ficha. */
+  readonly casoActoresVisibles = computed<readonly ActorCasoVista[]>(() => {
+    const alerta = this.alerta();
+    if (alerta?.casoActores.length) {
+      return alerta.casoActores.map((actor) => ({
+        nombre: actor.nombre,
+        detalle:
+          [actor.cargo, actor.rol].filter((valor): valor is string => !!valor).join(' · ') || null,
+      }));
+    }
+    return (this.casoVinculado()?.actores ?? []).map((nombre) => ({ nombre, detalle: null }));
+  });
+
+  /** Demandas del caso, con su estado cuando el detalle lo trae. */
+  readonly casoDemandasVisibles = computed<readonly DemandaCasoVista[]>(() => {
+    const alerta = this.alerta();
+    if (alerta?.casoDemandas.length) {
+      return alerta.casoDemandas.map((demanda) => ({
+        descripcion: demanda.descripcion,
+        estado: demanda.estado,
+      }));
+    }
+    return (this.casoVinculado()?.demandas ?? []).map((descripcion) => ({
+      descripcion,
+      estado: null,
+    }));
+  });
 
   readonly inicialDistritoAlta = computed(() => {
     const distrito = this.distritoAlta();
@@ -941,14 +967,12 @@ export class AlertaPanelComponent {
       firma = actual;
       if (!alerta) {
         this.editando.set(false);
-        this.verHistorial.set(false);
         return;
       }
       this.sembrar(alerta);
       // El modo «editar» sólo aplica si el perfil puede modificar el contenido
       // y la ficha no está abierta en sólo lectura.
       this.editando.set(!this.soloLectura() && modo === 'editar' && this.puedeModificar());
-      this.verHistorial.set(modo === 'historial');
     });
 
     // El alta se siembra limpia y con el caso del contexto, si lo hay. Nunca
@@ -1882,10 +1906,6 @@ export class AlertaPanelComponent {
   enviarWhatsapp(): void {
     const alerta = this.alerta();
     if (alerta) this.whatsapp.emit(alerta);
-  }
-
-  alternarHistorial(): void {
-    this.verHistorial.update((valor) => !valor);
   }
 
   /* ---------------------------------------------------------------------- *

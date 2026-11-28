@@ -193,6 +193,12 @@ export class ImportarPanelComponent {
   readonly erroresRestantes = computed(() =>
     Math.max(0, (this.importacion.resultado()?.errores.length ?? 0) - LIMITE_VISIBLE),
   );
+  readonly advertencias = computed(
+    () => this.importacion.resultado()?.advertencias.slice(0, LIMITE_VISIBLE) ?? [],
+  );
+  readonly advertenciasRestantes = computed(() =>
+    Math.max(0, (this.importacion.resultado()?.advertencias.length ?? 0) - LIMITE_VISIBLE),
+  );
 
   /** Rótulo del botón que ejecuta la estrategia del tipo elegido. */
   readonly etiquetaAccion = computed(() => {

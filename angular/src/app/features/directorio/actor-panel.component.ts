@@ -22,7 +22,7 @@ import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
 import { resolverUrlMedia } from '../../core/http/url-media';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
-import { aFoto, esFotoPintable, fotoPrincipal, type Foto } from '../../dominio/medios';
+import { aFoto, esFotoPintable, fotoPrincipal, urlFoto, type Foto } from '../../dominio/medios';
 import { IconoComponent } from '../../shared/ui/icono.component';
 import { salirModal } from '../../shared/ui/modal-salida';
 import {
@@ -45,7 +45,7 @@ import {
   type MembresiaActor,
   type OpcionCatalogo,
 } from './directorio.mapeo';
-import { parsearFicha } from './ficha-plantilla';
+import { parsearFicha, PLANTILLA_FICHA } from './ficha-plantilla';
 
 /**
  * Motivo que se envía con la solicitud de PII. La base lo registra en
@@ -341,6 +341,9 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       color: #52677a;
       font-size: 13px;
       line-height: 1.65;
+      /* Texto largo de lectura: se justifica para que el bloque no quede
+         desparejo, pero se conserva pre-line para respetar los saltos. */
+      text-align: justify;
       white-space: pre-line;
     }
 
@@ -500,6 +503,19 @@ type ActorEdicion = Record<CampoActorEdicion, string> & { activo: boolean };
       font-weight: 400;
     }
 
+    .actor-pista-acciones {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .actor-pista-acciones button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+    }
+
     .actor-estado {
       display: flex !important;
       align-items: center;
@@ -597,6 +613,10 @@ export class ActorPanelComponent {
   readonly copiado = signal<string | null>(null);
   private temporizadorCopiado?: ReturnType<typeof setTimeout>;
 
+  /** Confirmación efímera de «Copiar plantilla» en la ficha en edición. */
+  readonly plantillaCopiada = signal(false);
+  private temporizadorPlantilla?: ReturnType<typeof setTimeout>;
+
   private readonly panel = viewChild<ElementRef<HTMLElement>>('panel');
 
   /** Fotografía principal del actor; `null` pinta las iniciales. */
@@ -622,7 +642,10 @@ export class ActorPanelComponent {
     // `aFoto` ya resuelve la ruta relativa contra `apiBase`, pero se refuerza
     // aquí para que la foto cargue aunque el medio llegue sin resolver desde
     // otra fuente. Con una URL absoluta o `data:`/`blob:` es un no-op.
-    return { ...principal, url: resolverUrlMedia(principal.url) };
+    const resuelta = resolverUrlMedia(principal.url);
+    // `urlFoto` prefiere el binario de `/api/v1/media/<id>/contenido` cuando el
+    // medio lo declara (`tieneContenido`), que es la fuente fiable de la imagen.
+    return { ...principal, url: urlFoto({ ...principal, url: resuelta }) };
   });
 
   readonly iniciales = computed(() => {
@@ -674,20 +697,6 @@ export class ActorPanelComponent {
 
   readonly correoContacto = computed(() => this.datos()?.email ?? null);
   readonly telefonoContacto = computed(() => this.datos()?.telefono ?? null);
-
-  /** Etiqueta legible de `core.cat_clasificacion` (nivel de clasificación). */
-  readonly clasificacionTexto = computed(() => {
-    switch (this.actor()?.clasificacion) {
-      case 1:
-        return 'Público';
-      case 2:
-        return 'Reservado';
-      case 3:
-        return 'Confidencial';
-      default:
-        return null;
-    }
-  });
 
   /**
    * Datos que sólo viven en la descripción libre (plantilla markdown de
@@ -843,6 +852,7 @@ export class ActorPanelComponent {
     // El panel sólo se cierra con Cancelar o Confirmar: Escape no lo descarta.
     this.destruccion.onDestroy(() => {
       clearTimeout(this.temporizadorCopiado);
+      clearTimeout(this.temporizadorPlantilla);
       this.focoPrevio?.focus?.();
       this.reiniciarPii();
     });
@@ -1125,6 +1135,17 @@ export class ActorPanelComponent {
     this.copiado.set(valor);
     clearTimeout(this.temporizadorCopiado);
     this.temporizadorCopiado = setTimeout(() => this.copiado.set(null), 1600);
+  }
+
+  /**
+   * Copia la plantilla de ficha (la que el parser realmente interpreta) para
+   * que el usuario la pegue y rellene los valores entre paréntesis.
+   */
+  copiarPlantillaFicha(): void {
+    void navigator.clipboard?.writeText(PLANTILLA_FICHA);
+    this.plantillaCopiada.set(true);
+    clearTimeout(this.temporizadorPlantilla);
+    this.temporizadorPlantilla = setTimeout(() => this.plantillaCopiada.set(false), 1600);
   }
 
   alTecla(evento: KeyboardEvent): void {

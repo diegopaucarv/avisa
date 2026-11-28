@@ -1,0 +1,1946 @@
+{
+  "hechos": [
+    {
+      "id": "e59a7481-66d8-4b55-9b8c-76a121c19c68",
+      "alerta_id": "0b1d7666-e099-48a3-8de6-c243a8e7e909",
+      "fecha": "2026-06-12T05:00:00.000Z",
+      "descripcion": "Aproximadamente 80 personas del AA. HH. 15 de Enero se movilizan a sede Barlovento (PRODUCE) exigiendo la anulación de la audiencia pública del EIA de Aceros Americanos programada para el 13.06.2026.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "dfa6084a-2641-497c-8a3b-aeee863e2303",
+      "alerta_id": "0b1d7666-e099-48a3-8de6-c243a8e7e909",
+      "fecha": "2026-06-13T05:00:00.000Z",
+      "descripcion": "Se suspende la audiencia pública del EIA del proyecto Aceros Americanos, sin nueva fecha reprogramada hasta la actualidad.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "f0cf8019-ac5e-4f66-8b51-3d51325f07e6",
+      "alerta_id": "0b1d7666-e099-48a3-8de6-c243a8e7e909",
+      "fecha": "2026-07-03T05:00:00.000Z",
+      "descripcion": "Representantes del AA. HH. 15 de Enero se movilizan en bus (60 pasajeros) hacia sede Barlovento de PRODUCE, con llegada estimada entre las 10:00 y 10:30 h.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "53bc13f7-b74b-4269-a3c9-76464d402172",
+      "alerta_id": "0eda232a-9174-4e04-9498-30f9d6227939",
+      "fecha": null,
+      "descripcion": "El 15 de enero PNDP realizó una inspección del terreno y se reportó la ocupación ilegal por parte de AAMEC, incluyendo una franja de terreno perteneciente al Ejército, donde se constató la construcción de muros de entre 40 y 60 m mediante bloques de concreto. En el área ocupada se hallaron materiales de construcción y logística (tubos de PVC, costalillos, lonas verdes), así como un reservorio de agua inflable, evidenciando una ocupación activa. Asimismo, se instaló un contenedor metálico con publicidad de AAMEC, colocado fuera del lindero, con el propósito de simular condición de posesionarios sin sustento legal.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "0414f302-6044-425e-9f33-d92ee59b7fff",
+      "alerta_id": "21e20673-1cf6-4ed4-b2e0-a2dcea2b4733",
+      "fecha": null,
+      "descripcion": "Dirigentes camaroneros han declarado públicamente su indignación por haber sido excluidos previamente de la mesa y recién haber sido reacreditados tras trámites administrativos.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "d2511832-bf4c-40de-989b-c56f2dcce7b7",
+      "alerta_id": "21e20673-1cf6-4ed4-b2e0-a2dcea2b4733",
+      "fecha": null,
+      "descripcion": "Señalan que desde setiembre no reciben información clara sobre los estudios en curso, plazos ni resultados esperados, pese a reiteradas reuniones.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "0a6a7629-988a-474c-a916-d70379d35779",
+      "alerta_id": "21e20673-1cf6-4ed4-b2e0-a2dcea2b4733",
+      "fecha": null,
+      "descripcion": "Han advertido que la disminución visible de la contaminación del río se debe únicamente al incremento del caudal por lluvias, no a acciones de remediación efectivas.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "5781af43-8204-4349-b805-0f71def7ea0d",
+      "alerta_id": "25f58ad0-7b6e-49fb-879b-3fe9f49a096c",
+      "fecha": null,
+      "descripcion": "Durante la intervención, PRODUCE determinó que la documentación presentada no permitía acreditar de manera fehaciente la procedencia y trazabilidad del producto, procediéndose al decomiso. Asimismo, SANIPES reportó observaciones relacionadas con las condiciones higiénico-sanitarias del transporte.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "16f629e0-8717-4a0d-8166-9f7a6f57d41c",
+      "alerta_id": "25f58ad0-7b6e-49fb-879b-3fe9f49a096c",
+      "fecha": null,
+      "descripcion": "El 01 de junio, productores acuícolas, comercializadores y pescadores artesanales realizaron protestas en la ciudad de Puno y sostuvieron una reunión en el auditorio del Gobierno Regional para expresar su rechazo a las acciones de fiscalización.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "b0438c3f-7958-40f3-a87b-5bbc5bf9873e",
+      "alerta_id": "25f58ad0-7b6e-49fb-879b-3fe9f49a096c",
+      "fecha": null,
+      "descripcion": "Los dirigentes presentaron un memorial dirigido al Ministro de la Producción solicitando la destitución del fiscalizador Edgar Ccalli Gutiérrez y la intervención de funcionarios del nivel central para atender sus reclamos.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "f0b3b2ed-6cb1-4b19-a717-84476424fe11",
+      "alerta_id": "31ca3f09-9697-4975-9685-541542c9b0cb",
+      "fecha": null,
+      "descripcion": "Precisar que con fecha 26 de noviembre del 2022 la Asociación Sindicato de Pecadores Artesanales del Puerto de Chancay remitió el Oficio N°102-ASPAPCH-2022 en el cual solicita: “En que supuestos se puede disponer la prohibición de pesca artesanal en un determinado ámbito, precisar la base legal”.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "d59e71a4-1644-4622-b5b8-f1847a65cb98",
+      "alerta_id": "31ca3f09-9697-4975-9685-541542c9b0cb",
+      "fecha": null,
+      "descripcion": "Al respecto la DGPA- PRODUCE respondió dicho oficio con Carta N°50128-2023-PRODUCE/DGPA de fecha 30 de enero 2023, indicando: “PRODUCE tiene competencia en temas relacionados al ordenamiento pesquero referidos entre otros, a cuotas de captura permisible, método de pesca y tallas mínimas de captura mas no en temas sobre contaminación ambiental, lo cual si correspondería a las funciones del Ministerio del Ambiente y al Organismo de Evaluación y Fiscalización Ambiental (OEFA), lo cual se hace de conocimiento para los fines y acciones pertinentes”.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "76871e25-8c7f-4b70-a2be-fbc3ef58e0bd",
+      "alerta_id": "31ca3f09-9697-4975-9685-541542c9b0cb",
+      "fecha": null,
+      "descripcion": "Con fecha 07 de marzo 2023, la Asociación de Pecadores Artesanales del Puerto de Ancón remitió una carta (HT N° 00015368-2023-E) reiterando el pedido a PRODUCE: “sobre si es posible o no realizar actividades extractivas de pesca artesanal”. La misma que fue respondida por la DGPA con Carta N° 00000617-2023-PRODUCE/DGPA, indicado: “La restricción de actividades extractivas en la zona afectada amerita necesariamente una posición técnica ambiental, basadas en las evaluaciones que le provean sus monitoreos seguimientos en las zonas dañadas, así como las que elaboran las adscritas del sector cono IMARPE y SANIPES”.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "90e55c79-a35f-48b7-9ad1-6cd45b67438b",
+      "alerta_id": "31ca3f09-9697-4975-9685-541542c9b0cb",
+      "fecha": null,
+      "descripcion": "Asimismo, indicar que se sostuvieron reuniones con estos gremios en fechas:",
+      "orden": 6,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "e093968a-0e0b-4bb2-bf6e-6e1962015c1f",
+      "alerta_id": "33883524-fbbd-499b-8115-31dcad76b30b",
+      "fecha": null,
+      "descripcion": "27–28.ABR.2026 — Mortandad masiva de truchas en 7 piscigranjas del río Yuracyacu. La Municipalidad Distrital de Pariahuanca constata agua turbia con sedimentos. DIREPRO Junín acuerda implementar un Programa Productivo para familias afectadas, previa evaluación. PNP y ANA (27) y SANIPES (28) toman muestras.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "a62fd391-7feb-4ad0-b6af-6e901264a25e",
+      "alerta_id": "33883524-fbbd-499b-8115-31dcad76b30b",
+      "fecha": "2026-05-05T05:00:00.000Z",
+      "descripcion": "PNP Junín emite informes que concluyen presencia de ácido cianhídrico en muestras de agua y truchas de 6 piscigranjas.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "040ace7c-27a4-4692-b622-5dce6e07fe7b",
+      "alerta_id": "33883524-fbbd-499b-8115-31dcad76b30b",
+      "fecha": "2026-05-06T05:00:00.000Z",
+      "descripcion": "ANA concluye que las muestras del río no superan los ECA para metales pesados (no incluye ácido cianhídrico).",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "ef2e8c69-d828-46e6-9b90-5de390845f62",
+      "alerta_id": "33883524-fbbd-499b-8115-31dcad76b30b",
+      "fecha": "2026-05-21T05:00:00.000Z",
+      "descripcion": "SANIPES indica que las muestras de 3 piscigranjas (no incluye ácido cianhídrico) no representan riesgo para consumo humano.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "75680fd6-7c29-4017-8ccd-9586c4281008",
+      "alerta_id": "33883524-fbbd-499b-8115-31dcad76b30b",
+      "fecha": "2026-05-22T05:00:00.000Z",
+      "descripcion": "MINAM concluye que no corresponde declaratoria de emergencia ambiental, al calificar el evento como súbito.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "12620f87-6002-437d-be06-4155e0fc6593",
+      "alerta_id": "33883524-fbbd-499b-8115-31dcad76b30b",
+      "fecha": "2026-06-03T05:00:00.000Z",
+      "descripcion": "Representante de piscicultores reporta incumplimiento del GORE Junín en la entrega de alevinos; asimismo reportan denuncias contra representantes por parte de la minera \"Oro Negro\".",
+      "orden": 6,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "d8cb529f-7513-4b01-b468-02689fb59e6f",
+      "alerta_id": "33883524-fbbd-499b-8115-31dcad76b30b",
+      "fecha": "2026-06-18T05:00:00.000Z",
+      "descripcion": "Convocatoria a movilización hacia la ciudad de Huancayo.",
+      "orden": 7,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "b9b7d9d5-baff-4bd5-8041-bbf5bc861192",
+      "alerta_id": "3c521858-2975-49a0-9999-25988bd18f5e",
+      "fecha": "2026-04-22T05:00:00.000Z",
+      "descripcion": "PRODUCE ordena suspensión de actividades extractivas hasta el 06.05.2026 en las primeras 10 millas en el tramo Chimbote–Pimentel, sustentada en informe de IMARPE que reporta incidencia de juveniles superior al 50% en el periodo 09–19 de abril. A la vez, Alcides Herrera Inga, (SUMOPP), presenta denuncia penal ante la Fiscalía Especializada en Materia Ambiental del Santa contra el ministro y el presidente ejecutivo del IMARPE, por presunto delito de extracción y procesamiento ilegal de especies acuáticas",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "5b422a78-0f6e-4c77-b472-a921c034822c",
+      "alerta_id": "3c521858-2975-49a0-9999-25988bd18f5e",
+      "fecha": "2026-04-28T05:00:00.000Z",
+      "descripcion": "El ministro César Quispe y el viceministro de Pesca y Acuicultura, Jesús Barrientos, se reúnen con dirigentes de SUMOPP y (SUPNEP), junto al congresista Elías Varas Meléndez; las autoridades reiteran decisiones basadas en evidencia científica del IMARPE y rechazan la suspensión total de la temporada.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "f9471f5f-9c41-44e8-a9a4-96965dd9012e",
+      "alerta_id": "3c521858-2975-49a0-9999-25988bd18f5e",
+      "fecha": null,
+      "descripcion": "MAY.2026 — Distintas cuentas de Facebook relacionadas a pesca (sindicatos, activistas, noticieros) sostienen la narrativa de “depredación por alta incidencia de pesca juvenil”, apoyándose de material audiovisual.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "63d9b441-fa7a-4923-ae83-bc46e58db136",
+      "alerta_id": "4492d131-d3fd-4eee-b202-fbbb15efd972",
+      "fecha": "2026-03-03T05:00:00.000Z",
+      "descripcion": ", FREDEMYPE convoca a plantón nacional en el frontis del Ministerio de la Producción para el miércoles 11 de marzo a las 10:00 am para exigir la salida de Jeferson Moreno, coordinador de la Unidad de Supervisión de los NEC y ex Director Ejecutivo del Programa Compras a MYPErú; y, Jorge Hernández, Director Ejecutivo de NEC Textil y ex jefe de supervisión. - 03/03/2026, Cabe señalar que, en comunicación con Reneé Cobeña, este expresó su descontento con la gestión del programa Compras a MYPErú, señalando que no se habrían logrado canalizar demandas de nuevas compras provenientes de otros sectores, lo que estaría afectando directamente a las MYPE’s. Además, manifestó que el día de ayer 02/03/2026 sostuvo una reunión con dos congresistas para abordar esta problemática.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "6a5fb874-27cd-4b02-b8ed-fe62415347bd",
+      "alerta_id": "4492d131-d3fd-4eee-b202-fbbb15efd972",
+      "fecha": null,
+      "descripcion": "El 01/03/2026 Infobae publicó las declaraciones de Reneé Cobeña, presidente de FREDEMYPE, quien acusa al Señor Ministro de la Producción de encubrir presuntos casos de corrupción ocurridos entre el 2023 y 2025 en el programa Compras a MYPErú relacionados a sobrevaloraciones injustificadas de bienes y servicios provistos por una decena de empresas contratadas en dichos años.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "ce8f3af1-6135-4cf1-8b3d-a5976324aacf",
+      "alerta_id": "4492d131-d3fd-4eee-b202-fbbb15efd972",
+      "fecha": null,
+      "descripcion": "A mediados de enero de 2026, el presidente del NEC Textil Confecciones, Jorge Luis Julca, solicitó al órgano de fiscalización una intervención urgente para investigar el manejo de los fondos asignados por diversas entidades estatales, ante la presunta comisión de actos irregulares detectados tras la revisión de contratos y pagos efectuados entre 2023 y 2025, asimismo, señala que la Unidad de Supervisión de los NEC no habría adoptado medidas frente a las observaciones presentadas.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "e4a33976-7072-4bc0-9642-6a70ba86596f",
+      "alerta_id": "449e5039-2aeb-4541-985f-036ead439fe8",
+      "fecha": null,
+      "descripcion": "En operativo del 09.02, se encontró embarcación con red de fondo dentro de las 2 millas, generando la indignación del OSPAS. Acusan a estas embarcaciones de pescar merluza, cabrilla, doncella y mero, agotando el recurso.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "6b12e39c-f9f0-4e99-9104-f531f440d7db",
+      "alerta_id": "449e5039-2aeb-4541-985f-036ead439fe8",
+      "fecha": null,
+      "descripcion": "Esto ha generado una reunión gremial de las OSPAS para intentar tomar medidas, señalando la posibilidad de iniciar acciones como paros si no son atendidos por alta dirección de PRODUCE.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "a33476bb-f02b-4119-86aa-dc0322391ad3",
+      "alerta_id": "449e5039-2aeb-4541-985f-036ead439fe8",
+      "fecha": null,
+      "descripcion": "Se encuentra vigente el DS N.° 002-2025-PRODUCE, que modifica el Reglamento de la Ley General de Pesca e incorpora disposiciones sobre el uso de artes de pesca; no obstante, la regulación sobre la migración de embarcaciones artesanales a menor escala aún se encuentra en desarrollo y no corresponde a lo señalado en la denuncia, por lo que requiere clarificación.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "094f7136-2326-4601-9981-5ac8d9c76107",
+      "alerta_id": "49c0f1ea-188e-4369-b55b-57be88b6d052",
+      "fecha": null,
+      "descripcion": "Definir con claridad el objetivo de las mesas de trabajo.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "bf5ee229-810f-4fb3-8f98-9a396a5ed451",
+      "alerta_id": "49c0f1ea-188e-4369-b55b-57be88b6d052",
+      "fecha": null,
+      "descripcion": "Identificar a los participantes por zona.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "ce6a1128-2fcd-47da-8d65-89500baa0d4c",
+      "alerta_id": "49c0f1ea-188e-4369-b55b-57be88b6d052",
+      "fecha": null,
+      "descripcion": "Establecer el criterio para la participación de los gremios (titular, alterno, etc.).",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "0149aa58-205a-4672-81fe-2ede1f8ac24b",
+      "alerta_id": "49c0f1ea-188e-4369-b55b-57be88b6d052",
+      "fecha": null,
+      "descripcion": "Definir la metodología de trabajo de cada sesión de la mesa de trabajo.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "ec363d02-3427-4c6b-bda5-6bc1de3e9b44",
+      "alerta_id": "49c0f1ea-188e-4369-b55b-57be88b6d052",
+      "fecha": null,
+      "descripcion": "Detallar los insumos que se requerirán de las áreas de PRODUCE (IMARPE, DGSFS, DGPARPA, entre otra) que serán necesarias para el desarrollo de las sesiones.",
+      "orden": 6,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "8d6b7606-ec34-40d8-8cd4-fc65e4d2d561",
+      "alerta_id": "49c0f1ea-188e-4369-b55b-57be88b6d052",
+      "fecha": null,
+      "descripcion": "La mesa de trabajo debe centrarse en ser una mesa técnica estrictamente, para evitar la interferencia política en el abordaje técnico de los temas.",
+      "orden": 7,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "a17a247d-4b89-4d93-ac74-d0fb6fecdb0b",
+      "alerta_id": "49c0f1ea-188e-4369-b55b-57be88b6d052",
+      "fecha": null,
+      "descripcion": "Contar con el apoyo de un asesor (facilitador) externo que permita el desarrollo de las sesiones de manera ordenada. Al respecto se ha hizo la propuesta de solicitar apoyo a la WWF.",
+      "orden": 8,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "fd199ab9-13cc-4748-ae95-7bfa9a5f5811",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "El DPA Callao es un muelle construido en la década de los cuarenta, que no cumple con las condiciones de infraestructura, seguridad, ni habilitación sanitaria requerida; sin embargo, se mantiene operativo a la fecha. Dicha situación viene colocando, desde hace muchos años, en estado de alerta a los pescadores y usuarios del DPA, quienes pese a estas ineficiencias continúan haciendo uso de éste y oponiéndose a su cierre.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "80caa296-e322-486b-827a-125e1899ca67",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "En el 2019, FONDEPES como parte de las obras de mejoramiento, concluyó con la remodelación de la losa de concreto y reparación del muelle del DPA, asimismo, se realizaron varias intervenciones de mantenimiento, tales como: obras de la red complementaria del alcantarillado y conexión domiciliaria del DPA.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "967d952d-e06f-4636-a878-d0b0467ace3d",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "El 20.07.2022, a través de la RD N° 00057-2022/PRODUCE/DGAAMPA, la Dirección General de Asuntos Ambientales Pesqueros y Acuícolas (DGAAMPA) desaprobó el Programa de Adecuación y Manejo Ambiental – PAMA del DPA Callao, por una opinión técnica desfavorable de DICAPI, quien indicó que un área del DPA se encuentra dentro de una zona de defensa nacional intransferible. Por este motivo, no se puede contratar el Estudio de Mecánica de Suelos para culminar el expediente técnico de reforzamiento del muelle espigón del DPA Callao y saldo de obra, dado que estas obras son en mar y se necesita del Derecho de Uso de Área Acuática – DUAA para intervenir en área acuática.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "dde0f518-b2df-4423-aa7e-65cc4283916c",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "El 21.03.2024, la OSPA ASOCIACION REGIONAL UNION DE PESCADORES ARTESANALES Y CONEXOS DEL CALLAO (ARUPACC), quien tenía a su cargo la administración del DPA, reconoció que mantenían deudas de arbitrios y servicios básicos; por lo cual solicitaron que se agilice la transferencia del DPA al GORE Callao, precisando que este último ofreció condonar dichas deudas. Esta situación originó que se den conflictos entre las diversas OSPAS del Callao, sobre todo hacia la OSPA encargada de la administración.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "16616e00-aa05-4d8c-9804-dc2e7f13ffb6",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "Por otro lado, en lo que refiere a la transferencia del DPA Callao al GORE Callao, con fecha 28 y 29.10.2024, se sostuvieron reuniones internas, para tratar sobre el avance del referido traslado, en dichas reuniones se identificó que el DPA mantenía una deuda aproximada de 140 mil soles, por lo cual, el GORE CALLAO señaló que no podían hacerse cargo de dicha deuda. Ante tal situación, se acordó que el sector Producción asumiría la deuda del DPA. Además, se acordó que se actualizará la RM para resolver el convenio de administración con la OSPA encargada del DPA Callao.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "1c699088-b2ed-4c5e-ba25-cf57ccf9b4ac",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "El 11.11.2024, la Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales (OAICPS) trasladó el expediente al GORE Callao para la efectivización de la transferencia del DPA. Por su parte, el GORE Callao se comprometió a agilizar la suscripción de dicho expediente para la transferencia.",
+      "orden": 6,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "7f0af227-06fb-4aa2-89f2-791a6367fc27",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "El 13.12.2024, la OGPPM envió a la DGPA el presupuesto detallado de 168,011 soles para cubrir los servicios pendientes y la actual administración del DPA. Posterior a ello, OGA realizó el pago de la deuda pendiente.",
+      "orden": 7,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "2738f2e3-1fe7-48eb-b803-51baa84cf61c",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "El 23.12.2024, en el marco de la RM Nº 00475-2024-PRODUCE, la Dirección General de Pesca Artesanal asumió la administración del DPA Callao, la cual se mantiene hasta la fecha.",
+      "orden": 8,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "e5d1e5cf-d426-42e4-91eb-4f7cdaffcc0d",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "El 10.02.2025, el GORE Callao, a través del Oficio N° 000030-2025-GRC/OAP, solicita a OAIPCS opinión técnico-legal respecto a la Única Disposición Complementaria del Decreto Supremo N° 144-2023-PCM, el cual establece que las funciones, programas, proyectos, empresas infraestructura y otros organismos pendientes de transferencia a los gobiernos regionales y locales, culminan su proceso de transferencia el 31 de diciembre de 2024.",
+      "orden": 9,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "0b0b7b84-77a5-4d63-bb73-3d19d8b4b592",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "El 11.02.2025, OAIPCS, a través de Oficio N°00000049-2025-PRODUCE/OAIPCS realiza consulta a la Secretaría de Descentralización de la PCM sobre lo señalado en el párrafo anterior. A la fecha, nos encontramos a la espera de la respuesta correspondiente.",
+      "orden": 10,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "2de9cf0c-6cb8-4d34-ba1c-be278023287b",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "El Sr Manuel Caminiti, indicó que el día 11.03.2025, ha presentado una carta a PRODUCE solicitando una copia del informe sobre el estado del espigón e infraestructura del muelle del Callao, expresó que tienen gran preocupación respecto a ello, que el espigón ya no tiene bases de fierro y que podría colapsar en cualquier momento. Se observa en el sistema de trámite documentario que el documento ha sido derivado a la DGPA, despacho ministerial y viceministerial de Pesca y Acuicultura.",
+      "orden": 11,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "00b769e1-3391-47eb-81ca-4abb76807252",
+      "alerta_id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "fecha": null,
+      "descripcion": "Finalmente, manifestó disponibilidad de seguir conversando con el sector y poder llegar acuerdos que brinden solución a la problemática expuesta.",
+      "orden": 12,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "7fbdeb9e-61a9-40e7-be12-12170fcbc792",
+      "alerta_id": "5e621ffe-a0c3-4026-a5c9-d02d06dbdd2c",
+      "fecha": null,
+      "descripcion": "En comunicación con OSPAS del sur, manifiestan que el sector viene trabajando para las grandes embarcaciones y no para el sector artesanal, calificando de “insostenible y ridícula” las emisiones de las normas de diferentes recursos.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "8647b5ad-a267-4168-9cb6-1215521b06fc",
+      "alerta_id": "5e621ffe-a0c3-4026-a5c9-d02d06dbdd2c",
+      "fecha": null,
+      "descripcion": "El Sr. Issac Tapia, dirigente representativo de Ilo, Moquegua, manifiesta que la resolución es un despropósito y perjudica al pescador artesanal. Anuncia que el Sindicato Unificado de Pescadores Artesanales Civiles del Puerto de Ilo y solicitan la renuncia del señor Ministro de la Producción, porque argumentan que “no los escucha, ni ve la realidad del pescador artesanal”.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "b6448b63-6edf-4075-95c2-771115bfc579",
+      "alerta_id": "5e621ffe-a0c3-4026-a5c9-d02d06dbdd2c",
+      "fecha": null,
+      "descripcion": "A la agenda y/o pedido de reclamo por el tema del recurso Jurel, se ha sumado otros como; ingreso de barcos chinos y carencia de la Pota, malestar por cuota del Perico.",
+      "orden": 6,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "be574e36-98da-43d4-ba73-093270e9bf1a",
+      "alerta_id": "5e621ffe-a0c3-4026-a5c9-d02d06dbdd2c",
+      "fecha": null,
+      "descripcion": "Finalmente, precisar que varios medios de comunicación regional y redes sociales vienen difundiendo los mensajes de los pescadores en contra de las emisiones de resoluciones ministeriales y la situación económica de la actividad pesquera. Además, el MNINTER y PCM ya vienen alertando el tema y solicitan que el sector atienda el pedido por el temor a bloqueo de carreteras.",
+      "orden": 8,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "89b3323b-4066-4a59-9c69-e51768ac4cba",
+      "alerta_id": "68b939ef-3332-4c59-8025-3a6b5448e184",
+      "fecha": null,
+      "descripcion": "Ingresaron brevemente al terreno; seguridad evitó instalación y abrió diálogo.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "7c3e5ba2-fa5e-4c70-8bb0-51d3ca7a6ff6",
+      "alerta_id": "68b939ef-3332-4c59-8025-3a6b5448e184",
+      "fecha": null,
+      "descripcion": "Permanecieron en el frontis y anunciaron que volverán el lunes a tomar posesión.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "963e95ea-7042-40b3-bea0-98ad3ab04f4f",
+      "alerta_id": "68e3a116-a3c1-47c4-9d78-352a53d4fb64",
+      "fecha": "2026-01-24T05:00:00.000Z",
+      "descripcion": "Se emitió un reporte de alerta temprana por malestar en pescadores artesanales del litoral sur debido a la caída del precio de la pota. El dirigente Edgar Jiménez Caipa (Macro Sur) anunció posibles protestas al finalizar la temporada en febrero, exigiendo regulación estatal de precios.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "a3593db1-076a-407e-957c-b4bbbbea4936",
+      "alerta_id": "68e3a116-a3c1-47c4-9d78-352a53d4fb64",
+      "fecha": "2026-02-02T05:00:00.000Z",
+      "descripcion": "Macro Sur publica pronunciamiento negándose a participar en el diálogo sobre la situación de la pota y acusando al Estado de “mala gestión de los recursos” y cuestiona medidas que califican como “arbitrarias” en especies como perico, pota, bonito y jurel.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "f7ec9f57-77c9-41b7-b7c8-4630c0ce8fa9",
+      "alerta_id": "68e3a116-a3c1-47c4-9d78-352a53d4fb64",
+      "fecha": null,
+      "descripcion": "Juan Cervantes Nolasco (Coordinador Macro Sur), en comunicación directa con OAIPCS, confirmó la no asistencia a la reunión y rechazó cualquier negociación. Así también se registra el apoyo en redes sociales de Wilber Isaac Tapia, ex secretario general de SUPABCPI.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "79dcc383-8cb0-453f-9de1-4c99e79e9e21",
+      "alerta_id": "68e3a116-a3c1-47c4-9d78-352a53d4fb64",
+      "fecha": null,
+      "descripcion": "Sin embargo, coordinador de FIUPAP a nivel sur indicó una falta de representatividad del señor Jiménez Caipa y su OSPA Macro Sur, asegurando que las OSPAS del sur, incluyendo SPAEMIM, si asistirán a reunión convocada",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "70cfccd2-5818-4ba0-97a1-ececbf6c3992",
+      "alerta_id": "69929d28-0a91-4aa1-b9b0-a8b6a8eb7221",
+      "fecha": null,
+      "descripcion": "La población ha presentado comunicaciones ante PRODUCE y la PCM solicitando la reprogramación de talleres y actividades participativas en horarios que faciliten una mayor participación ciudadana; desde el sector se atendió y se cambiaron los horarios previamente.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "d8f62b57-b453-4482-91bc-4f29274381cd",
+      "alerta_id": "69929d28-0a91-4aa1-b9b0-a8b6a8eb7221",
+      "fecha": null,
+      "descripcion": "El proyecto de ACERO AMERICANO S.A.C. continúa su proceso de estudio de impacto ambiental detallado y participación ciudadana conforme al procedimiento correspondiente, atendido por PRODUCE.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "df048114-cafe-44b3-8cd1-e9a954639c7a",
+      "alerta_id": "6a0812b8-41c4-4fcc-b67c-9b8a74461507",
+      "fecha": null,
+      "descripcion": "27–28.ABR.2026 — Mortandad masiva de truchas en 7 piscigranjas del río Yuracyacu. La Municipalidad Distrital de Pariahuanca constata agua turbia con sedimentos. DIREPRO Junín acuerda implementar un Programa Productivo para familias afectadas, previa evaluación.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "7b6ae652-b8cf-4ec9-8879-87922648278c",
+      "alerta_id": "6a0812b8-41c4-4fcc-b67c-9b8a74461507",
+      "fecha": "2026-05-05T05:00:00.000Z",
+      "descripcion": "Informe de PNP Junín concluye presencia de ácido cianhídrico en muestras de agua y truchas de 6 piscigranjas.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "a48a6b32-9f1e-4cab-87e8-b919d23521d3",
+      "alerta_id": "6a0812b8-41c4-4fcc-b67c-9b8a74461507",
+      "fecha": "2026-05-06T05:00:00.000Z",
+      "descripcion": "Informe de ANA concluye que las muestras del río no superan los ECA para metales pesados (no incluye ácido cianhídrico).",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "56c52f79-69e3-4876-88d1-5fe4f8eced2d",
+      "alerta_id": "6a0812b8-41c4-4fcc-b67c-9b8a74461507",
+      "fecha": "2026-05-21T05:00:00.000Z",
+      "descripcion": "Informe de SANIPES sobre muestras de 3 piscigranjas (no incluye ácido cianhídrico) indica que no representan riesgo para consumo humano.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "e8425f0f-4311-4afe-ab2b-7bdb2d9085ee",
+      "alerta_id": "6a0812b8-41c4-4fcc-b67c-9b8a74461507",
+      "fecha": "2026-05-22T05:00:00.000Z",
+      "descripcion": "MINAM concluye que no corresponde declaratoria de emergencia ambiental, al calificar el evento como súbito.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "650ad70e-de75-4184-a779-aba614f3af85",
+      "alerta_id": "6a0812b8-41c4-4fcc-b67c-9b8a74461507",
+      "fecha": "2026-06-12T05:00:00.000Z",
+      "descripcion": "DIREPRO Junín inicia la entrega de 80 mil alevinos de trucha en las piscigranjas afectadas, con proyección hasta octubre.",
+      "orden": 6,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "49114883-10e7-4ab7-8471-1d919e392520",
+      "alerta_id": "7d879728-27b6-48a2-8b56-f93c6c0ac9ac",
+      "fecha": null,
+      "descripcion": "Problemática de la pesca del perico. Indica que no existe una cuota por el momento para la zona sur, la cual debe ser diferenciada.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "42fae724-6da8-4849-a25b-597df21ab464",
+      "alerta_id": "7d879728-27b6-48a2-8b56-f93c6c0ac9ac",
+      "fecha": null,
+      "descripcion": "Problemática de la pesca del tiburón azul y tiburón diamante. Refiere que es necesario que, de marera urgente, se regule esta pesquería, porque ya se ha dado inicio a la temporada y a la fecha no existen cuotas ni regulación al respecto.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "5144d4ac-7b03-422d-a514-4a40abd3e306",
+      "alerta_id": "7d879728-27b6-48a2-8b56-f93c6c0ac9ac",
+      "fecha": null,
+      "descripcion": "También hizo referencia a la falta de emisión de la certificación para la exportación de la aleta de tiburón por parte de PRODUCE. Actualmente, es una problemática que se traslada hacia los exportadores y comercializadores de este recurso.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "53218448-c992-4e73-8cfc-0849de456c8f",
+      "alerta_id": "7e18f7a4-590e-4a81-bdee-8bb31c4381d2",
+      "fecha": null,
+      "descripcion": "Los dirigentes cancelaron la reunión debido a la indignación y a la percepción de una estrategia dilatoria respecto a sus demandas, atribuida a un presunto uso político-electoral del espacio de diálogo por parte de la congresista Portalatino (en contexto de campaña electoral), así como a la falta de atención técnica adecuada, al considerar que PRODUCE habría propuesto enviar representantes de la dirección de Dirección General de Consumo Humano Indirecto, quienes no serían competentes para abordar la problemática planteada, según dirigentes.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "a2ec75ba-609f-40a9-8ccc-49262b065dce",
+      "alerta_id": "7e18f7a4-590e-4a81-bdee-8bb31c4381d2",
+      "fecha": null,
+      "descripcion": "El hecho se suma a un descontento acumulado por el rechazo al proceso de formalización y una baja actividad pesquera asociada a la presencia de tallas pequeñas de peces en Áncash, identificándose estos factores como posibles disparadores del actual malestar.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "15572927-a4c7-4cbd-a8b2-80bf47dcf224",
+      "alerta_id": "854022c7-5038-4290-9665-8e21a3f3ca6a",
+      "fecha": "2025-09-08T05:00:00.000Z",
+      "descripcion": "La DGSFS-PA remite la Carta N° 84-2025-PRODUCE/DGSFS-PA a la Asoc. de Armadores Artesanales de CHD de Samanco y Los Chimus (Oficio N° 011-2025, H.T. N° 00069705-2025-E): al no concretarse la adecuación prevista en el D.S. N° 002-2025-PRODUCE, las embarcaciones artesanales mantienen su autorización para operar dentro de las primeras cinco millas marinas.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "4f548555-9f3d-46b3-ac28-b70946bc63a9",
+      "alerta_id": "854022c7-5038-4290-9665-8e21a3f3ca6a",
+      "fecha": "2026-08-03T05:00:00.000Z",
+      "descripcion": "Dirigencia de El Dorado informa a OAIPCS que las autoridades ejecutaron un operativo de fiscalización sin efectos sobre las actividades cuestionadas.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "d7745c7c-9a7d-484a-886e-1fdf771d7010",
+      "alerta_id": "854022c7-5038-4290-9665-8e21a3f3ca6a",
+      "fecha": "2026-08-13T05:00:00.000Z",
+      "descripcion": "Pescador de El Dorado remite a OAIPCS material audiovisual del enfrentamiento en el mar del mismo día; el material se viraliza en redes. La dirigencia comunica telefónicamente a OAIPCS que el enfrentamiento está en curso y solicita asesoría legal y coordinaciones técnicas urgentes.  Se observan embarcaciones de cerco con placa: \"Tres hermanos\" (CE5439BM), \"Ximenita\" (PS57300BM), \"Fabian\" (CE02988BM) y \"Santiago\".",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "6b96c337-f6fd-4fb4-b311-4a1ee4c59abe",
+      "alerta_id": "8d8a042c-6e50-44ef-84ea-d0288af49958",
+      "fecha": null,
+      "descripcion": "ENE–MAY 2026 — Se modifican las fechas iniciales de las audiencias públicas por considerarse en horario poco accesible para la población.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "ecb2e560-1f89-492b-a3dc-dcd04dbf643c",
+      "alerta_id": "8d8a042c-6e50-44ef-84ea-d0288af49958",
+      "fecha": null,
+      "descripcion": "JUN 2026 — Se entregan ejemplares impresos del EIA en la zona.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "9201c378-66b4-4d69-8ec2-d54a0781e64e",
+      "alerta_id": "8d8a042c-6e50-44ef-84ea-d0288af49958",
+      "fecha": null,
+      "descripcion": "MAY–JUN 2026 — La dirigente Marlene Demarini indica que un sindicato de construcción estaría coaccionando a los pobladores a firmar una carta a favor de la empresa, con amenazas a quienes se oponen.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "9c012f09-829a-47b5-9c01-5c6c86fa03d6",
+      "alerta_id": "8d8a042c-6e50-44ef-84ea-d0288af49958",
+      "fecha": "2026-06-11T05:00:00.000Z",
+      "descripcion": "El abog. Jorge Palomino y la señora Marlene Demarini, junto con alrededor de 100 personas, se movilizan en bus hacia la sede central de PRODUCE buscando reunión con la Directora María Ysabel Valle Martínez.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "01be481a-ee7a-45b2-ba66-069f3896d4f3",
+      "alerta_id": "9e71414b-ed4f-4774-b84e-3cc4f621a6ce",
+      "fecha": null,
+      "descripcion": "JUN.2026 — Sindicato JOB y CGTP sostienen reunión técnica con el ENFEN; el organismo confirma alta probabilidad de intensificación del Fenómeno del Niño, amenazando las condiciones propicias para la segunda temporada 2026.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "13fe343e-8325-44d2-ade3-cd64adf20f84",
+      "alerta_id": "9e71414b-ed4f-4774-b84e-3cc4f621a6ce",
+      "fecha": "2026-06-17T05:00:00.000Z",
+      "descripcion": "JOB anuncia marcha en Chimbote para el 01.JUL.2026.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "aa467c2a-f964-4c30-95ac-04d8a59f63d8",
+      "alerta_id": "9e71414b-ed4f-4774-b84e-3cc4f621a6ce",
+      "fecha": "2026-06-24T05:00:00.000Z",
+      "descripcion": "El Ministro de la Producción anuncia estar a la espera del informe del ENFEN para continuar o no con la 1ra temporada 2026 de pesca de anchoveta; indica mecanismos económicos de ayuda (créditos con amortizaciones diferidas y otros). JOB reitera en redes sociales la marcha del 01.JUL.2026.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "0d1a3ada-dccb-49d1-8221-26d76efaa47e",
+      "alerta_id": "9ef6a346-c225-4567-abe7-c5db0222d2c0",
+      "fecha": "2026-06-10T05:00:00.000Z",
+      "descripcion": "FIUPAP movilizó aproximadamente 150 pescadores en San Andrés; tras una reunión con funcionarios de DIREPRO Ica, la federación otorgó 24 horas al PRODUCE para atender sus demandas y advirtió nuevas medidas.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "40e9cc7a-a046-4813-8421-e93b0e398a77",
+      "alerta_id": "9ef6a346-c225-4567-abe7-c5db0222d2c0",
+      "fecha": "2026-06-11T05:00:00.000Z",
+      "descripcion": "Mediante Oficio N.° 084-2026-FIUPAP, rechazó la propuesta de reunión en Lima, cuestionó el proceso de diálogo y advirtió acciones legales frente a decisiones desfavorables.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "27d2f15c-426e-43b3-93dd-33a4bbd60f08",
+      "alerta_id": "9ef6a346-c225-4567-abe7-c5db0222d2c0",
+      "fecha": "2026-06-13T05:00:00.000Z",
+      "descripcion": "Se publicó la RM N.° 169-2026-PRODUCE, estableciendo el límite de captura del recurso bonito para el año 2026.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "f004b8df-e56a-4f91-b5bf-9625e4cdce4e",
+      "alerta_id": "9ef6a346-c225-4567-abe7-c5db0222d2c0",
+      "fecha": "2026-06-14T05:00:00.000Z",
+      "descripcion": "Información recogida por OAIPCS confirmó la realización de una movilización hacia frontis de PRODUCE para el lunes 15 de junio",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "8263cac4-478d-40fa-b047-29a3c66e8527",
+      "alerta_id": "a096037f-64c9-40ce-a56a-9e44fd378cfc",
+      "fecha": null,
+      "descripcion": "El Programa Compras a MYPErú, informa que está en proceso de transferencia un monto de S/ 6.5 millones de la entidad demandante RENIEC para el sector textil-confecciones, beneficiando a 59 MYPE. También se beneficiará a 9,800 MYPEs de otros sectores con un presupuesto de S/ 1,151 millones.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "016881c8-2980-4ca0-a8bc-7390437aaf17",
+      "alerta_id": "b53635cb-7d58-4eb6-a8af-565166848955",
+      "fecha": "2026-06-25T05:00:00.000Z",
+      "descripcion": "MINDEF informa en reunión que no cuenta con disponibilidad presupuestal para ejecutar el desalojo; gestiona ante la SBN la renuncia a la afectación en uso del predio.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "84ae855c-f23a-423b-88af-3900aec0682a",
+      "alerta_id": "b53635cb-7d58-4eb6-a8af-565166848955",
+      "fecha": "2026-07-17T05:00:00.000Z",
+      "descripcion": "Notaría de Lima (Ruth Alessandra Ramos Rivas) realiza Constatación de Hechos in situ y verifica que el muro impide acceso vehicular y peatonal al predio (Partida Electrónica N° 13409092, Km 45+850 – Km 50+750, Panamericana Norte, Ancón), con participación de PRODUCE (Abastecimiento, PNDP, OAIPCS) y de Lima National Industrial Park S.A.C.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "09e5f3d7-f65b-4461-8af8-f44712f91fa0",
+      "alerta_id": "b53635cb-7d58-4eb6-a8af-565166848955",
+      "fecha": "2026-07-21T05:00:00.000Z",
+      "descripcion": "(previsto) — Ingreso programado de tres contenedores con material de construcción importado (malla electrosoldada, tubos metálicos).",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "11d176b1-a014-4b9c-9ce5-b02b49ff2d0b",
+      "alerta_id": "baa21204-340c-4b87-babe-965146db6390",
+      "fecha": "2026-02-06T05:00:00.000Z",
+      "descripcion": "AAMEC ha trasladado personal y materiales para instalación de la feria y acto cívico del 07.02.2026 en área colindante con el PIA Ancón.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "f7c1362e-7f4a-47fa-90a0-cd282b261bb3",
+      "alerta_id": "baa21204-340c-4b87-babe-965146db6390",
+      "fecha": "2026-02-06T05:00:00.000Z",
+      "descripcion": "OGA instaló un cartel informativo en la caseta de vigilancia dentro del predio del PIA.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "091da8e6-b43e-4344-a3a9-e25fb16a45dc",
+      "alerta_id": "baa21204-340c-4b87-babe-965146db6390",
+      "fecha": "2026-02-05T05:00:00.000Z",
+      "descripcion": "PNP Ancón confirma presencia policial para el día 07.02.2026 como respuesta a solicitud formal realizada por OGA-PRODUCE el 02.02.2026.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "51b32fd0-dbe3-4aff-a121-6d6f516a7424",
+      "alerta_id": "baa21204-340c-4b87-babe-965146db6390",
+      "fecha": "2026-02-04T05:00:00.000Z",
+      "descripcion": "DVMYPE remite oficio a MINDEF sugiriendo tomar acciones respecto al predio colindante al PIA que estaba teniendo indicios de  ocupación ilegal.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "89611ba7-6ee1-4a23-bc66-0d837462ce6b",
+      "alerta_id": "c211e461-0fdf-402f-8290-51e8a277733c",
+      "fecha": "2026-02-12T05:00:00.000Z",
+      "descripcion": "Gremio de Pescadores de Sechura se reúne con la alcaldesa distrital y manifiestan malestar y pedido de renuncia del ministro y viceministro. Advierten posible paro indefinido",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "6a3eb29f-d343-433f-98ec-0860040427ae",
+      "alerta_id": "c211e461-0fdf-402f-8290-51e8a277733c",
+      "fecha": "2026-02-11T05:00:00.000Z",
+      "descripcion": "FIUPAP presentó Oficio a PRODUCE solicitando dejar sin efecto la RM N°018-2026-PRODUCE sobre el límite de captura de la pota.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "b9f08ead-1aee-4e4c-9652-a3d7f9cfe937",
+      "alerta_id": "c211e461-0fdf-402f-8290-51e8a277733c",
+      "fecha": "2026-02-10T05:00:00.000Z",
+      "descripcion": "(tarde/noche) – Ante críticas de dirigentes y pescadores, PRODUCE emite R.D. N.° 00020-2026 que revoca la suspensión el mismo día, argumentando que \"desaparecieron las condiciones\". Pescadores, en redes, califican el hecho de \"improvisación\" y \"técnicamente imposible\".",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "2cc833ad-55ae-4ca4-9ae3-3af42be99ffa",
+      "alerta_id": "c211e461-0fdf-402f-8290-51e8a277733c",
+      "fecha": "2026-02-10T05:00:00.000Z",
+      "descripcion": "(en la mañana)– PRODUCE pública R.D. N.° 00019-2026 que suspende la pesca de pota a partir del 12.02.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "1d0b8007-e552-40d5-be28-41ef0b487936",
+      "alerta_id": "c211e461-0fdf-402f-8290-51e8a277733c",
+      "fecha": "2026-02-05T05:00:00.000Z",
+      "descripcion": "Reunión multisectorial en PRODUCE. Se identifican 9 pedidos y se acuerda nueva reunión. Sin embargo, a los reclamos sobre la pota, se le suma la indignación de algunos dirigentes por la percepción de exclusión del espacio de diálogo.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "d1184415-c370-4327-8f1a-3703e79e5d07",
+      "alerta_id": "c211e461-0fdf-402f-8290-51e8a277733c",
+      "fecha": null,
+      "descripcion": "Entre el 24.01 y el 04.02, la Federación Macro Sur pasó de denunciar la caída del precio de la pota a exigir la renuncia de la alta dirección de PRODUCE, anunciando en dos oportunidades una paralización regional al cierre de la temporada.",
+      "orden": 6,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "d61e9d93-2fe1-47a9-93b3-bd6af32cdc94",
+      "alerta_id": "c9f4ee01-5c7c-4e20-80a3-cb235b93a482",
+      "fecha": null,
+      "descripcion": "Se ha programado una reunión el lunes 13 de abril (09:00 hrs) con el Gerente General del GORE Tacna para abordar la problemática del DPA Morro Sama y la presencia de embarcaciones foráneas.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "85712dab-a58b-423c-b5fe-4d395ab42b28",
+      "alerta_id": "c9f4ee01-5c7c-4e20-80a3-cb235b93a482",
+      "fecha": null,
+      "descripcion": "Posteriormente (10:00–11:00 hrs), los pescadores sostendrán una reunión ampliada donde, en función de los resultados, definirán medidas colectivas.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "7ef4ef51-5cc6-4d93-9e75-9530bb5d0664",
+      "alerta_id": "ca1f3769-4363-425b-bd32-b87bf492ef44",
+      "fecha": null,
+      "descripcion": "Según el representante de la Asociación (Hugo Vera del Rio), entre los años 2016 y 2020, la Dirección de Supervisión, Fiscalización y Sanciones les ha impuesto multas a las empresas pesqueras, pescadores artesanales, armadores y comerciantes, por más de 1.697 millones de soles. Hasta la fecha, el ministerio recaudó 241 millones de soles (Diario La República).",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "f2614579-0801-4170-904f-644dfeae1daa",
+      "alerta_id": "ca1f3769-4363-425b-bd32-b87bf492ef44",
+      "fecha": null,
+      "descripcion": "El 10.02.2022, la Asociación manifiesta que recibieron el Informe N° 000001-2022-PRODUCE/DS-PA, donde les hacen llegar la propuesta de un regimen transitorio de descuento de las multas impuestas por PRODUCE a los administrados de las cadenas productivas para consumo humano directo (CHD) y consume humano indirecto (CHI). La Asociación dejó constancia de su disconformidad con el respectivo informe mediante escrito del 17.02.2022.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "434baf37-c13c-4085-960b-f07bba719262",
+      "alerta_id": "ca1f3769-4363-425b-bd32-b87bf492ef44",
+      "fecha": null,
+      "descripcion": "La Asociación solicitan mediante escrito del 11.03.2022 (Reg. N° 00015166-2022), que no han recibido respuesta a sus requerimientos como descuentos de multas administrativas, disponer la anulación y archivo definitivo de las actas o reportes de ocurrencia que no hayan tenido resolución de multas, entre otros. Asimismo, manifiestan que su escrito se encuentra en la Dirección General de Supervisión, Fiscalización y Sanciones (DGSFS-PA) desde el 13.04.2022 sin ninguna respuesta hasta el momento.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "7bd8293a-7ef9-4a6e-a1de-68e21bcf26ed",
+      "alerta_id": "ca1f3769-4363-425b-bd32-b87bf492ef44",
+      "fecha": null,
+      "descripcion": "Finalmente, la Asociación señala en su Carta S/N (Exp. N° 00023457-2021) que con el objetivo de ser atendidos están dejando constancia de su solicitud enviando copia al Despacho Presidencial, PCM, Contraloría General de la República, Defensoría del Pueblo y Congreso de la República.",
+      "orden": 7,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "18885898-d991-473b-860a-06da9006ebdf",
+      "alerta_id": "d0720c9b-b46e-49d8-b6d3-250ce66bae80",
+      "fecha": "2026-01-16T05:00:00.000Z",
+      "descripcion": "El sector recibe oficialmente el caso de presunta corrupción por sobrevaloraciones y formaliza denuncia ante la Contraloría General de la República y la Oficina de Integridad y Lucha Contra la Corrupción de PRODUCE.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "ecc07e1e-966d-4b40-8abf-22c50e060e9f",
+      "alerta_id": "d0720c9b-b46e-49d8-b6d3-250ce66bae80",
+      "fecha": "2026-07-14T05:00:00.000Z",
+      "descripcion": "El PNCM reporta ejecución de S/ 410 millones sobre los S/ 471 millones transferidos a los Núcleos Ejecutores de Compra (NEC), con 3,898 MYPE contratadas.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "9ff3d7e2-845a-41f6-8ba7-9ad715aad182",
+      "alerta_id": "d0720c9b-b46e-49d8-b6d3-250ce66bae80",
+      "fecha": "2026-07-29T05:00:00.000Z",
+      "descripcion": "René Cobeña Gómez difunde video denunciando la cancelación de contratos en mochilas tácticas PNP y zapatillas, y la imposición de multas a MYPE ganadoras.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "096f4f54-79bb-4784-a53f-c806876b7b27",
+      "alerta_id": "d0720c9b-b46e-49d8-b6d3-250ce66bae80",
+      "fecha": "2026-08-10T05:00:00.000Z",
+      "descripcion": "Fecha anunciada para el plantón frente a la sede central de PRODUCE, a las 10:00 h.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "e28a0c12-094d-48db-9d0d-edfe66f1928e",
+      "alerta_id": "d12267f4-6e4e-4a15-be78-77cda03c718e",
+      "fecha": null,
+      "descripcion": "Los manifestantes advirtieron que mañana realizarán una acción de mayor intensidad si no reciben respuesta hoy, con participación confirmada de pescadores de Lobitos, Talara, Órganos, El Ñuro y otras caletas, pudiendo paralizar actividades durante todo el día.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "6d88c97c-07ea-4fcc-92af-37858d96a476",
+      "alerta_id": "d12267f4-6e4e-4a15-be78-77cda03c718e",
+      "fecha": null,
+      "descripcion": "Denuncian que las redes cortina de fondo ya devastaron áreas de pesca en caletas vecinas y ahora amenazan los recursos de Cabo Blanco y Lobitos; además, cuestionan al Director Regional de la Producción, Néstor, por evitar cuatro reuniones citadas .",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "fbb3c1fc-aca6-41e8-b9d9-74f743d2d54e",
+      "alerta_id": "d8dc3f47-81a7-4d1a-bbe6-e57e91e82236",
+      "fecha": "2026-04-27T05:00:00.000Z",
+      "descripcion": "Se reporta muerte masiva de truchas en Pariahuanca  en piscigranjas de la margen derecha del río Yuracyacu. COES elabora Reporte Preliminar N° 019 a las 15:30 h \"CONTAMINACIÓN AMBIENTAL DE AGUA EN EL DISTRITO DE PARIAHUANCA – JUNÍN\" .",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "66a79642-38b4-4f44-8e33-1d91afadce5a",
+      "alerta_id": "d8dc3f47-81a7-4d1a-bbe6-e57e91e82236",
+      "fecha": "2026-04-27T05:00:00.000Z",
+      "descripcion": "DIREPRO Junín se desplaza al lugar para EDAN sectorial y articula con SANIPES, ALA (Administración Local del Agua) y OEFA. La Municipalidad Distrital de Pariahuanca envía maquinaria para apertura de pozos sépticos y disposición de la mortandad.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "831c21d6-17ed-47e6-b259-bd3a00b3dac4",
+      "alerta_id": "d8dc3f47-81a7-4d1a-bbe6-e57e91e82236",
+      "fecha": "2026-04-28T05:00:00.000Z",
+      "descripcion": "28.04.2026–30.04.2026 — Maquinaria pagada por la Municipalidad Distrital, los piscicultores y una ONG permite el retiro de truchas muertas ante la demora de respuesta del GORE Junín.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "70bbf2a8-1d34-4cf9-b30b-4faf9943ca02",
+      "alerta_id": "d8dc3f47-81a7-4d1a-bbe6-e57e91e82236",
+      "fecha": "2026-04-29T05:00:00.000Z",
+      "descripcion": "DGA-PRODUCE emite Oficio N° 00000215-2026-PRODUCE/DGA a SANIPES solicitando información sobre acciones en el marco de sus competencias.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "acd244b2-c9ea-4e41-a843-b11702ae5274",
+      "alerta_id": "d8dc3f47-81a7-4d1a-bbe6-e57e91e82236",
+      "fecha": "2026-05-11T05:00:00.000Z",
+      "descripcion": "Programada reunión en Huancayo entre los afectados y los directores de las áreas técnicas del GORE Junín para informe sobre avances de la investigación.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "db3a9e77-155f-4d7a-a82b-fb421c771c73",
+      "alerta_id": "dd01363e-7606-432c-8592-d0dd9e3e6c18",
+      "fecha": "2026-03-27T05:00:00.000Z",
+      "descripcion": "Mediante la RM N.° 075-2026-PRODUCE se estableció el Límite Máximo de Captura Total Permisible (LMCTP) del recurso pota para el 2026.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "a0f444b6-2b59-48cc-94d2-7279f4d73dc1",
+      "alerta_id": "dd01363e-7606-432c-8592-d0dd9e3e6c18",
+      "fecha": "2026-05-20T05:00:00.000Z",
+      "descripcion": "La RM N.° 141-2026-PRODUCE amplió el LMCTP anual y extendió su vigencia hasta el 31.12.2026.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "eb93a252-4d7b-4363-81d2-d2a4e54757cb",
+      "alerta_id": "dd01363e-7606-432c-8592-d0dd9e3e6c18",
+      "fecha": "2026-06-29T05:00:00.000Z",
+      "descripcion": "La DGSFS-PA informó que las embarcaciones menores a 10 m³ habían alcanzado el 97,18 % de la cuota asignada.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "a3b0fa44-e22f-49aa-938f-98ffb4abd35b",
+      "alerta_id": "dd01363e-7606-432c-8592-d0dd9e3e6c18",
+      "fecha": "2026-07-01T05:00:00.000Z",
+      "descripcion": "Mediante la Resolución Directoral N.° 00088-2026-PRODUCE/DGSFS-PA, PRODUCE suspendió las actividades extractivas del recurso pota para embarcaciones artesanales menores a 10 m³.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "1078ccfc-a714-497b-8695-243133cf0bad",
+      "alerta_id": "dd01363e-7606-432c-8592-d0dd9e3e6c18",
+      "fecha": "2026-07-02T05:00:00.000Z",
+      "descripcion": "ASUPAPS presentó los Oficios N.° 004 y N.° 005-2026-ASUPAPS/P, solicitando la instalación de una Mesa de Diálogo y la suspensión temporal de la aplicación de la Resolución Directoral. Asimismo, se vienen elaborando nuevos pronunciamientos públicos de SPAEMIM y Macrosur.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "be8c86c1-7cfa-4a49-b9c3-73051ce3e346",
+      "alerta_id": "e0fb72e9-02cf-40d9-bb14-942d92265fb7",
+      "fecha": null,
+      "descripcion": "En comunicación con diversas organizaciones de pesca del sur, muestran su malestar por dicha emisión de la norma y señalan que el sector viene trabajando bajo otros intereses de las grandes embarcaciones y no de los pescadores artesanales selectivos.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "d5b1ce20-b1d5-4de0-9a83-5bee4f1fb785",
+      "alerta_id": "e0fb72e9-02cf-40d9-bb14-942d92265fb7",
+      "fecha": null,
+      "descripcion": "Issac Tapia, dirigente representativo de Ilo, Moquegua, manifiesta que la resolución es un despropósito y perjudica al pescador artesanal. Anuncia que el Sindicato Unificado de Pescadores Artesanales Civiles del Puerto de Ilo, van a organizarse para iniciar una medida de protesta y solicitar la renuncia del señor Ministro de la Producción, porque argumentan que “no los escucha, ni ve la realidad del pescador artesanal”.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "e1e08612-1b0a-4ad3-ab0e-c9c7ccc7966b",
+      "alerta_id": "e0fb72e9-02cf-40d9-bb14-942d92265fb7",
+      "fecha": null,
+      "descripcion": "Juan Cervantes, coordinador de la Asociación de la Macro Sur de la Pesca Artesanal exige al señor Viceministro de Pesca y Acuicultura cumpla su palabra y amenaza con convocatoria de movilizaciones de cada puerto de Arequipa. Anuncia que ya han cursado documentos al Ministerio de la Producción y a Congresistas de la República.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "a94013a0-ad79-470c-b2c3-f4393a3ddbfc",
+      "alerta_id": "e0fb72e9-02cf-40d9-bb14-942d92265fb7",
+      "fecha": null,
+      "descripcion": "Finalmente, precisar que varios medios de comunicación regional y redes sociales vienen difundiendo los mensajes de los pescadores en contra de las emisiones de resoluciones ministeriales y la situación económica de la actividad pesquera.",
+      "orden": 7,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "28074ae2-f83f-455d-9c8c-ca0d6c427519",
+      "alerta_id": "e309b4a5-9853-47d4-a297-43f82acd179a",
+      "fecha": null,
+      "descripcion": "Los representantes de cada asociación deberán reunirse con de manera interna con los integrantes de sus gremios, asociaciones o grupos sociales, para coordinar en un plazo de 15 de días y preparar los insumos necesarios para el desarrollo del plantón.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "8de7aef0-27df-401f-81d6-2bfe68e4e123",
+      "alerta_id": "e309b4a5-9853-47d4-a297-43f82acd179a",
+      "fecha": null,
+      "descripcion": "Proponen el cierre de vías, bloqueos en los ingresos y salidas de la refinería La Pampilla, instalación de carpas, y otras modalidades necesarias para el plantón.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "b24dca42-a6f6-47c0-ae14-84012f186a3c",
+      "alerta_id": "e309b4a5-9853-47d4-a297-43f82acd179a",
+      "fecha": null,
+      "descripcion": "Se realizará la invitación a los alcaldes de los distritos afectados para que apoyen a la lucha.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "b5052605-374d-4eb4-8803-d5e8d31cf808",
+      "alerta_id": "e309b4a5-9853-47d4-a297-43f82acd179a",
+      "fecha": null,
+      "descripcion": "El paro indefinido se realizará el 09.09.2024",
+      "orden": 9,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "5619c15a-cd9e-4695-83f5-e236b264af59",
+      "alerta_id": "e309b4a5-9853-47d4-a297-43f82acd179a",
+      "fecha": null,
+      "descripcion": "Argumentan que este paro se debe a que se ha agotado todas las vías de diálogo con el Estado y la empresa REPSOL, y que no existe voluntad por parte de dichos sectores para poder tratar y solucionar la problemática social.",
+      "orden": 10,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "47a2380b-d538-4743-9cf5-f62108afe440",
+      "alerta_id": "e309b4a5-9853-47d4-a297-43f82acd179a",
+      "fecha": null,
+      "descripcion": "Solicitan que las organizaciones se reúnan y coordinen su participación para buscar una solución justa y hacer respetar sus derechos.",
+      "orden": 11,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "3c4c0e32-1044-4fb5-a38c-ac3c80d52db5",
+      "alerta_id": "e309b4a5-9853-47d4-a297-43f82acd179a",
+      "fecha": null,
+      "descripcion": "Adicionalmente, con fecha 02.09.2024 mediante oficio N° 116-2024-PCM, PCM ha convocado a los viceministros del sector Producción, hidrocarburos y ambiente para una reunión el jueves 05.09.32024 a la 5pm, la cual tiene como agenda abordar el tema de la problemática del derrame de petróleo.",
+      "orden": 12,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "969ad80a-b9f7-4d2e-88cc-66e173fa087c",
+      "alerta_id": "e410b2eb-6e15-4e7a-8267-a317dcacc0e7",
+      "fecha": null,
+      "descripcion": "Acelerar los procesos de formalización: SIFORPA II y Cooperativas pesqueras.",
+      "orden": 6,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "59e1c532-ee41-416c-8e73-6594e572700b",
+      "alerta_id": "e410b2eb-6e15-4e7a-8267-a317dcacc0e7",
+      "fecha": null,
+      "descripcion": "Habilitación de los bancos de semilla del recurso concha de abanico en la Isla Lobos y zona de amortiguamiento.",
+      "orden": 7,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "26f67451-7de2-4823-9599-5b1d4846334e",
+      "alerta_id": "e410b2eb-6e15-4e7a-8267-a317dcacc0e7",
+      "fecha": null,
+      "descripcion": "Corrección de los niveles de producción de las AMYPES.",
+      "orden": 8,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "456eed53-a48f-4c44-b65d-479bbe5c39f2",
+      "alerta_id": "e410b2eb-6e15-4e7a-8267-a317dcacc0e7",
+      "fecha": null,
+      "descripcion": "Acelerar los procesos de pesca experimental y exploratoria de langostino.",
+      "orden": 9,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "f1c20fb5-8457-411c-9170-798b7dbdd354",
+      "alerta_id": "e7847e1c-a332-46eb-a90e-02906eab1ca2",
+      "fecha": null,
+      "descripcion": "El 15/01/2026 se registró el último intento de ocupación del predio con intentos de instalación de un contenedor flexible de agua, materiales (tubos de PVC, costales y lonas) y un container de vigilancia colindante.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "fa786fd7-643c-430e-bb72-606455849d7c",
+      "alerta_id": "e7847e1c-a332-46eb-a90e-02906eab1ca2",
+      "fecha": null,
+      "descripcion": "El 22/04, a las 11 h, el PNDP tomó conocimiento de la presencia de aprox. 7 personas de la asociación AAMEC en una franja colindante al predio, correspondiente a MINDEF, quienes emplearon un cargador frontal para habilitar un acceso hacia el PIA.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "8b700674-f79d-4325-ac1d-06cbe5f382fc",
+      "alerta_id": "e7847e1c-a332-46eb-a90e-02906eab1ca2",
+      "fecha": null,
+      "descripcion": "Entre las 11 h y las 16:00 h, el PNDP realizó coordinaciones con la Procuraduría del Ejército (MINDEF), a la cual remitió documentación para la ejecución del desalojo, articulando con la Comisaría de Ancón; sin que al cierre del reporte se hayan ejecutado acciones.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "94837558-5b03-47b6-8746-1b5865754835",
+      "alerta_id": "e7847e1c-a332-46eb-a90e-02906eab1ca2",
+      "fecha": null,
+      "descripcion": "Se ha programado una visita de PNDP a la Comisaría de Ancón para el 23/04 a las 8 h para dar alerta de los hechos.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "ae656cda-7ee0-4044-95a2-9dcbcfa60b22",
+      "alerta_id": "e7847e1c-a332-46eb-a90e-02906eab1ca2",
+      "fecha": null,
+      "descripcion": "El PNDP precisó que el área en cuestión pertenece al MINDEF, por lo que PRODUCE limita su intervención a la articulación intersectorial.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "73509668-e516-4fd4-bda1-97b449ec5f2c",
+      "alerta_id": "f2c7fd6e-ae9e-476b-9b55-00b8dc3a8e16",
+      "fecha": null,
+      "descripcion": "La ANAP - Ley 26920, manifiesta que esta medida de lucha es por la supuesta desidia del gobierno y exigen medidas urgentes para evitar la quiebra de sus familias, frente a lo que viene sucediendo con el impacto del niño costero, lo cual no habría permitido autorizar la primera temporada de pesca de anchoveta, a fin de realizar sus actividades diarias.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "576d1d34-d557-4792-b679-7bab01d930db",
+      "alerta_id": "f2c7fd6e-ae9e-476b-9b55-00b8dc3a8e16",
+      "fecha": null,
+      "descripcion": "En comunicación con el área de gestión social del MININTER Piura, manifestó que la medida de movilización se realizará en Piura, principalmente en Sechura. Se prevé movilización y boqueo de carreteras, ingreso y salido de Sechura. MININTER viene coordinando gestiones con la PNP para acciones pertinentes.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "9c97dbfd-a4a0-4623-854b-cc561f4df8b1",
+      "alerta_id": "f2c7fd6e-ae9e-476b-9b55-00b8dc3a8e16",
+      "fecha": null,
+      "descripcion": "Finalmente, tras la comunicación con el sr. Fidel Periche Martinez, presidente del Comité Multisectorial Defensa Sector Pesquero de la Bahía de Sechura, informó que el sector no habría atendido sus demandas, por lo que a partir de las 12:00 horas iniciaran sus movilizaciones y evaluaran bloqueo de carreteras en Sechura, Piura y Lambayeque.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "34e3eaf4-5fb5-486a-9089-98476de683fe",
+      "alerta_id": "f2c7fd6e-ae9e-476b-9b55-00b8dc3a8e16",
+      "fecha": null,
+      "descripcion": "Entre sus antecedentes de la ANPA, los armadores industriales de madera de la Ley 26920 vienen demandando la modificación de la Ley 30003 que regula el aporte de $1.40 x Tm de anchoveta, el cual beneficia únicamente a los pensionistas de la flota de acero, discriminando a los jubilados de la flota de madera, pese a que los armadores de la Ley 26920 vienen aportando desde la dación de la norma.",
+      "orden": 7,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "188fa742-77e1-405b-9526-9043d8bb02ee",
+      "alerta_id": "f6d34a16-afde-459f-bc60-7b942d6471cc",
+      "fecha": null,
+      "descripcion": "El 15/01/2026 se registró el último intento de ocupación del predio con intentos de instalación de un contenedor flexible de agua, materiales (tubos de PVC, costales y lonas) y un container de vigilancia colindante.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "30af8b9e-4a94-4279-8674-81fe033c8411",
+      "alerta_id": "f6d34a16-afde-459f-bc60-7b942d6471cc",
+      "fecha": null,
+      "descripcion": "El 22/04, a las 11 h, el PNDP tomó conocimiento de la presencia de aprox. 7 personas de la asociación AAMEC en una franja colindante al predio, correspondiente a MINDEF, quienes emplearon un cargador frontal para habilitar un acceso hacia el PIA.",
+      "orden": 2,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "5faec1d3-5dc5-49bb-bf26-d3c266d28252",
+      "alerta_id": "f6d34a16-afde-459f-bc60-7b942d6471cc",
+      "fecha": null,
+      "descripcion": "Entre las 11 h y las 16:00 h, el PNDP realizó coordinaciones con la Procuraduría del Ejército (MINDEF), a la cual remitió documentación para la ejecución del desalojo, articulando con la Comisaría de Ancón; sin que al cierre del reporte se hayan ejecutado acciones.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "fdf8bfa6-aa7b-4b96-900b-aa4773bc835a",
+      "alerta_id": "f6d34a16-afde-459f-bc60-7b942d6471cc",
+      "fecha": null,
+      "descripcion": "Se ha programado una visita de PNDP a la Comisaría de Ancón para el 23/04 a las 8 h para dar alerta de los hechos.",
+      "orden": 4,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "e3b661bc-c02a-442e-b981-cacbb20613fb",
+      "alerta_id": "f6d34a16-afde-459f-bc60-7b942d6471cc",
+      "fecha": null,
+      "descripcion": "El PNDP precisó que el área en cuestión pertenece al MINDEF, por lo que PRODUCE limita su intervención a la articulación intersectorial.",
+      "orden": 5,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "753d91ae-ac86-4bde-9701-fec92e80b310",
+      "alerta_id": "fe2f72c1-63db-49ba-b9a5-b9bc0c2b11e0",
+      "fecha": null,
+      "descripcion": "Las redes sociales esta dominada por la crítica al bajo precio de la pota, con un descontento generalizado por el impacto a la economía de los pescadores. El monitoreo semanal de la OAIPCS no identificó convocatorias a movilizaciones ni conflictos sociales activos.",
+      "orden": 1,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    },
+    {
+      "id": "74e20930-b4e4-4bab-86df-cfdd879e4b67",
+      "alerta_id": "fe2f72c1-63db-49ba-b9a5-b9bc0c2b11e0",
+      "fecha": null,
+      "descripcion": "Edgar Jiménez Caipa anunció posibles movilizaciones tras denunciar el monopolio de grandes exportadores y falta de acción del estado. El dirigente exige una intervención estatal inmediata para regular los precios. Señaló que contemplan protestas al finalizar la temporada de pesca en febrero, precisando que no se darían bloqueos o enfrentamientos violentos.",
+      "orden": 3,
+      "created_at": "2026-11-27T16:53:40.237Z",
+      "created_by": null,
+      "anulado_en": null
+    }
+  ],
+  "textos": [
+    {
+      "id": "449e5039-2aeb-4541-985f-036ead439fe8",
+      "codigo_alerta": "AT-2026-01",
+      "hechos_recientes": "- En operativo del 09.02, se encontró embarcación con red de fondo dentro de las 2 millas, generando la indignación del OSPAS. Acusan a estas embarcaciones de pescar merluza, cabrilla, doncella y mero, agotando el recurso.\n- Esto ha generado una reunión gremial de las OSPAS para intentar tomar medidas, señalando la posibilidad de iniciar acciones como paros si no son atendidos por alta dirección de PRODUCE.\n- Se encuentra vigente el DS N.° 002-2025-PRODUCE, que modifica el Reglamento de la Ley General de Pesca e incorpora disposiciones sobre el uso de artes de pesca; no obstante, la regulación sobre la migración de embarcaciones artesanales a menor escala aún se encuentra en desarrollo y no corresponde a lo señalado en la denuncia, por lo que requiere clarificación."
+    },
+    {
+      "id": "d12267f4-6e4e-4a15-be78-77cda03c718e",
+      "codigo_alerta": "AT-2026-02",
+      "hechos_recientes": "- Los manifestantes advirtieron que mañana realizarán una acción de mayor intensidad si no reciben respuesta hoy, con participación confirmada de pescadores de Lobitos, Talara, Órganos, El Ñuro y otras caletas, pudiendo paralizar actividades durante todo el día. \n- Denuncian que las redes cortina de fondo ya devastaron áreas de pesca en caletas vecinas y ahora amenazan los recursos de Cabo Blanco y Lobitos; además, cuestionan al Director Regional de la Producción, Néstor, por evitar cuatro reuniones citadas ."
+    },
+    {
+      "id": "aa6569f2-d898-4379-b112-87e3e6d8f26f",
+      "codigo_alerta": "AT-2026-03",
+      "hechos_recientes": "* Compromiso 01 : El estudio técnico “ Evaluación y monitoreo de la pesquería artesanal de Merluza peruana con redes de enmalle de fondo en la zona norte del Perú ” , financiado por SERNANP, presenta retrasos en su ejecución de campo por falta de permisos formales de muestreo (SERNAMP) y débil articulación interinstitucional (IMARPE); su conclusión está proyectada para julio de 2026.\n* Compromiso 02 : La RDR N.° 1042-2025 fue emitida y amplió la cobertura normativa a Talara, Cabo Blanco y Lobitos, constituyendo el único compromiso cumplido de manera completa.\n* Compromiso 03 : La conformación de las COREVIPAs está pendiente de acreditación, con observaciones sucesivas de DIREPRO Piura sin resolver; el 15ABR2026 se emitió un informe para el levantamiento de observaciones por parte de los gremios de pescadores de Cabo Blanco.\n* La reunión con las OSPAS del 15ABR2026 fue cancelada sin reprogramación confirmada, lo que incrementó la percepción de \"desinterés, abandono\" institucional entre los actores locales."
+    },
+    {
+      "id": "197ec87b-5b18-4171-bf03-955eab4d7187",
+      "codigo_alerta": "AT-2026-04",
+      "hechos_recientes": "Denuncian irregularidades en el destino de los recursos hidrobiológicos decomisados , señalando que no se estarían aplicando los procedimientos establecidos. Solicitan mayor control por parte de PRODUCE para garantizar que los productos decomisados sean destinados a comedores populares y familias de bajos recursos.\nAl cierre de este reporte, la movilización continúa de manera pacífica en las instalaciones del GORE Tacna."
+    },
+    {
+      "id": "e0f3257a-3d59-4a1b-929c-16de273daea3",
+      "codigo_alerta": "AT-2026-05",
+      "hechos_recientes": "* El comunicado, firmado por el Secretario General, Gerónimo López Sevillano, califica las medidas del sector como una “política irracional que incentiva las malas prácticas empresariales” y señala presuntas omisiones e irregularidades en la supervisión pesquera y en el cumplimiento de la normativa vigente.\n* El documento cuestiona directamente que el Viceministerio de Pesca y Acuicultura estaría permitiendo el incumplimiento de la R.M. 209-2001-PE, referida a los límites de pesca en zonas costeras. Asimismo, sostiene que las recientes sanciones emitidas por la Contraloría General de la República a funcionarios de PRODUCE evidenciarían deficiencias estructurales en la fiscalización del sector.\n* Asimismo, otro documento difundido en redes sociales, por el Sindicato Único de Pescadores de Nuevas Embarcaciones del Perú (SUPNEP), liderado por Franklin Gonzales, manifiesta desidia con el sector porque no habrían sido incluidos en la reunión que se desarrolló para ver el manejo de la Anchoveta. Y anuncia iniciar una medida de protesta \"por excluir de manera reiterada a los trabajadores de las decisiones que afectan directamente nuestra actividad y sustento.\""
+    },
+    {
+      "id": "08742a5c-bfa8-455a-941e-74f3c12af808",
+      "codigo_alerta": "AT-2026-06",
+      "hechos_recientes": "En paralelo, la SGSD de la PCM ha iniciado reuniones con las OSPAs del Callao para reimpulsar la implementación del DU 004-2025, referido a los incentivos para la reubicación y desguace de embarcaciones artesanales que ocupan los amarraderos D y E del Muelle 5 (área concesionada por el MTC a APM Terminals).\nEste proceso ha generado tensión social creciente entre los pescadores artesanales del Callao, quienes exigen:\n* Derogar el decreto de urgencia 004-2025\n* Mejoras en los incentivos por reubicación y desguace \n* La construcción de un nuevo DPA, e\n* Inversiones de mejora en el DPA actualmente en proceso de transferencia al GORE Callao."
+    },
+    {
+      "id": "1bd1f37c-1ec2-432e-8b22-e641e7c2f055",
+      "codigo_alerta": "AT-2026-07",
+      "hechos_recientes": "Los dirigentes señalan que, el actual muelle del DPA Salaverry no soporta la temporada alta de mareas, lo que obliga a trasladar sus embarcaciones a otros puertos y genera sobrecostos en sus operaciones. Asimismo, demandan que el Gobierno Regional gestione el presupuesto necesario para mejorar la infraestructura pesquera y ampliar el muelle de Salaverry.\nSe tiene conocimiento que durante la mañana de hoy, los pescadores serán recibidos por la Gobernadora Regional de La Libertad."
+    },
+    {
+      "id": "f198689a-09fd-48fe-a47d-201bc7fc4543",
+      "codigo_alerta": "AT-2026-08",
+      "hechos_recientes": "La SGSD–PCM el 03/12/2025 remitió dichos puntos a PRODUCE mediante Oficio Múltiple N.º D000782-2025-PCM-SGSD, solicitando respuesta directa al congresista con copia obligatoria a PCM .\n\n📝 2. Temas que requieren respuesta sectorial de PRODUCE al CR Malaga Trillo\n\n1. Se programará, durante la segunda o tercera semana de diciembre, una reunión con el Presidente Jerí y el Premier Álvarez Miranda, junto a representantes de los afectados, para comunicar avances en campañas de salud, reactivación económica, reconversión productiva (turismo y otros) y facilidades tributarias-financieras.\n2. Se coordinará la publicación del estado de los informes finales de sectores ( PRODUCE , MINAM, MINEM, MIDIS, MINSA, etc.) y entidades técnicas (OEFA, OSINERGMIN, IMARPE, DIGESA, ITP, etc.), incluyendo las causas de retraso y la situación de aprobación por parte de los jefes institucionales .\n3. Se evaluará y reportará el estado de remediación de playas y ecosistemas y la condición sanitaria para pesca , recreación y consumo de recursos hidrobiológicos."
+    },
+    {
+      "id": "7e18f7a4-590e-4a81-bdee-8bb31c4381d2",
+      "codigo_alerta": "AT-2026-09",
+      "hechos_recientes": "- Los dirigentes cancelaron la reunión debido a la indignación y a la percepción de una estrategia dilatoria respecto a sus demandas, atribuida a un presunto uso político-electoral del espacio de diálogo por parte de la congresista Portalatino (en contexto de campaña electoral), así como a la falta de atención técnica adecuada, al considerar que PRODUCE habría propuesto enviar representantes de la dirección de Dirección General de Consumo Humano Indirecto, quienes no serían competentes para abordar la problemática planteada, según dirigentes.\n- El hecho se suma a un descontento acumulado por el rechazo al proceso de formalización y una baja actividad pesquera asociada a la presencia de tallas pequeñas de peces en Áncash, identificándose estos factores como posibles disparadores del actual malestar."
+    },
+    {
+      "id": "86811991-cc4b-4041-bbda-5dd8c6e40bc3",
+      "codigo_alerta": "AT-2026-10",
+      "hechos_recientes": "* La obra principal del DPA se inició con una inversión aproximada de S/ 8 millones, siendo el contrato resuelto en junio de 2019 por incumplimientos, con un avance físico de 43,75 %.\n* En diciembre de 2020, se inició la elaboración del expediente técnico del saldo de obra, con una inversión de S/ 11 millones.\n* En 2025, FONDEPES aprobó el Expediente Técnico – Saldo de Obra 2, por un monto de S/ 7 millones, con un plazo de ejecución de 180 días calendario.\n* El 26 de agosto de 2025 se realizó la entrega del terreno al contratista, fijándose como fecha programada de culminación el 22 de febrero de 2026.\n* El 16 de enero de 2026, FONDEPES notificó la resolución del contrato debido a incumplimientos y retrasos atribuibles a la empresa ejecutora.\n* En dicho contexto, FONDEPES ejecutaría un Procedimiento No Competitivo para la contratación del saldo de obra , aplicable tras la aprobación del Expediente Técnico que prioriza lo no ejecutado o ejecutado deficientemente. Este procedimiento tiene un plazo de 27 días hábiles, contempla la invitación a potenciales postores y la aprobación por el Titular de la Entidad mediante Resolución sustentada en informes técnico y legal, recomendándose por su celeridad y por permitir la selección de un postor con experiencia y solvencia económica.\n* El DPA no cuenta con energía eléctrica ( aunque cuenta con paneles solares para iluminación) ni agua potable, lo que limita su operatividad integral.\n* Se vienen utilizando de manera parcial el muelle y el patio de maniobras.\n* Se logró la instalación del sistema de iluminación con paneles solares, coordinada con la empresa MARCOBRE, en articulación con la OSPA administradora del DPA."
+    },
+    {
+      "id": "0eda232a-9174-4e04-9498-30f9d6227939",
+      "codigo_alerta": "AT-2026-11",
+      "hechos_recientes": "- El 15 de enero PNDP realizó una inspección del terreno y se reportó la ocupación ilegal por parte de AAMEC, incluyendo una franja de terreno perteneciente al Ejército, donde se constató la construcción de muros de entre 40 y 60 m mediante bloques de concreto. En el área ocupada se hallaron materiales de construcción y logística (tubos de PVC, costalillos, lonas verdes), así como un reservorio de agua inflable, evidenciando una ocupación activa. Asimismo, se instaló un contenedor metálico con publicidad de AAMEC, colocado fuera del lindero, con el propósito de simular condición de posesionarios sin sustento legal.\n* Recientemente, mediante comunicaciones del líder de AAMEC, Rafael Paredes, anunció que viene programando una movilización hacia PRODUCE. Acusó manipulación de las bases de licitación, vinculó a funcionarios con corrupción (Odebrecht), señaló que el Embajador de EE.UU. visitará el terreno y confirmó denuncias ante Contraloría y la Comisión de Constitución del Congreso y Fiscalía."
+    },
+    {
+      "id": "66fcce09-57dc-4d0c-880d-ddc6f9ee9deb",
+      "codigo_alerta": "AT-2026-12",
+      "hechos_recientes": "* El Programa Compras a MYPErú, viene realizando reuniones con MYPE aliadas para informar intervenciones y desincentivar la convocatoria al paro (con Asociación de Empresarios de Gamarra, Asociación de MYPES Lima Norte, entre otras)\n* El Programa Compras a MYPErú, informa que está en proceso de transferencia un monto de S/ 6.5 millones de la entidad demandante RENIEC para el sector textil-confecciones, beneficiando a 59 MYPE. También se beneficiará a 9,800 MYPEs de otros sectores con un presupuesto de S/ 1,151 millones."
+    },
+    {
+      "id": "fe2f72c1-63db-49ba-b9a5-b9bc0c2b11e0",
+      "codigo_alerta": "AT-2026-13",
+      "hechos_recientes": "- Las redes sociales esta dominada por la crítica al bajo precio de la pota, con un descontento generalizado por el impacto a la economía de los pescadores. El monitoreo semanal de la OAIPCS no identificó convocatorias a movilizaciones ni conflictos sociales activos.\n\n- Edgar Jiménez Caipa anunció posibles movilizaciones tras denunciar el monopolio de grandes exportadores y falta de acción del estado. El dirigente exige una intervención estatal inmediata para regular los precios. Señaló que contemplan protestas al finalizar la temporada de pesca en febrero, precisando que no se darían bloqueos o enfrentamientos violentos."
+    },
+    {
+      "id": "baa21204-340c-4b87-babe-965146db6390",
+      "codigo_alerta": "AT-2026-14",
+      "hechos_recientes": "- 06.02.2026: AAMEC ha trasladado personal y materiales para instalación de la feria y acto cívico del 07.02.2026 en área colindante con el PIA Ancón.\n- 06.02.2026: OGA instaló un cartel informativo en la caseta de vigilancia dentro del predio del PIA.\n- 05.02.2026: PNP Ancón confirma presencia policial para el día 07.02.2026 como respuesta a solicitud formal realizada por OGA-PRODUCE el 02.02.2026.\n- 04.02.2026 DVMYPE remite oficio a MINDEF sugiriendo tomar acciones respecto al predio colindante al PIA que estaba teniendo indicios de  ocupación ilegal."
+    },
+    {
+      "id": "4492d131-d3fd-4eee-b202-fbbb15efd972",
+      "codigo_alerta": "AT-2026-15",
+      "hechos_recientes": "- 03/03/2026, FREDEMYPE convoca a plantón nacional en el frontis del Ministerio de la Producción para el miércoles 11 de marzo a las 10:00 am para exigir la salida de Jeferson Moreno, coordinador de la Unidad de Supervisión de los NEC y ex Director Ejecutivo del Programa Compras a MYPErú; y, Jorge Hernández, Director Ejecutivo de NEC Textil y ex jefe de supervisión. - 03/03/2026, Cabe señalar que, en comunicación con Reneé Cobeña, este expresó su descontento con la gestión del programa Compras a MYPErú, señalando que no se habrían logrado canalizar demandas de nuevas compras provenientes de otros sectores, lo que estaría afectando directamente a las MYPE’s. Además, manifestó que el día de ayer 02/03/2026 sostuvo una reunión con dos congresistas para abordar esta problemática.\n- El 01/03/2026 Infobae publicó las declaraciones de Reneé Cobeña, presidente de FREDEMYPE, quien acusa al Señor Ministro de la Producción de encubrir presuntos casos de corrupción ocurridos entre el 2023 y 2025 en el programa Compras a MYPErú relacionados a sobrevaloraciones injustificadas de bienes y servicios provistos por una decena de empresas contratadas en dichos años. \n- A mediados de enero de 2026, el presidente del NEC Textil Confecciones, Jorge Luis Julca, solicitó al órgano de fiscalización una intervención urgente para investigar el manejo de los fondos asignados por diversas entidades estatales, ante la presunta comisión de actos irregulares detectados tras la revisión de contratos y pagos efectuados entre 2023 y 2025, asimismo, señala que la Unidad de Supervisión de los NEC no habría adoptado medidas frente a las observaciones presentadas."
+    },
+    {
+      "id": "b7b0c34d-6311-447d-ac5f-c4c68f650b5a",
+      "codigo_alerta": "AT-2026-16",
+      "hechos_recientes": null
+    },
+    {
+      "id": "103821bc-9572-43e4-9e1a-76160839f73c",
+      "codigo_alerta": "AT-2026-17",
+      "hechos_recientes": "* 24ABR2026 — Publicación de RM N° 000102-2026-PRODUCE modificando límites de captura de bonito para ene–dic 2026.\n* 25ABR2026 — DGPA-PRODUCE convocó reunión con armadores y pescadores para el 27ABRI2026 a las 16:00 h.\n* 27ABR2026 — Secretario del Gremio Parachique confirma plantón coordinado previamente en sede PRODUCE.\n* 27ABR2026 — PRODUCE convocó reunión con armadores y pescadores para las 16:00 h (mismo día)."
+    },
+    {
+      "id": "d8dc3f47-81a7-4d1a-bbe6-e57e91e82236",
+      "codigo_alerta": "AT-2026-18",
+      "hechos_recientes": "- 27.04.2026 — Se reporta muerte masiva de truchas en Pariahuanca  en piscigranjas de la margen derecha del río Yuracyacu. COES elabora Reporte Preliminar N° 019 a las 15:30 h \"CONTAMINACIÓN AMBIENTAL DE AGUA EN EL DISTRITO DE PARIAHUANCA – JUNÍN\" .\n- 27.04.2026 DIREPRO Junín se desplaza al lugar para EDAN sectorial y articula con SANIPES, ALA (Administración Local del Agua) y OEFA. La Municipalidad Distrital de Pariahuanca envía maquinaria para apertura de pozos sépticos y disposición de la mortandad.\n- 28.04.2026–30.04.2026 — Maquinaria pagada por la Municipalidad Distrital, los piscicultores y una ONG permite el retiro de truchas muertas ante la demora de respuesta del GORE Junín. \n- 29.04.2026 — DGA-PRODUCE emite Oficio N° 00000215-2026-PRODUCE/DGA a SANIPES solicitando información sobre acciones en el marco de sus competencias.\n- 11.05.2026 — Programada reunión en Huancayo entre los afectados y los directores de las áreas técnicas del GORE Junín para informe sobre avances de la investigación."
+    },
+    {
+      "id": "d764a235-df49-4a53-a5cf-8d91595c28e2",
+      "codigo_alerta": "AT-2026-20",
+      "hechos_recientes": "* Se reporta la construcción ilegal de un silo (baño rústico) en el terreno de SANIPES.\n* Municipalidad informó que se activó fiscalización y procedió con el área respectiva para intervenir."
+    },
+    {
+      "id": "0f4a5d69-aead-4c93-a453-9e530a7ae5f7",
+      "codigo_alerta": "AT-2026-21",
+      "hechos_recientes": "* 23-29MAR2026 — COP15 de la CMS en Brasil incorpora al Apéndice I tres especies de tiburón zorro (Alopias pelagicus, A. superciliosus, A. vulpinus), el tiburón martillo festoneado (Sphyrna lewini) y el tiburón martillo gigante (Sphyrna mokarran). Resultado de la votación: 49 a favor, 1 en contra (Perú), 6 abstenciones.\n* 01ABR2026 — MINAM remite a PRODUCE el Oficio N° D000085-2026-MINAM-VMDERN-DGDB comunicando los resultados de la COP15 y la entrada en vigor de las obligaciones el 27JUN2026.\n* 25ABR2026 — Pescadores artesanales de Máncora (Talara, Piura) se concentran en el Desembarcadero Pesquero Artesanal para protestar contra la prohibición. Raúl Querevalú (AGREPESAR) convoca a toda la cadena productiva local.\n* 30ABR2026 — Reunión sectorial con el Ministro de la Producción. Representantes de la Macrorregión Sur plantean: (i) demoras en certificados CITES superiores a un año; (ii) solidaridad con gremios del norte; (iii) inquietud por una eventual extensión de la prohibición a tiburón azul, diamante y marrajo sardinero. \n* 04MAY2026 — Armadores artesanales de Santa Rosa (Chiclayo, Lambayeque), liderados por Santos Marchena Marchena, celebran asamblea macrorregional. Exigen mesa de diálogo técnico con PRODUCE y dan plazo de 20 días al Ministro.\n* 04MAY2026 — Familiares de pescadores (Leslie Lizana Choquehuanca, tesorera) y sector gastronómico (José Fernando, restaurantero) advierten movilizaciones si no hay respuesta."
+    },
+    {
+      "id": "8c854cee-6e7c-44c7-a7e5-ab568b7b5478",
+      "codigo_alerta": "AT-2026-22",
+      "hechos_recientes": "* El pasado 16ABR2026 se reportó la construcción ilegal de un silo (baño rústico) en el terreno de SANIPES.\n* 17ABR2026 Municipalidad informó que se activó fiscalización y procedió con el área respectiva para intervenir."
+    },
+    {
+      "id": "3c521858-2975-49a0-9999-25988bd18f5e",
+      "codigo_alerta": "AT-2026-23",
+      "hechos_recientes": "- 22.ABR.2026 — PRODUCE ordena suspensión de actividades extractivas hasta el 06.05.2026 en las primeras 10 millas en el tramo Chimbote–Pimentel, sustentada en informe de IMARPE que reporta incidencia de juveniles superior al 50% en el periodo 09–19 de abril. A la vez, Alcides Herrera Inga, (SUMOPP), presenta denuncia penal ante la Fiscalía Especializada en Materia Ambiental del Santa contra el ministro y el presidente ejecutivo del IMARPE, por presunto delito de extracción y procesamiento ilegal de especies acuáticas\n- 28.ABR.2026 — El ministro César Quispe y el viceministro de Pesca y Acuicultura, Jesús Barrientos, se reúnen con dirigentes de SUMOPP y (SUPNEP), junto al congresista Elías Varas Meléndez; las autoridades reiteran decisiones basadas en evidencia científica del IMARPE y rechazan la suspensión total de la temporada.\n- MAY.2026 — Distintas cuentas de Facebook relacionadas a pesca (sindicatos, activistas, noticieros) sostienen la narrativa de “depredación por alta incidencia de pesca juvenil”, apoyándose de material audiovisual."
+    },
+    {
+      "id": "f6d34a16-afde-459f-bc60-7b942d6471cc",
+      "codigo_alerta": "AT-2026-25",
+      "hechos_recientes": "- El 15/01/2026 se registró el último intento de ocupación del predio con intentos de instalación de un contenedor flexible de agua, materiales (tubos de PVC, costales y lonas) y un container de vigilancia colindante.\n- El 22/04, a las 11 h, el PNDP tomó conocimiento de la presencia de aprox. 7 personas de la asociación AAMEC en una franja colindante al predio, correspondiente a MINDEF, quienes emplearon un cargador frontal para habilitar un acceso hacia el PIA.\n- Entre las 11 h y las 16:00 h, el PNDP realizó coordinaciones con la Procuraduría del Ejército (MINDEF), a la cual remitió documentación para la ejecución del desalojo, articulando con la Comisaría de Ancón; sin que al cierre del reporte se hayan ejecutado acciones.\n- Se ha programado una visita de PNDP a la Comisaría de Ancón para el 23/04 a las 8 h para dar alerta de los hechos.\n- El PNDP precisó que el área en cuestión pertenece al MINDEF, por lo que PRODUCE limita su intervención a la articulación intersectorial."
+    },
+    {
+      "id": "8cc452bf-688f-4a17-9dbd-21094d233ab0",
+      "codigo_alerta": "AT-2026-26",
+      "hechos_recientes": "* 30.05.2026 — FIUPAP ejecutó una Asamblea General Extraordinaria masiva en el local de la Asociación de Bolichitos (San Andrés).\n* 30.05.2026 — La dirigencia tramitó formalmente ante PRODUCE el Oficio N°066-2026-FIUPAP, dirigido al Ministro de la Producción, con atención al Viceministro de Pesca y Acuicultura.\n* 30.05.2026 — Se estableció la fecha del 04.06.2026 como plazo límite y definitivo exigido por el gremio para que el SM se constituya físicamente en San Andrés, Además en un video difundido afirman que el SM de Producción habría confirmado dicha visita (esta información está bajo verificación oficial con DM).\n* 30.05.2026 — Se reportan coordinaciones con la Subprefectura de Pisco para elevar la problemática a la Presidencia del Consejo de Ministros (PCM) en una reunión con el Premier."
+    },
+    {
+      "id": "c044db4b-b223-4dc8-82d3-90d4471d6ad0",
+      "codigo_alerta": "AT-2026-28",
+      "hechos_recientes": "•\t30.05.2026 — FIUPAP realizó una Asamblea General Extraordinaria en San Andrés, donde acordó exigir una reunión presencial con el Ministro de la Producción y advirtió la posibilidad de adoptar medidas de fuerza de no obtener respuestas satisfactorias. \n•\t30.05.2026 — La organización presentó el Oficio N.° 066-2026-FIUPAP solicitando atención a la problemática del recurso bonito. \n•\t03.06.2026 — La OAIPCS comunicó oficialmente la reprogramación de la reunión solicitada por FIUPAP para el 12.06.2026 a las 15:00 horas en la sede central de PRODUCE, solicitando además la acreditación previa de los participantes. \n•\t03.06.2026 — FIUPAP difundió un comunicado convocando a una reunión de urgencia en el local de la Asociación de Bolichitos “Víctor Peña Ormeño”, en San Andrés. \n•\t03.06.2026 — Entre los puntos de agenda de la reunión convocada destacan: \no\tDeclarar reunión permanente. \no\tEvaluar acciones frente al presunto silencio del Ministerio de la Producción respecto a la visita solicitada a San Andrés para abordar la problemática del recurso bonito. \no\tDefinir medidas y acciones a adoptar por las bases"
+    },
+    {
+      "id": "9ef6a346-c225-4567-abe7-c5db0222d2c0",
+      "codigo_alerta": "AT-2026-30",
+      "hechos_recientes": "- 10.06 – FIUPAP movilizó aproximadamente 150 pescadores en San Andrés; tras una reunión con funcionarios de DIREPRO Ica, la federación otorgó 24 horas al PRODUCE para atender sus demandas y advirtió nuevas medidas.\n- 11.06 – Mediante Oficio N.° 084-2026-FIUPAP, rechazó la propuesta de reunión en Lima, cuestionó el proceso de diálogo y advirtió acciones legales frente a decisiones desfavorables.\n- 13.06 – Se publicó la RM N.° 169-2026-PRODUCE, estableciendo el límite de captura del recurso bonito para el año 2026.\n- 14.06 – Información recogida por OAIPCS confirmó la realización de una movilización hacia frontis de PRODUCE para el lunes 15 de junio"
+    },
+    {
+      "id": "7e445a9a-7d45-490a-a067-0aaa14281a00",
+      "codigo_alerta": "AT-2026-32",
+      "hechos_recientes": "●\t16.02.2026 (aprox. 08:00 hrs): Inicio de la concentración en el óvalo Quiñones (Chiclayo) y posterior marcha hacia la Panamericana Norte.\n●\t16.02.2026 (aprox. 10:30 hrs): Los manifestantes toman el puente Reque, paralizando el tránsito en ambos sentidos de la Panamericana Norte de manera intermitente.\n●\tEn curso: La Federación Unificada del Norte (Manuel Héctor Galán) confirma su apoyo a la movilización. Se reporta desabastecimiento de bonito en el Mercado Moshoqueque y un alza en el precio minorista debido a la paralización de la flota."
+    },
+    {
+      "id": "69929d28-0a91-4aa1-b9b0-a8b6a8eb7221",
+      "codigo_alerta": "AT-2026-36",
+      "hechos_recientes": "- La población ha presentado comunicaciones ante PRODUCE y la PCM solicitando la reprogramación de talleres y actividades participativas en horarios que faciliten una mayor participación ciudadana; desde el sector se atendió y se cambiaron los horarios previamente.\n- El proyecto de ACERO AMERICANO S.A.C. continúa su proceso de estudio de impacto ambiental detallado y participación ciudadana conforme al procedimiento correspondiente, atendido por PRODUCE."
+    },
+    {
+      "id": "33883524-fbbd-499b-8115-31dcad76b30b",
+      "codigo_alerta": "AT-2026-37",
+      "hechos_recientes": "- 27–28.ABR.2026 — Mortandad masiva de truchas en 7 piscigranjas del río Yuracyacu. La Municipalidad Distrital de Pariahuanca constata agua turbia con sedimentos. DIREPRO Junín acuerda implementar un Programa Productivo para familias afectadas, previa evaluación. PNP y ANA (27) y SANIPES (28) toman muestras.\n- 05.MAY.2026 — PNP Junín emite informes que concluyen presencia de ácido cianhídrico en muestras de agua y truchas de 6 piscigranjas. \n- 06.MAY.2026 — ANA concluye que las muestras del río no superan los ECA para metales pesados (no incluye ácido cianhídrico). \n- 21.MAY.2026 — SANIPES indica que las muestras de 3 piscigranjas (no incluye ácido cianhídrico) no representan riesgo para consumo humano.\n- 22.MAY.2026 — MINAM concluye que no corresponde declaratoria de emergencia ambiental, al calificar el evento como súbito. \n- 03.JUN.2026 — Representante de piscicultores reporta incumplimiento del GORE Junín en la entrega de alevinos; asimismo reportan denuncias contra representantes por parte de la minera \"Oro Negro\". \n- 18.JUN.2026 — Convocatoria a movilización hacia la ciudad de Huancayo."
+    },
+    {
+      "id": "8d8a042c-6e50-44ef-84ea-d0288af49958",
+      "codigo_alerta": "AT-2026-38",
+      "hechos_recientes": "- ENE–MAY 2026 — Se modifican las fechas iniciales de las audiencias públicas por considerarse en horario poco accesible para la población.\n- JUN 2026 — Se entregan ejemplares impresos del EIA en la zona. \n- MAY–JUN 2026 — La dirigente Marlene Demarini indica que un sindicato de construcción estaría coaccionando a los pobladores a firmar una carta a favor de la empresa, con amenazas a quienes se oponen.\n- 11.JUN.2026 — El abog. Jorge Palomino y la señora Marlene Demarini, junto con alrededor de 100 personas, se movilizan en bus hacia la sede central de PRODUCE buscando reunión con la Directora María Ysabel Valle Martínez."
+    },
+    {
+      "id": "6a0812b8-41c4-4fcc-b67c-9b8a74461507",
+      "codigo_alerta": "AT-2026-40",
+      "hechos_recientes": "- 27–28.ABR.2026 — Mortandad masiva de truchas en 7 piscigranjas del río Yuracyacu. La Municipalidad Distrital de Pariahuanca constata agua turbia con sedimentos. DIREPRO Junín acuerda implementar un Programa Productivo para familias afectadas, previa evaluación.\n- 05.MAY.2026 — Informe de PNP Junín concluye presencia de ácido cianhídrico en muestras de agua y truchas de 6 piscigranjas. \n- 06.MAY.2026 — Informe de ANA concluye que las muestras del río no superan los ECA para metales pesados (no incluye ácido cianhídrico).\n- 21.MAY.2026 — Informe de SANIPES sobre muestras de 3 piscigranjas (no incluye ácido cianhídrico) indica que no representan riesgo para consumo humano.\n- 22.MAY.2026 — MINAM concluye que no corresponde declaratoria de emergencia ambiental, al calificar el evento como súbito.\n- 12.JUN.2026 — DIREPRO Junín inicia la entrega de 80 mil alevinos de trucha en las piscigranjas afectadas, con proyección hasta octubre."
+    },
+    {
+      "id": "9e71414b-ed4f-4774-b84e-3cc4f621a6ce",
+      "codigo_alerta": "AT-2026-41",
+      "hechos_recientes": "- JUN.2026 — Sindicato JOB y CGTP sostienen reunión técnica con el ENFEN; el organismo confirma alta probabilidad de intensificación del Fenómeno del Niño, amenazando las condiciones propicias para la segunda temporada 2026. \n- 17.JUN.2026 — JOB anuncia marcha en Chimbote para el 01.JUL.2026. \n- 24.JUN.2026 — El Ministro de la Producción anuncia estar a la espera del informe del ENFEN para continuar o no con la 1ra temporada 2026 de pesca de anchoveta; indica mecanismos económicos de ayuda (créditos con amortizaciones diferidas y otros). JOB reitera en redes sociales la marcha del 01.JUL.2026."
+    },
+    {
+      "id": "0b1d7666-e099-48a3-8de6-c243a8e7e909",
+      "codigo_alerta": "AT-2026-42",
+      "hechos_recientes": "- 12.06.2026 — Aproximadamente 80 personas del AA. HH. 15 de Enero se movilizan a sede Barlovento (PRODUCE) exigiendo la anulación de la audiencia pública del EIA de Aceros Americanos programada para el 13.06.2026.\n- 13.06.2026 — Se suspende la audiencia pública del EIA del proyecto Aceros Americanos, sin nueva fecha reprogramada hasta la actualidad.\n- 03.07.2026 — Representantes del AA. HH. 15 de Enero se movilizan en bus (60 pasajeros) hacia sede Barlovento de PRODUCE, con llegada estimada entre las 10:00 y 10:30 h."
+    },
+    {
+      "id": "b53635cb-7d58-4eb6-a8af-565166848955",
+      "codigo_alerta": "AT-2026-43",
+      "hechos_recientes": "- 25.JUN.2026 — MINDEF informa en reunión que no cuenta con disponibilidad presupuestal para ejecutar el desalojo; gestiona ante la SBN la renuncia a la afectación en uso del predio. \n- 17.JUL.2026 — Notaría de Lima (Ruth Alessandra Ramos Rivas) realiza Constatación de Hechos in situ y verifica que el muro impide acceso vehicular y peatonal al predio (Partida Electrónica N° 13409092, Km 45+850 – Km 50+750, Panamericana Norte, Ancón), con participación de PRODUCE (Abastecimiento, PNDP, OAIPCS) y de Lima National Industrial Park S.A.C. \n- 21.JUL.2026 (previsto) — Ingreso programado de tres contenedores con material de construcción importado (malla electrosoldada, tubos metálicos)."
+    },
+    {
+      "id": "c211e461-0fdf-402f-8290-51e8a277733c",
+      "codigo_alerta": "AT-2026-44",
+      "hechos_recientes": "- 12.02.2026 – Gremio de Pescadores de Sechura se reúne con la alcaldesa distrital y manifiestan malestar y pedido de renuncia del ministro y viceministro. Advierten posible paro indefinido\n- 11.02.2026 FIUPAP presentó Oficio a PRODUCE solicitando dejar sin efecto la RM N°018-2026-PRODUCE sobre el límite de captura de la pota.\n- 10.02.2026 (tarde/noche) – Ante críticas de dirigentes y pescadores, PRODUCE emite R.D. N.° 00020-2026 que revoca la suspensión el mismo día, argumentando que \"desaparecieron las condiciones\". Pescadores, en redes, califican el hecho de \"improvisación\" y \"técnicamente imposible\".\n- 10.02.2026 (en la mañana)– PRODUCE pública R.D. N.° 00019-2026 que suspende la pesca de pota a partir del 12.02.\n- 05.02.2026 – Reunión multisectorial en PRODUCE. Se identifican 9 pedidos y se acuerda nueva reunión. Sin embargo, a los reclamos sobre la pota, se le suma la indignación de algunos dirigentes por la percepción de exclusión del espacio de diálogo.\n- Entre el 24.01 y el 04.02, la Federación Macro Sur pasó de denunciar la caída del precio de la pota a exigir la renuncia de la alta dirección de PRODUCE, anunciando en dos oportunidades una paralización regional al cierre de la temporada."
+    },
+    {
+      "id": "68e3a116-a3c1-47c4-9d78-352a53d4fb64",
+      "codigo_alerta": "AT-2026-45",
+      "hechos_recientes": "- 24.01.2026: Se emitió un reporte de alerta temprana por malestar en pescadores artesanales del litoral sur debido a la caída del precio de la pota. El dirigente Edgar Jiménez Caipa (Macro Sur) anunció posibles protestas al finalizar la temporada en febrero, exigiendo regulación estatal de precios.\n- 02.02.2026: Macro Sur publica pronunciamiento negándose a participar en el diálogo sobre la situación de la pota y acusando al Estado de “mala gestión de los recursos” y cuestiona medidas que califican como “arbitrarias” en especies como perico, pota, bonito y jurel. \n- Juan Cervantes Nolasco (Coordinador Macro Sur), en comunicación directa con OAIPCS, confirmó la no asistencia a la reunión y rechazó cualquier negociación. Así también se registra el apoyo en redes sociales de Wilber Isaac Tapia, ex secretario general de SUPABCPI.\n- Sin embargo, coordinador de FIUPAP a nivel sur indicó una falta de representatividad del señor Jiménez Caipa y su OSPA Macro Sur, asegurando que las OSPAS del sur, incluyendo SPAEMIM, si asistirán a reunión convocada"
+    },
+    {
+      "id": "854022c7-5038-4290-9665-8e21a3f3ca6a",
+      "codigo_alerta": "AT-2026-46",
+      "hechos_recientes": "- 08.SET.2025 — La DGSFS-PA remite la Carta N° 84-2025-PRODUCE/DGSFS-PA a la Asoc. de Armadores Artesanales de CHD de Samanco y Los Chimus (Oficio N° 011-2025, H.T. N° 00069705-2025-E): al no concretarse la adecuación prevista en el D.S. N° 002-2025-PRODUCE, las embarcaciones artesanales mantienen su autorización para operar dentro de las primeras cinco millas marinas.\n- 03.AGO.2026 — Dirigencia de El Dorado informa a OAIPCS que las autoridades ejecutaron un operativo de fiscalización sin efectos sobre las actividades cuestionadas.\n- 13.AGO.2026 — Pescador de El Dorado remite a OAIPCS material audiovisual del enfrentamiento en el mar del mismo día; el material se viraliza en redes. La dirigencia comunica telefónicamente a OAIPCS que el enfrentamiento está en curso y solicita asesoría legal y coordinaciones técnicas urgentes.  Se observan embarcaciones de cerco con placa: \"Tres hermanos\" (CE5439BM), \"Ximenita\" (PS57300BM), \"Fabian\" (CE02988BM) y \"Santiago\"."
+    },
+    {
+      "id": "a096037f-64c9-40ce-a56a-9e44fd378cfc",
+      "codigo_alerta": "AT-2026-47",
+      "hechos_recientes": "El Programa Compras a MYPErú, viene realizando reuniones con MYPE aliadas para informar intervenciones y desincentivar la convocatoria al paro (con Asociación de Empresarios de Gamarra, Asociación de MYPES Lima Norte, entre otras)\n- El Programa Compras a MYPErú, informa que está en proceso de transferencia un monto de S/ 6.5 millones de la entidad demandante RENIEC para el sector textil-confecciones, beneficiando a 59 MYPE. También se beneficiará a 9,800 MYPEs de otros sectores con un presupuesto de S/ 1,151 millones."
+    },
+    {
+      "id": "8486c922-cd25-4b83-9e88-c09f4969be5d",
+      "codigo_alerta": "AT-2026-48",
+      "hechos_recientes": "El Programa Compras a MYPErú, viene realizando reuniones con MYPE aliadas para informar intervenciones y desincentivar la convocatoria al paro (con Asociación de Empresarios de Gamarra, Asociación de MYPES Lima Norte, entre otras)\n* El Programa Compras a MYPErú, informa que está en proceso de transferencia un monto de S/ 6.5 millones de la entidad demandante RENIEC para el sector textil-confecciones, beneficiando a 59 MYPE. También se beneficiará a 9,800 MYPEs de otros sectores con un presupuesto de S/ 1,151 millones."
+    },
+    {
+      "id": "c9f4ee01-5c7c-4e20-80a3-cb235b93a482",
+      "codigo_alerta": "AT-2026-48-bis",
+      "hechos_recientes": "- Se ha programado una reunión el lunes 13 de abril (09:00 hrs) con el Gerente General del GORE Tacna para abordar la problemática del DPA Morro Sama y la presencia de embarcaciones foráneas.\n - Posteriormente (10:00–11:00 hrs), los pescadores sostendrán una reunión ampliada donde, en función de los resultados, definirán medidas colectivas."
+    },
+    {
+      "id": "68b939ef-3332-4c59-8025-3a6b5448e184",
+      "codigo_alerta": "AT-2026-49",
+      "hechos_recientes": "- Ingresaron brevemente al terreno; seguridad evitó instalación y abrió diálogo.\n- Permanecieron en el frontis y anunciaron que volverán el lunes a tomar posesión."
+    },
+    {
+      "id": "52d6446a-8d54-4a5f-b5d4-967676d95555",
+      "codigo_alerta": "AT-2026-50",
+      "hechos_recientes": "- El DPA Callao es un muelle construido en la década de los cuarenta, que no cumple con las condiciones de infraestructura, seguridad, ni habilitación sanitaria requerida; sin embargo, se mantiene operativo a la fecha. Dicha situación viene colocando, desde hace muchos años, en estado de alerta a los pescadores y usuarios del DPA, quienes pese a estas ineficiencias continúan haciendo uso de éste y oponiéndose a su cierre. \n- En el 2019, FONDEPES como parte de las obras de mejoramiento, concluyó con la remodelación de la losa de concreto y reparación del muelle del DPA, asimismo, se realizaron varias intervenciones de mantenimiento, tales como: obras de la red complementaria del alcantarillado y conexión domiciliaria del DPA.\n- El 20.07.2022, a través de la RD N° 00057-2022/PRODUCE/DGAAMPA, la Dirección General de Asuntos Ambientales Pesqueros y Acuícolas (DGAAMPA) desaprobó el Programa de Adecuación y Manejo Ambiental – PAMA del DPA Callao, por una opinión técnica desfavorable de DICAPI, quien indicó que un área del DPA se encuentra dentro de una zona de defensa nacional intransferible. Por este motivo, no se puede contratar el Estudio de Mecánica de Suelos para culminar el expediente técnico de reforzamiento del muelle espigón del DPA Callao y saldo de obra, dado que estas obras son en mar y se necesita del Derecho de Uso de Área Acuática – DUAA para intervenir en área acuática. \n- El 21.03.2024, la OSPA ASOCIACION REGIONAL UNION DE PESCADORES ARTESANALES Y CONEXOS DEL CALLAO (ARUPACC), quien tenía a su cargo la administración del DPA, reconoció que mantenían deudas de arbitrios y servicios básicos; por lo cual solicitaron que se agilice la transferencia del DPA al GORE Callao, precisando que este último ofreció condonar dichas deudas. Esta situación originó que se den conflictos entre las diversas OSPAS del Callao, sobre todo hacia la OSPA encargada de la administración.\n- Por otro lado, en lo que refiere a la transferencia del DPA Callao al GORE Callao, con fecha 28 y 29.10.2024, se sostuvieron reuniones internas, para tratar sobre el avance del referido traslado, en dichas reuniones se identificó que el DPA mantenía una deuda aproximada de 140 mil soles, por lo cual, el GORE CALLAO señaló que no podían hacerse cargo de dicha deuda. Ante tal situación, se acordó que el sector Producción asumiría la deuda del DPA. Además, se acordó que se actualizará la RM para resolver el convenio de administración con la OSPA encargada del DPA Callao. \n- El 11.11.2024, la Oficina de Articulación Intergubernamental y Prevención de Conflictos Sociales (OAICPS) trasladó el expediente al GORE Callao para la efectivización de la transferencia del DPA. Por su parte, el GORE Callao se comprometió a agilizar la suscripción de dicho expediente para la transferencia. \n- El 13.12.2024, la OGPPM envió a la DGPA el presupuesto detallado de 168,011 soles para cubrir los servicios pendientes y la actual administración del DPA. Posterior a ello, OGA realizó el pago de la deuda pendiente. \n- El 23.12.2024, en el marco de la RM Nº 00475-2024-PRODUCE, la Dirección General de Pesca Artesanal asumió la administración del DPA Callao, la cual se mantiene hasta la fecha.   \n- El 10.02.2025, el GORE Callao, a través del Oficio N° 000030-2025-GRC/OAP, solicita a OAIPCS opinión técnico-legal respecto a la Única Disposición Complementaria del Decreto Supremo N° 144-2023-PCM, el cual establece que las funciones, programas, proyectos, empresas infraestructura y otros organismos pendientes de transferencia a los gobiernos regionales y locales, culminan su proceso de transferencia el 31 de diciembre de 2024. \n- El 11.02.2025, OAIPCS, a través de Oficio N°00000049-2025-PRODUCE/OAIPCS realiza consulta a la Secretaría de Descentralización de la PCM sobre lo señalado en el párrafo anterior. A la fecha, nos encontramos a la espera de la respuesta correspondiente. \n- El Sr Manuel Caminiti, indicó que el día 11.03.2025, ha presentado una carta a PRODUCE solicitando una copia del informe sobre el estado del espigón e infraestructura del muelle del Callao, expresó que tienen gran preocupación respecto a ello, que el espigón ya no tiene bases de fierro y que podría colapsar en cualquier momento. Se observa en el sistema de trámite documentario que el documento ha sido derivado a la DGPA, despacho ministerial y viceministerial de Pesca y Acuicultura. \n- Finalmente, manifestó disponibilidad de seguir conversando con el sector y poder llegar acuerdos que brinden solución a la problemática expuesta."
+    },
+    {
+      "id": "52b90658-9003-4c52-bedb-64bc9cfcb833",
+      "codigo_alerta": "AT-2026-51",
+      "hechos_recientes": null
+    },
+    {
+      "id": "7d879728-27b6-48a2-8b56-f93c6c0ac9ac",
+      "codigo_alerta": "AT-2026-52",
+      "hechos_recientes": "27.02.2024, el señor Wilber Isaac Tapia, ex secretario general del sindicato de pescadores artesanales buzos civiles del puerto de Ilo (SUPABCPI) brindó declaraciones antes de la reunión de pescadores artesanales de la macro región sur, indicando que los principales temas que abordan son los siguientes:\n- Problemática de la pesca del perico. Indica que no existe una cuota por el momento para la zona sur, la cual debe ser diferenciada.\n- Problemática de la pesca del tiburón azul y tiburón diamante. Refiere que es necesario que, de marera urgente, se regule esta pesquería, porque ya se ha dado inicio a la temporada y a la fecha no existen cuotas ni regulación al respecto.\n- También hizo referencia a la falta de emisión de la certificación para la exportación de la aleta de tiburón por parte de PRODUCE. Actualmente, es una problemática que se traslada hacia los exportadores y comercializadores de este recurso."
+    },
+    {
+      "id": "ee149089-ca75-45a4-baf2-b4e93ea1f514",
+      "codigo_alerta": "AT-2026-53",
+      "hechos_recientes": "El dirigente de Máncora (Raúl Querevalú) indicó que apoyarán la protesta en Lima, plegándose al pedido y realizando, de manera paralela, un plantón pacífico en las instalaciones del Desembarcadero Artesanal de Máncora- DPA, para que sus demandas sean atendidas. \n\nSe reporta, asimismo, que los dirigentes del sur ya tienen decido realizar un plantón en el Desembarcadero Pesquero Artesanal (DPA) de Ilo el día lunes 11.03.2024, debido a que sus demandas no han sido atendidas hasta el momento. Asimismo, realizarán marchas por las calles principales de dicho puerto"
+    },
+    {
+      "id": "76fa2895-ca7d-4e7c-ad1c-a09aa3eef29c",
+      "codigo_alerta": "AT-2026-54",
+      "hechos_recientes": null
+    },
+    {
+      "id": "a06c5a0c-464f-47b5-9d7a-754c0f4c8f78",
+      "codigo_alerta": "AT-2026-55",
+      "hechos_recientes": "El 05.06.2024, se emitió la R.M. N° 239-2024 PRODUCE (que modificó la R.M. N° 0026-2024-PRODUCE), la cual estableció el límite de captura para el periodo de junio a diciembre de 2024 del recurso bonito. En dicha norma se estableció la cuota de captura, clasificando a las embarcaciones artesanales de hasta 32.6 m3 (Cerco) y pesca de cortina y otros.\n\nEl 21.06.2024, los gremios de la Macro Sur (Arequipa, Moquegua y Tacna) de la Pesca Artesanal ingresaron un oficio a PRODUCE solicitando una reunión de trabajo en la ciudad de Mollendo (Arequipa) para abordar los siguientes temas: \n1) Las regulaciones relacionadas con la pesca de bonito, jurel, caballa, pota y perico.\n2) La escasa fiscalización y control en estas pesquerías.\n3) La situación actual de los desembarcaderos pesqueros artesanales de la Macro Sur. \n\nEl 28.06.2024, el Congresista José Luís Elías Ávalos remitió el Oficio N° 807-2023-2024/JLEA-CR a PRODUCE solicitando una reunión para abordar la actual problemática de los pescadores del Puerto de San Andrés – Pisco (ICA).\n\nEl 28.06.2024, el Congresista José Luís Elías Ávalos se reunió con la Asociación Sindicato de Pescadores Artesanales del Distrito de San Andrés, quienes ya le habían remitido sendas cartas, solicitándole reunión, para abordar sus problemáticas pesqueras"
+    },
+    {
+      "id": "8b7a9427-659e-4915-a64e-20a49890e0b7",
+      "codigo_alerta": "AT-2026-56",
+      "hechos_recientes": "22.06.2024, la Federación de Pescadores Artesanales Ancestrales y tradicionales de los Distritos de Ventanilla, Santa Rosa, Ancón, Aucallama y Chancay y la Asociación de Pescadores Artesanales del Norte Chico - Chancay convocaron a una reunión en la ciudad de Chancay, donde participaron pescadores artesanales, comerciantes y otras organizaciones de los distritos de Chancay, Aucallama, Ancón y Ventanilla, que se reconocen a si mismos como afectados por el derrame de petróleo de REPSOL. \n\nLa reunión finalizo con el acuerdo de convocar a la movilización a la PCM el día 05.07.2024 por desinterés del gobierno de atender sus pedidos y el pedido a PCM que interceda con la empresa REPSOL para que procedan sus pretensiones."
+    },
+    {
+      "id": "1d072edc-e0e4-45cc-8e6c-5a62fa005df0",
+      "codigo_alerta": "AT-2026-57",
+      "hechos_recientes": "El 18.06.2024 La Dirección General de Pesca Artesanal del PRODUCE mediante Carta N° 00000887-2024 PRODUCE/DGPA convocó al Gremio de Pescadores Artesanales de San Pedro de Chorrillos a una reunión de coordinación el día 21.06.2024 en la sala de reuniones de la DGPA.\n\nLa Asociación de Pescadores Artesanales José Silverio Olaya Balandra remitió el oficio N° 402-2024 al PRODUCE manifestando su preocupación por la ampliación de 08 días calendarios adicionales al calendario inicial del proceso de selección para la administración de la IPA Chorrillos. Asimismo, hacen mención qué no se les informó anticipadamente de dicho cambio, como estaba establecido en las bases sobre cualquier modificación.\n\nEl 08.07.2024, la Asociación de Pescadores Artesanales José Silverio Olaya Balandra remitió el Oficio N° 410-2024 al PRODUCE denunciando presuntos procedimientos irregulares dentro del proceso de selección de la OSPA que administraría la Infraestructura Pesquera Artesanal (IPA) de Chorrillos. La Asociación refiere que en la fecha según cronograma de la capacitación a las OSPA identificaron al señor Walter Abraham Alarco Cuba como ex funcionario de la DGPA y que actualmente venia desempeñando el rol de asesor de la OSPA participante San Pedro de Chorrillos. También hicieron mención de la reunión del 21.06.2024 realizada por la DGPA con la OSPA San Pedro de Chorrillos en pleno proceso de selección, referida en el primer párrafo.\n\nEl 09.07.2024, la Asociación José Silverio Olaya Balandra de Chorrillos remitió a través del Expediente N° 00052166- 2024 a la Oficina de Prevención y Lucha Contra la Corrupción del PRODUCE la denuncia por presuntos procedimientos irregulares dentro del Proceso de Selección de la OSPA que administraría el IPA de Chorrillos. En dicha denuncia, solicitaron la investigación de manera imparcial y adjuntaron el reporte de visitas a la DGPA de la página web PRODUCE, la Carta N° 00000887-2024 PRODUCE/DGPA y el resultado como ganador de la OSPA San Pedro de Chorrillos como un acto de presunta corrupción.\n\nEl 11.07.2024, la Asociación José Silverio Olaya Balandra de Chorrillos remitió mediante el Oficio N° 417 -2024 al PRODUCE para manifestarle la respuesta al documento enviado por la Oficina de Prevención y Lucha Contra la Corrupción del PRODUCE respecto a lo manifestado en el Oficio N° 410-2024."
+    },
+    {
+      "id": "54bbc978-64b2-4594-9736-2206ede85ddb",
+      "codigo_alerta": "AT-2026-58",
+      "hechos_recientes": "Con fecha 12.08.2024; la Sra. Valeria Mezarina Avia, presidenta de la Asociación Gamarra Emprende, ingresa a través del tramite documentario de PRODUCE, su solicitud en la que expresa su disconformidad sobre diversos aspectos de las bases\n\nA la fecha el Programa Compras MYPERU, ha recogido de las mypes sus comentarios y observaciones a las bases, a través del mecanismo establecido para dicho fin; las cuales deberán ser revisadas para considerar, de ser el caso, su incorporación en las bases. \n\nUn elemento también importante, a considerar en el escenario bajo el cual se plantea la movilización, es que muchas de las mypes actualmente, cuentan con contratos vigentes para la producción de bienes en el marco del D. U 058."
+    },
+    {
+      "id": "e309b4a5-9853-47d4-a297-43f82acd179a",
+      "codigo_alerta": "AT-2026-59",
+      "hechos_recientes": "Con fecha 21.08.2024, en Ancón se reunieron los dirigentes de la Asociación de pescadores Artesanales de Ancón (APESCAA) y otros gremios de pescadores e integrantes inscritos, quienes plantearon y acordaron: \n- Los representantes de cada asociación deberán reunirse con de manera interna con los integrantes de sus gremios, asociaciones o grupos sociales, para coordinar en un plazo de 15 de días y preparar los insumos necesarios para el desarrollo del plantón.\n- Proponen el cierre de vías, bloqueos en los ingresos y salidas de la refinería La Pampilla, instalación de carpas, y otras modalidades necesarias para el plantón. \n- Se realizará la invitación a los alcaldes de los distritos afectados para que apoyen a la lucha.\n\nAún no tienen una fecha exacta para el inicio del plantón; sin embargo, se infiere que se podría dar la primera o segunda semana de septiembre. \n\nCon fecha 30.08.2024, OAIPCS tomo conocimiento sobre el comunicado de convocatoria por parte de Federación de Pescadores Artesanales, Ancestrales y Tradicionales de los distritos de Aucallama, Santa Rosa, Ventanilla, Ancón y Chancay, el cual señala:\n- El paro indefinido se realizará el 09.09.2024\n- Argumentan que este paro se debe a que se ha agotado todas las vías de diálogo con el Estado y la empresa REPSOL, y que no existe voluntad por parte de dichos sectores para poder tratar y solucionar la problemática social. \n- Solicitan que las organizaciones se reúnan y coordinen su participación para buscar una solución justa y hacer respetar sus derechos. \n- Adicionalmente, con fecha 02.09.2024 mediante oficio N° 116-2024-PCM, PCM ha convocado a los viceministros del sector Producción, hidrocarburos y ambiente para una reunión el jueves 05.09.32024 a la 5pm, la cual tiene como agenda abordar el tema de la problemática del derrame de petróleo."
+    },
+    {
+      "id": "59d98b26-b05a-4a75-9431-f6f8d5c7d4d5",
+      "codigo_alerta": "AT-2026-60",
+      "hechos_recientes": null
+    },
+    {
+      "id": "f50a2e25-3efb-4f66-bc7a-a187220f6a78",
+      "codigo_alerta": "AT-2026-61",
+      "hechos_recientes": null
+    },
+    {
+      "id": "379d6533-ca2b-405e-8773-711133db3a17",
+      "codigo_alerta": "AT-2026-62",
+      "hechos_recientes": "El sr. Sixto Roas, dirigente representativo de la Federación de Pescadores de Arequipa (FEPAR) comunicó que su organización, evaluará el apoyo para una movilización en la región Arequipa y bloqueo de la carretera. Solicita al sector a dialogar y para no tener que llegar a radicalizar medidas."
+    },
+    {
+      "id": "e0fb72e9-02cf-40d9-bb14-942d92265fb7",
+      "codigo_alerta": "AT-2026-63",
+      "hechos_recientes": "- En comunicación con diversas organizaciones de pesca del sur, muestran su malestar por dicha emisión de la norma y señalan que el sector viene trabajando bajo otros intereses de las grandes embarcaciones y no de los pescadores artesanales selectivos.\n\n- Issac Tapia, dirigente representativo de Ilo, Moquegua, manifiesta que la resolución es un despropósito y perjudica al pescador artesanal. Anuncia que el Sindicato Unificado de Pescadores Artesanales Civiles del Puerto de Ilo, van a organizarse para iniciar una medida de protesta y solicitar la renuncia del señor Ministro de la Producción, porque argumentan que “no los escucha, ni ve la realidad del pescador artesanal”.\n\n- Juan Cervantes, coordinador de la Asociación de la Macro Sur de la Pesca Artesanal exige al señor Viceministro de Pesca y Acuicultura cumpla su palabra y amenaza con convocatoria de movilizaciones de cada puerto de Arequipa. Anuncia que ya han cursado documentos al Ministerio de la Producción y a Congresistas de la República.\n\n- Finalmente, precisar que varios medios de comunicación regional y redes sociales vienen difundiendo los mensajes de los pescadores en contra de las emisiones de resoluciones ministeriales y la situación económica de la actividad pesquera."
+    },
+    {
+      "id": "5e621ffe-a0c3-4026-a5c9-d02d06dbdd2c",
+      "codigo_alerta": "AT-2026-64",
+      "hechos_recientes": "Anuncian que la concentración se realizara a las 8 am. en la Plaza La Bandera de Ilo, para posteriormente dirigirse a la carretera Costanera Sur para realizar la toma.\n- En comunicación con OSPAS del sur, manifiestan que el sector viene trabajando para las grandes embarcaciones y no para el sector artesanal, calificando de “insostenible y ridícula” las emisiones de las normas de diferentes recursos.\n\n- El Sr. Issac Tapia, dirigente representativo de Ilo, Moquegua, manifiesta que la resolución es un despropósito y perjudica al pescador artesanal. Anuncia que el Sindicato Unificado de Pescadores Artesanales Civiles del Puerto de Ilo y solicitan la renuncia del señor Ministro de la Producción, porque argumentan que “no los escucha, ni ve la realidad del pescador artesanal”.\n\n- A la agenda y/o pedido de reclamo por el tema del recurso Jurel, se ha sumado otros como; ingreso de barcos chinos y carencia de la Pota, malestar por cuota del Perico.\n\n- Finalmente, precisar que varios medios de comunicación regional y redes sociales vienen difundiendo los mensajes de los pescadores en contra de las emisiones de resoluciones ministeriales y la situación económica de la actividad pesquera. Además, el MNINTER y PCM ya vienen alertando el tema y solicitan que el sector atienda el pedido por el temor a bloqueo de carreteras."
+    },
+    {
+      "id": "37780283-ee7a-42c9-a7fe-764bc3db633a",
+      "codigo_alerta": "AT-2026-65",
+      "hechos_recientes": null
+    },
+    {
+      "id": "c5da086d-276e-42e6-8f74-b023c42d7cf8",
+      "codigo_alerta": "AT-2026-66",
+      "hechos_recientes": null
+    },
+    {
+      "id": "49c0f1ea-188e-4369-b55b-57be88b6d052",
+      "codigo_alerta": "AT-2026-67",
+      "hechos_recientes": "Con fechas 23 de enero, 24 de enero, el 3 de febrero y el 7 de febrero; la OAPCS sostuvo reuniones de trabajo la DGPA y sus equipos técnicos, y se sugirió considerar algunos aspectos centrales para el desarrollo de la mesa de trabajo, como son: \n- Definir con claridad el objetivo de las mesas de trabajo.\n- Identificar a los participantes por zona.\n- Establecer el criterio para la participación de los gremios (titular, alterno, etc.).\n- Definir la metodología de trabajo de cada sesión de la mesa de trabajo.\n- Detallar los insumos que se requerirán de las áreas de PRODUCE (IMARPE, DGSFS, DGPARPA, entre otra) que serán necesarias para el desarrollo de las sesiones. \n- La mesa de trabajo debe centrarse en ser una mesa técnica estrictamente, para evitar la interferencia política en el abordaje técnico de los temas.\n- Contar con el apoyo de un asesor (facilitador) externo que permita el desarrollo de las sesiones de manera ordenada. Al respecto se ha hizo la propuesta de solicitar apoyo a la WWF."
+    },
+    {
+      "id": "31ca3f09-9697-4975-9685-541542c9b0cb",
+      "codigo_alerta": "AT-2026-68",
+      "hechos_recientes": "- Precisar que con fecha 26 de noviembre del 2022 la Asociación Sindicato de Pecadores Artesanales del Puerto de Chancay remitió el Oficio N°102-ASPAPCH-2022 en el cual solicita: “En que supuestos se puede disponer la prohibición de pesca artesanal en un determinado ámbito, precisar la base legal”. \n\n- Al respecto la DGPA- PRODUCE respondió dicho oficio con Carta N°50128-2023-PRODUCE/DGPA de fecha 30 de enero 2023, indicando: “PRODUCE tiene competencia en temas relacionados al ordenamiento pesquero referidos entre otros, a cuotas de captura permisible, método de pesca y tallas mínimas de captura mas no en temas sobre contaminación ambiental, lo cual si correspondería a las funciones del Ministerio del Ambiente y al Organismo de Evaluación y Fiscalización Ambiental (OEFA), lo cual se hace de conocimiento para los fines y acciones pertinentes”.\n\n- Con fecha 07 de marzo 2023, la Asociación de Pecadores Artesanales del Puerto de Ancón remitió una carta (HT N° 00015368-2023-E) reiterando el pedido a PRODUCE: “sobre si es posible o no realizar actividades extractivas de pesca artesanal”. La misma que fue respondida por la DGPA con Carta N° 00000617-2023-PRODUCE/DGPA, indicado: “La restricción de actividades extractivas en la zona afectada amerita necesariamente una posición técnica ambiental, basadas en las evaluaciones que le provean sus monitoreos seguimientos en las zonas dañadas, así como las que elaboran las adscritas del sector cono IMARPE y SANIPES”.   \n- Asimismo, indicar que se sostuvieron reuniones con estos gremios en fechas: \n03.02.2023, reunión con DGPA, SANIPES e IMARPE \n28.03.2023, reunión con DGPA."
+    },
+    {
+      "id": "af2b1e87-17d4-4e33-b507-840ceeae0eba",
+      "codigo_alerta": "AT-2026-69",
+      "hechos_recientes": null
+    },
+    {
+      "id": "08d59569-6063-41ce-82e5-55d03fd3cf9a",
+      "codigo_alerta": "AT-2026-70",
+      "hechos_recientes": null
+    },
+    {
+      "id": "7af45618-68d9-4471-b4b1-a3f98ab58e79",
+      "codigo_alerta": "AT-2026-71",
+      "hechos_recientes": null
+    },
+    {
+      "id": "26cccf60-c73b-4a12-8d7b-01ae92992f64",
+      "codigo_alerta": "AT-2026-72",
+      "hechos_recientes": "El día 22.05.2023 tendrán una asamblea con todos los representantes de las organizaciones sociales y se pondrán de acuerdo la hora y punto de concentración y/o movilización para el día martes 23 de mayo.\nPrecisar que el sr. Elizar Medina, Pdte. de pescadores artesanales de Ventanilla, a través de trámite documentario ingreso el expediente N° 00031682-2023, solicitando al DVPA la relación de pescadores rezagados que fue entregado a la PCM, pero a la fecha no tienen respuesta. Dicho documento se encuentra en la DGPA y está pendiente su respuesta."
+    },
+    {
+      "id": "f2c7fd6e-ae9e-476b-9b55-00b8dc3a8e16",
+      "codigo_alerta": "AT-2026-73",
+      "hechos_recientes": "- La ANAP - Ley 26920, manifiesta que esta medida de lucha es por la supuesta desidia del gobierno y exigen medidas urgentes para evitar la quiebra de sus familias, frente a lo que viene sucediendo con el impacto del niño costero, lo cual no habría permitido autorizar la primera temporada de pesca de anchoveta, a fin de realizar sus actividades diarias.\n\n- En comunicación con el área de gestión social del MININTER Piura, manifestó que la medida de movilización se realizará en Piura, principalmente en Sechura. Se prevé movilización y boqueo de carreteras, ingreso y salido de Sechura. MININTER viene coordinando gestiones con la PNP para acciones pertinentes.\n\n- Finalmente, tras la comunicación con el sr. Fidel Periche Martinez, presidente del Comité Multisectorial Defensa Sector Pesquero de la Bahía de Sechura, informó que el sector no habría atendido sus demandas, por lo que a partir de las 12:00 horas iniciaran sus movilizaciones y evaluaran bloqueo de carreteras en Sechura, Piura y Lambayeque.\n\n- Entre sus antecedentes de la ANPA, los armadores industriales de madera de la Ley 26920 vienen demandando la modificación de la Ley 30003 que regula el aporte de $1.40 x Tm de anchoveta, el cual beneficia únicamente a los pensionistas de la flota de acero, discriminando a los jubilados de la flota de madera, pese a que los armadores de la Ley 26920 vienen aportando desde la dación de la norma."
+    },
+    {
+      "id": "5ec894ab-b6e5-439c-aeb8-504b12037004",
+      "codigo_alerta": "AT-2026-74",
+      "hechos_recientes": "La Cooperativa Pesquera Jehova Rey de Reyes de la caleta La Islilla, el Sindicato de Pescadores Atuneros de Puerto de Paita y la Asociación de Armadores Artesanales de Consumo Humano Directo (AAARCUDIPA), presentaron ante Produce diversas solicitudes, donde solicitan la renuncia de Úrsula Desilú León Champén, Viceministra de Pesca y Acuicultura."
+    },
+    {
+      "id": "ca1f3769-4363-425b-bd32-b87bf492ef44",
+      "codigo_alerta": "AT-2026-75",
+      "hechos_recientes": "- Según el representante de la Asociación (Hugo Vera del Rio), entre los años 2016 y 2020, la Dirección de Supervisión, Fiscalización y Sanciones les ha impuesto multas a las empresas pesqueras, pescadores artesanales, armadores y comerciantes, por más de 1.697 millones de soles. Hasta la fecha, el ministerio recaudó 241 millones de soles (Diario La República).\n\n- El 10.02.2022, la Asociación manifiesta que recibieron el Informe N° 000001-2022-PRODUCE/DS-PA, donde les hacen llegar la propuesta de un regimen transitorio de descuento de las multas impuestas por PRODUCE a los administrados de las cadenas productivas para consumo humano directo (CHD) y consume humano indirecto (CHI). La Asociación dejó constancia de su disconformidad con el respectivo informe mediante escrito del 17.02.2022.\n\n- La Asociación solicitan mediante escrito del 11.03.2022 (Reg. N° 00015166-2022), que no han recibido respuesta a sus requerimientos como descuentos de multas administrativas, disponer la anulación y archivo definitivo de las actas o reportes de ocurrencia que no hayan tenido resolución de multas, entre otros. Asimismo, manifiestan que su escrito se encuentra en la Dirección General de Supervisión, Fiscalización y Sanciones (DGSFS-PA) desde el 13.04.2022 sin ninguna respuesta hasta el momento.\n\n- Finalmente, la Asociación señala en su Carta S/N (Exp. N° 00023457-2021) que con el objetivo de ser atendidos están dejando constancia de su solicitud enviando copia al Despacho Presidencial, PCM, Contraloría General de la República, Defensoría del Pueblo y Congreso de la República."
+    },
+    {
+      "id": "b49a52f4-7ab6-4be6-a90a-f6bf197e639f",
+      "codigo_alerta": "AT-2026-76",
+      "hechos_recientes": null
+    },
+    {
+      "id": "6a6098c5-640a-42cf-a077-5f12af52b551",
+      "codigo_alerta": "AT-2026-77",
+      "hechos_recientes": "Además, el 07.07.2022, el sr. Hilton Guerrero nuevamente se comunicó telefónicamente para manifestarse en contra de la pronta atención a la COPMAR por el hecho de hacer plantón frente a la Municipalidad Provincial de Nazca. Asimismo, solicitó una audiencia con el SM y al DVPA, a fin de exponer su problemática frente a la suspensión de la DER para Pisco.\n\nLos dirigentes de Pisco tendrán una asamblea el 07.07.2022 en San Andrés, Pisco para abordar sobre el acuerdo de Produce con la COPMAR de Marcona de la suspensión de la emisión de la DER para Pisco. Al término de su reunión definirían si realizarán un plantón en el frontis del Ministerio de la Producción."
+    },
+    {
+      "id": "8c12889b-9767-45c6-bfd0-5ddb73506bbf",
+      "codigo_alerta": "AT-2026-78",
+      "hechos_recientes": "El miércoles 6 de julio, un grupo de pescadores de la Asociación Nacional de Armadores y Pescadores de Madera de la Ley 26920 – ANAP (Base Sechura) realizó una movilización en contra de una nueva Ley General de Pesca que no los representa, pues solo contempla las posiciones de ONG’s como SPDA y Oceana, así como del congresista Jaime Quito. Los pescadores sostuvieron que de insistir en esta nueva ley tendrían que radicalizar su medida.\n\nAsimismo, en el departamento de Lambayeque, la Asociación de Armadores Industriales de Embarcaciones de Madera Ley 26929 – Santa Rosa exigen ser tomados en cuenta para cualquier trabajo relacionado con la pesca, pues este predictamen solo considera a organizaciones ambientales. En este sentido, han convocado una manifestación para el día jueves 7 de julio a las 9:00 horas en el Parque Principal de Santa Rosa. La marcha se viene desarrollando pacíficamente."
+    },
+    {
+      "id": "ce80477e-88bf-4733-9deb-e3b9c499c944",
+      "codigo_alerta": "AT-2026-79",
+      "hechos_recientes": "Posteriormente, con fecha 07.07.2022, mediante ALERTA No 008-2022, se alertó sobre convocatorias sociales para manifestarse en contra del Proyecto de Ley 0828/2021, CR el cual propone el texto sustitorio para la aprobación de una nueva Ley General de Pesca; en las regiones de Piura, Lambayeque y Ancash.\n\nPrecisar que a ésto se suma la convocatoria realizada por el Consejo de representantes de las zonas de producción acuícola de la bahía de Sechura, quienes citan a toda la masa maricultura a una movilización social contra la actividad extractiva de hidrocarburos para el próximo martes 12.07.2022, a las 11:00 Hrs en la plaza Miguel Grau de Vice. Asimismo, algunas Municipalidades han expresado abiertamente su rechazo contra estas actividades extractivas, tales como: Municipalidad de Vice, La Tortuga y Letirá."
+    },
+    {
+      "id": "7a189508-fb4f-4278-8a3c-89780a63be23",
+      "codigo_alerta": "AT-2026-80",
+      "hechos_recientes": null
+    },
+    {
+      "id": "dc2b08b4-25c6-4be7-bfdc-88b1df4a8b0c",
+      "codigo_alerta": "AT-2026-81",
+      "hechos_recientes": "Precisar que el SUPAPI y la APASUR son grupos de pescadores de boliche de cerco, con poco poder de convocatoria de pescadores artesanales y con posibles intereses políticos y económicos. Ambos grupos habrían financiado la campaña del actual gobernador regional de Moquegua. Y entre sus principales intereses estarían: mayor cuota para el bonito, mayor fiscalización para EP foráneas, que estarían descargando bonito\nde forma ilegal y la administración del DPA Ilo.\n\nSegún comunicación con el sr. Jaime Bojorges, Presidente del Sindicato de Pescadores Artesanales de Buzos Civiles del Puerto de Ilo - SUPABCPI, gremio representativo y con mayor número de asociados, manifestó que no se unirán a la convocatoria de marcha porque su pliego de petitorios no tendría vinculación con los de la convocatoria, además señalaron que los pescadores de cerco no estarían respetando la veda del bonito, por\nlo que son catalogados como “depredadores” \n\nFinalmente, en Ilo, uno de sus principales demandas es la entrega e inauguración del DPA Ilo. Además para las OSPAS del Sur (Arequipa, Moquegua y Tacna) es la reclasificación de la Flota Pesquera Artesanal."
+    },
+    {
+      "id": "6159696e-acde-409b-b705-bebf3d3e76ac",
+      "codigo_alerta": "AT-2026-82",
+      "hechos_recientes": "• El 27.10.2022, el Congreso de la República con 93 votos a favor aprobó, por allanamiento, los proyectos de ley 196, 463 y 993 que incorpora el tráfico ilegal de especies silvestres, considerando lo acuático, dentro de los alcances de la Ley N° 30077 contra el crimen organizado y modifica los artículos 308-B, 308-D y 309 del Código Penal.\n\n• 03.11.2022, el dirigente de la Federación de Armadores, Pescadores Artesanales y Cadena Productiva de CHD de la región Ancash, el señor Pedro Oliva a través de sus redes sociales se manifestó en contra del Proyecto de Ley 196/2021, el cual se incluiría dentro de la Ley N° 30077 contra el Crimen Organizado. Asimismo, hizo mención que la Comisión de Justicia y Derechos Humanos del Congreso de la República aprobó por mayoría los acuerdos adoptados por el dictamen del Proyecto de Ley y que, aún estaba pendiente la aprobación en la Comisión de Producción del Congreso de la República.\n\n• El 04.11.2022, La Federación de Integración y Unificación de los Pescadores Artesanales del Perú - FIUPAP emitió un comunicado en rechazo a la aprobación del Proyecto de Ley 196-2021-CR, que modifica la Ley N° 30077 de Crimen Organizado tipificando el delito contra los recursos naturales, el cual sin mayor análisis ni aplicación de las variantes tanto en temporadas, talla, pesca incidental y cambios climatológicos sancionan y convierten en delincuentes al sector de pesca artesanal,\nmaricultores, anexos, conexos, y comerciantes del rubro pesquero artesanal.\n\n• El 05.11.2022, La Asociación Nacional de Armadores Pesqueros 26920 emitió Pronunciamiento Público en rechazo de la Autógrafa del Proyecto de Ley 196-2021-CR, Según la asociación, sancionaría por pescar de manera incidental especies juveniles. Asimismo, los dirigentes pesqueros, manifiestan que, en ningún momento se ha cursado invitación a algún gremio pesquero representativo y a PRODUCE, a fin de solicitar opinión sobre los alcances del presente Proyecto de Ley, el cual pretendería encarcelar a los pescadores y juzgarlos como parte del Crimen Organizado a los que extraigan en forma incidental ejemplares juveniles, cuando PRODUCE dejó de sancionar administrativamente, por medio del. D. S. 024-2016, pero siempre que se reporte en la bitácora electrónica. Por ello, anuncian movilizaciones a nivel nacional, para que el Gobierno Central, atienda su demanda.\n\n• El 05.11.2022, las bases pesqueras artesanales del cerco de boliche de la región Piura emitieron un comunicado en rechazo a la aprobación del Proyecto de Ley N° 196-2021, que modifica el art. 3 de la Ley 30077, Ley contra el crimen organizado, manifestando que como pescadores van a ser sancionados por crimen organizado. De lo anterior, señalan que la pesca artesanal y la maricultura es una actividad económica que ejercen dentro del marco legal. En ese sentido, mencionan que las normas emitidas, no han tenido ningún nivel de consulta con las OSPAS, y no han tomado en cuenta sus opiniones, lo cual carecen de legitimidad y las consideran antidemocráticas e irrespetuosas."
+    },
+    {
+      "id": "e410b2eb-6e15-4e7a-8267-a317dcacc0e7",
+      "codigo_alerta": "AT-2026-83",
+      "hechos_recientes": "El 17.11.2022 se constituye en Sechura el “Frente de lucha y defensa de las pesquerías de Sechura”, convocado por el COPROPESCA, con el objeto de impulsar la derogatoria de la Ley 31622.\n\nHoy 18.11.2022 OSPAS de la provincia de Talara, Paita y Sechura, en conferencia de prensa, anuncian y convocan a las distintas bases nacionales a realizar un paro indefinido que iniciaría el 22.11.2022 demandando la derogatoria de la Ley 31622. \n\nA la fecha distintas organizaciones pesqueras de Piura se han manifestado en contra de la referida ley ya que, según manifiestan, se verían vulnerados sus derechos al ser intervenidos y posteriormente, encarcelados y juzgados como parte de grupos de crimen organizado. En ese sentido, los dirigentes de Piura demandan la atención e injerencia del Ministerio de la Producción en los siguientes puntos:\n- Acelerar los procesos de formalización: SIFORPA II y Cooperativas pesqueras.\n- Habilitación de los bancos de semilla del recurso concha de abanico en la Isla Lobos y zona de amortiguamiento.\n- Corrección de los niveles de producción de las AMYPES.\n- Acelerar los procesos de pesca experimental y exploratoria de langostino.\n\nLos dirigentes de las distintas pesquerías de esta región sostienen que el interés de las ONG que han impulsado esta ley recae en viabilizar la injerencia de empresas extractivas de hidrocarburos en el litoral peruano.\n\nFinalmente, indicar que a la fecha distintas OSPAS de otras regiones (Tumbes, Ancash, Lima, Callao e Ica) se han manifestado también en contra de la Ley 31622."
+    },
+    {
+      "id": "f23b630c-22a8-460e-b6d3-1ca0b3c14502",
+      "codigo_alerta": "AT-2026-84",
+      "hechos_recientes": "* *ENE–MAY 2026* — Se modifican fechas iniciales de audiencias públicas del proyecto por considerarse en horario poco accesible para la población.\n * *JUN 2026* — Se hace entrega de ejemplares impresos del EIA en la zona; la comunidad señala que el volumen técnico impide su comprensión por parte de la población.\n * *MAY–JUN 2026* — Dirigente Marlene Demarini indica que el Sindicato de Construcción \"15 de Enero\" estaría coaccionando a pobladores a suscribir cartas a favor de Aceros Americanos, con amenazas a quienes se oponen al proyecto.\n * *11.06.2026* — Aproximadamente 60 personas del AA. HH. 15 de Enero se movilizan hacia sede central de PRODUCE; el abog. Jorge Palomino y la señora Marlene Demarini coordinan con OAIPCS y solicitan reunión con la Directora General María Ysabel Valle Martínez.\n * *12.06.2026* — Alrededor de 100 personas del AA. HH. 15 de Enero se movilizan nuevamente hacia sede central de PRODUCE con llegada estimada entre las 09:30 y 10:30 h; demanda central es la anulación de la audiencia pública programada para el 13.06.2026."
+    },
+    {
+      "id": "25f58ad0-7b6e-49fb-879b-3fe9f49a096c",
+      "codigo_alerta": "AT-2026-85",
+      "hechos_recientes": "El 28 de mayo, PRODUCE, SANIPES, Ministerio Público, PNP y Municipalidad Provincial de Puno ejecutaron un operativo conjunto en el sector de Ichu, interviniendo vehículos que transportaban aproximadamente 590 kg de trucha arcoíris.\n - Durante la intervención, PRODUCE determinó que la documentación presentada no permitía acreditar de manera fehaciente la procedencia y trazabilidad del producto, procediéndose al decomiso. Asimismo, SANIPES reportó observaciones relacionadas con las condiciones higiénico-sanitarias del transporte.\n - El 01 de junio, productores acuícolas, comercializadores y pescadores artesanales realizaron protestas en la ciudad de Puno y sostuvieron una reunión en el auditorio del Gobierno Regional para expresar su rechazo a las acciones de fiscalización.\n - Los dirigentes presentaron un memorial dirigido al Ministro de la Producción solicitando la destitución del fiscalizador Edgar Ccalli Gutiérrez y la intervención de funcionarios del nivel central para atender sus reclamos."
+    },
+    {
+      "id": "dd01363e-7606-432c-8592-d0dd9e3e6c18",
+      "codigo_alerta": "AT-2026-86",
+      "hechos_recientes": "- 27.03 – Mediante la RM N.° 075-2026-PRODUCE se estableció el Límite Máximo de Captura Total Permisible (LMCTP) del recurso pota para el 2026.\n - 20.05 – La RM N.° 141-2026-PRODUCE amplió el LMCTP anual y extendió su vigencia hasta el 31.12.2026.\n - 29.06 – La DGSFS-PA informó que las embarcaciones menores a 10 m³ habían alcanzado el 97,18 % de la cuota asignada.\n - 01.07 – Mediante la Resolución Directoral N.° 00088-2026-PRODUCE/DGSFS-PA, PRODUCE suspendió las actividades extractivas del recurso pota para embarcaciones artesanales menores a 10 m³.\n - 02.07 – ASUPAPS presentó los Oficios N.° 004 y N.° 005-2026-ASUPAPS/P, solicitando la instalación de una Mesa de Diálogo y la suspensión temporal de la aplicación de la Resolución Directoral. Asimismo, se vienen elaborando nuevos pronunciamientos públicos de SPAEMIM y Macrosur."
+    },
+    {
+      "id": "e7847e1c-a332-46eb-a90e-02906eab1ca2",
+      "codigo_alerta": "AT-2026-87",
+      "hechos_recientes": "- El 15/01/2026 se registró el último intento de ocupación del predio con intentos de instalación de un contenedor flexible de agua, materiales (tubos de PVC, costales y lonas) y un container de vigilancia colindante.\n - El 22/04, a las 11 h, el PNDP tomó conocimiento de la presencia de aprox. 7 personas de la asociación AAMEC en una franja colindante al predio, correspondiente a MINDEF, quienes emplearon un cargador frontal para habilitar un acceso hacia el PIA.\n - Entre las 11 h y las 16:00 h, el PNDP realizó coordinaciones con la Procuraduría del Ejército (MINDEF), a la cual remitió documentación para la ejecución del desalojo, articulando con la Comisaría de Ancón; sin que al cierre del reporte se hayan ejecutado acciones.\n - Se ha programado una visita de PNDP a la Comisaría de Ancón para el 23/04 a las 8 h para dar alerta de los hechos.\n - El PNDP precisó que el área en cuestión pertenece al MINDEF, por lo que PRODUCE limita su intervención a la articulación intersectorial."
+    },
+    {
+      "id": "23a65ed1-10fb-41fc-961b-45e5505d54ee",
+      "codigo_alerta": "AT-2026-88",
+      "hechos_recientes": "En diciembre de 2025, dirigentes de FIUPAR sostuvieron una reunión con el director general de la DGPCHDI, donde expusieron sus observaciones y se comprometió a enviar una respuesta escrita, el cual indican desde el gremio, no fue remitida hasta la fecha.\n•        El 27 de enero de 2026, la organización remitió un oficio a la Presidencia del Consejo de Ministros solicitando la abrogación de la resolución cuestionada y una explicación técnica. PCM derivó el expediente a Produce el 26 de febrero de 2026 para su atención.\n•        El 15 de febrero de 2026, el medio OjoPúblico publicó una investigación que expone las presuntas irregularidades del caso, amplificando la exposición pública del conflicto."
+    },
+    {
+      "id": "d0720c9b-b46e-49d8-b6d3-250ce66bae80",
+      "codigo_alerta": "AT-2026-89",
+      "hechos_recientes": "- 16.ENE.2026 — El sector recibe oficialmente el caso de presunta corrupción por sobrevaloraciones y formaliza denuncia ante la Contraloría General de la República y la Oficina de Integridad y Lucha Contra la Corrupción de PRODUCE. \n- 14.JUL.2026 — El PNCM reporta ejecución de S/ 410 millones sobre los S/ 471 millones transferidos a los Núcleos Ejecutores de Compra (NEC), con 3,898 MYPE contratadas.\n- 29.JUL.2026 — René Cobeña Gómez difunde video denunciando la cancelación de contratos en mochilas tácticas PNP y zapatillas, y la imposición de multas a MYPE ganadoras. \n- 10.AGO.2026 — Fecha anunciada para el plantón frente a la sede central de PRODUCE, a las 10:00 h."
+    },
+    {
+      "id": "21e20673-1cf6-4ed4-b2e0-a2dcea2b4733",
+      "codigo_alerta": "AT-2026-90",
+      "hechos_recientes": "- Dirigentes camaroneros han declarado públicamente su indignación por haber sido excluidos previamente de la mesa y recién haber sido reacreditados tras trámites administrativos.\n- Señalan que desde setiembre no reciben información clara sobre los estudios en curso, plazos ni resultados esperados, pese a reiteradas reuniones.\n- Han advertido que la disminución visible de la contaminación del río se debe únicamente al incremento del caudal por lluvias, no a acciones de remediación efectivas."
+    }
+  ]
+}

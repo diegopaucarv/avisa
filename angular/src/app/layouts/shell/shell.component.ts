@@ -129,6 +129,7 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     ruta: '/mesas',
     icono: 'instituciones',
     exacto: true,
+    oculto: true,
   },
   {
     grupo: 'GESTIÓN DE IYC',

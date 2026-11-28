@@ -14,7 +14,7 @@
 
 import { limpiarCelda, normalizarEncabezado, type TablaLeida } from './importacion.csv';
 import type { TipoImportacion, TipoImportacionId } from './importacion.tipos';
-import { TIPO_ACTOR_PUBLICO } from '../directorio/directorio.mapeo';
+import { TIPO_ACTOR_PUBLICO, TIPOS_ACTOR } from '../directorio/directorio.mapeo';
 
 export const LIMITE_FILAS = 400;
 
@@ -32,6 +32,8 @@ export type FilaValida = {
   readonly payload: Record<string, unknown>;
   /** Demandas en texto; el ejecutor las crea después del caso. */
   readonly demandas: readonly string[];
+  /** Foto principal declarada en la hoja; el ejecutor la registra tras el alta. */
+  readonly foto?: string | null;
 };
 
 export type Validacion = {
@@ -83,11 +85,27 @@ const NIVELES_GOBIERNO: Record<string, string> = {
   'sociedad civil': 'Sociedad_Civil',
 };
 
-const NATURALEZAS: Record<string, string> = {
-  persona: 'persona',
-  organizacion: 'organizacion',
-  organización: 'organizacion',
-};
+/** Tipos de actor ya normalizados; el catálogo congelado vive en el directorio. */
+const TIPOS_ACTOR_NORMALIZADOS = new Set(TIPOS_ACTOR.map((tipo) => normalizarEncabezado(tipo)));
+
+/** Texto de la hoja → nombre canónico del catálogo, o `null` si no existe. */
+function tipoActorCanonico(valor: string): string | null {
+  const buscado = normalizarEncabezado(valor);
+  return TIPOS_ACTOR_NORMALIZADOS.has(buscado)
+    ? (TIPOS_ACTOR.find((tipo) => normalizarEncabezado(tipo) === buscado) ?? null)
+    : null;
+}
+
+/** Una URL de foto aceptable: http(s) absoluta y de largo razonable. */
+function esUrlPublica(valor: string): boolean {
+  if (valor.length > 2000) return false;
+  try {
+    const url = new URL(valor);
+    return (url.protocol === 'http:' || url.protocol === 'https:') && Boolean(url.hostname);
+  } catch {
+    return false;
+  }
+}
 
 /** Índice de la cabecera: clave de columna → posición. */
 function indexarCabecera(
@@ -214,7 +232,18 @@ function faltante(fila: number, rotulo: string): FilaConstruida {
     rechazo: {
       fila,
       codigo: 'CAMPO_OBLIGATORIO',
-      motivo: `Falta «${rotulo}».`,
+      motivo: `La columna «${rotulo}» está vacía en la fila ${fila}.`,
+    },
+  };
+}
+
+function fechaInvalida(fila: number, rotulo: string, valor: string): FilaConstruida {
+  return {
+    clave: '',
+    rechazo: {
+      fila,
+      codigo: 'FECHA_INVALIDA',
+      motivo: `«${valor}» no es una fecha válida en «${rotulo}». Use AAAA-MM-DD o DD/MM/AAAA.`,
     },
   };
 }
@@ -341,11 +370,52 @@ function filaDeActor(
     };
   }
 
+  // El tipo escrito sólo se valida fuera de instituciones: ahí el tipo es fijo.
+  const tipoCelda = valores['tipo'] ?? '';
+  const tipoCanonico = tipoCelda === '' ? null : tipoActorCanonico(tipoCelda);
+  if (tipo !== 'actores-instituciones' && tipoCelda !== '' && !tipoCanonico) {
+    return {
+      clave: '',
+      rechazo: {
+        fila,
+        codigo: 'TIPO_ACTOR_INVALIDO',
+        motivo: `El tipo de actor «${tipoCelda}» no está en el catálogo (${TIPOS_ACTOR.join(
+          ', ',
+        )}).`,
+      },
+    };
+  }
+
+  // Las vigencias OSPA se parsean aquí para no gastar una petición por fila.
+  const vigenciaDesdeTexto = valores['vigenciaDesde'] ?? '';
+  const vigenciaDesde = vigenciaDesdeTexto === '' ? undefined : normalizarFecha(vigenciaDesdeTexto);
+  if (vigenciaDesdeTexto !== '' && vigenciaDesde === null) {
+    return fechaInvalida(fila, 'Vigencia desde', vigenciaDesdeTexto);
+  }
+
+  const vigenciaHastaTexto = valores['vigenciaHasta'] ?? '';
+  const vigenciaHasta = vigenciaHastaTexto === '' ? undefined : normalizarFecha(vigenciaHastaTexto);
+  if (vigenciaHastaTexto !== '' && vigenciaHasta === null) {
+    return fechaInvalida(fila, 'Vigencia hasta', vigenciaHastaTexto);
+  }
+
+  const foto = valores['foto'] ?? '';
+  if (foto !== '' && !esUrlPublica(foto)) {
+    return {
+      clave: '',
+      rechazo: {
+        fila,
+        codigo: 'FOTO_INVALIDA',
+        motivo: `La foto «${foto}» no es una URL pública válida (http o https).`,
+      },
+    };
+  }
+
   const payload: Record<string, unknown> = {
     naturaleza: esPersona ? 'persona' : 'organizacion',
     nombre,
     cargo: valores['cargo'] || undefined,
-    tipo: tipo === 'actores-instituciones' ? TIPO_ACTOR_PUBLICO : valores['tipo'] || undefined,
+    tipo: tipo === 'actores-instituciones' ? TIPO_ACTOR_PUBLICO : (tipoCanonico ?? undefined),
     funcion: valores['funcion'] || undefined,
     posicionamiento: valores['posicionamiento'] || undefined,
     region: valores['region'] || undefined,
@@ -361,13 +431,13 @@ function filaDeActor(
     payload['ruc'] = ruc || undefined;
     payload['expedienteOspa'] = valores['expedienteOspa'] || undefined;
     payload['estadoOspa'] = valores['estadoOspa'] || undefined;
-    payload['vigenciaDesde'] = normalizarFecha(valores['vigenciaDesde'] ?? '') ?? undefined;
-    payload['vigenciaHasta'] = normalizarFecha(valores['vigenciaHasta'] ?? '') ?? undefined;
+    payload['vigenciaDesde'] = vigenciaDesde ?? undefined;
+    payload['vigenciaHasta'] = vigenciaHasta ?? undefined;
   }
 
   return {
     clave: normalizarEncabezado(nombre),
-    fila: { fila, etiqueta: nombre, payload, demandas: [] },
+    fila: { fila, etiqueta: nombre, payload, demandas: [], foto: foto || null },
   };
 }
 
