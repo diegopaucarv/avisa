@@ -1,3 +1,4 @@
+import { registrarDescarga } from "@/lib/db/auditoria-descargas";
 import { ApiError, jsonError } from "@/lib/db/errors";
 import {
   jsonOk,
@@ -107,7 +108,16 @@ export async function GET(request: Request) {
     const base = `avisa_anexo_14_${fechaArchivo(generadoEn)}`;
     const descarga = decidirDescarga(params, formato);
 
+    const auditar = () =>
+      registrarDescarga(request, sesion, {
+        entidad: "anexo-14",
+        formato,
+        filtros: { ...query },
+        filas: datos.filas.length,
+      });
+
     if (formato === "json") {
+      await auditar();
       return jsonOk({
         numero: "14",
         referencia: documento.referencia,
@@ -143,6 +153,7 @@ export async function GET(request: Request) {
         "Anexo 14",
       );
 
+      await auditar();
       return respuestaXlsx(
         documentoXlsx([hoja]),
         `${base}.xlsx`,
@@ -151,6 +162,7 @@ export async function GET(request: Request) {
     }
 
     if (formato === "pdf") {
+      await auditar();
       return respuestaPdf(
         documentoPdf(documento, contexto),
         `${base}.pdf`,
@@ -158,6 +170,7 @@ export async function GET(request: Request) {
       );
     }
 
+    await auditar();
     return respuestaHtml(
       documentoHtml(documento, contexto),
       `${base}.html`,

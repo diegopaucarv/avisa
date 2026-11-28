@@ -72,7 +72,7 @@ const CASE_FROM = `
   -- una por ubigeo y no por nombre. «dp.id» es PK: el join no duplica filas.
   left join core.distritos dp on dp.id = c.distrito_principal_id
   left join lateral (
-    select rg.nombre
+    select rg.id, rg.nombre
       from core.caso_regiones cr
       join core.regiones rg on rg.id = cr.region_id
      where cr.caso_id = c.id
@@ -97,6 +97,12 @@ export type CaseListQuery = {
   naturaleza?: string;
   unidad?: string;
   region?: string;
+  /**
+   * Ámbito territorial por defecto (regiones asignadas al sectorista). El caso
+   * entra si su región principal está entre estas; la ruta sólo lo rellena
+   * cuando el usuario no pidió un filtro territorial explícito.
+   */
+  regiones?: string[];
   /** Texto a buscar (`ilike`) en el nombre del usuario sectorista del caso. */
   sectorista?: string;
   /** UUID del usuario sectorista (`core.casos.punto_focal_usuario_id`). */
@@ -379,15 +385,28 @@ async function construirWhere(
     query.unidad,
   );
 
-  // «Sin región» complementa el filtro por región: un caso no puede estar en
-  // ambos conjuntos, así que si llegaran los dos manda `sinregion`.
+  // La región del caso es la misma que pinta la columna «Región»: la principal
+  // de `core.caso_regiones` y, si no hay ninguna, la `region_principal_id`.
+  // Se compara por id, no por nombre, para que el etiquetado no dependa de la
+  // grafía y para compartir el criterio con el ámbito por defecto.
   if (esVerdadero(query.sinRegion)) {
-    where.push(`coalesce(reg.nombre, rp.nombre) is null`);
+    where.push(`coalesce(reg.id, rp.id) is null`);
   } else if (query.region) {
-    const nombre = await resolverRegion(client, query.region);
-    where.push(
-      `core.normalizar_ref(coalesce(reg.nombre, rp.nombre)) = core.normalizar_ref(${bind(nombre)})`,
-    );
+    const region = await resolverRegion(client, query.region);
+    where.push(`coalesce(reg.id, rp.id) = ${bind(region.id)}`);
+  }
+
+  // Ámbito territorial de la sesión: el caso entra si su región principal está
+  // entre las asignadas al sectorista. `resolveRegions` entrega ids de
+  // `core.regiones`, así que el filtro no viaja nunca como texto libre. La ruta
+  // sólo rellena `regiones` cuando el usuario no pidió otro territorio, de modo
+  // que este filtro y el de `region` no compiten en la práctica.
+  if (query.regiones && query.regiones.length > 0) {
+    const ambito = await resolveRegions(client, query.regiones);
+    const ids = [...new Set(ambito.map((region) => region.id))];
+    if (ids.length > 0) {
+      where.push(`coalesce(reg.id, rp.id) = any(${bind(ids)}::int[])`);
+    }
   }
 
   // Sectorista: por id (UUID) o por texto sobre el nombre del usuario. Se usa
@@ -1464,24 +1483,39 @@ async function filtrarPorCatalogo(
   where.push(`${columna} = ${bind(id)}`);
 }
 
-/** El nombre canónico se toma de `core.regiones` para no comparar etiquetas. */
+/**
+ * Llave de ubigeo que corresponde a un valor de filtro: dos dígitos para una
+ * región y los dos primeros de un ubigeo distrital de seis. Cualquier otra
+ * forma —incluido un nombre— se resuelve por nombre.
+ */
+function ubigeoDeRegion(value: string): string | null {
+  if (/^\d{1,2}$/.test(value)) return value.padStart(2, "0");
+  if (/^\d{6}$/.test(value)) return value.slice(0, 2);
+  return null;
+}
+
 async function resolverRegion(
   client: PoolClient,
   raw: string,
-): Promise<string> {
+): Promise<RegionRow> {
   const value = raw.trim();
   if (!value) filtroInvalido("region");
-  const result = await client.query<{ nombre: string }>(
-    `select nombre
+  // El filtro `?region=` sigue aceptando el nombre de siempre y, además, el
+  // ubigeo INEI. El `order by` deja la coincidencia por ubigeo por delante de
+  // la de nombre, sin duplicar filas (una sola fila por `limit 1`).
+  const ubigeo = ubigeoDeRegion(value);
+  const result = await client.query<RegionRow>(
+    `select id, nombre
        from core.regiones
-      where core.normalizar_ref(nombre) = core.normalizar_ref($1)
-      order by id
+      where ($1::text is not null and btrim(ubigeo::text) = $1)
+         or core.normalizar_ref(nombre) = core.normalizar_ref($2)
+      order by ($1::text is not null and btrim(ubigeo::text) = $1) desc, id
       limit 1`,
-    [value],
+    [ubigeo, value],
   );
-  const nombre = result.rows[0]?.nombre;
-  if (!nombre) filtroInvalido("region");
-  return nombre;
+  const region = result.rows[0];
+  if (!region) filtroInvalido("region");
+  return { id: Number(region.id), nombre: String(region.nombre) };
 }
 
 async function resolveCatalog(
@@ -1588,22 +1622,57 @@ async function resolveRegions(
   names: string[],
 ): Promise<RegionRow[]> {
   if (names.length === 0) return [];
-  const result = await client.query(
-    `select id, nombre from core.regiones where lower(nombre) = any($1::text[])`,
-    [names.map((name) => name.toLowerCase())],
+
+  // Cada valor puede ser un nombre o un ubigeo: dos dígitos de región o seis del
+  // distrito, que hereda los dos primeros. La preferencia ubigeo > nombre se
+  // resuelve en el `order by` del lateral y una sola consulta devuelve a lo sumo
+  // una fila por entrada; la deduplicación por id se hace después en memoria
+  // para que «Lima» y «15» no creen dos vínculos a la misma región.
+  const result = await client.query<{
+    entrada: string;
+    id: number;
+    nombre: string;
+  }>(
+    `with entradas as (
+       select v.valor as entrada,
+              case
+                when v.valor ~ '^[0-9]{1,2}$' then lpad(v.valor, 2, '0')
+                when v.valor ~ '^[0-9]{6}$' then left(v.valor, 2)
+              end as ubigeo
+         from unnest($1::text[]) as v(valor)
+     )
+     select e.entrada, r.id, r.nombre
+       from entradas e
+       join lateral (
+         select id, nombre
+           from core.regiones
+          where (e.ubigeo is not null and btrim(ubigeo::text) = e.ubigeo)
+             or core.normalizar_ref(nombre) = core.normalizar_ref(e.entrada)
+          order by (e.ubigeo is not null and btrim(ubigeo::text) = e.ubigeo) desc, id
+          limit 1
+       ) r on true`,
+    [names.map((name) => name.trim())],
   );
-  const byName = new Map<string, RegionRow>();
+
+  const byEntrada = new Map<string, RegionRow>();
   for (const row of result.rows) {
-    byName.set(String(row.nombre).toLowerCase(), {
+    byEntrada.set(String(row.entrada), {
       id: Number(row.id),
       nombre: String(row.nombre),
     });
   }
-  return names.map((name) => {
-    const found = byName.get(name.toLowerCase());
+
+  const resolved: RegionRow[] = [];
+  const vistos = new Set<number>();
+  for (const name of names) {
+    const found = byEntrada.get(name.trim());
     if (!found) invalid();
-    return found;
-  });
+    if (!vistos.has(found.id)) {
+      vistos.add(found.id);
+      resolved.push(found);
+    }
+  }
+  return resolved;
 }
 
 function enteroCrudo(raw: unknown): number {

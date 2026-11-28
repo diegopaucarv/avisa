@@ -8,9 +8,9 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
 import {
@@ -47,6 +47,7 @@ import {
   FILTROS_ESTADO,
   ORDENES_DOCUMENTO,
   aDocumento,
+  aDetalleDocumento,
   aNormativa,
   aOtroDocumento,
   aTiposDocumento,
@@ -338,6 +339,11 @@ export class DocumentosPage {
   private readonly destruccion = inject(DestroyRef);
   private readonly registroSolicitado = toSignal(
     this.ruta.queryParamMap.pipe(map((params) => params.get('registrar'))),
+    { initialValue: null },
+  );
+  /** `?abrir=<id>`: documento que la búsqueda global pide abrir en el panel. */
+  private readonly documentoAbiertoSolicitado = toSignal(
+    this.ruta.queryParamMap.pipe(map((params) => params.get('abrir'))),
     { initialValue: null },
   );
   private readonly http = inject(HttpClient);
@@ -665,6 +671,9 @@ export class DocumentosPage {
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
+  /** Fallo al abrir por `?abrir=`, cuando el documento pedido no se puede leer. */
+  readonly errorApertura = signal<string | null>(null);
+
   /** Documento que se está anulando en el panel compartido. */
   readonly documentoAnulacion = signal<Documento | null>(null);
   readonly enviandoAnulacion = signal(false);
@@ -700,6 +709,12 @@ export class DocumentosPage {
         queryParamsHandling: 'merge',
         replaceUrl: true,
       });
+    });
+    // La búsqueda global llega con `?abrir=<id>`: se pide el documento y se abre
+    // el panel aunque su fila no esté en la página visible.
+    effect(() => {
+      const id = this.documentoAbiertoSolicitado();
+      if (id) this.abrirDocumentoPorId(id);
     });
   }
 
@@ -761,6 +776,45 @@ export class DocumentosPage {
   cerrarPanel(): void {
     this.seleccionadaId.set(null);
     this.respaldo.set(null);
+    this.errorApertura.set(null);
+    // Un `?abrir=` de la búsqueda no debe sobrevivir al cierre de la ficha.
+    this.limpiarParametroAbrir();
+  }
+
+  /** Abre la ficha de un documento por id, venga o no del listado visible. */
+  private abrirDocumentoPorId(id: string): void {
+    this.errorApertura.set(null);
+    firstValueFrom(
+      this.http
+        .get<unknown>(urlApi(`/v1/documents/${encodeURIComponent(id)}`))
+        .pipe(takeUntilDestroyed(this.destruccion)),
+    )
+      .then((bruto) => {
+        // El detalle responde `{ document, fuentes }`; el panel vuelve a pedirlo,
+        // así que aquí sólo se necesita el documento para abrirlo.
+        const documento = aDetalleDocumento(bruto).documento;
+        if (!documento.id) {
+          this.errorApertura.set('No se pudo leer el documento solicitado.');
+          this.limpiarParametroAbrir();
+          return;
+        }
+        this.abrir(documento);
+      })
+      .catch((fallo: unknown) => {
+        this.errorApertura.set(aErrorApi(fallo).message);
+        this.limpiarParametroAbrir();
+      });
+  }
+
+  /** Quita `abrir` de la URL sin recargar la ruta ni el listado. */
+  private limpiarParametroAbrir(): void {
+    if (this.documentoAbiertoSolicitado() === null) return;
+    void this.router.navigate([], {
+      relativeTo: this.ruta,
+      queryParams: { abrir: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   recargarListado(): void {

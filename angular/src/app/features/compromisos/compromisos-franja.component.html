@@ -1,0 +1,123 @@
+<section class="franja" aria-labelledby="franja-compromisos-titulo">
+  <div class="franja-cabecera">
+    <h2 id="franja-compromisos-titulo">Panorama de compromisos</h2>
+    <p>
+      Sobre todos los compromisos vigentes (sin anulados): no depende de los filtros ni de la página
+      visible.
+    </p>
+  </div>
+
+  <div class="executive-kpis franja-kpis">
+    <!--
+      Las tres primeras tarjetas enlazan con la lista limpiando los demás
+      filtros: la cifra es la del universo (no la de la página), así que la
+      lista de destino tiene que medir lo mismo. «Vencidos» no enlaza porque su
+      corte es por hito vencido y la tabla filtra por vencimiento efectivo.
+    -->
+    <a
+      class="stat-card franja-card"
+      routerLink="/compromisos"
+      [queryParams]="filtroTotal"
+      queryParamsHandling="merge"
+      aria-label="Ver todos los compromisos"
+    >
+      <span class="stat-icon"><app-icono nombre="compromisos" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Compromisos</span>
+        <strong>{{ cifraTotal() }}</strong>
+      </span>
+    </a>
+
+    <a
+      class="stat-card franja-card"
+      routerLink="/compromisos"
+      [queryParams]="filtroCumplidos"
+      queryParamsHandling="merge"
+      aria-label="Ver los compromisos cumplidos"
+    >
+      <span class="stat-icon green"><app-icono nombre="check" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Cumplidos</span>
+        <strong>{{ cifraCumplidos() }}</strong>
+      </span>
+    </a>
+
+    <a
+      class="stat-card franja-card"
+      routerLink="/compromisos"
+      [queryParams]="filtroEnProceso"
+      queryParamsHandling="merge"
+      aria-label="Ver los compromisos en proceso"
+    >
+      <span class="stat-icon amber"><app-icono nombre="reloj" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>En proceso</span>
+        <strong>{{ cifraEnProceso() }}</strong>
+      </span>
+    </a>
+
+    <div class="stat-card franja-card" title="Compromisos con al menos un hito vencido sin cumplir">
+      <span class="stat-icon red"><app-icono nombre="alerta" [tamano]="16" /></span>
+      <span class="stat-copy">
+        <span>Vencidos</span>
+        <strong>{{ cifraVencidos() }}</strong>
+      </span>
+    </div>
+  </div>
+
+  @if (estado() === 'error') {
+    <p class="franja-aviso" role="alert">
+      No se pudieron cargar las estadísticas. {{ error()?.message }}
+      <button type="button" class="link-button" (click)="recargar()">Reintentar</button>
+    </p>
+  } @else {
+    <section class="franja-ranking" aria-labelledby="franja-ranking-titulo">
+      <h3 id="franja-ranking-titulo">
+        Oficinas responsables (top 5)
+        @if (unidadActiva()) {
+          <a
+            class="franja-quitar"
+            routerLink="/compromisos"
+            [queryParams]="filtroQuitarUnidad"
+            queryParamsHandling="merge"
+          >
+            Quitar filtro de oficina
+          </a>
+        }
+      </h3>
+
+      @if (cargando() && ranking().length === 0) {
+        <p class="franja-vacio" role="status">Cargando el ranking…</p>
+      } @else if (ranking().length === 0) {
+        <p class="franja-vacio">Sin oficinas con compromisos registrados.</p>
+      } @else {
+        <ol class="franja-lista">
+          @for (fila of filasRanking(); track fila.area) {
+            <li>
+              <a
+                class="franja-area"
+                [class.franja-area-activa]="fila.area === unidadActiva()"
+                [routerLink]="fila.filtrable ? ['/compromisos'] : null"
+                [queryParams]="fila.queryParams"
+                queryParamsHandling="merge"
+                [attr.title]="fila.titulo"
+              >
+                <span class="franja-area-siglas">{{ fila.area }}</span>
+                <span class="franja-area-nombre">{{ fila.nombre || '—' }}</span>
+                <span class="franja-area-total">{{ fila.total }}</span>
+                <span class="franja-area-barra" aria-hidden="true">
+                  <i [style.width.%]="fila.porcentajeCumplimiento"></i>
+                </span>
+                <span class="franja-area-pct">{{ fila.porcentajeCumplimiento }}%</span>
+              </a>
+            </li>
+          }
+        </ol>
+        <p class="franja-nota">
+          «Total» es la cantidad de compromisos de cada oficina y «%» su cumplimiento (cumplidos
+          sobre el total de esa oficina).
+        </p>
+      }
+    </section>
+  }
+</section>

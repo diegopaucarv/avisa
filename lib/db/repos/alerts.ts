@@ -10,8 +10,11 @@ import { anularRegistro, restaurarRegistro } from "./anulacion";
  * se deriva en SQL para que la lista y los filtros usen exactamente el mismo
  * criterio. Cuando el paso llega a 5 la alerta ya está atendida aunque
  * `aprobada_por` / `validada_por` sigan nulos.
+ *
+ * Se exporta para que la búsqueda de duplicados de alertas pinte el mismo
+ * estado derivado sin duplicar el `case` y arriesgar que diverjan.
  */
-const ALERT_STATE = `case
+export const ALERT_STATE = `case
     when a.paso_actual >= 5 then 'Atendida'
     when a.aprobada_por is not null then 'Aprobada'
     when a.validada_por is not null then 'Validada'
@@ -29,6 +32,11 @@ const ALERT_ATENDIDA = `(a.paso_actual >= 5)`;
 const ALERT_RIESGO = `coalesce(nr.codigo, nrc.codigo)`;
 const ALERT_RIESGO_ORDEN = `coalesce(nr.orden, nrc.orden)`;
 
+/**
+ * Proyección común del listado y del detalle. Incluye el triaje persistido
+ * (`core.alerta_triaje`) para que la ficha muestre el motivo del descarte y la
+ * alerta duplicada sin una segunda consulta.
+ */
 const ALERT_SELECT = `
   a.id,
   a.codigo_alerta as codigo,
@@ -82,7 +90,7 @@ const ALERT_SELECT = `
   ss.nombre as subsector,
   a.mesa_id,
   a.sectorista_usuario_id,
-  su.nombre as sectorista,
+  coalesce(nsr.nombre, su.nombre) as sectorista,
   a.origen_dato as origen,
   a.confidence::float8 as confianza,
   a.es_validado_humano as validado,
@@ -96,10 +104,16 @@ const ALERT_SELECT = `
   a.motivo_archivo as motivo_archivo,
   a.archivado_por as archivado_por,
   ur.nombre as archivado_por_nombre,
+  t.estado as triaje_estado,
+  t.motivo as motivo_descarte,
+  dup.codigo_alerta as duplicada_de_codigo,
   ${ALERT_STATE} as estado,
   ${ALERT_ATENDIDA} as atendida
 `;
 
+// El triaje es una fila por alerta (`unique (alerta_id)`), así que el join no
+// puede multiplicar las filas del listado; `dup` sólo aporta el código legible
+// de la alerta de la que ésta es duplicada.
 const ALERT_FROM = `
   from core.alertas_tempranas a
   left join core.casos c on c.id = a.caso_id
@@ -121,6 +135,15 @@ const ALERT_FROM = `
   left join core.usuarios ur on ur.id = a.archivado_por
   left join core.usuarios mu on mu.id = a.updated_by
   left join core.usuarios su on su.id = a.sectorista_usuario_id
+  -- El nombre del sectorista no se puede leer con el join a core.usuarios
+  -- cuando el rol de la sesión no es administrador: p18_usuarios_sel sólo deja
+  -- ver la fila propia. core.nombres_sectoristas() (migración 74) es security
+  -- definer y expone únicamente (id, nombre) de los sectoristas activos, así que
+  -- resuelve el nombre para cualquier rol. Se deja el join original como
+  -- respaldo por si el asignado no es un sectorista vigente.
+  left join core.nombres_sectoristas() nsr on nsr.id = a.sectorista_usuario_id
+  left join core.alerta_triaje t on t.alerta_id = a.id
+  left join core.alertas_tempranas dup on dup.id = t.duplicada_de
   left join lateral (
     select (array_agg(coalesce(urv.nombre, 'Sin identificar') order by r.created_at desc))[1] as ultimo_revisor,
            json_agg(
@@ -137,6 +160,18 @@ const ALERT_FROM = `
 `;
 
 export type AlertListQuery = {
+  /**
+   * Búsqueda libre por código, título, descripción del riesgo, nombre del
+   * sectorista asignado y último revisor. No hay parámetro nuevo: comparte el
+   * mismo `q` que ya usaba el listado.
+   *
+   * El sectorista se resuelve con `core.nombres_sectoristas()` (migración 74),
+   * que es `security definer` y por eso funciona para todos los roles. El
+   * último revisor, en cambio, sale del historial contra `core.usuarios`, que
+   * la RLS sólo deja leer ajeno a `administrador`: para el resto llega como
+   * «Sin identificar». El `coalesce` del filtro evita que el nulo apague el
+   * resto del `or`.
+   */
   q?: string;
   caso?: string;
   /**
@@ -284,6 +319,15 @@ export type AlertItem = {
   clasificacion: number;
   estado: string;
   atendida: boolean;
+  /**
+   * Estado de triaje persistido en `core.alerta_triaje`; `null` cuando la
+   * alerta todavía no tiene fila (equivale a «pendiente» en la cola RED-RADAR).
+   */
+  triajeEstado: string | null;
+  /** Motivo declarado al descartar o marcar la alerta como duplicada. */
+  motivoDescarte: string | null;
+  /** Código de la alerta de la que ésta es duplicada, si se declaró. */
+  duplicadaDeCodigo: string | null;
   /** Fecha de anulación en ISO 8601, o `null` si la alerta está vigente. */
   anuladoEn: string | null;
   /** Motivo declarado al anular; sólo se puebla en la papelera. */
@@ -450,6 +494,9 @@ function mapAlert(row: Record<string, any>): AlertItem {
     clasificacion: row.clasificacion,
     estado: row.estado,
     atendida: row.atendida,
+    triajeEstado: row.triaje_estado,
+    motivoDescarte: row.motivo_descarte,
+    duplicadaDeCodigo: row.duplicada_de_codigo,
     anuladoEn: isoOrNull(row.anulado_en),
     motivoAnulacion: row.motivo_anulacion,
     anuladoPor: row.anulado_por,
@@ -483,8 +530,25 @@ export async function listAlerts(
     return `$${params.length}`;
   };
 
+  // Un solo término para todo el listado: código, título, descripción del
+  // riesgo, sectorista asignado y último revisor. Los `coalesce` no son
+  // decorativos: la RLS de `core.usuarios` deja nombres en nulo y un nulo en el
+  // `or` no rompe el resultado, pero sí apaga esa columna; con el coalesce el
+  // `or` conserva las demás.
+  //
+  // El sectorista se busca por la función de la migración 74 (no por el join a
+  // `core.usuarios`) porque el rol `sectorista` o `direccion_oaipcs` no ve la
+  // fila del compañero. El último revisor sigue viniendo del historial, que aún
+  // depende de esa RLS: sólo acierta para `administrador`. Ver pendiente en
+  // `docs/06_operacion/migraciones-neon-estado.md`.
   const porTexto = filtroTexto(
-    ["a.codigo_alerta", "a.titulo", "coalesce(a.descripcion_riesgo, '')"],
+    [
+      "a.codigo_alerta",
+      "a.titulo",
+      "coalesce(a.descripcion_riesgo, '')",
+      "coalesce(nsr.nombre, su.nombre, '')",
+      "coalesce(ar.ultimo_revisor, '')",
+    ],
     query.q,
     bind,
   );

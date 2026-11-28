@@ -1,3 +1,4 @@
+import { registrarDescarga } from "@/lib/db/auditoria-descargas";
 import { jsonError } from "@/lib/db/errors";
 import { jsonOk, requireSession } from "@/lib/db/http";
 import { withSession } from "@/lib/db/tenant";
@@ -32,6 +33,13 @@ export async function GET(request: Request) {
       { usuarioId: sesion.uid, rolCodigo: sesion.rol },
       (client) => listarAnexosDisponibles(client),
     );
+
+    await registrarDescarga(request, sesion, {
+      entidad: "anexos",
+      formato: "json",
+      filtros: {},
+      filas: anexos.length,
+    });
 
     return jsonOk({
       generadoEn: new Date().toISOString(),

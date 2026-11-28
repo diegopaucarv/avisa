@@ -34,6 +34,8 @@ const FILTERS = [
  *
  * `GET` devuelve el sobre paginado y acepta los filtros `q`, `caso`,
  * `sinCaso`, `prioridad`, `riesgo`, `nivel`, `estado`, `distritoId` y `sort`.
+ * `q` busca por código, título, descripción del riesgo, nombre del sectorista
+ * asignado y último revisor (un solo parámetro, sin variantes nuevas).
  * `riesgo` filtra por el código de `core.cat_niveles_riesgo` (`Bajo` · `Medio` ·
  * `Alto`); `sort=riesgo` ordena de alto a bajo.
  *

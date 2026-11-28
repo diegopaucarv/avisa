@@ -32,6 +32,10 @@ const COMMITMENT_COLUMNS = `
   to_char(cmp.fecha_inicio, 'YYYY-MM-DD') as fecha_inicio,
   to_char(cmp.fecha_vencimiento, 'YYYY-MM-DD') as fecha_vencimiento,
   uo.siglas as unidad,
+  -- Institución dueña del área responsable: la unidad orgánica pertenece a una
+  -- entidad (tenant), así que el compromiso hereda siglas y nombre de ella.
+  en.siglas as entidad_siglas,
+  en.nombre as entidad_nombre,
   ag.codigo as alcance,
   te.nombre as tematica,
   -- Vínculo a la demanda y punto focal del compromiso (migración 41).
@@ -65,6 +69,7 @@ const COMMITMENT_FROM = `
   left join core.mesas_dialogo m on m.caso_id = cmp.caso_id
   left join core.cat_estados_compromiso ec on ec.id = cmp.estado_id
   left join core.cat_unidades_organicas uo on uo.id = cmp.unidad_responsable_id
+  left join core.entidades en on en.id = uo.entidad_id
   left join core.cat_alcances_geograficos ag on ag.id = cmp.alcance_id
   left join core.cat_tematicas te on te.id = cmp.tematica_id
   left join core.demandas dm on dm.id = cmp.demanda_id
@@ -228,6 +233,10 @@ export type CommitmentListItem = {
   fechaVencimientoEfectiva: string | null;
   origenVencimiento: "manual" | "hito" | null;
   unidad: string | null;
+  /** Siglas de la institución dueña del área responsable (`core.entidades`). */
+  institucionSiglas: string | null;
+  /** Nombre completo de la institución dueña del área responsable. */
+  institucionNombre: string | null;
   alcance: string | null;
   tematica: string | null;
   /** Demanda del caso que este compromiso atiende (`core.compromisos.demanda_id`). */
@@ -373,6 +382,8 @@ function mapItem(row: CommitmentRow): CommitmentListItem {
         ? "hito"
         : null,
     unidad: row.unidad,
+    institucionSiglas: row.entidad_siglas ?? null,
+    institucionNombre: row.entidad_nombre ?? null,
     alcance: row.alcance,
     tematica: row.tematica,
     demandaId: row.demanda_id ?? null,

@@ -23,6 +23,8 @@
 
   @if (exportarError(); as mensaje) {
   <p class="exportar-error" role="alert">{{ mensaje }}</p>
+  } @if (errorApertura(); as mensaje) {
+  <p class="exportar-error" role="alert">{{ mensaje }}</p>
   } @if (avisoAnulacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   } @if (avisoCreacion(); as aviso) {

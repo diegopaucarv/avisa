@@ -146,6 +146,13 @@ export type DemandaCaso = {
   estado: string | null;
 };
 
+/**
+ * Estados del triaje de la cola RED-RADAR. `null` en la alerta significa que
+ * nunca se trió (equivale a «pendiente»); la UI sólo pinta la sección cuando
+ * hay una fila real, sin inventar el estado.
+ */
+export type EstadoTriaje = 'pendiente' | 'en_triage' | 'confirmada' | 'descartada' | 'duplicada';
+
 export type Alerta = {
   id: string;
   codigo: string;
@@ -226,6 +233,12 @@ export type Alerta = {
   clasificacion: number;
   estado: string;
   atendida: boolean;
+  /** Estado del triaje RED-RADAR; `null` cuando la alerta aún no se trió. */
+  triajeEstado: EstadoTriaje | null;
+  /** Motivo declarado al descartar o marcar la alerta como duplicada. */
+  motivoDescarte: string | null;
+  /** Código de la alerta de la que ésta es duplicada, si se declaró. */
+  duplicadaDeCodigo: string | null;
   anuladoEn: string | null;
   motivoAnulacion: string | null;
   anuladoPor: string | null;
@@ -580,6 +593,9 @@ export function aAlerta(bruto: unknown): Alerta {
     clasificacion: numero(registro, ['clasificacion']) ?? 1,
     estado: texto(registro, ['estado']) ?? '',
     atendida: booleano(registro, ['atendida']),
+    triajeEstado: aTriajeEstado(texto(registro, ['triajeEstado', 'triaje_estado'])),
+    motivoDescarte: texto(registro, ['motivoDescarte', 'motivo_descarte']),
+    duplicadaDeCodigo: texto(registro, ['duplicadaDeCodigo', 'duplicada_de_codigo']),
     anuladoEn: texto(registro, ['anuladoEn', 'anulado_en']),
     motivoAnulacion: texto(registro, ['motivoAnulacion', 'motivo_anulacion']),
     anuladoPor: texto(registro, ['anuladoPor', 'anulado_por']),
@@ -676,6 +692,36 @@ export function etiquetaEstado(estado: string | null): string {
       return 'Aprobado';
     default:
       return estado?.trim() || 'Sin estado';
+  }
+}
+
+const ESTADOS_TRIAJE: readonly EstadoTriaje[] = [
+  'pendiente',
+  'en_triage',
+  'confirmada',
+  'descartada',
+  'duplicada',
+];
+
+function aTriajeEstado(valor: string | null): EstadoTriaje | null {
+  return valor && (ESTADOS_TRIAJE as readonly string[]).includes(valor)
+    ? (valor as EstadoTriaje)
+    : null;
+}
+
+/** Rótulo legible del estado de triaje para la ficha. */
+export function etiquetaTriaje(estado: EstadoTriaje): string {
+  switch (estado) {
+    case 'en_triage':
+      return 'En triaje';
+    case 'confirmada':
+      return 'Confirmada';
+    case 'descartada':
+      return 'Descartada';
+    case 'duplicada':
+      return 'Duplicada';
+    default:
+      return 'Pendiente';
   }
 }
 

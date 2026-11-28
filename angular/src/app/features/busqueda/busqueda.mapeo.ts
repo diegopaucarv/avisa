@@ -105,8 +105,19 @@ export type DefinicionGrupo = {
   recurso: string;
   /** Listado del tipo; destino de las filas que no tienen ficha. */
   listado: string[];
-  /** Ficha del registro. Sólo si `app.routes.ts` la declara. */
+  /** Ficha por ruta propia (path param). Sólo el caso la tiene hoy. */
   ficha?: (codigo: string) => string[];
+  /**
+   * Ficha propia abierta por query param (`?<parametro>=<identificador>`).
+   * `campo` elige, del resultado ya normalizado, el identificador correcto para
+   * el contrato de cada entidad: código para alertas, `id` para compromisos,
+   * documentos y actores. Si falta, la fila cae al listado filtrado.
+   */
+  fichaIdentificador?: {
+    ruta: readonly string[];
+    parametro: string;
+    campo: 'codigo' | 'id';
+  };
   claves: Claves;
   /**
    * Valor de `q` con el que el listado vuelve a mostrar la fila. `null` cuando
@@ -116,10 +127,12 @@ export type DefinicionGrupo = {
 };
 
 /**
- * Orden fijo de los grupos. Sólo el caso tiene pantalla de detalle
- * (`/casos/:codigo`); alertas, compromisos, documentos, actores y demandas no
- * la tienen, así que enlazan a su listado ya filtrado por `q` en vez de a una
- * ruta muerta.
+ * Orden fijo de los grupos.
+ *
+ * El caso abre su detalle por ruta (`/casos/:codigo`). Alerta, compromiso,
+ * documento y actor abren el panel lateral de su propia pantalla mediante el
+ * contrato `?abrir=<identificador>` —ver `fichaIdentificador`—. Las demandas sin
+ * caso no tienen ficha propia: enlazan a su listado filtrado por `q`.
  */
 export const GRUPOS: readonly DefinicionGrupo[] = [
   {
@@ -142,6 +155,8 @@ export const GRUPOS: readonly DefinicionGrupo[] = [
     icono: 'alertas',
     recurso: '/v1/alerts',
     listado: ['/alertas'],
+    // La pantalla de alertas abre el panel por código (`AT-2026-37`), no por id.
+    fichaIdentificador: { ruta: ['/alertas'], parametro: 'abrir', campo: 'codigo' },
     claves: { codigo: ['codigo'], titulo: ['titulo'], subtitulo: ['prioridad'] },
     filtroLista: ({ codigo }) => codigo,
   },
@@ -153,6 +168,7 @@ export const GRUPOS: readonly DefinicionGrupo[] = [
     icono: 'compromisos',
     recurso: '/v1/commitments',
     listado: ['/compromisos'],
+    fichaIdentificador: { ruta: ['/compromisos'], parametro: 'abrir', campo: 'id' },
     claves: { codigo: ['codigo'], titulo: ['accion'], subtitulo: ['estado'] },
     filtroLista: ({ codigo }) => codigo,
   },
@@ -164,6 +180,7 @@ export const GRUPOS: readonly DefinicionGrupo[] = [
     icono: 'documentos',
     recurso: '/v1/documents',
     listado: ['/documentos'],
+    fichaIdentificador: { ruta: ['/documentos'], parametro: 'abrir', campo: 'id' },
     claves: { codigo: ['codigo'], titulo: ['titulo'], subtitulo: ['tipoNombre', 'tipo'] },
     filtroLista: ({ codigo }) => codigo,
   },
@@ -175,6 +192,8 @@ export const GRUPOS: readonly DefinicionGrupo[] = [
     icono: 'actores',
     recurso: '/v1/actors',
     listado: ['/directorio', 'actores'],
+    // `id` es el `actor_uid` que la ficha del directorio usa como clave.
+    fichaIdentificador: { ruta: ['/directorio', 'actores'], parametro: 'abrir', campo: 'id' },
     claves: { codigo: ['codigo'], titulo: ['nombre'], subtitulo: ['tipo', 'cargo'] },
     // El `q` del directorio busca nombre, abreviatura y cargo; no `codigo_legado`.
     filtroLista: ({ titulo }) => titulo,
@@ -278,18 +297,39 @@ export function enriquecer(resultado: Resultado, indice: IndiceBusqueda): Result
 }
 
 /**
- * Destino del resultado: la ficha si existe y hay código; si no, el listado
- * del tipo prefiltrado con `q` para reencontrar la fila.
+ * Destino del resultado: la ficha propia si hay identificador con el que
+ * abrirla; si no, el listado del tipo prefiltrado con `q` para reencontrar la
+ * fila. Para las fichas por query param nunca se inventa el identificador: si
+ * el resultado no lo trae, la fila se queda en el listado.
  */
 export function aEnlace(
   definicion: DefinicionGrupo,
   resultado: Resultado,
   termino: string,
 ): ResultadoEnlazado {
-  const ficha = definicion.ficha && resultado.codigo ? definicion.ficha(resultado.codigo) : null;
+  // Caso: la ficha es una ruta con el código en el path.
+  if (definicion.ficha && resultado.codigo) {
+    return {
+      ...resultado,
+      ruta: definicion.ficha(resultado.codigo),
+      parametros: {},
+      abreFicha: true,
+    };
+  }
 
-  if (ficha) {
-    return { ...resultado, ruta: ficha, parametros: {}, abreFicha: true };
+  // Alerta, compromiso, documento y actor: ficha propia por `?abrir=`.
+  const apertura = definicion.fichaIdentificador;
+  if (apertura) {
+    const identificador =
+      apertura.campo === 'codigo' ? (resultado.codigo ?? null) : resultado.id || null;
+    if (identificador) {
+      return {
+        ...resultado,
+        ruta: [...apertura.ruta],
+        parametros: { [apertura.parametro]: identificador },
+        abreFicha: true,
+      };
+    }
   }
 
   const filtro =

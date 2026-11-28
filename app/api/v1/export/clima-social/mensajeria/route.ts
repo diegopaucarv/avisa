@@ -1,3 +1,4 @@
+import { registrarDescarga } from "@/lib/db/auditoria-descargas";
 import { ApiError, jsonError } from "@/lib/db/errors";
 import {
   jsonOk,
@@ -130,7 +131,18 @@ export async function GET(request: Request) {
     const base = `avisa_clima_social_${tipo}_${fechaArchivo(generadoEn)}`;
     const descarga = decidirDescarga(params, formato);
 
+    const auditar = () =>
+      registrarDescarga(request, sesion, {
+        entidad: "clima-social",
+        formato,
+        // `foto` es una URL pública; nunca es un token.
+        filtros: { tipo, codigo, foto },
+        // El mensaje se arma desde un único reporte de clima social.
+        filas: 1,
+      });
+
     if (formato === "json") {
+      await auditar();
       return jsonOk({
         tipo,
         referencia: `Anexo N° ${config.numero}`,
@@ -167,6 +179,7 @@ export async function GET(request: Request) {
         faltantes: resultado.faltantes,
       };
 
+      await auditar();
       return respuestaPdf(
         documentoPdf(docPdf, contexto),
         `${base}.pdf`,
@@ -174,6 +187,7 @@ export async function GET(request: Request) {
       );
     }
 
+    await auditar();
     return respuestaTexto(resultado.mensaje, `${base}.txt`, descarga);
   } catch (error) {
     return jsonError(error);

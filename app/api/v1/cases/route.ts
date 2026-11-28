@@ -12,6 +12,7 @@ import {
   listCases,
   type CaseListQuery,
 } from "@/lib/db/repos/cases";
+import { resolveDataScope } from "@/lib/db/scope";
 import { puedeAnularRegistros, withSession } from "@/lib/db/tenant";
 
 export const runtime = "nodejs";
@@ -36,9 +37,18 @@ export const dynamic = "force-dynamic";
  * `naturaleza=<código>` filtra por la naturaleza declarada del caso; el literal
  * «Sin declarar» aísla los casos con `naturaleza_id` nulo.
  *
- * `region=<nombre>` filtra por región principal y se resuelve contra
- * `core.regiones` (422 si no existe); `sinregion=true` es su complemento y
- * alimenta la fila «Sin región» del panorama territorial.
+ * `region=<nombre|ubigeo>` filtra por región principal y se resuelve contra
+ * `core.regiones` (422 si no existe). Acepta el ubigeo INEI —dos dígitos de la
+ * región o los seis del distrito, que heredan los dos primeros— y, si el valor
+ * no es numérico, el nombre normalizado de siempre. `sinregion=true` es su
+ * complemento y alimenta la fila «Sin región» del panorama territorial.
+ *
+ * Ámbito por defecto: un sectorista con territorios en `core.usuario_territorio`
+ * consulta sólo sus regiones. La ruta inyecta esas regiones en el repositorio
+ * salvo que la petición pida explícitamente otro recorte (`region`, `sinregion`
+ * o `alcance=todos`), de modo que el número de la tabla y el filtro visible
+ * coincidan. Dirección, Alta Dirección y Administración conservan el alcance
+ * total; `alcance=todos` es además la marca para limpiar el ámbito por defecto.
  *
  * `sectorista=<texto>` filtra por el nombre del usuario sectorista del caso
  * (`ilike`); `sectoristaId=<uuid>` lo filtra por `punto_focal_usuario_id`.
@@ -72,7 +82,12 @@ export async function GET(request: Request) {
     const query: CaseListQuery = { page, pageSize };
     for (const key of FILTERS) {
       const value = params.get(key);
-      if (value) query[key] = value;
+      if (!value) continue;
+      // `alcance=todos` no es un valor del catálogo: es la marca con la que la
+      // vista pide no aplicar ningún ámbito. Se interpreta aquí y no se reenvía
+      // al repositorio, que la rechazaría como filtro inválido.
+      if (key === "alcance" && value === "todos") continue;
+      query[key] = value;
     }
 
     const anulados = leerBooleano(params.get("anulados"));
@@ -95,6 +110,22 @@ export async function GET(request: Request) {
     // No cambia el listado ni el `total`; sin el parámetro la respuesta es la
     // misma de siempre.
     if (leerBooleano(params.get("conteos"))) query.conteos = true;
+
+    // Ámbito territorial por defecto: el sectorista ve sus regiones asignadas.
+    // Un filtro territorial explícito del usuario manda sobre el valor por
+    // defecto, incluido `alcance=todos`, que pide ver todo.
+    const scope = resolveDataScope(session);
+    const pidioTerritorio =
+      Boolean(params.get("region")) ||
+      leerBooleano(params.get("sinregion")) ||
+      params.get("alcance") === "todos";
+    if (
+      scope.mode === "regions" &&
+      !pidioTerritorio &&
+      scope.regiones.length > 0
+    ) {
+      query.regiones = scope.regiones;
+    }
 
     const result = await withSession(
       { usuarioId: session.uid, rolCodigo: session.rol },

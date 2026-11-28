@@ -1,5 +1,11 @@
+import { registrarDescarga } from "@/lib/db/auditoria-descargas";
 import { ApiError, jsonError } from "@/lib/db/errors";
-import { jsonOk, leerBooleano, queryParams, requireSession } from "@/lib/db/http";
+import {
+  jsonOk,
+  leerBooleano,
+  queryParams,
+  requireSession,
+} from "@/lib/db/http";
 import { withSession } from "@/lib/db/tenant";
 import { getCaseByCode } from "@/lib/db/repos/cases";
 import type { SessionPayload } from "@/lib/db/auth";
@@ -12,19 +18,31 @@ import {
   respuestaHtml,
   respuestaPdf,
 } from "../../../lib/documento";
-import { contextoDesdeSesion, leerFormato, type FormatoDocumento } from "../../../lib/contexto";
+import {
+  contextoDesdeSesion,
+  leerFormato,
+  type FormatoDocumento,
+} from "../../../lib/contexto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const FORMATOS = ["html", "pdf", "json"] as const satisfies readonly FormatoDocumento[];
+const FORMATOS = [
+  "html",
+  "pdf",
+  "json",
+] as const satisfies readonly FormatoDocumento[];
 
 function nombreArchivo(codigo: string, generadoEn: Date): string {
-  const seguro = codigo.replace(/[^0-9A-Za-z_-]+/g, "_").replace(/^_+|_+$/g, "") || "caso";
+  const seguro =
+    codigo.replace(/[^0-9A-Za-z_-]+/g, "_").replace(/^_+|_+$/g, "") || "caso";
   return `avisa_analisis_caso_${seguro}_${fechaArchivo(generadoEn)}`;
 }
 
-function decidirDescarga(params: URLSearchParams, formato: FormatoDocumento): boolean {
+function decidirDescarga(
+  params: URLSearchParams,
+  formato: FormatoDocumento,
+): boolean {
   return params.has("descarga")
     ? leerBooleano(params.get("descarga"))
     : formato !== "html";
@@ -76,7 +94,17 @@ export async function GET(
     const base = nombreArchivo(detalle.case.code, generadoEn);
     const descarga = decidirDescarga(params, formato);
 
+    const auditar = () =>
+      registrarDescarga(request, sesion, {
+        entidad: "analisis-caso",
+        formato,
+        // El análisis cierra sobre un único caso.
+        filtros: { codigo: codigoCaso },
+        filas: 1,
+      });
+
     if (formato === "json") {
+      await auditar();
       return jsonOk({
         codigo: detalle.case.code,
         referencia: documento.referencia,
@@ -89,10 +117,20 @@ export async function GET(
     }
 
     if (formato === "pdf") {
-      return respuestaPdf(documentoPdf(documento, contexto), `${base}.pdf`, descarga);
+      await auditar();
+      return respuestaPdf(
+        documentoPdf(documento, contexto),
+        `${base}.pdf`,
+        descarga,
+      );
     }
 
-    return respuestaHtml(documentoHtml(documento, contexto), `${base}.html`, descarga);
+    await auditar();
+    return respuestaHtml(
+      documentoHtml(documento, contexto),
+      `${base}.html`,
+      descarga,
+    );
   } catch (error) {
     return jsonError(error);
   }

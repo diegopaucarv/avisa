@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 
+import { registrarDescarga } from "@/lib/db/auditoria-descargas";
 import { ApiError, jsonError } from "@/lib/db/errors";
 import {
   jsonOk,
@@ -189,7 +190,16 @@ export async function GET(
 
     const base = `avisa_anexo_${numero}_${fechaArchivo(generadoEn)}`;
 
+    const auditar = () =>
+      registrarDescarga(request, sesion, {
+        entidad: "anexos",
+        formato,
+        filtros: { numero, codigo },
+        filas: registros,
+      });
+
     if (formato === "json") {
+      await auditar();
       return jsonOk({
         numero,
         referencia: documento.referencia,
@@ -205,6 +215,7 @@ export async function GET(
     const descarga = decidirDescarga(params, formato);
 
     if (formato === "pdf") {
+      await auditar();
       return respuestaPdf(
         documentoPdf(documento, contexto),
         `${base}.pdf`,
@@ -212,6 +223,7 @@ export async function GET(
       );
     }
 
+    await auditar();
     return respuestaHtml(
       documentoHtml(documento, contexto),
       `${base}.html`,

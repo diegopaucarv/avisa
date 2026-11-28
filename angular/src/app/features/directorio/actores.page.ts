@@ -4,6 +4,7 @@ import {
   DestroyRef,
   ElementRef,
   computed,
+  effect,
   inject,
   input,
   signal,
@@ -750,6 +751,12 @@ export class ActoresPage {
     { initialValue: FILTROS_INICIALES },
   );
 
+  /** `?abrir=<uid>`: actor que la búsqueda global pide abrir en el panel. */
+  private readonly actorAbiertoSolicitado = toSignal(
+    this.ruta.queryParamMap.pipe(map((params) => params.get('abrir'))),
+    { initialValue: null },
+  );
+
   /** `persona` siempre: la naturaleza ya no se elige ni viaja por la URL. */
   private readonly naturalezaActiva = computed(() => this.naturalezaFija().trim() || 'persona');
 
@@ -944,12 +951,21 @@ export class ActoresPage {
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
+  /** Fallo al abrir por `?abrir=`, cuando el actor pedido no se puede leer. */
+  readonly errorApertura = signal<string | null>(null);
+
   private temporizadorBusqueda?: ReturnType<typeof setTimeout>;
 
   constructor() {
     this.destruccion.onDestroy(() => {
       clearTimeout(this.temporizadorBusqueda);
       clearTimeout(this.temporizadorCopiado);
+    });
+    // La búsqueda global llega con `?abrir=<uid>`: se pide el actor y se abre el
+    // panel aunque su fila no esté en la página visible.
+    effect(() => {
+      const uid = this.actorAbiertoSolicitado();
+      if (uid) this.abrirActorPorUid(uid);
     });
   }
 
@@ -1170,6 +1186,43 @@ export class ActoresPage {
   cerrarPanel(): void {
     this.seleccionado.set(null);
     this.editarAlAbrir.set(false);
+    this.errorApertura.set(null);
+    // Un `?abrir=` de la búsqueda no debe sobrevivir al cierre de la ficha.
+    this.limpiarParametroAbrir();
+  }
+
+  /** Abre la ficha de un actor por uid, venga o no del listado visible. */
+  private abrirActorPorUid(uid: string): void {
+    this.errorApertura.set(null);
+    firstValueFrom(
+      this.http
+        .get<unknown>(urlApi(`/v1/actors/${encodeURIComponent(uid)}`))
+        .pipe(takeUntilDestroyed(this.destruccion)),
+    )
+      .then((bruto) => {
+        const actor = aActorDirectorio(bruto);
+        if (!actor.id) {
+          this.errorApertura.set('No se pudo leer el actor solicitado.');
+          this.limpiarParametroAbrir();
+          return;
+        }
+        this.abrir(actor);
+      })
+      .catch((fallo: unknown) => {
+        this.errorApertura.set(aErrorApi(fallo).message);
+        this.limpiarParametroAbrir();
+      });
+  }
+
+  /** Quita `abrir` de la URL sin recargar el listado. */
+  private limpiarParametroAbrir(): void {
+    if (this.actorAbiertoSolicitado() === null) return;
+    void this.router.navigate([], {
+      relativeTo: this.ruta,
+      queryParams: { abrir: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   alActualizarActor(actor: ActorDirectorio): void {

@@ -24,6 +24,7 @@ import {
 } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
+import { SesionStore } from '../../core/auth/sesion.store';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { ALCANCES, aCaso, esRegistro, formatearFechaCorta, leer, texto } from '../../dominio/mapeo';
 import type { Caso } from '../../dominio/modelos';
@@ -156,6 +157,35 @@ const CLAVE_ALCANCE = 'avisa-alcance';
 const SIN_REGION = '__sin_region__';
 
 /**
+ * Jerarquía con la que `core.autenticar_usuario` elige el rol vigente de la
+ * cuenta. El alcance territorial sólo se recorta en el escalón `sectorista`; se
+ * replica aquí para que el cliente preseleccione la Región con el mismo
+ * criterio que `lib/db/scope.ts`, sin depender del orden del arreglo `roles`.
+ */
+const JERARQUIA_SCOPE = [
+  'administrador',
+  'direccion_oaipcs',
+  'alta_direccion',
+  'sectorista',
+] as const;
+
+/**
+ * Región que abre el filtro. Si el usuario ya la pidió en la URL (o pidió «sin
+ * región»), manda él. Si no, un sectorista con un único territorio la ve
+ * preseleccionada para que el filtro y las cifras de la tabla coincidan. Con
+ * varios territorios no se preselecciona ninguno.
+ */
+function regionInicial(
+  ambito: readonly string[],
+  region: string | null,
+  sinRegion: string | null,
+): string {
+  if (region) return region;
+  if (sinRegion === 'true') return '';
+  return ambito.length === 1 ? (ambito[0] ?? '') : '';
+}
+
+/**
  * Ámbito predeterminado elegido en Preferencias. Es un filtro de presentación,
  * no un permiso: el ámbito de la sesión lo aplica la RLS. Sólo se toma cuando la
  * URL no trae `alcance`, y `alcance=todos` lo desactiva de forma explícita para
@@ -277,6 +307,12 @@ function aConteos(bruto: unknown): ConteosCasos {
     .aviso-ok {
       color: #2f6f52;
       font-size: 13.5px;
+    }
+
+    .ayuda-ambito {
+      margin: 0 0 8px;
+      color: #4a5568;
+      font-size: 13px;
     }
 
     /*
@@ -641,6 +677,25 @@ export class CasosPage {
   readonly guardando = signal(false);
   readonly errorAlta = signal<string | null>(null);
 
+  /**
+   * Sesión vigente. Se reutiliza el store existente para leer los territorios
+   * asignados al usuario; no hace falta un servicio nuevo.
+   */
+  private readonly sesion = inject(SesionStore);
+
+  /**
+   * Regiones del ámbito por defecto, con la misma decisión que `lib/db/scope.ts`:
+   * sólo un `sectorista` con territorios asignados queda recortado; Dirección,
+   * Alta Dirección y Administración ven todo. El servidor aplica ese criterio
+   * sobre el rol de mayor jerarquía, así que se busca en `JERARQUIA_SCOPE`.
+   */
+  private readonly ambitoRegiones = computed(() => {
+    const regiones = this.sesion.usuario()?.regiones ?? [];
+    if (regiones.length === 0) return [];
+    const rol = JERARQUIA_SCOPE.find((codigo) => this.sesion.roles().includes(codigo));
+    return rol === 'sectorista' ? regiones : [];
+  });
+
   private readonly parametros = toSignal(
     this.ruta.queryParamMap.pipe(
       map((params) => {
@@ -661,7 +716,11 @@ export class CasosPage {
           riesgo: params.get('riesgo') ?? '',
           // Sin `alcance` rige Preferencias; `todos` es la limpieza explícita.
           alcance: alcance === null ? alcancePreferido() : alcance === 'todos' ? '' : alcance,
-          region: params.get('region') ?? '',
+          region: regionInicial(
+            this.ambitoRegiones(),
+            params.get('region'),
+            params.get('sinregion'),
+          ),
           sectorista: params.get('sectorista') ?? '',
           sinRegion: params.get('sinregion') === 'true',
           pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
@@ -744,6 +803,17 @@ export class CasosPage {
   readonly conflictividades = computed(() => this.catalogoRecurso.valor()?.conflictividades ?? []);
   readonly alcances = computed(() => this.catalogoRecurso.valor()?.alcances ?? []);
   readonly regiones = computed(() => this.catalogoRecurso.valor()?.regiones ?? []);
+
+  /**
+   * Aviso del ámbito cuando el sectorista tiene varias regiones: no se puede
+   * preseleccionar una sola en el filtro, así que se listan para que el recorte
+   * que aplica el servidor no quede invisible.
+   */
+  readonly ayudaAmbito = computed(() => {
+    const regiones = this.ambitoRegiones();
+    if (regiones.length <= 1) return null;
+    return `Tu ámbito: ${regiones.length} regiones asignadas — ${regiones.join(', ')}`;
+  });
 
   private readonly recurso = consulta<Coleccion<CasoConSectorista> & { conteos: ConteosCasos }>({
     fuente: () => {

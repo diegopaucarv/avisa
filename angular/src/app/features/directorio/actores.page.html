@@ -43,6 +43,8 @@
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (errorApertura(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
   } @if (filtros().organizacion) {
   <div class="filtro-organizacion" role="status">
     <span>

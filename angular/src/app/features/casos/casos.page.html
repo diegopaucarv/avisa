@@ -336,7 +336,9 @@
     </button>
     }
   </div>
-  } @else {
+  } @else { @if (ayudaAmbito(); as ayuda) {
+  <p class="ayuda-ambito">{{ ayuda }}</p>
+  }
   <div class="table-wrap">
     <table class="data-table">
       <thead>

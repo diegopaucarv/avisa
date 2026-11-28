@@ -895,57 +895,6 @@
         }
       </section>
 
-      <section class="detail-section" aria-labelledby="alertas-caso">
-        <h2 id="alertas-caso">Alertas vinculadas ({{ d.alertas.length }})</h2>
-        @if (d.alertas.length === 0) {
-        <p class="empty-inline">Sin alertas registradas.</p>
-        } @else {
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th scope="col" [appThOrden]="'codigo'" [orden]="ordenAlertas">Alerta</th>
-                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenAlertas">Fecha</th>
-                <th scope="col">Enlace</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (alerta of filasAlertas(); track alerta.id) {
-              <tr class="alerta-fila" (click)="abrirAlerta(alerta)">
-                <td>
-                  <div class="alerta-celda">
-                    <div class="alerta-celda-linea">
-                      <strong>{{ alerta.codigo || 'Sin código' }}</strong>
-                      @if (alerta.anulada) {
-                      <span class="status-badge state-dismissed">Anulada</span>
-                      }
-                    </div>
-                    @if (alerta.titulo) {
-                    <span class="alerta-celda-titulo" [title]="alerta.titulo"
-                      >{{ alerta.titulo }}</span
-                    >
-                    }
-                  </div>
-                </td>
-                <td>{{ fechaTexto(alerta.fechaReporte) }}</td>
-                <td>
-                  <button
-                    type="button"
-                    class="link-button"
-                    [attr.aria-label]="'Abrir la alerta ' + alerta.codigo"
-                    (click)="$event.stopPropagation(); abrirAlerta(alerta)"
-                  >
-                    Ver alerta
-                  </button>
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        }
-      </section>
-
       <section class="detail-section" aria-labelledby="compromisos-caso">
         <h2 id="compromisos-caso">Acuerdos y compromisos ({{ d.compromisos.length }})</h2>
         @if (d.compromisos.length === 0) {
@@ -994,6 +943,57 @@
                   'hito') {
                   <small class="detail-hint">Derivado del próximo hito</small>
                   }
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        }
+      </section>
+
+      <section class="detail-section" aria-labelledby="alertas-caso">
+        <h2 id="alertas-caso">Alertas vinculadas ({{ d.alertas.length }})</h2>
+        @if (d.alertas.length === 0) {
+        <p class="empty-inline">Sin alertas registradas.</p>
+        } @else {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col" [appThOrden]="'codigo'" [orden]="ordenAlertas">Alerta</th>
+                <th scope="col" [appThOrden]="'fecha'" [orden]="ordenAlertas">Fecha</th>
+                <th scope="col">Enlace</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (alerta of filasAlertas(); track alerta.id) {
+              <tr class="alerta-fila" (click)="abrirAlerta(alerta)">
+                <td>
+                  <div class="alerta-celda">
+                    <div class="alerta-celda-linea">
+                      <strong>{{ alerta.codigo || 'Sin código' }}</strong>
+                      @if (alerta.anulada) {
+                      <span class="status-badge state-dismissed">Anulada</span>
+                      }
+                    </div>
+                    @if (alerta.titulo) {
+                    <span class="alerta-celda-titulo" [title]="alerta.titulo"
+                      >{{ alerta.titulo }}</span
+                    >
+                    }
+                  </div>
+                </td>
+                <td>{{ fechaTexto(alerta.fechaReporte) }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="link-button"
+                    [attr.aria-label]="'Abrir la alerta ' + alerta.codigo"
+                    (click)="$event.stopPropagation(); abrirAlerta(alerta)"
+                  >
+                    Ver alerta
+                  </button>
                 </td>
               </tr>
               }

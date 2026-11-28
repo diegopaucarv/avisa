@@ -24,6 +24,11 @@
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (errorApertura(); as mensajeApertura) {
+  <p class="form-error" role="alert">
+    {{ mensajeApertura }}
+    <button type="button" class="link-button" (click)="reintentarApertura()">Reintentar</button>
+  </p>
   } @if (avisoAnulacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">{{ aviso }}</p>
   } @if (avisoCreacion(); as aviso) {
@@ -112,6 +117,11 @@
         }
       </select>
     </label>
+    } @if (filtros().unidad; as unidad) {
+    <span class="filtro-oficina">
+      Oficina responsable: <strong>{{ unidad }}</strong>
+      <button type="button" class="link-button" (click)="quitarUnidad()">Quitar</button>
+    </span>
     }
 
     <button type="button" class="button-secondary" (click)="limpiar()">Limpiar filtros</button>
@@ -342,6 +352,7 @@
     </app-tabla>
   </div>
   } @else {
+  <app-compromisos-franja [soloMesas]="vistaMesas()" [unidadActiva]="filtros().unidad" />
   <app-tabla
     [columnas]="vistaMesas() ? columnasMesas : columnasListado"
     [filas]="filasVisibles()"

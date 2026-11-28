@@ -116,24 +116,25 @@ export function contactoDeLocal(local: LocalDirectorio): string | null {
   return partes.length > 0 ? partes.join(' · ') : null;
 }
 
-/** Dirección, distrito, provincia y región en una sola línea. */
-export function ubicacionDeLocal(local: LocalDirectorio): string | null {
-  const partes = [local.direccion, local.distrito, local.provincia, local.region].filter(
-    (parte): parte is string => Boolean(parte),
-  );
+/** Une los valores no vacíos con «, »; `null` si no queda ninguno. */
+function unirPartes(valores: ReadonlyArray<string | null | undefined>): string | null {
+  const partes = valores
+    .map((valor) => (typeof valor === 'string' ? valor.trim() : ''))
+    .filter((parte) => parte.length > 0);
 
   return partes.length > 0 ? partes.join(', ') : null;
+}
+
+/** Dirección, distrito, provincia y región en una sola línea. */
+export function ubicacionDeLocal(local: LocalDirectorio): string | null {
+  return unirPartes([local.direccion, local.distrito, local.provincia, local.region]);
 }
 
 /** Distrito, provincia y región sin la dirección (la dirección tiene su línea). */
 export function territorioDeLocal(
   local: Pick<LocalDirectorio, 'distrito' | 'provincia' | 'region'>,
 ): string | null {
-  const partes = [local.distrito, local.provincia, local.region].filter((parte): parte is string =>
-    Boolean(parte),
-  );
-
-  return partes.length > 0 ? partes.join(', ') : null;
+  return unirPartes([local.distrito, local.provincia, local.region]);
 }
 
 /** Descarta coordenadas incompletas o fuera del rango terrestre. */
@@ -204,6 +205,65 @@ export function enlaceMapaLocal(
   if (!direccion) return null;
 
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`;
+}
+
+/** Campos suficientes para ubicar el local en un mapa: no hay coordenadas. */
+export type CamposMapaLocal = Pick<
+  LocalDirectorio,
+  'direccion' | 'distrito' | 'provincia' | 'region'
+>;
+
+/**
+ * Texto de búsqueda para ubicar el local en un mapa.
+ *
+ * `core.locales` no tiene latitud/longitud (verificado en `information_schema` el
+ * 2026-11-27), así que la ubicación sólo puede resolverse por texto. Se prefiere
+ * la dirección porque es el dato más específico; si falta, se cae al territorio.
+ * Los campos vacíos se descartan para no dejar separadores sueltos ni «null» en
+ * la URL.
+ */
+export function consultaMapa(local: CamposMapaLocal): string | null {
+  const direccion = local.direccion?.trim() ?? '';
+  if (direccion) return direccion;
+
+  return unirPartes([local.distrito, local.provincia, local.region]);
+}
+
+/**
+ * Enlace para abrir la búsqueda del local en Google Maps.
+ * `null` cuando no hay ningún dato de ubicación: no se inventa una búsqueda.
+ */
+export function enlaceGoogleMaps(local: CamposMapaLocal): string | null {
+  const consulta = consultaMapa(local);
+  return consulta
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(consulta)}`
+    : null;
+}
+
+/**
+ * URL de la vista incorporada de Google Maps, sin API key.
+ *
+ * `output=embed` sobre `maps.google.com/maps` es la forma que Google resuelve
+ * sin clave; el zoom 17 pide nivel de calle cuando la dirección se geocodifica.
+ * Sin consulta no hay nada que embeber y devuelve `null`.
+ */
+export function enlaceMapaIncorporado(local: CamposMapaLocal): string | null {
+  const consulta = consultaMapa(local);
+  if (!consulta) return null;
+
+  return `https://maps.google.com/maps?q=${encodeURIComponent(consulta)}&z=17&hl=es&output=embed`;
+}
+
+/**
+ * Etiqueta accesible del mapa (`title` del iframe y `aria-label` del enlace).
+ * Nombra el local y la búsqueda; sin datos de ubicación sólo nombra el local.
+ */
+export function etiquetaMapa(
+  local: Pick<LocalDirectorio, 'nombre' | 'direccion' | 'distrito' | 'provincia' | 'region'>,
+): string {
+  const nombre = local.nombre?.trim() || 'el local';
+  const consulta = consultaMapa(local);
+  return consulta ? `Mapa de ${nombre} en ${consulta}` : `Mapa de ${nombre}`;
 }
 
 /** Registro de `GET /api/v1/locales` → dominio del directorio. */

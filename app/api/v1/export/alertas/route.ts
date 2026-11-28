@@ -1,3 +1,4 @@
+import { registrarDescarga } from "@/lib/db/auditoria-descargas";
 import { ApiError, jsonError } from "@/lib/db/errors";
 import { leerBooleano, queryParams, requireSession } from "@/lib/db/http";
 import {
@@ -91,16 +92,16 @@ function leerFormato(valor: string | null): Formato {
 /** Una fila lista para CSV/XLSX; las columnas sin dato salen vacías. */
 function filaExportada(item: AlertItem): Record<string, unknown> {
   return {
-    "Código": item.codigo,
-    "Título": item.titulo ?? "",
+    Código: item.codigo,
+    Título: item.titulo ?? "",
     "Fecha de reporte": item.fechaReporte ?? "",
     "Nivel de riesgo": item.riesgo ?? "",
-    "Estado": item.estado,
-    "Revisor": item.ultimoRevisor ?? "",
+    Estado: item.estado,
+    Revisor: item.ultimoRevisor ?? "",
     "Caso vinculado": item.casoCode ?? "",
     "Título del caso": item.casoTitulo ?? "",
-    "Región": item.region ?? "",
-    "Provincia": item.provincia ?? "",
+    Región: item.region ?? "",
+    Provincia: item.provincia ?? "",
   };
 }
 
@@ -170,18 +171,25 @@ export async function GET(request: Request) {
     const fecha = new Date().toISOString().slice(0, 10);
     const nombre = `avisa_alertas_${fecha}.${EXTENSIONES[formato]}`;
 
-    if (formato === "xlsx") {
-      const libro = escribirXlsx([
-        { nombre: "Alertas", filas: registros, columnas: COLUMNAS },
-      ]);
-      return respuesta(libro, TIPOS.xlsx, nombre);
-    }
+    const cuerpo =
+      formato === "xlsx"
+        ? escribirXlsx([
+            { nombre: "Alertas", filas: registros, columnas: COLUMNAS },
+          ])
+        : BOM +
+          generarCsv(
+            COLUMNAS,
+            registros.map((fila) => COLUMNAS.map((columna) => fila[columna])),
+          );
 
-    const csv = generarCsv(
-      COLUMNAS,
-      registros.map((fila) => COLUMNAS.map((columna) => fila[columna])),
-    );
-    return respuesta(BOM + csv, TIPOS.csv, nombre);
+    await registrarDescarga(request, sesion, {
+      entidad: "alertas",
+      formato,
+      filtros: { ...query },
+      filas: filas.length,
+    });
+
+    return respuesta(cuerpo, TIPOS[formato], nombre);
   } catch (error) {
     return jsonError(error);
   }

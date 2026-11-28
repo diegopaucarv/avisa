@@ -1,5 +1,11 @@
+import { registrarDescarga } from "@/lib/db/auditoria-descargas";
 import { jsonError } from "@/lib/db/errors";
-import { jsonOk, leerBooleano, queryParams, requireSession } from "@/lib/db/http";
+import {
+  jsonOk,
+  leerBooleano,
+  queryParams,
+  requireSession,
+} from "@/lib/db/http";
 import { withSession } from "@/lib/db/tenant";
 import {
   listarConflictividad,
@@ -17,13 +23,21 @@ import {
   respuestaHtml,
   respuestaPdf,
 } from "../lib/documento";
-import { contextoDesdeSesion, leerFormato, type FormatoDocumento } from "../lib/contexto";
+import {
+  contextoDesdeSesion,
+  leerFormato,
+  type FormatoDocumento,
+} from "../lib/contexto";
 import type { SessionPayload } from "@/lib/db/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const FORMATOS = ["html", "pdf", "json"] as const satisfies readonly FormatoDocumento[];
+const FORMATOS = [
+  "html",
+  "pdf",
+  "json",
+] as const satisfies readonly FormatoDocumento[];
 
 const ETIQUETAS_FILTRO: Readonly<Record<string, string>> = {
   region: "Región",
@@ -76,12 +90,17 @@ function describir(params: URLSearchParams): string[] {
     const crudo = (params.get(clave) ?? "").trim();
     if (!crudo) continue;
     valores[clave] =
-      clave === "desde" || clave === "hasta" ? fechaDdMmAaaa(crudo) || crudo : crudo;
+      clave === "desde" || clave === "hasta"
+        ? fechaDdMmAaaa(crudo) || crudo
+        : crudo;
   }
   return describirFiltros(ETIQUETAS_FILTRO, valores);
 }
 
-function decidirDescarga(params: URLSearchParams, formato: FormatoDocumento): boolean {
+function decidirDescarga(
+  params: URLSearchParams,
+  formato: FormatoDocumento,
+): boolean {
   return params.has("descarga")
     ? leerBooleano(params.get("descarga"))
     : formato !== "html";
@@ -124,7 +143,16 @@ export async function GET(request: Request) {
     const base = `avisa_anexo_15_${fechaArchivo(generadoEn)}`;
     const descarga = decidirDescarga(params, formato);
 
+    const auditar = () =>
+      registrarDescarga(request, sesion, {
+        entidad: "anexo-15",
+        formato,
+        filtros: { ...filtros },
+        filas: resultado.items.length,
+      });
+
     if (formato === "json") {
+      await auditar();
       return jsonOk({
         numero: "15",
         referencia: documento.referencia,
@@ -139,10 +167,20 @@ export async function GET(request: Request) {
     }
 
     if (formato === "pdf") {
-      return respuestaPdf(documentoPdf(documento, contexto), `${base}.pdf`, descarga);
+      await auditar();
+      return respuestaPdf(
+        documentoPdf(documento, contexto),
+        `${base}.pdf`,
+        descarga,
+      );
     }
 
-    return respuestaHtml(documentoHtml(documento, contexto), `${base}.html`, descarga);
+    await auditar();
+    return respuestaHtml(
+      documentoHtml(documento, contexto),
+      `${base}.html`,
+      descarga,
+    );
   } catch (error) {
     return jsonError(error);
   }

@@ -1,0 +1,158 @@
+<div class="modal-scrim" (click)="alFondo()">
+  <section
+    #dialogo
+    class="modal"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="triaje-titulo"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="modal-head">
+      <div>
+        <p class="modal-codigo">{{ codigo() || 'Alerta sin código' }}</p>
+        <h2 id="triaje-titulo">
+          {{ esDuplicada() ? 'Marcar como duplicada' : 'Descartar alerta' }}
+        </h2>
+        @if (titulo()) {
+          <span class="modal-sitio">{{ titulo() }}</span>
+        }
+      </div>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Cerrar la ventana de triaje"
+        (click)="cerrarConSalida()"
+      >
+        <app-icono nombre="cerrar" [tamano]="18" />
+      </button>
+    </header>
+
+    <div class="modal-body">
+      @if (esDuplicada()) {
+        <p class="modal-texto">
+          Indique el código de la alerta original. La alerta actual quedará marcada como
+          <strong>duplicada</strong> y no se borrará ni se fusionará nada.
+        </p>
+
+        <div class="form-field">
+          <label class="form-label" for="triaje-codigo">Código de la alerta original *</label>
+          <input
+            id="triaje-codigo"
+            type="text"
+            placeholder="AL-2026-000123"
+            [value]="codigoOriginal()"
+            [attr.aria-describedby]="errorCodigo() ? 'triaje-codigo-error' : null"
+            (input)="campoCodigo($event)"
+          />
+          @if (errorCodigo(); as fallo) {
+            <p id="triaje-codigo-error" class="campo-error" role="alert">{{ fallo }}</p>
+          }
+        </div>
+
+        <div class="form-field">
+          <div class="candidatos-cabecera">
+            <span class="form-label">Posibles originales</span>
+            <button
+              type="button"
+              class="button-secondary"
+              [disabled]="verificando()"
+              (click)="alBuscar()"
+            >
+              {{ verificando() ? 'Buscando…' : 'Buscar de nuevo' }}
+            </button>
+          </div>
+
+          @if (verificando()) {
+            <p class="form-hint" role="status">Buscando alertas parecidas…</p>
+          }
+          @if (errorCandidatos(); as fallo) {
+            <p class="campo-error" role="alert">{{ fallo }}</p>
+          }
+          @if (!verificando() && !errorCandidatos() && !candidatos().length) {
+            <p class="form-hint">No se encontraron alertas parecidas en el último trimestre.</p>
+          }
+          @if (candidatos().length) {
+            <ul class="candidatos">
+              @for (candidato of candidatos(); track candidato.codigo) {
+                <li>
+                  <button
+                    type="button"
+                    class="candidato"
+                    [attr.aria-pressed]="estaElegido(candidato)"
+                    (click)="seleccionarCandidato(candidato)"
+                  >
+                    <span class="candidato-codigo">{{ candidato.codigo }}</span>
+                    <span class="candidato-titulo">{{ candidato.titulo || 'Sin título' }}</span>
+                    <span class="candidato-meta">
+                      {{ fecha(candidato.fecha) }}
+                      @if (candidato.distrito) {
+                        · {{ candidato.distrito }}
+                      }
+                      @if (candidato.estado) {
+                        · {{ candidato.estado }}
+                      }
+                    </span>
+                    @if (candidato.coincidencias.length) {
+                      <span class="candidato-criterios">
+                        @for (criterio of candidato.coincidencias; track criterio) {
+                          <span class="candidato-chip">{{ etiquetaCriterio(criterio) }}</span>
+                        }
+                      </span>
+                    }
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      } @else {
+        <p class="modal-texto">
+          La alerta se marcará como <strong>descartada</strong>: sale del trabajo pendiente pero no
+          se anula ni se borra. El motivo queda registrado con su autor y su fecha.
+        </p>
+      }
+
+      <div class="form-field">
+        <label class="form-label" for="triaje-motivo">Motivo *</label>
+        <textarea
+          id="triaje-motivo"
+          class="form-textarea"
+          rows="4"
+          [attr.maxlength]="maximo"
+          [value]="motivo()"
+          [attr.aria-describedby]="
+            errorMotivo() ? 'triaje-contador triaje-motivo-error' : 'triaje-contador'
+          "
+          (input)="campoMotivo($event)"
+        ></textarea>
+        <span id="triaje-contador" class="contador">
+          {{ motivo().length }} / {{ maximo }} caracteres · mínimo {{ minimo }}
+        </span>
+        @if (errorMotivo(); as fallo) {
+          <p id="triaje-motivo-error" class="campo-error" role="alert">{{ fallo }}</p>
+        }
+      </div>
+
+      @if (errorEnvio(); as fallo) {
+        <p class="form-error" role="alert">{{ fallo }}</p>
+      }
+    </div>
+
+    <footer class="modal-foot">
+      <button
+        type="button"
+        class="button-secondary"
+        [disabled]="enviando()"
+        (click)="cerrarConSalida()"
+      >
+        Cancelar
+      </button>
+      <button type="button" class="button-primary" [disabled]="enviando()" (click)="alConfirmar()">
+        {{
+          enviando() ? 'Guardando…' : esDuplicada() ? 'Marcar como duplicada' : 'Descartar alerta'
+        }}
+      </button>
+    </footer>
+  </section>
+</div>

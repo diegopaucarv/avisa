@@ -1,5 +1,6 @@
 import type { PoolClient } from "pg";
 
+import { registrarDescarga } from "@/lib/db/auditoria-descargas";
 import { ApiError, jsonError } from "@/lib/db/errors";
 import { queryParams, requireSession } from "@/lib/db/http";
 import { withSession } from "@/lib/db/tenant";
@@ -468,6 +469,9 @@ export async function GET(request: Request) {
         .filter(Boolean),
     );
 
+    // Se guarda lo aplicado para auditar la descarga fuera de la transacción.
+    let filtrosAuditoria: Record<string, string> = {};
+
     const { tablas, titulo } = await withSession(
       { usuarioId: sesion.uid, rolCodigo: sesion.rol },
       async (client) => {
@@ -496,6 +500,7 @@ export async function GET(request: Request) {
 
         const filtros = recogerFiltros(params, definicion);
         validarRangoVencimiento(filtros);
+        filtrosAuditoria = filtros;
 
         const filas = filtrarPorIds(
           filtrarPorId(await leerTodas(client, definicion.listar, filtros), id),
@@ -515,6 +520,11 @@ export async function GET(request: Request) {
     const nombre = `avisa_${claveEntidad}_${fechaArchivo(generadoEn)}.${
       EXTENSIONES[formato]
     }`;
+
+    const totalFilas = tablas.reduce(
+      (suma, tabla) => suma + tabla.filas.length,
+      0,
+    );
 
     let cuerpo: Uint8Array;
 
@@ -536,19 +546,27 @@ export async function GET(request: Request) {
         })),
       );
     } else {
-      const total = tablas.reduce(
-        (suma, tabla) => suma + tabla.filas.length,
-        0,
-      );
       cuerpo = generarPdf({
         titulo: esBase ? "AVISA - Respaldo de la base" : `AVISA - ${titulo}`,
-        subtitulo: `${total} registros en ${tablas.length} entidad${
+        subtitulo: `${totalFilas} registros en ${tablas.length} entidad${
           tablas.length === 1 ? "" : "es"
         }`,
         generadoEn,
         tablas: tablas.map(tablaParaPdf),
       });
     }
+
+    const filtrosDescarga: Record<string, string> = { ...filtrosAuditoria };
+    if (id) filtrosDescarga.id = id;
+    if (ids.size > 0) filtrosDescarga.ids = [...ids].join(",");
+
+    await registrarDescarga(request, sesion, {
+      entidad: claveEntidad,
+      // La extensión del archivo Excel es `xlsx`, no `excel`.
+      formato: formato === "excel" ? "xlsx" : formato,
+      filtros: filtrosDescarga,
+      filas: totalFilas,
+    });
 
     return respuesta(cuerpo, TIPOS[formato], nombre);
   } catch (error) {

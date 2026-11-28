@@ -65,6 +65,8 @@
 
   @if (exportarError(); as mensaje) {
   <p class="form-error" role="alert">{{ mensaje }}</p>
+  } @if (errorAbrir(); as mensaje) {
+  <p class="form-error" role="alert">{{ mensaje }}</p>
   } @if (avisoAnulacion(); as aviso) {
   <p class="form-hint aviso-ok" role="status">
     {{ aviso }}
@@ -81,9 +83,9 @@
       <app-icono nombre="buscar" [tamano]="14" />
       <input
         type="search"
-        placeholder="Buscar por código o palabra clave"
+        placeholder="Buscar por código, palabra clave o sectorista"
         [value]="filtros().q"
-        aria-label="Buscar alertas"
+        aria-label="Buscar alertas por código, palabra clave o sectorista"
         (input)="buscar($event)"
       />
     </label>
@@ -439,6 +441,20 @@
     [errorEnvio]="errorArchivo()"
     (cerrar)="cerrarArchivo()"
     (confirmar)="confirmarArchivo($event)"
+  />
+  } @if (alertaTriaje(); as triaje) {
+  <app-alerta-triaje
+    [modo]="triaje.modo"
+    [codigo]="triaje.alerta.codigo"
+    [titulo]="tituloAlerta(triaje.alerta)"
+    [enviando]="enviandoTriaje()"
+    [errorEnvio]="errorTriaje()"
+    [candidatos]="candidatosTriaje()"
+    [verificando]="verificandoTriaje()"
+    [errorCandidatos]="errorCandidatosTriaje()"
+    (cerrar)="cerrarTriaje()"
+    (confirmar)="confirmarTriaje($event)"
+    (buscar)="buscarCandidatosTriaje(triaje.alerta)"
   />
   }
 </section>

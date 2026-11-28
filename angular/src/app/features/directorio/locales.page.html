@@ -204,21 +204,39 @@
           </dl>
 
           <!--
-            El mapa nunca inventa precisión: con coordenadas pinta el marcador
-            exacto y, sin ellas, centra en el centroide regional con una nota.
+            `core.locales` no registra latitud/longitud, así que la ficha no pinta
+            un marcador exacto. La vista incorporada de Google Maps busca por la
+            dirección y resuelve el nivel de calle en el proveedor; la nota deja
+            claro que es una aproximación. Se retiró el mapa Leaflet de este
+            bloque porque, sin coordenadas, sólo centraba un círculo regional:
+            duplicaba el mapa y sugería más precisión de la que hay. El enlace a
+            Google Maps queda como vía directa y como respaldo si la vista
+            incorporada no carga.
           -->
-          <app-mapa-local
-            [nombre]="local.nombre"
-            [coordenadas]="coordenadasSeleccionado()"
-            [region]="local.region"
-          />
-
-          @if (enlaceMapa(local); as enlace) {
-          <a class="ficha-mapa" [href]="enlace" target="_blank" rel="noopener noreferrer">
-            <app-icono nombre="pin" [tamano]="14" />
-            Ver en el mapa
-          </a>
-          }
+          <div class="ficha-mapa-bloque">
+            @if (enlaceMapaIncorporadoSeleccionado(); as mapa) {
+            <iframe
+              class="ficha-mapa-embed"
+              [src]="mapa"
+              [title]="etiquetaMapaSeleccionado()"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen
+            ></iframe>
+            <p class="ficha-nota" role="note">
+              Vista aproximada por dirección: el local no tiene coordenadas registradas.
+            </p>
+            } @if (enlaceMapsSeleccionado(); as enlace) {
+            <a class="ficha-mapa" [href]="enlace" target="_blank" rel="noopener noreferrer">
+              <app-icono nombre="pin" [tamano]="14" />
+              Abrir en Google Maps
+            </a>
+            } @else {
+            <p class="ficha-nota" role="note">
+              Sin dirección ni distrito registrados: no hay mapa disponible.
+            </p>
+            }
+          </div>
         </section>
 
         <section class="ficha-seccion" aria-labelledby="local-panel-capacidad">

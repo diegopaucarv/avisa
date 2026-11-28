@@ -16,7 +16,10 @@ import {
 
 import { firstValueFrom } from 'rxjs';
 
+import { RouterLink } from '@angular/router';
+
 import { urlApi } from '../../core/config/entorno';
+import { urlConParametros } from '../../core/http/coleccion';
 import { consulta } from '../../core/http/consulta';
 import { aErrorApi, type ErrorApi } from '../../core/http/errores';
 import {
@@ -43,15 +46,23 @@ import {
   aJsonLineas,
   claveRiesgo,
   etiquetaEstado,
+  etiquetaTriaje,
   geografiaAlerta,
   hechosComoLineas,
   tituloLimpio,
   type Alerta,
   type AlcanceAlerta,
   type AltaAlerta,
+  type EstadoTriaje,
   type HechoLinea,
   type PatchAlerta,
 } from './alerta.mapeo';
+import {
+  aDuplicadosAlerta,
+  etiquetaCriterioAlerta,
+  type CandidatoDuplicadoAlerta,
+  type CriterioDuplicadoAlerta,
+} from './alerta-duplicados.mapeo';
 import { CasoComboboxComponent } from './caso-combobox.component';
 import {
   casoVinculadoDesde,
@@ -241,6 +252,7 @@ function claveProvincia(nombre: string): number {
   selector: 'app-alerta-panel',
   imports: [
     IconoComponent,
+    RouterLink,
     TerritorioBuscadorComponent,
     AdjuntosPanelComponent,
     CasoComboboxComponent,
@@ -689,6 +701,97 @@ function claveProvincia(nombre: string): number {
       text-decoration: underline;
     }
 
+    /* Aviso de duplicados del alta: se lee antes de registrar, no lo bloquea. */
+    .duplicados-aviso {
+      margin: 4px 0 10px;
+      padding: 11px 12px;
+      border: 1px solid #e8d3a3;
+      border-radius: 8px;
+      background: #fdf8ec;
+    }
+
+    .duplicados-aviso h3 {
+      margin: 0 0 3px;
+      color: #7a5a16;
+      font: 700 13.5px var(--font-display, inherit);
+    }
+
+    .duplicados-aviso .form-hint {
+      margin: 2px 0 0;
+    }
+
+    .duplicados-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 10px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .duplicado-item {
+      padding: 8px 9px;
+      border: 1px solid #e6e0cd;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .duplicado-cabecera {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+    }
+
+    .duplicado-codigo {
+      color: #7a5a16;
+      font: 700 12.5px var(--font-body, inherit);
+    }
+
+    .duplicado-titulo {
+      color: #22303f;
+      font-size: 13.5px;
+      line-height: 1.35;
+    }
+
+    .duplicado-meta {
+      margin: 3px 0 0;
+      color: #647487;
+      font-size: 12.5px;
+    }
+
+    .duplicado-criterios {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin: 6px 0 0;
+    }
+
+    .duplicado-chip {
+      padding: 1px 7px;
+      border: 1px solid #e8d3a3;
+      border-radius: 10px;
+      background: #fff;
+      color: #7a5a16;
+      font-size: 11.5px;
+      font-weight: 600;
+    }
+
+    /* Triaje en la ficha: sólo se pinta cuando hay fila de triaje. */
+    .triaje-estado {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: #f1ede1;
+      color: #7a5a16;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .triaje-estado.triaje-duplicada {
+      background: #eef3fa;
+      color: #4a6b93;
+    }
+
     .rejilla-dos {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -758,6 +861,23 @@ export class AlertaPanelComponent {
   readonly borradorAlta = signal<BorradorAlta>(borradorAltaVacio());
   readonly distritoAlta = signal<OpcionTerritorio | null>(null);
   readonly mensajeLocal = signal<string | null>(null);
+
+  /**
+   * Aviso de alertas parecidas en el alta. Es advisory: informa y nunca bloquea
+   * el registro. Se consulta con debounce mientras se escribe el título o se
+   * elige el distrito.
+   */
+  readonly duplicadosAlta = signal<readonly CandidatoDuplicadoAlerta[]>([]);
+  readonly verificandoDuplicados = signal(false);
+  readonly errorDuplicados = signal<string | null>(null);
+  private timerDuplicados: ReturnType<typeof setTimeout> | null = null;
+  private turnoDuplicados = 0;
+
+  /** Texto del botón de registro: con candidatos a la vista, confirma explícito. */
+  readonly textoRegistrar = computed(() => {
+    if (this.guardando()) return 'Registrando…';
+    return this.duplicadosAlta().length > 0 ? 'Registrar igualmente' : 'Registrar alerta';
+  });
 
   /** Texto del reporte pegado para repartirlo en el borrador. */
   readonly reportePegado = signal('');
@@ -941,6 +1061,7 @@ export class AlertaPanelComponent {
     this.destruccion.onDestroy(() => {
       this.focoPrevio?.focus?.();
       if (this.timerActor) clearTimeout(this.timerActor);
+      if (this.timerDuplicados) clearTimeout(this.timerDuplicados);
     });
 
     // Tras un guardado correcto se cierra el formulario para mostrar lo ya persistido.
@@ -982,6 +1103,7 @@ export class AlertaPanelComponent {
       this.borradorAlta.set({ ...borradorAltaVacio(), casoCode: this.casoInicial().trim() });
       this.distritoAlta.set(null);
       this.mensajeLocal.set(null);
+      this.limpiarDuplicados();
     });
 
     // Cuando responden los hechos del servidor se reemplazan las filas del
@@ -1095,6 +1217,7 @@ export class AlertaPanelComponent {
     const valor = objetivo.value;
     this.borradorAlta.update((actual) => ({ ...actual, [clave]: valor }));
     this.mensajeLocal.set(null);
+    if (clave === 'titulo') this.programarDuplicados();
   }
 
   cambiarRiesgoAlta(evento: Event): void {
@@ -1111,6 +1234,7 @@ export class AlertaPanelComponent {
       this.borradorAlta.update((actual) => ({ ...actual, region: '', provincia: '' }));
     }
     this.mensajeLocal.set(null);
+    this.programarDuplicados();
   }
 
   alElegirDistritoAlta(opcion: OpcionTerritorio | null): void {
@@ -1125,6 +1249,7 @@ export class AlertaPanelComponent {
       }));
     }
     this.mensajeLocal.set(null);
+    this.programarDuplicados();
   }
 
   /**
@@ -1147,6 +1272,85 @@ export class AlertaPanelComponent {
   cambiarCasoAlta(codigo: string): void {
     this.borradorAlta.update((actual) => ({ ...actual, casoCode: codigo }));
     this.mensajeLocal.set(null);
+  }
+
+  /**
+   * Programa (con debounce) la consulta de duplicados del alta. Correr la
+   * comprobación en cada tecla castigaría a la API; 400 ms basta para no
+   * consultar mientras se escribe.
+   */
+  private programarDuplicados(): void {
+    if (!this.esAlta()) return;
+    if (this.timerDuplicados) clearTimeout(this.timerDuplicados);
+    this.timerDuplicados = setTimeout(() => {
+      this.timerDuplicados = null;
+      this.consultarDuplicados();
+    }, 400);
+  }
+
+  /** Descarta la consulta en vuelo y el aviso visible (al cerrar o reiniciar el alta). */
+  private limpiarDuplicados(): void {
+    if (this.timerDuplicados) {
+      clearTimeout(this.timerDuplicados);
+      this.timerDuplicados = null;
+    }
+    this.turnoDuplicados += 1;
+    this.duplicadosAlta.set([]);
+    this.verificandoDuplicados.set(false);
+    this.errorDuplicados.set(null);
+  }
+
+  /**
+   * Consulta `GET /v1/alerts/duplicados` con el título y el distrito en curso.
+   *
+   * Se dispara con el título de 12 caracteres o más, o con un distrito elegido
+   * (aunque el título sea corto). La API exige un título no vacío, así que sin
+   * título no se consulta: sólo se limpia el aviso anterior.
+   */
+  private consultarDuplicados(): void {
+    if (!this.esAlta()) return;
+
+    const titulo = this.borradorAlta().titulo.trim();
+    const distrito = this.distritoAlta();
+    const distritoId = distrito?.tipo === 'distrito' ? distrito.id : null;
+
+    if (!titulo || (titulo.length < 12 && distritoId === null)) {
+      this.turnoDuplicados += 1;
+      this.duplicadosAlta.set([]);
+      this.verificandoDuplicados.set(false);
+      this.errorDuplicados.set(null);
+      return;
+    }
+
+    const turno = ++this.turnoDuplicados;
+    this.verificandoDuplicados.set(true);
+    this.errorDuplicados.set(null);
+
+    const url = urlConParametros(urlApi('/v1/alerts/duplicados'), { titulo, distritoId });
+
+    this.http.get<unknown>(url).subscribe({
+      next: (bruto) => {
+        if (turno !== this.turnoDuplicados) return;
+        this.verificandoDuplicados.set(false);
+        this.duplicadosAlta.set(aDuplicadosAlerta(bruto).candidatos);
+      },
+      error: () => {
+        if (turno !== this.turnoDuplicados) return;
+        // El aviso es advisory: un fallo no impide registrar la alerta.
+        this.verificandoDuplicados.set(false);
+        this.errorDuplicados.set('No se pudieron verificar alertas parecidas.');
+      },
+    });
+  }
+
+  /** Rótulo legible del estado de triaje (la ficha sólo lo usa en lectura). */
+  triajeLegible(estado: EstadoTriaje | null): string {
+    return estado ? etiquetaTriaje(estado) : '';
+  }
+
+  /** Rótulo del criterio de similitud de un candidato a duplicado. */
+  etiquetaCriterio(criterio: CriterioDuplicadoAlerta): string {
+    return etiquetaCriterioAlerta(criterio);
   }
 
   /* ---------------------------------------------------------------------- *
@@ -1332,6 +1536,7 @@ export class AlertaPanelComponent {
         `${datos.riesgos.length} riesgos y ${datos.acciones.length} acciones.`,
     );
     this.mensajeLocal.set(null);
+    this.programarDuplicados();
   }
 
   private actualizarLineas(campo: CampoLinea, transformar: (lineas: Linea[]) => Linea[]): void {

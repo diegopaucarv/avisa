@@ -24,9 +24,11 @@ import type { ResultadoEnlazado } from './busqueda.mapeo';
  * fondo y devuelve el foco al disparador; Tab y Shift+Tab ciclan dentro.
  *
  * Muestra el territorio que publica `GET /api/v1/search` —región, provincia,
- * distrito y ubigeo— cuando existe, y el destino del registro: la ficha de la
- * entidad si la ruta existe o su listado ya filtrado. Los datos faltantes se
- * pintan «—»; no se completan con suposiciones.
+ * distrito y ubigeo— cuando existe, y el destino del registro: la ficha propia
+ * de la entidad —alerta, compromiso, documento y actor abren su panel lateral
+ * con `?abrir=`; el caso, su ruta de detalle— o, para las demandas sin caso, su
+ * listado ya filtrado. Los datos faltantes se pintan «—»; no se completan con
+ * suposiciones.
  *
  * No consulta HTTP: recibe la fila ya normalizada y enriquecida por la página.
  */
@@ -54,7 +56,7 @@ import type { ResultadoEnlazado } from './busqueda.mapeo';
             <div class="panel-badges">
               <span class="status-badge panel-entidad">{{ fila().etiquetaTipo }}</span>
               <span class="status-badge" [class.panel-ficha]="fila().abreFicha">
-                {{ fila().abreFicha ? 'Ficha disponible' : 'Sin ficha propia' }}
+                {{ fila().abreFicha ? 'Abre ficha propia' : 'Sólo en el listado' }}
               </span>
             </div>
           </div>

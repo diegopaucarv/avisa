@@ -7,6 +7,7 @@ import {
   effect,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -47,6 +48,7 @@ import {
   ESTADOS_COMPROMISO,
   TIPOS_COMPROMISO,
   aCompromiso,
+  aDetalleCompromiso,
   estadoCumplimientoDe,
   etiquetaNivelGobierno,
   etiquetaPuntoFocal,
@@ -64,6 +66,7 @@ import {
   type Situacion,
 } from './compromiso.mapeo';
 import { CompromisoPanelComponent } from './compromiso-panel.component';
+import { CompromisosFranjaComponent } from './compromisos-franja.component';
 import { CompromisosGraficosComponent } from './compromisos-graficos.component';
 import { EstadisticasCompromisosComponent } from './estadisticas-compromisos.component';
 import { MatrizEquipoComponent } from './matriz-equipo.component';
@@ -79,6 +82,8 @@ type FiltrosCompromisos = {
   mesa: string;
   nivelGobierno: string;
   atiendeGenero: string;
+  /** Siglas de la unidad orgánica responsable; vacío = todas. */
+  unidad: string;
   /** `?vencidos=1`: sólo compromisos con vencimiento efectivo anterior a hoy. */
   vencidos: boolean;
   ver: VerRegistros;
@@ -233,6 +238,7 @@ function totalDe(bruto: unknown): number {
     CompromisoPanelComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
+    CompromisosFranjaComponent,
     CompromisosGraficosComponent,
     EstadisticasCompromisosComponent,
     MatrizEquipoComponent,
@@ -244,6 +250,23 @@ function totalDe(bruto: unknown): number {
   styles: `
     .filter-bar {
       flex-wrap: wrap;
+    }
+    /* El ranking de la franja fija la oficina por URL; el chip la hace visible
+       y permite quitarla aunque el panel de ranking no esté a la vista. */
+    .filtro-oficina {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--blue-pale);
+      color: #23384d;
+      font-size: 12.5px;
+    }
+    .filtro-oficina .link-button {
+      padding: 0;
+      font-size: 12px;
     }
     /*
      * Franja de cifras: una sola línea de indicadores pulsables, con el idioma
@@ -670,6 +693,24 @@ export class CompromisosPage {
     this.ruta.queryParamMap.pipe(map((params) => params.get('registrar'))),
     { initialValue: null },
   );
+
+  /**
+   * `?abrir=<id o código>`: abre el panel de ese compromiso aunque no esté en
+   * la página visible. Es el destino de los enlaces externos que apuntan a un
+   * registro concreto.
+   */
+  private readonly compromisoSolicitado = toSignal(
+    this.ruta.queryParamMap.pipe(map((params) => params.get('abrir'))),
+    { initialValue: null },
+  );
+
+  /** Última referencia pedida por URL; evita relanzar la petición en cada emisión. */
+  private aperturaEnCurso: string | null = null;
+
+  /** Error al resolver `?abrir`; se puede reintentar sin recargar la página. */
+  readonly errorApertura = signal<string | null>(null);
+
+  private readonly franja = viewChild(CompromisosFranjaComponent);
   private readonly http = inject(HttpClient);
   private readonly capacidades = inject(CapacidadesService);
 
@@ -893,6 +934,7 @@ export class CompromisosPage {
         mesa: params.get('mesa') ?? '',
         nivelGobierno: params.get('nivelGobierno') ?? '',
         atiendeGenero: params.get('atiendeGenero') ?? '',
+        unidad: params.get('unidad') ?? '',
         vencidos: params.get('vencidos') === '1',
         ver: params.get('ver') === 'anulados' ? 'anulados' : 'activos',
       })),
@@ -907,6 +949,7 @@ export class CompromisosPage {
         mesa: '',
         nivelGobierno: '',
         atiendeGenero: '',
+        unidad: '',
         vencidos: false,
         ver: 'activos',
       } satisfies FiltrosCompromisos,
@@ -929,6 +972,7 @@ export class CompromisosPage {
       tipo: filtros.tipo,
       nivelGobierno: filtros.nivelGobierno,
       atiendeGenero: filtros.atiendeGenero,
+      unidad: filtros.unidad,
     };
 
     if (this.vistaCalendario()) {
@@ -1001,6 +1045,7 @@ export class CompromisosPage {
         mesa: filtros.mesa,
         nivelGobierno: filtros.nivelGobierno,
         atiendeGenero: filtros.atiendeGenero,
+        unidad: filtros.unidad,
         // El modo mesas acota el listado a compromisos con espacio de diálogo.
         soloMesas: this.vistaMesas() ? '1' : '',
         // «Vencidos» es el mismo corte que usa el semáforo de la fila:
@@ -1067,6 +1112,7 @@ export class CompromisosPage {
           mesa: filtros.mesa,
           nivelGobierno: filtros.nivelGobierno,
           atiendeGenero: filtros.atiendeGenero,
+          unidad: filtros.unidad,
           soloMesas: this.vistaMesas() ? '1' : '',
           vencimiento_hasta: filtros.vencidos ? isoAyer() : '',
           ...extra,
@@ -1152,6 +1198,7 @@ export class CompromisosPage {
         mesa: filtros.mesa,
         nivelGobierno: filtros.nivelGobierno,
         atiendeGenero: filtros.atiendeGenero,
+        unidad: filtros.unidad,
       });
     },
     esquema: (bruto) => {
@@ -1188,6 +1235,7 @@ export class CompromisosPage {
         mesa: filtros.mesa,
         nivelGobierno: filtros.nivelGobierno,
         atiendeGenero: filtros.atiendeGenero,
+        unidad: filtros.unidad,
       });
     },
     esquema: (bruto) => {
@@ -1329,6 +1377,11 @@ export class CompromisosPage {
     void this.actualizar({ mesa: this.valorDe(evento), pagina: 1 });
   }
 
+  /** Quita el filtro de oficina que pudo llegar desde el ranking de la franja. */
+  quitarUnidad(): void {
+    void this.actualizar({ unidad: '', pagina: 1 });
+  }
+
   cambiarPagina(pagina: number): void {
     void this.actualizar({ pagina });
   }
@@ -1432,6 +1485,17 @@ export class CompromisosPage {
 
   cerrarPanel(): void {
     this.seleccionado.set(null);
+    this.aperturaEnCurso = null;
+    // El enlace directo ya cumplió su función al abrir el panel: se limpia sin
+    // dejar una entrada más en el historial.
+    if (this.ruta.snapshot.queryParamMap.has('abrir')) {
+      void this.router.navigate([], {
+        relativeTo: this.ruta,
+        queryParams: { abrir: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
   }
 
   constructor() {
@@ -1448,6 +1512,53 @@ export class CompromisosPage {
         replaceUrl: true,
       });
     });
+
+    effect(() => {
+      const referencia = this.compromisoSolicitado();
+      if (!referencia) {
+        // Cerrado el panel, un nuevo enlace con la misma referencia debe volver
+        // a resolverla.
+        this.aperturaEnCurso = null;
+        return;
+      }
+      if (referencia === this.aperturaEnCurso) return;
+      this.aperturaEnCurso = referencia;
+      this.abrirPorReferencia(referencia);
+    });
+  }
+
+  /**
+   * Resuelve `?abrir=` contra `GET /v1/commitments/{id}`. Se abre aunque el
+   * compromiso no esté en la página visible: la referencia manda, no la tabla.
+   * Si el registro se anuló, la API responde 404 y se avisa sin abrir nada.
+   */
+  private abrirPorReferencia(referencia: string): void {
+    this.errorApertura.set(null);
+    this.http.get<unknown>(urlApi(`/v1/commitments/${encodeURIComponent(referencia)}`)).subscribe({
+      next: (bruto) => {
+        // Si mientras cargaba se cerró o cambió el enlace, no se abre nada.
+        if (this.compromisoSolicitado() !== referencia) return;
+        const compromiso = aDetalleCompromiso(bruto).compromiso;
+        if (!compromiso.id) {
+          this.errorApertura.set('El compromiso solicitado no está disponible.');
+          return;
+        }
+        this.cerrarAnulacion();
+        this.abrir(compromiso);
+      },
+      error: (fallo: unknown) => {
+        this.aperturaEnCurso = null;
+        this.errorApertura.set(aErrorApi(fallo).message);
+      },
+    });
+  }
+
+  /** Reintenta el enlace directo sin recargar la página ni perder el parámetro. */
+  reintentarApertura(): void {
+    const referencia = this.compromisoSolicitado();
+    if (!referencia) return;
+    this.aperturaEnCurso = referencia;
+    this.abrirPorReferencia(referencia);
   }
 
   abrirAlta(): void {
@@ -1475,6 +1586,7 @@ export class CompromisosPage {
 
   alActualizar(): void {
     this.recurso.recargar();
+    this.franja()?.recargar();
     if (this.vistaCalendario()) this.recursoCalendario.recargar();
     if (this.vistaResumen()) this.recursoResumen.recargar();
   }
@@ -1739,6 +1851,7 @@ export class CompromisosPage {
         mesa: siguiente.mesa || null,
         nivelGobierno: siguiente.nivelGobierno || null,
         atiendeGenero: siguiente.atiendeGenero || null,
+        unidad: siguiente.unidad || null,
         vencidos: siguiente.vencidos ? '1' : null,
         ver: siguiente.ver === 'anulados' ? 'anulados' : null,
       },

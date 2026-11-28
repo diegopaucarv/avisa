@@ -112,6 +112,55 @@
             />
           </div>
 
+          @if (
+            esAlta() &&
+            (verificandoDuplicados() || duplicadosAlta().length > 0 || errorDuplicados())
+          ) {
+            <section class="duplicados-aviso" aria-labelledby="alta-duplicados-titulo">
+              <h3 id="alta-duplicados-titulo">Posibles alertas duplicadas</h3>
+              <p class="form-hint">
+                Revise estas alertas antes de registrar. El aviso no bloquea el alta: puede
+                registrar igualmente.
+              </p>
+              @if (verificandoDuplicados()) {
+                <p class="form-hint" role="status">Buscando alertas parecidas…</p>
+              }
+              @if (errorDuplicados(); as falloDuplicados) {
+                <p class="form-hint" role="alert">{{ falloDuplicados }}</p>
+              }
+              @if (duplicadosAlta().length) {
+                <ul class="duplicados-lista">
+                  @for (candidato of duplicadosAlta(); track candidato.codigo) {
+                    <li class="duplicado-item">
+                      <div class="duplicado-cabecera">
+                        <span class="duplicado-codigo">{{ candidato.codigo }}</span>
+                        <strong class="duplicado-titulo">{{
+                          candidato.titulo || 'Sin título'
+                        }}</strong>
+                      </div>
+                      <p class="duplicado-meta">
+                        {{ fecha(candidato.fecha) }}
+                        @if (candidato.distrito) {
+                          · {{ candidato.distrito }}
+                        }
+                        @if (candidato.estado) {
+                          · {{ candidato.estado }}
+                        }
+                      </p>
+                      @if (candidato.coincidencias.length) {
+                        <p class="duplicado-criterios">
+                          @for (criterio of candidato.coincidencias; track criterio) {
+                            <span class="duplicado-chip">{{ etiquetaCriterio(criterio) }}</span>
+                          }
+                        </p>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+          }
+
           <div class="rejilla-dos">
             <div class="form-field">
               <label class="form-label" for="alta-riesgo">⚠️ Nivel de riesgo *</label>
@@ -594,6 +643,43 @@
             </div>
           </section>
 
+          <!--
+            Triaje: sólo se pinta cuando hay una fila real de descarte o de
+            duplicado. Si la alerta nunca se trió no se inventa «Pendiente».
+          -->
+          @if (a.triajeEstado === 'descartada' || a.triajeEstado === 'duplicada') {
+            <section class="alerta-seccion triaje-seccion">
+              <h3 class="alerta-seccion-titulo">🧪 Triaje</h3>
+              <div class="alerta-seccion-cuerpo">
+                <p>
+                  <span
+                    class="triaje-estado"
+                    [class.triaje-duplicada]="a.triajeEstado === 'duplicada'"
+                    >{{ triajeLegible(a.triajeEstado) }}</span
+                  >
+                </p>
+                @if (a.motivoDescarte) {
+                  <p><b>Motivo:</b> {{ a.motivoDescarte }}</p>
+                }
+                @if (a.triajeEstado === 'duplicada') {
+                  @if (a.duplicadaDeCodigo) {
+                    <p>
+                      Duplicada de
+                      <a
+                        class="table-link"
+                        [routerLink]="['/alertas']"
+                        [queryParams]="{ abrir: a.duplicadaDeCodigo }"
+                        >{{ a.duplicadaDeCodigo }}</a
+                      >.
+                    </p>
+                  } @else {
+                    <p class="alerta-vacio">Duplicada de una alerta sin código registrado.</p>
+                  }
+                }
+              </div>
+            </section>
+          }
+
           <section class="alerta-seccion">
             <app-adjuntos-panel
               entidadTipo="alerta"
@@ -632,7 +718,7 @@
             [disabled]="guardando()"
             (click)="guardarAlta()"
           >
-            {{ guardando() ? 'Registrando…' : 'Registrar alerta' }}
+            {{ textoRegistrar() }}
           </button>
         } @else if (editando()) {
           <button type="button" class="button-secondary" (click)="cancelarEdicion()">

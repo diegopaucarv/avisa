@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 import { map } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
@@ -34,7 +35,6 @@ import {
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { MapaLocalComponent } from '../../shared/ui/mapa-local.component';
 import { salirModal } from '../../shared/ui/modal-salida';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -49,8 +49,10 @@ import {
 import {
   aLocalDirectorio,
   contactoDeLocal,
-  coordenadasDeLocal,
+  enlaceGoogleMaps,
+  enlaceMapaIncorporado,
   enlaceMapaLocal,
+  etiquetaMapa,
   territorioDeLocal,
   ubicacionDeLocal,
   type LocalDirectorio,
@@ -92,7 +94,6 @@ const FILTROS_INICIALES: FiltrosLocales = {
   selector: 'app-locales',
   imports: [
     IconoComponent,
-    MapaLocalComponent,
     PaginacionComponent,
     BarraSeleccionComponent,
     GaleriaFotosComponent,
@@ -299,6 +300,28 @@ const FILTROS_INICIALES: FiltrosLocales = {
       font-size: 13px;
       line-height: 1.65;
       white-space: pre-line;
+    }
+
+    .ficha-mapa-bloque {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    /*
+     * Alto fijo de nivel de calle dentro del panel lateral estrecho; el borde
+     * redondeado casa con la ficha y el fondo evita un hueco blanco mientras
+     * cargan las teselas de Google.
+     */
+    .ficha-mapa-embed {
+      display: block;
+      width: 100%;
+      height: 320px;
+      border: 1px solid #e6ecf1;
+      border-radius: 10px;
+      background: #f6f8fa;
     }
 
     .ficha-mapa {
@@ -585,6 +608,7 @@ export class LocalesPage {
   private readonly destruccion = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly capacidades = inject(CapacidadesService);
+  private readonly sanitizador = inject(DomSanitizer);
 
   /** El contacto del local sólo se pinta si el rol puede ver datos personales. */
   readonly puedeVerPii = this.capacidades.puedeVerPii;
@@ -785,10 +809,37 @@ export class LocalesPage {
     };
   });
 
-  /** Coordenadas exactas del local abierto; `null` si no hay ninguna. */
-  readonly coordenadasSeleccionado = computed(() => {
+  /**
+   * Enlace para abrir el local en Google Maps. Sin coordenadas registradas la
+   * búsqueda va por la dirección o el territorio; una URL de referencia guardada
+   * por el operador (`ubicacion_ref`) tiene prioridad porque es la que se quiso
+   * señalar.
+   */
+  readonly enlaceMapsSeleccionado = computed(() => {
     const local = this.seleccionado();
-    return local ? coordenadasDeLocal(local) : null;
+    if (!local) return null;
+
+    const referencia = local.ubicacionRef?.trim() ?? '';
+    if (/^https?:\/\//i.test(referencia)) return referencia;
+
+    return enlaceGoogleMaps(local);
+  });
+
+  /**
+   * Vista incorporada de Google Maps, sin API key. Se sanea como recurso porque
+   * Angular bloquea la URL de un `iframe` no confiable; `null` cuando el local no
+   * tiene ni dirección ni territorio y no hay nada que embeber.
+   */
+  readonly enlaceMapaIncorporadoSeleccionado = computed<SafeResourceUrl | null>(() => {
+    const local = this.seleccionado();
+    const enlace = local ? enlaceMapaIncorporado(local) : null;
+    return enlace ? this.sanitizador.bypassSecurityTrustResourceUrl(enlace) : null;
+  });
+
+  /** Etiqueta accesible del mapa del local abierto (nombre + búsqueda). */
+  readonly etiquetaMapaSeleccionado = computed(() => {
+    const local = this.seleccionado();
+    return local ? etiquetaMapa(local) : 'Mapa del local';
   });
 
   /**
@@ -953,11 +1004,6 @@ export class LocalesPage {
   /** Distrito, provincia y región, sin la dirección (que tiene su propia línea). */
   territorio(local: LocalDirectorio): string | null {
     return territorioDeLocal(local);
-  }
-
-  /** Enlace a Google Maps: URL de referencia o búsqueda por dirección. */
-  enlaceMapa(local: LocalDirectorio): string | null {
-    return enlaceMapaLocal(local);
   }
 
   /** Abre la ventana con el mensaje de WhatsApp ya generado. */

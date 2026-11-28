@@ -8,6 +8,7 @@ import {
   enriquecer,
   type ClaveGrupo,
   type Resultado,
+  type TipoBusqueda,
 } from './busqueda.mapeo';
 
 function grupo(clave: ClaveGrupo) {
@@ -245,36 +246,58 @@ describe('aEnlace', () => {
     expect(enlace.abreFicha).toBe(true);
   });
 
-  it('manda alerta, compromiso y documento a su listado filtrado por el código', () => {
-    const casos: [ClaveGrupo, string, string][] = [
-      ['alertas', 'AL-1', '/alertas'],
-      ['compromisos', 'CM-1', '/compromisos'],
-      ['documentos', 'DOC-1', '/documentos'],
+  it('abre la ficha de la alerta por su código', () => {
+    const enlace = aEnlace(
+      grupo('alertas'),
+      resultado({ tipo: 'alert', codigo: 'AT-2026-37', titulo: 'Alerta temprana' }),
+      'término',
+    );
+
+    expect(enlace.ruta).toEqual(['/alertas']);
+    expect(enlace.parametros).toEqual({ abrir: 'AT-2026-37' });
+    expect(enlace.abreFicha).toBe(true);
+  });
+
+  it('abre la ficha de compromisos y documentos por su id', () => {
+    const casos: [ClaveGrupo, TipoBusqueda, string][] = [
+      ['compromisos', 'commitment', '/compromisos'],
+      ['documentos', 'document', '/documentos'],
     ];
 
-    for (const [clave, codigo, listado] of casos) {
-      const definicion = grupo(clave);
+    for (const [clave, tipo, ruta] of casos) {
       const enlace = aEnlace(
-        definicion,
-        resultado({ tipo: definicion.tipo, codigo, titulo: 'Registro' }),
+        grupo(clave),
+        resultado({ tipo, id: '42', codigo: 'X-42', titulo: 'Registro' }),
         'término',
       );
 
-      expect(enlace.ruta).toEqual([listado]);
-      expect(enlace.parametros).toEqual({ q: codigo });
-      expect(enlace.abreFicha).toBe(false);
+      expect(enlace.ruta).toEqual([ruta]);
+      expect(enlace.parametros).toEqual({ abrir: '42' });
+      expect(enlace.abreFicha).toBe(true);
     }
   });
 
-  it('envía al directorio de actores con el título como término', () => {
+  it('abre la ficha del actor por su uid', () => {
     const enlace = aEnlace(
       grupo('actores'),
-      resultado({ tipo: 'actor', codigo: 'AC-1', titulo: 'Rosa Quispe' }),
+      resultado({ tipo: 'actor', id: 'uid-9', codigo: 'AC-9', titulo: 'Rosa Quispe' }),
       'rosa',
     );
 
     expect(enlace.ruta).toEqual(['/directorio', 'actores']);
-    expect(enlace.parametros).toEqual({ q: 'Rosa Quispe' });
+    expect(enlace.parametros).toEqual({ abrir: 'uid-9' });
+    expect(enlace.abreFicha).toBe(true);
+  });
+
+  it('cae al listado filtrado si falta el identificador de la ficha', () => {
+    const enlace = aEnlace(
+      grupo('documentos'),
+      resultado({ tipo: 'document', id: '', codigo: 'DOC-1', titulo: 'Registro' }),
+      'término',
+    );
+
+    expect(enlace.ruta).toEqual(['/documentos']);
+    expect(enlace.parametros).toEqual({ q: 'DOC-1' });
     expect(enlace.abreFicha).toBe(false);
   });
 

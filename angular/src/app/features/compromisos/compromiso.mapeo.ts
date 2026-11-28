@@ -150,8 +150,8 @@ export type Compromiso = {
   unidad: string | null;
   /**
    * Institución a la que pertenece la unidad responsable (`core.entidades`).
-   * La API todavía no la envía; se mapea por si llega y, si no, la ficha deja
-   * el hueco con «—» en lugar de inventar el nombre.
+   * La API la envía como `institucionSiglas` / `institucionNombre`; si no
+   * llega, la ficha deja el hueco con «—» en lugar de inventar el nombre.
    */
   institucionSiglas: string | null;
   institucionNombre: string | null;

@@ -48,6 +48,7 @@ import {
 } from '../../shared/ui/tabla.component';
 import { AccionesFilaComponent, type AccionMenu } from './acciones-fila.component';
 import { AlertaArchivoComponent } from './alerta-archivo.component';
+import { aDuplicadosAlerta, type CandidatoDuplicadoAlerta } from './alerta-duplicados.mapeo';
 import { AlertaModificacionComponent } from './alerta-modificacion.component';
 import {
   AlertaPanelComponent,
@@ -55,6 +56,11 @@ import {
   type ModoPanelAlerta,
 } from './alerta-panel.component';
 import { AlertaWhatsappComponent } from './alerta-whatsapp.component';
+import {
+  AlertaTriajeComponent,
+  type ModoTriaje,
+  type ResultadoTriaje,
+} from './alerta-triaje.component';
 import { ExportarAlertasMenuComponent } from './exportar-alertas-menu.component';
 import {
   ESTADOS_ALERTA,
@@ -151,6 +157,7 @@ function totalDe(bruto: unknown): number {
     AlertaArchivoComponent,
     AlertaModificacionComponent,
     AlertaWhatsappComponent,
+    AlertaTriajeComponent,
     ExportarAlertasMenuComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
@@ -461,6 +468,12 @@ export class AlertasPage {
     this.ruta.queryParamMap.pipe(map((params) => params.get('registrar'))),
     { initialValue: null },
   );
+
+  /** Código de alerta que pide abrir la URL (`?abrir=CODIGO`). */
+  private readonly abrirSolicitado = toSignal(
+    this.ruta.queryParamMap.pipe(map((params) => params.get('abrir'))),
+    { initialValue: null },
+  );
   private readonly http = inject(HttpClient);
   private readonly destruccion = inject(DestroyRef);
   private readonly capacidades = inject(CapacidadesService);
@@ -707,6 +720,21 @@ export class AlertasPage {
   readonly errorArchivo = signal<string | null>(null);
   readonly avisoArchivo = signal<string | null>(null);
 
+  /** Alerta que se está triando (descartar o marcar duplicada). */
+  readonly alertaTriaje = signal<{ alerta: Alerta; modo: ModoTriaje } | null>(null);
+  readonly enviandoTriaje = signal(false);
+  readonly errorTriaje = signal<string | null>(null);
+  /** Posibles originales al marcar duplicada; sólo aplica a ese modo. */
+  readonly candidatosTriaje = signal<readonly CandidatoDuplicadoAlerta[]>([]);
+  readonly verificandoTriaje = signal(false);
+  readonly errorCandidatosTriaje = signal<string | null>(null);
+  private turnoTriaje = 0;
+
+  /** Fallo al abrir una alerta pedida por `?abrir=`; vacío si no hubo. */
+  readonly errorAbrir = signal<string | null>(null);
+  /** Código ya abierto por URL, para no reabrir el panel al limpiar el parámetro. */
+  private codigoAbierto: string | null = null;
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
@@ -810,6 +838,22 @@ export class AlertasPage {
         queryParamsHandling: 'merge',
         replaceUrl: true,
       });
+    });
+
+    // Apertura directa por URL (`?abrir=CODIGO`). Funciona aunque la alerta no
+    // esté en la página visible: se pide el detalle por código y se abre por el
+    // mismo camino que un clic en la fila. Al limpiar el parámetro se olvida el
+    // código procesado para que un nuevo enlace pueda reabrirla.
+    effect(() => {
+      const codigo = this.abrirSolicitado();
+      if (!codigo) {
+        this.codigoAbierto = null;
+        return;
+      }
+      const limpio = codigo.trim();
+      if (!limpio || limpio === this.codigoAbierto) return;
+      this.codigoAbierto = limpio;
+      this.abrirPorCodigo(limpio);
     });
 
     // El caso del mensaje se recuerda para no volver a pedirlo al reabrir.
@@ -992,6 +1036,15 @@ export class AlertasPage {
       { id: 'whatsapp', etiqueta: 'Enviar por mensajería instantánea', seccion: 'Otras acciones' },
     );
 
+    // El triaje es escritura: sólo se ofrece a quien ya puede modificar la
+    // alerta. El endpoint exige además motivo, que el diálogo recoge.
+    if (this.capacidades.puedeModificar(alerta.clasificacion)) {
+      acciones.push(
+        { id: 'descartar', etiqueta: 'Descartar alerta', seccion: 'Otras acciones' },
+        { id: 'marcar-duplicada', etiqueta: 'Marcar como duplicada', seccion: 'Otras acciones' },
+      );
+    }
+
     return acciones;
   }
 
@@ -1025,6 +1078,12 @@ export class AlertasPage {
         break;
       case 'archivar-flujo':
         this.enviarAccionFila(alerta, PASO_ARCHIVO, alerta.pasoActual);
+        break;
+      case 'descartar':
+        this.abrirTriaje(alerta, 'descartar');
+        break;
+      case 'marcar-duplicada':
+        this.abrirTriaje(alerta, 'duplicada');
         break;
     }
   }
@@ -1404,6 +1463,143 @@ export class AlertasPage {
   }
 
   /* ---------------------------------------------------------------------- *
+   * Triaje (descartar / marcar duplicada)
+   * ---------------------------------------------------------------------- */
+
+  abrirTriaje(alerta: Alerta, modo: ModoTriaje): void {
+    if (!alerta.id) return;
+    if (!this.capacidades.puedeModificar(alerta.clasificacion)) {
+      this.avisoFila.set({
+        id: alerta.id,
+        texto: 'Su rol no permite triar esta alerta.',
+        tipo: 'error',
+      });
+      return;
+    }
+
+    this.aprobacionFila.set(null);
+    this.deshacerFila.set(null);
+    this.errorTriaje.set(null);
+    this.candidatosTriaje.set([]);
+    this.errorCandidatosTriaje.set(null);
+    this.verificandoTriaje.set(false);
+    this.alertaTriaje.set({ alerta, modo });
+
+    // En modo duplicada se ofrecen candidatos antes de escribir el código.
+    if (modo === 'duplicada') this.buscarCandidatosTriaje(alerta);
+  }
+
+  cerrarTriaje(): void {
+    if (this.enviandoTriaje()) return;
+    this.turnoTriaje += 1; // Invalida respuestas de una búsqueda en vuelo.
+    this.alertaTriaje.set(null);
+    this.errorTriaje.set(null);
+    this.candidatosTriaje.set([]);
+    this.errorCandidatosTriaje.set(null);
+    this.verificandoTriaje.set(false);
+  }
+
+  /**
+   * Pide `GET /v1/alerts/duplicados` con el código actual como `alerta` para que
+   * el servidor excluya la propia fila. El endpoint exige además un título: se
+   * reenvía el de la alerta; sin título la API responde 422 y el modal lo muestra
+   * como aviso, sin bloquear la escritura manual del código.
+   */
+  buscarCandidatosTriaje(alerta: Alerta): void {
+    const turno = ++this.turnoTriaje;
+    this.verificandoTriaje.set(true);
+    this.errorCandidatosTriaje.set(null);
+    this.candidatosTriaje.set([]);
+
+    const clave = (alerta.codigo || alerta.id).trim();
+    const url = urlConParametros(urlApi('/v1/alerts/duplicados'), {
+      titulo: alerta.titulo ?? '',
+      alerta: clave,
+    });
+
+    this.http.get<unknown>(url).subscribe({
+      next: (bruto) => {
+        if (turno !== this.turnoTriaje) return;
+        this.verificandoTriaje.set(false);
+        this.candidatosTriaje.set(aDuplicadosAlerta(bruto).candidatos);
+      },
+      error: (fallo: unknown) => {
+        if (turno !== this.turnoTriaje) return;
+        this.verificandoTriaje.set(false);
+        this.errorCandidatosTriaje.set(this.mensajeDeError(fallo));
+      },
+    });
+  }
+
+  /**
+   * `{id}` de `/v1/red-radar/{id}/triaje` acepta uuid o código legible; se envía
+   * el código por legibilidad y se recarga el listado para reflejar el estado.
+   */
+  confirmarTriaje(resultado: ResultadoTriaje): void {
+    const pendiente = this.alertaTriaje();
+    if (!pendiente || this.enviandoTriaje()) return;
+
+    const { alerta, modo } = pendiente;
+    const motivo = resultado.motivo.trim();
+    const clave = (alerta.codigo || alerta.id).trim();
+    if (!motivo || !clave) return;
+
+    const cuerpo: Record<string, unknown> = {
+      estado: modo === 'duplicada' ? 'duplicada' : 'descartada',
+      motivo,
+    };
+    const codigoOriginal = resultado.duplicadaDeCodigo?.trim();
+    if (modo === 'duplicada' && codigoOriginal) cuerpo['duplicadaDeCodigo'] = codigoOriginal;
+
+    this.enviandoTriaje.set(true);
+    this.errorTriaje.set(null);
+
+    this.http
+      .patch<unknown>(urlApi(`/v1/red-radar/${encodeURIComponent(clave)}/triaje`), cuerpo)
+      .subscribe({
+        next: () => {
+          this.enviandoTriaje.set(false);
+          this.alertaTriaje.set(null);
+          this.candidatosTriaje.set([]);
+          this.avisoFila.set({
+            id: alerta.id,
+            texto:
+              modo === 'duplicada'
+                ? `${alerta.codigo || 'La alerta'} quedó marcada como duplicada.`
+                : `${alerta.codigo || 'La alerta'} quedó descartada.`,
+            tipo: 'ok',
+          });
+          this.listado.recargar();
+          if (this.seleccionadaId() === alerta.id) this.detalle.recargar();
+        },
+        error: (fallo: unknown) => {
+          this.enviandoTriaje.set(false);
+          this.errorTriaje.set(this.mensajeDeError(fallo));
+        },
+      });
+  }
+
+  /** Abre el panel de una alerta pedida por `?abrir=` aunque no esté en la página. */
+  private abrirPorCodigo(codigo: string): void {
+    this.errorAbrir.set(null);
+    this.http.get<unknown>(urlApi(`/v1/alerts/${encodeURIComponent(codigo)}`)).subscribe({
+      next: (bruto) => {
+        const detalle = aDetalleAlerta(bruto);
+        if (!detalle.alerta.id) {
+          this.errorAbrir.set(`No se encontró la alerta «${codigo}».`);
+          return;
+        }
+        this.abrir(detalle.alerta);
+      },
+      error: (fallo: unknown) => {
+        this.errorAbrir.set(
+          `No se pudo abrir la alerta «${codigo}»: ${this.mensajeDeError(fallo)}`,
+        );
+      },
+    });
+  }
+
+  /* ---------------------------------------------------------------------- *
    * Anulación
    * ---------------------------------------------------------------------- */
 
@@ -1461,6 +1657,18 @@ export class AlertasPage {
     this.errorGuardado.set(null);
     this.aviso.set(null);
     this.modoPanel.set('ver');
+    this.errorAbrir.set(null);
+
+    // La apertura por `?abrir=` se limpia al cerrar para que recargar la página
+    // no vuelva a abrir el panel.
+    if (this.ruta.snapshot.queryParamMap.has('abrir')) {
+      void this.router.navigate([], {
+        relativeTo: this.ruta,
+        queryParams: { abrir: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
   }
 
   recargarListado(): void {
