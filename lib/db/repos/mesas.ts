@@ -20,6 +20,8 @@ type MesaFila = {
   naturaleza: string | null;
   estadoVigencia: string | null;
   ambito: string | null;
+  ambitoDetalle?: string | null;
+  esNacional?: boolean | null;
   fechaInstalacion: string | null;
   fechaFinVigencia: string | null;
   miembros: number;
@@ -100,7 +102,12 @@ export type MesaListItem = {
   tipoInstrumento: string | null;
   naturaleza: string | null;
   estadoVigencia: string | null;
+  /** Ámbito para mostrar: «Nacional» si `esNacional`, si no el texto crudo. */
   ambito: string | null;
+  /** Texto crudo de `ambito_departamento`, aunque se muestre «Nacional». */
+  ambitoDetalle: string | null;
+  /** Mesa de alcance nacional (más de tres regiones o ámbito declarado). */
+  esNacional: boolean;
   fechaInstalacion: string | null;
   fechaFinVigencia: string | null;
   miembros: number;
@@ -196,6 +203,27 @@ export async function hayVinculoMesas(client: PoolClient): Promise<boolean> {
   return existe;
 }
 
+/**
+ * `mesas_dialogo.es_nacional` llega con la migración 89. Mismo criterio que
+ * `hayVinculoMesas`: sólo se memoriza el positivo y, contra una base sin la
+ * columna, la lectura se degrada a `false` en vez de romper la pantalla.
+ */
+let nacionalCache: boolean | null = null;
+
+export async function hayEsNacional(client: PoolClient): Promise<boolean> {
+  if (nacionalCache === true) return true;
+  const result = await client.query<{ existe: boolean }>(
+    `select exists (
+       select 1 from information_schema.columns
+        where table_schema = 'core' and table_name = 'mesas_dialogo'
+          and column_name = 'es_nacional'
+     ) as existe`,
+  );
+  const existe = result.rows[0]?.existe === true;
+  if (existe) nacionalCache = true;
+  return existe;
+}
+
 /** `replace(codigo,'_',' ')`: la UI muestra el estado legible del catálogo. */
 const HITOS_TOTAL = `(select count(*)::int
            from core.hitos_compromiso h
@@ -245,6 +273,8 @@ function mapMesa(row: MesaFila): MesaListItem {
     naturaleza: row.naturaleza,
     estadoVigencia: row.estadoVigencia,
     ambito: row.ambito,
+    ambitoDetalle: row.ambitoDetalle ?? row.ambito ?? null,
+    esNacional: row.esNacional === true,
     fechaInstalacion: row.fechaInstalacion,
     fechaFinVigencia: row.fechaFinVigencia,
     miembros: Number(row.miembros ?? 0),
@@ -319,6 +349,7 @@ export async function listMesas(
   filtros: MesaListQuery = {},
 ): Promise<MesaListResult> {
   const vinculo = await hayVinculoMesas(client);
+  const nacional = await hayEsNacional(client);
 
   const params: unknown[] = [];
   const where: string[] = [];
@@ -367,6 +398,16 @@ export async function listMesas(
     ? `(select c.codigo_caso from core.casos c where c.id = m.caso_id)`
     : `null::text`;
 
+  // Con la columna de la migración 89 la mesa nacional se muestra como
+  // «Nacional» y conserva el texto crudo en `ambitoDetalle`; sin ella, ambos
+  // campos caen al texto de siempre para no romper una base sin migrar.
+  const ambitoSql = nacional
+    ? `case when m.es_nacional then 'Nacional' else m.ambito_departamento end as ambito`
+    : `m.ambito_departamento as ambito`;
+  const esNacionalSql = nacional
+    ? `m.es_nacional as "esNacional"`
+    : `false as "esNacional"`;
+
   const sql = `
     select m.id,
            m.codigo,
@@ -374,7 +415,9 @@ export async function listMesas(
            m.tipo_instrumento as "tipoInstrumento",
            m.naturaleza,
            m.estado_vigencia as "estadoVigencia",
-           m.ambito_departamento as ambito,
+           ${ambitoSql},
+           m.ambito_departamento as "ambitoDetalle",
+           ${esNacionalSql},
            to_char(m.fecha_instalacion, 'YYYY-MM-DD') as "fechaInstalacion",
            to_char(m.fecha_fin_vigencia, 'YYYY-MM-DD') as "fechaFinVigencia",
            (select count(*)::int
@@ -440,6 +483,14 @@ export async function getMesaDetalle(
   codigo: string,
 ): Promise<MesaDetalle | null> {
   const vinculo = await hayVinculoMesas(client);
+  const nacional = await hayEsNacional(client);
+
+  const ambitoSql = nacional
+    ? `case when m.es_nacional then 'Nacional' else m.ambito_departamento end as ambito`
+    : `m.ambito_departamento as ambito`;
+  const esNacionalSql = nacional
+    ? `m.es_nacional as "esNacional"`
+    : `false as "esNacional"`;
 
   const camposCaso = vinculo
     ? `m.caso_id as "casoId",
@@ -474,7 +525,9 @@ export async function getMesaDetalle(
             m.tipo_instrumento as "tipoInstrumento",
             m.naturaleza,
             m.estado_vigencia as "estadoVigencia",
-            m.ambito_departamento as ambito,
+            ${ambitoSql},
+            m.ambito_departamento as "ambitoDetalle",
+            ${esNacionalSql},
             to_char(m.fecha_instalacion, 'YYYY-MM-DD') as "fechaInstalacion",
             to_char(m.fecha_fin_vigencia, 'YYYY-MM-DD') as "fechaFinVigencia",
             m.objetivo,

@@ -73,6 +73,13 @@ function aCasoConSectorista(bruto: unknown): CasoConSectorista {
   return { ...aCaso(bruto), sectorista: texto(fila, ['sectorista', 'sectoristaNombre']) };
 }
 
+/**
+ * Espacio lógico del listado de `/casos`: el catálogo de casos o los casos
+ * espejo de mesas de diálogo (`MD-AAAA-NNNN`). Cadena vacía = casos, el valor de
+ * siempre, para que las URLs existentes sigan igual.
+ */
+type EspacioListado = '' | 'mesas';
+
 type FiltrosCasos = {
   q: string;
   estado: string;
@@ -100,6 +107,12 @@ type FiltrosCasos = {
   pagina: number;
   tamano: number;
   orden: string;
+  /**
+   * Espacio del listado: `''` (casos, valor por defecto) o `'mesas'` (sólo los
+   * casos espejo de mesas de diálogo). Viaja como `espacio=mesas` y lo resuelve
+   * el servidor; nunca se filtra sobre las filas ya cargadas.
+   */
+  espacio: EspacioListado;
   ver: VerRegistros;
 };
 
@@ -116,6 +129,7 @@ const FILTROS_INICIALES: FiltrosCasos = {
   pagina: 1,
   tamano: TAMANO_PAGINA,
   orden: 'risk',
+  espacio: '',
   ver: 'activos',
 };
 
@@ -406,62 +420,40 @@ function aConteos(bruto: unknown): ConteosCasos {
     /*
      * Barra principal de filtros (barra-filtros-casos).
      *
-     * Medido con el CSS real: los seis controles con rótulo más el botón de
-     * búsqueda avanzada suman ~1.490 px, de modo que la fila solo cabe de una
-     * pieza a partir de ~1.500 px de ventana; el campo de búsqueda puede
-     * encogerse hasta 140 px para absorber la diferencia. Por debajo se reparte
-     * en una rejilla de columnas iguales (3, luego 2, luego 1) en vez de
-     * envolver en filas irregulares.
+     * El requisito es una sola fila: búsqueda, chips de riesgo, Región,
+     * Abiertos/Archivados, el switch Casos/Mesas y «Búsqueda avanzada». Por eso
+     * la barra no envuelve (nowrap): si la ventana no alcanza, se desplaza en
+     * horizontal en lugar de repartirse en una rejilla de varias filas. El campo
+     * de búsqueda es el único elástico —absorbe el espacio sobrante y se encoge
+     * hasta 130 px—; el resto de controles conserva su ancho natural.
      *
      * Estos estilos viven aquí, y no en la hoja global, porque los del
      * componente ganan por especificidad.
      */
+    .barra-filtros-casos {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: thin;
+    }
+
     .barra-filtros-casos > * {
+      flex: 0 0 auto;
       min-width: 0;
     }
 
-    @media (min-width: 1500px) {
-      .barra-filtros-casos {
-        flex-wrap: nowrap;
-      }
-
-      .barra-filtros-casos .search-field--compacta {
-        flex: 1 1 200px;
-        min-width: 140px;
-      }
+    .barra-filtros-casos > .search-field--compacta {
+      flex: 1 1 160px;
+      min-width: 130px;
+      max-width: none;
     }
 
-    @media (max-width: 1499px) {
-      .barra-filtros-casos {
-        display: grid;
-        align-items: center;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px 10px;
-      }
-
-      .barra-filtros-casos .search-field--compacta {
-        width: 100%;
-        max-width: none;
-        flex: initial;
-      }
-
-      .barra-filtros-casos > .select-filter select {
-        flex: 1 1 auto;
-        min-width: 0;
-        max-width: none;
-      }
+    .barra-filtros-casos .chips-en-linea {
+      flex: none;
     }
 
-    @media (max-width: 1100px) {
-      .barra-filtros-casos {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 560px) {
-      .barra-filtros-casos {
-        grid-template-columns: minmax(0, 1fr);
-      }
+    .barra-filtros-casos .avanzado-enlace {
+      flex: none;
     }
 
     /* Búsqueda avanzada: no lleva la clase de la barra principal. */
@@ -703,6 +695,7 @@ export class CasosPage {
         const ver: VerRegistros = params.get('ver') === 'anulados' ? 'anulados' : 'activos';
         const estado = params.get('estado') ?? '';
         const abiertosParam = params.get('abiertos');
+        const espacio: EspacioListado = params.get('espacio') === 'mesas' ? 'mesas' : '';
         return {
           q: params.get('q') ?? '',
           estado,
@@ -715,20 +708,30 @@ export class CasosPage {
           nivel: params.get('nivel') ?? '',
           riesgo: params.get('riesgo') ?? '',
           // Sin `alcance` rige Preferencias; `todos` es la limpieza explícita.
-          alcance: alcance === null ? alcancePreferido() : alcance === 'todos' ? '' : alcance,
-          region: regionInicial(
-            this.ambitoRegiones(),
-            params.get('region'),
-            params.get('sinregion'),
-          ),
+          // En modo mesas no se aplica ningún recorte territorial: las mesas no
+          // declaran distrito y muchas no tienen región principal, así que un
+          // ámbito heredado las ocultaría por completo.
+          alcance:
+            espacio === 'mesas'
+              ? ''
+              : alcance === null
+                ? alcancePreferido()
+                : alcance === 'todos'
+                  ? ''
+                  : alcance,
+          region:
+            espacio === 'mesas'
+              ? ''
+              : regionInicial(this.ambitoRegiones(), params.get('region'), params.get('sinregion')),
           sectorista: params.get('sectorista') ?? '',
-          sinRegion: params.get('sinregion') === 'true',
+          sinRegion: espacio === 'mesas' ? false : params.get('sinregion') === 'true',
           pagina: Math.max(1, Number(params.get('pagina') ?? '1') || 1),
           tamano: Math.max(
             1,
             Number(params.get('tamano') ?? String(TAMANO_PAGINA)) || TAMANO_PAGINA,
           ),
           orden: ordenDe(params.get('orden')),
+          espacio,
           ver,
         };
       }),
@@ -776,6 +779,7 @@ export class CasosPage {
       region: filtros.region,
       sectorista: filtros.sectorista,
       sinregion: filtros.sinRegion ? 'true' : '',
+      espacio: filtros.espacio,
       sort: filtros.orden,
     });
   });
@@ -829,6 +833,7 @@ export class CasosPage {
         region: filtros.region,
         sectorista: filtros.sectorista,
         sinregion: filtros.sinRegion ? 'true' : '',
+        espacio: filtros.espacio,
         sort: filtros.orden,
         anulados: filtros.ver === 'anulados' ? 'true' : '',
         conteos: 'true',
@@ -993,6 +998,31 @@ export class CasosPage {
   /** Chips de nivel de riesgo: no abren la búsqueda avanzada. */
   seleccionarRiesgo(valor: string): void {
     this.actualizar({ riesgo: valor, pagina: 1 });
+  }
+
+  /**
+   * Switch «Casos / Mesas de diálogo». Al entrar en mesas se limpian los filtros
+   * que no las describen —riesgo, nivel, territorio y sectorista— para que el
+   * listado no aparezca vacío por un filtro heredado de la vista de casos. La
+   * búsqueda por palabra sí se conserva: sirve para localizar una mesa por su
+   * nombre o por su código `MD-`.
+   */
+  seleccionarEspacio(valor: 'casos' | 'mesas'): void {
+    if (valor === 'mesas') {
+      this.actualizar({
+        espacio: 'mesas',
+        riesgo: '',
+        nivel: '',
+        region: '',
+        sinRegion: false,
+        sectorista: '',
+        estado: '',
+        abiertos: true,
+        pagina: 1,
+      });
+      return;
+    }
+    this.actualizar({ espacio: '', pagina: 1 });
   }
 
   cambiarAlcance(evento: Event): void {
@@ -1320,6 +1350,7 @@ export class CasosPage {
         region: siguiente.region || null,
         sectorista: siguiente.sectorista || null,
         sinregion: siguiente.sinRegion ? 'true' : null,
+        espacio: siguiente.espacio || null,
         pagina: siguiente.pagina > 1 ? siguiente.pagina : null,
         tamano: siguiente.tamano !== TAMANO_PAGINA ? siguiente.tamano : null,
         orden: siguiente.orden !== ORDEN_INICIAL ? siguiente.orden : null,

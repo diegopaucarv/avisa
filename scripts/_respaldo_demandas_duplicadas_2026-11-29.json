@@ -1,0 +1,62 @@
+{
+  "generado": "2026-11-28T04:54:31.108Z",
+  "motivo": "respaldo previo a anular demandas duplicadas de la alerta 7d879728",
+  "alertaId": "7d879728-27b6-48a2-8b56-f93c6c0ac9ac",
+  "filas": [
+    {
+      "id": "7c2a98a3-69ae-4e51-a326-0ddb8f154a4d",
+      "descripcion_demanda": "Cuotas y dictámenes para la pesca de tiburón azul",
+      "clave": "cuotasydictamenesparalapescadetiburonazul",
+      "created_at": "2026-10-31T07:52:56.714Z",
+      "anulado_en": null
+    },
+    {
+      "id": "7eb0a1b8-de68-46f7-bddb-7d48f5578e8a",
+      "descripcion_demanda": "Cuotas y dictámenes para la pesca de tiburón azul",
+      "clave": "cuotasydictamenesparalapescadetiburonazul",
+      "created_at": "2026-10-31T07:52:56.714Z",
+      "anulado_en": null
+    },
+    {
+      "id": "8d9694ae-14f0-4715-94c8-0d83d187443d",
+      "descripcion_demanda": "1. Cuotas y dictámenes para la pesca de tiburón azul 2. Zonificación para la pesca del Perico 3. Emisión de la certificación para la exportación de la aleta de tiburón",
+      "clave": "1.cuotasydictamenesparalapescadetiburonazul2.zonificacionparalapescadelperico3.emisiondelacertificacionparalaexportaciondelaaletadetiburon",
+      "created_at": "2026-10-31T07:52:56.714Z",
+      "anulado_en": null
+    },
+    {
+      "id": "bf109feb-1868-4877-854c-bb4067b82b18",
+      "descripcion_demanda": "Emisión de la certificación para la exportación de la aleta de tiburón",
+      "clave": "emisiondelacertificacionparalaexportaciondelaaletadetiburon",
+      "created_at": "2026-10-31T07:52:56.714Z",
+      "anulado_en": null
+    },
+    {
+      "id": "c70e1c45-5808-4923-a2bf-15dc5904d66a",
+      "descripcion_demanda": "Zonificación para la pesca del Perico",
+      "clave": "zonificacionparalapescadelperico",
+      "created_at": "2026-10-31T07:52:56.714Z",
+      "anulado_en": null
+    },
+    {
+      "id": "c91e5366-6916-4726-b2b2-66176cde8da4",
+      "descripcion_demanda": "Zonificación para la pesca del Perico",
+      "clave": "zonificacionparalapescadelperico",
+      "created_at": "2026-10-31T07:52:56.714Z",
+      "anulado_en": null
+    },
+    {
+      "id": "c972d6ed-392f-479c-993b-fafe9942e8f2",
+      "descripcion_demanda": "Emisión de la certificación para la exportación de la aleta de tiburón",
+      "clave": "emisiondelacertificacionparalaexportaciondelaaletadetiburon",
+      "created_at": "2026-10-31T07:52:56.714Z",
+      "anulado_en": null
+    }
+  ],
+  "aAnular": [
+    "7eb0a1b8-de68-46f7-bddb-7d48f5578e8a",
+    "c972d6ed-392f-479c-993b-fafe9942e8f2",
+    "c91e5366-6916-4726-b2b2-66176cde8da4",
+    "8d9694ae-14f0-4715-94c8-0d83d187443d"
+  ]
+}

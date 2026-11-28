@@ -1,6 +1,6 @@
 # Estado de las migraciones en Neon
 
-> Última verificación: **28/11/2026**, contra `core.migracion_log` de la base
+> Última verificación: **29/11/2026**, contra `core.migracion_log` de la base
 > de producción en Neon (consulta de sólo lectura).
 >
 > Este documento es la fuente única para saber **qué está aplicado**, **qué
@@ -40,15 +40,24 @@
 | `85_c8_hechos_fecha_compacta_2026_11_27`                          | Mueve la fecha compacta (`* 05NOV2026`) a `alerta_hechos.fecha` |
 | `86_c8_hechos_vineta_asterisco_2026_11_27`                        | Quita la viñeta `*` inicial de los hechos                       |
 | `87_ampliar_textos_carga_historica_2026_11_27`                    | `cargo_actual` y `reuniones_dialogo.titulo` pasan a `text`      |
+| `88_auditoria_descargas_2026_11_28`                               | Tabla `audit.descargas` (auditoría de exportaciones)            |
+| `89_mesas_nacionales_2026_11_29`                                  | Marca de mesas nacionales y `core.casos.alcance_override`       |
+| `90_trigger_mesa_nacional_2026_11_29`                             | Trigger que deriva `es_nacional` y propaga el alcance al caso   |
+| `91_ambito_mesas_nacionales_2026_11_29`                           | Ámbito de las mesas 004/005/012 y registro de la clave 54       |
 
 Claves históricas fuera de la serie numérica, también aplicadas:
-`casos_tematica_anulable`, `distritos_inei_2025`.
+`casos_tematica_anulable`, `distritos_inei_2025` y
+`54_demandas_desvinculo_caso_2026_11_24`.
+
+> **La `54` se registró el 29/11/2026 sin volver a ejecutarla.** Su efecto ya
+> estaba en los datos (CS-2026-0003 sin demandas vinculadas), pero la clave
+> faltaba en el log. Se insertó de forma idempotente para que el registro
+> refleje la realidad y nadie la repita por error.
 
 ### 2.2 Pendientes de aplicar
 
-| Archivo                                 | Qué hace                                                                                                                           | Consecuencia mientras no se aplique                                                                                                                                                   |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `88_auditoria_descargas_2026_11_28.sql` | Crea `audit.descargas` (una fila por exportación: quién, entidad, formato, filtros, filas, IP y `user_agent`) con RLS y políticas. | `lib/db/auditoria-descargas.ts` deja un `console.warn` y la exportación funciona igual: la auditoría no puede tumbar una descarga. Las exportaciones no dejan rastro hasta aplicarla. |
+No hay migraciones pendientes de aplicar. La `88` (auditoría de descargas) se
+llevó a producción el 28/11/2026 y la `90`/`91` el 29/11/2026.
 
 La `82_porteo_campos_mesas` se aplicó el 27/11/2026 en una única transacción
 con `COMMIT`: creó `core.mesa_ficha` (satélite 1:1 del caso espejo) y portó la
@@ -56,13 +65,37 @@ ficha de las 21 mesas. Verificado tras el `COMMIT`: 21 fichas alineadas a los
 casos `MD-2026-0001..0021`, 0 mesas sin ficha, 0 desalineadas y la clave
 `82_porteo_campos_mesas_2026_11_27` en `core.migracion_log`.
 
-> **La `89` no hace falta.** La búsqueda de alertas por nombre de sectorista
-> necesitaba resolver `core.usuarios.nombre` para roles distintos de
-> `administrador` (la política `p18_usuarios_sel` sólo deja ver la fila propia).
-> Se resolvió con `core.nombres_sectoristas()` de la **74**, que ya está
-> aplicada y es `security definer`: `listAlerts` la usa como `left join` y como
-> columna de búsqueda, con el join original a `core.usuarios` como respaldo.
-> No hay DDL pendiente por este motivo.
+> **La regla «más de tres regiones ⇒ Nacional» es ahora un trigger.** La `89`
+> marcó las mesas nacionales con un `update` puntual; la `90` añade
+> `core.mesa_es_nacional(text)`, el trigger BEFORE que recalcula
+> `es_nacional` en cada escritura y el trigger AFTER que fija o limpia
+> `core.casos.alcance_override` del caso espejo. La marca es un valor
+> **derivado**: una edición manual de `es_nacional` se sobrescribe. Verificado
+> con una transacción revertida (`OAIPCS-013` → `ambito = 'Loreto'` desmarca la
+> mesa y limpia el override; el `rollback` lo restaura).
+>
+> La `91` completó las tres mesas que la `89` dejó sin clasificar:
+>
+> | Mesa         | Ámbito escrito                                   | Fundamento                                                                                                                                            |
+> | ------------ | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+> | `OAIPCS-004` | `Nacional`                                       | Comisión Sectorial de Transferencia MYPE e Industria (RM N° 159-2017-PRODUCE): transferencia de competencias a los gobiernos regionales, todo el país |
+> | `OAIPCS-005` | `Nacional`                                       | Grupo de Trabajo Multisectorial de la Política Nacional Multisectorial de Descentralización (RM N° 120-2022-PCM)                                      |
+> | `OAIPCS-012` | `Apurímac, Ayacucho, Cusco, Junín, Huancavelica` | VRAEM Productivo (DS N° 006-2023-PCM): el valle abarca cinco departamentos                                                                            |
+>
+> Resultado: **nueve** mesas nacionales (001, 002, 003, 004, 005, 012, 013,
+> 015 y 034), todas con su caso espejo en alcance 5, y cero discrepancias entre
+> la marca almacenada y la regla.
+
+> **El número `89` quedó para las mesas nacionales.** La búsqueda de alertas
+> por nombre de sectorista necesitaba resolver `core.usuarios.nombre` para roles
+> distintos de `administrador` (la política `p18_usuarios_sel` sólo deja ver la
+> fila propia). Se resolvió con `core.nombres_sectoristas()` de la **74**, que ya
+> está aplicada y es `security definer`: `listAlerts` la usa como `left join` y
+> como columna de búsqueda, con el join original a `core.usuarios` como respaldo.
+> No hizo falta DDL por ese motivo, así que el `89` se usó para la marca de mesas
+> nacionales (`migration/89_mesas_nacionales_2026_11_29.sql`): añade
+> `core.mesas_dialogo.es_nacional` y `core.casos.alcance_override`, y ajusta
+> `core.alcance_caso()` para respetar el override.
 
 ### 2.3 Diseñadas, no aplicadas
 

@@ -71,6 +71,7 @@ const FILTROS_CASOS = [
   "region",
   "sinregion",
   "abiertos",
+  "espacio",
   "sort",
 ] as const;
 

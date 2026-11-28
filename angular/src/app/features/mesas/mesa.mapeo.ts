@@ -43,7 +43,12 @@ export type Mesa = {
   tipoInstrumento: string | null;
   naturaleza: NaturalezaMesa;
   estadoVigencia: EstadoVigencia;
+  /** Ámbito para mostrar: «Nacional» si `esNacional`, si no el texto crudo. */
   ambito: string | null;
+  /** Texto crudo de `ambito_departamento`, aun cuando se muestre «Nacional». */
+  ambitoDetalle: string | null;
+  /** Mesa de alcance nacional (más de tres regiones o ámbito declarado así). */
+  esNacional: boolean;
   fechaInstalacion: string | null;
   fechaFinVigencia: string | null;
   miembros: number;
@@ -147,6 +152,8 @@ export function aMesa(bruto: unknown): Mesa {
     naturaleza: naturalezaDe(texto(registro, ['naturaleza'])),
     estadoVigencia: vigenciaDe(texto(registro, ['estadoVigencia', 'estado_vigencia'])),
     ambito: texto(registro, ['ambito', 'ambitoDepartamento', 'ambito_departamento']),
+    ambitoDetalle: texto(registro, ['ambitoDetalle', 'ambito_detalle', 'ambito_departamento']),
+    esNacional: registro['esNacional'] === true || registro['es_nacional'] === true,
     fechaInstalacion: texto(registro, ['fechaInstalacion', 'fecha_instalacion']),
     fechaFinVigencia: texto(registro, ['fechaFinVigencia', 'fecha_fin_vigencia']),
     miembros: numero(registro, ['miembros']) ?? 0,

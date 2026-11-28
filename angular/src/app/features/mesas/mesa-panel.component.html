@@ -82,10 +82,22 @@
               @if (ficha.mesa.tipoInstrumento) {
                 <span class="badge">{{ ficha.mesa.tipoInstrumento }}</span>
               }
-              @if (ficha.mesa.ambito) {
+              @if (ficha.mesa.esNacional) {
+                <span class="badge">Nacional</span>
+              } @else if (ficha.mesa.ambito) {
                 <span class="badge">{{ ficha.mesa.ambito }}</span>
               }
             </div>
+
+            <!-- Solo se muestra la cobertura cuando el detalle aporta algo
+                 distinto del chip «Nacional» (evita la línea redundante). -->
+            @if (
+              ficha.mesa.esNacional &&
+              ficha.mesa.ambitoDetalle &&
+              ficha.mesa.ambitoDetalle.trim().toLowerCase() !== 'nacional'
+            ) {
+              <p class="form-hint">Cobertura: {{ ficha.mesa.ambitoDetalle }}</p>
+            }
 
             <dl class="mesa-datos">
               <div>

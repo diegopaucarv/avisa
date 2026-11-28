@@ -3,7 +3,7 @@ import { auditChange } from "../audit";
 import { filtroTexto } from "../busqueda";
 import { ApiError } from "../errors";
 import { normalizarMotivo } from "./anulacion";
-import { excluirCasosMesa } from "./casos-filtro";
+import { excluirCasosMesa, soloCasosMesa } from "./casos-filtro";
 
 const CASE_SELECT = `
   c.id,
@@ -126,6 +126,12 @@ export type CaseListQuery = {
    * `abiertos`, para que los chips muestren cuántos casos hay al cambiar de chip.
    */
   conteos?: boolean;
+  /**
+   * Espacio lógico del listado. `"mesas"` se queda sólo con los casos espejo
+   * de mesas de diálogo (`MD-AAAA-NNNN`); por defecto (o `"casos"`) se excluyen
+   * como siempre. Es el switch «Casos / Mesas de diálogo» de la barra.
+   */
+  espacio?: "casos" | "mesas";
   page?: number;
   pageSize?: number;
   sort?: string;
@@ -268,10 +274,14 @@ async function construirWhere(
     return `$${params.length}`;
   };
 
-  // Los casos espejo de mesas (`MD-AAAA-NNNN`) no entran en el listado ni en los
-  // chips: no declaran distrito, nivel ni prioridad y sólo inflarían totales.
-  // `getCaseByCode` los sigue resolviendo porque no pasa por este constructor.
-  where.push(excluirCasosMesa("c"));
+  // Los casos espejo de mesas (`MD-AAAA-NNNN`) no entran en el listado oficial ni
+  // en los chips: no declaran distrito, nivel ni prioridad y sólo inflarían
+  // totales. El modo «Mesas de diálogo» los pide a propósito (`espacio=mesas`),
+  // y entonces el resto de filtros sigue aplicándose con normalidad.
+  // `getCaseByCode` los resuelve siempre porque no pasa por este constructor.
+  where.push(
+    query.espacio === "mesas" ? soloCasosMesa("c") : excluirCasosMesa("c"),
+  );
 
   // Se exige que aparezcan todas las palabras del término: un único `like` con
   // el término completo sólo encontraba las palabras contiguas y en ese orden.

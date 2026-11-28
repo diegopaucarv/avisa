@@ -7,9 +7,10 @@
  * generan filas vacías y totales inflados. Siguen accesibles por su código con
  * `getCaseByCode`; lo que se excluye es su aparición en los conjuntos oficiales.
  *
- * Éste es el único punto a cambiar si mañana se quieren mostrar de nuevo:
- * basta con que `excluirCasosMesa` devuelva `true`, que es un predicado válido y
- * neutral en cualquier `WHERE` (los llamadores lo añaden siempre).
+ * Los listados oficiales siguen excluyéndolos con `excluirCasosMesa`; el
+ * listado de casos puede pedirlos explícitamente con `soloCasosMesa` (el switch
+ * «Casos / Mesas de diálogo» de la barra de filtros), de modo que el mismo
+ * endpoint sirva ambas vistas sin duplicar repositorios.
  */
 
 /** Prefijo de los códigos de caso que espejan una mesa de diálogo. */
@@ -25,4 +26,15 @@ export const PREFIJO_CASO_MESA = "MD-";
 export function excluirCasosMesa(alias?: string): string {
   const columna = alias ? `${alias}.codigo_caso` : "codigo_caso";
   return `coalesce(${columna}, '') not like '${PREFIJO_CASO_MESA}%'`;
+}
+
+/**
+ * Complemento exacto de `excluirCasosMesa`: deja **sólo** los casos espejo de
+ * mesa. Lo usa el listado de casos cuando la barra cambia al modo «Mesas de
+ * diálogo»; el resto de filtros (búsqueda, riesgo, estado) siguen aplicándose.
+ * Tolera el código nulo por la misma razón que su complemento.
+ */
+export function soloCasosMesa(alias?: string): string {
+  const columna = alias ? `${alias}.codigo_caso` : "codigo_caso";
+  return `coalesce(${columna}, '') like '${PREFIJO_CASO_MESA}%'`;
 }

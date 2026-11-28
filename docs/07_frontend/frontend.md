@@ -951,9 +951,29 @@ Capa de servidor y de datos, más el remate de las vistas que dependían de ella
 | **Búsqueda**    | `3.5` · Las fichas propias abren por `?abrir=`: alertas por código, compromisos y documentos por id, actores por `actor_uid`. La insignia «Abre ficha propia» lo indica.                                                                                                    |
 | **Transversal** | **Auditoría de descargas** (`audit.descargas`, migración `88`): cada exportación registra usuario, rol, entidad, formato, filtros, filas, IP y `user_agent`. Sin la migración, la descarga sigue y sólo queda un aviso.                                                     |
 
-**Migración de esta ronda:** `88` (auditoría de descargas) está **diseñada y sin
-aplicar**. No se necesitó DDL para la búsqueda por sectorista: se resolvió con
+**Migración de esta ronda:** `88` (auditoría de descargas) **aplicada** el
+28/11/2026. No se necesitó DDL para la búsqueda por sectorista: se resolvió con
 `core.nombres_sectoristas()` de la `74`, ya aplicada.
+
+### Tercera ronda del 2026-11-29 · mesas de alcance nacional
+
+Regla de negocio: una mesa de diálogo cuyo ámbito abarque **más de tres
+regiones** se considera de alcance **Nacional**. Lo resuelve la migración `89`,
+ya aplicada:
+
+| Pieza          | Qué quedó hecho                                                                                                                                                                                                                                                             |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Base**       | `core.mesas_dialogo.es_nacional` (DEFAULT `false`) y `core.casos.alcance_override` (nullable, FK a `core.cat_alcances_geograficos`).                                                                                                                                        |
+| **Derivación** | `core.alcance_caso(uuid)` devuelve `coalesce(alcance_override, <cálculo previo>)`: la semántica anterior (macroregión única, o 5 si abarca varias, o NULL sin regiones) queda intacta y el override sólo actúa cuando está definido.                                        |
+| **Datos**      | Se marcan `OAIPCS-001/002/003` (25 regiones), `OAIPCS-013` (5), `OAIPCS-015` y `OAIPCS-034` (texto «Nacional»). Con la `91` se suman `OAIPCS-004` y `OAIPCS-005` (ámbito `Nacional`) y `OAIPCS-012` (los cinco departamentos del VRAEM). Total: **nueve** mesas nacionales. |
+| **API mesas**  | `GET /v1/mesas` y `/v1/mesas/{codigo}` envían `esNacional` y `ambitoDetalle`; `ambito` pasa a `«Nacional»` en esas filas conservando el texto crudo en `ambitoDetalle`. Contra una base sin la 89, `esNacional` degrada a `false`.                                          |
+| **Vista**      | El panel de la mesa muestra el chip **Nacional** y, debajo, la cobertura detallada («Cobertura: …»). El listado muestra «Nacional» en la columna Ámbito.                                                                                                                    |
+
+**Migraciones de esta ronda:** `89` (columnas y override), `90` (trigger que
+deriva `es_nacional` y propaga el alcance al caso espejo) y `91` (ámbito de las
+mesas 004/005/012), aplicadas y verificadas. La regla «más de tres regiones ⇒
+Nacional» ya no se recalcula a mano: es un trigger `SECURITY DEFINER` que
+deriva la marca en cada escritura y mantiene el `alcance_override` del caso.
 
 ---
 

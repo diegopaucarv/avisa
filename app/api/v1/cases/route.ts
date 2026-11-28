@@ -56,6 +56,10 @@ export const dynamic = "force-dynamic";
  * `conteos=true` no es un filtro: pide que la respuesta incluya los conteos de
  * los chips de estado (`todos`, `abiertos`, `resueltos`, `archivados`), que se
  * calculan con los filtros vigentes pero ignorando el propio estado.
+ *
+ * `espacio=mesas` cambia el conjunto: en vez de excluir los casos espejo de
+ * mesas de diálogo (`MD-AAAA-NNNN`) los devuelve como único contenido. Sin el
+ * parámetro (o con `espacio=casos`) el listado es el de siempre.
  */
 const FILTERS = [
   "q",
@@ -111,6 +115,18 @@ export async function GET(request: Request) {
     // misma de siempre.
     if (leerBooleano(params.get("conteos"))) query.conteos = true;
 
+    // `espacio=mesas` acota el listado a los casos espejo de mesas de diálogo.
+    // Es un valor cerrado, así que se valida aquí y no en el repositorio.
+    const espacio = params.get("espacio");
+    if (espacio === "mesas") query.espacio = "mesas";
+    else if (espacio && espacio !== "casos") {
+      throw new ApiError(
+        422,
+        "El filtro espacio sólo admite «casos» o «mesas».",
+        "FILTRO_INVALIDO",
+      );
+    }
+
     // Ámbito territorial por defecto: el sectorista ve sus regiones asignadas.
     // Un filtro territorial explícito del usuario manda sobre el valor por
     // defecto, incluido `alcance=todos`, que pide ver todo.
@@ -122,6 +138,10 @@ export async function GET(request: Request) {
     if (
       scope.mode === "regions" &&
       !pidioTerritorio &&
+      // Las mesas de diálogo no declaran distrito y muchas no tienen región
+      // principal (algunas la tienen por coincidencia exacta, otras son
+      // nacionales): aplicarles el ámbito del sectorista las ocultaría todas.
+      query.espacio !== "mesas" &&
       scope.regiones.length > 0
     ) {
       query.regiones = scope.regiones;

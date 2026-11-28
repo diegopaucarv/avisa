@@ -63,6 +63,7 @@ describe('aMesa', () => {
     expect(mesa.tipoInstrumento).toBe('Acta');
     expect(mesa.estadoVigencia).toBe('Por vencer');
     expect(mesa.ambito).toBe('Loreto, Ucayali');
+    expect(mesa.esNacional).toBe(false);
     expect(mesa.miembros).toBe(4);
     expect(mesa.casoCodigo).toBe('MD-2026-0001');
   });
@@ -78,11 +79,25 @@ describe('aMesa', () => {
     expect(mesa.compromisos).toBe(0);
     expect(mesa.compromisosCumplidos).toBe(0);
     expect(mesa.casoCodigo).toBeNull();
+    expect(mesa.esNacional).toBe(false);
   });
 
   it('tolera un bruto que no es registro', () => {
     expect(aMesa(null).codigo).toBe('Sin código');
     expect(aMesa([1, 2]).codigo).toBe('Sin código');
+  });
+
+  it('muestra «Nacional» y conserva el ámbito detallado de una mesa nacional', () => {
+    const mesa = aMesa({
+      codigo: 'OAIPCS-013',
+      ambito: 'Nacional',
+      ambitoDetalle: 'Junín, Pasco, Huánuco, Cusco, Ayacucho',
+      esNacional: true,
+    });
+
+    expect(mesa.ambito).toBe('Nacional');
+    expect(mesa.ambitoDetalle).toBe('Junín, Pasco, Huánuco, Cusco, Ayacucho');
+    expect(mesa.esNacional).toBe(true);
   });
 });
 
