@@ -375,7 +375,12 @@ export type AlertDemanda = {
 };
 
 export type AlertDetail = {
-  alert: AlertItem;
+  /**
+   * `casoActualizadoEn` sólo viaja en el detalle: es el instante de la última
+   * actividad del expediente vinculado (ver `getAlertById`). En la lista no se
+   * calcula (sería costoso y no se pinta).
+   */
+  alert: AlertItem & { casoActualizadoEn: string | null };
   demandas: AlertDemanda[];
   generatedAt: string;
 };
@@ -701,7 +706,21 @@ export async function getAlertById(
                    limit 20
                 ) x
                where x.descripcion is not null
-            ) as caso_demandas
+            ) as caso_demandas,
+            -- Última actividad del expediente: el mayor updated_at entre el
+            -- propio caso, sus demandas, compromisos, hechos de cronología y
+            -- alertas vinculadas. greatest() ignora los nulos, así que un
+            -- agregado vacío no arrastra el resultado; si no hay caso, todas
+            -- las fuentes son nulas y el campo queda en null. No se filtra por
+            -- anulado_en: una anulación también es actividad del expediente.
+            greatest(
+              c.fecha_ultima_actualizacion,
+              c.updated_at,
+              (select max(dem.updated_at) from core.demandas dem where dem.caso_id = a.caso_id),
+              (select max(comp.updated_at) from core.compromisos comp where comp.caso_id = a.caso_id),
+              (select max(cron.updated_at) from core.caso_cronologia cron where cron.caso_id = a.caso_id),
+              (select max(alrt.updated_at) from core.alertas_tempranas alrt where alrt.caso_id = a.caso_id)
+            ) as caso_actualizado_en
      ${ALERT_FROM}
      where a.id::text = $1 or a.codigo_alerta = $1
      limit 1`,
@@ -726,7 +745,10 @@ export async function getAlertById(
   );
 
   return {
-    alert: mapAlert(row),
+    alert: {
+      ...mapAlert(row),
+      casoActualizadoEn: isoOrNull(row.caso_actualizado_en),
+    },
     demandas: demandas.rows.map((d) => ({
       id: d.id,
       descripcion: d.descripcion,

@@ -8,6 +8,16 @@
         [idsSeleccionados]="seleccion.lista()"
         (fallo)="alFallarExportacion($event)"
       />
+      @if (seleccion.cantidad() > 0) {
+      <button
+        type="button"
+        class="button-secondary barra-mensaje"
+        (click)="abrirMensajeSeleccion()"
+      >
+        <app-icono nombre="bandeja" [tamano]="14" />
+        Enviar mensaje ({{ seleccion.cantidad() }})
+      </button>
+      }
     </div>
   </header>
 
@@ -114,7 +124,7 @@
     (paginaCambia)="cambiarPagina($event)"
     (tamanoCambia)="cambiarTamano($event)"
   />
-  } @if (seleccionado(); as local) {
+  } @if (seleccionado(); as local) { @if (!mensajeAbierto()) {
   <div class="drawer-scrim" (click)="alFondo($event)" (keydown)="alTecla($event)">
     <aside
       #panel
@@ -154,10 +164,20 @@
       </header>
 
       <div class="drawer-body">
-        <button type="button" class="button-primary whatsapp-boton" (click)="abrirWhatsapp(local)">
-          <app-icono nombre="bandeja" [tamano]="16" />
-          Generar mensaje para WhatsApp
-        </button>
+        <div class="ficha-acciones">
+          <button
+            type="button"
+            class="button-secondary whatsapp-boton"
+            (click)="abrirWhatsapp(local)"
+          >
+            <app-icono nombre="bandeja" [tamano]="16" />
+            Generar mensaje para WhatsApp
+          </button>
+          <button type="button" class="button-primary whatsapp-boton" (click)="abrirMensaje(local)">
+            <app-icono nombre="bandeja" [tamano]="16" />
+            Enviar mensaje
+          </button>
+        </div>
 
         <figure class="ficha-foto">
           @if (fotoDe(local.id); as foto) {
@@ -387,7 +407,7 @@
       </div>
     </aside>
   </div>
-  } @if (whatsappLocal(); as local) {
+  } } @if (whatsappLocal(); as local) {
   <div class="modal-scrim" (click)="alFondoWhatsapp($event)" (keydown)="alTeclaWhatsapp($event)">
     <section
       #whatsappDialogo
@@ -475,5 +495,14 @@
       </footer>
     </section>
   </div>
+  } @if (mensajeAbierto()) {
+  <app-mensaje-panel
+    [abierto]="true"
+    [contexto]="contextoMensaje()"
+    [destinatarios]="destinatariosMensaje()"
+    [permitirAnadir]="true"
+    (cerrar)="cerrarMensaje()"
+    (destinatariosCambio)="alCambiarDestinatarios($event)"
+  />
   }
 </section>

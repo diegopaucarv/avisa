@@ -253,6 +253,26 @@
               [valor]="borradorAlta().casoCode"
               (cambio)="cambiarCasoAlta($event)"
             />
+            @if (!esAlta()) {
+              @if (alerta(); as aEdicion) {
+                @if (aEdicion.casoCodigo) {
+                  <p class="form-hint caso-edicion">
+                    Caso actual:
+                    <a
+                      class="caso-enlace"
+                      [routerLink]="['/casos', aEdicion.casoCodigo]"
+                      [attr.title]="'Abrir el expediente ' + aEdicion.casoCodigo"
+                      >{{ aEdicion.casoCodigo }}</a
+                    >
+                    @if (aEdicion.casoActualizadoEn) {
+                      · Actualizado: {{ fecha(aEdicion.casoActualizadoEn) }}
+                    } @else {
+                      · <span class="caso-actualizado-vacio">Sin fecha de actualización</span>
+                    }
+                  </p>
+                }
+              }
+            }
           </div>
 
           <div class="form-field">
@@ -608,11 +628,28 @@
             <h3 class="alerta-seccion-titulo">📁 Caso vinculado</h3>
             <div class="alerta-seccion-cuerpo">
               <p>
-                <b>{{ a.casoCodigo || 'SIN CASO' }}</b>
+                @if (a.casoCodigo) {
+                  <a
+                    class="caso-enlace"
+                    [routerLink]="['/casos', a.casoCodigo]"
+                    [attr.title]="'Abrir el expediente ' + a.casoCodigo"
+                    ><b>{{ a.casoCodigo }}</b></a
+                  >
+                } @else {
+                  <b>SIN CASO</b>
+                }
                 @if (casoTituloVisible(); as tituloCaso) {
                   · {{ tituloCaso }}
                 }
               </p>
+
+              @if (a.casoCodigo) {
+                @if (a.casoActualizadoEn) {
+                  <p class="caso-actualizado">Actualizado: {{ fecha(a.casoActualizadoEn) }}</p>
+                } @else {
+                  <p class="caso-actualizado caso-actualizado-vacio">Sin fecha de actualización</p>
+                }
+              }
 
               @if (cargandoCaso()) {
                 <p class="alerta-vacio" role="status">Cargando datos del caso…</p>

@@ -163,6 +163,7 @@ describe('plantillaWhatsapp', () => {
       casoResumen: null,
       casoActores: [],
       casoDemandas: [],
+      casoActualizadoEn: null,
       riesgo: 'Alto',
       alcance: 'Región',
       region: 'Puno',
@@ -468,5 +469,25 @@ describe('hechosComoLineas', () => {
   it('pasa la fecha de reporte a cada línea', () => {
     const lineas = hechosComoLineas('09.02 - Operativo\n10.02 - Reunión', '2026-02-10');
     expect(lineas.map((linea) => linea.fecha)).toEqual(['2026-02-09', '2026-02-10']);
+  });
+});
+
+describe('aAlerta: casoActualizadoEn', () => {
+  it('normaliza a fecha el instante del expediente', () => {
+    const alerta = aAlerta({
+      id: 'alerta-1',
+      codigo: 'AL-2026-001',
+      casoCode: 'CA-2026-001',
+      casoActualizadoEn: '2026-11-27T09:12:00.000Z',
+    });
+    expect(alerta.casoActualizadoEn).toBe('2026-11-27');
+  });
+
+  it('acepta la clave en snake_case y deja null si falta o es inválida', () => {
+    expect(aAlerta({ caso_actualizado_en: '2026-11-27T09:12:00Z' }).casoActualizadoEn).toBe(
+      '2026-11-27',
+    );
+    expect(aAlerta({}).casoActualizadoEn).toBeNull();
+    expect(aAlerta({ casoActualizadoEn: 'sin fecha' }).casoActualizadoEn).toBeNull();
   });
 });

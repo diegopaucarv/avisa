@@ -35,6 +35,10 @@ import {
 import { BarraSeleccionComponent } from '../../shared/ui/barra-seleccion.component';
 import { GaleriaFotosComponent } from '../../shared/ui/galeria-fotos.component';
 import { IconoComponent } from '../../shared/ui/icono.component';
+import {
+  MensajePanelComponent,
+  type DestinatarioMensaje,
+} from '../../shared/ui/mensaje-panel.component';
 import { salirModal } from '../../shared/ui/modal-salida';
 import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
@@ -94,6 +98,7 @@ const FILTROS_INICIALES: FiltrosLocales = {
   selector: 'app-locales',
   imports: [
     IconoComponent,
+    MensajePanelComponent,
     PaginacionComponent,
     BarraSeleccionComponent,
     GaleriaFotosComponent,
@@ -172,6 +177,12 @@ const FILTROS_INICIALES: FiltrosLocales = {
       font-size: 12px;
     }
 
+    .barra-mensaje {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .drawer {
       width: min(560px, 100%);
     }
@@ -215,6 +226,18 @@ const FILTROS_INICIALES: FiltrosLocales = {
       justify-content: center;
       gap: 7px;
       width: 100%;
+    }
+
+    /* Dos acciones de contacto del local, repartidas en la misma fila. */
+    .ficha-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .ficha-acciones .whatsapp-boton {
+      flex: 1 1 180px;
+      width: auto;
     }
 
     .ficha-foto {
@@ -887,6 +910,14 @@ export class LocalesPage {
   /** Aviso de copia en la ventana de WhatsApp; vacío si no hubo. */
   readonly avisoCopia = signal<string | null>(null);
 
+  /**
+   * Compositor «Enviar mensaje» abierto. Reemplaza a la ficha del local: mientras
+   * vive, el cajón de la ficha no se pinta y el panel ocupa su lugar.
+   */
+  readonly mensajeAbierto = signal(false);
+  readonly destinatariosMensaje = signal<DestinatarioMensaje[]>([]);
+  readonly contextoMensaje = signal<string | null>(null);
+
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
 
@@ -907,6 +938,10 @@ export class LocalesPage {
     if (typeof document !== 'undefined') {
       const alEscape = (evento: KeyboardEvent): void => {
         if (evento.key !== 'Escape') return;
+
+        // Con el compositor abierto, su propio guard manda: Escape no cierra si
+        // hay texto escrito. El panel emite `cerrar` y sólo entonces seguimos.
+        if (this.mensajeAbierto()) return;
 
         // Las dos ventanas viven en el mismo componente: WhatsApp, que siempre
         // va encima, se cierra antes que la ficha.
@@ -939,6 +974,8 @@ export class LocalesPage {
   }
 
   cerrarPanel(): void {
+    // Ficha y compositor comparten ciclo: cerrar la ficha cierra el panel.
+    this.mensajeAbierto.set(false);
     if (this.seleccionado() === null) return;
 
     // El panel se desmonta en el acto: el mensaje no debe esperar animación.
@@ -1006,6 +1043,74 @@ export class LocalesPage {
   /** Distrito, provincia y región, sin la dirección (que tiene su propia línea). */
   territorio(local: LocalDirectorio): string | null {
     return territorioDeLocal(local);
+  }
+
+  /**
+   * Abre el compositor con los contactos del local. Sin contacto —o sin permiso
+   * para leerlo— la lista va vacía y el panel invita a escribirlo o buscarlo; no
+   * se inventa ningún destinatario ni se exponen datos que la ficha oculta.
+   */
+  abrirMensaje(local: LocalDirectorio): void {
+    this.cerrarWhatsappAhora();
+    this.destinatariosMensaje.set(this.destinatariosDeLocal(local));
+    this.contextoMensaje.set(local.codigo ? `${local.codigo} · ${local.nombre}` : local.nombre);
+    this.mensajeAbierto.set(true);
+  }
+
+  /**
+   * Compositor con los locales marcados. Cada local aporta sus responsables con
+   * contacto; el que no tiene queda en la lista con su nombre para que el panel
+   * lo marque «sin teléfono registrado» en vez de desaparecer en silencio.
+   */
+  abrirMensajeSeleccion(): void {
+    const ids = new Set(this.seleccion.lista());
+    const marcados = this.locales().filter((local) => ids.has(local.id));
+    const destinatarios: DestinatarioMensaje[] = [];
+
+    for (const local of marcados) {
+      const propios = this.destinatariosDeLocal(local);
+      if (propios.length > 0) {
+        destinatarios.push(...propios);
+      } else {
+        destinatarios.push({ nombre: local.nombre });
+      }
+    }
+
+    this.contextoMensaje.set(
+      marcados.length === 1 ? '1 local seleccionado' : `${marcados.length} locales seleccionados`,
+    );
+    this.destinatariosMensaje.set(destinatarios);
+    this.mensajeAbierto.set(true);
+  }
+
+  cerrarMensaje(): void {
+    this.mensajeAbierto.set(false);
+  }
+
+  alCambiarDestinatarios(lista: DestinatarioMensaje[]): void {
+    this.destinatariosMensaje.set(lista);
+  }
+
+  /**
+   * Contactos del local listos para `app-mensaje-panel`. Los responsables del
+   * local no son actores: van sin `actorId`, así que el panel no pide PII por
+   * ellos y usa el teléfono/correo que ya trae la ficha.
+   */
+  private destinatariosDeLocal(local: LocalDirectorio): DestinatarioMensaje[] {
+    if (!this.puedeVerPii()) return [];
+
+    const salida: DestinatarioMensaje[] = [];
+    for (const responsable of local.responsables) {
+      const telefono = responsable.telefono?.trim() || null;
+      const correo = responsable.correo?.trim() || null;
+      if (!telefono && !correo) continue;
+      salida.push({
+        nombre: responsable.nombre?.trim() || local.nombre,
+        telefono,
+        correo,
+      });
+    }
+    return salida;
   }
 
   /** Abre la ventana con el mensaje de WhatsApp ya generado. */

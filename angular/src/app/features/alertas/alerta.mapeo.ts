@@ -18,6 +18,7 @@ import {
   RIESGOS,
   booleano,
   esRegistro,
+  fechaIso,
   leer,
   lista,
   numero,
@@ -178,6 +179,11 @@ export type Alerta = {
   casoActores: ActorCaso[];
   /** Demandas vigentes del caso vinculado (tope 20, orden estable). */
   casoDemandas: DemandaCaso[];
+  /**
+   * Fecha (`YYYY-MM-DD`) de la última actividad del expediente vinculado, o
+   * `null` si la alerta no tiene caso o el backend no pudo calcularla.
+   */
+  casoActualizadoEn: string | null;
   /**
    * Riesgo heredado del caso vinculado (o declarado a mano). Es el eje de la
    * tarjeta de riesgo y del filtro `riesgo`.
@@ -548,6 +554,7 @@ export function aAlerta(bruto: unknown): Alerta {
     casoResumen: texto(registro, ['casoResumen', 'caso_resumen']),
     casoActores: aActoresCaso(leer(registro, ['casoActores', 'caso_actores'])),
     casoDemandas: aDemandasCaso(leer(registro, ['casoDemandas', 'caso_demandas'])),
+    casoActualizadoEn: fechaIso(texto(registro, ['casoActualizadoEn', 'caso_actualizado_en'])),
     riesgo,
     alcance:
       aAlcance(texto(registro, ['alcance'])) ??

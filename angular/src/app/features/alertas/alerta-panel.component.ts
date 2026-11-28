@@ -493,6 +493,34 @@ function claveProvincia(nombre: string): number {
       text-transform: uppercase;
     }
 
+    /* Código del caso como enlace al expediente; se subraya al pasar el puntero. */
+    .caso-enlace {
+      color: #1f5597;
+      text-decoration: none;
+    }
+
+    .caso-enlace:hover,
+    .caso-enlace:focus-visible {
+      text-decoration: underline;
+    }
+
+    /* Última actividad del expediente bajo el código del caso. */
+    .caso-actualizado {
+      margin: 0;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    /* Sin fecha calculable: se avisa en gris y no se inventa un valor. */
+    .caso-actualizado-vacio {
+      color: #99a3aa;
+    }
+
+    /* Caso persistido que se está editando, junto al combobox del formulario. */
+    .caso-edicion {
+      margin: 4px 0 0;
+    }
+
     /* Estado de la demanda heredada del caso, en gris y sin competir con el texto. */
     .demanda-estado {
       color: #99a3aa;

@@ -1,0 +1,112 @@
+{
+  "generadoEn": "2026-11-28T10:29:38.725Z",
+  "modo": "apply",
+  "rol": "administrador",
+  "antes": {
+    "reuniones": 34,
+    "participantes": 0
+  },
+  "participantesInsertados": [
+    {
+      "reunionId": "a8ece8d6-3956-4644-9c6b-1dc46fca1bdd",
+      "codigo": "RD-2026-034",
+      "actorId": "0059b3e5-26d3-4f84-a845-dcd16d7e4cd8",
+      "nombre": "Donatán Benites Eche"
+    },
+    {
+      "reunionId": "a8ece8d6-3956-4644-9c6b-1dc46fca1bdd",
+      "codigo": "RD-2026-034",
+      "actorId": "00f1dea4-8d6d-4154-9c2a-965c32b2d44a",
+      "nombre": "Panta Paiva Aldo"
+    },
+    {
+      "reunionId": "a8ece8d6-3956-4644-9c6b-1dc46fca1bdd",
+      "codigo": "RD-2026-034",
+      "actorId": "010997c6-2843-4570-aadf-50874d60cbb1",
+      "nombre": "Patricia Lacey Morales Franco"
+    },
+    {
+      "reunionId": "8f087511-240b-418b-bbc9-7563a03217ee",
+      "codigo": "RD-2026-033",
+      "actorId": "01dc7d92-b66a-4b97-9da5-3a013e6f68f4",
+      "nombre": "Favio Aron Morales Tarrillo"
+    },
+    {
+      "reunionId": "8f087511-240b-418b-bbc9-7563a03217ee",
+      "codigo": "RD-2026-033",
+      "actorId": "0259fc50-2354-4225-b2a4-31a2ff1f4db0",
+      "nombre": "Javier Querevalu Puescas"
+    },
+    {
+      "reunionId": "8f087511-240b-418b-bbc9-7563a03217ee",
+      "codigo": "RD-2026-033",
+      "actorId": "02a3435a-4c99-41a7-97c2-91c478861abd",
+      "nombre": "Willy Alfonso Alejo Ramírez"
+    },
+    {
+      "reunionId": "a6787b34-f690-4538-a765-8a53c268c6e8",
+      "codigo": "RD-2026-032",
+      "actorId": "02d7e48b-39dd-4c13-89a3-f69184cfcec2",
+      "nombre": "Carlos Camilo Acasiete"
+    },
+    {
+      "reunionId": "a6787b34-f690-4538-a765-8a53c268c6e8",
+      "codigo": "RD-2026-032",
+      "actorId": "02e605b0-2df9-4fb8-b42b-d6a84cb17362",
+      "nombre": "Renato Guevara Carrasco"
+    },
+    {
+      "reunionId": "a6787b34-f690-4538-a765-8a53c268c6e8",
+      "codigo": "RD-2026-032",
+      "actorId": "03043847-b441-4379-b306-738e08c8d758",
+      "nombre": "Pedro Tume Panta"
+    },
+    {
+      "reunionId": "597c3094-1657-4996-8d08-99e6057a3bc7",
+      "codigo": "RD-2026-030",
+      "actorId": "03c69b32-4b9d-458c-b673-418ff61b7a72",
+      "nombre": "Juan Bayona Sernaque"
+    },
+    {
+      "reunionId": "597c3094-1657-4996-8d08-99e6057a3bc7",
+      "codigo": "RD-2026-030",
+      "actorId": "04ab2775-1e00-4ad3-90f4-1dd834306efe",
+      "nombre": "José Martín Prieto Muñoz"
+    },
+    {
+      "reunionId": "597c3094-1657-4996-8d08-99e6057a3bc7",
+      "codigo": "RD-2026-030",
+      "actorId": "052c9d81-67b8-43c9-b95a-4cc1b0ad0fe8",
+      "nombre": "Adriana Janette Rodríguez Jadrosich"
+    },
+    {
+      "reunionId": "b8ce6109-26bc-4a68-8c48-40d290ad8400",
+      "codigo": "RD-2026-025",
+      "actorId": "0549e64e-7329-4e0f-9bc5-fc0daba0748c",
+      "nombre": "Marcos Salazar Vega"
+    },
+    {
+      "reunionId": "b8ce6109-26bc-4a68-8c48-40d290ad8400",
+      "codigo": "RD-2026-025",
+      "actorId": "059d75ef-636f-4693-8945-ac3a665f3b15",
+      "nombre": "Gilmer Marcelo Flores"
+    },
+    {
+      "reunionId": "b8ce6109-26bc-4a68-8c48-40d290ad8400",
+      "codigo": "RD-2026-025",
+      "actorId": "05b9af9b-9e56-4364-b767-34e6046f07d8",
+      "nombre": "Pedro Martín Cerón Borjas"
+    }
+  ],
+  "reunionesCreadas": [
+    {
+      "id": "c59349ce-eae0-4d5b-b96c-de87ba16fe17",
+      "codigo": "RD-2026-035"
+    },
+    {
+      "id": "7059afed-e4b5-4a06-a82d-6139c408be79",
+      "codigo": "RD-2026-036"
+    }
+  ],
+  "errores": []
+}
