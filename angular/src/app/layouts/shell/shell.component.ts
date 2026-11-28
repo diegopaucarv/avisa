@@ -97,19 +97,7 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     ruta: '/clima-social',
     icono: 'analisis',
   },
-  {
-    grupo: 'INTERVENCIÓN',
-    etiqueta: 'Reuniones',
-    ruta: '/reuniones',
-    icono: 'reloj',
-    oculto: false,
-  },
-  {
-    grupo: 'INTERVENCIÓN',
-    etiqueta: 'Productos del diálogo',
-    ruta: '/resultados',
-    icono: 'check',
-  },
+
   {
     grupo: 'INTERVENCIÓN',
     etiqueta: 'Reporte de actividad',
@@ -140,6 +128,19 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     etiqueta: 'Auditorios',
     ruta: '/directorio/locales',
     icono: 'mapa',
+  },
+  {
+    grupo: 'INTERVENCIÓN',
+    etiqueta: 'Reuniones',
+    ruta: '/reuniones',
+    icono: 'reloj',
+    oculto: false,
+  },
+  {
+    grupo: 'INTERVENCIÓN',
+    etiqueta: 'Productos del diálogo',
+    ruta: '/resultados',
+    icono: 'check',
   },
   {
     grupo: 'SEGUIMIENTO',

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 
 import {
   MensajePanelComponent,
@@ -12,8 +12,10 @@ import { EnviarMensajeService } from './enviar-mensaje.service';
  *
  * Sigue el patrón de `ListaAsistenciaComponent`: el botón y el cajón viven aquí,
  * el estado de los destinatarios en un servicio raíz para sobrevivir a la
- * navegación. Al abrir, si el cajón está vacío, usa la selección de la tabla
- * como destinatarios iniciales; el panel permite además buscarlos a mano.
+ * navegación. Mientras nadie edite el cajón, los destinatarios son la selección
+ * de la tabla (por eso el contador sigue las casillas al instante, como el de la
+ * lista de asistencia); en cuanto el panel añade o quita uno, manda esa lista.
+ * El panel permite además buscarlos a mano.
  *
  * `sobreLista` sube el botón cuando convive con el de la lista de asistencia en
  * la misma esquina (actores y organizaciones). En autoridades va solo.
@@ -141,11 +143,11 @@ export class EnviarMensajeComponent {
   readonly sobreLista = input(false);
 
   readonly abierto = signal(false);
-  readonly total = this.lista.total;
-  readonly destinatarios = this.lista.destinatarios;
+  /** Lista editada en el cajón o, mientras no haya, la selección de la tabla. */
+  readonly destinatarios = computed(() => this.lista.destinatariosCon(this.semilla()));
+  readonly total = computed(() => this.destinatarios().length);
 
   abrir(): void {
-    this.lista.sembrar(this.semilla());
     this.abierto.set(true);
   }
 

@@ -646,7 +646,9 @@
               @if (a.casoCodigo) {
                 @if (a.casoActualizadoEn) {
                   <p class="caso-actualizado">Actualizado: {{ fecha(a.casoActualizadoEn) }}</p>
-                } @else {
+                } @else if (!cargando()) {
+                  <!-- Mientras carga el detalle la alerta puede venir de la lista
+                       y no traer el campo; no se anuncia una ausencia falsa. -->
                   <p class="caso-actualizado caso-actualizado-vacio">Sin fecha de actualización</p>
                 }
               }
