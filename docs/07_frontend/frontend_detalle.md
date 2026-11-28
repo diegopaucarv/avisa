@@ -1840,20 +1840,28 @@ esquema que retirar; la 75 dejó el territorio en `core`.
 `compromisos.page.*` con Redacción · Fuente · Fecha · Plazo · Oficina
 responsable · Estado de cumplimiento. `compromiso-panel` muestra Institución.
 `compromiso.mapeo.ts` añade `institucionSiglas`/`institucionNombre`.
-**Diagnóstico:** `cat_unidades_organicas.entidad_id → entidades` existe, pero la
-API no la expone: falta un `JOIN` en `lib/db/repos/commitments.ts`; **no** hace
-falta migración.
+**Resuelto el 2026-11-28:** el `JOIN` que faltaba ya está en
+`lib/db/repos/commitments.ts` (`left join core.entidades en on en.id = uo.entidad_id`,
+proyectado como `entidad_siglas` / `entidad_nombre` en el listado y en el detalle),
+sin migración.
+
+**Franja de estadísticas:** `features/compromisos/compromisos-franja.component.*`
+consume `GET /v1/commitments/estadisticas` (total, cumplidos, en proceso, vencidos
+y ranking de oficinas con % de cumplimiento). **Orden del expediente:** la sección
+`compromisos-caso` va ahora después de Demandas.
 
 ### Locales
 
 - `features/directorio/local-notas.ts`: `leerRiesgosMarkdown()` (
   `## Accesibilidad`, `## Ventilación`, `## Otros riesgos`) y `unirRiesgos()`.
-- `local.mapeo.ts`: `latitud`/`longitud`, `coordenadasEnUbicacion()`,
-  `coordenadasDeLocal()`, `territorioDeLocal()`.
-- `shared/ui/mapa-local.component.ts` (Leaflet) y `mapa-local.centroides.ts`
-  (marcador exacto o centroide regional con nota de aproximación).
+- `local.mapeo.ts`: `consultaMapa()`, `enlaceGoogleMaps()`, `enlaceMapaIncorporado()`,
+  `etiquetaMapa()` y `territorioDeLocal()`. **Cambio del 2026-11-28:** el panel ya no
+  usa Leaflet; embebe `maps.google.com/maps?q=<dirección>&z=17&output=embed` (vista de
+  calle aproximada por dirección) y ofrece el enlace a Google Maps.
+- `shared/ui/mapa-local.component.ts` (Leaflet) sigue existiendo para el panorama
+  territorial, pero **no** lo usa la ficha del local.
 - **La base no tiene coordenadas en `core.locales`** (verificado por
-  `information_schema`).
+  `information_schema`): por eso la ubicación es por dirección.
 
 ### Datos
 
@@ -1872,3 +1880,27 @@ falta migración.
 2. Clon SESIGUE y «usuarios de PRODUCE sin login»: diagnóstico únicamente; exige
    decisión de seguridad.
 3. `valid_to` exclusivo: ratificar el criterio (ya aplicado en 4 predicados).
+
+---
+
+## Verificación del 2026-11-28 (segunda ronda)
+
+Evidencia de archivo para lo que se cerró en esta pasada.
+
+| Ítem                                   | Evidencia                                                                                                                                                                                                                                                                                                                        |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **3.1 · institución del compromiso**   | `lib/db/repos/commitments.ts`: `left join core.entidades en on en.id = uo.entidad_id` en listado y detalle; alias `entidad_siglas` / `entidad_nombre`.                                                                                                                                                                           |
+| **Búsqueda por sectorista**            | `lib/db/repos/alerts.ts`: `left join core.nombres_sectoristas() nsr on nsr.id = a.sectorista_usuario_id`, `coalesce(nsr.nombre, su.nombre) as sectorista` y la misma expresión en el `filtroTexto` de `q`. La función viene de `migration/74_usuarios_sectoristas_lectura_2026_11_27.sql` (`security definer`), **ya aplicada**. |
+| **3.7 · ámbito por defecto**           | `lib/db/scope.ts` (`resolveDataScope`), `app/api/v1/cases/route.ts` (inyecta `query.regiones`), `lib/db/repos/cases.ts` (`CaseListQuery.regiones` → `coalesce(reg.id, rp.id) = any($n::int[])`).                                                                                                                                 |
+| **3.7 · exportación con ámbito**       | `app/api/v1/export/route.ts`: `resolveDataScope` + `recorteTerritorial` que se mezcla en `leerTodas` sólo para `entidad=casos`, respetando `region` / `sinregion` / `alcance=todos`.                                                                                                                                             |
+| **3.6 · ubigeo**                       | `lib/db/repos/cases.ts`: `resolveRegions` y `resolverRegion` aceptan 1, 2 o 6 dígitos (`lpad` / prefijo) y caen a `core.normalizar_ref(nombre)`.                                                                                                                                                                                 |
+| **Auditoría de descargas**             | `lib/db/auditoria-descargas.ts` + `migration/88_auditoria_descargas_2026_11_28.sql`; cableada en los ocho endpoints de exportación. **Sin aplicar**: la tabla no existe todavía y el helper sólo avisa.                                                                                                                          |
+| **Locales con mapa**                   | `features/directorio/local.mapeo.ts` y su spec (23 pruebas); `locales.page.html` con el iframe y el enlace a Google Maps.                                                                                                                                                                                                        |
+| **Alertas · triaje y duplicados**      | `lib/db/repos/alerts.ts` (`triajeEstado`, `motivoDescarte`, `duplicadaDeCodigo`), `lib/db/repos/alerts-duplicados.ts`, `app/api/v1/alerts/duplicados/route.ts`, `features/alertas/alerta-triaje.component.*`, `alerta-duplicados.mapeo.ts`.                                                                                      |
+| **Compromisos · estadísticas**         | `features/compromisos/compromisos-franja.component.*` sobre `GET /v1/commitments/estadisticas` (existente).                                                                                                                                                                                                                      |
+| **3.5 · fichas propias**               | `features/busqueda/busqueda.mapeo.ts` (`fichaIdentificador`), `busqueda-ficha.component.ts`, `documentos.page.*` y `actores.page.*` (                                                                                                                                                                                            |
+| `?abrir=`, limpiado con `replaceUrl`). |
+
+Puerta ejecutada en esta ronda: `npm run typecheck` limpio, `npm test` con **31
+archivos y 649 pruebas verdes** y `npm --prefix angular run build` completo (con el
+aviso preexistente de presupuesto CSS en `red-radar.page.ts`).

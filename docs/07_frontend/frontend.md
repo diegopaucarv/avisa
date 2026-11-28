@@ -121,36 +121,39 @@ Sólo las pantallas con algo pendiente. Lo más importante va primero. Los conte
 encargo del **2026-11-25** (paridad con la matriz de conflictividad del equipo), cuyo detalle
 está en `frontend_detalle.md`.
 
-| Pantalla               | Pendientes | Lo más importante                                                          |
-| ---------------------- | ---------: | -------------------------------------------------------------------------- |
-| Ficha del caso         |          9 | Riesgo recalculable, contacto de actores y pestañas de reuniones/productos |
-| Transversal (todas)    |          9 | Recorte por región en servidor, rango de fechas compartido y auditoría     |
-| Panorama territorial   |          5 | Agrupar puntos, leyenda y tasa regional                                    |
-| Perfil territorial     |          6 | Catálogo de artes de pesca; no tiene ruta todavía                          |
-| ETL de tres pestañas   |          6 | Ejecución real, fuentes e historial                                        |
-| Casos                  |          5 | Selector de sectorista, franja de hitos en la tarjeta e importador         |
-| Compromisos            |          7 | Validación del punto focal, recarga de la matriz y directorio de usuarios  |
-| Documentos             |          3 | Validación por fragmento, versiones y lista blanca por fuente              |
-| Reuniones              |          2 | Registro real de reuniones y banderas                                      |
-| Alertas tempranas      |          2 | Motivo de descarte y envío real por WhatsApp                               |
-| Resumen operativo      |          2 | Panel de operación OAIPCS y sincronización global                          |
-| Bandeja de trabajo     |          2 | Mapa y resumen de casos; indicador de completitud                          |
-| Clima social           |          1 | Región y carga desde la pantalla                                           |
-| Auditorios             |          1 | Editar el distrito desde la pantalla                                       |
-| Dashboard              |          1 | Aging / antigüedad de los casos                                            |
-| RED-RADAR              |          1 | Conector de señales y «convertir en alerta»                                |
-| Autoridades            |          1 | Universo fuera de PRODUCE y agenda                                         |
-| Archivo de sugerencias |          1 | Registro automático en `agent.run_log` / `lessons_learned`                 |
-| Envíos y auditoría     |          1 | Vista de envíos con acuse y auditoría consultable (sin ruta)               |
-| Acceso                 |          1 | Segundo factor                                                             |
-| Búsqueda               |          1 | Fichas propias de alertas, compromisos, documentos y actores               |
-| Preferencias           |          1 | Tamaño de página efectivo y ámbito/avisos en servidor                      |
-| Shell                  |          1 | Registrar sin cambiar de pantalla                                          |
+| Pantalla               | Pendientes | Lo más importante                                                                  |
+| ---------------------- | ---------: | ---------------------------------------------------------------------------------- |
+| Ficha del caso         |          9 | Riesgo recalculable, contacto de actores y pestañas de reuniones/productos         |
+| Transversal (todas)    |          6 | Rango de fechas compartido, descriptor único de formularios y ámbito por subsector |
+| Panorama territorial   |          5 | Agrupar puntos, leyenda y tasa regional                                            |
+| Perfil territorial     |          6 | Catálogo de artes de pesca; no tiene ruta todavía                                  |
+| ETL de tres pestañas   |          6 | Ejecución real, fuentes e historial                                                |
+| Casos                  |          5 | Selector de sectorista, franja de hitos en la tarjeta e importador                 |
+| Compromisos            |          7 | Validación del punto focal, recarga de la matriz y directorio de usuarios          |
+| Documentos             |          3 | Validación por fragmento, versiones y lista blanca por fuente                      |
+| Reuniones              |          2 | Registro real de reuniones y banderas                                              |
+| Alertas tempranas      |          1 | Envío real por WhatsApp                                                            |
+| Resumen operativo      |          2 | Panel de operación OAIPCS y sincronización global                                  |
+| Bandeja de trabajo     |          2 | Mapa y resumen de casos; indicador de completitud                                  |
+| Clima social           |          1 | Región y carga desde la pantalla                                                   |
+| Auditorios             |          1 | Editar el distrito desde la pantalla                                               |
+| Dashboard              |          1 | Aging / antigüedad de los casos                                                    |
+| RED-RADAR              |          1 | Conector de señales y «convertir en alerta»                                        |
+| Autoridades            |          1 | Universo fuera de PRODUCE y agenda                                                 |
+| Archivo de sugerencias |          1 | Registro automático en `agent.run_log` / `lessons_learned`                         |
+| Envíos y auditoría     |          1 | Vista de envíos con acuse y auditoría consultable (sin ruta)                       |
+| Acceso                 |          1 | Segundo factor                                                                     |
+| Preferencias           |          1 | Tamaño de página efectivo y ámbito/avisos en servidor                              |
+| Shell                  |          1 | Registrar sin cambiar de pantalla                                                  |
 
 **Sin pendientes de interfaz:** `/casos/sin-caso`, `/reportes`, `/archivo`,
 `/directorio`, `/directorio/actores`, `/directorio/organizaciones`,
-`/directorio/instituciones`, `/direccion`, `/resultados`, `/notificaciones` y `/ayuda`.
+`/directorio/instituciones`, `/direccion`, `/resultados`, `/notificaciones`, `/busqueda` y `/ayuda`.
 En cada una se indica abajo si el hueco es de dato.
+
+Los conteos de esta tabla son del encargo del **2026-11-25** y no se recalculan en
+cada ronda: lo que se va cerrando queda como evidencia en «Cierre del 2026-11-28»
+y en las secciones de pendientes de abajo, que son la fuente de verdad.
 
 ---
 
@@ -386,10 +389,17 @@ la columna **Acciones** con Aprobar · Solicitar modificación · Anular (item 1
 **archivo con motivo**, distinto de anular (`POST /v1/alerts/{id}/archivar`, con
 desarchivar).
 
-| Item | Qué falta                                                                                                   | Por qué no está | Mockup                    |
-| ---- | ----------------------------------------------------------------------------------------------------------- | --------------- | ------------------------- |
-| 38   | Motivo de descarte, búsqueda de duplicados y conciliación con el documento original (los adjuntos ya están) | `API`           | —                         |
-| 105  | Envío real por WhatsApp: hoy «Enviar por WhatsApp» sólo copia el texto al portapapeles                      | `API`           | `alertas-operativas.html` |
+| Item | Qué falta                                                                              | Por qué no está | Mockup                    |
+| ---- | -------------------------------------------------------------------------------------- | --------------- | ------------------------- |
+| 105  | Envío real por WhatsApp: hoy «Enviar por WhatsApp» sólo copia el texto al portapapeles | `API`           | `alertas-operativas.html` |
+
+**Cerrado el 2026-11-28 (ítem 38).** Motivo de descarte y búsqueda de duplicados:
+`core.alerta_triaje` se escribe con `PATCH /v1/red-radar/{id}/triaje` (uuid o
+código), la lista y la ficha exponen `triajeEstado`, `motivoDescarte` y
+`duplicadaDeCodigo`, y `GET /v1/alerts/duplicados` sugiere candidatas por título
+y distrito. **No** se persiste «no es duplicado» (falta tabla). La conciliación
+con el documento original sigue abierta: es un pendiente de **dato** (los
+adjuntos están, el vínculo documento↔alerta no).
 
 **Nota de archivo.** `archivado_en`/`motivo_archivo` existen en `core.alertas_tempranas`:
 archivar no es anular, y la pantalla ya los separa.
@@ -500,6 +510,17 @@ degradar la lectura; vive en el panel.
 `fecha_vencimiento` y el único hito con fecha está cumplido. Es un hueco de carga, no de
 vista.
 
+**Añadido el 2026-11-28.** La **institución del área responsable** se ve en el listado y en el
+panel: el repositorio une `core.entidades` por la unidad y expone `institucionSiglas` /
+`institucionNombre`. Se agregó la **franja de estadísticas** (`compromisos-franja.component`)
+alimentada por `GET /v1/commitments/estadisticas` —total, cumplidos, en proceso, vencidos y
+ranking de oficinas con su % de cumplimiento—. En el expediente, el bloque **cambió de lugar**:
+va justo después de _Demandas_, antes de _Alertas vinculadas_.
+
+> Conviven **dos franjas de indicadores**: la del listado (sensible a los filtros) y esta de
+> universo. Es deliberado para no perder el conteo filtrado, pero el solapamiento con la
+> pestaña **Estadísticas** y con `app-compromisos-graficos` conviene consolidarlo.
+
 ---
 
 ## Documentos · `/documentos`
@@ -595,12 +616,23 @@ enlace y se conserva sólo como referencia histórica.
 
 **Mockup:** `directorio-crud.html`.
 Los 27 locales tienen aforo y contacto (23 de 27), **27 de 27 tienen `distrito_id`** desde
-`migration/48_locales_distritos.sql`, y el mapa los dibuja en el centroide de su distrito.
-En la navegación el nombre es «Auditorios»; la página todavía titula «Locales».
+`migration/48_locales_distritos.sql`. En la navegación el nombre es «Auditorios»; la página
+todavía titula «Locales».
+
+**Mapa (2026-11-28).** Sin coordenadas: cada local se ubica por su **dirección de texto**.
+El panel embebe un mapa de Google a nivel de calle
+(`maps.google.com/maps?q=<dirección>&z=17&output=embed`) bajo la nota «Vista aproximada por
+dirección», y añade un enlace a **Google Maps** para abrirlo fuera. El `app-mapa-local`
+(Leaflet) se retiró **sólo** de ese bloque; el componente sigue en `shared/ui` porque lo usa
+el panorama territorial. La consulta y los enlaces se arman en `local.mapeo.ts`
+(`consultaMapa`, `enlaceGoogleMaps`, `enlaceMapaIncorporado`, `etiquetaMapa`).
 
 | Item | Qué falta                                                             | Por qué no está | Mockup                 |
 | ---- | --------------------------------------------------------------------- | --------------- | ---------------------- |
 | 115  | Editar el distrito desde la pantalla: la API de locales es sólo `GET` | `API`           | `directorio-crud.html` |
+
+**Pendiente de dato:** coordenadas reales por local (lat/long). Hoy la vista es aproximada
+por dirección; no hay columna que las guarde ni decisión de cargarlas.
 
 ---
 
@@ -738,11 +770,13 @@ y flujo institucional.
 
 ## Búsqueda global · `/busqueda`
 
-| Item | Qué falta                                                                                                                                                                    | Por qué no está | Mockup |
-| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ------ |
-| 30   | Que alertas, compromisos, documentos y actores abran su **ficha propia**: hoy abren un panel con el territorio (región, provincia, distrito y ubigeo) y un enlace al listado | `API`           | —      |
+**Sin pendientes.** El ítem 30 quedó cerrado el 2026-11-28: alertas, compromisos,
+documentos y actores abren su **ficha propia** con `?abrir=` (código, id o
+`actor_uid` según la entidad) y la insignia «Abre ficha propia» lo anuncia
+(`features/busqueda/busqueda.mapeo.ts`, `busqueda-ficha.component.ts`). Ver la
+segunda ronda del cierre, más arriba.
 
-La búsqueda ya cubre las seis entidades, agrupa los resultados y muestra el territorio.
+La búsqueda cubre las seis entidades, agrupa los resultados y muestra el territorio.
 
 ---
 
@@ -789,17 +823,17 @@ visible y deshabilitada hasta que exista la capa de reuniones.
 
 Pendientes que no pertenecen a una vista concreta.
 
-| Item     | Qué falta                                                                                                                                                                     | Por qué no está | Estado    |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | --------- |
-| 29       | Rango de fechas compartido: `shared/ui/rango-fechas.component.ts` existe (7 d, 30 d, mes, año y fechas libres) y no lo consume ninguna vista                                  | `Implementar`   | Parcial   |
-| 32       | Pruebas de formularios (19 `*.spec.ts`) y verificar contrastes AA del tema oscuro                                                                                             | `Implementar`   | Parcial   |
-| 35       | Recorte territorial real por región: `/mapa` filtra en cliente y la API acepta `alcance` y `region`, pero no hay RLS de región ni lo aplica `/casos`                          | `Bloqueado`     | Parcial   |
-| 36       | Usar el ubigeo como clave donde todavía se casa por nombre de región                                                                                                          | `Implementar`   | Parcial   |
-| 42, 43   | Registrar en auditoría cada descarga de datos sensibles (hoy sólo se auditan escrituras)                                                                                      | `API`           | Pendiente |
-| 57       | Aging / antigüedad para dashboards y bandeja (series y zona horaria ya están)                                                                                                 | `Dato`          | Parcial   |
-| 66       | Un descriptor por entidad que genere los formularios y lea los catálogos de la API                                                                                            | `Implementar`   | Pendiente |
-| 69       | Un solo componente de tabla: `shared/ui/tabla.component.ts` ya sirve alertas, compromisos, notificaciones y reportes; casos, documentos, actores y demandas mantienen la suya | `Implementar`   | Parcial   |
-| 113 · X6 | Ámbito de subsector por rol: Dirección y Secretaría General ven ambos; cada Vice-ministerio el suyo                                                                           | `Bloqueado`     | Pendiente |
+| Item     | Qué falta                                                                                                                                                                                              | Por qué no está | Estado            |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- | ----------------- |
+| 29       | Rango de fechas compartido: `shared/ui/rango-fechas.component.ts` existe (7 d, 30 d, mes, año y fechas libres) y no lo consume ninguna vista                                                           | `Implementar`   | Parcial           |
+| 32       | Pruebas de formularios (19 `*.spec.ts`) y verificar contrastes AA del tema oscuro                                                                                                                      | `Implementar`   | Parcial           |
+| 35       | Recorte territorial por región: el sectorista ve por defecto sus regiones en `/casos` y en la exportación. **Falta** la política RLS de región y el recorte de `/mapa`, que sigue filtrando en cliente | `Bloqueado`     | Parcial           |
+| 36       | Usar el ubigeo como clave donde todavía se casa por nombre de región: hecho en `region`/`sinregion` (1, 2 o 6 dígitos), **falta** en el resto de cruces por nombre                                     | `Implementar`   | Parcial           |
+| 42, 43   | Registrar en auditoría cada descarga: `audit.descargas` y su cableado están escritos (migración `88`) y falta **aplicar la migración**                                                                 | `API`           | Hecho sin aplicar |
+| 57       | Aging / antigüedad para dashboards y bandeja (series y zona horaria ya están)                                                                                                                          | `Dato`          | Parcial           |
+| 66       | Un descriptor por entidad que genere los formularios y lea los catálogos de la API                                                                                                                     | `Implementar`   | Pendiente         |
+| 69       | Un solo componente de tabla: `shared/ui/tabla.component.ts` ya sirve alertas, compromisos, notificaciones y reportes; casos, documentos, actores y demandas mantienen la suya                          | `Implementar`   | Parcial           |
+| 113 · X6 | Ámbito de subsector por rol: Dirección y Secretaría General ven ambos; cada Vice-ministerio el suyo                                                                                                    | `Bloqueado`     | Pendiente         |
 
 **Sobre el 113.** No es una pantalla: es una regla de sesión. Hoy no existe rol de
 viceministerio ni ámbito de subsector, así que primero hay que tocarlo en el modelo de
@@ -890,13 +924,36 @@ evidencia de que los ítems correspondientes ya no aparecen arriba.
 | **Directorio**      | Importación de actores desde **`.xlsx`/`.xlsm`** (además del CSV), con columna opcional **Foto** que sube el medio y deja `tieneContenido=false` si no hay bytes.                                |
 | **Directorio**      | `Foto.tieneContenido` en el dominio y helper `urlFoto()`, que prefiere `/api/v1/media/<id>/contenido` y respeta las URL externas.                                                                |
 | **Directorio**      | La ficha de contacto retira «Clasificación de la información» y «Descripción del perfil» pasa a **«Ámbito de acción»**, justificado.                                                             |
-| **Locales**         | Mapa Leaflet por local (marcador exacto o centroide regional con nota de aproximación), dirección explícita cuando falta y sección «Otros riesgos» leída de la descripción en markdown.          |
+| **Locales**         | Mapa por local con la dirección explícita cuando falta y sección «Otros riesgos» leída de la descripción en markdown.                                                                            |
 | **Casos**           | Cronología y WhatsApp en fecha compacta `02NOV2025`; el formato es único en toda la SPA (`shared/formato-fecha.ts`).                                                                             |
 | **Carga histórica** | `87` amplía a `text` `core.actores.cargo_actual` y `core.reuniones_dialogo.titulo`, para no truncar el libro del sectorista.                                                                     |
 
 **Migraciones aplicadas en la ronda:** `85`, `86`, `87`. Sigue pendiente `82`
 (porteo de mesas). El estado completo está en
 [`../06_operacion/migraciones-neon-estado.md`](../06_operacion/migraciones-neon-estado.md).
+
+### Segunda ronda del 2026-11-28 · backend aditivo, territorio y búsqueda
+
+Capa de servidor y de datos, más el remate de las vistas que dependían de ella.
+
+| Vista / pieza   | Qué quedó hecho                                                                                                                                                                                                                                                             |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Compromisos** | `3.1` · El listado y el detalle **unen `core.entidades`** por la unidad responsable y exponen `institucionSiglas` / `institucionNombre`; la columna y el panel muestran la institución cuando existe.                                                                       |
+| **Compromisos** | Franja de **estadísticas** sobre `GET /v1/commitments/estadisticas`: total · cumplidos · en proceso · vencidos y ranking de oficinas con su % de cumplimiento.                                                                                                              |
+| **Compromisos** | La sección del expediente **cambió de lugar**: ahora va justo después de _Demandas_ (antes quedaba tras _Alertas vinculadas_).                                                                                                                                              |
+| **Casos**       | `3.7` · **Ámbito por defecto** del sectorista: `resolveDataScope` inyecta sus regiones de `core.usuario_territorio` en `GET /v1/cases` salvo que pida otro recorte. La vista preselecciona la región cuando hay una y, con varias, avisa «Tu ámbito: N regiones asignadas». |
+| **Casos**       | La **exportación** aplica el mismo recorte (`entidad=casos`): antes un sectorista podía bajar casos de otras regiones.                                                                                                                                                      |
+| **Casos**       | `3.6` · El **ubigeo** sirve como clave donde antes se casaba por nombre: `region`/`sinregion` aceptan 1, 2 o 6 dígitos (región o distrito) y el nombre normalizado queda como respaldo.                                                                                     |
+| **Alertas**     | **Búsqueda por sectorista** con el mismo `q` del listado (sin input nuevo): `core.nombres_sectoristas()` resuelve el nombre para todos los roles; el placeholder lo declara.                                                                                                |
+| **Alertas**     | **Motivo de descarte** visible: `triajeEstado`, `motivoDescarte` y `duplicadaDeCodigo` viajan en la lista y en la ficha, con sección «Triaje» cuando la alerta está descartada o duplicada.                                                                                 |
+| **Alertas**     | **Búsqueda de duplicados** (`GET /v1/alerts/duplicados` + `alerta-triaje.component`) antes de registrar o como acción de fila; motivos con código de alerta duplicada.                                                                                                      |
+| **Locales**     | Sin coordenadas: **mapa embebido** a nivel de calle por dirección (`maps.google.com/maps?q=…&z=17&output=embed`), nota de vista aproximada y enlace a Google Maps.                                                                                                          |
+| **Búsqueda**    | `3.5` · Las fichas propias abren por `?abrir=`: alertas por código, compromisos y documentos por id, actores por `actor_uid`. La insignia «Abre ficha propia» lo indica.                                                                                                    |
+| **Transversal** | **Auditoría de descargas** (`audit.descargas`, migración `88`): cada exportación registra usuario, rol, entidad, formato, filtros, filas, IP y `user_agent`. Sin la migración, la descarga sigue y sólo queda un aviso.                                                     |
+
+**Migración de esta ronda:** `88` (auditoría de descargas) está **diseñada y sin
+aplicar**. No se necesitó DDL para la búsqueda por sectorista: se resolvió con
+`core.nombres_sectoristas()` de la `74`, ya aplicada.
 
 ---
 

@@ -17,6 +17,7 @@ import {
 } from "@/lib/db/repos/notifications";
 import { listOrganizaciones } from "@/lib/db/repos/organizaciones";
 import { listReportes } from "@/lib/db/repos/reportes";
+import { resolveDataScope } from "@/lib/db/scope";
 import {
   dumpBase,
   dumpEntidad,
@@ -35,7 +36,7 @@ type Formato = "json" | "excel" | "pdf";
 type ConsultaLista = {
   page?: number;
   pageSize?: number;
-  [filtro: string]: string | number | undefined;
+  [filtro: string]: string | number | readonly string[] | undefined;
 };
 type Lector = (
   client: PoolClient,
@@ -302,11 +303,16 @@ function leerFormato(valor: string | null): Formato {
  * página los filtros vigentes de la vista. El tope de 100 por página lo imponen
  * las propias listas; el límite de páginas evita un bucle infinito si el total
  * cambiara durante la lectura.
+ *
+ * `extra` lleva los recortes que no vienen de la query string sino de la sesión
+ * (hoy, las regiones del sectorista). Se mezcla antes que `filtros` para que un
+ * filtro explícito de la URL, si lo hubiera, gane.
  */
 async function leerTodas(
   client: PoolClient,
   listar: Lector,
   filtros: Readonly<Record<string, string>> = {},
+  extra: Readonly<Record<string, string | readonly string[]>> = {},
 ): Promise<unknown[]> {
   const filas: unknown[] = [];
   let pagina = 1;
@@ -314,6 +320,7 @@ async function leerTodas(
 
   while (pagina <= MAX_PAGINAS && filas.length < total) {
     const resultado = await listar(client, {
+      ...extra,
       ...filtros,
       page: pagina,
       pageSize: TAMANO_LECTURA,
@@ -472,6 +479,22 @@ export async function GET(request: Request) {
     // Se guarda lo aplicado para auditar la descarga fuera de la transacción.
     let filtrosAuditoria: Record<string, string> = {};
 
+    // Ámbito territorial por defecto: la exportación debe entregar lo mismo que
+    // la pantalla. El listado (`/v1/cases`) inyecta las regiones del sectorista
+    // y la exportación no lo hacía, así que un sectorista podía bajar casos de
+    // otras regiones filtrando por `entidad=casos`. Un filtro territorial
+    // explícito en la URL (`region`, `sinregion`, `alcance=todos`) manda, igual
+    // que en el listado.
+    const scope = resolveDataScope(sesion);
+    const pidioTerritorio =
+      Boolean(params.get("region")) ||
+      Boolean(params.get("sinregion")) ||
+      params.get("alcance") === "todos";
+    const recorteTerritorial: Record<string, readonly string[]> =
+      scope.mode === "regions" && !pidioTerritorio && scope.regiones.length > 0
+        ? { regiones: scope.regiones }
+        : {};
+
     const { tablas, titulo } = await withSession(
       { usuarioId: sesion.uid, rolCodigo: sesion.rol },
       async (client) => {
@@ -503,7 +526,15 @@ export async function GET(request: Request) {
         filtrosAuditoria = filtros;
 
         const filas = filtrarPorIds(
-          filtrarPorId(await leerTodas(client, definicion.listar, filtros), id),
+          filtrarPorId(
+            await leerTodas(
+              client,
+              definicion.listar,
+              filtros,
+              claveEntidad === "casos" ? recorteTerritorial : {},
+            ),
+            id,
+          ),
           ids,
           CLAVES_SELECCION[claveEntidad] ?? ["id"],
         );

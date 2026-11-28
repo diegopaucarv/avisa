@@ -46,19 +46,30 @@ Claves históricas fuera de la serie numérica, también aplicadas:
 
 ### 2.2 Pendientes de aplicar
 
-No hay migraciones pendientes de aplicar. La `82_porteo_campos_mesas` se aplicó
-el 27/11/2026 en una única transacción con `COMMIT`: creó `core.mesa_ficha`
-(satélite 1:1 del caso espejo) y portó la ficha de las 21 mesas. Verificado tras
-el `COMMIT`: 21 fichas alineadas a los casos `MD-2026-0001..0021`, 0 mesas sin
-ficha, 0 desalineadas y la clave `82_porteo_campos_mesas_2026_11_27` en
-`core.migracion_log`.
+| Archivo                                 | Qué hace                                                                                                                           | Consecuencia mientras no se aplique                                                                                                                                                   |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `88_auditoria_descargas_2026_11_28.sql` | Crea `audit.descargas` (una fila por exportación: quién, entidad, formato, filtros, filas, IP y `user_agent`) con RLS y políticas. | `lib/db/auditoria-descargas.ts` deja un `console.warn` y la exportación funciona igual: la auditoría no puede tumbar una descarga. Las exportaciones no dejan rastro hasta aplicarla. |
+
+La `82_porteo_campos_mesas` se aplicó el 27/11/2026 en una única transacción
+con `COMMIT`: creó `core.mesa_ficha` (satélite 1:1 del caso espejo) y portó la
+ficha de las 21 mesas. Verificado tras el `COMMIT`: 21 fichas alineadas a los
+casos `MD-2026-0001..0021`, 0 mesas sin ficha, 0 desalineadas y la clave
+`82_porteo_campos_mesas_2026_11_27` en `core.migracion_log`.
+
+> **La `89` no hace falta.** La búsqueda de alertas por nombre de sectorista
+> necesitaba resolver `core.usuarios.nombre` para roles distintos de
+> `administrador` (la política `p18_usuarios_sel` sólo deja ver la fila propia).
+> Se resolvió con `core.nombres_sectoristas()` de la **74**, que ya está
+> aplicada y es `security definer`: `listAlerts` la usa como `left join` y como
+> columna de búsqueda, con el join original a `core.usuarios` como respaldo.
+> No hay DDL pendiente por este motivo.
 
 ### 2.3 Diseñadas, no aplicadas
 
 No hay migraciones diseñadas y sin aplicar en este momento. Las propuestas del
 Bloque C (riesgo concreto, tipologías de actor, artes de pesca, datos de
-organización, locales) siguen **sin decisión funcional**, así que no se
-numeran todavía.
+organización, locales, motivo de descarte en el alta de alertas) siguen **sin
+decisión funcional**, así que no se numeran todavía.
 
 ## 3. Claves huérfanas del plan
 

@@ -300,11 +300,14 @@ puede sostener es peor que una que declara su estado.
 | A3  | `/api/dashboard` no existe.                                                                         | La sesión se restaura con `GET /api/v1/session` y los agregados salen de los totales de los listados paginados.                                                                                                                                                                                                               | No reintroducir esa ruta. Resumen y Dirección leen `tamano=1` + `total`; Bandeja suma además el rango de vencimiento.                                                                                                                                                       |
 | A4  | ~~El mapa está aplazado hasta que exista el dataset de ubigeo/centroide.~~ **Cerrado.**             | `/mapa` es real: Leaflet con la capa distrital coroplética de `territorio.distrito` (1 892 distritos), círculos regionales en su centroide y capas opcionales de puntos del KML (125) y auditorios por centroide (130).                                                                                                       | La capa llegó el 2026-11-24 (item 128). Los puntos del KML (125) y los 27 auditorios con `distrito_id` (130) también se cerraron. Sigue sin dato el estado de proyecto de las redes RADAR (126–127): se declara ausente.                                                    |
 | A5  | ~~El calendario de compromisos no está portado.~~ **Cerrado en código.**                            | `/compromisos` tiene conmutador Tabla · Calendario; la rejilla se pide al servidor por rango mensual.                                                                                                                                                                                                                         | El calendario está vacío por falta de fechas, no por la vista (ver §6). No requiere escritura: el riesgo original de A1 no aplicaba.                                                                                                                                        |
-| A6  | ~~Vitest está instalado y `ng test` configurado, pero **no hay archivos de prueba**.~~ **Cerrado.** | Hay **19** archivos `*.spec.ts` (15 en el corte del 2026-11-22, con 227 pruebas verdes; la cifra no se re-ejecutó en esta pasada) y `npm run typecheck` pasa limpio.                                                                                                                                                          | `npm test` y `npm run typecheck` son la puerta antes de cada entrega.                                                                                                                                                                                                       |
+| A6  | ~~Vitest está instalado y `ng test` configurado, pero **no hay archivos de prueba**.~~ **Cerrado.** | Hay **31** archivos `*.spec.ts` con **649 pruebas verdes** (última corrida: 2026-11-28) y `npm run typecheck` pasa limpio.                                                                                                                                                                                                    | `npm test` y `npm run typecheck` son la puerta antes de cada entrega.                                                                                                                                                                                                       |
 | A7  | ~~El mapeo de `origen_dato` enviaba `KAG` y `WORKFLOW` a `Manual`.~~ **Cerrado por D10.**           | `KAG` y `Workflow` tienen etiqueta explícita en `dominio/mapeo.ts`.                                                                                                                                                                                                                                                           | Mantener el `CHECK` técnico (`MANUAL · KAG · WORKFLOW · AVISA_HISTORICO · WHATSAPP`) sin cambios.                                                                                                                                                                           |
 | A10 | ~~La exportación PDF / Excel / JSON está decidida y no implementada (E5).~~ **Cerrado.**            | `GET /api/v1/export?formato=&entidad=` sirve JSON, XLSX y PDF; el menú está montado en **15** vistas.                                                                                                                                                                                                                         | Ofrece dos grupos: «Esta vista» (respeta los filtros de la URL) y «Base completa» (`entidad=base`). Firmas XLSX `PK` y PDF `%PDF` verificadas.                                                                                                                              |
 | A11 | ~~Los contadores de Resumen y Bandeja filtran «por vencer» sobre la página.~~ **Cerrado.**          | Ambas vistas piden el rango al servidor y leen su `total`. El servidor ordena por vencimiento efectivo ascendente cuando hay rango, y `excluir_terminales=true` deja fuera los compromisos cumplidos o desestimados.                                                                                                          | Tres consultas por vista: contador de vencidos (`vencimiento_hasta` ayer), contador de por vencer (hoy … hoy+30) y cola combinada (hasta hoy+30, sin `desde`). El único límite que queda es que la API no ofrece orden descendente por vencimiento; la cola no lo necesita. |
 | A12 | El catálogo de ciclos se ordena por `id`, así que «Prevención estratégica» aparece última.          | El orden de presentación no coincide con la Guía §8.                                                                                                                                                                                                                                                                          | Añadir columna `orden` al catálogo cuando se reabra el tema; la Guía aclara que las etapas no son sucesivas.                                                                                                                                                                |
+| A13 | La **búsqueda de alertas por último revisor** sólo acierta con rol `administrador`.                 | El nombre sale del historial (`core.alerta_revision` → `core.usuarios`), y `p18_usuarios_sel` deja leer filas ajenas sólo a `administrador`; para el resto el autor llega como «Sin identificar».                                                                                                                             | El **sectorista** ya se resuelve con `core.nombres_sectoristas()` (migración 74, `security definer`). Para el revisor haría falta una función `core.nombre_usuario(uuid)` equivalente: es DDL nueva, no autorizada.                                                         |
+| A14 | La **auditoría de descargas** depende de una migración sin aplicar.                                 | Sin `audit.descargas` (migración `88`), cada exportación deja un `console.warn` y no queda rastro; el archivo se entrega igual.                                                                                                                                                                                               | Aplicar `88` con `node scripts/_aplicar_migraciones.mjs neon migration/88_….sql`.                                                                                                                                                                                           |
+| A15 | La exportación `entidad=base` no aplica el ámbito de región.                                        | Un sectorista que pida el respaldo completo recibe **todos** los casos, aunque `entidad=casos` ya respeta su territorio.                                                                                                                                                                                                      | O restringir `entidad=base` a `administrador` o pasar el recorte a cada entidad. Pendiente de decisión.                                                                                                                                                                     |
 | A8  | Las fuentes se cargan desde Google Fonts.                                                           | Dependencia de red y de terceros en el primer pintado.                                                                                                                                                                                                                                                                        | Autoalojar y eliminar el `@import`.                                                                                                                                                                                                                                         |
 | A9  | `angular/README.md` sigue siendo el README genérico que genera el CLI, en inglés.                   | Confunde a quien llegue al workspace.                                                                                                                                                                                                                                                                                         | Sustituirlo por las instrucciones de §10.                                                                                                                                                                                                                                   |
 
@@ -315,7 +318,7 @@ puede sostener es peor que una que declara su estado.
 > Resultados registrados el **2026-11-22**. Las filas de paginación, filtros, rango de vencimiento,
 > anulación y exportación se ejecutaron contra el servidor en esa misma fecha; `ng build` es la última
 > medición de producción disponible. La única fila rehecha después es el **recuento de rutas**, del
-> 2026-11-24.
+> 2026-11-24, y el **bloque de la ronda del 2026-11-28** que va al final.
 
 | Prueba                                                                         | Resultado                                                                                                                                                                                                                                                                         |
 | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -356,6 +359,14 @@ puede sostener es peor que una que declara su estado.
 | `GET /api/v1/export?entidad=base&formato=excel` · `…=pdf`                      | 200 · firmas `PK` y `%PDF` verificadas                                                                                                                                                                                                                                            |
 | `pg_proc` sobre `siguiente_codigo_caso`                                        | una sola firma tras `migration/25`: `CS-<PA\|MI>-…-<AAAA>-NN`; la llamada sin argumentos ya no da `42725`                                                                                                                                                                         |
 
+**Ronda del 2026-11-28** (ejecutada en local, no contra Neon):
+
+| Prueba                           | Resultado                                                                                                                                          |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run typecheck`              | pasa (raíz + `angular` + `tsconfig.spec.json`)                                                                                                     |
+| `npm test`                       | **31 archivos, 649 pruebas verdes**, 8,85 s                                                                                                        |
+| `npm --prefix angular run build` | completa; 506,40 kB iniciales (115,52 kB de transferencia) y un aviso **preexistente** de presupuesto en `red-radar.page.ts` (13,11 kB sobre 8 kB) |
+
 Las rutas de la API siguen en inglés (la API en español está decidida y pendiente); la UI las envuelve
 y traduce las claves en su capa HTTP.
 
@@ -377,11 +388,11 @@ Requisitos: el backend Next tiene que estar escuchando en `localhost:3000`, porq
 `angular/proxy.conf.json` redirige `/api` allí y reescribe el dominio de la cookie a `localhost`.
 Sin ese backend, el login no funciona aunque la SPA arranque.
 
-Pruebas: `npm test` (`ng test`, Vitest). Hay **19 archivos `*.spec.ts`** —mapeos de
-respuesta de cada módulo, agregados de Panorama, cola de Bandeja, matriz CSV,
-validadores de formulario, descriptores de entidad, capacidades de la sesión,
-`ubigeo` y la guarda de inactividad—. No se re-ejecutaron en el corte del
-2026-11-24; la última corrida verde completa es del 2026-11-23.
+Pruebas: `npm test` (`ng test`, Vitest). Hay **31 archivos `*.spec.ts`** con 649 pruebas
+—mapeos de cada módulo, agregados de Panorama, cola de Bandeja, matriz CSV, validadores de
+formulario, descriptores de entidad, capacidades de la sesión, `ubigeo`, la guarda de
+inactividad, el padrón de asistencia en Excel, los locales y la búsqueda—. Última corrida
+verde completa: **2026-11-28**.
 
 ---
 
@@ -399,31 +410,33 @@ validadores de formulario, descriptores de entidad, capacidades de la sesión,
 
 ## 12 · Siguiente en orden
 
-1. **Cerrar el hueco de datos de compromisos**: sin `fecha_vencimiento` ni hitos con fecha, el
+1. **Aplicar `88` (auditoría de descargas)** con el runner del proyecto. Mientras no se
+   aplique, las exportaciones no dejan rastro y sólo queda un aviso en el log.
+2. **Cerrar el hueco de datos de compromisos**: sin `fecha_vencimiento` ni hitos con fecha, el
    calendario y la cola «por vencer» están vacíos aunque funcionen. Es captura, no código.
-2. **Aplicar la matriz del equipo en cada entorno**: la SPA exporta el CSV y previsualiza la
+3. **Aplicar la matriz del equipo en cada entorno**: la SPA exporta el CSV y previsualiza la
    importación (`<app-matriz-equipo/>` y `<app-matriz-importar/>` en `/compromisos`), y
    `scripts/matriz/importar_matriz.py` tiene `--dry-run` (por omisión, con conexión de sólo
    lectura) y `--apply --confirmar`. Falta ejecutar la carga tras las migraciones; hoy el camino
    está ensayado en seco y la UI no escribe.
-3. **Mapa**: la capa distrital coroplética, la nube de los 13 456 puntos del KML (item 125) y el
+4. **Mapa**: la capa distrital coroplética, la nube de los 13 456 puntos del KML (item 125) y el
    `distrito_id` de los 27 auditorios (item 130) **ya se dibujan**. Falta sólo lo que no tiene
    dato en la base: las redes de la Red Radar y el estado de proyecto de cada DPA (items 126–127);
    `fact_red_radar` existe únicamente en el legado y no hay tabla de avance de obra.
-4. **Sembrar los nudos críticos**: la tabla `core.caso_nudo_critico`, los endpoints y los bloques
+5. **Sembrar los nudos críticos**: la tabla `core.caso_nudo_critico`, los endpoints y los bloques
    «Nudos de la semana» de `/casos` y `/casos/{codigo}` están vivos y hoy muestran «Periodo sin
    registro» porque no hay filas; `migration/43_nudos_criticos_fieles.sql` sigue siendo propuesta.
-5. **Salida de WhatsApp**: la plantilla y el copiado al portapapeles están (item 105); el correo ya
+6. **Salida de WhatsApp**: la plantilla y el copiado al portapapeles están (item 105); el correo ya
    sale por `POST /v1/mensajes/correo`. No hay envío directo por WhatsApp.
-6. **Orden descendente por vencimiento en `/v1/commitments`** si alguna vista lo necesita: el filtro
+7. **Orden descendente por vencimiento en `/v1/commitments`** si alguna vista lo necesita: el filtro
    de estados terminales ya existe (`excluir_terminales=true`) y la cola de vencidos ya se sirve con él.
-7. **Exportación específica del Anexo 14** y desglose por responsable y por nivel de gobierno: la
+8. **Exportación específica del Anexo 14** y desglose por responsable y por nivel de gobierno: la
    API no los expone y no se estiman en la UI.
-8. **Sustituir el `@import` de Google Fonts** por fuentes autoalojadas y añadir una comprobación de
+9. **Sustituir el `@import` de Google Fonts** por fuentes autoalojadas y añadir una comprobación de
    tamaño gzip en CI, además de los presupuestos de `angular.json`.
-9. **Reemplazar `angular/README.md`** por las instrucciones de §10; este documento ya figura en
-   `docs/README.md` §2.
-10. **Unificar el nombre de la API en español** (decisión del usuario, pendiente): hoy las rutas son
+10. **Reemplazar `angular/README.md`** por las instrucciones de §10; este documento ya figura en
+    `docs/README.md` §2.
+11. **Unificar el nombre de la API en español** (decisión del usuario, pendiente): hoy las rutas son
     `/api/v1/*` en inglés y la UI traduce.
-11. **Añadir columna `orden` a `core.cat_ciclos_intervencion`** para que la presentación siga el orden
+12. **Añadir columna `orden` a `core.cat_ciclos_intervencion`** para que la presentación siga el orden
     de la Guía §8.

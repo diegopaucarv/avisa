@@ -159,12 +159,18 @@ La SPA oculta controles por rol, pero eso es cosmético: **la API debe seguir re
 | `nivel`                                      | desplegable de conflictividad | sí (item 100)                |
 | `prioridad`, `alcance`, `tematica`, `unidad` | selects de búsqueda avanzada  | sí                           |
 | `region`                                     | select de búsqueda avanzada   | sí                           |
+| `sectorista`, `sectoristaId`                 | — (no hay campo propio)       | **no** (sólo `/direccion`)   |
+| `sinregion`, `alcance=todos`                 | —                             | **no** (los usa el panorama) |
 | `sort`                                       | select de orden               | sí                           |
 | `anulados`                                   | pestaña de papelera           | sí (`true` solo en papelera) |
 | `conteos`                                    | desplegable de estado         | sí (`true`)                  |
 | `riesgo`                                     | —                             | **no** (solo `/direccion`)   |
 
 Archivo: `angular/src/app/features/casos/casos.page.ts:293-313`; servidor: `app/api/v1/cases/route.ts:40-80`.
+
+**Ámbito por defecto (sectorista).** `resolveDataScope` (`lib/db/scope.ts`) devuelve `mode: "regions"` cuando la sesión es `sectorista` y trae `regs` no vacío (las regiones de `core.usuario_territorio`). La ruta inyecta entonces `query.regiones` en el repositorio, salvo que la petición pida otro recorte: `region`, `sinregion` o `alcance=todos`. No es un parámetro nuevo del contrato: es el valor por defecto de la sesión, y `alcance=todos` es la marca para limpiarlo. Dirección, Alta Dirección y Administración conservan el alcance total.
+
+El **mismo recorte** se aplica a `GET /v1/export?entidad=casos` (`app/api/v1/export/route.ts`): una exportación no puede entregar más de lo que la pantalla muestra. `entidad=base` sigue sin recorte por entidad (ver pendientes en `frontend.md`).
 
 `abiertos=true` no es una etiqueta de `estado`: se resuelve con `es_activo` del catálogo. `nivel` viaja con el **`codigo` de `core.cat_niveles_conflicto`**, que en esta base coincide con el nombre visible (`Diferencia`, `Controversia`, `Conflicto social`, `Crisis social`, con acentos y espacios); el repositorio lo resuelve con `core.normalizar_ref` contra `codigo` y `nombre`, igual que `riesgo`, y responde `422` si el valor no existe. No se filtra en cliente para que `conteos` y la paginación sigan siendo ciertos. `conteos=true` no filtra: añade el bloque `conteos` calculado **sin** `estado` ni `abiertos`, para que las opciones del desplegable no se muevan al elegirlas.
 
@@ -205,15 +211,22 @@ historial | stateHistory | state_history, completitud | completeness
 
 ### 4.2 · Alertas
 
-| Método   | Ruta                        | Query / cuerpo                                         | Respuesta                         |
-| -------- | --------------------------- | ------------------------------------------------------ | --------------------------------- |
-| `GET`    | `/v1/alerts`                | `q, prioridad, nivel, estado, sinCaso, sort, anulados` | sobre paginado                    |
-| `GET`    | `/v1/alerts/{id}`           | —                                                      | `{ alert \| alerta, demandas[] }` |
-| `PATCH`  | `/v1/alerts/{id}`           | campos de edición (abajo)                              | —                                 |
-| `DELETE` | `/v1/alerts/{id}`           | `{ motivo }` **en el cuerpo**                          | —                                 |
-| `POST`   | `/v1/alerts/{id}/restaurar` | `{}`                                                   | —                                 |
+| Método   | Ruta                        | Query / cuerpo                                                                               | Respuesta                                 |
+| -------- | --------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `GET`    | `/v1/alerts`                | `q, prioridad, nivel, riesgo, estado, sinCaso, caso, distritoId, archivados, sort, anulados` | sobre paginado                            |
+| `GET`    | `/v1/alerts/duplicados`     | `titulo` (obligatorio), `distritoId`, `alerta` (código o uuid a excluir)                     | `{ criterios, candidatos[], generadoEn }` |
+| `GET`    | `/v1/alerts/{id}`           | —                                                                                            | `{ alert \| alerta, demandas[] }`         |
+| `PATCH`  | `/v1/alerts/{id}`           | campos de edición (abajo)                                                                    | —                                         |
+| `DELETE` | `/v1/alerts/{id}`           | `{ motivo }` **en el cuerpo**                                                                | —                                         |
+| `POST`   | `/v1/alerts/{id}/restaurar` | `{}`                                                                                         | —                                         |
 
 Servidor admite además `caso` (`app/api/v1/alerts/route.ts:20`), que la SPA envía solo cuando llega por URL. `sinCaso` (`true` = sin caso, `false` = con caso) usa el mismo vocabulario que `/v1/demandas`; el repositorio lo resuelve con `a.caso_id is null` / `is not null` (`lib/db/repos/alerts.ts`).
+
+**`q` busca también por sectorista.** El término se aplica a código, título, descripción del riesgo, nombre del sectorista asignado y último revisor (`listAlerts`). El sectorista se resuelve con `core.nombres_sectoristas()` —`security definer`, migración 74— porque la política `p18_usuarios_sel` de `core.usuarios` sólo deja leer filas ajenas a `administrador`; el join directo daba nulo para `sectorista` y `direccion_oaipcs`. El **último revisor** sigue saliendo del historial contra `core.usuarios`, así que sólo acierta para `administrador`.
+
+**Triaje.** La respuesta de `GET /v1/alerts` y `GET /v1/alerts/{id}` incluye `triajeEstado` (`pendiente | en_triage | confirmada | descartada | duplicada`), `motivoDescarte` y `duplicadaDeCodigo`, leídos de `core.alerta_triaje` (join 1:1, no multiplica filas). La escritura **no** tiene endpoint propio: se usa `PATCH /v1/red-radar/{id}/triaje`, que acepta uuid **o** código de alerta (`a.id::text = $1 or a.codigo_alerta = $1`) y `{ estado, motivo, duplicadaDeCodigo }`; `motivo` es obligatorio para `descartada` y `duplicada`.
+
+**`GET /v1/alerts/duplicados`** compara títulos con `pg_trgm.similarity` cuando la extensión está disponible y, si no, con solape de palabras normalizadas (`lib/db/repos/alerts-duplicados.ts`); la ventana es de 90 días y el `distritoId` acota. Cada candidato es `{ id, codigo, titulo, fecha, estado, distrito, coincidencias[] }`, donde `coincidencias` dice qué criterio acertó (`titulo` / `distrito`). El sobre `criterios` repite lo aplicado. Es una sugerencia: no persiste «no es duplicado», porque no hay tabla para esa decisión.
 
 **Cuerpo de `PATCH`** (`alerta-panel.component.ts:473-511`): `titulo`, `prioridad`, `nivel` (código `NA-001…NA-004`), `situacionActual`, `hechosRecientes`, `descripcionRiesgo`, `accionesOaipcs`, `accionesSugeridas` (`string[] | null`), `casoCode`, y `{ pasoActual }` en las acciones de flujo. Solo viajan los campos cambiados.
 
@@ -225,6 +238,7 @@ Servidor admite además `caso` (`app/api/v1/alerts/route.ts:20`), que la SPA env
 | -------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET`    | `/v1/commitments`                               | `q, estado, tipo, nivelGobierno, atiendeGenero, anulados, excluir_terminales, vencimiento_desde, vencimiento_hasta`                           |
 | `GET`    | `/v1/commitments/resumen`                       | — (sobre de conteos; ignora la query)                                                                                                         |
+| `GET`    | `/v1/commitments/estadisticas`                  | `soloMesas` (booleano) → conteos por estado, ranking de áreas y situación de plazo                                                            |
 | `GET`    | `/v1/commitments/{id}`                          | — → `{ commitment \| compromiso, caso, documentoOrigen }`                                                                                     |
 | `PATCH`  | `/v1/commitments/{id}`                          | `accion, tipo, estado, unidad, nivelGobierno, alcance, tematica, atiendeGenero, criteriosSmart, evidenciaUri, fechaVencimiento, fechaInicio?` |
 | `POST`   | `/v1/commitments/{id}/hitos`                    | `{ descripcion, estado, fecha? }`                                                                                                             |
@@ -235,6 +249,10 @@ Servidor admite además `caso` (`app/api/v1/alerts/route.ts:20`), que la SPA env
 | `POST`   | `/v1/commitments/{id}/hitos/{hitoId}/restaurar` | — (no existe: el `DELETE` del hito es baja lógica y no tiene contraparte)                                                                     |
 
 Servidor admite además `caso` y `unidad` en el listado, que la SPA no envía hoy (`app/api/v1/commitments/route.ts:19-27`).
+
+**Institución del área responsable.** El listado y el detalle hacen `left join core.entidades en on en.id = uo.entidad_id` sobre la unidad responsable y proyectan `entidad_siglas` / `entidad_nombre`; la API los entrega como `institucionSiglas` y `institucionNombre` (`lib/db/repos/commitments.ts`). Son `null` cuando la unidad no tiene entidad asociada.
+
+**`GET /v1/commitments/estadisticas`** alimenta la franja de `features/compromisos/compromisos-franja.component.ts`: total, cumplidos, en proceso y vencidos, más el `top` de oficinas con su porcentaje de cumplimiento.
 
 `criteriosSmart` es **JSON libre**: se lee como objeto y se reenvía tal cual, sin transformar. Los hitos sin `fecha` se descartan en el mapeo y `proximoHito` exige fecha (`compromiso.mapeo.ts:219-228`).
 
