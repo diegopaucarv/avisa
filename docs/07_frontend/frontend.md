@@ -1019,6 +1019,25 @@ deriva la marca en cada escritura y mantiene el `alcance_override` del caso.
 
 ---
 
+## Ronda 2026-11-28 · ajustes de interfaz
+
+| Área                    | Qué cambió                                                                                                                                                                                                                                                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Shell**               | Se eliminó el borde de 1 px entre secciones del menú colapsado: el estado replegado y el instante cero del hover son ya idénticos. El «+ Nuevo» suma **Actor** (persona) junto a Organización e Institución.                                                                                                                                                        |
+| **Casos**               | Fuera el conmutador Abiertos/Archivados y el desplegable Región; los filtros restantes tienen tope de ancho en % (la búsqueda no). Se retiró el botón «Nuevo caso»: el alta vive sólo en el encabezado. En el alta desaparecen Alcance derivado, Naturaleza y Temática, y el check **Nacional** sustituye a la derivación manual.                                   |
+| **Alertas**             | Estado binario en el filtro: **Atendidas / Pendientes** (`Pendiente` se traduce a `coalesce(paso_actual,0) < 5`; los cinco valores del flujo siguen vigentes para las etiquetas). La celda del revisor deja de pintar la fecha.                                                                                                                                     |
+| **Actores**             | Sin menú «Nuevo» propio. El campo Organización es un buscador con despliegue de alto fijo y «＋ Añadir nueva organización» al pie. La ficha muestra **casos en los que participa** (`GET /v1/actors/{uid}/casos`, aditivo) y la **región derivada** de esos casos cuando el actor no la declara.                                                                    |
+| **Lista de asistencia** | Deja de ser estado de la página y pasa a `ListaAsistenciaService` (`providedIn: 'root'`) con componente propio montado en actores y organizaciones. El diálogo del padrón se fusionó en el cajón «Generar lista de asistencia»; las organizaciones entran como grupo y aportan sus integrantes al Excel; el PII del lote es resiliente por actor (`noDescifrados`). |
+| **Organizaciones**      | El detalle muestra región (declarada o derivada de sus integrantes), integrantes con nombre y los botones Editar/Eliminar en la cabecera. La ruta acepta `?alta=organizacion` / `?alta=institucion`.                                                                                                                                                                |
+| **Autoridades**         | Se retiró la nota de «Criterio»; el conmutador Todos/Autoridad/Agente es un `select` en la barra de búsqueda; la ficha inline ya abre el panel de edición.                                                                                                                                                                                                          |
+| **Modales**             | Editar (lápiz) y Eliminar/Baja (papelera) viven en la cabecera, junto a la X, en actor, organización, compromiso, documento, archivo, alerta y sugerencias.                                                                                                                                                                                                         |
+
+**Operación de datos:** `scripts/_marcar_alertas_atendidas_2026-11-28.mjs` llevó a
+`paso_actual = 5` las 53 alertas con `fecha_reporte < 2026-11-01` (respaldo en
+`backups/alertas_paso_actual_2026-11-28.json`, revertible con `--rollback`).
+
+---
+
 ## Dónde está el detalle
 
 - [`frontend_detalle.md`](frontend_detalle.md) — catálogo de los 131 items, hallazgos de

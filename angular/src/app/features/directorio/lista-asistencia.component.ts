@@ -7,7 +7,12 @@ import { normalizarColeccion, paramsDePagina, urlConParametros } from '../../cor
 import { aErrorApi } from '../../core/http/errores';
 import { CapacidadesService } from '../../core/permisos/capacidades.service';
 import { IconoComponent } from '../../shared/ui/icono.component';
-import { aActorDirectorio, aPiiLote, type ActorDirectorio } from './directorio.mapeo';
+import {
+  aActorDirectorio,
+  aPiiLote,
+  desglosarSinPii,
+  type ActorDirectorio,
+} from './directorio.mapeo';
 import { ListaAsistenciaService, type EntradaLista } from './lista-asistencia.service';
 import {
   crearXlsxPadron,
@@ -184,7 +189,10 @@ type PiiPadron = { dni: string | null; telefono: string | null };
             @if (error(); as mensaje) {
               <p class="lista-asistencia-error" role="alert">{{ mensaje }}</p>
             }
-            @if (nota(); as mensaje) {
+            @if (notaSinPii(); as mensaje) {
+              <p class="lista-asistencia-nota" role="status">{{ mensaje }}</p>
+            }
+            @if (notaIlegibles(); as mensaje) {
               <p class="lista-asistencia-nota" role="status">{{ mensaje }}</p>
             }
           </div>
@@ -446,8 +454,10 @@ export class ListaAsistenciaComponent {
   readonly abierto = signal(false);
   readonly generando = signal(false);
   readonly error = signal<string | null>(null);
-  /** Aviso posterior a la descarga («N actores sin DNI/celular»). */
-  readonly nota = signal<string | null>(null);
+  /** Actores que nunca registraron DNI/celular; no incluye los ilegibles. */
+  readonly notaSinPii = signal<string | null>(null);
+  /** Actores cuyo DNI/celular existe pero no se pudo descifrar. */
+  readonly notaIlegibles = signal<string | null>(null);
 
   /**
    * Generación en curso. Se numera cada intento: al cerrar el cajón se
@@ -526,7 +536,8 @@ export class ListaAsistenciaComponent {
     const token = this.token;
     this.generando.set(true);
     this.error.set(null);
-    this.nota.set(null);
+    this.notaSinPii.set(null);
+    this.notaIlegibles.set(null);
 
     try {
       const miembros = await this.expandirOrganizaciones(incluidas, token);
@@ -538,7 +549,7 @@ export class ListaAsistenciaComponent {
         return;
       }
 
-      const pii = await this.piiDePersonas(personas, token);
+      const { datos: pii, noDescifrados } = await this.piiDePersonas(personas, token);
       if (token !== this.token) return;
 
       const { filas, sinPii } = filasPadronDePersonas(personas, pii);
@@ -548,9 +559,20 @@ export class ListaAsistenciaComponent {
       if (token !== this.token) return;
 
       this.descargarArchivo(archivo, `lista-asistencia-${fechaLocalIso()}.xlsx`);
-      if (this.capacidades.puedeVerPii() && sinPii > 0) {
-        this.nota.set(
-          `${sinPii} ${sinPii === 1 ? 'actor sin DNI/celular' : 'actores sin DNI/celular'}`,
+      if (this.capacidades.puedeVerPii()) {
+        const { sinDato, ilegibles } = desglosarSinPii(sinPii, noDescifrados);
+        this.notaSinPii.set(
+          sinDato > 0
+            ? `${sinDato} ${sinDato === 1 ? 'actor sin DNI/celular' : 'actores sin DNI/celular'}`
+            : null,
+        );
+        // Nota agregada: el motivo por id de `errores` no se muestra crudo.
+        this.notaIlegibles.set(
+          ilegibles > 0
+            ? `${ilegibles} ${
+                ilegibles === 1 ? 'actor con datos ilegibles' : 'actores con datos ilegibles'
+              }`
+            : null,
         );
       }
     } catch (fallo) {
@@ -618,13 +640,18 @@ export class ListaAsistenciaComponent {
   /**
    * DNI y celular de todas las personas en lotes de 500. Un id sin dato no es
    * un error: la fila se imprime en blanco y la nota final lo resume.
+   *
+   * Devuelve además el total de filas ilegibles. Los ids se deduplican antes de
+   * partir los lotes y cada uno viaja en uno solo, así que sumar el conteo por
+   * lote no repite actores aportados por varias organizaciones.
    */
   private async piiDePersonas(
     personas: readonly ActorDirectorio[],
     token: number,
-  ): Promise<Map<string, PiiPadron>> {
+  ): Promise<{ datos: Map<string, PiiPadron>; noDescifrados: number }> {
     const datos = new Map<string, PiiPadron>();
-    if (!this.capacidades.puedeVerPii()) return datos;
+    let noDescifrados = 0;
+    if (!this.capacidades.puedeVerPii()) return { datos, noDescifrados };
 
     const ids = [...new Set(personas.map((persona) => persona.id).filter((id) => !!id))];
     for (let inicio = 0; inicio < ids.length; inicio += LOTE_PII) {
@@ -634,13 +661,14 @@ export class ListaAsistenciaComponent {
           .post<unknown>(urlApi('/v1/actors/pii'), { ids: loteIds, motivo: MOTIVO_PII })
           .pipe(takeUntil(this.cancelado)),
       );
-      if (token !== this.token) return datos;
+      if (token !== this.token) return { datos, noDescifrados };
 
       const lote = aPiiLote(bruto);
       for (const [id, valor] of lote.datos) datos.set(id, valor);
+      noDescifrados += lote.noDescifrados;
     }
 
-    return datos;
+    return { datos, noDescifrados };
   }
 
   private descargarArchivo(archivo: Blob, nombre: string): void {

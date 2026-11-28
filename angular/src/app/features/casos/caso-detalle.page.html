@@ -659,7 +659,7 @@
             <button
               type="button"
               class="button-secondary"
-              title="Copia el último hecho registrado en formato WhatsApp"
+              title="Copia la cronología en formato WhatsApp"
               (click)="copiarCronologia(hechosVisibles())"
             >
               <app-icono nombre="copiar" [tamano]="14" />
@@ -675,12 +675,9 @@
         } @if (d.eventos.length === 0) {
         <p class="empty-inline">Sin hechos registrados.</p>
         } @else if (hechosVisibles().length === 0) {
-        <!-- Hay histórico, pero el último hecho quedó fuera de la ventana: se
+        <!-- Hay eventos en la API, pero ninguno trae una fecha reconocible: se
              dice en voz alta para que no parezca que el expediente perdió datos. -->
-        <p class="empty-inline">
-          Sin hechos en los últimos {{ mesesVentanaCronologia }} meses. El último hecho registrado
-          es anterior a la ventana o no tiene fecha válida.
-        </p>
+        <p class="empty-inline">Hay eventos registrados, pero ninguno tiene una fecha válida.</p>
         } @else {
         <ol class="timeline-list">
           @for (evento of hechosVisibles(); track evento.id) {
@@ -739,13 +736,7 @@
         <div class="detail-section-title">
           <div>
             <h2 id="demandas-caso">Demandas ({{ filasDemandas().length }})</h2>
-            <p>
-              Se listan las demandas de los últimos {{ mesesVentanaDemandas }} meses a partir del
-              último hecho registrado.@if (demandasFueraDeVentana() > 0) {<span>
-                {{ demandasFueraDeVentana() }} demanda(s) quedan fuera de la ventana o sin
-                fecha.</span
-              >}
-            </p>
+            <p>Todas las demandas registradas en el caso.</p>
           </div>
           <div class="demandas-acciones">
             @if (puedeModificar()) {
@@ -803,7 +794,7 @@
         } @if (errorDemanda(); as error) {
         <p class="form-error" role="alert">{{ error }}</p>
         } @if (filasDemandas().length === 0) {
-        <p class="empty-inline">{{ motivoDemandasVacias() }}</p>
+        <p class="empty-inline">Sin demandas registradas en el caso.</p>
         } @else {
         <div class="table-wrap">
           <table class="data-table">

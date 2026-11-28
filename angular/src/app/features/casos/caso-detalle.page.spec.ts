@@ -6,9 +6,11 @@ import {
   aDetalleCasoConCompromisos,
   claseEstadoHito,
   codigoHitoVisible,
+  demandasDeFicha,
   esEstadoHitoFicha,
   fechaHoyIso,
   hechoEnVentana,
+  hechosCronologia,
   integrantesTexto,
   referenciaHito,
   textoFechaHito,
@@ -239,7 +241,7 @@ describe('cronología del expediente: fecha de hoy', () => {
   });
 });
 
-describe('cronología del expediente: sólo el último hecho reciente', () => {
+describe('ventana de exportación: sólo el último hecho reciente', () => {
   const hoy = '2026-11-27';
 
   it('elige el hecho más reciente aunque el arreglo llegue desordenado', () => {
@@ -269,6 +271,62 @@ describe('cronología del expediente: sólo el último hecho reciente', () => {
     expect(hechoEnVentana([], hoy)).toBeNull();
     expect(hechoEnVentana([{ id: 'x', fecha: '' }], hoy)).toBeNull();
     expect(hechoEnVentana([{ id: 'y', fecha: 'sin-fecha' }], hoy)).toBeNull();
+  });
+});
+
+describe('cronología de la ficha: se muestran todos los hechos', () => {
+  it('con tres hechos muestra los tres, del más reciente al más antiguo', () => {
+    const eventos = [
+      { id: 'viejo', fecha: '2026-06-10' },
+      { id: 'nuevo', fecha: '2026-11-20' },
+      { id: 'medio', fecha: '2026-09-01' },
+    ];
+
+    const visibles = hechosCronologia(eventos);
+
+    expect(visibles).toHaveLength(3);
+    expect(visibles.map((evento) => evento.id)).toEqual(['nuevo', 'medio', 'viejo']);
+  });
+
+  it('no descarta hechos antiguos: la ventana de seis meses ya no aplica aquí', () => {
+    const eventos = [
+      { id: 'remoto', fecha: '2020-01-15' },
+      { id: 'reciente', fecha: '2026-11-20' },
+    ];
+
+    expect(hechosCronologia(eventos)).toHaveLength(2);
+  });
+
+  it('omite las fechas inválidas sin inventarles posición', () => {
+    const eventos = [
+      { id: 'valido', fecha: '2026-11-20' },
+      { id: 'vacio', fecha: '' },
+      { id: 'texto', fecha: 'sin-fecha' },
+    ];
+
+    expect(hechosCronologia(eventos).map((evento) => evento.id)).toEqual(['valido']);
+  });
+});
+
+describe('demandas de la ficha: se muestran todas', () => {
+  it('un caso con demandas y sin hechos muestra sus demandas', () => {
+    // `demandasDeFicha` no recibe hechos: ya no hay ventana que dependa de ellos.
+    const demandas = [
+      { id: 'dem-1', fechaRegistro: null },
+      { id: 'dem-2', fechaRegistro: '2019-03-01' },
+    ];
+
+    expect(demandasDeFicha(demandas).map((demanda) => demanda.id)).toEqual(['dem-1', 'dem-2']);
+  });
+
+  it('no descarta las demandas sin fecha de registro o muy antiguas', () => {
+    const demandas = [
+      { id: 'sin-fecha', fechaRegistro: null },
+      { id: 'antigua', fechaRegistro: '2018-01-01' },
+      { id: 'reciente', fechaRegistro: '2026-11-20' },
+    ];
+
+    expect(demandasDeFicha(demandas)).toHaveLength(3);
   });
 });
 

@@ -342,12 +342,6 @@ const SIN_TEMATICA_DEMANDA: TematicaDemanda = { tematica: null, tematicaId: null
 const SIN_VINCULO_DEMANDA: VinculoCompromisoDemanda = { demandaId: null, demandaCodigo: null };
 
 /**
- * Ventana de demandas del expediente, en meses, contada desde el último hecho
- * registrado. `core.demandas` no vincula la demanda con el hecho que la origina.
- */
-const MESES_VENTANA_DEMANDAS = 6;
-
-/**
  * Resta meses a una fecha `YYYY-MM-DD` sin desplazar el día por zona horaria.
  * Si el día no existe en el mes destino (31 → febrero), se ajusta al último día
  * disponible. Devuelve `null` si la fecha de entrada no se reconoce.
@@ -367,9 +361,9 @@ function restarMeses(fecha: string, meses: number): string | null {
 }
 
 /**
- * Ventana de la cronología del expediente (E3), en meses, contada desde hoy.
- * El requisito pide mostrar sólo el último hecho y sólo si es reciente: el
- * «mínimo» de antigüedad es en realidad un máximo de seis meses.
+ * Ventana de la cronología para la exportación, en meses, contada desde hoy.
+ * La ficha muestra todo el histórico; este recorte sólo lo aplican los caminos
+ * de exportación (ver `hechoEnVentana`).
  */
 const MESES_VENTANA_CRONOLOGIA = 6;
 
@@ -386,10 +380,11 @@ export function fechaHoyIso(ahora: Date = new Date()): string {
 }
 
 /**
- * Hecho visible de la cronología: el más reciente con fecha válida, siempre que
- * su fecha caiga dentro de la ventana de `meses` contada desde `hoy` (el borde
- * se incluye). Sin hechos, sin fechas válidas o con el último fuera de la
- * ventana devuelve `null`: la ficha no inventa ni muestra hechos antiguos.
+ * Hecho más reciente dentro de la ventana de exportación: el más reciente con
+ * fecha válida, siempre que su fecha caiga dentro de la ventana de `meses`
+ * contada desde `hoy` (el borde se incluye). Sin hechos, sin fechas válidas o
+ * con el último fuera de la ventana devuelve `null`. No lo usa la ficha, que
+ * lista todo el histórico; se conserva para los caminos de exportación.
  */
 export function hechoEnVentana<T extends { fecha: string }>(
   eventos: readonly T[],
@@ -409,6 +404,32 @@ export function hechoEnVentana<T extends { fecha: string }>(
 
   if (ultimo === null || ultimo.fecha < umbral) return null;
   return ultimo.evento;
+}
+
+/**
+ * Cronología de la ficha: todos los hechos con fecha válida, del más reciente
+ * al más antiguo. Se descartan los eventos sin fecha reconocible en vez de
+ * inventarles una posición. `sort` es estable, así los empates de fecha
+ * conservan el orden en que llegaron de la API.
+ */
+export function hechosCronologia<T extends { fecha: string }>(eventos: readonly T[]): T[] {
+  const conFecha: { evento: T; fecha: string }[] = [];
+  for (const evento of eventos) {
+    const fecha = fechaIso(evento.fecha);
+    if (fecha !== null) conFecha.push({ evento, fecha });
+  }
+  return conFecha
+    .sort((a, b) => (a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : 0))
+    .map(({ evento }) => evento);
+}
+
+/**
+ * Demandas de la ficha: todas las del caso, incluidas las que no traen
+ * `fechaRegistro`. El recorte de seis meses era sólo de presentación; la
+ * ficha muestra el histórico completo y la exportación la resuelve el backend.
+ */
+export function demandasDeFicha<T>(demandas: readonly T[]): T[] {
+  return [...demandas];
 }
 
 /**
@@ -1352,71 +1373,27 @@ export class CasoDetallePage {
       origen: (demanda) => demanda.documentoOrigenCodigo ?? demanda.documentoOrigenTitulo,
     };
   /**
-   * Fecha del hecho más reciente del caso (`YYYY-MM-DD`), o `null` si no hay
-   * hechos con fecha. Se toma el máximo y no se confía en el orden de la API.
+   * Demandas de la ficha: todas las del caso, con el orden de la tabla. Antes
+   * se recortaban a los seis meses posteriores al último hecho, pero ese filtro
+   * sólo tenía sentido para la exportación; la ficha muestra el histórico.
    */
-  private readonly fechaUltimoHecho = computed(() => {
-    let ultima: string | null = null;
-    for (const evento of this.ficha()?.eventos ?? []) {
-      const fecha = fechaIso(evento.fecha);
-      if (fecha !== null && (ultima === null || fecha > ultima)) ultima = fecha;
-    }
-    return ultima;
-  });
-
-  // TODO(confirmar): `core.demandas` no guarda el hecho que originó cada
-  // demanda. Se aproxima por fecha: sólo entran las demandas de la ventana de
-  // 6 meses contada desde el último hecho registrado. Falta confirmar qué hacer
-  // cuando ese último hecho tiene más de 6 meses: ¿dejar la tabla vacía
-  // (comportamiento actual) o mostrar el histórico completo?
-  readonly filasDemandas = computed(() => {
-    const ultimoHecho = this.fechaUltimoHecho();
-    if (ultimoHecho === null) return [];
-    const umbral = restarMeses(ultimoHecho, MESES_VENTANA_DEMANDAS);
-    if (umbral === null) return [];
-    const demandas = (this.ficha()?.demandas ?? []).filter(
-      (demanda) => demanda.fechaRegistro !== null && demanda.fechaRegistro >= umbral,
-    );
-    return this.ordenDemandas.ordenar(demandas, this.accesoresDemandas);
-  });
-
-  /** Meses de la ventana de demandas, para los textos de la vista. */
-  readonly mesesVentanaDemandas = MESES_VENTANA_DEMANDAS;
-
-  /**
-   * Cronología del expediente (E3). El requisito pide sólo el último hecho y
-   * sólo si es reciente: la antigüedad máxima es de seis meses contados desde
-   * hoy. El filtro es de presentación; la API sigue devolviendo el histórico.
-   */
-  private readonly hoy = fechaHoyIso();
-  readonly hechosVisibles = computed<readonly EventoCaso[]>(() => {
-    const hecho = hechoEnVentana(this.ficha()?.eventos ?? [], this.hoy);
-    return hecho ? [hecho] : [];
-  });
-  readonly mesesVentanaCronologia = MESES_VENTANA_CRONOLOGIA;
-  /** Se expone a la plantilla y al CSV; la lógica vive fuera de la clase. */
-  readonly textoTipologias = textoTipologias;
-
-  /**
-   * Demandas del caso que la ventana deja fuera (anteriores al umbral o sin
-   * `fecha_registro`). La vista lo dice en voz alta para que no parezca que el
-   * expediente perdió datos.
-   */
-  readonly demandasFueraDeVentana = computed(() =>
-    Math.max(0, (this.ficha()?.demandas.length ?? 0) - this.filasDemandas().length),
+  readonly filasDemandas = computed(() =>
+    this.ordenDemandas.ordenar(
+      demandasDeFicha(this.ficha()?.demandas ?? []),
+      this.accesoresDemandas,
+    ),
   );
 
-  /** Explica por qué la tabla de demandas está vacía; no siempre es «no hay». */
-  readonly motivoDemandasVacias = computed(() => {
-    if (this.fechaUltimoHecho() === null) {
-      return 'El caso no tiene hechos registrados y la ventana se cuenta desde el último hecho.';
-    }
-    const fuera = this.demandasFueraDeVentana();
-    if (fuera > 0) {
-      return `Sin demandas en los últimos ${MESES_VENTANA_DEMANDAS} meses desde el último hecho. ${fuera} demanda(s) quedan fuera de la ventana o sin fecha.`;
-    }
-    return 'Sin demandas registradas en el caso.';
-  });
+  /**
+   * Cronología del expediente: todos los hechos con fecha válida, del más
+   * reciente al más antiguo. La antigüedad ya no recorta la ficha; la ventana
+   * de seis meses queda sólo para la exportación (`hechoEnVentana`).
+   */
+  readonly hechosVisibles = computed<readonly EventoCaso[]>(() =>
+    hechosCronologia(this.ficha()?.eventos ?? []),
+  );
+  /** Se expone a la plantilla y al CSV; la lógica vive fuera de la clase. */
+  readonly textoTipologias = textoTipologias;
 
   /**
    * Compromisos del caso agrupados por la demanda a la que pertenecen. Sólo los
@@ -1678,9 +1655,9 @@ export class CasoDetallePage {
   }
 
   /**
-   * Copia el hecho visible en formato WhatsApp (`*05NOV2026* - texto`) sin
-   * abrir ningún editor (item 34). La ficha sólo lista el último hecho
-   * reciente, así que la copia usa esa misma lista.
+   * Copia la cronología visible en formato WhatsApp (`*05NOV2026* - texto`) sin
+   * abrir ningún editor (item 34). La ficha muestra todo el histórico, así que
+   * la copia replica exactamente lo que está en pantalla.
    */
   async copiarCronologia(eventos: readonly EventoCaso[]): Promise<void> {
     if (eventos.length === 0) return;

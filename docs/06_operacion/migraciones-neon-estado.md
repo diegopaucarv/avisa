@@ -7,6 +7,12 @@
 > falta** y **qué número sigue**. Cuando se aplique una migración, se actualiza
 > aquí y se registra en `core.migracion_log`.
 
+## 0. Operaciones de datos (no son migraciones)
+
+| Fecha      | Script                                                     | Efecto                                                                                                                                                                                               | Reversible                                                   |
+| ---------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| 2026-11-28 | `scripts/_marcar_alertas_atendidas_2026-11-28.mjs --apply` | `paso_actual = 5` en las 53 alertas activas con `fecha_reporte < 2026-11-01`, para que el filtro binario Atendidas/Pendientes deje como pendiente sólo el mes en curso (89 atendidas / 1 pendiente). | Sí: `--rollback backups/alertas_paso_actual_2026-11-28.json` |
+
 ## 1. Reglas
 
 1. Las migraciones son **aditivas**: agregan columnas con `DEFAULT`, tablas
@@ -186,3 +192,22 @@ psql "$NEON_OWNER_URL" -v ON_ERROR_STOP=1 -f migration/84_indices_rendimiento_20
 
 Después de aplicar: actualizar este documento y volver a correr el _contract
 check_ (los `SELECT` principales de los listados) para detectar `42703`.
+
+## 7. Operaciones de datos aplicadas el 2026-11-28
+
+| Fecha      | Script                                                 | Filas afectadas                                                                                                                                             | Cómo revertir                                                                                                                      |
+| ---------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-28 | `scripts/_b5_anclas_membresias_2026-11-28.mjs --apply` | `core.actores.organizacion_ancla_uid`: 292 personas. `core.actores.caso_ancla_id`: 45 actores. `core.actor_membresia.cargo`: 249 membresías. `valid_to`: 0. | `node scripts/_b5_anclas_membresias_2026-11-28.mjs --rollback` (lee `backups/b5_anclas_membresias_2026-11-28T10-00-12-397Z.json`). |
+| 2026-11-28 | `scripts/_b7_restaurar_ruc_2026-11-28.mjs --apply`     | 0 filas.                                                                                                                                                    | No aplica: no se escribió nada.                                                                                                    |
+
+- **B5:** la organización ancla sale de la membresía vigente más reciente de cada
+  persona; el caso ancla, del caso con más vínculos vigentes (empate: el más
+  reciente por `fecha_inicio`); el cargo, de `core.actores.cargo_actual` con
+  respaldo en `legacy.dim_actores.c06`. `valid_to` no se tocó: ni el legado ni
+  ninguna otra tabla traen fecha de cese.
+- **B7:** el RUC del legado es `legacy.dim_organizacion.c14` (5 filas) y ya
+  estaba completo. Las 22 filas de `c07` son inscripciones SUNARP, ya cargadas
+  en `core.organizaciones.inscripcion_sunarp`; no son RUC y cargarlas como tal
+  habría corrompido el dato.
+- **OSPA:** `expediente_ospa` y `estado_ospa` siguen vacíos por falta de fuente;
+  ver `docs/06_operacion/OSPA-sin-fuente-2026-11-28.md`.

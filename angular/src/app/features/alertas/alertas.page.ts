@@ -61,7 +61,6 @@ import {
   type ModoTriaje,
   type ResultadoTriaje,
 } from './alerta-triaje.component';
-import { ExportarAlertasMenuComponent } from './exportar-alertas-menu.component';
 import {
   FILTROS_ESTADO_ALERTA,
   ORDENES_ALERTA,
@@ -158,7 +157,6 @@ function totalDe(bruto: unknown): number {
     AlertaModificacionComponent,
     AlertaWhatsappComponent,
     AlertaTriajeComponent,
-    ExportarAlertasMenuComponent,
     AnularPanelComponent,
     BarraSeleccionComponent,
     TablaComponent,
@@ -734,9 +732,6 @@ export class AlertasPage {
 
   /** Último fallo del botón de exportación; vacío si no hubo. */
   readonly exportarError = signal<string | null>(null);
-
-  /** Botón de alta: basta el permiso global de escritura. */
-  readonly puedeRegistrar = this.capacidades.puedeEditar;
 
   /**
    * Dirección de la vista de alertas: `direccion_oaipcs`, alta dirección y

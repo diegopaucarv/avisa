@@ -108,7 +108,7 @@
       <div class="mapa-aviso" role="alert">
         <p>
           La capa distrital no está disponible ({{ fallo.estado === 0 ? 'sin conexión' : 'error ' +
-          fallo.estado }}): {{ fallo.message }}. Los círculos por región siguen vigentes.
+          fallo.estado }}): {{ fallo.message }}. El resto del mapa sigue vigente.
         </p>
         <button type="button" class="button-secondary" (click)="reintentarDistritos()">
           Reintentar

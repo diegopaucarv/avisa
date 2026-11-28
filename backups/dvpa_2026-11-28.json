@@ -1,0 +1,1339 @@
+{
+  "tarea": "B3 DVPA",
+  "generado_en": "2026-11-28T10:08:20.944018+00:00",
+  "xlsx": "C:\\Users\\Julia\\Downloads\\avisa\\docs\\05_datos\\23NOV2026 MATRIZ DE CONFLICTOS SOCIALES (2) (1).xlsx",
+  "contexto_rls": {
+    "app.rol_codigo": "administrador",
+    "app.user_id": "00000000-0000-0000-0000-000000000001"
+  },
+  "totales": {
+    "actores": 186,
+    "membresias": 2,
+    "kag_nodos": 186,
+    "kag_aristas": 2
+  },
+  "actores": [
+    {
+      "actor_uid": "af539cb2-93b2-414a-a11c-5df9d311f903",
+      "nombre": "Simon Henry Juarez Ruiz",
+      "fila_excel": 3,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "a9cd8124-8004-4030-8b2c-ccdb380d2e0f",
+      "nombre": "Jorge Luis Jacinto Galán",
+      "fila_excel": 4,
+      "region_id": 14
+    },
+    {
+      "actor_uid": "6886de76-dec8-40e6-8fb2-84d0b29bd33d",
+      "nombre": "Elsa Vega",
+      "fila_excel": 5,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "033291cf-e6b3-4560-abbe-784c59de935c",
+      "nombre": "Edwin Jonathan Purisaca",
+      "fila_excel": 6,
+      "region_id": null
+    },
+    {
+      "actor_uid": "cdc95294-c369-47b6-adde-c8d66289aa56",
+      "nombre": "Edwin Hougthon Rosas",
+      "fila_excel": 8,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "23593d7c-ca0c-449e-a350-e80b5e0b393a",
+      "nombre": "Ever Miltón Candia Cano",
+      "fila_excel": 11,
+      "region_id": 11
+    },
+    {
+      "actor_uid": "db4c5b6e-fdb1-4039-a9e5-fbf9a38caef7",
+      "nombre": "José Manuel Querevalu Puescas",
+      "fila_excel": 15,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "c9a36d99-807f-41a3-aa1b-65436558372e",
+      "nombre": "Guillermo Sheyneider Alegre Usquiamo",
+      "fila_excel": 19,
+      "region_id": 15
+    },
+    {
+      "actor_uid": "1fd0cbd1-1158-4902-bbc1-be9a92f7da66",
+      "nombre": "Carlos Alberto Bayona",
+      "fila_excel": 22,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "5ded1d46-08be-4ab9-aa58-8644a5f8bf0e",
+      "nombre": "Mario Fausto Alvarado Echeandía",
+      "fila_excel": 23,
+      "region_id": 14
+    },
+    {
+      "actor_uid": "6f81ffce-63d9-4f34-a51a-6534892c4f28",
+      "nombre": "Hilton Guerrero Bonifacio",
+      "fila_excel": 25,
+      "region_id": 11
+    },
+    {
+      "actor_uid": "c5d00faa-45b5-4ba9-abe3-904325859e1c",
+      "nombre": "Walter Cayo Ticona",
+      "fila_excel": 27,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "1ac6a77e-e899-465d-ad19-0354d9873ce1",
+      "nombre": "Segundo Tito Chochevilca",
+      "fila_excel": 28,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "c5266835-7da9-4966-840c-b19a49f701a4",
+      "nombre": "Pablo Florencio Espinoza de la Cruz",
+      "fila_excel": 29,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "4bd26ce7-c677-4c05-a82e-e9945cdbcd4d",
+      "nombre": "Sixto Roas",
+      "fila_excel": 30,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "627aba88-20e3-4c92-87b4-6ea22132d77b",
+      "nombre": "Juan Cervantes Nolasco",
+      "fila_excel": 31,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "2ebf828f-5ad8-48c6-8dfa-9194895ec7a9",
+      "nombre": "Juan Ramos de la Cruz",
+      "fila_excel": 32,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "ef9b8635-f135-4a2e-b552-8ff2d06c3352",
+      "nombre": "Luis Carlos de la Cruz",
+      "fila_excel": 33,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "964279da-79f6-4a41-953c-d369ca9ccba5",
+      "nombre": "Harry William Lamas Valdivieso",
+      "fila_excel": 34,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "0c662e8f-02a7-417c-8629-506c0c3fff6b",
+      "nombre": "Jorge Nazario Cruz Alvarez",
+      "fila_excel": 35,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "fb333de7-8ef3-4be2-86f8-2cb6ff590e67",
+      "nombre": "Edgar Jimenez",
+      "fila_excel": 36,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "a6c9f6dc-59e0-484e-9a9e-d62381b046ac",
+      "nombre": "Cesar Benavidez (Ex SG)",
+      "fila_excel": 38,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "08068842-f582-4002-a9fd-58f9f3d043ca",
+      "nombre": "Frank Valiente",
+      "fila_excel": 39,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "ab7d46db-f1a0-440c-bf04-5f77c958880a",
+      "nombre": "Juan Carlos Alvarado Yerena (Pdte)",
+      "fila_excel": 40,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "1c6b3b23-71f2-4a39-909b-8025f5f7709b",
+      "nombre": "Derliz Alvarado (ex Pdte.)",
+      "fila_excel": 41,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "45034639-b4b7-4b8d-ae51-aaa0fed24307",
+      "nombre": "Edwin Villajuan",
+      "fila_excel": 42,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "35dc04ed-ca7e-457d-bb7d-f279af98f0ac",
+      "nombre": "Jhonny Villajuan",
+      "fila_excel": 43,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "604090e1-a758-45cc-9611-b9651e9a3e72",
+      "nombre": "Pablo Salinas",
+      "fila_excel": 44,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "0786df4d-66c3-4bd8-a77a-9701e4132a30",
+      "nombre": "Percy Acaguana",
+      "fila_excel": 45,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "e580b691-24f4-422b-8585-49aa680a6c1f",
+      "nombre": "Eugenio Condori",
+      "fila_excel": 46,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "8b2d51b1-a23a-4273-aa43-9e9c890cca99",
+      "nombre": "Henry Colque",
+      "fila_excel": 47,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "0d2a5994-1ab1-49cf-b91d-d3a7fea1c4f0",
+      "nombre": "Alfredo Calhuna",
+      "fila_excel": 48,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "f8b16e3a-88f1-4140-9f48-81dd089e0dc8",
+      "nombre": "José Condori",
+      "fila_excel": 49,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "cc657286-811e-4e35-ab48-55365f753400",
+      "nombre": "Jorge Hurtado Llayqui",
+      "fila_excel": 50,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "7e372223-59ab-42b9-96eb-f2124b178ccd",
+      "nombre": "Miguel Ángel Torres",
+      "fila_excel": 52,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "7cc97ecd-1458-4526-9b79-3eba004eb806",
+      "nombre": "Otto Cordero",
+      "fila_excel": 53,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "06cd7602-7bf8-4cfc-87e4-16211c66f169",
+      "nombre": "José Huisa Ortiz",
+      "fila_excel": 54,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "88cbb2f5-0144-4a92-8a1d-34a45f8928e6",
+      "nombre": "Edwin Huarcaya",
+      "fila_excel": 55,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "d9dac685-22c7-4f1a-9a87-af69b242e555",
+      "nombre": "Marcos Ccama Flores",
+      "fila_excel": 57,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "56ecbb5a-6909-4bf1-b62b-373a02016c51",
+      "nombre": "Percy Choque Curasi",
+      "fila_excel": 58,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "971a2f12-b192-4ac3-909e-0809bcb03984",
+      "nombre": "Raul Cruz Panuera",
+      "fila_excel": 59,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "ebea4f78-833f-4bfc-8f58-804dcd01f74c",
+      "nombre": "Jaime Daniel Mamani Arii",
+      "fila_excel": 60,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "a388dcc8-e9a7-4d62-b590-10afa255d934",
+      "nombre": "Elar Alvarez Lazo",
+      "fila_excel": 61,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "10fee9e5-27c0-45eb-be2a-a19080bff886",
+      "nombre": "Mauro Figueroa",
+      "fila_excel": 62,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "a52675ab-7dec-4f5e-b191-5ee1dd3d37cf",
+      "nombre": "Hernan Garcia Cornejo",
+      "fila_excel": 63,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "3dd6938a-2137-4e68-8c6d-e20203b1717a",
+      "nombre": "Angel Benacio Sanchez Puma",
+      "fila_excel": 64,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "ed2b86d8-8b46-4697-9c72-2db080b35ce7",
+      "nombre": "Jorge Pesaressi Caceres",
+      "fila_excel": 65,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "51f7a226-4cb9-4e88-94f0-69833e136ddf",
+      "nombre": "David Patiño Cutipa",
+      "fila_excel": 66,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "0e86cc4e-a162-4727-8c3d-c5b53f930502",
+      "nombre": "Juan Moyna",
+      "fila_excel": 67,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "7293e3e9-3c8b-4738-9f79-2485826c8921",
+      "nombre": "Arturo Bueno",
+      "fila_excel": 68,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "0a817093-5532-4733-9d93-54269fd2b06a",
+      "nombre": "Miguel Angel Plaza Chuquizuta",
+      "fila_excel": 69,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "636545b4-bf7d-41d0-a2dd-235191df58af",
+      "nombre": "José Antonio León Loza",
+      "fila_excel": 70,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "f06a4f1b-5a06-4e32-8f06-8328f5f611a0",
+      "nombre": "Juan Moina Lerma",
+      "fila_excel": 71,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "eab8a8d6-2702-46ce-ba71-668aa428b6d7",
+      "nombre": "Israel Mamani Mamani",
+      "fila_excel": 72,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "f4a1b8de-1714-4ce3-a5b0-fa380d507e1f",
+      "nombre": "Mayela Quispe",
+      "fila_excel": 73,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "96f16146-5381-481e-b2ff-26242a1d38f1",
+      "nombre": "Alfredo Alave",
+      "fila_excel": 74,
+      "region_id": 21
+    },
+    {
+      "actor_uid": "4084407f-0357-4ce9-a41a-4c51b95e6b8d",
+      "nombre": "Clemencia Quispe Apaza",
+      "fila_excel": 75,
+      "region_id": 21
+    },
+    {
+      "actor_uid": "3ee63c88-5a2e-4ab5-803a-0fce606b6061",
+      "nombre": "Eduardo Toque Juli",
+      "fila_excel": 76,
+      "region_id": 21
+    },
+    {
+      "actor_uid": "388d1eae-dae8-48f1-98d8-578dc7982bc2",
+      "nombre": "Gabriel Chipana Quispe",
+      "fila_excel": 77,
+      "region_id": 21
+    },
+    {
+      "actor_uid": "a00e5358-ea26-47ab-9679-7818af514cca",
+      "nombre": "Amado Yañez Shavier",
+      "fila_excel": 78,
+      "region_id": 16
+    },
+    {
+      "actor_uid": "f4962312-4261-428b-a989-8adef3b2d182",
+      "nombre": "Jessica Rojas",
+      "fila_excel": 79,
+      "region_id": 16
+    },
+    {
+      "actor_uid": "c53fdc0e-6b02-4cad-9cc4-4fb5dfec2997",
+      "nombre": "Edinson Vilchez",
+      "fila_excel": 80,
+      "region_id": 1
+    },
+    {
+      "actor_uid": "05f228eb-b80f-483c-985f-c98c6aa3431f",
+      "nombre": "Wilber Rufo Chuctaya Farfan",
+      "fila_excel": 81,
+      "region_id": 17
+    },
+    {
+      "actor_uid": "994ace76-cd51-4633-9e65-e425464f6759",
+      "nombre": "Victor Anyosa Cardenas",
+      "fila_excel": 82,
+      "region_id": 17
+    },
+    {
+      "actor_uid": "afbd1bc9-3960-469e-b055-f6ef56f99441",
+      "nombre": "JOSE ZAPATA PANTA",
+      "fila_excel": 84,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "f7196642-a88e-45cb-aaa3-00e059e1b148",
+      "nombre": "JUAN JOSE CRUZ POICON",
+      "fila_excel": 85,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "e8d45369-6769-4d66-af69-3b6038e076f4",
+      "nombre": "SANTOS AGAPO MONTOYA PANTA",
+      "fila_excel": 87,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "9bd43627-84a7-49c6-9f49-21f4ffb17d03",
+      "nombre": "ROSENDO ESPINOZA OVIEDO",
+      "fila_excel": 88,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "89d5981a-d386-44cb-83f3-09c18788aa44",
+      "nombre": "JULIO CESAR ARIADEL ROSALES",
+      "fila_excel": 89,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "e57876c3-2f03-4652-9273-a18eba480f98",
+      "nombre": "WILFREDO RUGEL INFANTE",
+      "fila_excel": 90,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "034cd282-5e27-4fba-a8bf-ddeab0215175",
+      "nombre": "FILEMÓN YACILA CALDERÓN",
+      "fila_excel": 91,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "031cf2cb-0dd9-449d-907b-d42d88ee21d9",
+      "nombre": "SILVIA ORTIZ",
+      "fila_excel": 92,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "a890d77e-5377-4ca0-a069-ae9b9212635f",
+      "nombre": "GRIMALDO GAMBOA FLORES",
+      "fila_excel": 93,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "2b96a295-1481-4b84-8b9f-53edff9ae6f8",
+      "nombre": "EDDYE OLAYA ESCOBAR",
+      "fila_excel": 94,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "8658ca53-9727-4981-bc1f-05025e03a252",
+      "nombre": "JULIO CALERO CESPEDES",
+      "fila_excel": 95,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "d2751371-11e9-4c71-a703-a6be83f5b3c7",
+      "nombre": "JORGE LUIS PANTA RISCO",
+      "fila_excel": 96,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "6ba23a75-96bc-4b8c-84ea-3ab6831fa17b",
+      "nombre": "MIGUEL MARTINEZ PINTADO",
+      "fila_excel": 97,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "d51b8596-0695-447d-bf4a-4f7eb13c419e",
+      "nombre": "CALIXTO FORTUNATO CHAPILLEQUEN CARLIN",
+      "fila_excel": 98,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "48fb6cbc-937b-4906-bf6a-2af15bc1142d",
+      "nombre": "ALEX HERRERA QUEVEDO",
+      "fila_excel": 99,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "2652ceb3-47eb-4f25-a946-75427bc17cb2",
+      "nombre": "JOSE MANUEL REYES MUÑOZ",
+      "fila_excel": 100,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "5927a2c3-e729-4575-bd19-f306676599bc",
+      "nombre": "TEÓFILO QUEREVALU TUME",
+      "fila_excel": 101,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "aa130b1c-a26d-4c7e-bdc7-9a84399aa21d",
+      "nombre": "JORGE CARPIO BALLADARES",
+      "fila_excel": 102,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "28c4f5ed-7e27-4993-8d59-99434381ee95",
+      "nombre": "DRAUCIN CHEITO TORRES ESPINOZA",
+      "fila_excel": 103,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "54d27855-629b-4d45-beeb-bce96d08c1d7",
+      "nombre": "PEDRO PABLO ECA MORALES",
+      "fila_excel": 105,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "87ec80e6-17a3-45cf-9818-4661fc56b5fd",
+      "nombre": "GUILLERMO PANTA",
+      "fila_excel": 106,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "bdbdeb35-0cda-4219-8d72-e2f3c6f16997",
+      "nombre": "JUBENCIO VILCHEZ ELIAS",
+      "fila_excel": 107,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "b37ced56-5338-48a7-afb3-c741e06e2d94",
+      "nombre": "TEÓFILO SARANG0 CHAMBA",
+      "fila_excel": 108,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "d7c8970f-113f-49a4-8b20-ebd4a7981fd3",
+      "nombre": "ELISEO CARLIN RAMIREZ",
+      "fila_excel": 109,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "123fad25-8a86-4a1b-9c21-40cca88513de",
+      "nombre": "JULIO QUIROGA",
+      "fila_excel": 110,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "6be68789-22e7-4656-a4b1-e6bfa0bdc4fe",
+      "nombre": "ALBERTO YESQUEN SALDARRIAGA",
+      "fila_excel": 111,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "8d7032df-de92-4bb5-b756-d6b91756a74d",
+      "nombre": "JOSÉ LUIS AMAYA VILLEGAS",
+      "fila_excel": 112,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "bdaba60e-0efa-48fa-a6de-fac1675f474e",
+      "nombre": "ZACARIAS BENITES MORALES",
+      "fila_excel": 113,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "03432e26-b57c-4344-9c3f-ea1cff27b9a5",
+      "nombre": "RAUL TUME JACINTO",
+      "fila_excel": 114,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "014463f4-a19d-4619-a64c-3a4a2c08387d",
+      "nombre": "LUIS MARCELINO ALVAREZ SALDARRIAGA",
+      "fila_excel": 115,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "cc7b6e84-fe94-4959-b97c-401994b32c05",
+      "nombre": "MARTIN OLIVOS VARGAS",
+      "fila_excel": 117,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "1d1b35e1-56ce-440d-8da7-325557a47cc5",
+      "nombre": "Ex pdte. Henry Navarro Carlín",
+      "fila_excel": 118,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "a81e92f1-e791-4482-97b6-244f237f9d9f",
+      "nombre": "Jorge Guerrero",
+      "fila_excel": 119,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "61e96738-8172-4f28-9a0e-f11b66da3c6a",
+      "nombre": "Juan Chulle Quiroga",
+      "fila_excel": 120,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "eb95ca56-cb50-40dd-89e1-1a5e5580964c",
+      "nombre": "Ex rpte. José Pazos Antón",
+      "fila_excel": 121,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "1e1d98f9-64d2-4697-b182-9c957c626775",
+      "nombre": "Ex rpte. Marcelino Gonzales Silupú",
+      "fila_excel": 122,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "b8e76143-12ed-414d-9df8-5fc67f099492",
+      "nombre": "Carlos Chapilliquén Panta",
+      "fila_excel": 124,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "dd51773b-acd8-4f9c-83c1-c84e4089e609",
+      "nombre": "Víctor Hugo Fiestas",
+      "fila_excel": 125,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "507a9d23-deeb-4fae-954e-e2fadff13613",
+      "nombre": "Alejandro Callacondo Choquecota",
+      "fila_excel": 316,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "4ffb13a2-22af-4026-aeed-365ec95d606a",
+      "nombre": "Alejandro Valenzuela Quispe",
+      "fila_excel": 317,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "c95e64e1-e9ac-43f2-9149-500ad3e166ab",
+      "nombre": "Alfredo Huaman Mattos",
+      "fila_excel": 318,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "cfc6aa23-ecb7-4b6c-bc90-786706977f46",
+      "nombre": "Ayme Cruz Mamani",
+      "fila_excel": 319,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "e572ea37-6b83-48b9-b896-627cf046af25",
+      "nombre": "Carlos Americó Muñante Vergara",
+      "fila_excel": 320,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "0e40fac8-51e3-4675-a8db-f97553353b8f",
+      "nombre": "Carlos Quispe Fraquita",
+      "fila_excel": 322,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "85fe377e-f4b7-4bf7-b7ff-2074f3005b00",
+      "nombre": "Claudio Faustino Quiñonez Nimaja",
+      "fila_excel": 323,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "be00bfd9-3da7-478a-83e1-cf6c5e5b5edd",
+      "nombre": "Diego Gilberto Jimenez Ramos",
+      "fila_excel": 324,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "af37d377-6c5b-4358-9757-7cc4117f7021",
+      "nombre": "Edgar H.O. Jimenez Caipa",
+      "fila_excel": 326,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "a12e00cb-62c6-44e6-8366-f18cf54abb76",
+      "nombre": "Edgar Marquez Martinez",
+      "fila_excel": 327,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "cc80a2db-2bc3-4a7b-af67-a74b171fe131",
+      "nombre": "Edwin Ehbert Villajuan Choque",
+      "fila_excel": 330,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "7cae1860-de1f-4404-8b5e-b918aa78a87d",
+      "nombre": "Edwin Echara Villanueva",
+      "fila_excel": 331,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "7ecfbfde-078f-4670-99eb-2d5fcbd08c48",
+      "nombre": "Edwin Huarcaya Berrios",
+      "fila_excel": 332,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "87eff50e-65ae-488e-9e84-80338e8822eb",
+      "nombre": "Felipe Arone Ata",
+      "fila_excel": 333,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "67f8e7c3-b2dc-4851-965e-1eb536a28b52",
+      "nombre": "Felix Valeriano Maguera",
+      "fila_excel": 334,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "002761bc-d98e-4fb9-b927-5baac6c25a5c",
+      "nombre": "Fredy Felix Quispe Guzman",
+      "fila_excel": 335,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "a056730c-58d7-417c-a446-2a1db5366c0c",
+      "nombre": "Fredy Wilfredo Tarqui Yugra",
+      "fila_excel": 336,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "92a875b1-10a6-49f2-9511-99e5b647a9e2",
+      "nombre": "Gladys Quispe Roa",
+      "fila_excel": 337,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "e670d5ff-fdbf-4cde-814f-64828f1aab5f",
+      "nombre": "Hunter Hernan Arias Linares",
+      "fila_excel": 339,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "4eeef9e9-12fb-4eb5-be83-b8580ecb948c",
+      "nombre": "Jaime Salazar Riega",
+      "fila_excel": 340,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "7496c924-9071-446f-8918-fd670ccfb121",
+      "nombre": "Javier Jose Chaparro Castellano",
+      "fila_excel": 341,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "49b1c2c0-d6b8-4827-977f-20d89798b97c",
+      "nombre": "Jesus Huanca Aquino",
+      "fila_excel": 342,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "e3adef2f-5db0-470a-bdf0-554b1b49ca9d",
+      "nombre": "Jorge Federico Hurtado Llayqui",
+      "fila_excel": 343,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "cbbe56d3-ed6c-4016-ba9d-4b4eec01bfd1",
+      "nombre": "Jorge Luis Prado Medina",
+      "fila_excel": 344,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "1e10be79-bb03-4028-8454-c226c81b90f1",
+      "nombre": "Jose Chafoque Neciosup",
+      "fila_excel": 345,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "f5635fc0-0a3c-4060-a6a3-45838fce548c",
+      "nombre": "Jose Fredy Orocolo Gutierez",
+      "fila_excel": 346,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "28b11a18-686a-42b3-b8e5-a904d1ac135f",
+      "nombre": "Jose Leon Loza",
+      "fila_excel": 347,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "ba19715f-dc92-492b-8138-af7a543d7e22",
+      "nombre": "Jose Quispe Mayhuire",
+      "fila_excel": 348,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "6494c16a-fc8b-4149-b7e9-03f391058dde",
+      "nombre": "Jose Carlos Pedraza Estrella",
+      "fila_excel": 349,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "0ddd2d4c-2f82-49a5-a7b6-a3fa321ff3d7",
+      "nombre": "Juan Carlos Velasquez Ramos",
+      "fila_excel": 350,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "9de93c17-3b82-415a-9060-221e3dcad388",
+      "nombre": "Juan Molina Lerma",
+      "fila_excel": 351,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "22ddd61c-4d68-4a6f-b62f-44f269bf5858",
+      "nombre": "Luis Carlos Ramos Nuñez",
+      "fila_excel": 353,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "6374e21e-a833-4b2f-af64-bd268d6079e0",
+      "nombre": "Luis Miranda Corvacho",
+      "fila_excel": 354,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "b73fc447-5da8-4249-aa3f-5f239d3c27f0",
+      "nombre": "Lumberto L. Herrera Machaca",
+      "fila_excel": 356,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "eb8daab8-a086-49c1-a9f1-f8f436eb3d58",
+      "nombre": "Lyner Pacheco Montiel",
+      "fila_excel": 357,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "92200ee5-f4d0-49a7-afd6-7d30ffb038d4",
+      "nombre": "Marcela Montoya Rivera",
+      "fila_excel": 358,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "8a496aa1-10ba-444a-a7bb-fb4524f5d32a",
+      "nombre": "Marco Reynoso Choque",
+      "fila_excel": 359,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "7551494d-4cc4-45b5-92e1-0ebe3f5c75ca",
+      "nombre": "Maruja Molleapaza Quispe",
+      "fila_excel": 361,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "3997e75d-6c32-4338-a3e0-8b021f08dbbb",
+      "nombre": "Miguel Angel Torres Tapia",
+      "fila_excel": 362,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "bf44ad81-d3cd-46f9-a431-239fb6ac318a",
+      "nombre": "Milwar H. Rodriguez Vasquez",
+      "fila_excel": 363,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "5ece900f-e951-4b47-89e0-69feb150c1ce",
+      "nombre": "Nelly Elvira Vasquez Reyes",
+      "fila_excel": 364,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "ef227fc7-a743-47bf-80de-9bddccaba10c",
+      "nombre": "Nicolas Alca Fernandez",
+      "fila_excel": 365,
+      "region_id": 23
+    },
+    {
+      "actor_uid": "de406542-8411-4f80-a737-575452545a0e",
+      "nombre": "Nilia Apaza Sonco",
+      "fila_excel": 366,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "f25d07b8-5abf-415b-8380-c2c2cd7a08f9",
+      "nombre": "Percy Aranya Villasante",
+      "fila_excel": 368,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "79a65274-5848-4ba6-b568-5780ea49dc44",
+      "nombre": "Udelia Abad Reyes",
+      "fila_excel": 371,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "a17c7838-c203-4e12-b414-3636d12a7875",
+      "nombre": "Victor Elio Chirapo Mamani",
+      "fila_excel": 372,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "062c248a-e375-40c3-a8e3-81e85fc860b2",
+      "nombre": "Victor Jefferson Requena Zuñiga",
+      "fila_excel": 373,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "79c8c1f1-3866-4e01-ab11-7da42e461089",
+      "nombre": "Wiber Layme Quispe",
+      "fila_excel": 374,
+      "region_id": 18
+    },
+    {
+      "actor_uid": "4ddb22e6-ebdf-4e2f-b451-c0ea730fd526",
+      "nombre": "Wilson Grover Gomes Blas",
+      "fila_excel": 375,
+      "region_id": null
+    },
+    {
+      "actor_uid": "7e7dee05-952e-483c-8926-206c0604d678",
+      "nombre": "Yesica Milagros Apaza Llanos",
+      "fila_excel": 376,
+      "region_id": 4
+    },
+    {
+      "actor_uid": "83ed5fee-eece-4523-ab22-8392b4b27f7b",
+      "nombre": "Jona Gordos Cordova Calle",
+      "fila_excel": 377,
+      "region_id": 15
+    },
+    {
+      "actor_uid": "2a00049e-d860-42ff-b3cd-bb358f7b9dbc",
+      "nombre": "Marcel Boavenales Valvanzuela",
+      "fila_excel": 378,
+      "region_id": null
+    },
+    {
+      "actor_uid": "eb8ab0c7-ad09-459b-a5ad-8da5cdf6e5ea",
+      "nombre": "Oscar Campasca Jimenez",
+      "fila_excel": 379,
+      "region_id": null
+    },
+    {
+      "actor_uid": "1e6fd21a-50b7-4e77-bf49-93a9c889fcfc",
+      "nombre": "Maria Angelita Arcenio",
+      "fila_excel": 380,
+      "region_id": 11
+    },
+    {
+      "actor_uid": "f1549fbd-24d1-49c3-a3b6-796980549453",
+      "nombre": "Sergio Fiestas Maernez",
+      "fila_excel": 381,
+      "region_id": 11
+    },
+    {
+      "actor_uid": "677962cb-f2c1-4be1-92aa-af34991864a1",
+      "nombre": "Jorge Gonzales Gelau",
+      "fila_excel": 382,
+      "region_id": 11
+    },
+    {
+      "actor_uid": "c04d812e-7792-4f5e-9148-cf83056411c6",
+      "nombre": "Jose Nuñal Santos Mundmit",
+      "fila_excel": 383,
+      "region_id": 11
+    },
+    {
+      "actor_uid": "39692d49-f43a-48b2-8513-69189e0efb5d",
+      "nombre": "Ernesto Castillo Yta",
+      "fila_excel": 384,
+      "region_id": 11
+    },
+    {
+      "actor_uid": "80625dc2-0a3a-4f2e-8028-f37c6febe3cb",
+      "nombre": "Julian Commenti Bonjuntos",
+      "fila_excel": 385,
+      "region_id": 11
+    },
+    {
+      "actor_uid": "60a048d7-489d-411c-96f4-b757f865d32c",
+      "nombre": "Enrique Cornejo Guerruand",
+      "fila_excel": 386,
+      "region_id": 11
+    },
+    {
+      "actor_uid": "0475b117-39ed-40ce-a3e6-ff56428c5ead",
+      "nombre": "Elgar Sannisteban Bravo",
+      "fila_excel": 387,
+      "region_id": 11
+    },
+    {
+      "actor_uid": "901047aa-5480-42d5-a6c1-7979eeb2738d",
+      "nombre": "Darwin Roil Anton",
+      "fila_excel": 388,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "eafb4cd0-1109-478a-a4bd-35a53754fd6f",
+      "nombre": "Jose Luis Panta Risco",
+      "fila_excel": 389,
+      "region_id": 24
+    },
+    {
+      "actor_uid": "bc934220-d9e4-4241-9f3f-3f41c03f8519",
+      "nombre": "Yony Esmertomi Creed Ballena",
+      "fila_excel": 390,
+      "region_id": null
+    },
+    {
+      "actor_uid": "eaa36cf1-d4c4-44a9-82bd-47c842d00d0c",
+      "nombre": "Nelson Muñon Wuinon",
+      "fila_excel": 391,
+      "region_id": null
+    },
+    {
+      "actor_uid": "4d599513-67c6-4cca-abf9-e1dfa99f479f",
+      "nombre": "Aaron Frain Eche",
+      "fila_excel": 392,
+      "region_id": 14
+    },
+    {
+      "actor_uid": "56a44274-e854-4b67-885f-fdf9ce64177b",
+      "nombre": "Grande Renalro Oke Galeemes",
+      "fila_excel": 393,
+      "region_id": 14
+    },
+    {
+      "actor_uid": "a585d454-9648-4141-afb0-73130ede055a",
+      "nombre": "Francisca Sosen Chinnghe Hernena",
+      "fila_excel": 394,
+      "region_id": 14
+    },
+    {
+      "actor_uid": "f804bce1-dfdf-44a8-a28f-850eb33c1439",
+      "nombre": "Henry Felix Sanchez Lees",
+      "fila_excel": 395,
+      "region_id": 14
+    },
+    {
+      "actor_uid": "83135523-0d37-439b-a807-f460961ed8cf",
+      "nombre": "Yenet Alexes Hella Chaca",
+      "fila_excel": 396,
+      "region_id": 14
+    },
+    {
+      "actor_uid": "fa6badab-ec4f-4dae-906b-42d09552cca4",
+      "nombre": "Jenifer Obosco Huamanchurmo",
+      "fila_excel": 397,
+      "region_id": 14
+    },
+    {
+      "actor_uid": "b0767e9f-f97f-4858-ad86-4edd95d4ff45",
+      "nombre": "Jose Fidel Fiestas Piameres",
+      "fila_excel": 398,
+      "region_id": 14
+    },
+    {
+      "actor_uid": "ce04b607-fff2-4955-aa85-47ec5203e098",
+      "nombre": "Ruido Bogela Uruni Paca",
+      "fila_excel": 399,
+      "region_id": 14
+    },
+    {
+      "actor_uid": "6db7451b-9aa8-4e32-985a-4cd122ff8562",
+      "nombre": "Genuto Chongeno Guena",
+      "fila_excel": 400,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "552433bd-a3ce-4a90-8a23-a95189454c20",
+      "nombre": "Roceco Ruiz Sanchez",
+      "fila_excel": 401,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "c3788633-4cad-4974-bfad-943542c4939b",
+      "nombre": "Adi.o Edo Eca",
+      "fila_excel": 402,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "2f8bff1c-e192-4cd7-8af9-52c0d586bd4c",
+      "nombre": "Orlando Puercas Querevalu",
+      "fila_excel": 403,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "518d4675-1a76-44ed-8579-77c91b29d427",
+      "nombre": "Serafo Ringo Pero",
+      "fila_excel": 404,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "8c1c62e5-81e6-415a-ad6e-74d22a4d553d",
+      "nombre": "Maxiho Tere Puri",
+      "fila_excel": 405,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "5dc5922e-5a79-46b3-9a4e-e337f204c2ac",
+      "nombre": "Jose Gregorio Lmnque Chonmgo",
+      "fila_excel": 406,
+      "region_id": null
+    },
+    {
+      "actor_uid": "305e4642-6056-481b-bd86-86ce2ee15a73",
+      "nombre": "Alejandro Simoly Commuris",
+      "fila_excel": 407,
+      "region_id": null
+    },
+    {
+      "actor_uid": "a653b14d-6980-4cb8-bb2d-5d6a99fbc331",
+      "nombre": "Nestor Simon Germanl",
+      "fila_excel": 408,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "fae0b380-5e6d-4667-a22e-5013dd1689c6",
+      "nombre": "Julio Sernero Sanluis",
+      "fila_excel": 409,
+      "region_id": 20
+    },
+    {
+      "actor_uid": "85550014-55ae-4892-94da-56e76d5fb36e",
+      "nombre": "Pedro Cloards Romero",
+      "fila_excel": 410,
+      "region_id": 20
+    }
+  ],
+  "membresias": [
+    {
+      "id": "129005b2-7eaf-49ab-9a80-a964a11a348d",
+      "persona_uid": "cdc95294-c369-47b6-adde-c8d66289aa56",
+      "organizacion_uid": "906667e1-e75b-4ae6-8874-b22cdabc09ef",
+      "cargo": "Vicepresidente"
+    },
+    {
+      "id": "cead8f15-9429-43e5-ba7d-233a4a459026",
+      "persona_uid": "6f81ffce-63d9-4f34-a51a-6534892c4f28",
+      "organizacion_uid": "19370e90-c428-4b91-a0cd-57bb914b88c3",
+      "cargo": "Secretario General"
+    }
+  ],
+  "kag_nodos": [
+    "df6a9358-3734-46f5-af84-e729ddc1b2c3",
+    "a11b9f64-08ca-4c09-a916-25130b6d4507",
+    "6cf29ab7-8ec5-4b3f-9773-7a42c18fe6dd",
+    "a1c6bb30-3983-44b2-8ffa-507c2428c035",
+    "4d68a18e-5a1e-4a6b-a5e2-2d65be76398c",
+    "062c7502-44d7-4277-b2f9-33b52c3a95aa",
+    "609d6cc2-f294-4c9a-9fae-843e29a48756",
+    "8863be78-801b-4d71-85bd-7af2029fa36a",
+    "6a7498a4-e737-4c1d-b74c-2cdd2663ac5b",
+    "5e5c0b02-93ec-4128-bda2-41231101dc55",
+    "725ab052-7173-4469-8749-36d96e04a292",
+    "d50b3991-55f4-42cb-bfaf-5de0076364e8",
+    "8e3b99d1-0bdd-48c7-b919-d5a99f2a6c85",
+    "f21bc2a5-c994-4a5a-bdef-75d0f0cf2cef",
+    "8dfafd82-8c93-4180-a0bf-9f16484c1b03",
+    "fe08b240-9784-475f-95e0-96baad4e2404",
+    "24665b89-f379-4a3c-b06f-8769f6cee2c1",
+    "f5e38f15-3542-49be-88a7-ea2b096ed2b3",
+    "41946d57-7579-4c0e-80b6-9579b1158d35",
+    "2675bf56-c310-4eae-8598-32eb79d1d19d",
+    "fc7c034f-6a34-4478-af1b-732e8b8848e9",
+    "8b79b45d-7005-4049-8c5d-9392ddf314f1",
+    "15b79f45-123c-43c1-a105-faf26ee95ad7",
+    "12bf21dc-1ad0-4820-8519-c51055e2ea9b",
+    "9f97bbd9-362d-46c6-a910-938afd76fb0a",
+    "2e35f641-b07d-4062-a903-e15318fe899b",
+    "d2469314-d416-4875-beda-2d4a5fb8b0a1",
+    "d5736ddc-0611-45d1-981b-3fe691da729f",
+    "790c6e5c-cbf8-4e59-9657-70a8c5025348",
+    "c105dfec-54e1-4cb0-8e24-75afd4a03651",
+    "e8e328c8-9a33-4581-8937-0b54f03c16ee",
+    "131f695b-9db9-413b-ba8c-0ce5edd10962",
+    "6d17ce7c-f7a5-4ffa-a771-8f2fe68077d6",
+    "ce2c9b93-d1e8-4e05-ad55-95427d638b03",
+    "7024ab4f-84ad-4126-a342-e999d7143464",
+    "419e1d96-264c-47fe-9dc4-13166400ec68",
+    "6b45b330-d22c-4041-8218-ec19b6dd473e",
+    "0609c9c7-02c0-4b0f-aedc-15c4bf9793c8",
+    "28b0a8f7-0c20-4f25-8cc8-2eeda4c1d7c7",
+    "d2cceb23-fc68-4961-8748-155e69e0b9f8",
+    "91d67fe0-cd30-4636-9e9d-67312bd3aeac",
+    "760b775c-48b6-4f1c-91c6-cb13122d515e",
+    "a63cd877-73a5-4956-a4dc-95de76a93946",
+    "5945d888-a146-4ef7-abdb-004849644018",
+    "62b1015a-8ffe-463b-9609-4fa147e04dba",
+    "d53b0e0a-d9f4-4fe1-a736-7f8343be4fb4",
+    "2c234f9b-c204-46ac-ad31-192fb2e1d9da",
+    "508edba4-672e-49b4-91d7-fde785e155f6",
+    "11115262-4551-4788-a7aa-d39e32dc6b5c",
+    "6b186fff-7ac5-4328-985c-a74e16679cd3",
+    "2cc11735-26e6-4404-92b0-f386b2ecddfb",
+    "caa1533c-2e97-4ef2-ac65-a2602a3d5565",
+    "6fbcadc2-207c-4c0d-9d87-2b6eeaa9951b",
+    "49b31550-f253-462d-89a3-652037d5c166",
+    "670482d3-9b75-4ae0-969a-8de109c37f10",
+    "2f3e5631-fefc-4963-a930-3f988cbba3a0",
+    "b5829be3-f5a5-4c4b-bde6-ae406ef2725e",
+    "110a2a22-04b7-4dc9-9277-9ef82f8e6b68",
+    "8c0a989a-7202-49b3-a58e-f533e37d0fa0",
+    "cefb794d-8bc8-4608-8909-0d75c27f05d2",
+    "0b7c5bb2-fafc-4510-8e03-0626971b3fdf",
+    "3f18063a-8a72-4350-9e0b-84cb646a92e4",
+    "a87cbddd-dd13-4629-8f96-9971cff2143b",
+    "c9f39630-8694-41b7-abe9-7fff04ef76c5",
+    "a6096b56-3d22-413a-80d7-67ae40906b8e",
+    "da9323f1-1ff8-4131-aa24-ddad3b5d5a78",
+    "e1e4513f-488f-4d46-9555-81114c220a13",
+    "fdb78aa1-8a05-499f-8a3c-d9fde228cb0d",
+    "c15a2f29-69fa-4955-acee-b1989ced9a27",
+    "551532ab-8390-40c7-8fcb-1d779ab8e9c3",
+    "19339551-6081-4aaf-a732-4dece0effaf8",
+    "82d1adf6-57db-4141-80a7-9e81ae1d7ff5",
+    "54b76d2c-b82a-40d2-a17c-d37fa9fd220b",
+    "13838e59-b4c3-446f-adc4-d345aa78e496",
+    "27f2a596-3e40-40f1-88a8-125c4f1e2526",
+    "361d438f-0967-4706-b224-d9e363666bb7",
+    "27ee8764-c9bb-498b-b1b9-311d400004d0",
+    "60e14f97-db1c-42f8-a0cb-67d0186652ba",
+    "4dfaa73c-4e4d-4deb-afcd-fb3ee3ff3467",
+    "4cbf34e7-eff5-4507-b109-4634a5426df6",
+    "e8965c38-c450-4ba6-9fd8-3b734e9574d8",
+    "0c2c0ee7-3388-4c02-bd58-450a5ff5a58b",
+    "16b295b3-5c3e-43e2-b252-eaa9b6f0f8af",
+    "c1d1d212-166e-4eda-85d5-438807bc1919",
+    "2f2b4504-d35f-4d6f-8faa-80b3e03e45b6",
+    "e4572355-a741-4f4b-8b4c-d5e0eab670bc",
+    "e32c4e47-b859-43c7-bf57-f3ac132ed0ac",
+    "d0637d5f-9e29-40fd-93c7-36e32b071834",
+    "4b6dd23f-04f8-4172-a047-012e8c40a196",
+    "0ab16089-42d7-468a-a322-13b5d0325df6",
+    "122f0f63-e290-4f12-bca6-aa431ccbdf4f",
+    "d75d4f37-ac23-4872-b9f6-e4b45b4778b7",
+    "6bcadca4-6f0b-4374-bb5b-a2303dbdd99a",
+    "ad7d0a79-0bbf-4f5a-b88e-b973b6afd482",
+    "5744e784-3ed6-48d3-aa02-e71a6909396f",
+    "8dc83128-bb53-46a4-a6aa-664112a80059",
+    "106f28fe-327f-4274-b29f-e0f06689e522",
+    "e56ba7ee-8fe5-484f-bf21-5496f9a2dfb5",
+    "b725b6bc-e6a6-4bcd-87d8-5c39091e1b69",
+    "08359521-1488-40bc-9fcc-4b6b834d8e32",
+    "063b79a0-1fba-4d99-9a80-c8855522dc07",
+    "f3c5b82a-c10e-41d9-9fec-f26c5151d210",
+    "710b96c3-64b7-413f-a284-8cb1271cddaf",
+    "a0aff198-c4f0-4856-9486-1b859ed82754",
+    "dd8d1fc0-d43d-4830-8c1e-c3440635f2d5",
+    "6de38cca-ab11-4b59-90b7-d7c7470c4082",
+    "9bdd643c-2688-49c7-917a-1573e975d6d9",
+    "152520f5-fe8d-4fcf-9274-bfed95ebf337",
+    "89debeff-4b9f-4a51-867b-5b83986dab23",
+    "a17b3200-caa2-4d7d-8c42-0df265e32d08",
+    "e0ac2a7a-6dd7-41cd-a2b4-366567403aa9",
+    "5a37b2d5-0f57-4839-abea-b2486eb2b421",
+    "87c6cc96-2b63-487c-be54-e9ec0d861772",
+    "970e9d5b-0569-4e24-a215-8096fe8b107e",
+    "b072a93b-1d2f-44cf-9c35-f91c4344b446",
+    "8dea20d1-9ef7-4458-a7b1-edf9dda400f1",
+    "36228107-7ded-41fd-bc9b-02241b78c63a",
+    "7fd485c5-04ea-4662-bf14-35e2fcd62425",
+    "90e16f54-574d-45fd-9de3-1d4f27872d5b",
+    "9db77f8c-a1c0-4168-b988-ca89761462aa",
+    "4d030cda-892e-410a-b2d0-27d7ff266818",
+    "bb0c18f5-05bf-4434-85fe-c64a3bb65743",
+    "725d3335-5832-4084-9b48-a24b82a630e9",
+    "b4bae0ea-9e94-432d-b4a1-3bd0e77402cc",
+    "acb2f6a6-a77f-477b-ab73-04be6f988df1",
+    "ebb87dd7-0202-4aa6-a53c-7f91b64ad287",
+    "675d5130-acbd-4bfc-b446-5997b772c65c",
+    "16e9d129-16da-4a79-8310-ca8443b93378",
+    "fa27891e-2845-4f64-bbf1-2d44c33dd1ea",
+    "aab4022f-9c00-4f89-a752-6fa1564323e1",
+    "e2116268-0886-4792-895b-8cb1f0f0bd70",
+    "13129d01-4d7a-4e53-a7de-6dbceb73095e",
+    "e297002e-0c4b-476f-9166-efcfc5475327",
+    "ab7e4d36-bb1d-4f48-a02a-190311980a47",
+    "96136e97-e5d3-44b2-bfeb-b89b2fc26fbc",
+    "b74ef070-4829-40ed-9cbd-bddd4d606e1a",
+    "7a5fa75a-7248-4a74-aae7-1daecc136660",
+    "2bd18447-1343-425f-b40f-d201079c39f7",
+    "9b4224de-63c2-47da-bda1-3df6bb0d5ec6",
+    "1d6d7c3a-0d05-48f1-bae2-866a2b650617",
+    "45de6b7a-8c52-413c-9e24-4837c662788a",
+    "3d226990-f4da-49f0-8869-ddc737c600ed",
+    "00027f5a-b220-46ae-96d3-9930f1fcad17",
+    "a11b1792-fe8d-4729-a9ee-59548dd38cca",
+    "aefff1f8-0b46-4c4e-943d-4c7008cfa7e0",
+    "b119f43c-1ff0-4347-9042-eb000b491eb0",
+    "2ed22bef-c4b1-4ae1-8aeb-9a02f8d22cfd",
+    "2459875a-c381-41e6-afee-135a142ea4fb",
+    "6b84df88-bb42-4d17-b2c4-b789d269e152",
+    "0a246072-1846-4fb8-93fd-68436f7d1133",
+    "5b5bd299-ea54-43f2-8df3-bcb5b94b15ca",
+    "4523aa90-df0c-4b6d-adbc-dc3b5c53fbf0",
+    "edd08094-4ace-457a-a3a7-2da5d8b47a7a",
+    "686cf192-7113-402d-aa86-b29a8409bc43",
+    "e62c8c39-e076-45f1-8834-7bf063982091",
+    "30102db9-605a-4184-9e61-ede002b3add5",
+    "96f9f2e4-5ca1-440b-a017-b78dc3f117d7",
+    "9eb5f12d-63cc-4a8f-ba20-590108358f7c",
+    "bc2b1b22-7547-48ac-9524-2106e880bc20",
+    "ce1ef35c-9687-43c1-9a1f-42a4a5209163",
+    "b9fad0db-dba9-443f-b5e8-1c7a96e86043",
+    "55039916-8344-42a5-bf66-b62a4454d53c",
+    "05daa235-3aa9-473b-ad3b-f524849e3311",
+    "28cdf414-7035-48e1-9fdb-3253b71d6d99",
+    "0d936a0d-a076-4795-b01d-e83183da5690",
+    "96df9d8d-ccc0-4c7a-9f88-94ee06649bc7",
+    "1760f14b-0557-44d2-b04e-6d8f52a54a56",
+    "0ebed259-ff9c-4612-ac4a-39597e5a2f3c",
+    "5f91f30c-0f4e-495d-81f5-a22c74f1cb2e",
+    "87f1e3a2-a942-48cd-9f78-b1dc8da260c4",
+    "edfe5f99-435e-4bbd-84bc-76f6868a51fa",
+    "c6b99171-eb89-432c-8a37-5f7f1bd2899b",
+    "fdf521f1-c21e-4c1d-a05a-d838552654eb",
+    "aa9527f1-451e-4d75-9d27-71f729098b99",
+    "0a5a3ec1-9a2e-4ed6-8084-519211112679",
+    "84b18e11-58fd-4bcd-af25-60169f2505f7",
+    "6860531b-00f5-4473-8e5a-fad0ae97bdc8",
+    "a6e22d39-42fe-4dbc-8801-46d992bdea1f",
+    "c383f3d4-cbdc-4365-b95b-91fbf2b66a9c",
+    "e430c5f8-d23a-4d4d-8510-004c7550f62f",
+    "cc76f2a5-ea05-4fa4-8f13-83476a9551d4",
+    "a88d729a-094c-45c0-b2bf-949b599eb351",
+    "fd059187-6d02-468b-a9f8-16541c48a120",
+    "453f1614-b1e6-40a2-9397-79750f771f6d",
+    "538a79ca-73da-4a61-aab5-34b0267418f8",
+    "8ef9e77f-11ea-480c-bb4e-82ec89453cad"
+  ],
+  "kag_aristas": [
+    "6476c13c-c419-4d24-9532-3b125773c73e",
+    "5fe0e266-0b1d-49d2-96db-d423fe20a4b5"
+  ]
+}

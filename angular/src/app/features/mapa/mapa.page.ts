@@ -17,6 +17,7 @@ import { map } from 'rxjs';
 
 import { AlcanceService, esAlcance } from '../../core/alcance/alcance.service';
 import { SesionStore } from '../../core/auth/sesion.store';
+import { codigoRegion } from '../../core/territorio/ubigeo';
 import { TerritorioService } from '../../core/territorio/territorio.service';
 import type { AnpGeo, DistritoGeo, RegionGeo } from '../../core/territorio/territorio.tipos';
 import { formatearFechaHora } from '../../shared/formato-fecha';
@@ -27,12 +28,10 @@ import { OrdenTabla } from '../../shared/ui/orden-tabla';
 import { ThOrdenDirective } from '../../shared/ui/th-orden.directive';
 import { formatearFechaCorta } from '../../dominio/mapeo';
 import type { Alcance, Caso, PrioridadAtencion, Riesgo } from '../../dominio/modelos';
-import { coordenadaDeRegion } from './centroides.regiones';
 import { CapasMapaService, type AuditorioMapa, type PuntoInfraestructura } from './capas.service';
 import {
   casosPorDistritoUbigeo,
   claseCoropleta,
-  claseManifiesto,
   colorChoropleta,
   conteosPorSituacion,
   contarRegiones,
@@ -41,7 +40,6 @@ import {
   distribuirPorSectorista,
   ESCALA_COROPLETA_ALERTAS,
   ESCALA_COROPLETA_MANIFIESTOS,
-  ESCALA_MANIFIESTO,
   filasPorRegion,
   intensidadMedida,
   medidasDeCasos,
@@ -68,26 +66,6 @@ const LIMITES_PERU: [number, number][] = [
   [-18.4, -81.4],
   [-0.05, -68.6],
 ];
-
-/** Radio en píxeles: acotado por diseño y escalado por la raíz del conteo. */
-const RADIO_MIN = 11;
-const RADIO_MAX = 34;
-
-/**
- * Color del círculo por composición del agregado, no por el nivel de conflicto
- * de un caso suelto. `ESCALA_MANIFIESTO` va de verde (todo latente) a rojo (todo
- * manifiesto) en cinco tramos; el borde es un tono más oscuro del relleno.
- * El tamaño sigue representando el volumen: sólo el color cambia de eje.
- */
-function estiloCirculo(fila: FilaRegion, activa: boolean): L.PathOptions {
-  const tramo = ESCALA_MANIFIESTO[claseManifiesto(fila.proporcionLatente)];
-  return {
-    color: tramo.borde,
-    weight: activa ? 2.5 : 1.5,
-    fillColor: tramo.relleno,
-    fillOpacity: activa ? 0.9 : 0.7,
-  };
-}
 
 /** Relleno de la coropleta distrital: un tono por tramo de `ESCALA_COROPLETA`. */
 const COLORES_COROPLETA = ['#e3e9f0', '#cfe0f5', '#9dc0e8', '#5f92cd', '#2455a2'];
@@ -164,17 +142,6 @@ type ClaveCapa =
   | 'anp';
 
 type CapasOpcionales = Record<ClaveCapa, boolean>;
-
-function radioCirculo(total: number, maximo: number): number {
-  if (maximo <= 1) return RADIO_MIN;
-  const proporcion = Math.sqrt((Math.max(1, total) - 1) / (maximo - 1));
-  return RADIO_MIN + (RADIO_MAX - RADIO_MIN) * proporcion;
-}
-
-function etiquetaCirculo(fila: FilaRegion): string {
-  const porcentaje = Math.round(fila.proporcionLatente * 100);
-  return `${fila.region} · ${fila.latentes} latentes · ${fila.manifiestos} manifiestos · ${fila.total} ${fila.total === 1 ? 'caso' : 'casos'} · ${porcentaje} % latente`;
-}
 
 /** Gravedad declarada del caso: ordena de más a menos grave. */
 const ORDEN_RIESGO: Record<Riesgo, number> = { Alto: 0, Medio: 1, Bajo: 2 };
@@ -296,6 +263,10 @@ function compararInicio(a: string | null, b: string | null): number {
       display: flex;
       flex-direction: column;
       min-height: 0;
+      /* Contexto de apilamiento propio: los z-index internos de Leaflet (panes
+         y controles, 200–1000) y los flotantes (960) quedan contenidos aquí, de
+         modo que el shell (29/41) se pinta por encima sin tocar Leaflet. */
+      isolation: isolate;
     }
 
     .panel-nota {
@@ -425,7 +396,7 @@ function compararInicio(a: string | null, b: string | null): number {
        zoom (que quedan arriba a la izquierda) para no taparlos. */
     .mapa-flotantes {
       position: absolute;
-      top: 70px;
+      top: 96px;
       left: 10px;
       z-index: 960;
       display: flex;
@@ -481,7 +452,7 @@ function compararInicio(a: string | null, b: string | null): number {
 
     .mapa-panel-capas {
       position: absolute;
-      top: 70px;
+      top: 96px;
       bottom: 10px;
       left: 54px;
       z-index: 950;
@@ -789,7 +760,6 @@ export class MapaPage {
   readonly coropletaVisible = signal(false);
 
   private mapa: L.Map | null = null;
-  private readonly capasRegion = new Map<string, L.CircleMarker>();
 
   readonly estadoDistritos = this.territorio.estadoDistritos;
   readonly errorDistritos = this.territorio.errorDistritos;
@@ -864,13 +834,6 @@ export class MapaPage {
       onCleanup(() => this.desmontarMapa());
     });
 
-    // Recalcula los círculos al cambiar los casos visibles o la selección, sin
-    // recrear el mapa ni sus teselas.
-    effect(() => {
-      this.versionMapa();
-      this.sincronizarCirculos(this.filasRegion(), this.claveSeleccionada());
-    });
-
     // Capa de departamentos permanente y coroplético. El estilo lee las señales
     // del eje, la medida y el ámbito, así que este efecto basta para repintar
     // los 26 polígonos cuando cambia cualquiera de ellas.
@@ -878,6 +841,8 @@ export class MapaPage {
       this.versionMapa();
       const mapa = this.mapa;
       const regiones = this.territorio.regiones();
+      // La selección cambia el borde resaltado: hay que repintar sin reconstruir.
+      this.claveSeleccionada();
       if (!mapa) return;
 
       this.sincronizarRegiones(mapa, regiones);
@@ -1509,7 +1474,15 @@ export class MapaPage {
   }
 
   private seleccionarRegion(region: string): void {
-    this.claveSeleccionada.set(normalizarRegion(region));
+    // El nombre del polígono puede no coincidir literalmente con el de los casos
+    // (Callao, Lima); se empareja por código INEI y se guarda la clave de la fila.
+    const codigo = codigoRegion(region);
+    const clave = normalizarRegion(region);
+    const fila = this.filasRegion().find((f) =>
+      codigo !== null ? codigoRegion(f.region) === codigo : normalizarRegion(f.region) === clave,
+    );
+    if (!fila) return; // Sin casos visibles no hay chip ni recorte que mostrar.
+    this.claveSeleccionada.set(normalizarRegion(fila.region));
   }
 
   private montarMapa(contenedor: HTMLElement): void {
@@ -1528,8 +1501,8 @@ export class MapaPage {
     }).addTo(mapa);
 
     // Las capas territoriales viven en un panel propio por debajo del
-    // `overlayPane`: así los círculos por región conservan sus clics y su
-    // relieve sobre el relleno, aunque los polígonos se añadan después.
+    // `overlayPane`: los polígonos de región y de distrito comparten capa y los
+    // distritos, añadidos después, quedan encima para capturar su clic.
     mapa.createPane('distritos');
     const panelDistritos = mapa.getPane('distritos');
     if (panelDistritos) panelDistritos.style.zIndex = '390';
@@ -1540,7 +1513,6 @@ export class MapaPage {
   }
 
   private desmontarMapa(): void {
-    this.capasRegion.clear();
     this.capaRegiones = null;
     this.regionesFuente = null;
     this.capaProvincias = null;
@@ -1584,8 +1556,16 @@ export class MapaPage {
 
     const capa = L.geoJSON(coleccion, {
       pane: 'distritos',
-      interactive: false,
+      interactive: true,
       style: (rasgo) => this.estiloRegion(rasgo),
+      // Sin las burbujas por región, el propio polígono selecciona: el clic
+      // mantiene viva la selección (chip de cabecera y filtro de la capa distrital).
+      onEachFeature: (rasgo, subcapa) => {
+        subcapa.on('click', () => {
+          const region = regionDelRasgo(rasgo);
+          if (region) this.seleccionarRegion(region);
+        });
+      },
     });
     capa.addTo(mapa);
 
@@ -1614,6 +1594,13 @@ export class MapaPage {
     const ubigeo = ubigeoDelRasgo(rasgo);
     const region = regionDelRasgo(rasgo);
     const destacada = ubigeo !== null && this.alcanceUbigeos().has(ubigeo);
+    const seleccion = this.claveSeleccionada();
+    const codigoSeleccion = seleccion !== null ? codigoRegion(seleccion) : null;
+    const seleccionada =
+      seleccion !== null &&
+      region !== null &&
+      (normalizarRegion(region) === seleccion ||
+        (codigoSeleccion !== null && codigoRegion(region) === codigoSeleccion));
 
     let fillColor = '#eef3f8';
     let fillOpacity = 0.18;
@@ -1631,8 +1618,8 @@ export class MapaPage {
     }
 
     return {
-      color: destacada ? '#1d427f' : '#8a98a5',
-      weight: destacada ? 1.8 : 0.6,
+      color: seleccionada ? '#0b2d5c' : destacada ? '#1d427f' : '#8a98a5',
+      weight: seleccionada ? 2.8 : destacada ? 1.8 : 0.6,
       fillColor,
       fillOpacity,
     };
@@ -1973,47 +1960,5 @@ export class MapaPage {
     const distrito = punto.distrito ?? 'distrito sin declarar';
     const region = punto.region ?? 'región sin declarar';
     return `${nombre} · ${distrito} · ${region}`;
-  }
-
-  private sincronizarCirculos(filas: readonly FilaRegion[], seleccion: string | null): void {
-    const mapa = this.mapa;
-    if (!mapa) return;
-
-    const maximo = filas.reduce((tope, fila) => Math.max(tope, fila.total), 0);
-    const vigentes = new Set<string>();
-
-    for (const fila of filas) {
-      const coordenada = coordenadaDeRegion(fila.region);
-      if (!coordenada) continue; // Sin centroide conocido no se ubica: no se inventa.
-
-      const clave = normalizarRegion(fila.region);
-      const activa = clave === seleccion;
-      const radio = radioCirculo(fila.total, maximo);
-      const estilo = estiloCirculo(fila, activa);
-      vigentes.add(clave);
-
-      const existente = this.capasRegion.get(clave);
-      if (existente) {
-        existente.setLatLng(coordenada);
-        existente.setRadius(radio);
-        existente.setStyle(estilo);
-        existente.setTooltipContent(etiquetaCirculo(fila));
-        if (activa) existente.bringToFront();
-        continue;
-      }
-
-      const capa = L.circleMarker(coordenada, { ...estilo, radius: radio })
-        .addTo(mapa)
-        .bindTooltip(etiquetaCirculo(fila), { direction: 'top', offset: [0, -4] })
-        .on('click', () => this.seleccionarRegion(fila.region));
-
-      this.capasRegion.set(clave, capa);
-    }
-
-    for (const [clave, capa] of this.capasRegion) {
-      if (vigentes.has(clave)) continue;
-      capa.remove();
-      this.capasRegion.delete(clave);
-    }
   }
 }

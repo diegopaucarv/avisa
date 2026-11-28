@@ -1,0 +1,396 @@
+{
+ "generadoEn": "2026-11-28T10:13:44.716Z",
+ "resumen": {
+  "paso1Legado": 2,
+  "paso1SinRegion": 1,
+  "paso2Membresia": 6,
+  "paso2Ambiguo": 0,
+  "paso3Casos": 20,
+  "paso3NoSocial": 0,
+  "paso4Matriz": 35,
+  "paso4Ambiguo": 1,
+  "conRegionAntes": 553,
+  "conRegionDespues": 616,
+  "totalActores": 1590
+ },
+ "cambios": [
+  {
+   "id": "ee61f9e2-8e35-4840-b002-2644ee7a21f4",
+   "nombre": "Yesica Changana Cavero",
+   "regionId": 15,
+   "motivo": "legado:departamento"
+  },
+  {
+   "id": "5d8e8a8a-7383-44b8-b9c1-3cf102da30a8",
+   "nombre": "Alejandro Gomez Araya",
+   "regionId": 15,
+   "motivo": "legado:departamento"
+  },
+  {
+   "id": "f398898d-95db-46e1-a899-306d92b24b00",
+   "nombre": "Wilmer Guillermo Oxsa Capari",
+   "regionId": 4,
+   "motivo": "membresia:organizacion"
+  },
+  {
+   "id": "30be9f14-818f-440e-af1c-f09650802cc1",
+   "nombre": "Alfonso Ernesto García Beunza",
+   "regionId": 4,
+   "motivo": "membresia:organizacion"
+  },
+  {
+   "id": "b3b93984-731b-4983-ada7-93e30d31ad29",
+   "nombre": "Edwin Elbher Villajuan Choque",
+   "regionId": 4,
+   "motivo": "membresia:organizacion"
+  },
+  {
+   "id": "9f9b71a9-935a-4e92-9098-80c65fd218ec",
+   "nombre": "Joel Esaul Palma Leyton",
+   "regionId": 20,
+   "motivo": "membresia:organizacion"
+  },
+  {
+   "id": "3e12df3a-d580-4747-a23d-1c41cce50266",
+   "nombre": "Walter Sipion Huamanchumo",
+   "regionId": 20,
+   "motivo": "membresia:organizacion"
+  },
+  {
+   "id": "290c6530-6ce9-4601-b66b-8a429cda40eb",
+   "nombre": "Juan Cherre Namuche",
+   "regionId": 20,
+   "motivo": "membresia:organizacion"
+  },
+  {
+   "id": "6004ba86-c955-4c1d-bfa5-796148085417",
+   "nombre": "Pedro Román Lévano",
+   "regionId": 7,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "b0fd885f-bb66-409a-b57c-46aa4f53fb36",
+   "nombre": "OSPAs de Tumbes",
+   "regionId": 7,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "b1979c25-0d8a-4862-a9d4-4be486bdb99f",
+   "nombre": "Mercedes Yovera",
+   "regionId": 7,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "ffa50b4d-19bb-4e9b-9ecd-73efc4e8490a",
+   "nombre": "Rafael Paredes Solís",
+   "regionId": 7,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "3c2e5245-7ba1-4d9b-b577-d872144557ef",
+   "nombre": "Juan Carlos Chulle",
+   "regionId": 11,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "e107d3ba-7534-41ef-bd03-5fa6611e0bdf",
+   "nombre": "Luis Díaz",
+   "regionId": 11,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "2a08025f-8948-4ef3-851f-0d4c2b4f324f",
+   "nombre": "Carlos Chapilliquen",
+   "regionId": 20,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "d95a9864-bf1a-47a4-ba1a-c941554ddbd4",
+   "nombre": "Ronal Paul Cornejo Palma",
+   "regionId": 20,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "f8568438-b9d9-4745-a94b-cccda6df654a",
+   "nombre": "Adonay Olaya Marchan",
+   "regionId": 20,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "99f0a31e-1a97-49ba-9b51-7583800fda68",
+   "nombre": "Jesús Querevalú",
+   "regionId": 2,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "394f0a4a-908d-468b-8444-af364a75fd82",
+   "nombre": "Oscar Fernando Camasco Jimenez",
+   "regionId": 12,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "e88c3928-b139-459b-922e-207572ddafaa",
+   "nombre": "Alexander Paucar Villanueva",
+   "regionId": 7,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "df8c8d86-ffd9-44c1-8e62-bc2127b142b6",
+   "nombre": "Susana Liliana Saldaña Ramos",
+   "regionId": 20,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "b66ce99a-5696-42ae-b3c1-d91caf0de5a0",
+   "nombre": "Pedro Fuentes Moreno",
+   "regionId": 16,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "fbbc8f53-54ff-4c69-bff4-462f537de330",
+   "nombre": "Jenny Pizarro Velarde",
+   "regionId": 15,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "9e0937de-a8de-4f22-9c7c-125f1103d935",
+   "nombre": "Wilfredo Florin Mena",
+   "regionId": 15,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "6b05936b-562a-4533-85dd-f3b3936e48f3",
+   "nombre": "Luis Suclupe",
+   "regionId": 4,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "467102a9-4351-44a0-8da1-38fea49a02b3",
+   "nombre": "Martín Olivos Gonzales",
+   "regionId": 11,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "7fe48ca8-94f9-4015-aa3b-c242330b04e7",
+   "nombre": "Cecis Rosos Sánchez",
+   "regionId": 11,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "3022b264-782d-470c-8947-41aba0dee412",
+   "nombre": "SPAEMIM",
+   "regionId": 14,
+   "motivo": "casos:region_principal"
+  },
+  {
+   "id": "accf5070-bd1e-465e-9743-ded0af591684",
+   "nombre": "Pescadores de Cabo Blanco, Órganos, Ñuro, lóbitos,Talara, DIREPRO",
+   "regionId": 20,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "8e4c1ca2-8c39-456f-87c1-47ef531f36ea",
+   "nombre": "OSPA de los Organos",
+   "regionId": 20,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "fb1bf6de-2603-4ec8-94d3-5a3408168d8f",
+   "nombre": "OSPAS DEL CALLAO",
+   "regionId": 7,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "a8238bcd-dadd-4f9c-91bb-3cd4e5740438",
+   "nombre": "OSPA José Olaya Balandra",
+   "regionId": 15,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "d9995dce-1d1f-4532-bba4-eec2259609e3",
+   "nombre": "OSPAS DEL CALLAO (ARAEMM, ARUPACC, ARAAPESCA, ENTRE OTRAS)",
+   "regionId": 7,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "3592026d-12b1-4216-be2a-2e81ac88425f",
+   "nombre": "Asociaciones de productores de concha de abanico de Sechura",
+   "regionId": 20,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "1ae80b55-b10d-4199-ad08-f38640db8548",
+   "nombre": "Municipalidad de Sechura",
+   "regionId": 20,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "c4476441-2f33-491f-bd57-70da4a4b9e75",
+   "nombre": "Municipalidad distrital",
+   "regionId": 14,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "2c5f2a64-1306-48a7-9ec5-9f0969f37681",
+   "nombre": "ANADARKO",
+   "regionId": 14,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "856a6f6a-68a1-41b1-afe0-4110512bacc8",
+   "nombre": "SENACE",
+   "regionId": 14,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "763aae8f-28c6-4dce-96ae-793adfb1857e",
+   "nombre": "Petro Perú",
+   "regionId": 14,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "68b895d7-3651-42f9-a5f6-8b08e57ad81d",
+   "nombre": "Westlawn Perú S.A.C.",
+   "regionId": 14,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "79208333-26e6-4ff7-9e0e-ae0d81a838a4",
+   "nombre": "Congresista Hector Acuña",
+   "regionId": 14,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "27e7d0c5-efb3-4b9b-944d-17195395a3bb",
+   "nombre": "Gilmer Yauri Gestor Social de FONDEPES 966019954",
+   "regionId": 2,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "bc13689a-f651-43fa-bbd3-9f779ac2f492",
+   "nombre": "Asociación de Buzos Artesanales Isla Blanca",
+   "regionId": 2,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "5c00ebe7-5301-4614-bf3d-ed6f15be096e",
+   "nombre": "Congresista Elías Varas Meléndez",
+   "regionId": 2,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "43d7e1ee-b9e0-4280-a22b-b7b4e8a69208",
+   "nombre": "SSGD-PCM",
+   "regionId": 15,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "23c0e87a-d482-44f2-8792-41a1232b2ac6",
+   "nombre": "Federación pescadores Artesanales, Ancestrales y Tradicionales de los distritos de Ventanilla, Santa Rosa, Aucallama, Ancón y Chancay",
+   "regionId": 15,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "47bbcdda-5c9f-487e-bc62-2aeab299307f",
+   "nombre": "Asociación Agrupación de Micro Empresarios Confraternidad (AAMEC)",
+   "regionId": 15,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "c6b44b96-d9cc-4fdd-884f-cb8148385fa7",
+   "nombre": "FREDEMYPE",
+   "regionId": 15,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "1f458d7b-2dc6-4617-8293-4bcc05fc39b8",
+   "nombre": "Rafael Rodriguez Gestor Social de FONDEPES 979326720",
+   "regionId": 15,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "4e631509-820a-4d36-a55c-65f930b24ac3",
+   "nombre": "Pescadores del DPA Huacho",
+   "regionId": 15,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "ce3b925e-32eb-45c2-8a15-7486c976eafa",
+   "nombre": "ADARPESCA",
+   "regionId": 15,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "61195572-5d66-4d66-b7b4-c97718c4c3a0",
+   "nombre": "Municipalidad Distrital de Supe",
+   "regionId": 15,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "7508c2ca-f8e7-4470-bd44-f31aac519815",
+   "nombre": "OSPA Asociación de Bolichitos de Marcona",
+   "regionId": 11,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "b9127674-7fef-462c-9255-17e6982a0e54",
+   "nombre": "Willy Vidal Gestor Social de FONDEPES 945686509 Pescadores del DPA Faro Matarani",
+   "regionId": 4,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "3921684b-6234-44b5-8713-965531810724",
+   "nombre": "Willy Vidal Gestor Social de FONDEPES 945686509",
+   "regionId": 4,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "96f573a8-565a-495b-a9ff-3c11f1420e80",
+   "nombre": "Municipalidad de Atico",
+   "regionId": 4,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "1e0b2505-20c6-410b-9e19-968a0a87226d",
+   "nombre": "OEFA-MINAM",
+   "regionId": 4,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "56ba3fab-e018-4225-bf58-de461421a8b6",
+   "nombre": "OSPAS",
+   "regionId": 16,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "7ac74ce1-b39c-4ff8-ae60-644700d0475c",
+   "nombre": "Federación de Comerciantes Autónomos del Mercado y Afines de Villa Belén (FECAMAVIB)",
+   "regionId": 16,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "33a3bb74-1ced-4915-ad18-6d126666c797",
+   "nombre": "OSPAS de San José",
+   "regionId": 14,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "c914d82f-8179-4025-8159-8ec7ca8764a6",
+   "nombre": "Pobladores del distrito de Mi Perú",
+   "regionId": 7,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "9b1f0ebf-6a2c-4b2b-8ac8-24bed0961e9b",
+   "nombre": "Pescadores del DPA Ilo (SUPABCPI), actores portuarios, órgano de control interno",
+   "regionId": 18,
+   "motivo": "matriz:region_caso"
+  },
+  {
+   "id": "4753c4b7-d83c-4f1e-9b12-a7f892c2c76f",
+   "nombre": "Comunidads campesinas de la margen derecha del Río Yuracyacu.",
+   "regionId": 12,
+   "motivo": "matriz:region_caso"
+  }
+ ]
+}

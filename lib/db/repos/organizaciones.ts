@@ -19,6 +19,7 @@ const ORGANIZACION_SELECT = `
   o.abreviatura,
   t.nombre as tipo,
   o.tipo_organizacion_id as tipo_id,
+  r.nombre as region,
   nullif(trim(o.ruc), '') as ruc,
   o.razon_social,
   o.numero_integrantes,
@@ -45,6 +46,7 @@ const ORGANIZACION_FROM = `
   join core.actores a on a.actor_uid = o.actor_uid
   left join core.cat_tipos_organizacion t on t.id = o.tipo_organizacion_id
   left join core.actores rep on rep.actor_uid = o.representante_uid
+  left join core.regiones r on r.id = a.region_id
 `;
 
 export type OrganizacionListQuery = {
@@ -66,6 +68,8 @@ export type OrganizacionListItem = {
   abreviatura: string | null;
   tipo: string | null;
   tipoId: number | null;
+  /** Región del actor colectivo; `core.organizaciones` no la guarda. */
+  region: string | null;
   ruc: string | null;
   razonSocial: string | null;
   numeroIntegrantes: number | null;
@@ -116,6 +120,7 @@ function mapOrganizacion(row: Record<string, unknown>): OrganizacionListItem {
     abreviatura: row.abreviatura as string | null,
     tipo: row.tipo as string | null,
     tipoId: row.tipo_id as number | null,
+    region: row.region as string | null,
     ruc: row.ruc as string | null,
     razonSocial: row.razon_social as string | null,
     numeroIntegrantes: row.numero_integrantes as number | null,
@@ -164,6 +169,7 @@ export async function listOrganizaciones(
       "coalesce(a.codigo_legado, '')",
       "coalesce(o.razon_social, '')",
       "coalesce(o.abreviatura, '')",
+      "coalesce(r.nombre, '')",
     ],
     query.q,
     bind,

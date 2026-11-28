@@ -36,21 +36,6 @@
     </div>
 
     <div class="view-actions">
-      @if (puedeRegistrar()) {
-      <button type="button" class="button-primary" (click)="abrirAlta()">
-        <app-icono nombre="alertas" [tamano]="14" />
-        Registrar alerta
-      </button>
-      }
-      <!--
-        «Exportar todo» vuelca el listado completo con los filtros vigentes a
-        CSV/XLSX. Es distinto del menú de la barra de selección, que exporta lo
-        marcado con el endpoint genérico cuando hay selección.
-      -->
-      <app-exportar-alertas-menu
-        [consulta]="filtrosExportacion()"
-        (fallo)="alFallarExportacion($event)"
-      />
       <app-barra-seleccion
         entidad="alertas"
         anulable="alertas"

@@ -134,7 +134,7 @@ export class BarraSeleccionComponent {
   );
 
   readonly etiquetaExportar = computed(() =>
-    this.cantidad() > 0 ? 'Exportar selección' : 'Exportar',
+    this.cantidad() > 0 ? `Exportar (${this.cantidad()})` : 'Exportar',
   );
 
   /** «1 registro» / «N registros», para la cabecera del panel. */

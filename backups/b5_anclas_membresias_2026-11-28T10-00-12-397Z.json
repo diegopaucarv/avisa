@@ -1,0 +1,3775 @@
+{
+  "generado": "2026-11-28T10:00:12.396Z",
+  "script": "scripts/_b5_anclas_membresias_2026-11-28.mjs",
+  "actores_org_ancla": [
+    {
+      "actor_uid": "d7791fc5-03bc-4230-a101-9b516fecd3ad",
+      "nombre": "Absalon Asencio Acuña",
+      "antes": null,
+      "nuevo": "785e4b70-0764-45fd-b7c1-d46fb93bef29"
+    },
+    {
+      "actor_uid": "ba41e265-09b2-4c1a-92d6-68ee23524682",
+      "nombre": "Absalon Asencio Acuña",
+      "antes": null,
+      "nuevo": "785e4b70-0764-45fd-b7c1-d46fb93bef29"
+    },
+    {
+      "actor_uid": "b827b065-42bb-4cea-90b6-a3f785194363",
+      "nombre": "Adán Rene Cobeña Gómez",
+      "antes": null,
+      "nuevo": "433634b1-d92d-4769-b716-026114dc23d8"
+    },
+    {
+      "actor_uid": "0a76fa59-1852-4d1a-a4b2-1e8bccaa8da0",
+      "nombre": "Agustín Gutierrez Ponce",
+      "antes": null,
+      "nuevo": "cdcbe0cc-41bf-423d-932c-d657087ad3ac"
+    },
+    {
+      "actor_uid": "aacbef3c-a111-4f90-a64b-f1a910c2cebc",
+      "nombre": "Alcides Paulino Herrera Inga",
+      "antes": null,
+      "nuevo": "40002f8a-215a-4c09-81ac-fd0bd2a93274"
+    },
+    {
+      "actor_uid": "55e24e9d-3e11-435f-b476-bf48730be695",
+      "nombre": "Alejandro A. Nalvarte Velásquez",
+      "antes": null,
+      "nuevo": "6f4ee724-fe75-4aee-bf2a-247aa265bc24"
+    },
+    {
+      "actor_uid": "a88b4af8-85c5-4820-b23d-41e7a90d66c5",
+      "nombre": "Alex Calle Livas",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "e88c3928-b139-459b-922e-207572ddafaa",
+      "nombre": "Alexander Paucar Villanueva",
+      "antes": null,
+      "nuevo": "a673d843-b9f3-4c14-a3e4-56c1234cabd7"
+    },
+    {
+      "actor_uid": "30be9f14-818f-440e-af1c-f09650802cc1",
+      "nombre": "Alfonso Ernesto García Beunza",
+      "antes": null,
+      "nuevo": "ca1d33f7-a096-4173-b90a-ac3a2daedf32"
+    },
+    {
+      "actor_uid": "a319fc50-39dd-42e1-8301-f7f90a6cd2f1",
+      "nombre": "Alfredo Manuel Huamán Mattos",
+      "antes": null,
+      "nuevo": "dd7ea8ca-cdfc-43f1-af2f-d24ec551d1a0"
+    },
+    {
+      "actor_uid": "5757b313-ecf0-4819-9b7a-64da24c844ab",
+      "nombre": "Andres Ventura Berrocal",
+      "antes": null,
+      "nuevo": "adf7542d-4707-4cbf-beaa-7c3fe2df9b52"
+    },
+    {
+      "actor_uid": "e8aeb45b-30d0-4e00-87bc-c1cd3036ff7c",
+      "nombre": "Andrés Camelo Miguel",
+      "antes": null,
+      "nuevo": "cb206565-68d4-46f8-a93c-77bf286d071b"
+    },
+    {
+      "actor_uid": "90617e0b-4e63-47ab-ba11-94b04abc8f8c",
+      "nombre": "Antonio Maza Paiva",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "2f6e5ff4-b65b-49c6-a1e6-d3e0607c6062",
+      "nombre": "Arelys Anco Soto",
+      "antes": null,
+      "nuevo": "37e19abc-f8bc-4a8f-a68b-b21f5acdd080"
+    },
+    {
+      "actor_uid": "8802611d-96eb-46cf-be6f-857922a2e1a8",
+      "nombre": "Calixto Pazos J.",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "f19e3907-95cb-4b62-bc18-fa1dd638f7f3",
+      "nombre": "Carlos Alberto Quispe Fraquita",
+      "antes": null,
+      "nuevo": "3674ca49-5ec2-4c29-9f49-8c2480ea6b9d"
+    },
+    {
+      "actor_uid": "6ed05528-a886-44d7-b5be-58ae1d210f27",
+      "nombre": "Carlos Chulla J.",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "a9f4636c-4eee-451e-aa53-0f0b8f06fbaa",
+      "nombre": "Carlos Daniel Pazo Perez",
+      "antes": null,
+      "nuevo": "b8e425d1-e1fc-45d8-aee9-3248035b8a10"
+    },
+    {
+      "actor_uid": "4eb316bd-b74c-4491-be8f-26d5b04759a1",
+      "nombre": "Carlos De La Cruz Cornejo",
+      "antes": null,
+      "nuevo": "7f056b60-73a8-4ee8-a8fc-2bb543549d63"
+    },
+    {
+      "actor_uid": "65ad1446-993d-4355-bf35-a18dfd76b1f0",
+      "nombre": "Carlos Fernández Olaya",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "a8852053-7bfb-4a0d-8c87-c6582e3ba8dd",
+      "nombre": "Carlos Gallego Pazo",
+      "antes": null,
+      "nuevo": "f926f439-ed8a-4268-bfdc-77025710e671"
+    },
+    {
+      "actor_uid": "432d986c-9a52-41b0-a718-06ea0b8f5a16",
+      "nombre": "Carlos Gutiérrez Laimes",
+      "antes": null,
+      "nuevo": "d5dec53e-c95c-4247-8dad-85bfb8d1c245"
+    },
+    {
+      "actor_uid": "442ac956-20c2-4516-ad13-e3e1f6d0ec24",
+      "nombre": "Carlos Nieto",
+      "antes": null,
+      "nuevo": "de0f5af3-c4e9-46eb-8a19-6562a39f3b69"
+    },
+    {
+      "actor_uid": "6feba672-8227-4e6b-98e3-dd4a4fe14375",
+      "nombre": "Carlos Ramírez Alquizar",
+      "antes": null,
+      "nuevo": "6daa79b4-4ac9-4cf1-97aa-ad7a8d59d644"
+    },
+    {
+      "actor_uid": "93fbc2cb-2296-4de5-b859-fd00fb69f050",
+      "nombre": "Carlos Yenque",
+      "antes": null,
+      "nuevo": "4a457a8f-feaf-4d07-aab8-53ead7a31ca5"
+    },
+    {
+      "actor_uid": "75e997bd-8cb8-42c5-8780-7f721b5cc041",
+      "nombre": "Cesar Alberto Abanto Noriega",
+      "antes": null,
+      "nuevo": "6ec75eaf-7466-450d-b44c-eb9012b8b017"
+    },
+    {
+      "actor_uid": "b605decd-6937-42bc-92e6-e0f5a3574485",
+      "nombre": "Christian De La Cruz Siuos",
+      "antes": null,
+      "nuevo": "c8808928-677a-4761-b261-2f054dc27b0a"
+    },
+    {
+      "actor_uid": "6ea45342-d8ea-401e-846a-d3bbbbb5885e",
+      "nombre": "Claudio Ramos Pazo Álvarez",
+      "antes": null,
+      "nuevo": "ed536831-84dc-463c-83b5-6e2c36e73a27"
+    },
+    {
+      "actor_uid": "320d00cd-0339-43be-925f-555f40a62f0c",
+      "nombre": "Crisilly Ramos Tinco",
+      "antes": null,
+      "nuevo": "d0f32c14-7d1c-40f1-b0df-8cc2695aadcc"
+    },
+    {
+      "actor_uid": "0c74d67f-7696-4cb1-88bb-42022499f622",
+      "nombre": "Cristobal Sandoval Peralta",
+      "antes": null,
+      "nuevo": "3c3f4ab7-71ed-4049-98c8-7dd287f95374"
+    },
+    {
+      "actor_uid": "5fc1247a-ac90-41aa-836d-683570b7e42d",
+      "nombre": "César Napa de la Cruz",
+      "antes": null,
+      "nuevo": "016a352b-10b2-4f83-98a8-299b6e216959"
+    },
+    {
+      "actor_uid": "8a54479f-77d4-4ca5-9375-2328615b453f",
+      "nombre": "Dalan Carrasco Girón",
+      "antes": null,
+      "nuevo": "34874664-ee5a-44be-9d0d-d1aefad42694"
+    },
+    {
+      "actor_uid": "e179b4c6-5502-40a6-9318-af646ea2a4f1",
+      "nombre": "Daniel Hermoza Negreiros",
+      "antes": null,
+      "nuevo": "55b36124-0790-4a29-92c2-1d3fe9334588"
+    },
+    {
+      "actor_uid": "81a11130-2130-49f1-86a6-3cbcb71c4dfe",
+      "nombre": "Daniel Hermoza Negreiros",
+      "antes": null,
+      "nuevo": "55b36124-0790-4a29-92c2-1d3fe9334588"
+    },
+    {
+      "actor_uid": "b6a0efdc-2547-4bd1-adfa-d9fe66291a03",
+      "nombre": "Daniel López",
+      "antes": null,
+      "nuevo": "1c51f29d-80c4-4342-8ba8-d4995f96f0d1"
+    },
+    {
+      "actor_uid": "cf66dae7-7454-4dff-bf1a-ab396ab6c317",
+      "nombre": "Daniel Pazo Ruiz",
+      "antes": null,
+      "nuevo": "78fdf61f-5ca1-45fc-92bc-0ab01053c1f2"
+    },
+    {
+      "actor_uid": "91a3c413-4dc0-4a43-b873-00d8e1d9a606",
+      "nombre": "Danny Abad Yarleque",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "b219f21a-e5b5-4413-a8a4-d8297a23d896",
+      "nombre": "Darwin Ruiz Antón",
+      "antes": null,
+      "nuevo": "030ae355-72d3-4ab2-97e0-5c9fc94dd8fe"
+    },
+    {
+      "actor_uid": "b3d3b669-2fbc-4f56-9cab-46fae6926cae",
+      "nombre": "David Rojas Villanueva",
+      "antes": null,
+      "nuevo": "1d1a0168-c483-4486-8ecd-edf5c79a34a1"
+    },
+    {
+      "actor_uid": "7621df1e-b5e0-4020-92da-85300775f6b0",
+      "nombre": "David Sebastián Pingo Purizaca",
+      "antes": null,
+      "nuevo": "12845589-c961-4ba6-b086-5761e6ec522c"
+    },
+    {
+      "actor_uid": "165b0773-18b4-4a4a-931d-a602d8611941",
+      "nombre": "Deiderico Lumbres C,",
+      "antes": null,
+      "nuevo": "063ac749-0a90-490c-b267-c4a568d44f44"
+    },
+    {
+      "actor_uid": "d2020d05-3934-4199-8c75-c6810dccad76",
+      "nombre": "Dixon Chávez Ubillus",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "2f15db9d-3f8b-402b-b3d5-b06abcc44ba4",
+      "nombre": "Domingo Purizaca Eche",
+      "antes": null,
+      "nuevo": "7cd27ce7-8bed-45cb-9914-4f3d7ad17d7a"
+    },
+    {
+      "actor_uid": "a6c2615d-5782-4566-b249-a407e68e20d3",
+      "nombre": "Doña Matea Zetos",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "5f72a9df-84ff-4d3f-aa3c-77aebf0586cb",
+      "nombre": "Eddie Olaya Escobar",
+      "antes": null,
+      "nuevo": "80a7dbca-7eac-4741-a909-20e9ef04820d"
+    },
+    {
+      "actor_uid": "ae573bc7-5889-4502-9c4e-f0818abbe0f2",
+      "nombre": "Edgar Eche B.",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "13856525-7af1-4866-bb3d-749da21604a4",
+      "nombre": "Edgar Escobar Ticona",
+      "antes": null,
+      "nuevo": "bdef4d1c-68f6-48c3-b629-183cb706e094"
+    },
+    {
+      "actor_uid": "6813ea8b-7a42-4a4d-870e-8266758e91f3",
+      "nombre": "Edgar Jiménez Caipa",
+      "antes": null,
+      "nuevo": "602029f4-23e5-42a3-be6a-9685138720f8"
+    },
+    {
+      "actor_uid": "f5764602-316b-43cb-afd8-f2ddf87d92c4",
+      "nombre": "Edgar Rotos Fiestas",
+      "antes": null,
+      "nuevo": "264df84b-eb2e-461d-a616-473a69e0a7e9"
+    },
+    {
+      "actor_uid": "060a2536-dc99-423d-965c-474d27e3c160",
+      "nombre": "Edgar Wilfredo Escobar Ticona",
+      "antes": null,
+      "nuevo": "e153597d-f2a3-4b5d-ae75-6e17f20b5039"
+    },
+    {
+      "actor_uid": "6469cb9a-c92a-4b85-b9fa-7d6efd958e87",
+      "nombre": "Edgard Fiestas Fiestas",
+      "antes": null,
+      "nuevo": "1b325b4a-9523-44a4-822c-ecc4bcbcfce9"
+    },
+    {
+      "actor_uid": "fe06d9ad-bd8f-4598-998c-463a61fce693",
+      "nombre": "Eduardo Francisco Yarleque La Chira",
+      "antes": null,
+      "nuevo": "a8ecd915-2faf-4927-b19a-dac11160ce63"
+    },
+    {
+      "actor_uid": "228d9752-bac3-417c-ba69-ac48fbe22dc1",
+      "nombre": "Eduardo Oshabana Galeno",
+      "antes": null,
+      "nuevo": "23e3f9f7-56d9-4fdc-9568-7485dbd981eb"
+    },
+    {
+      "actor_uid": "9a0af5e0-0a9a-480f-9143-e822c55ec05f",
+      "nombre": "Eduardo Ángel Fernández Beza",
+      "antes": null,
+      "nuevo": "19080f0f-7f27-4f4a-8882-a795729e4794"
+    },
+    {
+      "actor_uid": "b3b93984-731b-4983-ada7-93e30d31ad29",
+      "nombre": "Edwin Elbher Villajuan Choque",
+      "antes": null,
+      "nuevo": "20ffa832-2ff5-4e77-8dd6-ef0055ba6c75"
+    },
+    {
+      "actor_uid": "e21e1947-4df0-4483-bdaf-4b33605ea1d2",
+      "nombre": "Edwin Hoyantin Rojas",
+      "antes": null,
+      "nuevo": "f896de14-5b11-4beb-b762-89c10b6ab83e"
+    },
+    {
+      "actor_uid": "2881fc96-8f61-4961-8492-f1395fb68c2b",
+      "nombre": "Edwin Martín Houghton Rosas",
+      "antes": null,
+      "nuevo": "906667e1-e75b-4ae6-8874-b22cdabc09ef"
+    },
+    {
+      "actor_uid": "63d1f1d2-adba-493f-9dd4-a149dcb03d4d",
+      "nombre": "Edy Lupaca Mamani",
+      "antes": null,
+      "nuevo": "a3e214d4-bdda-4a7e-9ccd-913a89107261"
+    },
+    {
+      "actor_uid": "e1fdf8ac-9c50-462d-9372-34c3323b22ba",
+      "nombre": "Efren Cecilio Díaz Vera",
+      "antes": null,
+      "nuevo": "9e734f87-bdef-41e5-ac85-7dfbf1542d31"
+    },
+    {
+      "actor_uid": "73fd12b5-1f8c-424d-b6ab-c394c2b0ea9e",
+      "nombre": "Elman A. Ramírez C.",
+      "antes": null,
+      "nuevo": "bec30f7e-c56b-4e23-a0d3-0221e3fb632b"
+    },
+    {
+      "actor_uid": "f80ea591-a6c3-4bbe-a42a-79703b6b3958",
+      "nombre": "Eloy Ángel Quispe Mimbela",
+      "antes": null,
+      "nuevo": "17dce7ee-9b73-4726-852a-29e1374ee534"
+    },
+    {
+      "actor_uid": "d371b999-4d16-4aca-9b8c-eeeb2f7c5039",
+      "nombre": "Elsa Graciela Vega Pardo",
+      "antes": null,
+      "nuevo": "32a9793a-6464-4e6b-b634-25f1f87a3bd5"
+    },
+    {
+      "actor_uid": "fd057867-02f0-491e-a1a0-a548661d693c",
+      "nombre": "Elsa Ureta Tapia",
+      "antes": null,
+      "nuevo": "ff78fcd6-64c4-480c-b158-50a0744e70c3"
+    },
+    {
+      "actor_uid": "35be9ad0-149d-4a7f-9639-97eab8ea53f4",
+      "nombre": "Elvia Torres Torres",
+      "antes": null,
+      "nuevo": "a7d38f15-d454-4cc5-a5b3-88b27f8b5e8d"
+    },
+    {
+      "actor_uid": "8c40bb65-648a-47e3-9013-16ea56fedc40",
+      "nombre": "Emily Ventura Sandoval",
+      "antes": null,
+      "nuevo": "063ac749-0a90-490c-b267-c4a568d44f44"
+    },
+    {
+      "actor_uid": "21f4cb93-17f9-4c23-a545-c4753be5f1b4",
+      "nombre": "Enderson Giancarlos Gonzales Anticona",
+      "antes": null,
+      "nuevo": "341ae539-fe86-4f6a-8944-0b01f79605bb"
+    },
+    {
+      "actor_uid": "1ae162f6-d492-4523-98c4-ab6032b2ea21",
+      "nombre": "Eric Alberto Garagua",
+      "antes": null,
+      "nuevo": "d01cb57b-a873-4d5c-ad7f-0d28373999cb"
+    },
+    {
+      "actor_uid": "b67f9087-94c5-47e9-b646-3b10061141b4",
+      "nombre": "Erko Ruiz Navarro",
+      "antes": null,
+      "nuevo": "89519c00-c155-40d3-adc9-785627bdf42d"
+    },
+    {
+      "actor_uid": "12e3a70a-7d65-446f-8966-10be5d7fb8b0",
+      "nombre": "Ernesto Calle Ruiz",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "96bbc6f8-d24b-4f43-b82a-046a128930b7",
+      "nombre": "Ernesto Gonzales Moran",
+      "antes": null,
+      "nuevo": "7f056b60-73a8-4ee8-a8fc-2bb543549d63"
+    },
+    {
+      "actor_uid": "de4cf013-3951-415b-b60d-d82bea8dfd52",
+      "nombre": "Esperanza Tafur Huamán",
+      "antes": null,
+      "nuevo": "97df8948-db11-484b-a375-03e0d961538f"
+    },
+    {
+      "actor_uid": "dea1668e-81a0-45c5-8330-1caf4eda26bb",
+      "nombre": "Esterlino Luis Castillo Oro",
+      "antes": null,
+      "nuevo": "ca1d33f7-a096-4173-b90a-ac3a2daedf32"
+    },
+    {
+      "actor_uid": "7965883f-b098-46c3-868d-20a879d78621",
+      "nombre": "Felix Aguirre Martinez",
+      "antes": null,
+      "nuevo": "69c23e48-cc0b-43fc-94a9-7c61fb0b0937"
+    },
+    {
+      "actor_uid": "b1a5c066-c150-416b-a0a7-81cca346412a",
+      "nombre": "Felix E. Pingo Bayona",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "cd1c37f6-1d3e-47cb-9f95-07778032fd22",
+      "nombre": "Fernando Elias paredes",
+      "antes": null,
+      "nuevo": "42a519d9-f2de-4cd2-8ec5-6d4f1a46f411"
+    },
+    {
+      "actor_uid": "0d146e76-2995-4f25-9a39-90783370e560",
+      "nombre": "Fernando Vilchéz Gómez",
+      "antes": null,
+      "nuevo": "9f347764-3ab1-4f86-9ace-15909d4d565b"
+    },
+    {
+      "actor_uid": "ab18c168-05b8-4653-bab4-4b8267e8b5f1",
+      "nombre": "Fidel Periche Martínez",
+      "antes": null,
+      "nuevo": "2ae65f1e-eb4d-4966-8228-e30cce2973e3"
+    },
+    {
+      "actor_uid": "a8e69b16-5347-43f8-b2f2-00c1585076a5",
+      "nombre": "Fiorella Angélica Herrera Salas",
+      "antes": null,
+      "nuevo": "4a1881cf-3d53-4d7d-9d76-2bea18facbe1"
+    },
+    {
+      "actor_uid": "2de712ea-4178-4b46-8e6e-8676cb2e7a12",
+      "nombre": "Francisco Núñura Fiestas",
+      "antes": null,
+      "nuevo": "1b5f1743-b5c2-42c4-a6cd-f2111fb84081"
+    },
+    {
+      "actor_uid": "e170b769-9d8b-4dbc-9616-f3cd5a145721",
+      "nombre": "Francisco Salvador Ticlihuanca",
+      "antes": null,
+      "nuevo": "0d750576-d1f9-47f1-b04f-3ba2c78b9eda"
+    },
+    {
+      "actor_uid": "485a1f34-851a-40a3-b9f6-2376c63771a9",
+      "nombre": "Frank Valiente Ortega",
+      "antes": null,
+      "nuevo": "b22d684f-f805-4eb9-98f6-0674d09e7773"
+    },
+    {
+      "actor_uid": "1c48627c-a7fe-4f4e-ac12-b4402813b134",
+      "nombre": "Franklyn Gonzales Olivos",
+      "antes": null,
+      "nuevo": "aabf04c2-5e2e-4e11-919a-e612342fb412"
+    },
+    {
+      "actor_uid": "14eaa0a5-9dcb-466a-9df9-704bcccf10e9",
+      "nombre": "Fredy O. Cornejo J.",
+      "antes": null,
+      "nuevo": "8dea4c79-625f-496d-abb4-9c2984e4a1c8"
+    },
+    {
+      "actor_uid": "dc026098-5023-4eef-9583-4f6018f73b2d",
+      "nombre": "Félix Maza Fiestas",
+      "antes": null,
+      "nuevo": "7f056b60-73a8-4ee8-a8fc-2bb543549d63"
+    },
+    {
+      "actor_uid": "e92636e7-e7c2-43f0-9f10-7a89fbc3db7f",
+      "nombre": "Félix Navarre Martínez",
+      "antes": null,
+      "nuevo": "95ab13d0-d312-46b7-a269-5a8cfe2eea73"
+    },
+    {
+      "actor_uid": "654cf2e3-7411-40bc-9376-5c48097b48bd",
+      "nombre": "Félix Noguera Martínez",
+      "antes": null,
+      "nuevo": "6c99ee4a-dad9-4d1e-9b90-253fb578d219"
+    },
+    {
+      "actor_uid": "651bc8d9-c36b-4f17-a8f5-faef7dfed14e",
+      "nombre": "Genaro Huamanchumo Bernal",
+      "antes": null,
+      "nuevo": "5c4c2305-94bf-462e-9e27-4abe24ddae1c"
+    },
+    {
+      "actor_uid": "3e6aaa91-a280-42cb-875c-f546f135f45b",
+      "nombre": "Genaro Villanueva Cuya",
+      "antes": null,
+      "nuevo": "a6237ceb-a1a8-46fe-991b-8e7c9ed73d00"
+    },
+    {
+      "actor_uid": "8eb2d9aa-922f-481c-afe7-1401ac7ce6da",
+      "nombre": "Genérica Reyes Romero",
+      "antes": null,
+      "nuevo": "bec30f7e-c56b-4e23-a0d3-0221e3fb632b"
+    },
+    {
+      "actor_uid": "ae333047-541e-40d7-92cd-ef554727bea7",
+      "nombre": "Geovana Vilca Flores",
+      "antes": null,
+      "nuevo": "777b1867-3671-430a-aa7d-a80853a45aea"
+    },
+    {
+      "actor_uid": "7262d50e-98c9-429c-b67c-e38b2c17ba4d",
+      "nombre": "German Ruiz Morquencho",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "758db452-d25c-4dc0-946a-91c8edf155ab",
+      "nombre": "Gloria Soto Apolaya",
+      "antes": null,
+      "nuevo": "95ab13d0-d312-46b7-a269-5a8cfe2eea73"
+    },
+    {
+      "actor_uid": "6bfa090b-9426-4368-87c3-d2b1c0511a80",
+      "nombre": "Grisillo Ramos Tinco",
+      "antes": null,
+      "nuevo": "37e19abc-f8bc-4a8f-a68b-b21f5acdd080"
+    },
+    {
+      "actor_uid": "e6f9b784-c557-4560-91f7-d53310b9bd3c",
+      "nombre": "Guillermo Abrego Joaquina",
+      "antes": null,
+      "nuevo": "97c245e6-1006-4505-b546-72b231d347e5"
+    },
+    {
+      "actor_uid": "2607f6a9-cf2a-454e-837d-b4293839455d",
+      "nombre": "Guillermo Dimas Ramos Pérez",
+      "antes": null,
+      "nuevo": "8d3e019d-6df9-4cd4-a862-594610d8567f"
+    },
+    {
+      "actor_uid": "c8a3a5f4-7678-4039-85e1-9ef6509912a1",
+      "nombre": "Guillermo Nelfando Jiménez",
+      "antes": null,
+      "nuevo": "939142d9-823a-4e98-9c35-885b2d0542b7"
+    },
+    {
+      "actor_uid": "08df4334-b1eb-4a8d-b6ba-2932931c87b2",
+      "nombre": "Guillermo S. Abrego Díaz",
+      "antes": null,
+      "nuevo": "ba966b1b-b4c4-45ca-9375-b8ab8999de37"
+    },
+    {
+      "actor_uid": "82acfb27-3a04-4579-a438-3bd520e221c1",
+      "nombre": "Guillermo Torres Díaz",
+      "antes": null,
+      "nuevo": "7f056b60-73a8-4ee8-a8fc-2bb543549d63"
+    },
+    {
+      "actor_uid": "ba39625f-f813-4cd9-a2a5-a18d475e8c6d",
+      "nombre": "Henry Juárez Ruiz",
+      "antes": null,
+      "nuevo": "c6f24914-5b96-4b73-9a81-8f96eb68fcb3"
+    },
+    {
+      "actor_uid": "39926229-df43-442b-892b-540b3b61a35d",
+      "nombre": "Hilton Gregorio Guerrero Bonifacio",
+      "antes": null,
+      "nuevo": "19370e90-c428-4b91-a0cd-57bb914b88c3"
+    },
+    {
+      "actor_uid": "8d3b3020-57e9-429f-9ea6-78e24915b002",
+      "nombre": "Huber Reynaga Mendoza",
+      "antes": null,
+      "nuevo": "14641b9e-c6ac-4556-8d25-11a921a1bddf"
+    },
+    {
+      "actor_uid": "e01b754d-9d91-47e9-b4dc-2e33e34eb0f9",
+      "nombre": "Hugo Roque Chana",
+      "antes": null,
+      "nuevo": "785f7421-59f2-43fc-a442-f59a35e61956"
+    },
+    {
+      "actor_uid": "7ec7ec61-2368-4769-9be9-793426424f7b",
+      "nombre": "Héctor Tume Periche",
+      "antes": null,
+      "nuevo": "7f056b60-73a8-4ee8-a8fc-2bb543549d63"
+    },
+    {
+      "actor_uid": "277ee35b-c74e-47e2-975a-d1ddef0a1e36",
+      "nombre": "Ismael Orozco Cornejo",
+      "antes": null,
+      "nuevo": "6ab5ae85-6e40-4792-99f0-2a2c59943978"
+    },
+    {
+      "actor_uid": "abdcdec4-ebe2-483f-b3e8-1305cf06e1ed",
+      "nombre": "Jacinto Eche Enrique",
+      "antes": null,
+      "nuevo": "70a98060-5fc9-406d-8795-1f1ca6e2cfda"
+    },
+    {
+      "actor_uid": "76110403-6bac-45e4-9483-df36a95c8da3",
+      "nombre": "Jaime Castillo Neyra",
+      "antes": null,
+      "nuevo": "0c8b221e-c52a-4a84-89cc-51b0d03b90fe"
+    },
+    {
+      "actor_uid": "a68bd3c3-c65f-4c1c-952f-2a48d12a14b4",
+      "nombre": "Jaime Chunga Querevalú",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "6458dc2f-56ad-4b72-98fd-881f1bc426d2",
+      "nombre": "Jaime Siesquen Llontop",
+      "antes": null,
+      "nuevo": "34874664-ee5a-44be-9d0d-d1aefad42694"
+    },
+    {
+      "actor_uid": "40c4ad42-5002-4cc2-b4cd-c4d4b00ce617",
+      "nombre": "Javier Eca Panta",
+      "antes": null,
+      "nuevo": "4bab9459-10a5-4f9d-bc4a-494c422cdeb7"
+    },
+    {
+      "actor_uid": "9f63d29f-5c94-4895-ab46-c268475504fa",
+      "nombre": "Javier Eca Querevalú",
+      "antes": null,
+      "nuevo": "7f056b60-73a8-4ee8-a8fc-2bb543549d63"
+    },
+    {
+      "actor_uid": "d5dea9d7-94dd-4472-9a5b-49b4a854c378",
+      "nombre": "Jenaro Mogolloncho",
+      "antes": null,
+      "nuevo": "4fa2e4d6-8ce1-4c0a-a92e-54c63804070c"
+    },
+    {
+      "actor_uid": "ec7229f3-e60f-4073-9f24-aee4fc419431",
+      "nombre": "Jenifer Oncic Huamanchumo",
+      "antes": null,
+      "nuevo": "4bd216d4-ac5e-4559-a1ed-d94603afb405"
+    },
+    {
+      "actor_uid": "fbbc8f53-54ff-4c69-bff4-462f537de330",
+      "nombre": "Jenny Pizarro Velarde",
+      "antes": null,
+      "nuevo": "23232170-ec27-48d5-820c-5074750172ce"
+    },
+    {
+      "actor_uid": "2f77d2c0-3bae-4f77-9523-6a34691aa648",
+      "nombre": "Jessica Rodríguez López",
+      "antes": null,
+      "nuevo": "eb3b72e5-559e-4cac-b41c-78fa37a7db02"
+    },
+    {
+      "actor_uid": "76acdd5d-9502-41fd-ad07-c94cbe02a983",
+      "nombre": "Jesús Benites Benites",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "f40c1f95-3907-4c93-a826-ac592ae8a86c",
+      "nombre": "Jesús E. Chuye More",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "73875fe2-566f-49d0-a841-e6d5b375e077",
+      "nombre": "Jesús Morales Morenales",
+      "antes": null,
+      "nuevo": "6daa79b4-4ac9-4cf1-97aa-ad7a8d59d644"
+    },
+    {
+      "actor_uid": "99f0a31e-1a97-49ba-9b51-7583800fda68",
+      "nombre": "Jesús Querevalú",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "63dd8c60-bbfb-4e72-b3aa-1bec3d523851",
+      "nombre": "Jesús Quesquen Periche",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "456c46dd-7065-4f07-9071-d316f9f86ba1",
+      "nombre": "Jesús Telso Alvarado Echeandía",
+      "antes": null,
+      "nuevo": "cef709e1-cb08-4818-a2ef-d54f69b53745"
+    },
+    {
+      "actor_uid": "838a0073-e6bd-4539-b606-5f86e3073f3e",
+      "nombre": "Jesús Yarleque Pingo",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "70bd22c7-5d52-4add-b31a-d6ef3f93c927",
+      "nombre": "Jhon Peña Huamanchumo",
+      "antes": null,
+      "nuevo": "42270b44-099a-4fc1-a6e9-94d9044cb7bc"
+    },
+    {
+      "actor_uid": "f75a5f0a-2b24-4db2-b3ef-4e9464afc02e",
+      "nombre": "Joan C. Otilia Cito",
+      "antes": null,
+      "nuevo": "cc422858-347e-48ad-9b86-593ac4503721"
+    },
+    {
+      "actor_uid": "9f9b71a9-935a-4e92-9098-80c65fd218ec",
+      "nombre": "Joel Esaul Palma Leyton",
+      "antes": null,
+      "nuevo": "300742a1-d9c1-4a9c-a707-0a520802411c"
+    },
+    {
+      "actor_uid": "b7b272a8-f63c-41a9-b2f7-16032ab964b9",
+      "nombre": "Johan Morales Pingo",
+      "antes": null,
+      "nuevo": "71998830-5b74-482d-b53b-d8bea4d20b85"
+    },
+    {
+      "actor_uid": "2c790d91-4d66-4529-9041-7b978b9c5250",
+      "nombre": "Jorge Galán Fiestas",
+      "antes": null,
+      "nuevo": "9ea25b8c-0b3f-4325-a0d8-b235687afc58"
+    },
+    {
+      "actor_uid": "4e608803-47fd-452f-8310-e48f376df324",
+      "nombre": "Jorge Jacinto Galán",
+      "antes": null,
+      "nuevo": "c86ec2db-69ee-4495-83b3-98962af1968a"
+    },
+    {
+      "actor_uid": "ff109066-acf3-432f-80ea-343f748c3fb9",
+      "nombre": "Jorge L. Benites M.",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "ba1cb1d4-d529-457a-b0aa-b540b97633b3",
+      "nombre": "Jose Luis Alvarez Saba",
+      "antes": null,
+      "nuevo": "9ea25b8c-0b3f-4325-a0d8-b235687afc58"
+    },
+    {
+      "actor_uid": "1b2b7cc7-db63-4fb2-bc89-b77ec22de462",
+      "nombre": "Jose Sixto panta Ramirez",
+      "antes": null,
+      "nuevo": "7f056b60-73a8-4ee8-a8fc-2bb543549d63"
+    },
+    {
+      "actor_uid": "38a789b7-5d59-495b-b12f-31204bc2f307",
+      "nombre": "Jose Ventura Sandoval",
+      "antes": null,
+      "nuevo": "063ac749-0a90-490c-b267-c4a568d44f44"
+    },
+    {
+      "actor_uid": "76dc5934-926a-48fb-a3ea-da06588bfff3",
+      "nombre": "Joshua Lara",
+      "antes": null,
+      "nuevo": "724507a3-6c0e-44ec-8501-77fa8f4fe8cd"
+    },
+    {
+      "actor_uid": "a8ed7add-57c2-4187-a692-cdc54d62001d",
+      "nombre": "José Enrique Rodríguez Díaz",
+      "antes": null,
+      "nuevo": "e5deb401-be07-4164-ac75-1adc85b64218"
+    },
+    {
+      "actor_uid": "9e73ab50-8b75-4a09-af9a-82e31d2b4fc2",
+      "nombre": "José G. Panta Bolo",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "c6e6148e-77eb-43d0-892e-b3bd5d4f9f83",
+      "nombre": "José Julio Alarcón Vilchez",
+      "antes": null,
+      "nuevo": "12845589-c961-4ba6-b086-5761e6ec522c"
+    },
+    {
+      "actor_uid": "076f349c-57e6-4e85-8324-8b264552a4b8",
+      "nombre": "José Luis Camacho Panta",
+      "antes": null,
+      "nuevo": "016a352b-10b2-4f83-98a8-299b6e216959"
+    },
+    {
+      "actor_uid": "de4362f7-2a40-497e-8f66-304a77620de4",
+      "nombre": "José Luis Huamán Castillo",
+      "antes": null,
+      "nuevo": "ccd998fd-1c25-40fb-b1e8-8f2da0639198"
+    },
+    {
+      "actor_uid": "ce4b0603-bfc7-400f-a575-e7903d3ce3c0",
+      "nombre": "José Manuel López Silva",
+      "antes": null,
+      "nuevo": "7bdd046c-ef94-48f0-a18d-d8b7fee48278"
+    },
+    {
+      "actor_uid": "4533a692-e14c-4b4a-aa11-9732dbcb92e9",
+      "nombre": "José Manuel Quispe Mayhuire",
+      "antes": null,
+      "nuevo": "dd7ea8ca-cdfc-43f1-af2f-d24ec551d1a0"
+    },
+    {
+      "actor_uid": "04ab2775-1e00-4ad3-90f4-1dd834306efe",
+      "nombre": "José Martín Prieto Muñoz",
+      "antes": null,
+      "nuevo": "c1abe465-05f9-45f7-964b-7057cac9e952"
+    },
+    {
+      "actor_uid": "c5788fb5-28a4-46bc-a79d-90e0b0993c84",
+      "nombre": "José Paiva Bayona",
+      "antes": null,
+      "nuevo": "7000ad29-850c-45f1-8f1a-3e82c05509de"
+    },
+    {
+      "actor_uid": "ae66fa2d-f731-4c06-836f-106d59658ec5",
+      "nombre": "José Pazos Zavaleta",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "63ddcfc5-33bd-4745-836a-451d50447242",
+      "nombre": "José Rodríguez Palacios",
+      "antes": null,
+      "nuevo": "7282d9bc-3667-4bf5-89cb-0a6da589733f"
+    },
+    {
+      "actor_uid": "14fcb8ca-737c-45c1-9d63-0b3ea995f835",
+      "nombre": "José Sixto Panta Ramírez",
+      "antes": null,
+      "nuevo": "c5abd175-cee5-41b7-816c-b721e41a02d7"
+    },
+    {
+      "actor_uid": "0bcf5fa1-20fb-4c4b-8067-32a3584d1387",
+      "nombre": "Juan Aparcana",
+      "antes": null,
+      "nuevo": "e0245e72-afc7-496a-9e71-77b4c02c19cb"
+    },
+    {
+      "actor_uid": "f6204944-51d3-4e6e-b715-08913159cd4d",
+      "nombre": "Juan Carlos Espinoza Medina",
+      "antes": null,
+      "nuevo": "a7d16e00-6bd3-4e25-88e1-6d46accfeac6"
+    },
+    {
+      "actor_uid": "290c6530-6ce9-4601-b66b-8a429cda40eb",
+      "nombre": "Juan Cherre Namuche",
+      "antes": null,
+      "nuevo": "0bd88f88-e6f3-45c4-9652-7868683a226b"
+    },
+    {
+      "actor_uid": "3f604cc8-7aa2-4714-8d47-63227d353136",
+      "nombre": "Juan Cherre Nunura",
+      "antes": null,
+      "nuevo": "0bd88f88-e6f3-45c4-9652-7868683a226b"
+    },
+    {
+      "actor_uid": "18bac94a-7cf2-47bb-a246-5e08250773ed",
+      "nombre": "Juan Ecca Jacinto",
+      "antes": null,
+      "nuevo": "d90e4b91-7871-473d-abfa-2756306f2890"
+    },
+    {
+      "actor_uid": "986eb016-a5cb-4187-b5f2-2b6d53808de9",
+      "nombre": "Juan Felix Vite Fiestas",
+      "antes": null,
+      "nuevo": "c5abd175-cee5-41b7-816c-b721e41a02d7"
+    },
+    {
+      "actor_uid": "bd3f9d33-0c6e-4609-8093-22725a12a84e",
+      "nombre": "Juan Francisco Morán Curay",
+      "antes": null,
+      "nuevo": "69a0146e-4013-4853-9c64-da83b20ebd9d"
+    },
+    {
+      "actor_uid": "9557be64-c5ea-4345-90f4-9cb6ebf26f3c",
+      "nombre": "Juan León Mogollón",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "2f3fdbee-33be-485c-8b7f-77c1effb6753",
+      "nombre": "Juan Manuel Paico Arzola",
+      "antes": null,
+      "nuevo": "d9daa921-6916-4be0-85ae-493eabf09bed"
+    },
+    {
+      "actor_uid": "5dcc04fa-79eb-40c2-95f5-9c9aadd95295",
+      "nombre": "Juan Miguel Cervantes Nolasco",
+      "antes": null,
+      "nuevo": "af19d388-0c48-4354-8172-3d04b8bb1f18"
+    },
+    {
+      "actor_uid": "e137a6d4-60d3-4f48-8cb7-3da3c8de208c",
+      "nombre": "Juan Moina",
+      "antes": null,
+      "nuevo": "fe757087-33fb-40d6-92c2-ecec44043907"
+    },
+    {
+      "actor_uid": "d3daca37-6985-42a3-ac4b-f287c101aefe",
+      "nombre": "Juan R. Quispe Huamaní",
+      "antes": null,
+      "nuevo": "3b74805b-f31f-413b-a549-967635af6830"
+    },
+    {
+      "actor_uid": "0ab23046-b23d-4a89-9af0-9beafffb017c",
+      "nombre": "Juan Yto Querevalú",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "013ae705-0584-4bc4-ba39-d7c26569bf0c",
+      "nombre": "Julio Chumacero",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "6f542282-b0e6-49c6-bd94-a7244495b6a4",
+      "nombre": "Julio Chuye Pazos",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "d4821ffb-6340-4afc-8543-38b2c8ea8345",
+      "nombre": "Julio De La Cruz Fernández",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "f06d6ca4-491c-4a47-84e1-f52f39c24a5b",
+      "nombre": "Julio Jesús Chollolosa Angulo",
+      "antes": null,
+      "nuevo": "392713d5-700f-421f-827e-a9c61a4b7170"
+    },
+    {
+      "actor_uid": "84299204-db12-4186-a5bd-4246915af81c",
+      "nombre": "Leonardo Reyes Anaya",
+      "antes": null,
+      "nuevo": "254d398a-6ed5-49ca-90fd-7894eedeadd6"
+    },
+    {
+      "actor_uid": "acdca160-92ad-44a8-9993-0b0eafb52f34",
+      "nombre": "Lesly Campoverde",
+      "antes": null,
+      "nuevo": "7ee78026-2502-4dc0-a2d3-97f581fd4e71"
+    },
+    {
+      "actor_uid": "afe83c5a-ae2c-46c0-b3b1-0200fd7f0e49",
+      "nombre": "Lester Calderón Querevalú",
+      "antes": null,
+      "nuevo": "7c0fa901-5e59-47d4-8a31-f299a52a1a49"
+    },
+    {
+      "actor_uid": "c6464b66-dd44-4ba7-a58b-080524a3d139",
+      "nombre": "Lester Querevalú Periche",
+      "antes": null,
+      "nuevo": "af74c5a4-cad7-4ae8-be36-69b54684c5ec"
+    },
+    {
+      "actor_uid": "776dff36-7a02-45bb-a71c-e70abbe3321a",
+      "nombre": "Liliana Sumari Huamani",
+      "antes": null,
+      "nuevo": "fe93456c-5a5e-4308-ab2c-3d4c7aec9260"
+    },
+    {
+      "actor_uid": "adad0530-c636-4f69-971d-5f7716d1bd40",
+      "nombre": "Lorenzo Macedonio Vásquez Contreras",
+      "antes": null,
+      "nuevo": "318f7260-ced2-4b0d-bbb9-a0e7f0480f93"
+    },
+    {
+      "actor_uid": "17679f97-0e44-45d3-8b37-2ea7d27a2212",
+      "nombre": "Luis Alfredo Iglesias Figueroa",
+      "antes": null,
+      "nuevo": "25edc73b-f1ed-4ed8-97ea-aa3e805c0be8"
+    },
+    {
+      "actor_uid": "a78a8973-5011-4eda-813b-f68aada66068",
+      "nombre": "Luis Andino Ussia",
+      "antes": null,
+      "nuevo": "fc93edd1-4909-44e6-bc4c-5d677c59d83f"
+    },
+    {
+      "actor_uid": "e107d3ba-7534-41ef-bd03-5fa6611e0bdf",
+      "nombre": "Luis Díaz",
+      "antes": null,
+      "nuevo": "6ad3c773-4d63-4b7c-9941-a89ff5ac67d4"
+    },
+    {
+      "actor_uid": "b615951e-ee01-46e0-bc01-84017b5cffcf",
+      "nombre": "Luis H. Benites B.",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "a7296363-0373-46da-85df-e38f308dd2e2",
+      "nombre": "Luis Morales Eche",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "6b05936b-562a-4533-85dd-f3b3936e48f3",
+      "nombre": "Luis Suclupe",
+      "antes": null,
+      "nuevo": "aebd9c98-2d15-4268-b399-e7cb2a2876ce"
+    },
+    {
+      "actor_uid": "80acd579-79c2-43a8-addb-3f8bfede24ff",
+      "nombre": "Luisa Andino Urria",
+      "antes": null,
+      "nuevo": "9aa1776a-86b3-4949-bca4-3d3e5fcb3660"
+    },
+    {
+      "actor_uid": "cb923769-e3b5-46d2-ae15-26b0387f2d2d",
+      "nombre": "Luisa Olivares Salazar",
+      "antes": null,
+      "nuevo": "a8d958a4-dba2-48ce-9b12-51b1b2bd0802"
+    },
+    {
+      "actor_uid": "71305b62-f899-4529-9d60-51ba7b074787",
+      "nombre": "Lynber Wilber Layme",
+      "antes": null,
+      "nuevo": "2706ac8a-d04c-44ba-b9cc-7f267f728cb6"
+    },
+    {
+      "actor_uid": "c262c2ba-7624-4ce9-ade9-63df9bb9cf09",
+      "nombre": "Magaly Paredes Jurado",
+      "antes": null,
+      "nuevo": "c1b947a7-6839-430d-b1fe-996b72bc5269"
+    },
+    {
+      "actor_uid": "6883a66a-181a-41ca-b8b2-21c848377fe4",
+      "nombre": "Manuel Alberto Barrientos Valenzuela",
+      "antes": null,
+      "nuevo": "20ad1b00-421d-4fe2-b09f-7c4733c82038"
+    },
+    {
+      "actor_uid": "c5f5869b-fd09-453b-b2a6-c0f387ed825c",
+      "nombre": "Manuel Barrientos Valenzuela",
+      "antes": null,
+      "nuevo": "3f9c3ec9-2fa5-48ae-9e9e-48ccbfd51cbf"
+    },
+    {
+      "actor_uid": "f1064af0-e6d1-41d3-9811-a085fb3f6604",
+      "nombre": "Manuel Berriento V.",
+      "antes": null,
+      "nuevo": "254d398a-6ed5-49ca-90fd-7894eedeadd6"
+    },
+    {
+      "actor_uid": "a3228459-194a-4776-8ef7-694025237678",
+      "nombre": "Manuel Dollaluqui",
+      "antes": null,
+      "nuevo": "978c4ec7-60cd-45c3-a0bc-87c60f36c48e"
+    },
+    {
+      "actor_uid": "ab3652b6-f03e-41d5-b077-20637793b72b",
+      "nombre": "Manuel Leonidas Benites Ch.",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "a2fa0e78-77c5-4ea8-b83e-3a9659862e60",
+      "nombre": "Manuel P. Querevalú Tume",
+      "antes": null,
+      "nuevo": "1159a3be-5d33-4816-a0fb-c5e1e44e0239"
+    },
+    {
+      "actor_uid": "33aa25f9-e3d4-4f00-a851-b709a434df13",
+      "nombre": "Manuelocalista Carlos",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "18448d1b-f1ba-4e0c-bea0-52d1f6d6c673",
+      "nombre": "Marcelino Gonzales",
+      "antes": null,
+      "nuevo": "7ee78026-2502-4dc0-a2d3-97f581fd4e71"
+    },
+    {
+      "actor_uid": "8ca6030f-d99f-4e62-98c3-032715268898",
+      "nombre": "Mariano Benites Morles",
+      "antes": null,
+      "nuevo": "fd3fd390-a282-4942-b895-4bc1c512a240"
+    },
+    {
+      "actor_uid": "d6111714-775a-42f4-bc50-2550645677f8",
+      "nombre": "Mario Reinoso Mamani",
+      "antes": null,
+      "nuevo": "d5f013e7-deb1-46b1-bcf6-5a9745d2eb2d"
+    },
+    {
+      "actor_uid": "c31ff7ce-3a3a-4758-93e3-9e6d66b30ae0",
+      "nombre": "Mario Vioduiero Olivos",
+      "antes": null,
+      "nuevo": "7282d9bc-3667-4bf5-89cb-0a6da589733f"
+    },
+    {
+      "actor_uid": "2f80549b-be9f-4e8c-9370-b27b2346bf57",
+      "nombre": "Martín Chulle G.",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "467102a9-4351-44a0-8da1-38fea49a02b3",
+      "nombre": "Martín Olivos Gonzales",
+      "antes": null,
+      "nuevo": "b4ff87d8-65ea-409a-af20-1e70f297cb94"
+    },
+    {
+      "actor_uid": "30668bda-fae3-4ccd-8591-d1892bdabf13",
+      "nombre": "Maruja Tinco Soto",
+      "antes": null,
+      "nuevo": "9415b3b3-bf23-45ae-b6a0-95c77bb81900"
+    },
+    {
+      "actor_uid": "c8d37f26-45c0-4bc6-836d-5a33b2aa1bd2",
+      "nombre": "Mary Isabel Ayala Custodio",
+      "antes": null,
+      "nuevo": "a1f6f6e7-54e8-428a-ad98-655f83e5d769"
+    },
+    {
+      "actor_uid": "d8816200-b31e-4598-9f1f-e3df03685778",
+      "nombre": "María García Herrera",
+      "antes": null,
+      "nuevo": "c7cb94ea-5cdd-466c-ade9-b9b8751be3c5"
+    },
+    {
+      "actor_uid": "ed721951-55a5-49b5-9c8f-6a915d027dce",
+      "nombre": "Maylin Flores Niña",
+      "antes": null,
+      "nuevo": "edf1b7e2-7183-400e-b569-15f7e3cef6be"
+    },
+    {
+      "actor_uid": "764cc34f-fe2b-493b-a958-9d646fbd7aba",
+      "nombre": "Medrano Olio Tinco Soto",
+      "antes": null,
+      "nuevo": "37e19abc-f8bc-4a8f-a68b-b21f5acdd080"
+    },
+    {
+      "actor_uid": "fa484b99-799f-48da-946b-d0239f9f4fdc",
+      "nombre": "Merardo Vite Zeta",
+      "antes": null,
+      "nuevo": "75382e6f-9b6e-48e1-9a83-fa40900381d5"
+    },
+    {
+      "actor_uid": "b1979c25-0d8a-4862-a9d4-4be486bdb99f",
+      "nombre": "Mercedes Yovera",
+      "antes": null,
+      "nuevo": "6ad3c773-4d63-4b7c-9941-a89ff5ac67d4"
+    },
+    {
+      "actor_uid": "dfbba5c5-4ea5-4659-9d5c-8d1e10a5c020",
+      "nombre": "Miflin Flores Nina",
+      "antes": null,
+      "nuevo": "8a2e9b14-e7e5-4a50-9b9a-1844023c7f62"
+    },
+    {
+      "actor_uid": "6d006564-d462-4364-9f7f-e1429935edcf",
+      "nombre": "Miglin Flores Nina",
+      "antes": null,
+      "nuevo": "88f9c3d7-39f8-4585-ab65-24214b768962"
+    },
+    {
+      "actor_uid": "5c17464c-df0a-451b-89a5-79df37bf7af2",
+      "nombre": "Miguel Antonio Martínez Pintado",
+      "antes": null,
+      "nuevo": "799e9f3b-88d9-4203-b82f-114766981954"
+    },
+    {
+      "actor_uid": "5eaee01f-ed4b-4f2b-a2cd-e9d20aa66772",
+      "nombre": "Milton Estrada Moro",
+      "antes": null,
+      "nuevo": "7f056b60-73a8-4ee8-a8fc-2bb543549d63"
+    },
+    {
+      "actor_uid": "c3f6b5dd-4ffc-4b11-9bde-988ef1a8f17d",
+      "nombre": "Milwar Hubert Rodriguez Vasquez",
+      "antes": null,
+      "nuevo": "602029f4-23e5-42a3-be6a-9685138720f8"
+    },
+    {
+      "actor_uid": "f8cf42f5-d754-4894-bc1c-0f3b25d626ae",
+      "nombre": "Missella Janeth Ramos Tinco",
+      "antes": null,
+      "nuevo": "37e19abc-f8bc-4a8f-a68b-b21f5acdd080"
+    },
+    {
+      "actor_uid": "14c3aa8d-ee90-4e07-95a8-77b075e8e51f",
+      "nombre": "Nibrulio Olivo Tinco Soto",
+      "antes": null,
+      "nuevo": "37e19abc-f8bc-4a8f-a68b-b21f5acdd080"
+    },
+    {
+      "actor_uid": "8d3fb34c-b5c8-4f7d-b111-be4d81200498",
+      "nombre": "Nikita Colonia Figueroa",
+      "antes": null,
+      "nuevo": "f4c84f57-ffce-4e89-9439-fac7ac10035a"
+    },
+    {
+      "actor_uid": "eb358e81-afbd-44b1-b4d7-cbc51503fabf",
+      "nombre": "Nilia Apaza Soncco",
+      "antes": null,
+      "nuevo": "bdef4d1c-68f6-48c3-b629-183cb706e094"
+    },
+    {
+      "actor_uid": "7f0342b5-709a-45a2-9c24-6436a15e4156",
+      "nombre": "Néstor Sipion Bernal",
+      "antes": null,
+      "nuevo": "4bd216d4-ac5e-4559-a1ed-d94603afb405"
+    },
+    {
+      "actor_uid": "50ff0efc-6557-4dac-9f31-21d765a50535",
+      "nombre": "Néstor Sipion Bernal",
+      "antes": null,
+      "nuevo": "4bd216d4-ac5e-4559-a1ed-d94603afb405"
+    },
+    {
+      "actor_uid": "257ba48e-67af-4403-b15e-94c56d10c0ba",
+      "nombre": "Néstor Sipion Bernal",
+      "antes": null,
+      "nuevo": "4bd216d4-ac5e-4559-a1ed-d94603afb405"
+    },
+    {
+      "actor_uid": "b0fd885f-bb66-409a-b57c-46aa4f53fb36",
+      "nombre": "OSPAs de Tumbes",
+      "antes": null,
+      "nuevo": "270d6ecf-4f02-4ab1-8856-10680ad0d68e"
+    },
+    {
+      "actor_uid": "d163f6a5-bb69-4289-880d-cc86bf95cba9",
+      "nombre": "Olinda Victoria Mamani Cutipa",
+      "antes": null,
+      "nuevo": "cdcbe0cc-41bf-423d-932c-d657087ad3ac"
+    },
+    {
+      "actor_uid": "d9c5c782-6b8b-4a7a-a54b-ab54402f332e",
+      "nombre": "Omar Joel Jacinto Fiestas",
+      "antes": null,
+      "nuevo": "5787d7a6-2462-4867-980e-d26cabf4b2a1"
+    },
+    {
+      "actor_uid": "3ab04823-decc-4b34-a9eb-9dc16f8b7585",
+      "nombre": "Orlando Juvien Palacio Guevara",
+      "antes": null,
+      "nuevo": "99e8199e-b47f-4ea6-910f-d62c30845bc5"
+    },
+    {
+      "actor_uid": "ef9fec81-1e9b-48db-a266-29a50b6debc2",
+      "nombre": "Oscar Camisán Jiménez",
+      "antes": null,
+      "nuevo": "8204f78b-6f09-4f91-b30e-74038f90a9ed"
+    },
+    {
+      "actor_uid": "394f0a4a-908d-468b-8444-af364a75fd82",
+      "nombre": "Oscar Fernando Camasco Jimenez",
+      "antes": null,
+      "nuevo": "5976b4dd-0e61-4aad-82c2-07e6c2c677b2"
+    },
+    {
+      "actor_uid": "8244a69d-688d-41eb-9c86-64c1b6c8f2e8",
+      "nombre": "Pablo Gaspar Vazueda",
+      "antes": null,
+      "nuevo": "98a3b5eb-bf52-4a04-8a6c-db1e57d26258"
+    },
+    {
+      "actor_uid": "c7e1c216-d9cf-4f8d-8be2-94110418a6f3",
+      "nombre": "Pablo Manrique Benites",
+      "antes": null,
+      "nuevo": "c8808928-677a-4761-b261-2f054dc27b0a"
+    },
+    {
+      "actor_uid": "1ede035d-f97c-4d2e-8cc3-2c96ecf8b1d2",
+      "nombre": "Pablo Querevalú Querevalú",
+      "antes": null,
+      "nuevo": "e06cc224-2b05-4e23-bf47-c9674a5b9375"
+    },
+    {
+      "actor_uid": "a2cd257f-9925-4ee1-8828-6979a42e8ed7",
+      "nombre": "Paolo Gaspar Unzueta",
+      "antes": null,
+      "nuevo": "65e1a470-02a1-4029-85a9-cb1205b5334c"
+    },
+    {
+      "actor_uid": "7d4fab79-41a0-474a-a56e-039770eb3a34",
+      "nombre": "Pedro Carrasco Sandoval",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "094731ca-5af7-483c-94d3-673aa03bbc6d",
+      "nombre": "Pedro Cisto Tuesta Figueroa",
+      "antes": null,
+      "nuevo": "37e19abc-f8bc-4a8f-a68b-b21f5acdd080"
+    },
+    {
+      "actor_uid": "773de150-8fb4-4574-9fd6-7863eb1e1d9f",
+      "nombre": "Pedro Domínguez Pérez",
+      "antes": null,
+      "nuevo": "786e8449-10fb-4768-afb2-18627f67efc4"
+    },
+    {
+      "actor_uid": "cb97279d-5dd0-4a7a-adb3-ba961a9ae140",
+      "nombre": "Pedro Huamayalli Oliva",
+      "antes": null,
+      "nuevo": "ed536831-84dc-463c-83b5-6e2c36e73a27"
+    },
+    {
+      "actor_uid": "bd91d33a-7054-4058-8031-ebb1ea68d39c",
+      "nombre": "Pedro José Laban Carmen",
+      "antes": null,
+      "nuevo": "25edc73b-f1ed-4ed8-97ea-aa3e805c0be8"
+    },
+    {
+      "actor_uid": "58b64936-9f8f-41b2-8f19-3df3eadab072",
+      "nombre": "Pedro Justo Fuentes Moreno",
+      "antes": null,
+      "nuevo": "9415b3b3-bf23-45ae-b6a0-95c77bb81900"
+    },
+    {
+      "actor_uid": "05b9af9b-9e56-4364-b767-34e6046f07d8",
+      "nombre": "Pedro Martín Cerón Borjas",
+      "antes": null,
+      "nuevo": "de9201fa-23f3-42ff-aefa-d10a1c3fbdb3"
+    },
+    {
+      "actor_uid": "f8a544cf-f5e8-492e-a723-0523a45eae7c",
+      "nombre": "Pedro More Paiva",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "6004ba86-c955-4c1d-bfa5-796148085417",
+      "nombre": "Pedro Román Lévano",
+      "antes": null,
+      "nuevo": "2a479130-73b8-4089-84de-33d5310f82c0"
+    },
+    {
+      "actor_uid": "03043847-b441-4379-b306-738e08c8d758",
+      "nombre": "Pedro Tume Panta",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "a9042296-41c9-43ad-8bb7-831252c4eef2",
+      "nombre": "Pedro Villafuerte B.",
+      "antes": null,
+      "nuevo": "1c51f29d-80c4-4342-8ba8-d4995f96f0d1"
+    },
+    {
+      "actor_uid": "45ec2b44-0205-4790-991d-c311e6842389",
+      "nombre": "Percy Javier Chuye Pazos",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "92b55b7f-537f-47cf-a2f8-ab4a9626849c",
+      "nombre": "Quintiliana Marisol Guillen Taipe",
+      "antes": null,
+      "nuevo": "cfcc90f0-cd43-4ab4-9223-88eb45e7edfa"
+    },
+    {
+      "actor_uid": "ffa50b4d-19bb-4e9b-9ecd-73efc4e8490a",
+      "nombre": "Rafael Paredes Solís",
+      "antes": null,
+      "nuevo": "5a5cd27c-c374-4b54-905c-1f5c2e1240be"
+    },
+    {
+      "actor_uid": "3160ca35-cac1-4352-9961-6899b5725be7",
+      "nombre": "Ramos Mayero Diógenes",
+      "antes": null,
+      "nuevo": "7bdd046c-ef94-48f0-a18d-d8b7fee48278"
+    },
+    {
+      "actor_uid": "5d78b5a4-7fad-41a8-9c2f-56e2604bd1e0",
+      "nombre": "Raul Querevalu Querevalu",
+      "antes": null,
+      "nuevo": "81b8e418-6d54-40f4-bbc1-25b4b1ecf158"
+    },
+    {
+      "actor_uid": "bd48cd4c-e8f3-498e-8894-069291161faa",
+      "nombre": "Renato Arangena Cuenca",
+      "antes": null,
+      "nuevo": "1c51f29d-80c4-4342-8ba8-d4995f96f0d1"
+    },
+    {
+      "actor_uid": "f5cebedf-f21f-4a00-b37f-d5f5df5ccd02",
+      "nombre": "Renato Changana Cavero",
+      "antes": null,
+      "nuevo": "5c4c2305-94bf-462e-9e27-4abe24ddae1c"
+    },
+    {
+      "actor_uid": "de5ac31a-3b1c-49a6-aa2c-e26b2cfdc8f9",
+      "nombre": "Renzo Arangena Cuenca",
+      "antes": null,
+      "nuevo": "679ffc79-1fb3-4e4f-a468-ddd0e8b708c6"
+    },
+    {
+      "actor_uid": "e88915ba-107f-450f-ae90-90d48ce55aff",
+      "nombre": "Ricardo Espinoza S.",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "6fd1093a-9e4e-4bd8-b6a9-680341983acf",
+      "nombre": "Robert Zarate Chulle",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "392b02cf-8ffc-4f1d-8cef-49f67944c2fb",
+      "nombre": "Roberto Chapilliquen Ruiz",
+      "antes": null,
+      "nuevo": "ed536831-84dc-463c-83b5-6e2c36e73a27"
+    },
+    {
+      "actor_uid": "7db575fc-68ea-447d-b367-a2ea858fe89b",
+      "nombre": "Roberto Olaya Araya",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "d3186446-24c3-47aa-b674-e4b5acdfdf41",
+      "nombre": "Roberto Tume Vite",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "bf2e7d58-5332-41bf-85de-5fbf28304ba5",
+      "nombre": "Rodolfo León Madrid",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "a77b62d3-f2cb-490c-991a-f9a90fc13b1e",
+      "nombre": "Rodrigo Vilca Mamani",
+      "antes": null,
+      "nuevo": "bbdc9130-6ae1-4185-a883-9a7b63681138"
+    },
+    {
+      "actor_uid": "77fa01b9-2360-49b1-b032-4ffdc3a4f438",
+      "nombre": "Roger Ruiz Eche",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "f290d343-49ff-4f83-a4fe-502fde2fa860",
+      "nombre": "Rolando Paiva Chulle",
+      "antes": null,
+      "nuevo": "08041e23-5f3a-48dc-b7f4-2dc5382cbbb1"
+    },
+    {
+      "actor_uid": "63049e3b-3893-43b3-88b9-72b7032d5fed",
+      "nombre": "Roly Lucca Mamani",
+      "antes": null,
+      "nuevo": "bc7d6add-0df6-4f69-9c95-583d28766c44"
+    },
+    {
+      "actor_uid": "a56575db-ab09-4b6c-bb19-e3d7958ad491",
+      "nombre": "Roman Paiva Eche",
+      "antes": null,
+      "nuevo": "d4d43c75-64f2-4578-bd2a-d91593ed757d"
+    },
+    {
+      "actor_uid": "d95a9864-bf1a-47a4-ba1a-c941554ddbd4",
+      "nombre": "Ronal Paul Cornejo Palma",
+      "antes": null,
+      "nuevo": "951c2720-82d9-48c2-8d29-1b82c9f9ab05"
+    },
+    {
+      "actor_uid": "d0dde809-bd58-436c-b887-af651217ff76",
+      "nombre": "Ronald Cornejo Palmo",
+      "antes": null,
+      "nuevo": "4bd216d4-ac5e-4559-a1ed-d94603afb405"
+    },
+    {
+      "actor_uid": "27141574-d986-4fd0-9984-6ef95b0d3dcd",
+      "nombre": "Ronald Paul Cornejo Palomino",
+      "antes": null,
+      "nuevo": "4bd216d4-ac5e-4559-a1ed-d94603afb405"
+    },
+    {
+      "actor_uid": "c67fd97a-5261-448b-bf68-516dfde6c05e",
+      "nombre": "Rosa Elvira Ayala Munives",
+      "antes": null,
+      "nuevo": "6e835c74-ce02-4b6b-bf6f-8a754a816cf4"
+    },
+    {
+      "actor_uid": "3fa12008-4e01-4e39-98f8-8956dac51e30",
+      "nombre": "Rosmery Franco Zapata",
+      "antes": null,
+      "nuevo": "a8ecd915-2faf-4927-b19a-dac11160ce63"
+    },
+    {
+      "actor_uid": "cb90ddad-66e8-414e-aa2d-572bc3ddb9a0",
+      "nombre": "Roxana Alanoca Apaza",
+      "antes": null,
+      "nuevo": "4bb8bef7-cf96-4caa-b13a-7eab8279c9f6"
+    },
+    {
+      "actor_uid": "3e51095d-0a62-4f46-b053-8ca8d4166361",
+      "nombre": "Rubén Chunga Chapa",
+      "antes": null,
+      "nuevo": "7f056b60-73a8-4ee8-a8fc-2bb543549d63"
+    },
+    {
+      "actor_uid": "fd50855a-0e7f-4cf0-938b-43f52195a605",
+      "nombre": "Rufo E. Pazo Querevalú",
+      "antes": null,
+      "nuevo": "23647f5c-4770-423d-b95a-45ae876986a6"
+    },
+    {
+      "actor_uid": "81ac2041-61cf-4435-9dc2-109fac0e71a9",
+      "nombre": "Santiago Gonzales V.",
+      "antes": null,
+      "nuevo": "6f4ee724-fe75-4aee-bf2a-247aa265bc24"
+    },
+    {
+      "actor_uid": "4b406c20-7d2e-4ba0-891b-687c0b4b3054",
+      "nombre": "Santos Eduardo Periche Querevalú",
+      "antes": null,
+      "nuevo": "3aa57af4-6d72-4bf6-98f8-1ae4c84aaae7"
+    },
+    {
+      "actor_uid": "6ae7e692-179f-44d1-b6f6-5e4e93612e32",
+      "nombre": "Santos Felipe Vite Puipanca",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "b87fdfbf-c86c-4b45-aa31-c958b621a2b9",
+      "nombre": "Santos Paiva Chulle",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "b86bc4f6-e92e-432d-abec-6a72a6c34d95",
+      "nombre": "Segundo Meza Jaramillo",
+      "antes": null,
+      "nuevo": "f585bd09-97f2-4cd4-a51e-f96063f48227"
+    },
+    {
+      "actor_uid": "48c44909-bd10-40fa-80c6-a9d666e6ce4b",
+      "nombre": "Selena Silvana Mundini Llauca",
+      "antes": null,
+      "nuevo": "02458aa4-d02f-4e32-bd0b-befa85c6f848"
+    },
+    {
+      "actor_uid": "1e9de866-f80e-4070-9936-a1c016f7524b",
+      "nombre": "Sheila Elvira Galloso Torres",
+      "antes": null,
+      "nuevo": "e6e369dd-02fe-4598-8397-4393d81e2ffa"
+    },
+    {
+      "actor_uid": "0c0bf524-e0c8-475d-9852-4247c2d47f4b",
+      "nombre": "Sirena Nandia",
+      "antes": null,
+      "nuevo": "e2a5e081-f22c-44f3-9899-073b84f0afd2"
+    },
+    {
+      "actor_uid": "80c9e3e9-614c-4938-b571-15a6ffae0bd3",
+      "nombre": "Sixto Peña Anaya",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "df8c8d86-ffd9-44c1-8e62-bc2127b142b6",
+      "nombre": "Susana Liliana Saldaña Ramos",
+      "antes": null,
+      "nuevo": "a41498c9-6f41-484f-991b-7590ba2e8d7d"
+    },
+    {
+      "actor_uid": "bc418b6f-6a93-4071-a48d-b1fdf979f4c5",
+      "nombre": "Taira García Moreno",
+      "antes": null,
+      "nuevo": "980d6e92-0ae7-40cc-b4c9-e7b294c978f9"
+    },
+    {
+      "actor_uid": "73dfb1fb-492c-4d8f-9f48-f8c04d8f94ce",
+      "nombre": "Timoteo Querevalu Eca",
+      "antes": null,
+      "nuevo": "f86b14e9-7786-4f2c-945e-b9c2bee09864"
+    },
+    {
+      "actor_uid": "8d3ef5a4-5890-4104-bcf2-1874ce7698bf",
+      "nombre": "Torres García Aquiles",
+      "antes": null,
+      "nuevo": "c4e07dad-89cd-40ec-b4b3-a6f4ee6dd37b"
+    },
+    {
+      "actor_uid": "ecd2103a-8a0a-4ad4-b5fa-1ec3593cfd8b",
+      "nombre": "Valeria Mezarina Avia",
+      "antes": null,
+      "nuevo": "d1f4a5b2-f8b8-4313-81e1-b2b1a38182bd"
+    },
+    {
+      "actor_uid": "d4b8c4ea-2503-4b72-a1a5-8fc4394e556b",
+      "nombre": "Valeria Mezarina Avia",
+      "antes": null,
+      "nuevo": "d1f4a5b2-f8b8-4313-81e1-b2b1a38182bd"
+    },
+    {
+      "actor_uid": "fc727d4f-bb45-401e-8abe-a442c64a6e5f",
+      "nombre": "Valerio Benites V.",
+      "antes": null,
+      "nuevo": "6f4ee724-fe75-4aee-bf2a-247aa265bc24"
+    },
+    {
+      "actor_uid": "d968c009-398c-46c3-97ce-761caadc12c8",
+      "nombre": "Veronica Alberca Estela",
+      "antes": null,
+      "nuevo": "5fb915e7-a5f8-40b1-800f-68d6040853ca"
+    },
+    {
+      "actor_uid": "6c0b67f5-4f07-490a-83e1-69fad041d89b",
+      "nombre": "Veronica Alberca Estela",
+      "antes": null,
+      "nuevo": "5fb915e7-a5f8-40b1-800f-68d6040853ca"
+    },
+    {
+      "actor_uid": "0cd81576-6939-46ce-89bc-7ee5d7b6f993",
+      "nombre": "Verónica Uchuya Córdova",
+      "antes": null,
+      "nuevo": "1dbb6277-ee08-44bc-a2b9-e04fd46264e5"
+    },
+    {
+      "actor_uid": "6b0c0ebb-34e2-480e-8515-1b8020c1d4f7",
+      "nombre": "Victor German Orosco Nunton",
+      "antes": null,
+      "nuevo": "26137791-56ee-4595-a9b4-b67508626c4f"
+    },
+    {
+      "actor_uid": "f2154177-d404-4012-9983-64f767f8190e",
+      "nombre": "Víctor Guerra León",
+      "antes": null,
+      "nuevo": "ad491cec-c656-417d-b84d-200a9e65ae40"
+    },
+    {
+      "actor_uid": "fece0d31-8014-40a3-a42e-0d48b1ee262f",
+      "nombre": "Víctor Núñura Fiestas",
+      "antes": null,
+      "nuevo": "31bb771c-768c-4361-9249-d4f2540f76f2"
+    },
+    {
+      "actor_uid": "57fcd71c-406e-40c9-8870-2b9496fd6138",
+      "nombre": "Víctor Viera Sosa",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "3e12df3a-d580-4747-a23d-1c41cce50266",
+      "nombre": "Walter Sipion Huamanchumo",
+      "antes": null,
+      "nuevo": "3c3f4ab7-71ed-4049-98c8-7dd287f95374"
+    },
+    {
+      "actor_uid": "e1fa2f3c-3c36-45cc-af21-2e2426e1e511",
+      "nombre": "Walter Sipión Huamanchumo",
+      "antes": null,
+      "nuevo": "316ca75a-935f-4515-a9d0-1cb35041e454"
+    },
+    {
+      "actor_uid": "864b07dc-86e1-4771-a14a-0643bffd3764",
+      "nombre": "Wilber Isaac Tapia",
+      "antes": null,
+      "nuevo": "602029f4-23e5-42a3-be6a-9685138720f8"
+    },
+    {
+      "actor_uid": "937048a6-be56-44fb-80c0-840b294d8c36",
+      "nombre": "Wilber Layme Quispe",
+      "antes": null,
+      "nuevo": "4fb00cef-012f-4c2a-8c5d-4402fcb0365e"
+    },
+    {
+      "actor_uid": "96c5faa5-c0ee-4ee3-b8a0-c6abb016ac9d",
+      "nombre": "Wilfran Chulle Ruiz",
+      "antes": null,
+      "nuevo": "8254e5e2-68ad-411e-88b1-821aa842f377"
+    },
+    {
+      "actor_uid": "9e0937de-a8de-4f22-9c7c-125f1103d935",
+      "nombre": "Wilfredo Florin Mena",
+      "antes": null,
+      "nuevo": "ea9ff081-9e1a-4329-aa1f-d5f62ef99429"
+    },
+    {
+      "actor_uid": "f398898d-95db-46e1-a899-306d92b24b00",
+      "nombre": "Wilmer Guillermo Oxsa Capari",
+      "antes": null,
+      "nuevo": "22a31936-5550-4ae9-bd13-0627291c0cb8"
+    },
+    {
+      "actor_uid": "49c4c064-7b1a-4343-93bb-336216aa3f30",
+      "nombre": "Wilmer Nicasvali Pazo",
+      "antes": null,
+      "nuevo": "e98a3c2c-7cf3-4854-91ee-088235c58bee"
+    },
+    {
+      "actor_uid": "2ba5b432-52b7-4e49-b8ab-efe6bf7f471f",
+      "nombre": "Witney Alejandro Ortiz Padilla",
+      "antes": null,
+      "nuevo": "13a21503-e0ff-4ada-b2e7-5ab29768c67b"
+    },
+    {
+      "actor_uid": "d06554fa-9e59-42d2-aa99-c57c20f13365",
+      "nombre": "Yimi A. Ramírez C.",
+      "antes": null,
+      "nuevo": "6f4ee724-fe75-4aee-bf2a-247aa265bc24"
+    },
+    {
+      "actor_uid": "2b386183-7a3f-47e9-9147-b630c7162409",
+      "nombre": "Yvette Madueño",
+      "antes": null,
+      "nuevo": "785e4b70-0764-45fd-b7c1-d46fb93bef29"
+    },
+    {
+      "actor_uid": "51098fca-2d0b-4b34-8787-17a3a53a8324",
+      "nombre": "mercedes Lumbres Cunpa",
+      "antes": null,
+      "nuevo": "bf746ddb-e7bc-4323-ae97-4db88fc54609"
+    }
+  ],
+  "actores_caso_ancla": [
+    {
+      "actor_uid": "f8568438-b9d9-4745-a94b-cccda6df654a",
+      "nombre": "Adonay Olaya Marchan",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "b827b065-42bb-4cea-90b6-a3f785194363",
+      "nombre": "Adán Rene Cobeña Gómez",
+      "antes": null,
+      "nuevo": "43629500-8c6d-4521-b448-84636150067c"
+    },
+    {
+      "actor_uid": "e88c3928-b139-459b-922e-207572ddafaa",
+      "nombre": "Alexander Paucar Villanueva",
+      "antes": null,
+      "nuevo": "4b23bf41-a361-445d-ba58-5a713524428a"
+    },
+    {
+      "actor_uid": "27b32d31-7511-49ed-bcf3-f10128cab53f",
+      "nombre": "Armando Namuche",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "e5310bc5-22ab-4c1f-afde-6f24b95b1625",
+      "nombre": "Carlos Alberto Jacinto Tume",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "2a08025f-8948-4ef3-851f-0d4c2b4f324f",
+      "nombre": "Carlos Chapilliquen",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "91cbadc5-7d67-46f3-9a4c-f5ba7d27e47c",
+      "nombre": "Cecilio Zea Calapuja",
+      "antes": null,
+      "nuevo": "75f1de99-b8fa-49f5-bf48-3330c444993f"
+    },
+    {
+      "actor_uid": "7fe48ca8-94f9-4015-aa3b-c242330b04e7",
+      "nombre": "Cecis Rosos Sánchez",
+      "antes": null,
+      "nuevo": "e81d2df8-bcd0-4efa-8b3c-416b168f7598"
+    },
+    {
+      "actor_uid": "947c50fa-9bc4-43d5-8afc-ddb41db5a95e",
+      "nombre": "Diego Armando Paiva Jacinto",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "6813ea8b-7a42-4a4d-870e-8266758e91f3",
+      "nombre": "Edgar Jiménez Caipa",
+      "antes": null,
+      "nuevo": "9373ad12-ded1-4484-b33f-05228422f24d"
+    },
+    {
+      "actor_uid": "6afec48c-429d-4cf0-9429-f51f9f63ad8d",
+      "nombre": "Ernesto Ruíz",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "7965883f-b098-46c3-868d-20a879d78621",
+      "nombre": "Felix Aguirre Martinez",
+      "antes": null,
+      "nuevo": "1ddf5690-f24f-47e0-9c3a-e7990ef956bd"
+    },
+    {
+      "actor_uid": "ba39625f-f813-4cd9-a2a5-a18d475e8c6d",
+      "nombre": "Henry Juárez Ruiz",
+      "antes": null,
+      "nuevo": "d6971147-329e-46ad-9c20-144924e41593"
+    },
+    {
+      "actor_uid": "39926229-df43-442b-892b-540b3b61a35d",
+      "nombre": "Hilton Gregorio Guerrero Bonifacio",
+      "antes": null,
+      "nuevo": "86040c3a-e81e-46ba-a564-f5d7e351c78c"
+    },
+    {
+      "actor_uid": "fbbc8f53-54ff-4c69-bff4-462f537de330",
+      "nombre": "Jenny Pizarro Velarde",
+      "antes": null,
+      "nuevo": "86040c3a-e81e-46ba-a564-f5d7e351c78c"
+    },
+    {
+      "actor_uid": "99f0a31e-1a97-49ba-9b51-7583800fda68",
+      "nombre": "Jesús Querevalú",
+      "antes": null,
+      "nuevo": "29e86bcf-e3ed-4657-99ea-2be454aaa611"
+    },
+    {
+      "actor_uid": "76dc5934-926a-48fb-a3ea-da06588bfff3",
+      "nombre": "Joshua Lara",
+      "antes": null,
+      "nuevo": "75f1de99-b8fa-49f5-bf48-3330c444993f"
+    },
+    {
+      "actor_uid": "9f21a558-0e65-440e-8f8d-2588433e22a0",
+      "nombre": "José Luis Moreno Moreno",
+      "antes": null,
+      "nuevo": "4b23bf41-a361-445d-ba58-5a713524428a"
+    },
+    {
+      "actor_uid": "04ab2775-1e00-4ad3-90f4-1dd834306efe",
+      "nombre": "José Martín Prieto Muñoz",
+      "antes": null,
+      "nuevo": "4b23bf41-a361-445d-ba58-5a713524428a"
+    },
+    {
+      "actor_uid": "2d320de9-24b6-4809-a576-cd22bb351792",
+      "nombre": "José Pazos Anthón",
+      "antes": null,
+      "nuevo": "710f2bb1-374b-4603-869d-dd65f225e930"
+    },
+    {
+      "actor_uid": "14fcb8ca-737c-45c1-9d63-0b3ea995f835",
+      "nombre": "José Sixto Panta Ramírez",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "3c2e5245-7ba1-4d9b-b577-d872144557ef",
+      "nombre": "Juan Carlos Chulle",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "acdca160-92ad-44a8-9993-0b0eafb52f34",
+      "nombre": "Lesly Campoverde",
+      "antes": null,
+      "nuevo": "b52f1a9c-7cee-4685-bf12-34e1c6fd39f9"
+    },
+    {
+      "actor_uid": "e107d3ba-7534-41ef-bd03-5fa6611e0bdf",
+      "nombre": "Luis Díaz",
+      "antes": null,
+      "nuevo": "1ddf5690-f24f-47e0-9c3a-e7990ef956bd"
+    },
+    {
+      "actor_uid": "6b05936b-562a-4533-85dd-f3b3936e48f3",
+      "nombre": "Luis Suclupe",
+      "antes": null,
+      "nuevo": "bd4ff4cb-7151-4dfa-9024-2984359f3625"
+    },
+    {
+      "actor_uid": "84c94c41-166f-4949-80f6-7160bc74471a",
+      "nombre": "MANUEL CAMINITI MISCAN",
+      "antes": null,
+      "nuevo": "4b23bf41-a361-445d-ba58-5a713524428a"
+    },
+    {
+      "actor_uid": "18448d1b-f1ba-4e0c-bea0-52d1f6d6c673",
+      "nombre": "Marcelino Gonzales",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "467102a9-4351-44a0-8da1-38fea49a02b3",
+      "nombre": "Martín Olivos Gonzales",
+      "antes": null,
+      "nuevo": "e81d2df8-bcd0-4efa-8b3c-416b168f7598"
+    },
+    {
+      "actor_uid": "30668bda-fae3-4ccd-8591-d1892bdabf13",
+      "nombre": "Maruja Tinco Soto",
+      "antes": null,
+      "nuevo": "bd4ff4cb-7151-4dfa-9024-2984359f3625"
+    },
+    {
+      "actor_uid": "b1979c25-0d8a-4862-a9d4-4be486bdb99f",
+      "nombre": "Mercedes Yovera",
+      "antes": null,
+      "nuevo": "1662b8ea-7ee9-445d-95cc-0ad57dc394d0"
+    },
+    {
+      "actor_uid": "b0fd885f-bb66-409a-b57c-46aa4f53fb36",
+      "nombre": "OSPAs de Tumbes",
+      "antes": null,
+      "nuevo": "1662b8ea-7ee9-445d-95cc-0ad57dc394d0"
+    },
+    {
+      "actor_uid": "394f0a4a-908d-468b-8444-af364a75fd82",
+      "nombre": "Oscar Fernando Camasco Jimenez",
+      "antes": null,
+      "nuevo": "39c091af-b98b-4a38-aa17-8914923560cd"
+    },
+    {
+      "actor_uid": "b66ce99a-5696-42ae-b3c1-d91caf0de5a0",
+      "nombre": "Pedro Fuentes Moreno",
+      "antes": null,
+      "nuevo": "710f2bb1-374b-4603-869d-dd65f225e930"
+    },
+    {
+      "actor_uid": "05b9af9b-9e56-4364-b767-34e6046f07d8",
+      "nombre": "Pedro Martín Cerón Borjas",
+      "antes": null,
+      "nuevo": "4b23bf41-a361-445d-ba58-5a713524428a"
+    },
+    {
+      "actor_uid": "6004ba86-c955-4c1d-bfa5-796148085417",
+      "nombre": "Pedro Román Lévano",
+      "antes": null,
+      "nuevo": "1662b8ea-7ee9-445d-95cc-0ad57dc394d0"
+    },
+    {
+      "actor_uid": "ffa50b4d-19bb-4e9b-9ecd-73efc4e8490a",
+      "nombre": "Rafael Paredes Solís",
+      "antes": null,
+      "nuevo": "1662b8ea-7ee9-445d-95cc-0ad57dc394d0"
+    },
+    {
+      "actor_uid": "5d78b5a4-7fad-41a8-9c2f-56e2604bd1e0",
+      "nombre": "Raul Querevalu Querevalu",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "f290d343-49ff-4f83-a4fe-502fde2fa860",
+      "nombre": "Rolando Paiva Chulle",
+      "antes": null,
+      "nuevo": "0abe46a6-1402-4f38-8e0a-6e25ed5437a7"
+    },
+    {
+      "actor_uid": "d95a9864-bf1a-47a4-ba1a-c941554ddbd4",
+      "nombre": "Ronal Paul Cornejo Palma",
+      "antes": null,
+      "nuevo": "25c62486-8629-4763-81d5-94d3e49851c8"
+    },
+    {
+      "actor_uid": "3022b264-782d-470c-8947-41aba0dee412",
+      "nombre": "SPAEMIM",
+      "antes": null,
+      "nuevo": "faf74217-945e-425d-9dc8-6691985edbd1"
+    },
+    {
+      "actor_uid": "df8c8d86-ffd9-44c1-8e62-bc2127b142b6",
+      "nombre": "Susana Liliana Saldaña Ramos",
+      "antes": null,
+      "nuevo": "654f5056-022b-4316-93c8-083d3d562ed9"
+    },
+    {
+      "actor_uid": "cdb90621-8668-4c95-be3d-729dace0d32f",
+      "nombre": "Washintong Espinoza Bolas",
+      "antes": null,
+      "nuevo": "8676ce35-2456-4754-b37b-01ab44427886"
+    },
+    {
+      "actor_uid": "9e0937de-a8de-4f22-9c7c-125f1103d935",
+      "nombre": "Wilfredo Florin Mena",
+      "antes": null,
+      "nuevo": "8676ce35-2456-4754-b37b-01ab44427886"
+    },
+    {
+      "actor_uid": "f398898d-95db-46e1-a899-306d92b24b00",
+      "nombre": "Wilmer Guillermo Oxsa Capari",
+      "antes": null,
+      "nuevo": "e81d2df8-bcd0-4efa-8b3c-416b168f7598"
+    },
+    {
+      "actor_uid": "51098fca-2d0b-4b34-8787-17a3a53a8324",
+      "nombre": "mercedes Lumbres Cunpa",
+      "antes": null,
+      "nuevo": "29e86bcf-e3ed-4657-99ea-2be454aaa611"
+    }
+  ],
+  "membresias_cargo": [
+    {
+      "id": "6892c412-2646-435c-b4c8-cf5755445361",
+      "persona_uid": "ba41e265-09b2-4c1a-92d6-68ee23524682",
+      "nombre": "Absalon Asencio Acuña",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "c3a97606-4be7-41ba-baa1-790d8823fe98",
+      "persona_uid": "d7791fc5-03bc-4230-a101-9b516fecd3ad",
+      "nombre": "Absalon Asencio Acuña",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "77256daa-4cf6-46c9-b548-e6e02a6f4bb2",
+      "persona_uid": "b827b065-42bb-4cea-90b6-a3f785194363",
+      "nombre": "Adán Rene Cobeña Gómez",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "931f87e6-7b20-4d00-8d2c-b9ee545ab0ca",
+      "persona_uid": "0a76fa59-1852-4d1a-a4b2-1e8bccaa8da0",
+      "nombre": "Agustín Gutierrez Ponce",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "7ff42b70-7e20-4629-9320-f65a928c30bf",
+      "persona_uid": "aacbef3c-a111-4f90-a64b-f1a910c2cebc",
+      "nombre": "Alcides Paulino Herrera Inga",
+      "antes": null,
+      "nuevo": "SECRETARIO GENERAL"
+    },
+    {
+      "id": "e4abae39-57d1-4d60-a128-a3c2cf783cfa",
+      "persona_uid": "55e24e9d-3e11-435f-b476-bf48730be695",
+      "nombre": "Alejandro A. Nalvarte Velásquez",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "816b8c88-d528-406d-b252-ea894984882e",
+      "persona_uid": "a88b4af8-85c5-4820-b23d-41e7a90d66c5",
+      "nombre": "Alex Calle Livas",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "8d47f152-ca10-4512-908f-489d688f8e9e",
+      "persona_uid": "e88c3928-b139-459b-922e-207572ddafaa",
+      "nombre": "Alexander Paucar Villanueva",
+      "antes": null,
+      "nuevo": "Administrador [dudoso]"
+    },
+    {
+      "id": "a7c119a9-686d-4079-8772-4930b39c90f7",
+      "persona_uid": "30be9f14-818f-440e-af1c-f09650802cc1",
+      "nombre": "Alfonso Ernesto García Beunza",
+      "antes": null,
+      "nuevo": "Secretario de Actas"
+    },
+    {
+      "id": "d334c1f0-7854-4446-9308-ec921dfd2b03",
+      "persona_uid": "a319fc50-39dd-42e1-8301-f7f90a6cd2f1",
+      "nombre": "Alfredo Manuel Huamán Mattos",
+      "antes": null,
+      "nuevo": "Secretario general"
+    },
+    {
+      "id": "8e8f4da2-b8e8-4822-9fd3-ef671aa30e12",
+      "persona_uid": "5757b313-ecf0-4819-9b7a-64da24c844ab",
+      "nombre": "Andres Ventura Berrocal",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "c7017619-0ebb-4351-bfaf-31a4c025090c",
+      "persona_uid": "e8aeb45b-30d0-4e00-87bc-c1cd3036ff7c",
+      "nombre": "Andrés Camelo Miguel",
+      "antes": null,
+      "nuevo": "Te Asoc. Pescador"
+    },
+    {
+      "id": "19df1865-2f58-4ea8-85a3-7957e846aa28",
+      "persona_uid": "90617e0b-4e63-47ab-ba11-94b04abc8f8c",
+      "nombre": "Antonio Maza Paiva",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "8b474422-1839-4e49-93d1-8e9d23846e12",
+      "persona_uid": "2f6e5ff4-b65b-49c6-a1e6-d3e0607c6062",
+      "nombre": "Arelys Anco Soto",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "99a229a4-771e-4d27-873d-4688a08cab32",
+      "persona_uid": "8802611d-96eb-46cf-be6f-857922a2e1a8",
+      "nombre": "Calixto Pazos J.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "de427b44-60ef-4796-853c-b0566b43fc7f",
+      "persona_uid": "f19e3907-95cb-4b62-bc18-fa1dd638f7f3",
+      "nombre": "Carlos Alberto Quispe Fraquita",
+      "antes": null,
+      "nuevo": "Dirigente"
+    },
+    {
+      "id": "f38feb73-db0d-44c5-971f-af3530735db9",
+      "persona_uid": "6ed05528-a886-44d7-b5be-58ae1d210f27",
+      "nombre": "Carlos Chulla J.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "9b11d5f0-ae14-4340-9dbb-536e8f793722",
+      "persona_uid": "4eb316bd-b74c-4491-be8f-26d5b04759a1",
+      "nombre": "Carlos De La Cruz Cornejo",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "6c7f5269-2cdd-43a7-9386-2ed798c45833",
+      "persona_uid": "65ad1446-993d-4355-bf35-a18dfd76b1f0",
+      "nombre": "Carlos Fernández Olaya",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "6e271986-137b-46d1-a836-3b3e5b4279f5",
+      "persona_uid": "432d986c-9a52-41b0-a718-06ea0b8f5a16",
+      "nombre": "Carlos Gutiérrez Laimes",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "08c8f194-447d-460e-943d-9cf0f7a7c826",
+      "persona_uid": "442ac956-20c2-4516-ad13-e3e1f6d0ec24",
+      "nombre": "Carlos Nieto",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "4eef708f-2218-422c-adad-fef35a934e01",
+      "persona_uid": "6feba672-8227-4e6b-98e3-dd4a4fe14375",
+      "nombre": "Carlos Ramírez Alquizar",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "acddf0db-dc0e-49ca-a153-c594d3fd6aa2",
+      "persona_uid": "93fbc2cb-2296-4de5-b859-fd00fb69f050",
+      "nombre": "Carlos Yenque",
+      "antes": null,
+      "nuevo": "gerente"
+    },
+    {
+      "id": "46ed39a9-dc3d-49ad-ae02-4a5ede5e0e5f",
+      "persona_uid": "75e997bd-8cb8-42c5-8780-7f721b5cc041",
+      "nombre": "Cesar Alberto Abanto Noriega",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "34ffd9f9-30f7-4f62-a4e2-0b787fc88dde",
+      "persona_uid": "6ea45342-d8ea-401e-846a-d3bbbbb5885e",
+      "nombre": "Claudio Ramos Pazo Álvarez",
+      "antes": null,
+      "nuevo": "Dirigente"
+    },
+    {
+      "id": "d162decc-7538-41b8-b385-46057b19847a",
+      "persona_uid": "320d00cd-0339-43be-925f-555f40a62f0c",
+      "nombre": "Crisilly Ramos Tinco",
+      "antes": null,
+      "nuevo": "Armador"
+    },
+    {
+      "id": "11e4a23b-dde4-48c1-a58a-65c96b50605f",
+      "persona_uid": "0c74d67f-7696-4cb1-88bb-42022499f622",
+      "nombre": "Cristobal Sandoval Peralta",
+      "antes": null,
+      "nuevo": "Asesor Legal"
+    },
+    {
+      "id": "2cebc4cc-3184-4ee7-b269-774141f56daf",
+      "persona_uid": "8a54479f-77d4-4ca5-9375-2328615b453f",
+      "nombre": "Dalan Carrasco Girón",
+      "antes": null,
+      "nuevo": "Trabajador"
+    },
+    {
+      "id": "3cfcb92a-6b8a-4f5d-ab99-09c55a57b63b",
+      "persona_uid": "81a11130-2130-49f1-86a6-3cbcb71c4dfe",
+      "nombre": "Daniel Hermoza Negreiros",
+      "antes": null,
+      "nuevo": "director"
+    },
+    {
+      "id": "c907ff33-5c79-4125-9802-191693ebcbc0",
+      "persona_uid": "e179b4c6-5502-40a6-9318-af646ea2a4f1",
+      "nombre": "Daniel Hermoza Negreiros",
+      "antes": null,
+      "nuevo": "director"
+    },
+    {
+      "id": "a04f9db1-b6f2-48f7-a3e8-bfc798881ede",
+      "persona_uid": "b6a0efdc-2547-4bd1-adfa-d9fe66291a03",
+      "nombre": "Daniel López",
+      "antes": null,
+      "nuevo": "Vice"
+    },
+    {
+      "id": "0fe73d51-d1da-4bb8-acec-ef35806fc76a",
+      "persona_uid": "91a3c413-4dc0-4a43-b873-00d8e1d9a606",
+      "nombre": "Danny Abad Yarleque",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "597ddc14-9a4f-41bc-a451-c2b83cfd1430",
+      "persona_uid": "b219f21a-e5b5-4413-a8a4-d8297a23d896",
+      "nombre": "Darwin Ruiz Antón",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "4168e091-3701-4567-821c-3d02e30b540d",
+      "persona_uid": "b3d3b669-2fbc-4f56-9cab-46fae6926cae",
+      "nombre": "David Rojas Villanueva",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "c5403151-6602-4bf2-a4b0-eb3fd4aaac4a",
+      "persona_uid": "7621df1e-b5e0-4020-92da-85300775f6b0",
+      "nombre": "David Sebastián Pingo Purizaca",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "c15e5ae0-81ca-4524-883d-963097d49aaf",
+      "persona_uid": "d2020d05-3934-4199-8c75-c6810dccad76",
+      "nombre": "Dixon Chávez Ubillus",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "fd302de2-5e47-4fec-8daa-636a2db53697",
+      "persona_uid": "2f15db9d-3f8b-402b-b3d5-b06abcc44ba4",
+      "nombre": "Domingo Purizaca Eche",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "7db938ec-73b5-468a-9eca-42a14aab59d0",
+      "persona_uid": "a6c2615d-5782-4566-b249-a407e68e20d3",
+      "nombre": "Doña Matea Zetos",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "f2e7f030-3354-4c52-84a6-99c6ace6b622",
+      "persona_uid": "5f72a9df-84ff-4d3f-aa3c-77aebf0586cb",
+      "nombre": "Eddie Olaya Escobar",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "58d9fafe-d921-4185-88f0-aab1b7bcd39a",
+      "persona_uid": "ae573bc7-5889-4502-9c4e-f0818abbe0f2",
+      "nombre": "Edgar Eche B.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "826a652d-8e99-4358-9259-0b9cb1fadba1",
+      "persona_uid": "13856525-7af1-4866-bb3d-749da21604a4",
+      "nombre": "Edgar Escobar Ticona",
+      "antes": null,
+      "nuevo": "Vicepresidente"
+    },
+    {
+      "id": "771c6cf7-d89f-4663-9ef2-bd43b5ac91ac",
+      "persona_uid": "6813ea8b-7a42-4a4d-870e-8266758e91f3",
+      "nombre": "Edgar Jiménez Caipa",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "486cd116-2b3f-42ec-812c-7f339b4b784c",
+      "persona_uid": "6469cb9a-c92a-4b85-b9fa-7d6efd958e87",
+      "nombre": "Edgard Fiestas Fiestas",
+      "antes": null,
+      "nuevo": "Dirigente"
+    },
+    {
+      "id": "196e0494-8880-4c80-876a-fb5e08446a9c",
+      "persona_uid": "fe06d9ad-bd8f-4598-998c-463a61fce693",
+      "nombre": "Eduardo Francisco Yarleque La Chira",
+      "antes": null,
+      "nuevo": "Secretario"
+    },
+    {
+      "id": "0af35679-dbf4-44ff-a885-c53e9fbe988b",
+      "persona_uid": "228d9752-bac3-417c-ba69-ac48fbe22dc1",
+      "nombre": "Eduardo Oshabana Galeno",
+      "antes": null,
+      "nuevo": "Miembro"
+    },
+    {
+      "id": "29f98d23-fb89-4e5d-9c94-ca26c7598a56",
+      "persona_uid": "9a0af5e0-0a9a-480f-9143-e822c55ec05f",
+      "nombre": "Eduardo Ángel Fernández Beza",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "d9c24c20-39db-425a-a3b6-a622d9d35a56",
+      "persona_uid": "b3b93984-731b-4983-ada7-93e30d31ad29",
+      "nombre": "Edwin Elbher Villajuan Choque",
+      "antes": null,
+      "nuevo": "Presidente / Coordinador"
+    },
+    {
+      "id": "46ee0d7c-9858-419f-8348-2c18330f48c9",
+      "persona_uid": "2881fc96-8f61-4961-8492-f1395fb68c2b",
+      "nombre": "Edwin Martín Houghton Rosas",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "95050ad4-0c83-4af7-9a38-b6666a2cee5f",
+      "persona_uid": "63d1f1d2-adba-493f-9dd4-a149dcb03d4d",
+      "nombre": "Edy Lupaca Mamani",
+      "antes": null,
+      "nuevo": "Secretario"
+    },
+    {
+      "id": "0c29722d-b605-4167-a371-394bf25426a0",
+      "persona_uid": "e1fdf8ac-9c50-462d-9372-34c3323b22ba",
+      "nombre": "Efren Cecilio Díaz Vera",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "6d89c0c2-5148-40f9-8b63-5a252dacf2db",
+      "persona_uid": "73fd12b5-1f8c-424d-b6ab-c394c2b0ea9e",
+      "nombre": "Elman A. Ramírez C.",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "d1ae78be-0a70-47fd-8141-4dedd167bc66",
+      "persona_uid": "f80ea591-a6c3-4bbe-a42a-79703b6b3958",
+      "nombre": "Eloy Ángel Quispe Mimbela",
+      "antes": null,
+      "nuevo": "Vicepresidente"
+    },
+    {
+      "id": "047d6361-267f-44e3-9a7b-6bb05d1c7734",
+      "persona_uid": "d371b999-4d16-4aca-9b8c-eeeb2f7c5039",
+      "nombre": "Elsa Graciela Vega Pardo",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "745ff858-8156-4265-b080-76c9277421d4",
+      "persona_uid": "fd057867-02f0-491e-a1a0-a548661d693c",
+      "nombre": "Elsa Ureta Tapia",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "10675b9f-5cb0-4d1d-b56b-e64fbb6616ae",
+      "persona_uid": "35be9ad0-149d-4a7f-9639-97eab8ea53f4",
+      "nombre": "Elvia Torres Torres",
+      "antes": null,
+      "nuevo": "Esposa de Pescador"
+    },
+    {
+      "id": "4ac2491e-a9f1-40ff-919c-0d583e2a3294",
+      "persona_uid": "21f4cb93-17f9-4c23-a545-c4753be5f1b4",
+      "nombre": "Enderson Giancarlos Gonzales Anticona",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "dc93c3f0-ff8c-4f3a-92e8-69e3f397a991",
+      "persona_uid": "1ae162f6-d492-4523-98c4-ab6032b2ea21",
+      "nombre": "Eric Alberto Garagua",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "75d84179-2eb1-4f1c-949f-3f46bccec7ef",
+      "persona_uid": "b67f9087-94c5-47e9-b646-3b10061141b4",
+      "nombre": "Erko Ruiz Navarro",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "cd1c83c0-f9b0-4d1f-b474-106b27371f8e",
+      "persona_uid": "12e3a70a-7d65-446f-8966-10be5d7fb8b0",
+      "nombre": "Ernesto Calle Ruiz",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "bbf0b6ee-964d-4041-9e4b-583c0b3f0612",
+      "persona_uid": "96bbc6f8-d24b-4f43-b82a-046a128930b7",
+      "nombre": "Ernesto Gonzales Moran",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "b81e1736-08af-4cb0-8283-7b8facd73f34",
+      "persona_uid": "de4cf013-3951-415b-b60d-d82bea8dfd52",
+      "nombre": "Esperanza Tafur Huamán",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "cc5449a5-0cf9-4bb0-af89-4f0c2eb1406d",
+      "persona_uid": "dea1668e-81a0-45c5-8330-1caf4eda26bb",
+      "nombre": "Esterlino Luis Castillo Oro",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "66cf3ead-1cc5-467e-9f2a-f16748984dd5",
+      "persona_uid": "7965883f-b098-46c3-868d-20a879d78621",
+      "nombre": "Felix Aguirre Martinez",
+      "antes": null,
+      "nuevo": "Secretario de Defensa"
+    },
+    {
+      "id": "337a688e-6fe8-42a3-9f83-96f1ff8dbde8",
+      "persona_uid": "b1a5c066-c150-416b-a0a7-81cca346412a",
+      "nombre": "Felix E. Pingo Bayona",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "7e9f8c68-e85b-438d-afc8-becfc8d41b1c",
+      "persona_uid": "cd1c37f6-1d3e-47cb-9f95-07778032fd22",
+      "nombre": "Fernando Elias paredes",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "7b287402-44a7-485b-9bd3-f2f8930ae1f5",
+      "persona_uid": "0d146e76-2995-4f25-9a39-90783370e560",
+      "nombre": "Fernando Vilchéz Gómez",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "84605104-d8e6-4bda-bad5-c07ccbf14b36",
+      "persona_uid": "ab18c168-05b8-4653-bab4-4b8267e8b5f1",
+      "nombre": "Fidel Periche Martínez",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "a0e711b4-d4ea-4578-8af9-60140f4f477f",
+      "persona_uid": "a8e69b16-5347-43f8-b2f2-00c1585076a5",
+      "nombre": "Fiorella Angélica Herrera Salas",
+      "antes": null,
+      "nuevo": "Bióloga marina y activista ecologista peruana"
+    },
+    {
+      "id": "d54a6dd3-2386-497d-b6f7-c1c0bad68eb3",
+      "persona_uid": "e170b769-9d8b-4dbc-9616-f3cd5a145721",
+      "nombre": "Francisco Salvador Ticlihuanca",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "3af34ae5-99ca-46c3-bdd4-ff9d73f71c61",
+      "persona_uid": "485a1f34-851a-40a3-b9f6-2376c63771a9",
+      "nombre": "Frank Valiente Ortega",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "e34b5138-d75c-4d20-8185-e691d40ed083",
+      "persona_uid": "1c48627c-a7fe-4f4e-ac12-b4402813b134",
+      "nombre": "Franklyn Gonzales Olivos",
+      "antes": null,
+      "nuevo": "SECRETARIO GENERAL"
+    },
+    {
+      "id": "b902f84b-52f5-4c25-a608-5719a1666992",
+      "persona_uid": "14eaa0a5-9dcb-466a-9df9-704bcccf10e9",
+      "nombre": "Fredy O. Cornejo J.",
+      "antes": null,
+      "nuevo": "Armador"
+    },
+    {
+      "id": "4fe2defd-f0e4-4880-b819-2ff5b152f8b5",
+      "persona_uid": "dc026098-5023-4eef-9583-4f6018f73b2d",
+      "nombre": "Félix Maza Fiestas",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "982c9535-03e0-41d0-a9b7-fc32ea0e3701",
+      "persona_uid": "e92636e7-e7c2-43f0-9f10-7a89fbc3db7f",
+      "nombre": "Félix Navarre Martínez",
+      "antes": null,
+      "nuevo": "Dirigente"
+    },
+    {
+      "id": "f02d891e-62c7-41ed-a466-c4747600913c",
+      "persona_uid": "654cf2e3-7411-40bc-9376-5c48097b48bd",
+      "nombre": "Félix Noguera Martínez",
+      "antes": null,
+      "nuevo": "Sec. Defensa de Asoc. Pescadores"
+    },
+    {
+      "id": "cbceb615-c131-4608-8bb8-5903194d77b1",
+      "persona_uid": "651bc8d9-c36b-4f17-a8f5-faef7dfed14e",
+      "nombre": "Genaro Huamanchumo Bernal",
+      "antes": null,
+      "nuevo": "Coordinador"
+    },
+    {
+      "id": "271ac3ac-0e54-40d1-8667-f9a7c429c35b",
+      "persona_uid": "3e6aaa91-a280-42cb-875c-f546f135f45b",
+      "nombre": "Genaro Villanueva Cuya",
+      "antes": null,
+      "nuevo": "Coordinador"
+    },
+    {
+      "id": "e4354592-1db0-4a19-88c3-d1da9c83bf21",
+      "persona_uid": "ae333047-541e-40d7-92cd-ef554727bea7",
+      "nombre": "Geovana Vilca Flores",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "fe7a874b-10d0-4b1f-b4a4-018cf2c57fdf",
+      "persona_uid": "7262d50e-98c9-429c-b67c-e38b2c17ba4d",
+      "nombre": "German Ruiz Morquencho",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "ade823b5-4ee5-4155-8780-2aaacb559943",
+      "persona_uid": "758db452-d25c-4dc0-946a-91c8edf155ab",
+      "nombre": "Gloria Soto Apolaya",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "ed34117c-66c6-4019-bcaa-9f5281610008",
+      "persona_uid": "e6f9b784-c557-4560-91f7-d53310b9bd3c",
+      "nombre": "Guillermo Abrego Joaquina",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "a6711e87-6333-4273-8f64-9fd422ccbff0",
+      "persona_uid": "2607f6a9-cf2a-454e-837d-b4293839455d",
+      "nombre": "Guillermo Dimas Ramos Pérez",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "cc277d99-4537-4928-85a9-8362be0a653f",
+      "persona_uid": "82acfb27-3a04-4579-a438-3bd520e221c1",
+      "nombre": "Guillermo Torres Díaz",
+      "antes": null,
+      "nuevo": "Dirigente"
+    },
+    {
+      "id": "97d01fd2-872d-463c-82a8-fc7080ec505b",
+      "persona_uid": "ba39625f-f813-4cd9-a2a5-a18d475e8c6d",
+      "nombre": "Henry Juárez Ruiz",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "8f43a9ba-bffe-4fa3-98fa-895de7dba8e9",
+      "persona_uid": "39926229-df43-442b-892b-540b3b61a35d",
+      "nombre": "Hilton Gregorio Guerrero Bonifacio",
+      "antes": null,
+      "nuevo": "Secretario General"
+    },
+    {
+      "id": "c93b1d77-c402-4dd7-899e-ee2af4bccc0b",
+      "persona_uid": "e01b754d-9d91-47e9-b4dc-2e33e34eb0f9",
+      "nombre": "Hugo Roque Chana",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "7a8811d8-bd2c-405a-98ad-1ed0f4600655",
+      "persona_uid": "7ec7ec61-2368-4769-9be9-793426424f7b",
+      "nombre": "Héctor Tume Periche",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "a63e0b33-af40-47b9-be87-ea0d0e42ee68",
+      "persona_uid": "277ee35b-c74e-47e2-975a-d1ddef0a1e36",
+      "nombre": "Ismael Orozco Cornejo",
+      "antes": null,
+      "nuevo": "Secretario"
+    },
+    {
+      "id": "ad3e8efb-fd9f-4126-a4b9-865263f2ccf3",
+      "persona_uid": "76110403-6bac-45e4-9483-df36a95c8da3",
+      "nombre": "Jaime Castillo Neyra",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "34de5f46-c030-455b-812d-b0d6d513b9d0",
+      "persona_uid": "a68bd3c3-c65f-4c1c-952f-2a48d12a14b4",
+      "nombre": "Jaime Chunga Querevalú",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "a7dc6408-88ec-4373-9302-20f73221386b",
+      "persona_uid": "6458dc2f-56ad-4b72-98fd-881f1bc426d2",
+      "nombre": "Jaime Siesquen Llontop",
+      "antes": null,
+      "nuevo": "Jefe de Planta"
+    },
+    {
+      "id": "4c15c41b-c746-4b18-9e01-9d8500b9db27",
+      "persona_uid": "40c4ad42-5002-4cc2-b4cd-c4d4b00ce617",
+      "nombre": "Javier Eca Panta",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "7682ad5f-bd92-4633-a0c9-31ffe1b14bec",
+      "persona_uid": "9f63d29f-5c94-4895-ab46-c268475504fa",
+      "nombre": "Javier Eca Querevalú",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "39c3f479-9052-4b11-a085-f71ec0094d1d",
+      "persona_uid": "d5dea9d7-94dd-4472-9a5b-49b4a854c378",
+      "nombre": "Jenaro Mogolloncho",
+      "antes": null,
+      "nuevo": "Coordinador"
+    },
+    {
+      "id": "2000f3b5-b6c9-4301-b5df-75ef17352a5c",
+      "persona_uid": "ec7229f3-e60f-4073-9f24-aee4fc419431",
+      "nombre": "Jenifer Oncic Huamanchumo",
+      "antes": null,
+      "nuevo": "Directivo Armador"
+    },
+    {
+      "id": "e4031b2a-4807-4e5c-b65c-bb6a7c4d81d4",
+      "persona_uid": "fbbc8f53-54ff-4c69-bff4-462f537de330",
+      "nombre": "Jenny Pizarro Velarde",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "a9ec2e2a-39fe-41b3-ac92-ff9c290a7901",
+      "persona_uid": "2f77d2c0-3bae-4f77-9523-6a34691aa648",
+      "nombre": "Jessica Rodríguez López",
+      "antes": null,
+      "nuevo": "Manipuleo"
+    },
+    {
+      "id": "e048ff33-5d85-4786-a41d-2aff062510f6",
+      "persona_uid": "76acdd5d-9502-41fd-ad07-c94cbe02a983",
+      "nombre": "Jesús Benites Benites",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "873081eb-0cce-4460-b56c-119167fbf08f",
+      "persona_uid": "f40c1f95-3907-4c93-a826-ac592ae8a86c",
+      "nombre": "Jesús E. Chuye More",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "c74bc11c-32ef-48ad-8d0d-3d4be7606397",
+      "persona_uid": "73875fe2-566f-49d0-a841-e6d5b375e077",
+      "nombre": "Jesús Morales Morenales",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "74276d6b-14b0-4ebf-b666-389c7c7d1ccc",
+      "persona_uid": "99f0a31e-1a97-49ba-9b51-7583800fda68",
+      "nombre": "Jesús Querevalú",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "14cec056-4bde-4d07-86d6-03307938e076",
+      "persona_uid": "63dd8c60-bbfb-4e72-b3aa-1bec3d523851",
+      "nombre": "Jesús Quesquen Periche",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "adee8163-bee1-48e0-9bed-0c6ee7367728",
+      "persona_uid": "838a0073-e6bd-4539-b606-5f86e3073f3e",
+      "nombre": "Jesús Yarleque Pingo",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "d6272951-8872-472b-b2af-c61bc539cb1d",
+      "persona_uid": "9f9b71a9-935a-4e92-9098-80c65fd218ec",
+      "nombre": "Joel Esaul Palma Leyton",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "0c659e73-bd86-40fa-8aba-023014756c55",
+      "persona_uid": "b7b272a8-f63c-41a9-b2f7-16032ab964b9",
+      "nombre": "Johan Morales Pingo",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "c2298d60-b17e-49a1-bc48-b4c2e61bd67a",
+      "persona_uid": "4e608803-47fd-452f-8310-e48f376df324",
+      "nombre": "Jorge Jacinto Galán",
+      "antes": null,
+      "nuevo": "Vice Presidente"
+    },
+    {
+      "id": "584c6af5-00a6-4690-9046-fcfe735eaaf4",
+      "persona_uid": "ff109066-acf3-432f-80ea-343f748c3fb9",
+      "nombre": "Jorge L. Benites M.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "18c2d5b4-8004-4b07-b223-d1156995c528",
+      "persona_uid": "ba1cb1d4-d529-457a-b0aa-b540b97633b3",
+      "nombre": "Jose Luis Alvarez Saba",
+      "antes": null,
+      "nuevo": "Secretario"
+    },
+    {
+      "id": "23e95140-01ce-41fd-96df-b1d641184399",
+      "persona_uid": "1b2b7cc7-db63-4fb2-bc89-b77ec22de462",
+      "nombre": "Jose Sixto panta Ramirez",
+      "antes": null,
+      "nuevo": "presidente"
+    },
+    {
+      "id": "17aafbb1-916d-4995-af5f-ea4c4232ee80",
+      "persona_uid": "76dc5934-926a-48fb-a3ea-da06588bfff3",
+      "nombre": "Joshua Lara",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "a2b7dca9-b014-4770-b49f-ca1da665ac38",
+      "persona_uid": "a8ed7add-57c2-4187-a692-cdc54d62001d",
+      "nombre": "José Enrique Rodríguez Díaz",
+      "antes": null,
+      "nuevo": "Presid. Gral. Nac. FIUPAP"
+    },
+    {
+      "id": "36d55add-a6fa-46d4-8abe-0097f28d7574",
+      "persona_uid": "9e73ab50-8b75-4a09-af9a-82e31d2b4fc2",
+      "nombre": "José G. Panta Bolo",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "9876bfd0-73a6-40fa-a660-c8790f530b27",
+      "persona_uid": "c6e6148e-77eb-43d0-892e-b3bd5d4f9f83",
+      "nombre": "José Julio Alarcón Vilchez",
+      "antes": null,
+      "nuevo": "Asociado"
+    },
+    {
+      "id": "6b3aa0f4-ba2d-4039-b6ac-9bd8a47fd789",
+      "persona_uid": "4533a692-e14c-4b4a-aa11-9732dbcb92e9",
+      "nombre": "José Manuel Quispe Mayhuire",
+      "antes": null,
+      "nuevo": "Secretario de economía"
+    },
+    {
+      "id": "a7788645-d71f-4fdf-a6e5-72f05dae1c8f",
+      "persona_uid": "04ab2775-1e00-4ad3-90f4-1dd834306efe",
+      "nombre": "José Martín Prieto Muñoz",
+      "antes": null,
+      "nuevo": "Secretario General"
+    },
+    {
+      "id": "fa19f18c-3cc5-4ac1-935b-4502b99f9dbd",
+      "persona_uid": "ae66fa2d-f731-4c06-836f-106d59658ec5",
+      "nombre": "José Pazos Zavaleta",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "2b4b48e3-dc44-4f03-9062-ea7c788ddae4",
+      "persona_uid": "63ddcfc5-33bd-4745-836a-451d50447242",
+      "nombre": "José Rodríguez Palacios",
+      "antes": null,
+      "nuevo": "Armador"
+    },
+    {
+      "id": "f579c560-82fa-431d-b21e-a77ef5629eb9",
+      "persona_uid": "14fcb8ca-737c-45c1-9d63-0b3ea995f835",
+      "nombre": "José Sixto Panta Ramírez",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "8c43a39e-d7e3-4fb7-a42a-2256ffedf248",
+      "persona_uid": "0bcf5fa1-20fb-4c4b-8067-32a3584d1387",
+      "nombre": "Juan Aparcana",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "dba131bf-6342-4741-93f4-5003d505a068",
+      "persona_uid": "f6204944-51d3-4e6e-b715-08913159cd4d",
+      "nombre": "Juan Carlos Espinoza Medina",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "509ad86e-6dd1-4648-8c47-f7ea211fba7d",
+      "persona_uid": "3f604cc8-7aa2-4714-8d47-63227d353136",
+      "nombre": "Juan Cherre Nunura",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "0f30561a-a04f-4f87-94fe-4bd883cf5678",
+      "persona_uid": "986eb016-a5cb-4187-b5f2-2b6d53808de9",
+      "nombre": "Juan Felix Vite Fiestas",
+      "antes": null,
+      "nuevo": "Dirigente"
+    },
+    {
+      "id": "a5189aae-b2fb-4159-99bc-0ae5151e6177",
+      "persona_uid": "bd3f9d33-0c6e-4609-8093-22725a12a84e",
+      "nombre": "Juan Francisco Morán Curay",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "a666d79f-5f4d-4496-a98c-767149d0d757",
+      "persona_uid": "9557be64-c5ea-4345-90f4-9cb6ebf26f3c",
+      "nombre": "Juan León Mogollón",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "50305620-1bea-41b2-b662-41e8b61f1ccf",
+      "persona_uid": "2f3fdbee-33be-485c-8b7f-77c1effb6753",
+      "nombre": "Juan Manuel Paico Arzola",
+      "antes": null,
+      "nuevo": "Fiscal"
+    },
+    {
+      "id": "4c6c57ca-b7e6-49c5-92be-f18c7de65f6e",
+      "persona_uid": "5dcc04fa-79eb-40c2-95f5-9c9aadd95295",
+      "nombre": "Juan Miguel Cervantes Nolasco",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "81b911f8-8564-422c-a87f-f8009738edfa",
+      "persona_uid": "e137a6d4-60d3-4f48-8cb7-3da3c8de208c",
+      "nombre": "Juan Moina",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "89bf9375-6a07-4f9c-88ca-aca299789329",
+      "persona_uid": "d3daca37-6985-42a3-ac4b-f287c101aefe",
+      "nombre": "Juan R. Quispe Huamaní",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "7b1d31cb-19ac-4486-8ce0-cb374114b805",
+      "persona_uid": "0ab23046-b23d-4a89-9af0-9beafffb017c",
+      "nombre": "Juan Yto Querevalú",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "590e988b-f443-4235-92e8-0213a5b29638",
+      "persona_uid": "013ae705-0584-4bc4-ba39-d7c26569bf0c",
+      "nombre": "Julio Chumacero",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "6b59aa8d-c63e-4d3d-a5ba-67244f5d9770",
+      "persona_uid": "6f542282-b0e6-49c6-bd94-a7244495b6a4",
+      "nombre": "Julio Chuye Pazos",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "ef51c3e7-452b-462e-bdfe-1237608f367e",
+      "persona_uid": "d4821ffb-6340-4afc-8543-38b2c8ea8345",
+      "nombre": "Julio De La Cruz Fernández",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "b51ee73e-8490-4bf7-97bd-87aca158adfd",
+      "persona_uid": "f06d6ca4-491c-4a47-84e1-f52f39c24a5b",
+      "nombre": "Julio Jesús Chollolosa Angulo",
+      "antes": null,
+      "nuevo": "Socio"
+    },
+    {
+      "id": "f205e6af-45af-4de1-abf1-2848e40ca764",
+      "persona_uid": "84299204-db12-4186-a5bd-4246915af81c",
+      "nombre": "Leonardo Reyes Anaya",
+      "antes": null,
+      "nuevo": "S. Defensor"
+    },
+    {
+      "id": "f89ca392-fd94-4e08-817d-7b61b8176c3a",
+      "persona_uid": "afe83c5a-ae2c-46c0-b3b1-0200fd7f0e49",
+      "nombre": "Lester Calderón Querevalú",
+      "antes": null,
+      "nuevo": "Armador"
+    },
+    {
+      "id": "7d7c0e1c-a93c-48be-afb5-b291762c9a85",
+      "persona_uid": "776dff36-7a02-45bb-a71c-e70abbe3321a",
+      "nombre": "Liliana Sumari Huamani",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "61311576-6364-457d-93f3-f634eca42691",
+      "persona_uid": "adad0530-c636-4f69-971d-5f7716d1bd40",
+      "nombre": "Lorenzo Macedonio Vásquez Contreras",
+      "antes": null,
+      "nuevo": "Secretario General"
+    },
+    {
+      "id": "b5211ed3-0e00-4b21-a4b3-0345489b3eeb",
+      "persona_uid": "17679f97-0e44-45d3-8b37-2ea7d27a2212",
+      "nombre": "Luis Alfredo Iglesias Figueroa",
+      "antes": null,
+      "nuevo": "Gerente General"
+    },
+    {
+      "id": "ba3c247b-31de-4d48-809b-52e6f86975b6",
+      "persona_uid": "a78a8973-5011-4eda-813b-f68aada66068",
+      "nombre": "Luis Andino Ussia",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "2d75f515-a341-44d5-a3db-2154f13d9210",
+      "persona_uid": "e107d3ba-7534-41ef-bd03-5fa6611e0bdf",
+      "nombre": "Luis Díaz",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "83792045-558a-4eb1-ad18-8b77976561a0",
+      "persona_uid": "b615951e-ee01-46e0-bc01-84017b5cffcf",
+      "nombre": "Luis H. Benites B.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "ab4be005-2a73-4c26-b104-4a61da72e414",
+      "persona_uid": "a7296363-0373-46da-85df-e38f308dd2e2",
+      "nombre": "Luis Morales Eche",
+      "antes": null,
+      "nuevo": "Secretario"
+    },
+    {
+      "id": "670e5ce2-1dc0-4991-bc4e-c9a9ff01268c",
+      "persona_uid": "6b05936b-562a-4533-85dd-f3b3936e48f3",
+      "nombre": "Luis Suclupe",
+      "antes": null,
+      "nuevo": "presidente"
+    },
+    {
+      "id": "61dcb3e5-1246-4936-910f-254f099844ab",
+      "persona_uid": "80acd579-79c2-43a8-addb-3f8bfede24ff",
+      "nombre": "Luisa Andino Urria",
+      "antes": null,
+      "nuevo": "Representante Nor."
+    },
+    {
+      "id": "1db3bbfb-b5c2-4ad7-a960-286b9ba05e86",
+      "persona_uid": "cb923769-e3b5-46d2-ae15-26b0387f2d2d",
+      "nombre": "Luisa Olivares Salazar",
+      "antes": null,
+      "nuevo": "Manipuleo"
+    },
+    {
+      "id": "10675a2e-3632-44c3-8ff6-9262eba5681e",
+      "persona_uid": "71305b62-f899-4529-9d60-51ba7b074787",
+      "nombre": "Lynber Wilber Layme",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "1e6ae807-0ee6-457d-a9a8-f854d6052050",
+      "persona_uid": "c262c2ba-7624-4ce9-ade9-63df9bb9cf09",
+      "nombre": "Magaly Paredes Jurado",
+      "antes": null,
+      "nuevo": "Esposa de Pescador"
+    },
+    {
+      "id": "922c03ea-2536-4bb7-87ea-98982fb11c18",
+      "persona_uid": "6883a66a-181a-41ca-b8b2-21c848377fe4",
+      "nombre": "Manuel Alberto Barrientos Valenzuela",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "f6071c83-0ab1-4a34-84e7-a5f98d7331e3",
+      "persona_uid": "c5f5869b-fd09-453b-b2a6-c0f387ed825c",
+      "nombre": "Manuel Barrientos Valenzuela",
+      "antes": null,
+      "nuevo": "ASPADSMA"
+    },
+    {
+      "id": "74ea8387-d116-4432-8607-1f5ea64cbc20",
+      "persona_uid": "f1064af0-e6d1-41d3-9811-a085fb3f6604",
+      "nombre": "Manuel Berriento V.",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "7ff5dd6e-73a3-418e-a00b-c0b4a1f8b71f",
+      "persona_uid": "a3228459-194a-4776-8ef7-694025237678",
+      "nombre": "Manuel Dollaluqui",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "1c283b28-a43f-4e5e-b0a6-067de9b52e4a",
+      "persona_uid": "ab3652b6-f03e-41d5-b077-20637793b72b",
+      "nombre": "Manuel Leonidas Benites Ch.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "0762fec6-70b3-4db1-9fe0-947b3c697154",
+      "persona_uid": "a2fa0e78-77c5-4ea8-b83e-3a9659862e60",
+      "nombre": "Manuel P. Querevalú Tume",
+      "antes": null,
+      "nuevo": "Eg. Téc."
+    },
+    {
+      "id": "3f5d6691-b60c-49bc-8b39-a0d381fa1dc6",
+      "persona_uid": "33aa25f9-e3d4-4f00-a851-b709a434df13",
+      "nombre": "Manuelocalista Carlos",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "68662951-ab6d-45b6-a982-c37e0ab75a5a",
+      "persona_uid": "18448d1b-f1ba-4e0c-bea0-52d1f6d6c673",
+      "nombre": "Marcelino Gonzales",
+      "antes": null,
+      "nuevo": "Ex-presidente"
+    },
+    {
+      "id": "b1d98483-e9b5-4f74-8c96-bc71527dc67c",
+      "persona_uid": "8ca6030f-d99f-4e62-98c3-032715268898",
+      "nombre": "Mariano Benites Morles",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "051acc0a-ffb2-404a-a2c9-289af50ad7f0",
+      "persona_uid": "d6111714-775a-42f4-bc50-2550645677f8",
+      "nombre": "Mario Reinoso Mamani",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "10a2e446-c119-484a-a11f-6ddb9e63592d",
+      "persona_uid": "c31ff7ce-3a3a-4758-93e3-9e6d66b30ae0",
+      "nombre": "Mario Vioduiero Olivos",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "ecd9dbc7-6769-42b6-87c0-45a5c54b1c06",
+      "persona_uid": "2f80549b-be9f-4e8c-9370-b27b2346bf57",
+      "nombre": "Martín Chulle G.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "cb3f2de2-2735-4658-a6bc-74a1e0f32eb9",
+      "persona_uid": "467102a9-4351-44a0-8da1-38fea49a02b3",
+      "nombre": "Martín Olivos Gonzales",
+      "antes": null,
+      "nuevo": "Dirigente Junta Vecinal"
+    },
+    {
+      "id": "38fe8b23-5f61-48b4-a52a-4a0e22de3d3f",
+      "persona_uid": "30668bda-fae3-4ccd-8591-d1892bdabf13",
+      "nombre": "Maruja Tinco Soto",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "8b9548ec-232b-47f2-9967-1f928219c7c5",
+      "persona_uid": "d8816200-b31e-4598-9f1f-e3df03685778",
+      "nombre": "María García Herrera",
+      "antes": null,
+      "nuevo": "Secretaria de Actas"
+    },
+    {
+      "id": "7864711c-dd78-43e3-afc4-d3ff977ba0ff",
+      "persona_uid": "ed721951-55a5-49b5-9c8f-6a915d027dce",
+      "nombre": "Maylin Flores Niña",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "02d79a27-0644-4b47-8722-51e59d07e68c",
+      "persona_uid": "fa484b99-799f-48da-946b-d0239f9f4fdc",
+      "nombre": "Merardo Vite Zeta",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "ea90fb6d-7265-4847-b818-9fc21916db6c",
+      "persona_uid": "b1979c25-0d8a-4862-a9d4-4be486bdb99f",
+      "nombre": "Mercedes Yovera",
+      "antes": null,
+      "nuevo": "Vicepresidenta"
+    },
+    {
+      "id": "e010a71c-c648-468a-8643-a6be80249989",
+      "persona_uid": "dfbba5c5-4ea5-4659-9d5c-8d1e10a5c020",
+      "nombre": "Miflin Flores Nina",
+      "antes": null,
+      "nuevo": "Armador"
+    },
+    {
+      "id": "694d9900-f4cc-4fad-aadc-25b5d4222984",
+      "persona_uid": "5c17464c-df0a-451b-89a5-79df37bf7af2",
+      "nombre": "Miguel Antonio Martínez Pintado",
+      "antes": null,
+      "nuevo": "Socio"
+    },
+    {
+      "id": "b3ab3727-c539-4e2b-afbe-e8fd537a7f7c",
+      "persona_uid": "5eaee01f-ed4b-4f2b-a2cd-e9d20aa66772",
+      "nombre": "Milton Estrada Moro",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "89d96235-ae12-401c-b6c5-b00ef237f6dd",
+      "persona_uid": "c3f6b5dd-4ffc-4b11-9bde-988ef1a8f17d",
+      "nombre": "Milwar Hubert Rodriguez Vasquez",
+      "antes": null,
+      "nuevo": "Secretario de organización"
+    },
+    {
+      "id": "a764869c-f62c-4225-8270-3f2701a4048c",
+      "persona_uid": "f8cf42f5-d754-4894-bc1c-0f3b25d626ae",
+      "nombre": "Missella Janeth Ramos Tinco",
+      "antes": null,
+      "nuevo": "Armador"
+    },
+    {
+      "id": "a596eb7a-a79c-4c20-8d39-158681d6dd95",
+      "persona_uid": "14c3aa8d-ee90-4e07-95a8-77b075e8e51f",
+      "nombre": "Nibrulio Olivo Tinco Soto",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "8f91fd5a-f56f-4663-afb3-2d5b07954462",
+      "persona_uid": "8d3fb34c-b5c8-4f7d-b111-be4d81200498",
+      "nombre": "Nikita Colonia Figueroa",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "3b93da03-7a22-4476-8c47-101fd9801f78",
+      "persona_uid": "eb358e81-afbd-44b1-b4d7-cbc51503fabf",
+      "nombre": "Nilia Apaza Soncco",
+      "antes": null,
+      "nuevo": "Asociación de Armadores de Pesca Artesanal del Sur"
+    },
+    {
+      "id": "6cf96a22-b425-48c5-9011-1c894571faf3",
+      "persona_uid": "257ba48e-67af-4403-b15e-94c56d10c0ba",
+      "nombre": "Néstor Sipion Bernal",
+      "antes": null,
+      "nuevo": "Presidente de Santa Rosa"
+    },
+    {
+      "id": "d9a42879-5888-4183-8ca4-6a2836441e06",
+      "persona_uid": "50ff0efc-6557-4dac-9f31-21d765a50535",
+      "nombre": "Néstor Sipion Bernal",
+      "antes": null,
+      "nuevo": "Coordinador"
+    },
+    {
+      "id": "68ac4c92-9898-4cea-a14c-cdda3e3b57c2",
+      "persona_uid": "7f0342b5-709a-45a2-9c24-6436a15e4156",
+      "nombre": "Néstor Sipion Bernal",
+      "antes": null,
+      "nuevo": "Coordinador"
+    },
+    {
+      "id": "2ca2d51d-121d-4766-82f2-60a15020312f",
+      "persona_uid": "b0fd885f-bb66-409a-b57c-46aa4f53fb36",
+      "nombre": "OSPAs de Tumbes",
+      "antes": null,
+      "nuevo": "Colectivo"
+    },
+    {
+      "id": "6b9c227b-6e78-4728-b17c-2920c6b82562",
+      "persona_uid": "d163f6a5-bb69-4289-880d-cc86bf95cba9",
+      "nombre": "Olinda Victoria Mamani Cutipa",
+      "antes": null,
+      "nuevo": "Vice Presidenta"
+    },
+    {
+      "id": "01459345-e972-4a04-939c-5e92cc85319a",
+      "persona_uid": "d9c5c782-6b8b-4a7a-a54b-ab54402f332e",
+      "nombre": "Omar Joel Jacinto Fiestas",
+      "antes": null,
+      "nuevo": "Comite Ténico"
+    },
+    {
+      "id": "7c8fe22c-c683-4cda-b1ff-26e2246f3fe6",
+      "persona_uid": "3ab04823-decc-4b34-a9eb-9dc16f8b7585",
+      "nombre": "Orlando Juvien Palacio Guevara",
+      "antes": null,
+      "nuevo": "Armador"
+    },
+    {
+      "id": "57cf6232-188b-47a3-989f-bc2113a2a70b",
+      "persona_uid": "ef9fec81-1e9b-48db-a266-29a50b6debc2",
+      "nombre": "Oscar Camisán Jiménez",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "48727acf-58cb-4dda-8973-2f98080229bf",
+      "persona_uid": "394f0a4a-908d-468b-8444-af364a75fd82",
+      "nombre": "Oscar Fernando Camasco Jimenez",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "28dc93dd-305f-4955-bcdc-c8831fd6f3e5",
+      "persona_uid": "8244a69d-688d-41eb-9c86-64c1b6c8f2e8",
+      "nombre": "Pablo Gaspar Vazueda",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "c2e80d55-c3ca-41c6-9024-2deeb4bcb68e",
+      "persona_uid": "1ede035d-f97c-4d2e-8cc3-2c96ecf8b1d2",
+      "nombre": "Pablo Querevalú Querevalú",
+      "antes": null,
+      "nuevo": "Armador"
+    },
+    {
+      "id": "f68142a5-3876-44ec-b4c9-aed08989788f",
+      "persona_uid": "a2cd257f-9925-4ee1-8828-6979a42e8ed7",
+      "nombre": "Paolo Gaspar Unzueta",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "a9892b5a-dadf-4c23-8982-0a31881eb893",
+      "persona_uid": "7d4fab79-41a0-474a-a56e-039770eb3a34",
+      "nombre": "Pedro Carrasco Sandoval",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "b54edc9d-efdf-4346-9dc8-de0615ae629a",
+      "persona_uid": "094731ca-5af7-483c-94d3-673aa03bbc6d",
+      "nombre": "Pedro Cisto Tuesta Figueroa",
+      "antes": null,
+      "nuevo": "Coordinador"
+    },
+    {
+      "id": "5a228e65-e07e-4355-b538-933352785c7c",
+      "persona_uid": "773de150-8fb4-4574-9fd6-7863eb1e1d9f",
+      "nombre": "Pedro Domínguez Pérez",
+      "antes": null,
+      "nuevo": "Gerente"
+    },
+    {
+      "id": "bee5255c-6dc9-4991-a78c-b86cc0e99c12",
+      "persona_uid": "cb97279d-5dd0-4a7a-adb3-ba961a9ae140",
+      "nombre": "Pedro Huamayalli Oliva",
+      "antes": null,
+      "nuevo": "Dirigente"
+    },
+    {
+      "id": "7d8cb4d9-523f-44f2-999a-6976e53eabc8",
+      "persona_uid": "bd91d33a-7054-4058-8031-ebb1ea68d39c",
+      "nombre": "Pedro José Laban Carmen",
+      "antes": null,
+      "nuevo": "Gerente"
+    },
+    {
+      "id": "b16ff60f-c64f-49da-beb5-cfad2f9b5b58",
+      "persona_uid": "58b64936-9f8f-41b2-8f19-3df3eadab072",
+      "nombre": "Pedro Justo Fuentes Moreno",
+      "antes": null,
+      "nuevo": "Coordinador"
+    },
+    {
+      "id": "e07dfdba-d2e3-45e2-83cb-b8ab9ffe31aa",
+      "persona_uid": "05b9af9b-9e56-4364-b767-34e6046f07d8",
+      "nombre": "Pedro Martín Cerón Borjas",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "da914ba7-3d4e-4349-833a-d0998601ce5c",
+      "persona_uid": "f8a544cf-f5e8-492e-a723-0523a45eae7c",
+      "nombre": "Pedro More Paiva",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "45874c02-e2ad-4c69-aed7-cc9454ffde0b",
+      "persona_uid": "6004ba86-c955-4c1d-bfa5-796148085417",
+      "nombre": "Pedro Román Lévano",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "188b83c4-24c3-404b-aaf7-8d183d484c99",
+      "persona_uid": "03043847-b441-4379-b306-738e08c8d758",
+      "nombre": "Pedro Tume Panta",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "b54377b5-c9d2-4a20-8c08-af791b9af307",
+      "persona_uid": "a9042296-41c9-43ad-8bb7-831252c4eef2",
+      "nombre": "Pedro Villafuerte B.",
+      "antes": null,
+      "nuevo": "Coordinador Asopep"
+    },
+    {
+      "id": "db34893b-d871-405a-9c26-0ce09d366f6f",
+      "persona_uid": "45ec2b44-0205-4790-991d-c311e6842389",
+      "nombre": "Percy Javier Chuye Pazos",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "9358b4a0-133a-434b-9ed7-79eec2617652",
+      "persona_uid": "92b55b7f-537f-47cf-a2f8-ab4a9626849c",
+      "nombre": "Quintiliana Marisol Guillen Taipe",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "9e56d865-de4e-4e3a-b549-756e6062a43c",
+      "persona_uid": "ffa50b4d-19bb-4e9b-9ecd-73efc4e8490a",
+      "nombre": "Rafael Paredes Solís",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "9ee9f4bd-bd1a-4232-9a7e-d7a8fd2fbff7",
+      "persona_uid": "5d78b5a4-7fad-41a8-9c2f-56e2604bd1e0",
+      "nombre": "Raul Querevalu Querevalu",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "801a69c9-86a0-475b-b3a8-f5c85c3d3e26",
+      "persona_uid": "bd48cd4c-e8f3-498e-8894-069291161faa",
+      "nombre": "Renato Arangena Cuenca",
+      "antes": null,
+      "nuevo": "Miembro"
+    },
+    {
+      "id": "be2ffbd6-033d-4fae-8e14-60ed36a516c9",
+      "persona_uid": "f5cebedf-f21f-4a00-b37f-d5f5df5ccd02",
+      "nombre": "Renato Changana Cavero",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "6d1ab46a-2388-4010-b5ae-cfdb913cca8c",
+      "persona_uid": "de5ac31a-3b1c-49a6-aa2c-e26b2cfdc8f9",
+      "nombre": "Renzo Arangena Cuenca",
+      "antes": null,
+      "nuevo": "Miembro"
+    },
+    {
+      "id": "51618891-b2bb-48fd-a2c1-a1f5cfe83213",
+      "persona_uid": "e88915ba-107f-450f-ae90-90d48ce55aff",
+      "nombre": "Ricardo Espinoza S.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "86de4a21-86ec-411d-ad9c-5156ec4e8258",
+      "persona_uid": "6fd1093a-9e4e-4bd8-b6a9-680341983acf",
+      "nombre": "Robert Zarate Chulle",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "2b333ceb-d207-4e50-8eb2-27b882e25b1a",
+      "persona_uid": "392b02cf-8ffc-4f1d-8cef-49f67944c2fb",
+      "nombre": "Roberto Chapilliquen Ruiz",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "bad23f39-76fe-4e8a-97da-d837c225539c",
+      "persona_uid": "7db575fc-68ea-447d-b367-a2ea858fe89b",
+      "nombre": "Roberto Olaya Araya",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "8f3a20f7-c00b-4fb4-9fe9-a40bd0299b36",
+      "persona_uid": "d3186446-24c3-47aa-b674-e4b5acdfdf41",
+      "nombre": "Roberto Tume Vite",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "c738375b-26d3-4e36-8676-7f6e1106265c",
+      "persona_uid": "bf2e7d58-5332-41bf-85de-5fbf28304ba5",
+      "nombre": "Rodolfo León Madrid",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "4403bc8d-ccd7-4691-a987-bfe92381e2ee",
+      "persona_uid": "77fa01b9-2360-49b1-b032-4ffdc3a4f438",
+      "nombre": "Roger Ruiz Eche",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "6be65bd7-85ea-46f3-ba8b-1e38d3c13b0b",
+      "persona_uid": "f290d343-49ff-4f83-a4fe-502fde2fa860",
+      "nombre": "Rolando Paiva Chulle",
+      "antes": null,
+      "nuevo": "Presidente de Gremio de El Ñuro"
+    },
+    {
+      "id": "f43d4262-efd4-4e6d-b218-3b67efdc4453",
+      "persona_uid": "63049e3b-3893-43b3-88b9-72b7032d5fed",
+      "nombre": "Roly Lucca Mamani",
+      "antes": null,
+      "nuevo": "Secretario AAPASUR"
+    },
+    {
+      "id": "42d70aa0-e733-4d9c-9c40-cbbd28932d54",
+      "persona_uid": "a56575db-ab09-4b6c-bb19-e3d7958ad491",
+      "nombre": "Roman Paiva Eche",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "0446bd20-065b-4356-bf32-542746d41122",
+      "persona_uid": "d0dde809-bd58-436c-b887-af651217ff76",
+      "nombre": "Ronald Cornejo Palmo",
+      "antes": null,
+      "nuevo": "Presidente de Dinámica"
+    },
+    {
+      "id": "fa4ddc42-3fff-4264-bbcb-5e5515e58639",
+      "persona_uid": "27141574-d986-4fd0-9984-6ef95b0d3dcd",
+      "nombre": "Ronald Paul Cornejo Palomino",
+      "antes": null,
+      "nuevo": "Coordinador"
+    },
+    {
+      "id": "21ae22d4-c652-4df5-bb98-bf085a064c2e",
+      "persona_uid": "c67fd97a-5261-448b-bf68-516dfde6c05e",
+      "nombre": "Rosa Elvira Ayala Munives",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "43e447c1-10ac-4ba9-914d-01531dc98162",
+      "persona_uid": "3fa12008-4e01-4e39-98f8-8956dac51e30",
+      "nombre": "Rosmery Franco Zapata",
+      "antes": null,
+      "nuevo": "Tesorera"
+    },
+    {
+      "id": "eabb4eb5-f9bc-4f62-b001-946c796f6977",
+      "persona_uid": "cb90ddad-66e8-414e-aa2d-572bc3ddb9a0",
+      "nombre": "Roxana Alanoca Apaza",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "da2d6664-0534-4971-9489-872db157b1c1",
+      "persona_uid": "3e51095d-0a62-4f46-b053-8ca8d4166361",
+      "nombre": "Rubén Chunga Chapa",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "c06a76f8-aa03-4751-acbb-8ff737596cc9",
+      "persona_uid": "81ac2041-61cf-4435-9dc2-109fac0e71a9",
+      "nombre": "Santiago Gonzales V.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "feb32951-1e10-4a34-8a13-2970d721e0d2",
+      "persona_uid": "6ae7e692-179f-44d1-b6f6-5e4e93612e32",
+      "nombre": "Santos Felipe Vite Puipanca",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "6d49ec25-288b-4f4e-a03d-8e7ca67aaa9b",
+      "persona_uid": "b87fdfbf-c86c-4b45-aa31-c958b621a2b9",
+      "nombre": "Santos Paiva Chulle",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "9eb38c7f-37d3-4e42-8602-ea0228963e23",
+      "persona_uid": "b86bc4f6-e92e-432d-abec-6a72a6c34d95",
+      "nombre": "Segundo Meza Jaramillo",
+      "antes": null,
+      "nuevo": "Secretario General"
+    },
+    {
+      "id": "33a393ce-21cd-4494-9d5e-b87b117bc710",
+      "persona_uid": "48c44909-bd10-40fa-80c6-a9d666e6ce4b",
+      "nombre": "Selena Silvana Mundini Llauca",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "6f7e53a3-24b8-4c6b-bb2c-e4d95a64b213",
+      "persona_uid": "0c0bf524-e0c8-475d-9852-4247c2d47f4b",
+      "nombre": "Sirena Nandia",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "38057eea-2386-4b3a-88af-a527175aa0ba",
+      "persona_uid": "80c9e3e9-614c-4938-b571-15a6ffae0bd3",
+      "nombre": "Sixto Peña Anaya",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "d55e7e7f-4dbe-43db-ba8e-d203e0617244",
+      "persona_uid": "df8c8d86-ffd9-44c1-8e62-bc2127b142b6",
+      "nombre": "Susana Liliana Saldaña Ramos",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "99da1bc4-dcc5-446b-bd0b-601b511033bc",
+      "persona_uid": "bc418b6f-6a93-4071-a48d-b1fdf979f4c5",
+      "nombre": "Taira García Moreno",
+      "antes": null,
+      "nuevo": "Secretaria ABPUSP"
+    },
+    {
+      "id": "47ccb8ad-6760-42c6-bea2-ec37dc2163ab",
+      "persona_uid": "73dfb1fb-492c-4d8f-9f48-f8c04d8f94ce",
+      "nombre": "Timoteo Querevalu Eca",
+      "antes": null,
+      "nuevo": "Coordinador"
+    },
+    {
+      "id": "76945443-3a77-4513-8530-e59ae1bc352e",
+      "persona_uid": "8d3ef5a4-5890-4104-bcf2-1874ce7698bf",
+      "nombre": "Torres García Aquiles",
+      "antes": null,
+      "nuevo": "Esposa de Pescador"
+    },
+    {
+      "id": "6786c804-d6c5-40b5-8fa5-bfc613f4ffe8",
+      "persona_uid": "ecd2103a-8a0a-4ad4-b5fa-1ec3593cfd8b",
+      "nombre": "Valeria Mezarina Avia",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "88260000-e46b-424c-a137-e98439313ca1",
+      "persona_uid": "d4b8c4ea-2503-4b72-a1a5-8fc4394e556b",
+      "nombre": "Valeria Mezarina Avia",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "2752225d-1470-4738-9f9c-b30a093e8ba6",
+      "persona_uid": "fc727d4f-bb45-401e-8abe-a442c64a6e5f",
+      "nombre": "Valerio Benites V.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "b8f5f403-bee4-4b1e-9de3-41fadad270a3",
+      "persona_uid": "d968c009-398c-46c3-97ce-761caadc12c8",
+      "nombre": "Veronica Alberca Estela",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "cbf3710a-fd9e-4eed-bacf-17c32a96612c",
+      "persona_uid": "6c0b67f5-4f07-490a-83e1-69fad041d89b",
+      "nombre": "Veronica Alberca Estela",
+      "antes": null,
+      "nuevo": "Representante"
+    },
+    {
+      "id": "f6e43d95-3c6c-46f7-8365-7cceed269c00",
+      "persona_uid": "0cd81576-6939-46ce-89bc-7ee5d7b6f993",
+      "nombre": "Verónica Uchuya Córdova",
+      "antes": null,
+      "nuevo": "Presidenta"
+    },
+    {
+      "id": "7e756dd9-b0f0-4cf4-92d0-50fca7f88e28",
+      "persona_uid": "6b0c0ebb-34e2-480e-8515-1b8020c1d4f7",
+      "nombre": "Victor German Orosco Nunton",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "b726fb46-9fe0-448e-b0ee-c85a5dfb02ee",
+      "persona_uid": "f2154177-d404-4012-9983-64f767f8190e",
+      "nombre": "Víctor Guerra León",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "1ef47f54-77b2-4387-a7a6-15e6f4404a71",
+      "persona_uid": "57fcd71c-406e-40c9-8870-2b9496fd6138",
+      "nombre": "Víctor Viera Sosa",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "4d20d8e9-081d-44a2-ac2c-2f8e5aebfa31",
+      "persona_uid": "3e12df3a-d580-4747-a23d-1c41cce50266",
+      "nombre": "Walter Sipion Huamanchumo",
+      "antes": null,
+      "nuevo": "Directivo"
+    },
+    {
+      "id": "b2d820c1-9179-4076-a544-4b7b432a80a2",
+      "persona_uid": "e1fa2f3c-3c36-45cc-af21-2e2426e1e511",
+      "nombre": "Walter Sipión Huamanchumo",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "7dde485c-f47a-4dd5-893a-4e510270eae8",
+      "persona_uid": "864b07dc-86e1-4771-a14a-0643bffd3764",
+      "nombre": "Wilber Isaac Tapia",
+      "antes": null,
+      "nuevo": "Vicepresidente"
+    },
+    {
+      "id": "354bf23f-9d1c-4fae-8ecb-6f2d6346b813",
+      "persona_uid": "937048a6-be56-44fb-80c0-840b294d8c36",
+      "nombre": "Wilber Layme Quispe",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "005ebadc-7f45-406c-b526-9c468d500f8b",
+      "persona_uid": "96c5faa5-c0ee-4ee3-b8a0-c6abb016ac9d",
+      "nombre": "Wilfran Chulle Ruiz",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "faa68e61-0d64-4a5b-86e8-af57da318a87",
+      "persona_uid": "9e0937de-a8de-4f22-9c7c-125f1103d935",
+      "nombre": "Wilfredo Florin Mena",
+      "antes": null,
+      "nuevo": "Vice presidente"
+    },
+    {
+      "id": "8da6e3b9-8b22-40b3-ae92-217029237a90",
+      "persona_uid": "f398898d-95db-46e1-a899-306d92b24b00",
+      "nombre": "Wilmer Guillermo Oxsa Capari",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "120f6972-c7ba-46a9-8374-cd79c8245318",
+      "persona_uid": "d06554fa-9e59-42d2-aa99-c57c20f13365",
+      "nombre": "Yimi A. Ramírez C.",
+      "antes": null,
+      "nuevo": "Pescador"
+    },
+    {
+      "id": "d5792c54-2e5e-4f37-8431-6fb736d4c8ed",
+      "persona_uid": "2b386183-7a3f-47e9-9147-b630c7162409",
+      "nombre": "Yvette Madueño",
+      "antes": null,
+      "nuevo": "Presidente"
+    },
+    {
+      "id": "bd61b6f0-a3f9-42f2-a03c-34fdcc2446aa",
+      "persona_uid": "51098fca-2d0b-4b34-8787-17a3a53a8324",
+      "nombre": "mercedes Lumbres Cunpa",
+      "antes": null,
+      "nuevo": "presidenta"
+    }
+  ]
+}

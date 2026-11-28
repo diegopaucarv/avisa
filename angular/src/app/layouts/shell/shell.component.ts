@@ -118,6 +118,30 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     oculto: true,
   },
   {
+    grupo: 'INTERVENCIÓN',
+    etiqueta: 'Actores',
+    ruta: '/directorio/personas',
+    icono: 'actores',
+  },
+  {
+    grupo: 'INTERVENCIÓN',
+    etiqueta: 'Organizaciones',
+    ruta: '/directorio/organizaciones',
+    icono: 'organizaciones',
+  },
+  {
+    grupo: 'INTERVENCIÓN',
+    etiqueta: 'Autoridades y agentes',
+    ruta: '/directorio/autoridades',
+    icono: 'instituciones',
+  },
+  {
+    grupo: 'INTERVENCIÓN',
+    etiqueta: 'Auditorios',
+    ruta: '/directorio/locales',
+    icono: 'mapa',
+  },
+  {
     grupo: 'SEGUIMIENTO',
     etiqueta: 'Compromisos',
     ruta: '/compromisos',
@@ -147,30 +171,6 @@ const ENLACES_NAV: readonly EnlaceNav[] = [
     etiqueta: 'Plantillas',
     ruta: '/exportaciones',
     icono: 'documentos',
-  },
-  {
-    grupo: 'DIRECTORIOS',
-    etiqueta: 'Actores',
-    ruta: '/directorio/personas',
-    icono: 'actores',
-  },
-  {
-    grupo: 'DIRECTORIOS',
-    etiqueta: 'Organizaciones',
-    ruta: '/directorio/organizaciones',
-    icono: 'organizaciones',
-  },
-  {
-    grupo: 'DIRECTORIOS',
-    etiqueta: 'Autoridades y agentes',
-    ruta: '/directorio/autoridades',
-    icono: 'instituciones',
-  },
-  {
-    grupo: 'DIRECTORIOS',
-    etiqueta: 'Auditorios',
-    ruta: '/directorio/locales',
-    icono: 'mapa',
   },
   {
     grupo: 'MI ESPACIO',

@@ -396,6 +396,12 @@ export type PiiLote = {
   datos: Map<string, PiiLoteActor>;
   /** Motivo por id cuando ese actor falló; el lote no se aborta por uno solo. */
   errores: Map<string, string>;
+  /**
+   * Filas cuya PII existía pero no se pudo descifrar (dato corrupto o ilegible).
+   * Esas filas sí llegan en `datos`, con `dni` y `telefono` en `null`, así que
+   * hay que separarlas de los actores que nunca registraron el dato.
+   */
+  noDescifrados: number;
 };
 
 /**
@@ -426,7 +432,30 @@ export function aPiiLote(bruto: unknown): PiiLote {
     if (typeof motivo === 'string' && motivo.trim()) errores.set(id, motivo.trim());
   }
 
-  return { datos, errores };
+  // Un conteo ausente, negativo o no numérico vale 0: la nota de la lista no
+  // debe inventar ilegibles que el servidor no reportó.
+  const crudoNoDescifrados = numero(registro, ['noDescifrados']);
+  const noDescifrados =
+    crudoNoDescifrados !== null && crudoNoDescifrados > 0 ? Math.trunc(crudoNoDescifrados) : 0;
+
+  return { datos, errores, noDescifrados };
+}
+
+/**
+ * Separa a los actores sin DNI/celular de los que tienen el dato ilegible.
+ *
+ * `sinPii` los cuenta a ambos, porque una fila ilegible también llega con los
+ * dos campos en `null`. Se restan los `noDescifrados` para no contarlos dos
+ * veces y se acota a `sinPii` por si el servidor informa de más de los que la
+ * lista contiene.
+ */
+export function desglosarSinPii(
+  sinPii: number,
+  noDescifrados: number,
+): { sinDato: number; ilegibles: number } {
+  const total = Math.max(0, Math.trunc(sinPii));
+  const ilegibles = Math.min(Math.max(0, Math.trunc(noDescifrados)), total);
+  return { sinDato: total - ilegibles, ilegibles };
 }
 
 /* ------------------------------------------------------------------ */
