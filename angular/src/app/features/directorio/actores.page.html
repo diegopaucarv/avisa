@@ -63,6 +63,12 @@
 
   <app-lista-asistencia />
 
+  <app-enviar-mensaje
+    contexto="Lista de actores"
+    [sobreLista]="true"
+    [semilla]="semillaMensaje()"
+  />
+
   @if (estado() === "error") {
   <div class="empty-state" role="alert">
     <strong>No se pudieron cargar las {{ sustantivo() }}</strong>

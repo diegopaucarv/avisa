@@ -404,3 +404,236 @@ export async function obtenerImagenDeReunion(
     contenido: fila.contenido,
   };
 }
+
+/** Participante de una reunión, sin datos personales: `tieneTelefono` es metadato. */
+export type ParticipanteReunion = {
+  actorId: string;
+  nombre: string;
+  cargo: string | null;
+  organizacion: string | null;
+  asistencia: boolean;
+  /** `telefono_cifrado is not null`: indica si hay contacto, nunca su valor. */
+  tieneTelefono: boolean;
+};
+
+/** Resumen con la marca de programación, que el listado no expone. */
+export type ReunionDetalle = ReunionResumen & { programada: boolean };
+
+export type ParticipantesReunionResultado = {
+  items: ParticipanteReunion[];
+  reunion: ReunionDetalle;
+  generatedAt: string;
+};
+
+type FilaReunionDetalle = {
+  id: string;
+  codigo: string | null;
+  titulo: string | null;
+  fecha: string;
+  lugar: string | null;
+  programada: boolean;
+  caso_codigo: string | null;
+  caso_nombre: string | null;
+  asistentes: string | number;
+};
+
+type FilaParticipante = {
+  actor_id: string;
+  nombre: string;
+  cargo: string | null;
+  organizacion: string | null;
+  asistencia: boolean;
+  tiene_telefono: boolean;
+};
+
+/**
+ * Participantes de una reunión con su metadato de contacto.
+ *
+ * El teléfono real NO se lee aquí: sólo se pregunta si existe
+ * (`telefono_cifrado is not null`), porque el descifrado tiene su propio
+ * endpoint auditado (`POST /api/v1/actors/pii`). Bajo RLS, los perfiles sin
+ * nivel de clasificación bastante ven el metadato en `false`.
+ */
+export async function listarParticipantesReunion(
+  client: PoolClient,
+  reunionId: string,
+): Promise<ParticipantesReunionResultado> {
+  if (!UUID_RE.test(reunionId)) {
+    throw new ApiError(
+      400,
+      "El identificador de la reunión no es válido.",
+      "REUNION_INVALIDA",
+    );
+  }
+
+  const reunion = await client.query<FilaReunionDetalle>(
+    `select
+        r.id::text as id,
+        r.codigo_reunion as codigo,
+        r.titulo,
+        to_char((r.fecha at time zone 'America/Lima')::date, 'YYYY-MM-DD') as fecha,
+        r.lugar,
+        r.programada,
+        c.codigo_caso as caso_codigo,
+        c.nombre_caso as caso_nombre,
+        (select count(*)::int
+           from core.reunion_participantes p
+          where p.reunion_id = r.id and p.asistio) as asistentes
+       from core.reuniones_dialogo r
+       left join core.casos c on c.id = r.caso_id
+      where r.id = $1::uuid`,
+    [reunionId],
+  );
+
+  const cabecera = reunion.rows[0];
+  if (!cabecera) {
+    throw new ApiError(
+      404,
+      "La reunión no existe o no es accesible con la sesión actual.",
+      "REUNION_NO_ENCONTRADA",
+    );
+  }
+
+  const { rows } = await client.query<FilaParticipante>(
+    `select
+        p.actor_uid::text as actor_id,
+        a.nombre_actual as nombre,
+        coalesce(nullif(btrim(p.cargo), ''), nullif(btrim(a.cargo_actual), '')) as cargo,
+        coalesce(inst.nombre_actual, org.nombre_actual) as organizacion,
+        p.asistio as asistencia,
+        exists (
+          select 1 from core.actor_datos_personales d
+           where d.actor_uid = p.actor_uid
+             and d.telefono_cifrado is not null
+        ) as tiene_telefono
+       from core.reunion_participantes p
+       join core.actores a on a.actor_uid = p.actor_uid
+       left join core.actores inst on inst.actor_uid = p.institucion_uid
+       left join lateral (
+         select m.organizacion_uid
+           from core.actor_membresia m
+          where m.persona_uid = p.actor_uid
+            and (m.valid_from is null or m.valid_from <= current_date)
+            and (m.valid_to is null or m.valid_to > current_date)
+          order by m.valid_from desc nulls last
+          limit 1
+       ) memb on true
+       left join core.actores org on org.actor_uid = memb.organizacion_uid
+      where p.reunion_id = $1::uuid
+      order by a.nombre_actual`,
+    [reunionId],
+  );
+
+  return {
+    items: rows.map((fila) => ({
+      actorId: fila.actor_id,
+      nombre: fila.nombre,
+      cargo: fila.cargo,
+      organizacion: fila.organizacion,
+      asistencia: fila.asistencia,
+      tieneTelefono: fila.tiene_telefono,
+    })),
+    reunion: {
+      id: cabecera.id,
+      codigo: cabecera.codigo,
+      titulo: cabecera.titulo,
+      fecha: cabecera.fecha,
+      lugar: cabecera.lugar,
+      casoCodigo: cabecera.caso_codigo,
+      casoNombre: cabecera.caso_nombre,
+      asistentes: Number(cabecera.asistentes ?? 0),
+      programada: cabecera.programada,
+    },
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * «Iniciar la reunión ahora».
+ *
+ * `core.reuniones_dialogo` no tiene columna de estado; el par que sí existe es
+ * `fecha` + `programada`. Iniciar la reunión es moverla al instante actual y
+ * marcarla como no programada (`programada = false`). No se inventa un estado
+ * que la tabla no guarda.
+ */
+export async function iniciarReunion(
+  client: PoolClient,
+  scope: DbSession,
+  reunionId: string,
+): Promise<ReunionDetalle> {
+  if (!puedeEditar(scope.rolCodigo)) {
+    throw new ApiError(
+      403,
+      "Sin permiso para iniciar la reunión.",
+      "SIN_PERMISO",
+    );
+  }
+  if (!UUID_RE.test(reunionId)) {
+    throw new ApiError(
+      400,
+      "El identificador de la reunión no es válido.",
+      "REUNION_INVALIDA",
+    );
+  }
+
+  const { rows } = await client.query<FilaReunionDetalle>(
+    `with actualizada as (
+       update core.reuniones_dialogo
+          set fecha = now(),
+              programada = false,
+              updated_at = now()
+        where id = $1::uuid
+       returning id, codigo_reunion, titulo, fecha, lugar, programada, caso_id
+     )
+     select
+         a.id::text as id,
+         a.codigo_reunion as codigo,
+         a.titulo,
+         to_char((a.fecha at time zone 'America/Lima')::date, 'YYYY-MM-DD') as fecha,
+         a.lugar,
+         a.programada,
+         c.codigo_caso as caso_codigo,
+         c.nombre_caso as caso_nombre,
+         (select count(*)::int
+            from core.reunion_participantes p
+           where p.reunion_id = a.id and p.asistio) as asistentes
+       from actualizada a
+       left join core.casos c on c.id = a.caso_id`,
+    [reunionId],
+  );
+
+  const fila = rows[0];
+  if (!fila) {
+    // Sin filas puede ser «no existe» o una RLS que niega la escritura. Se
+    // distingue preguntando por la existencia: prometer un 404 cuando el
+    // registro existe pero está protegido confunde a quien lo intenta.
+    const existe = await client.query(
+      `select 1 from core.reuniones_dialogo where id = $1::uuid`,
+      [reunionId],
+    );
+    if (existe.rowCount === 0) {
+      throw new ApiError(
+        404,
+        "La reunión no existe o no es accesible con la sesión actual.",
+        "REUNION_NO_ENCONTRADA",
+      );
+    }
+    throw new ApiError(
+      403,
+      "Sin permiso para modificar esta reunión.",
+      "SIN_PERMISO",
+    );
+  }
+
+  return {
+    id: fila.id,
+    codigo: fila.codigo,
+    titulo: fila.titulo,
+    fecha: fila.fecha,
+    lugar: fila.lugar,
+    casoCodigo: fila.caso_codigo,
+    casoNombre: fila.caso_nombre,
+    asistentes: Number(fila.asistentes ?? 0),
+    programada: fila.programada,
+  };
+}

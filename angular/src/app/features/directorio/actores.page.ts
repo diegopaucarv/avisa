@@ -56,6 +56,8 @@ import {
 } from './directorio.mapeo';
 import { ListaAsistenciaComponent } from './lista-asistencia.component';
 import { ListaAsistenciaService } from './lista-asistencia.service';
+import { EnviarMensajeComponent } from './enviar-mensaje.component';
+import type { DestinatarioMensaje } from '../../shared/ui/mensaje-panel.component';
 import { HttpClient } from '@angular/common/http';
 
 type FiltrosActores = {
@@ -112,6 +114,7 @@ const SIN_MEMBRESIAS: MembresiaActor[] = [];
     AnularPanelComponent,
     BarraSeleccionComponent,
     ListaAsistenciaComponent,
+    EnviarMensajeComponent,
     ThOrdenDirective,
   ],
   templateUrl: './actores.page.html',
@@ -398,6 +401,15 @@ export class ActoresPage {
   /** Ids de personas en la lista, para la barra de selección y la exportación. */
   readonly idsPersonasEnLista = computed(() =>
     this.personasEnLista().map((entrada) => entrada.actor.id),
+  );
+
+  /** Destinatarios iniciales del FAB «Enviar mensaje»: las personas de la lista. */
+  readonly semillaMensaje = computed<DestinatarioMensaje[]>(() =>
+    this.personasEnLista().map((entrada) => ({
+      actorId: entrada.actor.id,
+      nombre: entrada.actor.nombre,
+      correo: entrada.actor.email ?? null,
+    })),
   );
 
   /** Estado de la casilla de cabecera: toda la página visible está en la lista. */

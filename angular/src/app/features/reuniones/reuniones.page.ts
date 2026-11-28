@@ -1,367 +1,484 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { urlApi } from '../../core/config/entorno';
+import { diaIso, hoyIso } from '../../core/fecha/zona-horaria';
+import {
+  TAMANO_PAGINA,
+  normalizarColeccion,
+  paramsDePagina,
+  urlConParametros,
+  type Coleccion,
+} from '../../core/http/coleccion';
+import { consulta } from '../../core/http/consulta';
 import { aErrorApi } from '../../core/http/errores';
+import { formatearFecha } from '../../shared/formato-fecha';
+import { IconoComponent } from '../../shared/ui/icono.component';
+import {
+  MensajePanelComponent,
+  type DestinatarioMensaje,
+} from '../../shared/ui/mensaje-panel.component';
+import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 
-type Canal = 'whatsapp' | 'correo' | 'institucional';
+/** Término mínimo para buscar a quién añadir a la reunión. */
+const MIN_BUSQUEDA = 2;
+/** Tope de candidatos que se listan al buscar participantes. */
+const TAMANO_BUSQUEDA = 8;
+
+type ReunionFila = {
+  id: string;
+  codigo: string | null;
+  titulo: string | null;
+  /** `YYYY-MM-DD` en horario de Lima (lo emite el endpoint de resultados). */
+  fecha: string;
+  lugar: string | null;
+  casoCodigo: string | null;
+  casoNombre: string | null;
+  asistentes: number;
+};
+
+/**
+ * `programada` llega en el detalle de participantes y en el PATCH, no en el
+ * listado. Mientras se carga es `null` para no ofrecer «Iniciar» a ciegas.
+ */
+type ReunionDetalleVista = ReunionFila & { programada: boolean | null };
+
+type ParticipanteReunionFila = {
+  actorId: string;
+  nombre: string;
+  cargo: string | null;
+  organizacion: string | null;
+  asistencia: boolean;
+  /** Metadato (`telefono_cifrado is not null`): nunca el número. */
+  tieneTelefono: boolean;
+};
+
+type Candidato = {
+  actorId: string;
+  nombre: string;
+  cargo: string | null;
+};
 
 type Aviso = { tipo: 'exito' | 'error'; texto: string };
 
+function texto(valor: unknown): string {
+  return typeof valor === 'string' ? valor : '';
+}
+
+function textoONull(valor: unknown): string | null {
+  const limpio = texto(valor).trim();
+  return limpio ? limpio : null;
+}
+
+function numero(valor: unknown): number {
+  if (typeof valor === 'number' && Number.isFinite(valor)) return valor;
+  const convertido = Number(valor);
+  return Number.isFinite(convertido) ? convertido : 0;
+}
+
+/** Una fila del listado; se descarta la que no traiga identificador. */
+function aReunionFila(bruto: unknown): ReunionFila | null {
+  if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) return null;
+  const registro = bruto as Record<string, unknown>;
+  const id = texto(registro['id']);
+  if (!id) return null;
+  return {
+    id,
+    codigo: textoONull(registro['codigo']),
+    titulo: textoONull(registro['titulo']),
+    fecha: texto(registro['fecha']),
+    lugar: textoONull(registro['lugar']),
+    casoCodigo: textoONull(registro['casoCodigo']),
+    casoNombre: textoONull(registro['casoNombre']),
+    asistentes: numero(registro['asistentes']),
+  };
+}
+
+function aProgramada(valor: unknown): boolean | null {
+  return typeof valor === 'boolean' ? valor : null;
+}
+
+function aReunionDetalle(bruto: unknown): ReunionDetalleVista | null {
+  const base = aReunionFila(bruto);
+  if (!base) return null;
+  const registro = bruto as Record<string, unknown>;
+  return { ...base, programada: aProgramada(registro['programada']) };
+}
+
+function mapearColeccion(bruto: unknown): Coleccion<ReunionFila> {
+  const coleccion = normalizarColeccion<unknown>(bruto);
+  return {
+    ...coleccion,
+    elementos: coleccion.elementos
+      .map(aReunionFila)
+      .filter((fila): fila is ReunionFila => fila !== null),
+  };
+}
+
+function aParticipante(bruto: unknown): ParticipanteReunionFila | null {
+  if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) return null;
+  const registro = bruto as Record<string, unknown>;
+  const actorId = texto(registro['actorId']);
+  if (!actorId) return null;
+  return {
+    actorId,
+    nombre: texto(registro['nombre']) || 'Sin nombre',
+    cargo: textoONull(registro['cargo']),
+    organizacion: textoONull(registro['organizacion']),
+    asistencia: registro['asistencia'] === true,
+    tieneTelefono: registro['tieneTelefono'] === true,
+  };
+}
+
+function aParticipantesRespuesta(bruto: unknown): {
+  items: ParticipanteReunionFila[];
+  reunion: ReunionDetalleVista | null;
+} {
+  if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) {
+    return { items: [], reunion: null };
+  }
+  const registro = bruto as Record<string, unknown>;
+  const itemsBrutos = Array.isArray(registro['items']) ? registro['items'] : [];
+  return {
+    items: itemsBrutos
+      .map(aParticipante)
+      .filter((item): item is ParticipanteReunionFila => item !== null),
+    reunion: aReunionDetalle(registro['reunion']),
+  };
+}
+
+function aCandidato(bruto: unknown): Candidato | null {
+  if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) return null;
+  const registro = bruto as Record<string, unknown>;
+  const actorId = texto(registro['id']);
+  if (!actorId) return null;
+  return {
+    actorId,
+    nombre: texto(registro['nombre']) || 'Sin nombre',
+    cargo: textoONull(registro['cargo']),
+  };
+}
+
+/** Lee el resumen de `POST /v1/resultados/asistentes`, sin confiar en su forma. */
+function leerResumen(bruto: unknown): { vinculados: number; errores: number } | null {
+  if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) return null;
+  const resumen = (bruto as Record<string, unknown>)['resumen'];
+  if (!resumen || typeof resumen !== 'object' || Array.isArray(resumen)) return null;
+  const registro = resumen as Record<string, unknown>;
+  return { vinculados: numero(registro['vinculados']), errores: numero(registro['errores']) };
+}
+
 /**
- * Gestión de reuniones.
+ * Reuniones de diálogo como mesa de trabajo (CRM).
  *
- * La base no tiene reuniones registradas (`core.reuniones_dialogo` está vacía),
- * así que el listado declara el vacío en vez de inventar filas. Lo que sí es
- * funcional es el envío del mensaje: el compositor arma enlaces `wa.me` y
- * `mailto:` con el destinatario que escribe la persona usuaria, sin tomar
- * contactos de fichas ni suponer a quién corresponde el mensaje.
+ * Antes esta pantalla era un compositor de mensajes que declaraba «sin
+ * reuniones registradas»: un vacío falso, porque `core.reuniones_dialogo` ya
+ * tiene filas. Ahora es lo que el endpoint existente ofrece: un listado paginado
+ * por fecha descendente con acciones sobre cada reunión.
  *
- * El canal «correo institucional» envía de verdad desde el servidor con la
- * cuenta de Gmail del Ministerio; si esa cuenta no está configurada, la API
- * responde 503 y aquí se muestra el aviso honesto en vez de simular el envío.
+ * La base NO tiene una columna de estado de reunión. Lo más cercano es el par
+ * `fecha` + `programada`: «iniciar la reunión ahora» mueve `fecha` al instante
+ * actual y marca `programada = false` (ver `PATCH /api/v1/reuniones/{id}`).
+ *
+ * Las reuniones con fecha anterior a hoy se atenúan con `var(--muted)` sin tocar
+ * la selección del texto: siguen siendo legibles y copiables.
  */
 @Component({
   selector: 'app-reuniones',
-  imports: [RouterLink],
-  template: `
-    <section class="view-body" aria-labelledby="titulo-reuniones">
-      <header class="view-head">
-        <div>
-          <h1 id="titulo-reuniones">Reuniones</h1>
-        </div>
-        <div class="view-actions">
-          <a class="button-secondary" routerLink="/resultados">Ver resultados</a>
-        </div>
-      </header>
-
-      <section class="surface panel" aria-labelledby="titulo-mensaje">
-        <div class="surface-heading">
-          <div>
-            <h3 id="titulo-mensaje">Enviar mensaje a participantes</h3>
-            <p>
-              El mensaje se envía desde su WhatsApp, su cliente de correo o la cuenta institucional
-              del Ministerio. No se toman contactos de fichas: escriba el destinatario.
-            </p>
-          </div>
-        </div>
-
-        <div class="compositor">
-          <div class="segmented" role="group" aria-label="Canal de envío">
-            <button
-              type="button"
-              [attr.aria-pressed]="canal() === 'whatsapp'"
-              (click)="cambiarCanal('whatsapp')"
-            >
-              WhatsApp
-            </button>
-            <button
-              type="button"
-              [attr.aria-pressed]="canal() === 'correo'"
-              (click)="cambiarCanal('correo')"
-            >
-              Correo
-            </button>
-            <button
-              type="button"
-              [attr.aria-pressed]="canal() === 'institucional'"
-              (click)="cambiarCanal('institucional')"
-            >
-              Correo institucional
-            </button>
-          </div>
-
-          <label class="campo">
-            {{
-              canal() === 'whatsapp' ? 'Teléfono (con código de país)' : 'Correo del destinatario'
-            }}
-            <input
-              type="text"
-              [attr.inputmode]="canal() === 'whatsapp' ? 'tel' : 'email'"
-              [attr.placeholder]="
-                canal() === 'whatsapp' ? '51 999 888 777' : 'nombre@dominio.gob.pe'
-              "
-              [value]="destinatario()"
-              (input)="destinatario.set($any($event.target).value)"
-            />
-          </label>
-
-          @if (canal() !== 'whatsapp') {
-            <label class="campo">
-              Asunto
-              <input
-                type="text"
-                [value]="asunto()"
-                (input)="asunto.set($any($event.target).value)"
-              />
-            </label>
-          }
-
-          <label class="campo">
-            Mensaje
-            <textarea
-              rows="5"
-              [value]="mensaje()"
-              (input)="mensaje.set($any($event.target).value)"
-            ></textarea>
-          </label>
-
-          <div class="compositor-pie">
-            @if (!listo()) {
-              <p class="compositor-aviso">
-                Complete el destinatario y el mensaje para habilitar el envío.
-              </p>
-            } @else if (canal() === 'institucional') {
-              <p class="compositor-aviso">
-                El correo saldrá de la cuenta institucional del Ministerio. No se guarda el
-                destinatario ni el cuerpo.
-              </p>
-            } @else {
-              <p class="compositor-aviso">
-                Se abrirá {{ canal() === 'whatsapp' ? 'WhatsApp' : 'su cliente de correo' }} con el
-                mensaje preparado.
-              </p>
-            }
-            @if (canal() === 'whatsapp') {
-              <a
-                class="button-primary"
-                [class.deshabilitado]="!listo()"
-                [attr.href]="listo() ? enlaceWhatsApp() : null"
-                target="_blank"
-                rel="noopener"
-              >
-                Abrir WhatsApp
-              </a>
-            } @else if (canal() === 'correo') {
-              <a
-                class="button-primary"
-                [class.deshabilitado]="!listo()"
-                [attr.href]="listo() ? enlaceCorreo() : null"
-              >
-                Abrir correo
-              </a>
-            } @else {
-              <div class="compositor-envio">
-                <button
-                  type="button"
-                  class="button-primary"
-                  [disabled]="!puedeEnviarInstitucional()"
-                  (click)="enviarInstitucional()"
-                >
-                  {{ enviando() ? 'Enviando…' : 'Enviar por correo institucional' }}
-                </button>
-                <a
-                  class="button-secondary"
-                  [class.deshabilitado]="!listo()"
-                  [attr.href]="listo() ? enlaceCorreo() : null"
-                >
-                  Abrir en su cliente de correo
-                </a>
-              </div>
-            }
-          </div>
-
-          @if (aviso(); as avisoActual) {
-            <p
-              class="compositor-estado"
-              [class.compositor-estado-error]="avisoActual.tipo === 'error'"
-              role="status"
-            >
-              {{ avisoActual.texto }}
-            </p>
-          }
-        </div>
-      </section>
-
-      <section class="surface panel" aria-labelledby="titulo-listado">
-        <div class="surface-heading">
-          <div>
-            <h3 id="titulo-listado">Reuniones registradas</h3>
-            <p>Programadas y realizadas, con su acta vinculada cuando exista.</p>
-          </div>
-        </div>
-
-        <div class="empty-state">
-          <strong>Sin reuniones registradas</strong>
-          <p>
-            La base no tiene reuniones cargadas todavía. Cuando se registren, aparecerán aquí con su
-            fecha, lugar, caso y estado; el acta quedará en Resultados.
-          </p>
-        </div>
-      </section>
-    </section>
-  `,
+  imports: [RouterLink, IconoComponent, PaginacionComponent, MensajePanelComponent],
+  templateUrl: './reuniones.page.html',
+  styleUrl: './reuniones.page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: `
-    :host {
-      display: block;
-    }
-
-    .surface.panel {
-      padding: 17px;
-    }
-
-    .compositor {
-      display: grid;
-      gap: 12px;
-      max-width: 640px;
-    }
-
-    .empty-state p {
-      max-width: 620px;
-      margin: 8px auto 0;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .campo {
-      display: grid;
-      gap: 5px;
-      color: var(--ink-2);
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .campo input,
-    .campo textarea {
-      min-width: 0;
-      padding: 8px 10px;
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--paper, #fff);
-      color: var(--ink);
-      font: inherit;
-      font-weight: 400;
-    }
-
-    .campo textarea {
-      resize: vertical;
-    }
-
-    .campo input:focus-visible,
-    .campo textarea:focus-visible {
-      outline: 2px solid #3576c5;
-      outline-offset: 2px;
-    }
-
-    .compositor-pie {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .compositor-aviso {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .compositor-pie a {
-      text-decoration: none;
-    }
-
-    .compositor-envio {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .compositor-estado {
-      margin: 0;
-      padding: 8px 10px;
-      border-radius: 6px;
-      background: #edf6ee;
-      color: #2f6b3a;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .compositor-estado-error {
-      background: #fdf1ef;
-      color: #a34c45;
-    }
-
-    .deshabilitado {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-  `,
 })
 export class ReunionesPage {
   private readonly http = inject(HttpClient);
+  private readonly destruccion = inject(DestroyRef);
 
-  readonly canal = signal<Canal>('whatsapp');
-  readonly destinatario = signal('');
-  readonly asunto = signal('Convocatoria a reunión de diálogo');
-  readonly mensaje = signal('');
+  readonly q = signal('');
+  readonly pagina = signal(1);
+  readonly tamano = signal(TAMANO_PAGINA);
 
-  readonly enviando = signal(false);
-  readonly aviso = signal<Aviso | null>(null);
-
-  readonly listo = computed(
-    () => this.destinatario().trim().length > 0 && this.mensaje().trim().length > 0,
-  );
-
-  readonly puedeEnviarInstitucional = computed(() => {
-    const asunto = this.asunto().trim();
-    return this.listo() && asunto.length > 0 && asunto.length <= 150 && !this.enviando();
+  private readonly listado = consulta<Coleccion<ReunionFila>>({
+    fuente: () => this.urlListado(),
+    esquema: mapearColeccion,
   });
 
-  readonly enlaceWhatsApp = computed(() => {
-    const telefono = this.destinatario().replace(/[^\d]/g, '');
-    return `https://wa.me/${telefono}?text=${encodeURIComponent(this.mensaje().trim())}`;
-  });
+  readonly estado = this.listado.estado;
+  readonly error = this.listado.error;
+  readonly reuniones = computed(() => this.listado.valor()?.elementos ?? []);
+  readonly total = computed(() => this.listado.valor()?.total ?? 0);
 
-  readonly enlaceCorreo = computed(() => {
-    const asunto = encodeURIComponent(this.asunto().trim());
-    const cuerpo = encodeURIComponent(this.mensaje().trim());
-    return `mailto:${this.destinatario().trim()}?subject=${asunto}&body=${cuerpo}`;
-  });
+  /** Reunión abierta en el panel lateral. */
+  readonly seleccionada = signal<ReunionFila | null>(null);
+  readonly participantes = signal<ParticipanteReunionFila[]>([]);
+  readonly reunionActual = signal<ReunionDetalleVista | null>(null);
 
-  cambiarCanal(canal: Canal): void {
-    this.canal.set(canal);
-    this.aviso.set(null);
+  readonly cargandoParticipantes = signal(false);
+  readonly errorParticipantes = signal<string | null>(null);
+
+  readonly confirmandoInicio = signal(false);
+  readonly iniciando = signal(false);
+  readonly accionAviso = signal<Aviso | null>(null);
+  readonly accionError = signal<string | null>(null);
+
+  /** Buscador de candidatos para añadir a la reunión. */
+  readonly busquedaActor = signal('');
+  readonly resultadosActor = signal<Candidato[]>([]);
+  readonly buscandoActor = signal(false);
+  readonly errorBusquedaActor = signal<string | null>(null);
+  readonly agregandoId = signal<string | null>(null);
+  readonly mensajeParticipantes = signal<string | null>(null);
+
+  /** Panel «Enviar mensaje» montado sobre el cajón de la reunión. */
+  readonly mensajeAbierto = signal(false);
+  readonly destinatariosMensaje = signal<DestinatarioMensaje[]>([]);
+
+  private tokenBusqueda = 0;
+  private temporizadorBusqueda?: ReturnType<typeof setTimeout>;
+
+  constructor() {
+    this.destruccion.onDestroy(() => clearTimeout(this.temporizadorBusqueda));
   }
 
-  /**
-   * Envía el mensaje desde la cuenta institucional. La API no toma el
-   * destinatario de la base: es exactamente el que se escribió aquí.
-   */
-  async enviarInstitucional(): Promise<void> {
-    if (!this.puedeEnviarInstitucional()) return;
+  readonly contextoMensaje = computed(() => {
+    const reunion = this.seleccionada();
+    if (!reunion) return 'Reunión';
+    const titulo = reunion.titulo ?? 'Reunión';
+    return reunion.codigo ? `${reunion.codigo} · ${titulo}` : titulo;
+  });
 
-    this.enviando.set(true);
-    this.aviso.set(null);
+  /** `true` si la reunión es anterior a hoy en Lima (se pinta atenuada). */
+  esPasada(fecha: string | null | undefined): boolean {
+    const dia = diaIso(fecha);
+    return !!dia && dia < hoyIso();
+  }
+
+  fechaTexto(valor: string | null | undefined): string {
+    return formatearFecha(valor);
+  }
+
+  buscar(evento: Event): void {
+    this.q.set((evento.target as HTMLInputElement).value);
+    this.pagina.set(1);
+  }
+
+  cambiarPagina(pagina: number): void {
+    this.pagina.set(pagina);
+  }
+
+  cambiarTamano(tamano: number): void {
+    this.tamano.set(tamano);
+    this.pagina.set(1);
+  }
+
+  recargar(): void {
+    this.listado.recargar();
+  }
+
+  abrir(reunion: ReunionFila): void {
+    this.seleccionada.set(reunion);
+    // Mientras llega el detalle, `programada` es desconocida: no se ofrece iniciar.
+    this.reunionActual.set({ ...reunion, programada: null });
+    this.participantes.set([]);
+    this.confirmandoInicio.set(false);
+    this.iniciando.set(false);
+    this.accionAviso.set(null);
+    this.accionError.set(null);
+    this.mensajeParticipantes.set(null);
+    this.busquedaActor.set('');
+    this.resultadosActor.set([]);
+    this.errorBusquedaActor.set(null);
+    void this.cargarParticipantes(reunion.id);
+  }
+
+  cerrarPanel(): void {
+    this.seleccionada.set(null);
+    this.mensajeAbierto.set(false);
+    this.confirmandoInicio.set(false);
+  }
+
+  /** Clic en el velo: sólo cierra si nació fuera del cajón. */
+  alFondo(evento: Event): void {
+    if (evento.target !== evento.currentTarget) return;
+    this.cerrarPanel();
+  }
+
+  /** Escape cierra el cajón salvo que el panel de mensaje esté encima. */
+  alEscape(): void {
+    if (this.mensajeAbierto()) return;
+    this.cerrarPanel();
+  }
+
+  pedirInicio(): void {
+    this.confirmandoInicio.set(true);
+    this.accionAviso.set(null);
+    this.accionError.set(null);
+  }
+
+  cancelarInicio(): void {
+    this.confirmandoInicio.set(false);
+  }
+
+  /** «Iniciar la reunión ahora»: `fecha = now()`, `programada = false`. */
+  async iniciar(): Promise<void> {
+    const reunion = this.seleccionada();
+    if (!reunion || this.iniciando()) return;
+
+    this.iniciando.set(true);
+    this.accionError.set(null);
+    this.accionAviso.set(null);
 
     try {
-      await firstValueFrom(
-        this.http.post<unknown>(urlApi('/v1/mensajes/correo'), {
-          destinatario: this.destinatario().trim(),
-          asunto: this.asunto().trim(),
-          cuerpo: this.mensaje().trim(),
-        }),
+      const bruto = await firstValueFrom(
+        this.http.patch<unknown>(urlApi(`/v1/reuniones/${encodeURIComponent(reunion.id)}`), {}),
       );
-      this.aviso.set({
-        tipo: 'exito',
-        texto: 'Correo enviado desde la cuenta institucional.',
-      });
+      const actualizada = aReunionDetalle(bruto);
+      if (actualizada) this.reunionActual.set(actualizada);
+      this.confirmandoInicio.set(false);
+      this.accionAviso.set({ tipo: 'exito', texto: 'La reunión se marcó como iniciada.' });
+      this.listado.recargar();
+      await this.cargarParticipantes(reunion.id);
     } catch (fallo) {
-      this.aviso.set({ tipo: 'error', texto: this.mensajeDeEnvio(fallo) });
+      this.accionError.set(aErrorApi(fallo, 'No se pudo iniciar la reunión.').message);
     } finally {
-      this.enviando.set(false);
+      this.iniciando.set(false);
     }
   }
 
-  private mensajeDeEnvio(fallo: unknown): string {
-    const error = aErrorApi(fallo, 'No se pudo enviar el correo institucional.');
-    if (error.estado === 503 || error.codigo === 'CONFIG_MISSING') {
-      return 'Correo institucional no configurado.';
+  avisarATodos(): void {
+    const participantes = this.participantes();
+    if (participantes.length === 0) return;
+    this.destinatariosMensaje.set(
+      participantes.map((p) => ({ actorId: p.actorId, nombre: p.nombre })),
+    );
+    this.mensajeAbierto.set(true);
+  }
+
+  cerrarMensaje(): void {
+    this.mensajeAbierto.set(false);
+  }
+
+  alCambiarDestinatarios(lista: DestinatarioMensaje[]): void {
+    this.destinatariosMensaje.set(lista);
+  }
+
+  alBuscarActor(evento: Event): void {
+    const valor = (evento.target as HTMLInputElement).value;
+    this.busquedaActor.set(valor);
+    clearTimeout(this.temporizadorBusqueda);
+    this.temporizadorBusqueda = setTimeout(() => void this.buscarActor(valor), 250);
+  }
+
+  async agregarParticipante(candidato: Candidato): Promise<void> {
+    const reunion = this.seleccionada();
+    if (!reunion || this.agregandoId()) return;
+
+    this.agregandoId.set(candidato.actorId);
+    this.accionError.set(null);
+    this.mensajeParticipantes.set(null);
+
+    try {
+      const bruto = await firstValueFrom(
+        this.http.post<unknown>(urlApi('/v1/resultados/asistentes'), {
+          reunionId: reunion.id,
+          asistentes: [
+            { actorId: candidato.actorId, nombre: candidato.nombre, cargo: candidato.cargo },
+          ],
+        }),
+      );
+      const resumen = leerResumen(bruto);
+      if (resumen && resumen.vinculados > 0) {
+        this.mensajeParticipantes.set(`${candidato.nombre} se añadió a la reunión.`);
+      } else if (resumen && resumen.errores > 0) {
+        this.accionError.set('No se pudo añadir al participante a la reunión.');
+      } else {
+        this.mensajeParticipantes.set(`${candidato.nombre} ya figuraba en la lista.`);
+      }
+      this.busquedaActor.set('');
+      this.resultadosActor.set([]);
+      this.listado.recargar();
+      await this.cargarParticipantes(reunion.id);
+    } catch (fallo) {
+      this.accionError.set(aErrorApi(fallo, 'No se pudo añadir al participante.').message);
+    } finally {
+      this.agregandoId.set(null);
     }
-    return error.message;
+  }
+
+  private urlListado(): string {
+    return urlConParametros(urlApi('/v1/resultados/reuniones'), {
+      q: this.q().trim(),
+      ...paramsDePagina({ pagina: this.pagina(), tamano: this.tamano() }),
+    });
+  }
+
+  private async cargarParticipantes(reunionId: string): Promise<void> {
+    this.cargandoParticipantes.set(true);
+    this.errorParticipantes.set(null);
+    try {
+      const bruto = await firstValueFrom(
+        this.http.get<unknown>(
+          urlApi(`/v1/reuniones/${encodeURIComponent(reunionId)}/participantes`),
+        ),
+      );
+      const { items, reunion } = aParticipantesRespuesta(bruto);
+      // Si la reunión ya no está abierta cuando responde, se descarta la lectura.
+      if (this.seleccionada()?.id !== reunionId) return;
+      this.participantes.set(items);
+      if (reunion) this.reunionActual.set(reunion);
+    } catch (fallo) {
+      if (this.seleccionada()?.id !== reunionId) return;
+      this.errorParticipantes.set(
+        aErrorApi(fallo, 'No se pudieron cargar los participantes.').message,
+      );
+    } finally {
+      if (this.seleccionada()?.id === reunionId) this.cargandoParticipantes.set(false);
+    }
+  }
+
+  private async buscarActor(textoBruto: string): Promise<void> {
+    const termino = textoBruto.trim();
+    this.tokenBusqueda += 1;
+    const token = this.tokenBusqueda;
+    this.errorBusquedaActor.set(null);
+
+    if (termino.length < MIN_BUSQUEDA) {
+      this.resultadosActor.set([]);
+      this.buscandoActor.set(false);
+      return;
+    }
+
+    this.buscandoActor.set(true);
+    try {
+      const bruto = await firstValueFrom(
+        this.http.get<unknown>(
+          urlConParametros(urlApi('/v1/actors'), {
+            q: termino,
+            ...paramsDePagina({ pagina: 1, tamano: TAMANO_BUSQUEDA }),
+          }),
+        ),
+      );
+      if (token !== this.tokenBusqueda) return;
+      const coleccion = normalizarColeccion<unknown>(bruto);
+      this.resultadosActor.set(
+        coleccion.elementos
+          .map(aCandidato)
+          .filter((candidato): candidato is Candidato => candidato !== null),
+      );
+    } catch (fallo) {
+      if (token !== this.tokenBusqueda) return;
+      this.errorBusquedaActor.set(aErrorApi(fallo, 'No se pudo buscar participantes.').message);
+    } finally {
+      if (token === this.tokenBusqueda) this.buscandoActor.set(false);
+    }
   }
 }

@@ -75,6 +75,8 @@ import {
 } from './organizacion.mapeo';
 import { ListaAsistenciaComponent } from './lista-asistencia.component';
 import { ListaAsistenciaService } from './lista-asistencia.service';
+import { EnviarMensajeComponent } from './enviar-mensaje.component';
+import type { DestinatarioMensaje } from '../../shared/ui/mensaje-panel.component';
 
 type FiltrosOrganizaciones = {
   q: string;
@@ -124,6 +126,7 @@ const FILTROS_INICIALES: FiltrosOrganizaciones = {
     ActorPanelAltaComponent,
     AnularPanelComponent,
     ListaAsistenciaComponent,
+    EnviarMensajeComponent,
   ],
   templateUrl: './organizaciones.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -421,6 +424,15 @@ export class OrganizacionesPage {
   /** Ids de organizaciones en la lista, en una referencia estable para `app-tabla`. */
   readonly idsSeleccionados = computed(() =>
     this.organizacionesEnLista().map((entrada) => entrada.actor.id),
+  );
+
+  /** Destinatarios iniciales del FAB «Enviar mensaje»: las organizaciones marcadas. */
+  readonly semillaMensaje = computed<DestinatarioMensaje[]>(() =>
+    this.organizacionesEnLista().map((entrada) => ({
+      actorId: entrada.actor.id,
+      nombre: entrada.actor.nombre,
+      correo: entrada.actor.email ?? null,
+    })),
   );
 
   /** Orden local de la página visible. */

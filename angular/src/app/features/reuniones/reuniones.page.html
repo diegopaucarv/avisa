@@ -1,0 +1,306 @@
+<section class="view-body" aria-labelledby="titulo-reuniones">
+  <header class="view-head">
+    <div>
+      <h1 id="titulo-reuniones">Reuniones</h1>
+      <p class="view-sub">
+        Espacios de diálogo registrados. Abre una reunión para añadir participantes, avisarles o
+        iniciarla.
+      </p>
+    </div>
+    <div class="view-actions">
+      <a class="button-secondary" routerLink="/resultados">Ver resultados</a>
+    </div>
+  </header>
+
+  <div class="filter-bar">
+    <label class="search-field">
+      <app-icono nombre="buscar" [tamano]="14" />
+      <input
+        type="search"
+        placeholder="Buscar por código, título, lugar o caso"
+        aria-label="Buscar reuniones"
+        [value]="q()"
+        (input)="buscar($event)"
+      />
+    </label>
+  </div>
+
+  @if (estado() === 'error') {
+    <div class="empty-state" role="alert">
+      <strong>No se pudieron cargar las reuniones</strong>
+      <p>{{ error()?.message }}</p>
+      <button type="button" class="button-secondary" (click)="recargar()">Reintentar</button>
+    </div>
+  } @else if (reuniones().length === 0) {
+    @if (estado() === 'cargando' || estado() === 'inactivo') {
+      <div class="empty-state" role="status">Cargando reuniones…</div>
+    } @else {
+      <div class="empty-state">
+        <strong>Sin reuniones para estos filtros</strong>
+        <p>No hay reuniones que coincidan con la búsqueda.</p>
+      </div>
+    }
+  } @else {
+    @if (estado() === 'cargando') {
+      <p class="reunion-actualizando" role="status">Actualizando el listado…</p>
+    }
+
+    <div class="table-wrap">
+      <table class="reuniones-tabla">
+        <thead>
+          <tr>
+            <th scope="col">Código</th>
+            <th scope="col" class="col-titulo">Título</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Lugar</th>
+            <th scope="col" class="col-caso">Caso vinculado</th>
+            <th scope="col" class="col-num">Asistentes</th>
+            <th scope="col" class="col-abrir"><span class="sr-only">Abrir</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (reunion of reuniones(); track reunion.id) {
+            <tr
+              class="case-row-clickable"
+              [class.reunion-pasada]="esPasada(reunion.fecha)"
+              tabindex="0"
+              [attr.aria-label]="'Abrir la reunión ' + (reunion.codigo || reunion.titulo || '')"
+              (click)="abrir(reunion)"
+              (keydown.enter)="abrir(reunion)"
+            >
+              <td><span class="reunion-codigo">{{ reunion.codigo || '—' }}</span></td>
+              <td class="col-titulo">{{ reunion.titulo || 'Sin título' }}</td>
+              <td>{{ fechaTexto(reunion.fecha) }}</td>
+              <td>{{ reunion.lugar || '—' }}</td>
+              <td class="col-caso">
+                @if (reunion.casoCodigo) {
+                  <span>{{ reunion.casoCodigo }}</span>
+                  @if (reunion.casoNombre) {
+                    <small>{{ reunion.casoNombre }}</small>
+                  }
+                } @else {
+                  —
+                }
+              </td>
+              <td class="col-num">{{ reunion.asistentes }}</td>
+              <td class="col-abrir">
+                <app-icono nombre="chevron-derecha" [tamano]="16" />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (total() > 0 && estado() !== 'error') {
+    <app-paginacion
+      [pagina]="pagina()"
+      [tamano]="tamano()"
+      [total]="total()"
+      (paginaCambia)="cambiarPagina($event)"
+      (tamanoCambia)="cambiarTamano($event)"
+    />
+  }
+</section>
+
+@if (seleccionada(); as reunion) {
+  <div
+    class="drawer-scrim"
+    role="presentation"
+    (click)="alFondo($event)"
+    (document:keydown.escape)="alEscape()"
+  >
+    <aside
+      class="drawer reunion-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="titulo-reunion-panel"
+    >
+      <header class="drawer-head">
+        <div>
+          <h2 id="titulo-reunion-panel">{{ reunion.codigo || 'Reunión' }}</h2>
+          <p>{{ reunion.titulo || 'Sin título' }}</p>
+        </div>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Cerrar el panel de la reunión"
+          (click)="cerrarPanel()"
+        >
+          <app-icono nombre="cerrar" [tamano]="18" />
+        </button>
+      </header>
+
+      <div class="drawer-body reunion-cuerpo">
+        <dl class="reunion-datos">
+          <div>
+            <dt>Fecha</dt>
+            <dd>{{ fechaTexto(reunionActual()?.fecha ?? reunion.fecha) }}</dd>
+          </div>
+          <div>
+            <dt>Lugar</dt>
+            <dd>{{ reunionActual()?.lugar ?? reunion.lugar ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>Caso</dt>
+            <dd>{{ reunionActual()?.casoCodigo ?? reunion.casoCodigo ?? '—' }}</dd>
+          </div>
+          <div>
+            <dt>Asistentes</dt>
+            <dd>{{ reunionActual()?.asistentes ?? reunion.asistentes }}</dd>
+          </div>
+        </dl>
+
+        @if (reunionActual()?.programada === true) {
+          @if (!confirmandoInicio()) {
+            <button type="button" class="button-secondary reunion-iniciar" (click)="pedirInicio()">
+              <app-icono nombre="reloj" [tamano]="15" />
+              Iniciar la reunión ahora
+            </button>
+          } @else {
+            <div class="reunion-confirma" role="alert">
+              <p>
+                ¿Iniciar la reunión ahora? Su fecha pasará a este momento y dejará de figurar como
+                programada.
+              </p>
+              <div class="reunion-confirma-acciones">
+                <button
+                  type="button"
+                  class="button-primary"
+                  [disabled]="iniciando()"
+                  (click)="iniciar()"
+                >
+                  {{ iniciando() ? 'Iniciando…' : 'Sí, iniciar ahora' }}
+                </button>
+                <button
+                  type="button"
+                  class="button-secondary"
+                  [disabled]="iniciando()"
+                  (click)="cancelarInicio()"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          }
+        } @else if (reunionActual()?.programada === false) {
+          <p class="reunion-nota">Esta reunión ya se inició.</p>
+        }
+
+        @if (accionAviso(); as aviso) {
+          <p class="reunion-estado" role="status">{{ aviso.texto }}</p>
+        }
+        @if (accionError(); as mensaje) {
+          <p class="form-error" role="alert">{{ mensaje }}</p>
+        }
+
+        <section class="reunion-bloque" aria-labelledby="titulo-participantes">
+          <div class="reunion-bloque-cabecera">
+            <h3 id="titulo-participantes">Participantes</h3>
+            <span class="reunion-contador">{{ participantes().length }}</span>
+          </div>
+
+          <button
+            type="button"
+            class="button-secondary reunion-avisar"
+            [disabled]="participantes().length === 0"
+            (click)="avisarATodos()"
+          >
+            <app-icono nombre="bandeja" [tamano]="15" />
+            Avisar a todos
+          </button>
+
+          @if (cargandoParticipantes()) {
+            <p class="reunion-nota" role="status">Cargando participantes…</p>
+          }
+          @if (errorParticipantes(); as mensaje) {
+            <p class="form-error" role="alert">{{ mensaje }}</p>
+          }
+          @if (!cargandoParticipantes() && !errorParticipantes() && participantes().length === 0) {
+            <p class="reunion-nota">Esta reunión todavía no tiene participantes.</p>
+          }
+
+          @if (participantes().length > 0) {
+            <ul class="reunion-participantes">
+              @for (p of participantes(); track p.actorId) {
+                <li>
+                  <div class="reunion-participante-datos">
+                    <strong>{{ p.nombre }}</strong>
+                    <small>
+                      {{ p.cargo || '—' }}
+                      @if (p.organizacion) {
+                        · {{ p.organizacion }}
+                      }
+                    </small>
+                  </div>
+                  <div class="reunion-participante-marcas">
+                    <span class="reunion-badge">{{ p.asistencia ? 'Asistió' : 'Invitado' }}</span>
+                    <span class="reunion-contacto" [class.sin-telefono]="!p.tieneTelefono">
+                      {{ p.tieneTelefono ? 'Con teléfono' : 'Sin teléfono' }}
+                    </span>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+
+        <section class="reunion-bloque" aria-labelledby="titulo-anadir">
+          <h3 id="titulo-anadir">Añadir participantes</h3>
+          <label class="search-field">
+            <app-icono nombre="buscar" [tamano]="14" />
+            <input
+              type="search"
+              placeholder="Buscar persona, organización o institución"
+              aria-label="Buscar a quién añadir a la reunión"
+              [value]="busquedaActor()"
+              (input)="alBuscarActor($event)"
+            />
+          </label>
+
+          @if (buscandoActor()) {
+            <p class="reunion-nota" role="status">Buscando…</p>
+          }
+          @if (errorBusquedaActor(); as mensaje) {
+            <p class="form-error" role="alert">{{ mensaje }}</p>
+          }
+          @if (resultadosActor().length > 0) {
+            <ul class="reunion-candidatos">
+              @for (c of resultadosActor(); track c.actorId) {
+                <li>
+                  <div class="reunion-candidato-datos">
+                    <strong>{{ c.nombre }}</strong>
+                    @if (c.cargo) {
+                      <small>{{ c.cargo }}</small>
+                    }
+                  </div>
+                  <button
+                    type="button"
+                    class="button-secondary"
+                    [disabled]="agregandoId() === c.actorId"
+                    (click)="agregarParticipante(c)"
+                  >
+                    {{ agregandoId() === c.actorId ? 'Añadiendo…' : 'Añadir' }}
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (mensajeParticipantes(); as mensaje) {
+            <p class="reunion-estado" role="status">{{ mensaje }}</p>
+          }
+        </section>
+      </div>
+    </aside>
+  </div>
+}
+
+<app-mensaje-panel
+  [abierto]="mensajeAbierto()"
+  [contexto]="contextoMensaje()"
+  [destinatarios]="destinatariosMensaje()"
+  (cerrar)="cerrarMensaje()"
+  (destinatariosCambio)="alCambiarDestinatarios($event)"
+/>

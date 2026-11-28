@@ -62,6 +62,8 @@
 
   <app-lista-asistencia />
 
+  <app-enviar-mensaje contexto="Organizaciones" [sobreLista]="true" [semilla]="semillaMensaje()" />
+
   @if (estado() === "error") {
   <div class="empty-state" role="alert">
     <strong>No se pudieron cargar las organizaciones</strong>

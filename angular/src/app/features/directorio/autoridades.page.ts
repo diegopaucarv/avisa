@@ -5,6 +5,7 @@ import {
   DestroyRef,
   ElementRef,
   computed,
+  effect,
   inject,
   signal,
   viewChild,
@@ -33,7 +34,9 @@ import { IconoComponent } from '../../shared/ui/icono.component';
 import { esDialogoSuperior } from '../../shared/ui/modal-salida';
 import { PaginacionComponent } from '../../shared/ui/paginacion.component';
 import { SeleccionTabla } from '../../shared/ui/seleccion-tabla';
+import type { DestinatarioMensaje } from '../../shared/ui/mensaje-panel.component';
 import { ActorPanelComponent } from './actor-panel.component';
+import { EnviarMensajeComponent } from './enviar-mensaje.component';
 import {
   aActorDirectorio,
   aCatalogosDirectorio,
@@ -292,6 +295,7 @@ function aDatosPersonales(bruto: unknown): { tieneFicha: boolean; datos: DatosPe
     BarraSeleccionComponent,
     ActorPanelComponent,
     AnularPanelComponent,
+    EnviarMensajeComponent,
   ],
   templateUrl: './autoridades.page.html',
   styleUrl: './autoridades.page.css',
@@ -368,6 +372,39 @@ export class AutoridadesPage {
 
   /** Selección de la tabla (página visible) para exportar. */
   readonly seleccion = new SeleccionTabla();
+
+  /**
+   * Nombres de las filas ya vistas, por id. La selección sobrevive al cambio
+   * de página, pero `filas()` sólo trae la página actual; este mapa permite
+   * sembrar el FAB de mensajes con todas las personas marcadas.
+   */
+  private readonly nombresSeleccion = signal<
+    Record<string, { nombre: string; correo: string | null }>
+  >({});
+
+  private readonly recordarNombres = effect(() => {
+    const mapa = { ...this.nombresSeleccion() };
+    let cambio = false;
+    for (const fila of this.filas()) {
+      const correo = fila.email ?? null;
+      const previo = mapa[fila.id];
+      if (!previo || previo.nombre !== fila.nombre || previo.correo !== correo) {
+        mapa[fila.id] = { nombre: fila.nombre, correo };
+        cambio = true;
+      }
+    }
+    if (cambio) this.nombresSeleccion.set(mapa);
+  });
+
+  /** Destinatarios iniciales del FAB «Enviar mensaje»: las filas seleccionadas. */
+  readonly semillaMensaje = computed<DestinatarioMensaje[]>(() => {
+    const mapa = this.nombresSeleccion();
+    return [...this.seleccion.ids()].map((id) => ({
+      actorId: id,
+      nombre: mapa[id]?.nombre ?? id,
+      correo: mapa[id]?.correo ?? null,
+    }));
+  });
 
   /** Actor completo de la fila que se edita; `null` cuando no hay panel abierto. */
   readonly actorEdicion = signal<ActorDirectorio | null>(null);
